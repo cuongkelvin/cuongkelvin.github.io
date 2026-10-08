@@ -1,4 +1,4 @@
-site_name: Sổ Tay Cường Kelvin
+site_name: Cường Kelvin
 
 theme:
   name: material
@@ -22,6 +22,10 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Chuyển sang sáng
+
+plugins:
+  - search
+  - awesome-pages            # đặt tên/thứ tự tab bằng file .pages trong mỗi thư mục
 
 markdown_extensions:
   - admonition               # khung ghi chú !!! note
