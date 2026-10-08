@@ -1,5 +1,7 @@
 # Sổ tay kiến thức
 
+![Messi](images/messi.jpg)
+
 Lưu trữ những kiến thức đã học về công việc, cuộc sống. 
 
 ## Chủ đề
