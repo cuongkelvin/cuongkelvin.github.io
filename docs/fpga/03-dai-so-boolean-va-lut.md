@@ -23,6 +23,7 @@ Chúng ta sẽ thảo luận về từng cổng logic phổ biến và xem xét 
 
 ### Bản Chất Điện Áp Của Tín Hiệu Nhị Phân (Core Voltage)
 Bên trong FPGA, dữ liệu kỹ thuật số được biểu diễn trực tiếp bằng mức điện áp thế tử:
+
 * **Mức 0 (Low):** Được đại diện bởi mức điện áp **0 Volt** (GND).
 * **Mức 1 (High):** Được đại diện bởi một mức điện áp cao hơn 0, gọi là **Điện áp lõi (Core Voltage)**. 
 
@@ -46,12 +47,13 @@ Cổng AND là cổng logic có đầu ra ở mức cao (1) khi và chỉ khi **
 | 1 | 1 | 1 |
 
 In trong bảng chân lý, các hàng thường được sắp xếp theo thứ tự nhị phân / thập phân tăng dần dựa trên các tổ hợp đầu vào. Trong trường hợp bảng chân lý AND ở trên:
-* Hàng 1: Đầu vào A = 0, B = 0 $\rightarrow$ Biểu diễn nhị phân `b00` (thập phân 0).
-* Hàng 2: Đầu vào A = 0, B = 1 $\rightarrow$ Biểu diễn nhị phân `b01` (thập phân 1).
-* Hàng 3: Đầu vào A = 1, B = 0 $\rightarrow$ Biểu diễn nhị phân `b10` (thập phân 2).
-* Hàng 4: Đầu vào A = 1, B = 1 $\rightarrow$ Biểu diễn nhị phân `b11` (thập phân 3).
 
-Nếu cổng AND có nhiều đầu vào hơn, số hàng trong bảng chân lý sẽ tăng lên theo quy tắc $2^n$ ($n$ là số đầu vào). Ví dụ, cổng AND 3 đầu vào sẽ có $2^3 = 8$ hàng trong bảng chân lý, chạy từ `b000` đến `b111` (từ 0 đến 7 trong hệ thập phân).
+* Hàng 1: Đầu vào A = 0, B = 0 → Biểu diễn nhị phân `b00` (thập phân 0).
+* Hàng 2: Đầu vào A = 0, B = 1 → Biểu diễn nhị phân `b01` (thập phân 1).
+* Hàng 3: Đầu vào A = 1, B = 0 → Biểu diễn nhị phân `b10` (thập phân 2).
+* Hàng 4: Đầu vào A = 1, B = 1 → Biểu diễn nhị phân `b11` (thập phân 3).
+
+Nếu cổng AND có nhiều đầu vào hơn, số hàng trong bảng chân lý sẽ tăng lên theo quy tắc `2ⁿ` (`n` là số đầu vào). Ví dụ, cổng AND 3 đầu vào sẽ có `2³ = 8` hàng trong bảng chân lý, chạy từ `b000` đến `b111` (từ 0 đến 7 trong hệ thập phân).
 
 > **GHI CHÚ VỀ KÝ HIỆU ĐẦU RA Q:**
 > Trong sơ đồ mạch logic, đầu ra của một cổng logic thường được ký hiệu bằng chữ cái **Q**. Quy ước này bắt nguồn từ nhà toán học người Anh **Alan Turing**, người đã sử dụng chữ cái Q để chỉ các trạng thái trong các cỗ máy Turing nổi tiếng của mình. Chữ Q đại diện cho từ *quanta* — chỉ một trạng thái rời rạc (chẳng hạn như 0 hoặc 1), thay vì một giá trị biến thiên liên tục trong đại số thông thường.
@@ -223,11 +225,12 @@ Trong đại số Boolean, mỗi phép toán logic có ký hiệu toán học ch
 | :---: | :---: |
 | `*` hoặc `·` | **AND** |
 | `+` | **OR** |
-| `'` hoặc $\overline{A}$ | **NOT** |
-| `^` hoặc $\oplus$ | **XOR** |
+| `'` hoặc `Ā` | **NOT** |
+| `^` hoặc `⊕` | **XOR** |
 
 ### Thứ Tự Ưu Tiên Phép Toán (Order of Operations)
 Đại số Boolean tuân theo thứ tự ưu tiên thực hiện phép toán nghiêm ngặt:
+
 1. Thực hiện phép toán **NOT** trước.
 2. Thực hiện phép toán **AND** tiếp theo.
 3. Thực hiện phép toán **OR** cuối cùng.
@@ -237,14 +240,17 @@ Giống như trong đại số thông thường, bạn có thể sử dụng **d
 ---
 
 ### Phân Tích Ví Dụ 1: Phương Trình 2 Đầu Vào
-Xét phương trình Boolean: 
-$$Q = A \cdot B + A'$$
+Xét phương trình Boolean:
+
+```
+Q = A·B + A'
+```
 
 Đọc bằng lời: *"Đầu ra Q bằng (A AND B) OR (NOT A)"*.
 
-#### Bảng Chân Lý Cho Phương Trình $Q = A \cdot B + A'$:
+#### Bảng Chân Lý Cho Phương Trình `Q = A·B + A'`:
 
-| Đầu vào A | Đầu vào B | Phép $A \cdot B$ | Phép $A'$ | Đầu ra Q ($A \cdot B + A'$) |
+| Đầu vào A | Đầu vào B | Phép `A·B` | Phép `A'` | Đầu ra Q (`A·B + A'`) |
 | :---: | :---: | :---: | :---: | :---: |
 | 0 | 0 | 0 | 1 | **1** |
 | 0 | 1 | 0 | 1 | **1** |
@@ -252,24 +258,28 @@ $$Q = A \cdot B + A'$$
 | 1 | 1 | 1 | 0 | **1** |
 
 **Giải thích luồng tính toán:**
-* **Hàng 1 ($A=0, B=0$):** $A' = 1$, $A \cdot B = 0$. Phép OR giữa 0 và 1 cho ra $Q = 1$.
-* **Hàng 2 ($A=0, B=1$):** $A' = 1$, $A \cdot B = 0$. Phép OR giữa 0 và 1 cho ra $Q = 1$.
-* **Hàng 3 ($A=1, B=0$):** $A' = 0$, $A \cdot B = 0$. Phép OR giữa 0 và 0 cho ra $Q = 0$.
-* **Hàng 4 ($A=1, B=1$):** $A' = 0$, $A \cdot B = 1$. Phép OR giữa 1 và 0 cho ra $Q = 1$.
 
-Như vậy, bất kỳ khi nào $A = 0$, hoặc khi cả $A$ và $B$ đều bằng 1, đầu ra $Q$ sẽ bằng 1. Trường hợp duy nhất $Q = 0$ là khi $A = 1$ và $B = 0$.
+* **Hàng 1 (`A=0, B=0`):** `A' = 1`, `A·B = 0`. Phép OR giữa 0 và 1 cho ra `Q = 1`.
+* **Hàng 2 (`A=0, B=1`):** `A' = 1`, `A·B = 0`. Phép OR giữa 0 và 1 cho ra `Q = 1`.
+* **Hàng 3 (`A=1, B=0`):** `A' = 0`, `A·B = 0`. Phép OR giữa 0 và 0 cho ra `Q = 0`.
+* **Hàng 4 (`A=1, B=1`):** `A' = 0`, `A·B = 1`. Phép OR giữa 1 và 0 cho ra `Q = 1`.
+
+Như vậy, bất kỳ khi nào `A = 0`, hoặc khi cả `A` và `B` đều bằng 1, đầu ra `Q` sẽ bằng 1. Trường hợp duy nhất `Q = 0` là khi `A = 1` và `B = 0`.
 
 ---
 
 ### Phân Tích Ví Dụ 2: Phương Trình 3 Đầu Vào
-Xét phương trình Boolean có 3 đầu vào: 
-$$Q = A + (C \cdot B')$$
+Xét phương trình Boolean có 3 đầu vào:
 
-Vì có 3 đầu vào ($A, B, C$), bảng chân lý sẽ có $2^3 = 8$ hàng.
+```
+Q = A + (C·B')
+```
 
-#### Bảng Chân Lý Cho Phương Trình $Q = A + (C \cdot B')$:
+Vì có 3 đầu vào (`A, B, C`), bảng chân lý sẽ có `2³ = 8` hàng.
 
-| Hàng (Thập phân) | Đầu vào A | Đầu vào B | Đầu vào C | $B'$ | $C \cdot B'$ | Đầu ra Q |
+#### Bảng Chân Lý Cho Phương Trình `Q = A + (C·B')`:
+
+| Hàng (Thập phân) | Đầu vào A | Đầu vào B | Đầu vào C | `B'` | `C·B'` | Đầu ra Q |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | 0 | 0 | 0 | 0 | 1 | 0 | **0** |
 | 1 | 0 | 0 | 1 | 1 | 1 | **1** |
@@ -281,9 +291,10 @@ Vì có 3 đầu vào ($A, B, C$), bảng chân lý sẽ có $2^3 = 8$ hàng.
 | 7 | 1 | 1 | 1 | 0 | 0 | **1** |
 
 **Giải thích luồng tính toán:**
-1. Biểu thức trong ngoặc $(C \cdot B')$ thực hiện phép AND giữa $C$ và đảo của $B$. Biểu thức này chỉ bằng 1 khi $C = 1$ và $B = 0$ (xuất hiện ở Hàng 1 và Hàng 5).
-2. Phép toán vế ngoài là phép OR với $A$. Do đó, bất kỳ khi nào $A = 1$ (ở các Hàng 4, 5, 6, 7), đầu ra $Q$ lập tức bằng 1 mà không cần quan tâm đến $B$ và $C$.
-3. Kết hợp hai điều kiện trên, $Q = 1$ ở các hàng 1, 4, 5, 6, 7. Các hàng còn lại (0, 2, 3) cho ra $Q = 0$.
+
+1. Biểu thức trong ngoặc `(C·B')` thực hiện phép AND giữa `C` và đảo của `B`. Biểu thức này chỉ bằng 1 khi `C = 1` và `B = 0` (xuất hiện ở Hàng 1 và Hàng 5).
+2. Phép toán vế ngoài là phép OR với `A`. Do đó, bất kỳ khi nào `A = 1` (ở các Hàng 4, 5, 6, 7), đầu ra `Q` lập tức bằng 1 mà không cần quan tâm đến `B` và `C`.
+3. Kết hợp hai điều kiện trên, `Q = 1` ở các hàng 1, 4, 5, 6, 7. Các hàng còn lại (0, 2, 3) cho ra `Q = 0`.
 
 ---
 
@@ -301,12 +312,13 @@ Sau khi tìm hiểu về các cổng logic rời rạc (AND, OR, NOT...), có th
 Không có một "ngân hàng" chứa sẵn các cổng AND, OR rời rạc để bạn rút ra và nối dây lại với nhau. Thay vào đó, FPGA chứa một linh kiện vạn năng tinh vi hơn rất nhiều: **Bảng tra (Look-Up Table - LUT)**.
 
 ### LUT Hoạt Động Như Thế Nào?
-Bảng tra (LUT) là một linh kiện phần cứng có thể được lập trình để giả lập **bất kỳ phương trình đại số Boolean nào**. Cho dù bạn cần một cổng AND, một cổng XOR, hay một phương trình kết hợp 3 cổng logic phức tạp như $Q = A + (C \cdot B')$, một LUT duy nhất đều có thể được nạp bảng chân lý tương ứng để tái tạo chính xác kết quả đầu ra đó.
+Bảng tra (LUT) là một linh kiện phần cứng có thể được lập trình để giả lập **bất kỳ phương trình đại số Boolean nào**. Cho dù bạn cần một cổng AND, một cổng XOR, hay một phương trình kết hợp 3 cổng logic phức tạp như `Q = A + (C·B')`, một LUT duy nhất đều có thể được nạp bảng chân lý tương ứng để tái tạo chính xác kết quả đầu ra đó.
 
 LUTs được phân loại dựa trên số lượng đầu vào mà chúng chấp nhận:
-* **LUT-2:** LUT có 2 đầu vào ($2^2 = 4$ vị trí nhớ bảng chân lý).
-* **LUT-3:** LUT có 3 đầu vào ($2^3 = 8$ vị trí nhớ bảng chân lý).
-* **LUT-4:** LUT có 4 đầu vào ($2^4 = 16$ vị trí nhớ bảng chân lý).
+
+* **LUT-2:** LUT có 2 đầu vào (`2² = 4` vị trí nhớ bảng chân lý).
+* **LUT-3:** LUT có 3 đầu vào (`2³ = 8` vị trí nhớ bảng chân lý).
+* **LUT-4:** LUT có 4 đầu vào (`2⁴ = 16` vị trí nhớ bảng chân lý).
 * **LUT-5 / LUT-6:** Các LUT cao cấp trên FPGA hiện đại của AMD (Xilinx) hay Intel (Altera).
 
 Hầu hết các LUT tiêu chuẩn tạo ra **1 đầu ra duy nhất**.
@@ -353,7 +365,7 @@ Sáu đầu vào của LUT đóng vai trò **địa chỉ**, còn giá trị c�
 
 Điều này nối thẳng với cơ chế đã trình bày ở Chương 1: cấu hình FPGA nằm trong các ô nhớ SRAM, và nạp bitstream chính là ghi giá trị vào những ô đó. Phần lớn số ô ấy là nội dung bảng tra của các LUT.
 
-Vì nội dung bảng do bạn nạp vào, **cùng một LUT-6 có thể trở thành bất kỳ hàm logic nào của 6 biến**. Số hàm khác nhau có thể nạp là $2^{64}$, tức khoảng 18 tỉ tỉ. Cổng AND, cổng XOR, bộ MUX 4:1, bộ so sánh 3 bit — tất cả chỉ là những bảng khác nhau trong cùng một linh kiện.
+Vì nội dung bảng do bạn nạp vào, **cùng một LUT-6 có thể trở thành bất kỳ hàm logic nào của 6 biến**. Số hàm khác nhau có thể nạp là **2⁶⁴**, tức khoảng 18 tỉ tỉ. Cổng AND, cổng XOR, bộ MUX 4:1, bộ so sánh 3 bit — tất cả chỉ là những bảng khác nhau trong cùng một linh kiện.
 
 Đó là toàn bộ ý nghĩa của chữ *Programmable* trong tên gọi FPGA: phần cứng giống hệt nhau ở mọi thiết kế, chỉ khác nội dung bảng.
 
@@ -381,7 +393,7 @@ Lúc đó trình tổng hợp phải **ghép nhiều LUT thành cây nhiều t�
           tang 1        tang 2
 ```
 
-Ba LUT, hai tầng. Quy tắc chung: mỗi tầng gộp được 6 kết quả thành 1, nên hàm `N` biến cần khoảng $\log_6 N$ tầng.
+Ba LUT, hai tầng. Quy tắc chung: mỗi tầng gộp được 6 kết quả thành 1, nên hàm `N` biến cần khoảng `log₆N` tầng.
 
 | Số biến | Số tầng | Số LUT (xấp xỉ) |
 | :---: | :---: | :---: |
@@ -472,8 +484,9 @@ end architecture RTL;
 ```
 
 #### Phân Tích Mã Nguồn:
+
 * Trong Verilog, toán tử `&` đại diện cho phép toán AND giữa hai tín hiệu nhị phân. Toán tử gán `assign` tạo ra kết nối tổ hợp trực tiếp từ kết quả phép AND ra chân `o_LED_1`.
-* Trong VHDL, từ khóa `and` được dùng trực tiếp giữa hai tín hiệu kiểu `std_logic`, và toán tử gán `<=$` chuyển kết quả ra chân đầu ra.
+* Trong VHDL, từ khóa `and` được dùng trực tiếp giữa hai tín hiệu kiểu `std_logic`, và toán tử gán `<=` chuyển kết quả ra chân đầu ra.
 
 ---
 
@@ -492,7 +505,7 @@ set_io o_LED_1    56
 
 ### C. Biên Dịch và Phân Tích Báo Cáo Tổng Hợp (Build & Synthesis Report)
 
-Mở **iCEcube2**, tạo dự án mới, thêm tệp mã nguồn và tệp `.pcf`, sau đó chọn **Tool $\rightarrow$ Run All**. 
+Mở **iCEcube2**, tạo dự án mới, thêm tệp mã nguồn và tệp `.pcf`, sau đó chọn **Tool → Run All**. 
 
 Sau khi biên dịch thành công, hãy mở **Synthesis Report** để xem kết quả tiêu tốn tài nguyên phần cứng:
 
@@ -504,8 +517,9 @@ Number of LUT4s used:   1 (0%)
 ```
 
 #### Phân Tích Kết Quả:
+
 1. **Number of IOs used = 3:** Công cụ xác nhận đã sử dụng 3 chân cắm vật lý (2 chân đầu vào cho `i_Switch_1`, `i_Switch_2` và 1 chân đầu ra cho `o_LED_1`).
-2. **Number of LUT4s used = 1 (0%):** Công cụ tổng hợp đã biên dịch phép toán `&` / `and` thành đúng **1 Bảng tra 4 đầu vào (LUT4)**. Con số `(0%)` hiển thị vì chip iCE40 HX1K có tới **1,280 LUT4**, và việc dùng 1 LUT4 chỉ chiếm $1 / 1,280 = 0.078\%$, được phần mềm làm tròn xuống $0\%$.
+2. **Number of LUT4s used = 1 (0%):** Công cụ tổng hợp đã biên dịch phép toán `&` / `and` thành đúng **1 Bảng tra 4 đầu vào (LUT4)**. Con số `(0%)` hiển thị vì chip iCE40 HX1K có tới **1,280 LUT4**, và việc dùng 1 LUT4 chỉ chiếm `1/1280 = 0,078%`, được phần mềm làm tròn xuống `0%`.
 
 ---
 
@@ -514,14 +528,15 @@ Number of LUT4s used:   1 (0%)
 1. Mở **Diamond Programmer**, chọn tệp `.bin` vừa xuất ra từ iCEcube2.
 2. Nạp chương trình vào bo mạch phát triển qua cáp USB.
 3. **Thử nghiệm:**
-   * Nhấn riêng lẻ Nút 1 $\rightarrow$ Đèn LED D1 vẫn TẮT.
-   * Nhấn riêng lẻ Nút 2 $\rightarrow$ Đèn LED D1 vẫn TẮT.
-   * **Nhấn đồng thời cả Nút 1 và Nút 2** $\rightarrow$ Đèn LED D1 **SÁNG LÊN**!
+   * Nhấn riêng lẻ Nút 1 → Đèn LED D1 vẫn TẮT.
+   * Nhấn riêng lẻ Nút 2 → Đèn LED D1 vẫn TẮT.
+   * **Nhấn đồng thời cả Nút 1 và Nút 2** → Đèn LED D1 **SÁNG LÊN**!
 
 #### Thử Nghiệm Mở Rộng:
 Bạn có thể dễ dàng sửa mã nguồn để thử nghiệm các cổng logic khác:
-* **Cổng OR:** Thay `&` bằng `|` (Verilog) hoặc `or` (VHDL) $\rightarrow$ Bấm 1 trong 2 nút là LED sáng.
-* **Cổng XOR:** Thay `&` bằng `^` (Verilog) hoặc `xor` (VHDL) $\rightarrow$ Chỉ bấm duy nhất 1 nút thì LED sáng, bấm cả 2 nút thì LED tắt.
+
+* **Cổng OR:** Thay `&` bằng `|` (Verilog) hoặc `or` (VHDL) → Bấm 1 trong 2 nút là LED sáng.
+* **Cổng XOR:** Thay `&` bằng `^` (Verilog) hoặc `xor` (VHDL) → Chỉ bấm duy nhất 1 nút thì LED sáng, bấm cả 2 nút thì LED tắt.
 
 ---
 
@@ -576,6 +591,7 @@ Ba điểm đáng rút ra từ bảng này:
 ## 7. Tóm Tắt Chương (Summary)
 
 Trong chương này, bạn đã tìm hiểu về viên gạch nền tảng đầu tiên của FPGA: **Bảng tra Look-Up Table (LUT)**. Bạn đã nắm vững:
+
 * Cách đại số Boolean biểu diễn logic số qua các số 0 và 1 (tương ứng với mức điện áp 0V và Điện áp lõi).
 * Bảng chân lý và ký hiệu của các cổng logic chuẩn: AND, OR, NOT, XOR, NAND.
 * Cách kết hợp nhiều cổng logic thành phương trình Boolean và thứ tự ưu tiên thực hiện phép toán.
