@@ -2,4 +2,5 @@ title: FPGA
 nav:
   - index.md
   - 01-gap-go-fpga.md
+  - 03-dai-so-boolean-va-lut.md
   - ...
