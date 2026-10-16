@@ -256,16 +256,22 @@ gtkwave and.ghw
 ```
 
 ```
-Time (ns)    0         10        20        30        40
-             |---------|---------|---------|---------|
-r_In1        ____________________/-------------------
-r_In2        __________/---------\_________/---------
-w_Out        ______________________________/---------
-i_Switch_1   ____________________/-------------------
-i_Switch_2   __________/---------\_________/---------
-o_LED_1      ______________________________/---------
+Time (ns)  0         10        20        30        40        
+           |         |         |         |         |
+                               ┌────────────────────
+r_In1      ────────────────────┘                    
+                     ┌─────────┐         ┌──────────
+r_In2      ──────────┘         └─────────┘          
+                                         ┌──────────
+w_Out      ──────────────────────────────┘          
+                               ┌────────────────────
+i_Switch_1 ────────────────────┘                    
+                     ┌─────────┐         ┌──────────
+i_Switch_2 ──────────┘         └─────────┘          
+                                         ┌──────────
+o_LED_1    ──────────────────────────────┘          
 ```
-*Hình 5-4: Biểu đồ dạng sóng đầu ra từ mô phỏng cổng AND.*
+*Hình 5-4: Dạng sóng mô phỏng cổng AND — vẽ lại từ file VCD của GHDL, mỗi ký tự một nanosecond.*
 
 Nhìn vào dạng sóng, chúng ta thấy tất cả các tín hiệu và mốc thời gian (tính bằng nanosecond) khi chúng chuyển trạng thái giữa 0 và 1:
 
@@ -283,12 +289,14 @@ Nhìn vào dạng sóng, chúng ta thấy tất cả các tín hiệu và mốc 
 Trong Chương 4 (Dự án #3), chúng ta đã lập trình FPGA để đảo trạng thái đèn LED mỗi khi nhả nút nhấn. Tuy nhiên có một vấn đề: thao tác bấm nút không làm đèn LED đảo trạng thái một cách ổn định. Lý do là bất kỳ nút nhấn cơ học nào cũng chịu ảnh hưởng của hiện tượng **dội phím (bouncing)** — những biến động tín hiệu đóng/ngắt liên tục xảy ra khi lá đồng cơ học bên trong nút nhấn va chạm và nảy lên trước khi định hình ở trạng thái ổn định. **Hình 5-5** minh họa sự khác biệt giữa lý thuyết và thực tế. (Trên bo QMTech, như chương 4 mục 2 đã chỉ ra, cạnh xuống xảy ra lúc **bấm** chứ không phải lúc nhả, vì bo dùng điện trở kéo lên. Mọi lập luận bên dưới vẫn đúng nguyên, chỉ đổi chữ "nhả" thành "bấm".)
 
 ```
-Kỳ vọng (Lý thuyết):
-Switch toggles ---> __________________/------------------- (Ổn định)
+Kỳ vọng (lý thuyết):
+                    ┌──────────────────────
+Switch   ───────────┘
 
-Thực tế (Do dội phím):
-Switch toggles ---> _____|||_|_||||___/------------------- (Ổn định)
-                    |<-- Nhiễu Glitches -->|
+Thực tế (dội phím):
+                    ┌┐ ┌┐┌┐ ┌┐  ┌───────────
+Switch   ───────────┘└─┘└┘└─┘└──┘
+                    |<-- nảy 1-10 ms -->|
 ```
 *Hình 5-5: Hiện tượng dội phím (bouncing) ở nút nhấn cơ học.*
 
@@ -640,14 +648,19 @@ Cách thứ hai tốt hơn vì testbench tự biết khi nào xong, không phụ
 
 Thứ hai, để ý mẫu `r_Bouncy <= '1'; wait until rising_edge(r_Clk);`. Lệnh gán nằm **ngay sau** một cạnh lên (vì dòng `wait until` phía trên vừa trả về). Theo quy tắc chương 4 — tín hiệu chỉ cập nhật sau khi process tạm dừng — UUT không thấy giá trị mới ở cạnh vừa rồi, mà ở **cạnh kế tiếp**. Đó là lý do trong Hình 5-7 bộ đếm luôn phản ứng chậm một cạnh so với dòng `i_Bouncy`. Trong Verilog, mẫu tương đương `r_Bouncy = 1'b1; @(posedge r_Clk);` dùng phép gán tức thời nên có thể tranh chấp (race) với khối `always` của UUT; VHDL không có vấn đề đó nhờ cơ chế delta cycle.
 
-#### Kết quả dạng sóng mô phỏng EPWave (Hình 5-7):
+#### Kết quả dạng sóng mô phỏng (Hình 5-7):
 ```
-Clock        _----_----_----_----_----_----_----_----_----_----
-i_Bouncy     ____/-----\________________/----------------------
-o_Debounced  ________________________________________/---------
-r_Count      0   0    1    0    0    0  1    2    3    0    0
+Time (ns)   0   4   8   12  16  20  24  28  32  36  
+            |   |   |   |   |   |   |   |   |   |
+              ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐
+r_Clk       ──┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └
+              ┌───┐       ┌──────────────────────
+i_Bouncy    ──┘   └───────┘                      
+                                          ┌──────
+o_Debounced ──────────────────────────────┘      
+r_Count     0     1   0       1   2   3   0      
 ```
-*Hình 5-7: Biểu đồ dạng sóng kiểm thử bộ lọc dội phím.*
+*Hình 5-7: Dạng sóng kiểm thử bộ lọc dội phím — vẽ lại từ file VCD của GHDL, mỗi ký tự một nanosecond; dòng `r_Count` ghi giá trị tại cột nó bắt đầu đổi.*
 
 **Phân tích dạng sóng:**
 
