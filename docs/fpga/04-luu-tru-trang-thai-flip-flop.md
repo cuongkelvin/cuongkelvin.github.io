@@ -785,28 +785,32 @@ Có một chỗ giá trị khởi tạo không thay được cho reset: **trong 
 Để có cái nhìn cụ thể hơn về cách LUT và Flip-flop thực sự được nối dây với nhau trong một chip FPGA thật, hãy xem sơ đồ cấu trúc từ Bảng thông số (Datasheet) của dòng FPGA Lattice iCE40 LP/HX trong **Hình 4-10**.
 
 ```
-┌───────────────────────────────────────────────────────────────────────────────────────┐
-│ Programmable Logic Block (PLB)                                                        │
-│                                                                                       │
-│  ┌──────────────┐     ┌────────────────────────────────────────────────────────────┐  │
-│  │ Logic Cell 1 │ ──> │ Shared Block-Level Controls (Clock, Enable, Set/Reset)     │  │
-│  ├──────────────┤     │                                                            │  │
-│  │ Logic Cell 2 │     │  ┌──────────────────────────────────────────────────────┐  │  │
-│  ├──────────────┤     │  │ Logic Cell 5 (phóng to)                              │  │  │
-│  │ Logic Cell 3 │     │  │                                                      │  │  │
-│  ├──────────────┤     │  │   [Carry Logic]                                      │  │  │
-│  │ Logic Cell 4 │     │  │         │                                            │  │  │
-│  ├──────────────┤     │  │   I0->  v                                            │  │  │
-│  │ Logic Cell 5 │     │  │   I1-> [ LUT4 ] ────> D                              │  │  │
-│  │ (Phóng to)   │====>│  │   I2->          │    EN -> [ DFF ] ───────> Out      │  │  │
-│  ├──────────────┤     │  │   I3->          │    SR -> (D Flip-Flop)             │  │  │
-│  │ Logic Cell 6 │     │  │                                                      │  │  │
-│  ├──────────────┤     │  └──────────────────────────────────────────────────────┘  │  │
-│  │ Logic Cell 7 │     └────────────────────────────────────────────────────────────┘  │
-│  ├──────────────┤                                                                     │
-│  │ Logic Cell 8 │                                                                     │
-│  └──────────────┘                                                                     │
-└───────────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────┐
+│ Programmable Logic Block (PLB)                                                 │
+│                                                                                │
+│  ┌──────────────────────────────────────────┐                                  │
+│  │ Shared Block-Level Controls              │                                  │
+│  │ Clock, Clock Enable, Set/Reset           │                                  │
+│  └────────┬─────────────────────────────────┘                                  │
+│           │ dùng chung cho cả 8 cell                                           │
+│  ┌────────▼─────┐                                                              │
+│  │ Logic Cell 1 │                                                              │
+│  ├──────────────┤       ┌────────────────────────────────────────────────────┐ │
+│  │ Logic Cell 2 │       │ Logic Cell 5 (phóng to)                            │ │
+│  ├──────────────┤       │                                                    │ │
+│  │ Logic Cell 3 │       │        ┌───────────────┐                           │ │
+│  ├──────────────┤       │  I0 ──>│               │                           │ │
+│  │ Logic Cell 4 │       │  I1 ──>│     LUT4      │       ┌──────────┐        │ │
+│  ├──────────────┤       │  I2 ──>│               ├─────> │ D      Q ├──> Out │ │
+│  │ Logic Cell 5 │ ════> │  I3 ──>│               │       │   DFF    │        │ │
+│  ├──────────────┤       │        └───────────────┘  EN ─>│ EN       │        │ │
+│  │ Logic Cell 6 │       │                           SR ─>│ SR       │        │ │
+│  ├──────────────┤       │                          Clk ─>│ >        │        │ │
+│  │ Logic Cell 7 │       │                                └──────────┘        │ │
+│  ├──────────────┤       │  Carry in ──> [ Carry Logic ] ──> Carry out        │ │
+│  │ Logic Cell 8 │       └────────────────────────────────────────────────────┘ │
+│  └──────────────┘                                                              │
+└────────────────────────────────────────────────────────────────────────────────┘
 ```
 *Hình 4-10: Cấu trúc LUT và Flip-flop trong một Logic Cell của chip FPGA Lattice iCE40*
 
@@ -818,8 +822,8 @@ Mọi họ chip FPGA, dù đến từ Lattice, AMD (Xilinx) hay Intel (Altera), 
 
 Nhìn vào sơ đồ:
 
-1. Mỗi khối **PLB** chứa **8 Logic Cells (LCs)**.
-2. Phóng to một Logic Cell — trong hình là cell 5, mũi tên `====>` chỉ có nghĩa "phóng to" chứ không phải đường tín hiệu, và cả 8 cell giống hệt nhau. Bên trong chứa **1 bảng tra 4 đầu vào (LUT4)** và **1 D Flip-Flop (DFF)**.
+1. Mỗi khối **PLB** chứa **8 Logic Cells (LCs)**, dùng chung một khối điều khiển (**Shared Block-Level Controls**) cấp xung nhịp, clock enable và set/reset cho cả 8 cell — trên hình là hộp phía trên với đường kẻ xuống cột cell.
+2. Phóng to một Logic Cell — trong hình là cell 5, mũi tên `════>` chỉ có nghĩa "phóng to" chứ không phải đường tín hiệu, và cả 8 cell giống hệt nhau. Bên trong chứa **1 bảng tra 4 đầu vào (LUT4)** và **1 D Flip-Flop (DFF)**.
 3. Các chân của DFF khớp chính xác với những gì chúng ta đã học: đầu vào dữ liệu `D`, đầu vào cho phép `EN`, đầu vào xung nhịp (`>`), và đầu vào `SR` (Set/Reset).
 4. Bên cạnh đó là khối **Carry Logic** giúp tăng tốc các phép toán số học như cộng, trừ, so sánh.
 
