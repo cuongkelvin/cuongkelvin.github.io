@@ -16,10 +16,12 @@ Hãy xem xét sơ đồ cơ bản của một **D Flip-Flop** (Data Flip-Flop) t
         +------------+
   D --->| D        Q |---> Q
  En --->| En         |
- >  --->| >          |
+Clk --->| >          |
         +------------+
 ```
 *Hình 4-1: Sơ đồ khối của một D Flip-Flop*
+
+Dấu `>` ở chân xung nhịp là cách vẽ chữ của ký hiệu tam giác nhỏ trong sơ đồ mạch: nó báo rằng chân này **kích theo cạnh** (edge-triggered) — flip-flop chỉ phản ứng đúng lúc xung nhịp chuyển mức, không phải suốt lúc xung nhịp ở mức cao. Hai chân `D` và `En` không có tam giác vì chúng đọc theo mức.
 
 Hãy chú ý rằng linh kiện này có ba đầu vào ở phía bên trái và một đầu ra ở phía bên phải:
 
@@ -43,14 +45,14 @@ Một **tín hiệu xung nhịp (Clock signal)**, thường được gọi ngắ
 Xung nhịp là chìa khóa cho cách thức vận hành của FPGA: nó kích hoạt các linh kiện khác, chẳng hạn như Flip-flop, thực hiện nhiệm vụ của chúng. Nếu bạn hình dung FPGA như một bộ bánh răng, thì xung nhịp giống như bánh răng lớn quay tất cả các bánh răng còn lại. Nếu bánh răng chính không quay, các bánh răng khác cũng sẽ đứng yên. Bạn cũng có thể coi xung nhịp như **trái tim** của hệ thống, vì nó giữ nhịp đập cho toàn bộ FPGA. Mỗi Flip-flop trong FPGA sẽ được cập nhật theo từng nhịp đập của xung nhịp.
 
 ```
-       Chu kỳ xung nhịp (Clock period)
-       |<---------------------------->|        Duty cycle 50%
-   1 --+      +-----------------------+      +-----------------------+
-       |      |                       |      |                       |
-   0 --+------+                       +------+                       +------
-       ^      ^                       ^
-   Cạnh lên   Cạnh xuống          Cạnh lên
-(Rising edge) (Falling edge)
+              |<-- Chu kỳ (period) -->|
+              ┌───────────┐           ┌───────────┐           ┌───────────┐      
+Clk  ─────────┘           └───────────┘           └───────────┘           └──────
+              ^           ^           ^
+          cạnh lên   cạnh xuống   cạnh lên
+          (rising)   (falling)    (rising)
+
+     Mức cao và mức thấp dài bằng nhau: duty cycle 50%
 ```
 *Hình 4-2: Dạng sóng của tín hiệu xung nhịp (Clock)*
 
