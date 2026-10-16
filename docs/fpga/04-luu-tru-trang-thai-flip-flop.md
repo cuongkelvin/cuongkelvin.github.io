@@ -444,10 +444,10 @@ signal sw_ff1, sw_ff2 : std_logic := '1';
 process (i_clk)
 begin
   if rising_edge(i_clk) then
-    sw_ff1 <= i_switch;    -- tang hy sinh, co the lo lung
-    sw_ff2 <= sw_ff1;      -- co tron 1 chu ky de on dinh
+    sw_ff1 <= i_switch;    -- tầng hy sinh, có thể lơ lửng
+    sw_ff2 <= sw_ff1;      -- có trọn 1 chu kỳ để ổn định
     ...
-    -- tu day tro di CHI dung sw_ff2, khong dung i_switch nua
+    -- từ đây trở đi CHỈ dùng sw_ff2, không dùng i_switch nữa
   end if;
 end process;
 ```
@@ -467,8 +467,8 @@ Con số đó lớn tới mức mô phỏng không chạy nổi — nên khi vi�
 #### Thứ tự ghép ba khối
 
 ```
-i_switch ──> [ 2 FF dong bo ] ──> [ loc doi phim ] ──> [ phat hien canh ] ──> dao LED
-             (chong metastable)    (loc nhieu co hoc)   (muc 2 cua chuong nay)
+i_switch ──> [ 2 FF đồng bộ ] ──> [ lọc dội phím ] ──> [ phát hiện cạnh ] ──> đảo LED
+             (chống metastable)    (lọc nhiễu cơ học)   (mục 2 của chương này)
 ```
 
 Mỗi khối làm đúng một việc và có thể dùng lại ở dự án khác. Dự án #3 trong sách mới chỉ có khối thứ ba.
@@ -547,17 +547,17 @@ Verilog chỉ có một cơ chế đó. VHDL thì có **hai**, và phân biệt 
 Khác biệt này quyết định ở một tình huống cụ thể: **tích luỹ trong vòng lặp**.
 
 ```vhdl
--- SAI: ca 8 vong deu doc gia tri CU cua sum, cuoi cung chi tang 1
+-- SAI: cả 8 vòng đều đọc giá trị CŨ của sum, cuối cùng chỉ tăng 1
 signal sum : integer;
 for i in 0 to 7 loop
     if input(i) = '1' then sum <= sum + 1; end if;
 end loop;
 
--- DUNG: variable co hieu luc ngay, vong sau doc duoc ket qua vong truoc
+-- ĐÚNG: variable có hiệu lực ngay, vòng sau đọc được kết quả vòng trước
 process (input)
     variable cnt : integer range 0 to 8;
 begin
-    cnt := 0;                       -- phai dat lai moi lan process chay
+    cnt := 0;                       -- phải đặt lại mỗi lần process chạy
     for i in 0 to 7 loop
         if input(i) = '1' then cnt := cnt + 1; end if;
     end loop;
@@ -578,7 +578,7 @@ Luật rất gọn: trong process có xung nhịp, **signal nào không được
 ```vhdl
 if rising_edge(i_clk) then
     if count = NGUONG then
-        -- khong gan count o day -> no DUNG YEN o NGUONG
+        -- không gán count ở đây -> nó ĐỨNG YÊN ở NGƯỠNG
         o_done <= '1';
     else
         count <= count + 1;
@@ -591,8 +591,8 @@ Bộ đếm trên tự dừng khi chạm ngưỡng mà không cần thêm cờ h
 ```vhdl
 if rising_edge(i_clk) then
     if i_en = '1' then
-        count <= count + 1;     -- khong co nhanh else
-    end if;                      -- -> en = 0 thi count dung yen
+        count <= count + 1;     -- không có nhánh else
+    end if;                      -- -> en = 0 thì count đứng yên
 end if;
 ```
 
@@ -760,7 +760,7 @@ Lời khuyên "tham khảo User Guide của hãng" ở trên dẫn tới một k
 Lý do là flip-flop trên Xilinx 7-series **có sẵn giá trị khởi tạo nạp từ bitstream**. Khi FPGA nạp cấu hình lúc bật nguồn, mọi flip-flop đã được đặt về đúng giá trị bạn khai trong mã nguồn:
 
 ```vhdl
-signal r_led : std_logic := '0';   -- gia tri nay nam trong bitstream
+signal r_led : std_logic := '0';   -- giá trị này nằm trong bitstream
 ```
 
 Nghĩa là mạch đã khởi động ở trạng thái xác định mà không cần một tín hiệu reset nào. Đây là điểm khác với ASIC, nơi flip-flop bật lên ở trạng thái ngẫu nhiên nên bắt buộc phải có reset.
@@ -839,7 +839,7 @@ Chip Artix-7 và Kintex-7 có cách tổ chức khác về chi tiết nhưng gi�
 │  │  4 x LUT6          │  │  4 x LUT6          │  │
 │  │  8 x Flip-flop     │  │  8 x Flip-flop     │  │
 │  │  Carry chain       │  │  Carry chain       │  │
-│  │  MUX ghep LUT      │  │  MUX ghep LUT      │  │
+│  │  MUX ghép LUT      │  │  MUX ghép LUT      │  │
 │  └────────────────────┘  └────────────────────┘  │
 └──────────────────────────────────────────────────┘
 ```

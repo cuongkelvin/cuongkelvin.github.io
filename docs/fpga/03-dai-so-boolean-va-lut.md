@@ -171,7 +171,7 @@ Trong **VHDL thì không như vậy**. Sáu toán tử logic nhị phân đều 
 
 ```vhdl
 q <= a and b or c;        -- LOI CU PHAP
-q <= (a and b) or c;      -- DUNG
+q <= (a and b) or c;      -- ĐÚNG
 ```
 
 Nếu viết dòng đầu, GHDL sẽ báo:
@@ -185,21 +185,21 @@ Quy tắc đầy đủ gồm ba phần, và phần thứ ba là cái ít ngườ
 **Một — `not` nằm ở mức ưu tiên cao hơn**, tách khỏi nhóm sáu toán tử kia. Vì vậy nó không cần ngoặc khi đứng cạnh phép khác:
 
 ```vhdl
-q <= not a and b;         -- DUNG, khong can ngoac
+q <= not a and b;         -- ĐÚNG, không cần ngoặc
 ```
 
 **Hai — `and`, `or`, `xor`, `xnor` có tính kết hợp** (associative), nên lặp lại cùng một toán tử thì viết liền thoải mái:
 
 ```vhdl
-q <= a and b and c;       -- DUNG
-q <= a xor b xor c;       -- DUNG
+q <= a and b and c;       -- ĐÚNG
+q <= a xor b xor c;       -- ĐÚNG
 ```
 
 **Ba — `nand` và `nor` thì KHÔNG có tính kết hợp.** Đây là ngoại lệ dễ bất ngờ: ngay cả khi lặp lại chính nó, VHDL vẫn từ chối.
 
 ```vhdl
-q <= a nand b nand c;     -- LOI, du cung mot toan tu
-q <= (a nand b) nand c;   -- DUNG
+q <= a nand b nand c;     -- LỖI, dù cùng một toán tử
+q <= (a nand b) nand c;   -- ĐÚNG
 ```
 
 GHDL báo lỗi rất rõ ràng ở trường hợp này:
@@ -349,18 +349,18 @@ Một LUT-6 gồm hai phần:
 Sáu đầu vào của LUT đóng vai trò **địa chỉ**, còn giá trị của ô nhớ tại địa chỉ ấy chính là đầu ra.
 
 ```
-     64 o nho SRAM            Cay MUX              Dau ra
-     (nap tu bitstream)
+     64 ô nhớ SRAM            Cây MUX              Đầu ra
+     (nạp từ bitstream)
         ┌────┐
         │ 0  │───┐
         │ 1  │───│
         │ 0  │───│   ┌──────────────────┐
         │ 1  │───┼──>│                  │
-        │ .. │───│   │  chon 1 trong 64 │───────────> O
+        │ .. │───│   │  chọn 1 trong 64 │───────────> O
         │ .. │───│   │                  │
         │ 1  │───│   └──^──^──^──^──^──^┘
         │ 0  │───┘      │  │  │  │  │  │
-        └────┘          I5 I4 I3 I2 I1 I0   (6 day vao)
+        └────┘          I5 I4 I3 I2 I1 I0   (6 dây vào)
 ```
 
 Điều này nối thẳng với cơ chế đã trình bày ở Chương 1: cấu hình FPGA nằm trong các ô nhớ SRAM, và nạp bitstream chính là ghi giá trị vào những ô đó. Phần lớn số ô ấy là nội dung bảng tra của các LUT.
@@ -375,7 +375,7 @@ Một hệ quả thực dụng mà bạn nên tận dụng: nếu hàm của b�
 
 ```vhdl
 q <= a and b;                          -- 1 LUT
-q <= (a and b) or (c and d) or e;      -- VAN la 1 LUT (5 bien)
+q <= (a and b) or (c and d) or e;      -- VẪN là 1 LUT (5 biến)
 ```
 
 Hai dòng trên tốn tài nguyên như nhau. Nói cách khác, **nhồi thêm logic vào cùng một LUT là miễn phí**, miễn tổng số biến không vượt quá 6.
@@ -391,10 +391,10 @@ Có một ngoại lệ đáng biết: LUT-6 của Xilinx còn hỗ trợ **chế
 Lúc đó trình tổng hợp phải **ghép nhiều LUT thành cây nhiều tầng**. Ví dụ một hàm AND 12 biến:
 
 ```
- 6 bien ──> [ LUT ] ──┐
+ 6 biến ──> [ LUT ] ──┐
                       │──> [ LUT ] ──> q
- 6 bien ──> [ LUT ] ──┘
-          tang 1        tang 2
+ 6 biến ──> [ LUT ] ──┘
+          tầng 1        tầng 2
 ```
 
 Ba LUT, hai tầng. Quy tắc chung: mỗi tầng gộp được 6 kết quả thành 1, nên hàm `N` biến cần khoảng `log₆N` tầng.
