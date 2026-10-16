@@ -8,6 +8,7 @@ Bản dịch kèm ghi chú riêng, bổ sung các ví dụ VHDL cụ thể và t
 
 - [**Chương 1 — Gặp gỡ FPGA**](01-gap-go-fpga.md) — tư duy song song vs tuần tự, cơ chế nạp bitstream, so sánh FPGA / vi điều khiển / ASIC, Verilog vs VHDL
 - [**Chương 3 — Đại số Boolean và bảng tra LUT**](03-dai-so-boolean-va-lut.md) — các cổng logic, toán tử trong VHDL và luật ưu tiên, bên trong một LUT-6
+- [**Chương 4 — Lưu trữ trạng thái bằng flip-flop**](04-luu-tru-trang-thai-flip-flop.md) — xung nhịp, phát hiện cạnh, latch, reset, metastability, `signal` vs `variable`, kiến trúc CLB/slice
 
 ## Phần cứng đang dùng
 

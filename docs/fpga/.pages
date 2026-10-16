@@ -3,4 +3,5 @@ nav:
   - index.md
   - 01-gap-go-fpga.md
   - 03-dai-so-boolean-va-lut.md
+  - 04-luu-tru-trang-thai-flip-flop.md
   - ...
