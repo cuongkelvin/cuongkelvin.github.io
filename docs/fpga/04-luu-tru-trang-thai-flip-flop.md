@@ -272,17 +272,17 @@ module LED_Toggle_Project (
   output o_LED_1
 );
 
-  reg r_LED_1    = 1'b0; // 1
-  reg r_Switch_1 = 1'b0; // 1
+  reg r_LED_1    = 1'b0; // [1]
+  reg r_Switch_1 = 1'b0; // [1]
 
-  always @(posedge i_Clk) // 2
+  always @(posedge i_Clk) // [2]
   begin
-    r_Switch_1 <= i_Switch_1; // 3
+    r_Switch_1 <= i_Switch_1; // [3]
 
     // Kiểm tra xem nút nhấn đã nhả ra chưa (Cạnh xuống)
-    if (i_Switch_1 == 1'b0 && r_Switch_1 == 1'b1) // 4
+    if (i_Switch_1 == 1'b0 && r_Switch_1 == 1'b1) // [4]
     begin
-      r_LED_1 <= ~r_LED_1; // 5
+      r_LED_1 <= ~r_LED_1; // [5]
     end
   end
 
@@ -306,18 +306,18 @@ entity LED_Toggle_Project is
 end entity LED_Toggle_Project;
 
 architecture RTL of LED_Toggle_Project is
-  signal r_LED_1    : std_logic := '0'; -- 1
-  signal r_Switch_1 : std_logic := '0'; -- 1
+  signal r_LED_1    : std_logic := '0'; -- [1]
+  signal r_Switch_1 : std_logic := '0'; -- [1]
 begin
 
-  process (i_Clk) -- 2
+  process (i_Clk) -- [2]
   begin
     if rising_edge(i_Clk) then
-      r_Switch_1 <= i_Switch_1; -- 3
+      r_Switch_1 <= i_Switch_1; -- [3]
 
       -- Kiểm tra xem nút nhấn đã nhả ra chưa (Cạnh xuống)
-      if i_Switch_1 = '0' and r_Switch_1 = '1' then -- 4
-        r_LED_1 <= not r_LED_1; -- 5
+      if i_Switch_1 = '0' and r_Switch_1 = '1' then -- [4]
+        r_LED_1 <= not r_LED_1; -- [5]
       end if;
     end if;
   end process;
@@ -329,16 +329,16 @@ end architecture RTL;
 
 #### Phân tích chi tiết mã nguồn:
 
-1. **Khai báo tín hiệu (❶):** Chúng ta bắt đầu bằng cách định nghĩa hai đầu vào (`i_Clk` và `i_Switch_1`) và một đầu ra (`o_LED_1`). Sau đó, chúng ta tạo hai tín hiệu `r_LED_1` và `r_Switch_1` bằng từ khóa `reg` (viết tắt của register) trong Verilog hoặc `signal` trong VHDL. Cuối cùng, các tín hiệu này sẽ được tổng hợp thành các Flip-flop (thanh ghi), vì vậy chúng ta thêm tiền tố `r_` vào tên của chúng. Việc dán nhãn cho bất kỳ tín hiệu nào bạn biết sẽ trở thành thanh ghi bằng dạng `r_signal_name` là một thói quen lập trình rất tốt.
+1. **Khai báo tín hiệu [1]:** Chúng ta bắt đầu bằng cách định nghĩa hai đầu vào (`i_Clk` và `i_Switch_1`) và một đầu ra (`o_LED_1`). Sau đó, chúng ta tạo hai tín hiệu `r_LED_1` và `r_Switch_1` bằng từ khóa `reg` (viết tắt của register) trong Verilog hoặc `signal` trong VHDL. Cuối cùng, các tín hiệu này sẽ được tổng hợp thành các Flip-flop (thanh ghi), vì vậy chúng ta thêm tiền tố `r_` vào tên của chúng. Việc dán nhãn cho bất kỳ tín hiệu nào bạn biết sẽ trở thành thanh ghi bằng dạng `r_signal_name` là một thói quen lập trình rất tốt.
 
-2. **Khối Always / Process (❷):** Chúng ta khởi tạo khối `always` (Verilog) hoặc `process` (VHDL). Loại khối code này được kích hoạt bởi sự thay đổi của một hoặc nhiều tín hiệu được chỉ định trong **danh sách nhạy (sensitivity list)** đặt trong ngoặc đơn. Trong trường hợp này, khối nhạy với tín hiệu xung nhịp `i_Clk`. Cụ thể, khối này sẽ được kích hoạt mỗi khi xung nhịp chuyển từ 0 lên 1 (tại mỗi cạnh lên xung nhịp). Trong Verilog, chúng ta chỉ định điều này bằng từ khóa `posedge` (positive edge) ngay trong danh sách nhạy: `always @(posedge i_Clk)`. Trong VHDL, chúng ta chỉ đưa tên tín hiệu vào danh sách nhạy `process (i_Clk)` và kiểm tra cạnh lên ở hai dòng phía dưới bằng `if rising_edge(i_Clk) then`.
+2. **Khối Always / Process [2]:** Chúng ta khởi tạo khối `always` (Verilog) hoặc `process` (VHDL). Loại khối code này được kích hoạt bởi sự thay đổi của một hoặc nhiều tín hiệu được chỉ định trong **danh sách nhạy (sensitivity list)** đặt trong ngoặc đơn. Trong trường hợp này, khối nhạy với tín hiệu xung nhịp `i_Clk`. Cụ thể, khối này sẽ được kích hoạt mỗi khi xung nhịp chuyển từ 0 lên 1 (tại mỗi cạnh lên xung nhịp). Trong Verilog, chúng ta chỉ định điều này bằng từ khóa `posedge` (positive edge) ngay trong danh sách nhạy: `always @(posedge i_Clk)`. Trong VHDL, chúng ta chỉ đưa tên tín hiệu vào danh sách nhạy `process (i_Clk)` và kiểm tra cạnh lên ở hai dòng phía dưới bằng `if rising_edge(i_Clk) then`.
 
-3. **Tạo Flip-flop thứ nhất (❸):** Bên trong khối `always`/`process`, chúng ta lấy tín hiệu đầu vào `i_Switch_1` và chốt vào `r_Switch_1`. Dòng mã này sẽ sinh ra một Flip-flop có `i_Switch_1` ở đầu vào `D`, `r_Switch_1` ở đầu ra `Q`, và `i_Clk` đi vào đầu vào xung nhịp. Đầu ra của Flip-flop này sẽ tạo ra độ trễ 1 chu kỳ xung nhịp đối với bất kỳ sự thay đổi nào ở đầu vào. Điều này mang lại cho chúng ta quyền truy cập vào **trạng thái trước đó** của nút nhấn, vốn cần thiết để phát hiện cạnh xuống.
+3. **Tạo Flip-flop thứ nhất [3]:** Bên trong khối `always`/`process`, chúng ta lấy tín hiệu đầu vào `i_Switch_1` và chốt vào `r_Switch_1`. Dòng mã này sẽ sinh ra một Flip-flop có `i_Switch_1` ở đầu vào `D`, `r_Switch_1` ở đầu ra `Q`, và `i_Clk` đi vào đầu vào xung nhịp. Đầu ra của Flip-flop này sẽ tạo ra độ trễ 1 chu kỳ xung nhịp đối với bất kỳ sự thay đổi nào ở đầu vào. Điều này mang lại cho chúng ta quyền truy cập vào **trạng thái trước đó** của nút nhấn, vốn cần thiết để phát hiện cạnh xuống.
 
-4. **Kiểm tra cạnh xuống (❹):** Tiếp theo, chúng ta kiểm tra xem nút nhấn đã được nhả ra chưa bằng cách so sánh trạng thái hiện tại (`i_Switch_1`) với trạng thái trước đó (`r_Switch_1`). Nếu trạng thái hiện tại bằng `0` và trạng thái trước đó bằng `1`, chúng ta đã phát hiện một cạnh xuống (nút nhấn vừa nhả). Mạch so sánh `AND` này sẽ được thực hiện bằng một bảng tra LUT.
+4. **Kiểm tra cạnh xuống [4]:** Tiếp theo, chúng ta kiểm tra xem nút nhấn đã được nhả ra chưa bằng cách so sánh trạng thái hiện tại (`i_Switch_1`) với trạng thái trước đó (`r_Switch_1`). Nếu trạng thái hiện tại bằng `0` và trạng thái trước đó bằng `1`, chúng ta đã phát hiện một cạnh xuống (nút nhấn vừa nhả). Mạch so sánh `AND` này sẽ được thực hiện bằng một bảng tra LUT.
 
 > **ĐIỀU BẤT NGỜ VỀ PHÉP GÁN PHI PHONG TỎA (`<=`)**
-> Bạn có thể nhận ra một điều kỳ lạ: Đầu tiên chúng ta gán `r_Switch_1 <= i_Switch_1` (❸), sau đó lại kiểm tra `if (i_Switch_1 == 1'b0 && r_Switch_1 == 1'b1)` (❹). Bạn có thể nghĩ rằng vì vừa gán `i_Switch_1` cho `r_Switch_1`, chúng sẽ luôn bằng nhau và câu lệnh `if` sẽ không bao giờ đúng? **Sai!** Các phép gán trong khối `always` hoặc `process` sử dụng toán tử `<= ` được gọi là **phép gán phi phong tỏa (non-blocking assignment)**. Chúng không xảy ra ngay lập tức! Thay vào đó, tất cả các phép gán sẽ diễn ra đồng thời tại cạnh lên của xung nhịp. Nếu tại cạnh lên xung nhịp `i_Switch_1` đang bằng 0 và `r_Switch_1` đang bằng 1, câu lệnh `if` sẽ được đánh giá là ĐÚNG, ngay cả khi `r_Switch_1` đồng thời chuyển từ 1 về 0 để khớp với `i_Switch_1`.
+> Bạn có thể nhận ra một điều kỳ lạ: Đầu tiên chúng ta gán `r_Switch_1 <= i_Switch_1` [3], sau đó lại kiểm tra `if (i_Switch_1 == 1'b0 && r_Switch_1 == 1'b1)` [4]. Bạn có thể nghĩ rằng vì vừa gán `i_Switch_1` cho `r_Switch_1`, chúng sẽ luôn bằng nhau và câu lệnh `if` sẽ không bao giờ đúng? **Sai!** Các phép gán trong khối `always` hoặc `process` sử dụng toán tử `<= ` được gọi là **phép gán phi phong tỏa (non-blocking assignment)**. Chúng không xảy ra ngay lập tức! Thay vào đó, tất cả các phép gán sẽ diễn ra đồng thời tại cạnh lên của xung nhịp. Nếu tại cạnh lên xung nhịp `i_Switch_1` đang bằng 0 và `r_Switch_1` đang bằng 1, câu lệnh `if` sẽ được đánh giá là ĐÚNG, ngay cả khi `r_Switch_1` đồng thời chuyển từ 1 về 0 để khớp với `i_Switch_1`.
 
 **Đính chính thuật ngữ cho người viết VHDL.** Hành vi mô tả trong khung trên là **đúng cho cả hai ngôn ngữ**, nhưng cái tên thì không. *Non-blocking assignment* (phép gán phi phong tỏa) là thuật ngữ **chỉ có trong Verilog**, nơi nó đối lập với *blocking assignment* viết bằng dấu `=`.
 
@@ -346,7 +346,7 @@ end architecture RTL;
 
 Cặp khái niệm đối lập trong VHDL là **`signal` dùng `<=`** (có hiệu lực muộn) và **`variable` dùng `:=`** (có hiệu lực ngay). Mục 3 sẽ trình bày kỹ sự khác biệt này — nó quan trọng hơn nhiều so với tên gọi. Nếu bạn tìm trên mạng cụm "non-blocking assignment VHDL", kết quả trả về sẽ chỉ gây nhầm lẫn, vì chuẩn VHDL không dùng từ đó.
 
-5. **Đảo trạng thái LED (❺):** Khi đi vào bên trong câu lệnh `if`, chúng ta đảo trạng thái của đèn LED. Thao tác này tạo ra Flip-flop thứ hai trong dự án. Chúng ta lấy giá trị hiện tại của `r_LED_1`, đảo ngược nó (phép NOT `~` / `not`), và lưu kết quả trở lại vào Flip-flop. Đầu ra của Flip-flop sẽ đi qua một LUT (đóng vai trò như cổng NOT) rồi phản hồi trở lại đầu vào `D` của chính Flip-flop đó. Bằng cách này, nếu đèn LED đang bật nó sẽ tắt, và ngược lại.
+5. **Đảo trạng thái LED [5]:** Khi đi vào bên trong câu lệnh `if`, chúng ta đảo trạng thái của đèn LED. Thao tác này tạo ra Flip-flop thứ hai trong dự án. Chúng ta lấy giá trị hiện tại của `r_LED_1`, đảo ngược nó (phép NOT `~` / `not`), và lưu kết quả trở lại vào Flip-flop. Đầu ra của Flip-flop sẽ đi qua một LUT (đóng vai trò như cổng NOT) rồi phản hồi trở lại đầu vào `D` của chính Flip-flop đó. Bằng cách này, nếu đèn LED đang bật nó sẽ tắt, và ngược lại.
 
 ---
 
@@ -406,9 +406,9 @@ Number of LUTs:           1 (0%)
 
 Báo cáo này cho chúng ta biết:
 
-* Thiết kế sử dụng **2 bit thanh ghi** (❶), nghĩa là có **2 Flip-flop** được sinh ra. Đúng như dự đoán của chúng ta!
-* Thiết kế sử dụng **1 LUT** (❸). Bảng tra LUT đơn lẻ này đảm nhận cả phép toán AND (so sánh cạnh xuống) và phép toán NOT (đảo trạng thái LED).
-* Công cụ đã nhận diện chính xác tín hiệu `i_Clk` là một tín hiệu xung nhịp (❷).
+* Thiết kế sử dụng **2 bit thanh ghi**, nghĩa là có **2 Flip-flop** được sinh ra. Đúng như dự đoán của chúng ta!
+* Thiết kế sử dụng **1 LUT**. Bảng tra LUT đơn lẻ này đảm nhận cả phép toán AND (so sánh cạnh xuống) và phép toán NOT (đảo trạng thái LED).
+* Công cụ đã nhận diện chính xác tín hiệu `i_Clk` là một tín hiệu xung nhịp.
 
 Sau khi biên dịch thành công, hãy nạp tệp `.bin` vào bo mạch qua Diamond Programmer. Hãy thử bấm nút nhấn nhiều lần—bạn sẽ thấy đèn LED đảo trạng thái bật hoặc tắt mỗi khi bạn nhả nút nhấn. Bạn đã kích hoạt thành công những Flip-flop đầu tiên của mình!
 
