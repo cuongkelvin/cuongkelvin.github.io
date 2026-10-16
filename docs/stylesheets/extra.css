@@ -1,0 +1,12 @@
+/* Font cho khối code: JetBrains Mono (giấy phép OFL, xem fonts/jetbrains-mono/OFL.txt).
+   Tự host vì Google Fonts không phục vụ dải ký tự box-drawing (U+2500–U+257F):
+   trình duyệt sẽ mượn font khác để vẽ ┌─┐│└┘, bề rộng lệch nhau nên sơ đồ bị xô cột.
+   JetBrains Mono có đủ box-drawing lẫn chữ Việt, mọi glyph rộng bằng nhau. */
+@font-face { font-family: "JetBrains Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/jetbrains-mono/JetBrainsMono-Regular.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 700; font-style: normal; font-display: swap; src: url("../fonts/jetbrains-mono/JetBrainsMono-Bold.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 400; font-style: italic; font-display: swap; src: url("../fonts/jetbrains-mono/JetBrainsMono-Italic.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 700; font-style: italic; font-display: swap; src: url("../fonts/jetbrains-mono/JetBrainsMono-BoldItalic.woff2") format("woff2"); }
+
+:root {
+  --md-code-font: "JetBrains Mono";
+}
