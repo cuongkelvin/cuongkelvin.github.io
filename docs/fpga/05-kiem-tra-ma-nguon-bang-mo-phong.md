@@ -73,7 +73,7 @@ Ba điều hay vấp lúc đầu:
 
 * Thứ tự file ở bước 1 quan trọng: file thiết kế phải đứng **trước** testbench, vì testbench gọi tới entity nằm trong thiết kế. Sửa file nào thì `-a` lại file đó, rồi `-e` và `-r` lại.
 * Tham số cho `-e` và `-r` là **tên entity**, không phải tên file. Đây chính là ô "Top Entity" mà sách nhắc tới ở EDA Playground.
-* Máy đang dùng thiếu `numeric_std` bản 2008 nên **không thêm `--std=08`**, chạy chuẩn VHDL-93 mặc định. Ở chuẩn này GHDL mặc định không chấp nhận ký tự có dấu, kể cả trong comment (báo `invalid character, even in a comment`). Comment trong blog viết có dấu cho dễ đọc, nên khi chép code về chạy hãy thêm cờ `--mb-comments`: `ghdl -a --mb-comments file.vhd` — đã thử, qua được.
+* Máy đang dùng thiếu `numeric_std` bản 2008 nên **không thêm `--std=08`**, chạy chuẩn VHDL-93 mặc định. Ở chuẩn này GHDL mặc định không chấp nhận ký tự có dấu, kể cả trong comment (báo `invalid character, even in a comment`). Comment trong blog viết có dấu cho dễ đọc, nên khi chép code về chạy hãy thêm cờ `--mb-comments` — và thêm vào **cả ba lệnh**, không chỉ `-a`: `ghdl -a --mb-comments f.vhd`, `ghdl -e --mb-comments tb`, `ghdl -r --mb-comments tb`. Lý do: bản GHDL mcode đọc lại file nguồn lúc elaborate, nên `-a` qua rồi mà `-e` vẫn báo `invalid character, even in a comment` nếu thiếu cờ. Đã thử với đủ 68 chữ cái có dấu.
 
 Trong GTKWave, tên tín hiệu hiện toàn chữ thường (`r_in1`, `uut`) dù trong mã bạn viết hoa — VHDL không phân biệt hoa thường nên GHDL quy hết về chữ thường. Tín hiệu bên trong UUT nằm dưới nhánh `uut` của cây phân cấp bên trái; chọn tín hiệu rồi bấm **Insert**, sau đó `Ctrl+Alt+F` để dàn kín màn hình. Chạy lại mô phỏng xong thì `Ctrl+Shift+R` nạp lại file sóng mà không mất danh sách tín hiệu đã chọn.
 
@@ -820,7 +820,7 @@ Trong chương này, bạn đã nắm vững:
 
 Thêm vào đó, từ góc độ thực hành với GHDL và bo QMTech:
 
-* **Ba lệnh `ghdl -a`, `-e`, `-r`** thay cho EDA Playground; tham số là tên entity, file thiết kế phân tích trước testbench, không dùng `--std=08` trên máy này, thêm `--mb-comments` vì comment có dấu.
+* **Ba lệnh `ghdl -a`, `-e`, `-r`** thay cho EDA Playground; tham số là tên entity, file thiết kế phân tích trước testbench, không dùng `--std=08` trên máy này, thêm `--mb-comments` vào cả `-a`, `-e`, `-r` vì comment có dấu.
 * **Process không có sensitivity list chạy lặp lại mãi** — `wait;` cuối process kích thích là bắt buộc, và xung nhịp viết bằng `after` thì không bao giờ dừng: dùng `--stop-time` hoặc cờ `xong` trong process xung nhịp.
 * **Gán ngay sau `wait until rising_edge`** thì UUT thấy giá trị ở cạnh kế tiếp, không phải cạnh vừa rồi.
 * **Chỉ `severity failure` mới dừng GHDL**; `error` in rồi chạy tiếp. Vét cạn thì dùng `error` để thấy hết, kiểm nhanh thì dùng `failure`.
