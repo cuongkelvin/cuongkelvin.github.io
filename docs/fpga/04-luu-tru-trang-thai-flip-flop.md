@@ -32,6 +32,8 @@ Hãy chú ý rằng linh kiện này có ba đầu vào ở phía bên trái và
 > **THUẬT NGỮ LINH KIỆN FLIP-FLOP**
 > Linh kiện được trình bày trong Hình 4-1—một Flip-flop có chân cho phép xung nhịp (`En`)—không phải lúc nào cũng được gọi là Flip-flop theo nghĩa lý thuyết thuần túy. Các nhà sản xuất FPGA như AMD (Xilinx) và Intel thực tế sử dụng thuật ngữ Flip-flop trong tài liệu kỹ thuật của họ, nhưng một tên gọi chính xác hơn về mặt kỹ thuật là **clocked D latch**. Tuy nhiên, việc tranh cãi tên gọi nào tốt hơn không mang lại nhiều giá trị; trong cuốn sách này, chúng ta sẽ sử dụng thuật ngữ thực tế trong ngành điện tử mà các nhà sản xuất FPGA sử dụng và gọi các linh kiện này là **Flip-flop**.
 
+**Lưu ý về khung trên.** Câu "tên gọi chính xác hơn là clocked D latch" là ý của tác giả sách, nhưng nó **đi ngược định nghĩa chuẩn** trong các giáo trình mạch số và cũng ngược với chính mục 4 của chương này. Theo định nghĩa chuẩn: **latch** nhạy theo *mức* (trong suốt khi chân cho phép đang kích hoạt, đầu ra bám theo đầu vào liên tục), còn **flip-flop** nhạy theo *cạnh* (chỉ chốt tại khoảnh khắc chuyển cạnh của xung nhịp). Linh kiện trong Hình 4-1 chốt dữ liệu tại cạnh lên nên đúng nghĩa là **flip-flop**, và các nhà sản xuất gọi vậy là chính xác. Mục 4 của chương sẽ dựa đúng vào sự phân biệt này để giải thích vì sao latch nguy hiểm còn flip-flop thì không — nếu coi hai thứ là một thì toàn bộ mục 4 không còn ý nghĩa. Bạn cứ dùng định nghĩa chuẩn.
+
 ---
 
 ### Tín Hiệu Xung Nhịp (The Clock Signal)
@@ -93,7 +95,7 @@ Một Flip-flop hoạt động dựa trên các sự chuyển biến cạnh ở 
 
 Quá trình này được gọi là **registering** (ghi nhận/chốt dữ liệu vào thanh ghi). Nhờ thuật ngữ này, một nhóm các Flip-flop được gọi là một **thanh ghi (register)**, và mở rộng ra, một Flip-flop đơn lẻ cũng có thể được gọi là một **thanh ghi 1-bit (one-bit register)**. Một Flip-flop đứng riêng lẻ có khả năng chốt được đúng 1 bit dữ liệu.
 
-To thấy quá trình chốt dữ liệu diễn ra như thế nào trong thực tế, chúng ta sẽ xem xét một vài ví dụ về đầu vào của Flip-flop và các đầu ra tương ứng. Đầu tiên, hãy xem **Hình 4-3**.
+Để thấy quá trình chốt dữ liệu diễn ra như thế nào trong thực tế, chúng ta sẽ xem xét một vài ví dụ về đầu vào của Flip-flop và các đầu ra tương ứng. Đầu tiên, hãy xem **Hình 4-3**.
 
 ```
         1          2          3
@@ -131,7 +133,7 @@ D    _______|                  |________________________
                    +---------------------+
 Q    ______________|                     |______________
 ```
-*Hình 4-4: Ví dụ 2 về hành vi của Flip-flop over nhiều chu kỳ*
+*Hình 4-4: Ví dụ 2 về hành vi của Flip-flop qua nhiều chu kỳ*
 
 Ở đây, chúng ta lại thấy Flip-flop hoạt động qua nhiều chu kỳ xung nhịp (giả định `En` luôn bằng 1). Giữa cạnh lên 1 và 2, đầu vào `D` từ thấp lên cao. Tại cạnh lên 2, `Q` thấy `D` lên cao nên `Q` cũng lật trạng thái từ thấp lên cao. Tại cạnh lên 3, `Q` thấy `D` vẫn ở mức cao nên giữ nguyên mức cao. Giữa cạnh lên 3 và 4, `D` chuyển xuống mức thấp, và đầu ra `Q` tương tự chuyển xuống mức thấp tại cạnh lên 4. Tại cạnh lên cuối cùng (thứ 5), `D` vẫn ở mức thấp nên `Q` giữ nguyên mức thấp.
 
