@@ -51,10 +51,8 @@ Clk  ─────────┘           └──────────�
               ^           ^           ^
           cạnh lên   cạnh xuống   cạnh lên
           (rising)   (falling)    (rising)
-
-     Mức cao và mức thấp dài bằng nhau: duty cycle 50%
 ```
-*Hình 4-2: Dạng sóng của tín hiệu xung nhịp (Clock)*
+*Hình 4-2: Dạng sóng của tín hiệu xung nhịp (Clock) — mức cao và mức thấp dài bằng nhau, tức duty cycle 50%*
 
 Hãy chú ý các đường thẳng đứng trong biểu đồ tín hiệu xung nhịp, nơi tín hiệu nhảy từ mức thấp lên mức cao hoặc từ mức cao xuống mức thấp. Những sự thay đổi đột ngột này của tín hiệu được gọi là **các cạnh (edges)**:
 
