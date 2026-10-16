@@ -11,9 +11,13 @@
   --md-code-font: "JetBrains Mono";
 }
 
-/* Ẩn thanh điều hướng bên trái trên màn rộng (trên điện thoại nó là menu ☰, giữ nguyên)
-   và nới bề rộng nội dung từ 61rem mặc định lên 80rem. */
+/* Nút bật/tắt thanh điều hướng bên trái: javascripts/nav-toggle.js đặt data-nav="hidden" lên <body>.
+   Chỉ tác dụng trên màn rộng; trên điện thoại thanh này là menu ☰ nên giữ nguyên và giấu nút.
+   Nội dung nới từ 61rem mặc định lên 80rem. */
 @media screen and (min-width: 76.25em) {
-  .md-sidebar--primary { display: none; }
+  body[data-nav="hidden"] .md-sidebar--primary { display: none; }
+}
+@media screen and (max-width: 76.1875em) {
+  .nav-toggle { display: none; }
 }
 .md-grid { max-width: 80rem; }

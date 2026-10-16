@@ -51,6 +51,7 @@ extra_css:
   - stylesheets/extra.css    # font JetBrains Mono tự host cho khối code (sơ đồ box-drawing thẳng cột)
 
 extra_javascript:
+  - javascripts/nav-toggle.js   # nút ẩn/hiện thanh điều hướng trái trên header
   - javascripts/mathjax.js   # cấu hình MathJax cho arithmatex
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
