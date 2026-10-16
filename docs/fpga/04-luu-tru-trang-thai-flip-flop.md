@@ -792,7 +792,7 @@ Có một chỗ giá trị khởi tạo không thay được cho reset: **trong 
 │  │ Logic Cell 1 │ ──> │ Shared Block-Level Controls (Clock, Enable, Set/Reset)     │  │
 │  ├──────────────┤     │                                                            │  │
 │  │ Logic Cell 2 │     │  ┌──────────────────────────────────────────────────────┐  │  │
-│  ├──────────────┤     │  │ Logic Cell (Phóng to)                                │  │  │
+│  ├──────────────┤     │  │ Logic Cell 5 (phóng to)                              │  │  │
 │  │ Logic Cell 3 │     │  │                                                      │  │  │
 │  ├──────────────┤     │  │   [Carry Logic]                                      │  │  │
 │  │ Logic Cell 4 │     │  │         │                                            │  │  │
@@ -819,7 +819,7 @@ Mọi họ chip FPGA, dù đến từ Lattice, AMD (Xilinx) hay Intel (Altera), 
 Nhìn vào sơ đồ:
 
 1. Mỗi khối **PLB** chứa **8 Logic Cells (LCs)**.
-2. Phóng to một Logic Cell: Bên trong chứa **1 bảng tra 4 đầu vào (LUT4)** và **1 D Flip-Flop (DFF)** màu xám đậm. 
+2. Phóng to một Logic Cell — trong hình là cell 5, mũi tên `====>` chỉ có nghĩa "phóng to" chứ không phải đường tín hiệu, và cả 8 cell giống hệt nhau. Bên trong chứa **1 bảng tra 4 đầu vào (LUT4)** và **1 D Flip-Flop (DFF)**.
 3. Các chân của DFF khớp chính xác với những gì chúng ta đã học: đầu vào dữ liệu `D`, đầu vào cho phép `EN`, đầu vào xung nhịp (`>`), và đầu vào `SR` (Set/Reset).
 4. Bên cạnh đó là khối **Carry Logic** giúp tăng tốc các phép toán số học như cộng, trừ, so sánh.
 
