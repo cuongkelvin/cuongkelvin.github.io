@@ -98,16 +98,15 @@ Quá trình này được gọi là **registering** (ghi nhận/chốt dữ li�
 Để thấy quá trình chốt dữ liệu diễn ra như thế nào trong thực tế, chúng ta sẽ xem xét một vài ví dụ về đầu vào của Flip-flop và các đầu ra tương ứng. Đầu tiên, hãy xem **Hình 4-3**.
 
 ```
-        1          2          3
-Clk  +--+       +--+       +--+
-     |  |       |  |       |  |
-     +--+-------+--+-------+--+-------
-            +-------------------------
-D    _______|
-                   +------------------
-Q    ______________|
+           1         2         3    
+           ┌────┐    ┌────┐    ┌────
+Clk   ─────┘    └────┘    └────┘    
+                ┌───────────────────
+D     ──────────┘                   
+                     ┌──────────────
+Q     ───────────────┘              
 ```
-*Hình 4-3: Ví dụ 1 về hành vi chốt dữ liệu của Flip-flop*
+*Hình 4-3: Ví dụ 1 về hành vi chốt dữ liệu của Flip-flop — vẽ từ mô phỏng GHDL*
 
 Hình này hiển thị 3 dạng sóng:
 
@@ -124,34 +123,32 @@ Flip-flop nhìn vào dữ liệu đầu vào và làm cho đầu ra khớp với
 Bây giờ hãy xem xét **Hình 4-4**, hiển thị phản ứng của Flip-flop trong một kịch bản khác.
 
 ```
-        1          2          3          4          5
-Clk  +--+       +--+       +--+       +--+       +--+
-     |  |       |  |       |  |       |  |       |  |
-     +--+-------+--+-------+--+-------+--+-------+--+----
-            +------------------+
-D    _______|                  |________________________
-                   +---------------------+
-Q    ______________|                     |______________
+           1         2         3         4         5         6
+           ┌────┐    ┌────┐    ┌────┐    ┌────┐    ┌────┐    ┌
+Clk   ─────┘    └────┘    └────┘    └────┘    └────┘    └────┘
+                ┌───────────────────┐                         
+D     ──────────┘                   └─────────────────────────
+                     ┌───────────────────┐                    
+Q     ───────────────┘                   └────────────────────
 ```
-*Hình 4-4: Ví dụ 2 về hành vi của Flip-flop qua nhiều chu kỳ*
+*Hình 4-4: Ví dụ 2 về hành vi của Flip-flop qua nhiều chu kỳ — vẽ từ mô phỏng GHDL*
 
 Ở đây, chúng ta lại thấy Flip-flop hoạt động qua nhiều chu kỳ xung nhịp (giả định `En` luôn bằng 1). Giữa cạnh lên 1 và 2, đầu vào `D` từ thấp lên cao. Tại cạnh lên 2, `Q` thấy `D` lên cao nên `Q` cũng lật trạng thái từ thấp lên cao. Tại cạnh lên 3, `Q` thấy `D` vẫn ở mức cao nên giữ nguyên mức cao. Giữa cạnh lên 3 và 4, `D` chuyển xuống mức thấp, và đầu ra `Q` tương tự chuyển xuống mức thấp tại cạnh lên 4. Tại cạnh lên cuối cùng (thứ 5), `D` vẫn ở mức thấp nên `Q` giữ nguyên mức thấp.
 
 Các ví dụ trước đều giả định chân `En` ở mức cao. Bây giờ hãy xem điều gì xảy ra khi chân `En` không phải lúc nào cũng ở mức cao. **Hình 4-5** hiển thị chính xác các dạng sóng `Clk` và `D` giống hệt Hình 4-4, nhưng tín hiệu `En` chỉ ở mức cao duy nhất tại cạnh lên thứ 3.
 
 ```
-        1          2          3          4          5
-Clk  +--+       +--+       +--+       +--+       +--+
-     |  |       |  |       |  |       |  |       |  |
-     +--+-------+--+-------+--+-------+--+-------+--+----
-                       +------+
-En   __________________|      |_________________________
-            +------------------+
-D    _______|                  |________________________
-                              +-------------------------
-Q    _________________________|
+           1         2         3         4         5         6
+           ┌────┐    ┌────┐    ┌────┐    ┌────┐    ┌────┐    ┌
+Clk   ─────┘    └────┘    └────┘    └────┘    └────┘    └────┘
+                            ┌─────┐                           
+En    ──────────────────────┘     └───────────────────────────
+                ┌───────────────────┐                         
+D     ──────────┘                   └─────────────────────────
+                               ┌──────────────────────────────
+Q     ─────────────────────────┘                              
 ```
-*Hình 4-5: Hành vi của Flip-flop khi kết hợp tín hiệu cho phép xung nhịp (`En`)*
+*Hình 4-5: Hành vi của Flip-flop khi kết hợp tín hiệu cho phép xung nhịp (`En`) — vẽ từ mô phỏng GHDL*
 
 Khi tín hiệu `En` tham gia vào, một đầu ra `Q` hoàn toàn khác sẽ được tạo ra:
 
@@ -181,22 +178,21 @@ Cả 4 Flip-flop đều được điều khiển bởi cùng một tín hiệu x
 Giả sử Flip-flop `test1` ghi nhận một sự thay đổi ở đầu vào của nó. **Hình 4-7** minh họa cách sự thay đổi đó lan truyền qua chuỗi Flip-flop cho đến khi ra tới đầu ra của `test4`.
 
 ```
-        1          2          3          4          5          6
-Clk  +--+       +--+       +--+       +--+       +--+       +--+
-     |  |       |  |       |  |       |  |       |  |       |  |
-     +--+-------+--+-------+--+-------+--+-------+--+-------+--+----
-            +-------------------------------------------------------
-test1_d ____|
-                   +------------------------------------------------
-test1_q ___________|
-                              +-------------------------------------
-test2_q ______________________|
-                                         +--------------------------
-test3_q _________________________________|
-                                                    +---------------+
-test4_q ____________________________________________|
+              1         2         3         4         5         6     
+              ┌────┐    ┌────┐    ┌────┐    ┌────┐    ┌────┐    ┌────┐
+Clk      ─────┘    └────┘    └────┘    └────┘    └────┘    └────┘    └
+                   ┌──────────────────────────────────────────────────
+test1_d  ──────────┘                                                  
+                        ┌─────────────────────────────────────────────
+test1_q  ───────────────┘                                             
+                                  ┌───────────────────────────────────
+test2_q  ─────────────────────────┘                                   
+                                            ┌─────────────────────────
+test3_q  ───────────────────────────────────┘                         
+                                                      ┌───────────────
+test4_q  ─────────────────────────────────────────────┘               
 ```
-*Hình 4-7: Sự lan truyền tín hiệu đầu vào qua chuỗi Flip-flop*
+*Hình 4-7: Sự lan truyền tín hiệu đầu vào qua chuỗi Flip-flop — vẽ từ mô phỏng GHDL*
 
 Biểu đồ hiển thị dạng sóng cho xung nhịp, đầu vào/đầu ra của Flip-flop `test1` (`test1_d` và `test1_q`), và đầu ra của từng Flip-flop tiếp theo:
 
@@ -226,19 +222,18 @@ Một cách tuyệt vời để tìm cạnh xuống trong FPGA là chốt tín h
 Cạnh xuống của nút nhấn không được nhầm lẫn với cạnh lên của xung nhịp; chúng ta vẫn đang sử dụng cạnh lên của xung nhịp để điều khiển tất cả các Flip-flop. **Hình 4-8** minh họa mẫu tín hiệu cần tìm kiếm.
 
 ```
-            1          2          3          4          5
-i_Clk    +--+       +--+       +--+       +--+       +--+
-         |  |       |  |       |  |       |  |       |  |
-         +--+-------+--+-------+--+-------+--+-------+--+----
-                +-----------------+
-i_Switch_1 _____|                 |__________________________
-                       +------------------+
-r_Switch_1 ____________|                  |__________________
-                                  ^
-                          Khoanh tròn: Phát hiện cạnh xuống
-                          (i_Switch_1 == 0 && r_Switch_1 == 1)
+                1         2         3         4         5         6
+                ┌────┐    ┌────┐    ┌────┐    ┌────┐    ┌────┐    ┌
+i_Clk      ─────┘    └────┘    └────┘    └────┘    └────┘    └────┘
+                   ┌───────────────────┐                           
+i_Switch_1 ────────┘                   └───────────────────────────
+                          ┌───────────────────┐                    
+r_Switch_1 ───────────────┘                   └────────────────────
+                                              ^
+                                      Cạnh lên được khoanh tròn:
+                                      i_Switch_1 = 0 và r_Switch_1 = 1
 ```
-*Hình 4-8: Mạch phát hiện cạnh xuống bằng Flip-flop*
+*Hình 4-8: Mạch phát hiện cạnh xuống bằng Flip-flop — vẽ từ mô phỏng GHDL*
 
 Ở đây:
 
