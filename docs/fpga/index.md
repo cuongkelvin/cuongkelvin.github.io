@@ -12,6 +12,7 @@ Bản dịch kèm ghi chú riêng, bổ sung các ví dụ VHDL cụ thể và t
 - [**Chương 5 — Kiểm tra mã nguồn bằng mô phỏng**](05-kiem-tra-ma-nguon-bang-mo-phong.md) — testbench, GHDL + GTKWave, lọc dội phím, `assert` và bốn mức severity, mô hình tham chiếu, `'U'` vs `'X'`
 - [**Chương 6 — Các module FPGA phổ biến**](06-cac-module-fpga-pho-bien.md) — mux/demux, thanh ghi dịch, LFSR và bộ đếm, RAM hai cổng, FIFO với cờ Full/Empty/AF/AE
 - [**Chương 7 — Synthesis, Place & Route và chuyển vùng xung nhịp**](07-synthesis-place-route-clock-domains.md) — mã không tổng hợp được, `for` vs bộ đếm, setup/hold, metastability, slack, pipelining, double-flop, CDC, FIFO hai xung nhịp
+- [**Chương 9 — Các thành phần chuyên dụng (primitives)**](09-cac-thanh-phan-chuyen-dung-primitives.md) — inference / instantiation / GUI, Block RAM, khối DSP và số dấu chấm tĩnh, PLL/MMCM, tín hiệu `locked`
 
 ## Phần cứng đang dùng
 
