@@ -188,10 +188,10 @@ Mặc dù có năng lực mạnh mẽ, FPGA vẫn là một công nghệ chuyên
 
 ```
 [Bảng Phổ Linh Kiện Logic Số]:
-+----------------------+-----------------------+-----------------------+
-|    VI ĐIỀU KHIỂN     |         FPGA          |         ASIC          |
-| (Linh hoạt phần mềm) | (Linh hoạt phần cứng) | (Cố định hoàn toàn)   |
-+----------------------+-----------------------+-----------------------+
+┌──────────────────────┬───────────────────────┬───────────────────────┐
+│    VI ĐIỀU KHIỂN     │         FPGA          │         ASIC          │
+│ (Linh hoạt phần mềm) │ (Linh hoạt phần cứng) │ (Cố định hoàn toàn)   │
+└──────────────────────┴───────────────────────┴───────────────────────┘
 ```
 
 ### A. FPGA vs. Vi Điều Khiển (Microcontrollers)

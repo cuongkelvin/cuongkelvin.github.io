@@ -13,11 +13,11 @@ Một Flip-flop lưu trữ trạng thái dưới dạng mức điện áp cao (h
 Hãy xem xét sơ đồ cơ bản của một **D Flip-Flop** (Data Flip-Flop) trong **Hình 4-1**. D Flip-Flop là loại Flip-flop phổ biến nhất trong các FPGA, và chúng là trọng tâm của chương này (từ đây về sau, chúng ta sẽ gọi tắt là Flip-flop).
 
 ```
-        +------------+
-  D --->| D        Q |---> Q
- En --->| En         |
-Clk --->| >          |
-        +------------+
+        ┌────────────┐
+  D ───>│ D        Q │───> Q
+ En ───>│ En         │
+Clk ───>│ >          │
+        └────────────┘
 ```
 *Hình 4-1: Sơ đồ khối của một D Flip-Flop*
 
@@ -45,7 +45,7 @@ Một **tín hiệu xung nhịp (Clock signal)**, thường được gọi ngắ
 Xung nhịp là chìa khóa cho cách thức vận hành của FPGA: nó kích hoạt các linh kiện khác, chẳng hạn như Flip-flop, thực hiện nhiệm vụ của chúng. Nếu bạn hình dung FPGA như một bộ bánh răng, thì xung nhịp giống như bánh răng lớn quay tất cả các bánh răng còn lại. Nếu bánh răng chính không quay, các bánh răng khác cũng sẽ đứng yên. Bạn cũng có thể coi xung nhịp như **trái tim** của hệ thống, vì nó giữ nhịp đập cho toàn bộ FPGA. Mỗi Flip-flop trong FPGA sẽ được cập nhật theo từng nhịp đập của xung nhịp.
 
 ```
-              |<-- Chu kỳ (period) -->|
+              |<── Chu kỳ (period) ──>|
               ┌───────────┐           ┌───────────┐           ┌───────────┐      
 Clk  ─────────┘           └───────────┘           └───────────┘           └──────
               ^           ^           ^
@@ -165,11 +165,11 @@ Những ví dụ này minh họa hành vi của Flip-flop, cho thấy hoạt đ�
 Các Flip-flop thường được nối chuỗi lại với nhau, trong đó đầu ra từ Flip-flop này đi trực tiếp vào đầu vào dữ liệu của Flip-flop tiếp theo. Ví dụ, **Hình 4-6** hiển thị một chuỗi gồm 4 Flip-flop (ký hiệu từ `test1` đến `test4`, giả định luôn được cho phép).
 
 ```
-        +-------+     +-------+     +-------+     +-------+
-------> |D     Q|---->|D     Q|---->|D     Q|---->|D     Q|------>
-        |test1  |     |test2  |     |test3  |     |test4  |
-Clk --->|>      |---->|>      |---->|>      |---->|>      |
-        +-------+     +-------+     +-------+     +-------+
+        ┌───────┐     ┌───────┐     ┌───────┐     ┌───────┐
+──────> │D     Q│────>│D     Q│────>│D     Q│────>│D     Q│──────>
+        │test1  │     │test2  │     │test3  │     │test4  │
+Clk ───>│>      │────>│>      │────>│>      │────>│>      │
+        └───────┘     └───────┘     └───────┘     └───────┘
 ```
 *Hình 4-6: Chuỗi nối tiếp 4 Flip-flop*
 
@@ -246,12 +246,12 @@ Tại cạnh lên xung nhịp được khoanh tròn, chúng ta có thể thấy 
 Dự án này cũng đòi hỏi một số logic nằm giữa hai Flip-flop, sẽ được thực hiện dưới dạng một bảng tra LUT. Đây sẽ là cái nhìn đầu tiên của bạn về cách Flip-flop và LUT phối hợp với nhau bên trong FPGA để hoàn thành công việc. **Hình 4-9** hiển thị sơ đồ khối tổng thể cho dự án này.
 
 ```
-             +---------------------------------------+
-             | FPGA                                  |
-             |                                       |
-SW1 -------->|---> [ Mạch phát hiện cạnh xuống ] --->|---> D1 (LED)
-             |                                       |
-             +---------------------------------------+
+             ┌───────────────────────────────────────┐
+             │ FPGA                                  │
+             │                                       │
+SW1 ────────>│───> [ Mạch phát hiện cạnh xuống ] ───>│───> D1 (LED)
+             │                                       │
+             └───────────────────────────────────────┘
 ```
 *Hình 4-9: Sơ đồ khối Dự án #3*
 
@@ -467,7 +467,7 @@ Con số đó lớn tới mức mô phỏng không chạy nổi — nên khi vi�
 #### Thứ tự ghép ba khối
 
 ```
-i_switch --> [ 2 FF dong bo ] --> [ loc doi phim ] --> [ phat hien canh ] --> dao LED
+i_switch ──> [ 2 FF dong bo ] ──> [ loc doi phim ] ──> [ phat hien canh ] ──> dao LED
              (chong metastable)    (loc nhieu co hoc)   (muc 2 cua chuong nay)
 ```
 
@@ -785,28 +785,28 @@ Có một chỗ giá trị khởi tạo không thay được cho reset: **trong 
 Để có cái nhìn cụ thể hơn về cách LUT và Flip-flop thực sự được nối dây với nhau trong một chip FPGA thật, hãy xem sơ đồ cấu trúc từ Bảng thông số (Datasheet) của dòng FPGA Lattice iCE40 LP/HX trong **Hình 4-10**.
 
 ```
-+---------------------------------------------------------------------------------------+
-| Programmable Logic Block (PLB)                                                        |
-|                                                                                       |
-|  +--------------+     +------------------------------------------------------------+  |
-|  | Logic Cell 1 | --> | Shared Block-Level Controls (Clock, Enable, Set/Reset)     |  |
-|  +--------------+     |                                                            |  |
-|  | Logic Cell 2 |     |  +------------------------------------------------------+  |  |
-|  +--------------+     |  | Logic Cell (Phóng to)                                |  |  |
-|  | Logic Cell 3 |     |  |                                                      |  |  |
-|  +--------------+     |  |   [Carry Logic]                                      |  |  |
-|  | Logic Cell 4 |     |  |         |                                            |  |  |
-|  +--------------+     |  |   I0->  v                                            |  |  |
-|  | Logic Cell 5 |     |  |   I1-> [ LUT4 ] ----> D                              |  |  |
-|  | (Phóng to)   |====>|  |   I2->          |    EN -> [ DFF ] -------> Out      |  |  |
-|  +--------------+     |  |   I3->          |    SR -> (D Flip-Flop)            |  |  |
-|  | Logic Cell 6 |     |  |                                                      |  |  |
-|  +--------------+     |  +------------------------------------------------------+  |  |
-|  | Logic Cell 7 |     +------------------------------------------------------------+  |
-|  +--------------+                                                                     |
-|  | Logic Cell 8 |                                                                     |
-|  +--------------+                                                                     |
-+---------------------------------------------------------------------------------------+
+┌───────────────────────────────────────────────────────────────────────────────────────┐
+│ Programmable Logic Block (PLB)                                                        │
+│                                                                                       │
+│  ┌──────────────┐     ┌────────────────────────────────────────────────────────────┐  │
+│  │ Logic Cell 1 │ ──> │ Shared Block-Level Controls (Clock, Enable, Set/Reset)     │  │
+│  ├──────────────┤     │                                                            │  │
+│  │ Logic Cell 2 │     │  ┌──────────────────────────────────────────────────────┐  │  │
+│  ├──────────────┤     │  │ Logic Cell (Phóng to)                                │  │  │
+│  │ Logic Cell 3 │     │  │                                                      │  │  │
+│  ├──────────────┤     │  │   [Carry Logic]                                      │  │  │
+│  │ Logic Cell 4 │     │  │         │                                            │  │  │
+│  ├──────────────┤     │  │   I0->  v                                            │  │  │
+│  │ Logic Cell 5 │     │  │   I1-> [ LUT4 ] ────> D                              │  │  │
+│  │ (Phóng to)   │====>│  │   I2->          │    EN -> [ DFF ] ───────> Out      │  │  │
+│  ├──────────────┤     │  │   I3->          │    SR -> (D Flip-Flop)             │  │  │
+│  │ Logic Cell 6 │     │  │                                                      │  │  │
+│  ├──────────────┤     │  └──────────────────────────────────────────────────────┘  │  │
+│  │ Logic Cell 7 │     └────────────────────────────────────────────────────────────┘  │
+│  ├──────────────┤                                                                     │
+│  │ Logic Cell 8 │                                                                     │
+│  └──────────────┘                                                                     │
+└───────────────────────────────────────────────────────────────────────────────────────┘
 ```
 *Hình 4-10: Cấu trúc LUT và Flip-flop trong một Logic Cell của chip FPGA Lattice iCE40*
 
@@ -830,18 +830,18 @@ Khối PLB này được nhân bản (copy-paste) hàng nghìn lần trên chip 
 Chip Artix-7 và Kintex-7 có cách tổ chức khác về chi tiết nhưng giống hệt về nguyên lý. Thay vì "PLB chứa 8 logic cell", Xilinx chia thành hai cấp:
 
 ```
-+--------------------------------------------------+
-| CLB (Configurable Logic Block)                   |
-|                                                  |
-|  +--------------------+  +--------------------+  |
-|  | SLICE              |  | SLICE              |  |
-|  |                    |  |                    |  |
-|  |  4 x LUT6          |  |  4 x LUT6          |  |
-|  |  8 x Flip-flop     |  |  8 x Flip-flop     |  |
-|  |  Carry chain       |  |  Carry chain       |  |
-|  |  MUX ghep LUT      |  |  MUX ghep LUT      |  |
-|  +--------------------+  +--------------------+  |
-+--------------------------------------------------+
+┌──────────────────────────────────────────────────┐
+│ CLB (Configurable Logic Block)                   │
+│                                                  │
+│  ┌────────────────────┐  ┌────────────────────┐  │
+│  │ SLICE              │  │ SLICE              │  │
+│  │                    │  │                    │  │
+│  │  4 x LUT6          │  │  4 x LUT6          │  │
+│  │  8 x Flip-flop     │  │  8 x Flip-flop     │  │
+│  │  Carry chain       │  │  Carry chain       │  │
+│  │  MUX ghep LUT      │  │  MUX ghep LUT      │  │
+│  └────────────────────┘  └────────────────────┘  │
+└──────────────────────────────────────────────────┘
 ```
 
 Đối chiếu ba hãng:

@@ -325,14 +325,14 @@ Hầu hết các LUT tiêu chuẩn tạo ra **1 đầu ra duy nhất**.
 
 ```
 [Mạch logic truyền thống tốn 3 cổng rời]:
-Input A ----> [Cổng NOT] --\
-Input B --------------------> [Cổng AND] --\
-Input C ------------------------------------> [Cổng OR] ---> Output Q
+Input A ────> [Cổng NOT] ──\
+Input B ────────────────────> [Cổng AND] ──\
+Input C ────────────────────────────────────> [Cổng OR] ───> Output Q
 
 [Mạch FPGA gói gọn trong 1 LUT-3 duy nhất]:
-Input A --\
-Input B ---> [ LUT-3 chứa Bảng Chân Lý 8 hàng ] ---> Output Q
-Input C --/
+Input A ──\
+Input B ───> [ LUT-3 chứa Bảng Chân Lý 8 hàng ] ───> Output Q
+Input C ──/
 ```
 
 Một chip FPGA điển hình chứa từ **hàng nghìn đến hàng triệu LUT** sẵn sàng được lập trình. Khi bạn viết mã Verilog hoặc VHDL ở mức cao (như so sánh 2 số, tăng bộ đếm), trình tổng hợp sẽ chia nhỏ logic đó thành các bảng chân lý và nạp vào các LUT trên chip. **LUT chính là thành phần cốt lõi đảm nhận phần logic tổ hợp (combinational logic) trong FPGA.**
@@ -351,16 +351,16 @@ Sáu đầu vào của LUT đóng vai trò **địa chỉ**, còn giá trị c�
 ```
      64 o nho SRAM            Cay MUX              Dau ra
      (nap tu bitstream)
-        +----+
-        | 0  |---+
-        | 1  |---|
-        | 0  |---|   +------------------+
-        | 1  |---+-->|                  |
-        | .. |---|   |  chon 1 trong 64 |-----------> O
-        | .. |---|   |                  |
-        | 1  |---|   +--^--^--^--^--^--^+
-        | 0  |---+      |  |  |  |  |  |
-        +----+          I5 I4 I3 I2 I1 I0   (6 day vao)
+        ┌────┐
+        │ 0  │───┐
+        │ 1  │───│
+        │ 0  │───│   ┌──────────────────┐
+        │ 1  │───┼──>│                  │
+        │ .. │───│   │  chon 1 trong 64 │───────────> O
+        │ .. │───│   │                  │
+        │ 1  │───│   └──^──^──^──^──^──^┘
+        │ 0  │───┘      │  │  │  │  │  │
+        └────┘          I5 I4 I3 I2 I1 I0   (6 day vao)
 ```
 
 Điều này nối thẳng với cơ chế đã trình bày ở Chương 1: cấu hình FPGA nằm trong các ô nhớ SRAM, và nạp bitstream chính là ghi giá trị vào những ô đó. Phần lớn số ô ấy là nội dung bảng tra của các LUT.
@@ -391,9 +391,9 @@ Có một ngoại lệ đáng biết: LUT-6 của Xilinx còn hỗ trợ **chế
 Lúc đó trình tổng hợp phải **ghép nhiều LUT thành cây nhiều tầng**. Ví dụ một hàm AND 12 biến:
 
 ```
- 6 bien --> [ LUT ] --+
-                      |--> [ LUT ] --> q
- 6 bien --> [ LUT ] --+
+ 6 bien ──> [ LUT ] ──┐
+                      │──> [ LUT ] ──> q
+ 6 bien ──> [ LUT ] ──┘
           tang 1        tang 2
 ```
 
@@ -427,13 +427,13 @@ Dự án #2 ở mục tiếp theo dùng đúng **1 LUT** trong số hơn hai mư
 Trong dự án này, bạn sẽ áp dụng kiến thức về đại số Boolean và bảng tra LUT để biến toàn bộ chip FPGA thành một **cổng AND duy nhất**: Đèn LED D1 chỉ phát sáng khi hai nút nhấn SW1 và SW2 được bấm đồng thời.
 
 ```
-+-------------------------------------------------------------+
-|                      FPGA Development Board                 |
-|                                                             |
-|  SW1 (Nút 1) ---\                                           |
-|                  ===> [ LUT lập trình Cổng AND ] ===> LED D1|
-|  SW2 (Nút 2) ---/                                           |
-+-------------------------------------------------------------+
+┌─────────────────────────────────────────────────────────────┐
+│                      FPGA Development Board                 │
+│                                                             │
+│  SW1 (Nút 1) ───\                                           │
+│                  ===> [ LUT lập trình Cổng AND ] ===> LED D1│
+│  SW2 (Nút 2) ───/                                           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 #### Bảng Chân Lý Cho Dự Án #2:
@@ -514,7 +514,7 @@ Mở **iCEcube2**, tạo dự án mới, thêm tệp mã nguồn và tệp `.pcf
 Sau khi biên dịch thành công, hãy mở **Synthesis Report** để xem kết quả tiêu tốn tài nguyên phần cứng:
 
 ```text
---- Resource Utilization Report for iCE40 HX1K ---
+─── Resource Utilization Report for iCE40 HX1K ───
 
 Number of IOs used:     3
 Number of LUT4s used:   1 (0%)

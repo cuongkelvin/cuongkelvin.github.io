@@ -13,13 +13,13 @@ Trong chương này, bạn sẽ học cách thức hoạt động của mô ph�
 Mô phỏng đóng vai trò quan trọng vì chiếc FPGA của bạn về bản chất là một **"chiếc hộp đen" (black box)**, như được minh họa trong **Hình 5-1**. Khi bạn nạp chương trình vào FPGA, bạn có thể thay đổi các đầu vào và nhìn thấy các đầu ra tương ứng, nhưng bạn hoàn toàn không thể thấy được chi tiết những gì đang diễn ra bên trong bản thân chiếc hộp đó. Bạn không thể theo dõi từng biến số hay đường đi của các tín hiệu dữ liệu khi chúng di chuyển bên trong chip FPGA.
 
 ```
-       +-----------------------+
-       |         FPGA          |
-Inputs |   +---------------+   | Outputs
------->|---|       ?       |---|------>
-       |   |  (Black Box)  |   |
-       |   +---------------+   |
-       +-----------------------+
+       ┌───────────────────────┐
+       │         FPGA          │
+Inputs │   ┌───────────────┐   │ Outputs
+──────>│───│       ?       │───│──────>
+       │   │  (Black Box)  │   │
+       │   └───────────────┘   │
+       └───────────────────────┘
 ```
 *Hình 5-1: Có gì bên trong chiếc hộp đen?*
 
@@ -84,13 +84,13 @@ Trong GTKWave, tên tín hiệu hiện toàn chữ thường (`r_in1`, `uut`) d�
 Mục đích của một Testbench là đặt khối logic UUT của bạn vào một môi trường mô phỏng để bạn có thể phân tích và kiểm tra xem nó có hoạt động đúng như kỳ vọng hay không. Đoạn mã Testbench sẽ khởi tạo (instantiate) UUT. Như được thể hiện trong **Hình 5-3**, Testbench cung cấp tất cả các đầu vào cần thiết cho UUT và theo dõi tất cả các đầu ra.
 
 ```
-+------------------------------------+
-|             Testbench              |
-|   +----------------------------+   |
-|   |      Unit Under Test       |   |
-|==>|           (UUT)            |==>|
-|   +----------------------------+   |
-+------------------------------------+
+┌────────────────────────────────────┐
+│             Testbench              │
+│   ┌────────────────────────────┐   │
+│   │      Unit Under Test       │   │
+│==>│           (UUT)            │==>│
+│   └────────────────────────────┘   │
+└────────────────────────────────────┘
 ```
 *Hình 5-3: Testbench bao bọc và cấp tín hiệu kích thích UUT để phân tích.*
 
@@ -296,7 +296,7 @@ Switch   ───────────┘
 Thực tế (dội phím):
                     ┌┐ ┌┐┌┐ ┌┐  ┌───────────
 Switch   ───────────┘└─┘└┘└─┘└──┘
-                    |<-- nảy 1-10 ms -->|
+                    |<── nảy 1-10 ms ──>|
 ```
 *Hình 5-5: Hiện tượng dội phím (bouncing) ở nút nhấn cơ học.*
 
@@ -309,7 +309,7 @@ Mạch phát hiện cạnh xuống ở Dự án #3 tìm kiếm chuyển biến t
 
 ```
           Unfiltered       Filtered
-SW1 ---> [ (Glitches) ] ---> [ Debounce ] ---> [ Logic Đảo LED ] ---> D1 (LED)
+SW1 ───> [ (Glitches) ] ───> [ Debounce ] ───> [ Logic Đảo LED ] ───> D1 (LED)
                              [  Switch  ]      [  (Chương 4)   ]
 ```
 *Hình 5-6: Sơ đồ khối Dự án #4 - Lọc dội phím kết hợp với mạch đảo LED.*
