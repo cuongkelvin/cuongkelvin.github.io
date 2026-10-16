@@ -237,7 +237,7 @@ Metastable mang tính **xác suất**: có lỗi timing không có nghĩa chắc
 
 `t_clk(min) = t_su + t_p`
 
-trong đó `t_p` là trễ lan truyền **xấu nhất** giữa hai Flip-flop bất kỳ trong thiết kế — công cụ Place and Route phân tích mọi đường và báo những đường tệ nhất. Ví dụ của sách: mọi Flip-flop có `t_su = 2 ns`, đường tệ nhất có `t_p = 10 ns`, thì chu kỳ tối thiểu là `2 + 10 = 12 ns`, tức tần số tối đa `83,3 MHz`. Chạy chậm hơn thì thoải mái; ép lên `100 MHz` (chu kỳ `10 ns`) thì thiếu 2 ns và thiết kế **bị lỗi timing**.
+trong đó `t_p` là trễ lan truyền **xấu nhất** giữa hai Flip-flop bất kỳ trong thiết kế — công cụ Place and Route phân tích mọi đường và báo những đường tệ nhất. Sách cố ý giản lược: công cụ thật còn cộng thêm trễ từ cạnh xung nhịp tới lúc `Q` của Flip-flop thứ nhất thực sự đổi (clock-to-output, `t_co`) và độ lệch thời điểm xung nhịp tới hai Flip-flop (clock skew); đầy đủ là `t_clk ≥ t_co + t_p + t_su ± skew`. Sách gộp các thành phần đó vào `t_p`, nên ý nghĩa không đổi: thứ bạn kiểm soát được vẫn chỉ là logic và dây giữa hai Flip-flop. Ví dụ của sách: mọi Flip-flop có `t_su = 2 ns`, đường tệ nhất có `t_p = 10 ns`, thì chu kỳ tối thiểu là `2 + 10 = 12 ns`, tức tần số tối đa `83,3 MHz`. Chạy chậm hơn thì thoải mái; ép lên `100 MHz` (chu kỳ `10 ns`) thì thiếu 2 ns và thiết kế **bị lỗi timing**.
 
 ---
 
