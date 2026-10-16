@@ -382,6 +382,10 @@ Hai dòng trên tốn tài nguyên như nhau. Nói cách khác, **nhồi thêm l
 
 Vì vậy đừng ngại viết biểu thức dài. Chỉ cần dè chừng khi nó vượt quá 6 biến.
 
+Có một ngoại lệ đáng biết: LUT-6 của Xilinx còn hỗ trợ **chế độ kép**. Nó chia được thành hai LUT-5 dùng chung đầu vào, cho ra hai đầu ra riêng gọi là `O5` và `O6`. Nhờ vậy, trong một thiết kế lớn, Vivado có thể gộp *hai* hàm nhỏ khác nhau vào cùng một LUT vật lý, miễn chúng dùng chung không quá 5 biến.
+
+Đây là việc công cụ tự làm, bạn không điều khiển được. Nhưng nó giải thích vì sao đôi khi báo cáo tài nguyên cho ra số LUT thấp hơn bạn nhẩm tay.
+
 ### Khi Hàm Có Nhiều Hơn 6 Đầu Vào
 
 Lúc đó trình tổng hợp phải **ghép nhiều LUT thành cây nhiều tầng**. Ví dụ một hàm AND 12 biến:
@@ -574,17 +578,19 @@ Mục C ở trên đọc Synthesis Report của iCEcube2 với chip iCE40 HX1K. 
 
 Bảng kết quả mong đợi cho dự án này trên XC7A35T:
 
-| Tài nguyên | Dùng | Có sẵn | Tỉ lệ |
-| :--- | :---: | :---: | :---: |
-| LUT | **1** | ~20.800 | 0,00% |
-| Flip-flop | 0 | ~41.600 | 0,00% |
-| IO | 3 | 210 | 1,43% |
+| Tài nguyên | Dùng | Có sẵn |
+| :--- | :---: | :---: |
+| LUT | **1** | ~20.800 |
+| Flip-flop | 0 | ~41.600 |
+| IO | 3 | (tùy gói chip) |
 
 Ba điểm đáng rút ra từ bảng này:
 
 * **LUT = 1.** Trình tổng hợp đã gói toàn bộ phép AND vào đúng một bảng tra, giống hệt kết luận của sách với LUT4 trên iCE40. Chỉ khác là LUT của Xilinx có 6 đầu vào thay vì 4, nên bốn đầu vào còn lại bị bỏ trống.
 * **Flip-flop = 0.** Thiết kế hoàn toàn là logic tổ hợp, không có gì cần ghi nhớ. Chương 4 sẽ bàn về linh kiện ngược lại.
 * **IO = 3.** Hai chân vào cho nút, một chân ra cho đèn — khớp với số port trong entity.
+
+Số chân IO khả dụng phụ thuộc vào **kiểu đóng gói** chứ không phải mã chip: cùng con XC7A35T nhưng gói CSG324 và gói FTG256 cho số chân khác hẳn nhau. Con số chính xác bạn đọc ngay trong báo cáo của Vivado, hoặc tra bảng package trong datasheet DS181 của dòng Artix-7.
 
 ---
 
