@@ -10,3 +10,10 @@
 :root {
   --md-code-font: "JetBrains Mono";
 }
+
+/* Ẩn thanh điều hướng bên trái trên màn rộng (trên điện thoại nó là menu ☰, giữ nguyên)
+   và nới bề rộng nội dung từ 61rem mặc định lên 80rem. */
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--primary { display: none; }
+}
+.md-grid { max-width: 80rem; }
