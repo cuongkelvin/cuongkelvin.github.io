@@ -6,4 +6,5 @@ nav:
   - 04-luu-tru-trang-thai-flip-flop.md
   - 05-kiem-tra-ma-nguon-bang-mo-phong.md
   - 06-cac-module-fpga-pho-bien.md
+  - 07-synthesis-place-route-clock-domains.md
   - ...
