@@ -181,7 +181,7 @@ Một hiểu lầm phổ biến của người mới bắt đầu là nghĩ FPGA
 | **5CEA4** | 308 khối | 3,080 Kb | ~385 KB |
 | **5CEA5** | 446 khối | 4,460 Kb | ~557 KB |
 
-> **Nhận xét quan trọng:** Chip lớn nhất **5CEA5** có 446 khối BRAM nhưng tổng dung lượng chỉ đạt **4,460 Kilobits (chưa đến 0.5 Megabyte!)**. Trong khi đó, một chiếc thẻ nhớ MicroSD 32GB có giá vài USD chứa dung lượng gấp hàng trăm nghìn lần.
+> **Nhận xét quan trọng:** Chip lớn nhất **5CEA5** có 446 khối BRAM nhưng tổng dung lượng chỉ đạt **4.460 Kilobit — khoảng 0,56 Megabyte, chưa đến 1 MB**. Trong khi đó, một chiếc thẻ nhớ MicroSD 32 GB giá chừng 10 USD chứa dung lượng gấp hàng chục nghìn lần (32 GB so với 0,56 MB là khoảng 57.000 lần).
 > **Kết luận:** Block RAM trên FPGA không được thiết kế để lưu trữ dữ liệu khối lượng lớn lâu dài, mà chỉ đóng vai trò là **vùng đệm tốc độ cao (high-speed buffer)** cho dữ liệu tạm thời.
 
 ---
@@ -250,11 +250,11 @@ gain_adjusted <= prod(23 downto 8);                    -- chia 256
 Bộ lọc thông thấp (Low-Pass Filter) loại bỏ nhiễu tần số cao bằng cách thực hiện hàng loạt phép Nhân và Cộng đồng thời trên các mẫu dữ liệu liên tiếp.
 
 #### 3. Xử lý Video (Làm mờ ảnh - Video Blurring):
-Để làm mờ một khung hình video 4K, FPGA phải tính giá trị trung bình (Cộng + Nhân hệ số) của hàng triệu điểm ảnh (pixels) lân cận cùng một lúc ở tốc độ 60–120 khung hình/giây.
+Để làm mờ một khung hình video, FPGA thay mỗi điểm ảnh bằng trung bình (Cộng + Nhân hệ số) của các điểm ảnh lân cận — phải làm trên hàng triệu điểm ảnh cùng lúc, và phải xong trước khi khung hình kế tiếp tới, vì video là nhiều khung hình mỗi giây.
 
 ---
 
-### C. Kiến Trúc Bên Trong Của Một DSP Block (DSP Tile / DSP48E2)
+### C. Kiến Trúc Bên Trong Của Một DSP Block (DSP Tile)
 
 ```
         ┌────────────────────────────────────────────────────────┐
@@ -335,7 +335,7 @@ Reset ────────────────>│──> [ khối khoá
    * *Lưu ý:* Vì M và D phải là số nguyên, bạn không thể tạo ra tần số bất kỳ: π MHz từ 10 MHz là bất khả, vì π không phải tỉ số của hai số nguyên.
 
 2. **Dịch Pha Tín Hiệu (Phase Shifting):**
-   PLL có thể tạo ra các bản sao xung nhịp bị lệch pha 90°, 180°, hay 270° so với xung nhịp gốc. Điều này cực kỳ quan trọng để căn chỉnh thời gian khi giao tiếp với bộ nhớ DDR ngoài chip.
+   PLL có thể tạo ra các bản sao xung nhịp bị lệch pha 90°, 180°, hay 270° so với xung nhịp gốc. Thiết kế đơn giản hiếm khi cần, nhưng có thể cần khi giao tiếp với linh kiện ngoài chip như bộ nhớ.
 
 ```
 Time (ns) 0                   40                  80                  
@@ -380,7 +380,7 @@ Trong chương này, bạn đã tìm hiểu các khối phần cứng Primitive 
 
 1. **Cách tạo Primitives:** Phân biệt giữa Suy luận (Inference), Khởi tạo trực tiếp (Instantiation), và Sử dụng phần mềm đồ họa (GUI).
 2. **Block RAM (BRAM):** Khối bộ nhớ đệm tốc độ cao tích hợp sẵn; cách tính dung lượng, các tính năng tự động ghép tầng (cascading) và nạp dữ liệu ban đầu.
-3. **DSP Block:** Khối tính toán toán học phần cứng chứa Pre-adder, Multiplier 27x18 và ALU 48-bit; giúp thực hiện các phép toán song song tốc độ cao (> 500 MHz) cho audio, video và bộ lọc số.
+3. **DSP Block:** Khối tính toán toán học phần cứng chứa Pre-adder, bộ nhân và ALU (trên 7-series: 25 × 18 và 48 bit); giúp thực hiện các phép toán song song tốc độ cao cho audio, video và bộ lọc số.
 4. **Phase-Locked Loop (PLL):** Khối tổng hợp xung nhịp; cho phép tạo nhiều tần số và dịch pha từ 1 nguồn thạch anh duy nhất; vai trò sống còn của tín hiệu `Locked` trong việc kiểm soát Reset hệ thống.
 
 Thêm vào đó, cho XC7A35T trên QMTech (theo DS180, chưa đối chiếu Vivado): 50 Block RAM 36 Kb tách được thành 18 Kb, 90 DSP48E1 (25 × 18), 5 cụm CMT với MMCM + PLL; BRAM suy luận từ mảng đọc đồng bộ, DSP suy luận từ `*` trên `signed`/`unsigned`, PLL/MMCM tạo bằng Clocking Wizard. Và một điều kiểm được ngay bằng GHDL: `* 1.6` trong sách là giả mã — số thực phải đổi thành nhân số nguyên rồi dịch bit.
