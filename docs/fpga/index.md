@@ -15,6 +15,7 @@ Bản dịch kèm ghi chú riêng, bổ sung các ví dụ VHDL cụ thể và t
 - [**Chương 8 — Máy trạng thái**](08-may-trang-thai.md) — trạng thái / chuyển tiếp / sự kiện, FSM một khối vs hai khối, bốn quy tắc, game trí nhớ kiểu Simon với LED 7 đoạn — mô phỏng chơi thật bằng GHDL
 - [**Chương 9 — Các thành phần chuyên dụng (primitives)**](09-cac-thanh-phan-chuyen-dung-primitives.md) — inference / instantiation / GUI, Block RAM, khối DSP và số dấu chấm tĩnh, PLL/MMCM, tín hiệu `locked`
 - [**Chương 10 — Số và phép toán**](10-so-va-phep-toan.md) — signed/unsigned, bù 2, định cỡ, chuyển kiểu VHDL, sáu quy tắc vàng cho cộng/trừ/nhân/chia, số dấu chấm tĩnh — 24 ví dụ của sách chạy lại bằng GHDL
+- [**Chương 11 — Vào/ra: GPIO, DDR và SerDes**](11-io-gpio-serdes.md) — đệm I/O và OE, chân hai chiều `inout`/`'Z'`, điện áp bank, drive/slew, vi sai LVDS, ODDR, song song vs nối tiếp, mã Manchester, cách SerDes hoạt động
 
 ## Phần cứng đang dùng
 
