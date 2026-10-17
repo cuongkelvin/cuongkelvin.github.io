@@ -7,9 +7,14 @@ theme:
     - navigation.tabs        # chủ đề thành tab trên đầu
     - navigation.indexes     # index.md làm trang tổng quan của chủ đề
     - navigation.top         # nút cuộn lên đầu trang
+    - navigation.footer      # nút trang trước / trang sau ở cuối bài
+    - navigation.tracking    # URL tự cập nhật #đề-mục khi cuộn
+    - navigation.instant     # chuyển trang không tải lại, thanh trái giữ vị trí cuộn
+    - navigation.instant.progress
     - toc.follow             # mục lục bên phải tự cuộn theo phần đang đọc
     - search.suggest
     - search.highlight
+    - search.share
     - content.code.copy      # nút copy cho khối code
   palette:
     - media: "(prefers-color-scheme: light)"
