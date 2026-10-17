@@ -7,6 +7,7 @@ theme:
     - navigation.tabs        # chủ đề thành tab trên đầu
     - navigation.indexes     # index.md làm trang tổng quan của chủ đề
     - navigation.top         # nút cuộn lên đầu trang
+    - toc.follow             # mục lục bên phải tự cuộn theo phần đang đọc
     - search.suggest
     - search.highlight
     - content.code.copy      # nút copy cho khối code
