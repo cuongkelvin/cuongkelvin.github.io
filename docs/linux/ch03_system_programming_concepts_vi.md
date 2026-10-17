@@ -1,5 +1,4 @@
-#### Chương 3
-### **CÁC KHÁI NIỆM LẬP TRÌNH HỆ THỐNG**
+# CHƯƠNG 3: CÁC KHÁI NIỆM LẬP TRÌNH HỆ THỐNG
 
 Chương này trang bị các chủ đề đa dạng vốn là điều kiện tiên quyết cho lập trình hệ thống. Chúng ta bắt đầu bằng việc giới thiệu các system call (lời gọi hệ thống) và đi vào chi tiết các bước diễn ra trong quá trình thực thi chúng. Sau đó, chúng ta xem xét các thư viện hàm (library functions) và điểm khác biệt của chúng so với system call, kết hợp với phần mô tả về thư viện (GNU) C library.
 
@@ -7,7 +6,7 @@ Mỗi khi thực hiện một system call hoặc gọi một thư viện hàm, c
 
 Chúng ta kết thúc bằng việc xem xét các vấn đề liên quan đến lập trình có tính di động (portable programming), cụ thể là việc sử dụng các macro thử nghiệm tính năng (feature test macros) và các kiểu dữ liệu hệ thống chuẩn (standard system data types) do SUSv3 định nghĩa.
 
-#### **3.1 System Calls**
+## 3.1 System Calls
 
 <span id="page-22-0"></span>System call là một điểm nhập có kiểm soát vào kernel, cho phép một tiến trình yêu cầu kernel thực hiện một số hành động thay mặt cho tiến trình đó. Kernel cung cấp một loạt các dịch vụ mà chương trình có thể truy cập thông qua giao diện lập trình ứng dụng system call (system call API). Các dịch vụ này bao gồm, ví dụ: tạo tiến trình mới, thực hiện I/O, và tạo pipe cho việc giao tiếp giữa các tiến trình. (Trang tài liệu hướng dẫn `syscalls(2)` liệt kê các system call của Linux.)
 
@@ -85,14 +84,14 @@ Phụ lục A mô tả lệnh `strace`, vốn có thể được sử dụng đ�
 
 Thêm thông tin về cơ chế system call của Linux có thể tìm thấy trong [Love, 2010], [Bovet & Cesati, 2005], và [Maxwell, 1999].
 
-#### **3.2 Library Functions**
+## 3.2 Library Functions
 
 Một thư viện hàm (library function) đơn giản là một trong số rất nhiều hàm cấu thành nên thư viện C chuẩn (standard C library). (Để ngắn gọn, khi nói về một hàm cụ thể trong phần còn lại của cuốn sách, chúng ta sẽ thường chỉ viết "hàm" thay vì "thư viện hàm".) Mục đích của các hàm này rất đa dạng, bao gồm các tác vụ như mở file, chuyển đổi thời gian sang định dạng đọc được cho con người, và so sánh hai chuỗi ký tự.
 
 Nhiều thư viện hàm không sử dụng bất kỳ system call nào (ví dụ: các hàm thao tác chuỗi). Mặt khác, một số thư viện hàm được xây dựng chồng lên các system call. Ví dụ, thư viện hàm `fopen()` sử dụng system call `open()` để thực sự mở một file. Thường thì các thư viện hàm được thiết kế để cung cấp một giao diện thân thiện với người gọi hơn so với system call bên dưới. Ví dụ, hàm `printf()` cung cấp định dạng đầu ra và đệm dữ liệu (data buffering), trong khi system call `write()` chỉ xuất một khối byte. Tương tự, các hàm `malloc()` và `free()` thực hiện nhiều tác vụ quản lý giúp cho việc cấp phát và giải phóng bộ nhớ dễ dàng hơn nhiều so với system call `brk()` bên dưới.
 
 
-### **3.3 Thư viện C chuẩn; Thư viện GNU C (glibc)**
+## 3.3 Thư viện C chuẩn; Thư viện GNU C (glibc)
 
 Có nhiều bản triển khai khác nhau của thư viện C chuẩn trên các bản thực thi UNIX khác nhau. Bản triển khai được sử dụng phổ biến nhất trên Linux là GNU C library (glibc, http://www.gnu.org/software/libc/).
 
@@ -100,7 +99,7 @@ Nhà phát triển và bảo trì chính của thư viện GNU C ban đầu là 
 
 Nhiều thư viện C khác cũng có sẵn cho Linux, bao gồm các thư viện với yêu cầu bộ nhớ nhỏ hơn dùng cho các ứng dụng thiết bị nhúng. Các ví dụ bao gồm uClibc (http://www.uclibc.org/) và diet libc (http://www.fefe.de/dietlibc/). Trong cuốn sách này, chúng ta giới hạn thảo luận về glibc, vì đó là thư viện C được sử dụng bởi hầu hết các ứng dụng được phát triển trên Linux.
 
-#### **Xác định phiên bản glibc trên hệ thống**
+### Xác định phiên bản glibc trên hệ thống
 
 Đôi khi, chúng ta cần xác định phiên bản glibc trên hệ thống. Từ shell, chúng ta có thể làm điều này bằng cách chạy file thư viện chia sẻ glibc như thể nó là một chương trình thực thi. Khi chúng ta chạy thư viện dưới dạng một file thực thi, nó hiển thị các đoạn văn bản khác nhau, bao gồm số phiên bản của nó:
 
@@ -145,7 +144,7 @@ Hàm `gnu_get_libc_version()` trả về một con trỏ tới chuỗi, chẳng 
 
 Chúng ta cũng có thể lấy thông tin phiên bản bằng cách sử dụng hàm `confstr()` để truy xuất giá trị của biến cấu hình `_CS_GNU_LIBC_VERSION` (đặc thù của glibc). Lời gọi này trả về một chuỗi như `glibc 2.12`.
 
-### <span id="page-27-0"></span> **3.4 Xử lý lỗi từ các System Call và Thư viện hàm**
+## <span id="page-27-0"></span> 3.4 Xử lý lỗi từ các System Call và Thư viện hàm
 
 Hầu như mọi system call và thư viện hàm đều trả về một loại giá trị trạng thái nào đó cho biết lời gọi thành công hay thất bại. Giá trị trạng thái này luôn luôn nên được kiểm tra để xem lời gọi có thành công hay không. Nếu không, hành động thích hợp nên được thực hiện — ít nhất, chương trình nên hiển thị một thông báo lỗi cảnh báo rằng một điều gì đó không mong muốn đã xảy ra.
 
@@ -153,7 +152,7 @@ Mặc dù việc bỏ qua các kiểm tra này để tiết kiệm thời gian g
 
 Một số ít system call không bao giờ thất bại. Ví dụ: `getpid()` luôn trả về thành công ID của một tiến trình, và `_exit()` luôn kết thúc một tiến trình. Không cần thiết phải kiểm tra giá trị trả về từ các system call như vậy.
 
-###### **Xử lý lỗi system call**
+### Xử lý lỗi system call
 
 Trang tài liệu hướng dẫn cho mỗi system call ghi lại các giá trị trả về có thể có của lời gọi, cho biết (các) giá trị nào báo hiệu lỗi. Thông thường, một lỗi được chỉ ra bằng giá trị trả về `-1`. Do đó, một system call có thể được kiểm tra bằng đoạn mã như sau:
 
@@ -222,7 +221,7 @@ Nếu `errnum` chỉ định một số hiệu lỗi không được nhận bi�
 
 Vì các hàm `perror()` và `strerror()` nhạy cảm với thiết lập ngôn ngữ cục bộ (locale-sensitive) (Mục 10.4), các mô tả lỗi sẽ được hiển thị bằng ngôn ngữ cục bộ.
 
-#### **Xử lý lỗi từ các thư viện hàm**
+### Xử lý lỗi từ các thư viện hàm
 
 Các thư viện hàm khác nhau trả về các kiểu dữ liệu khác nhau và các giá trị khác nhau để chỉ ra sự thất bại. (Kiểm tra trang tài liệu hướng dẫn cho từng hàm.) Cho các mục đích của chúng ta, các thư viện hàm có thể được chia thành các loại sau:
 
@@ -231,11 +230,11 @@ Các thư viện hàm khác nhau trả về các kiểu dữ liệu khác nhau v
 * Các thư viện hàm khác hoàn toàn không sử dụng `errno`. Phương pháp xác định sự tồn tại và nguyên nhân gây lỗi phụ thuộc vào từng hàm cụ thể và được ghi lại trong trang tài liệu hướng dẫn của hàm đó. Đối với các hàm này, việc sử dụng `errno`, `perror()`, hoặc `strerror()` để chẩn đoán lỗi là một sai lầm.
 
 
-### **3.5 Ghi chú về các chương trình ví dụ trong cuốn sách này**
+## 3.5 Ghi chú về các chương trình ví dụ trong cuốn sách này
 
 Trong mục này, chúng ta mô tả các quy ước và tính năng khác nhau thường được sử dụng bởi các chương trình ví dụ trình bày trong cuốn sách này.
 
-#### **3.5.1 Tùy chọn và đối số dòng lệnh**
+### 3.5.1 Tùy chọn và đối số dòng lệnh
 
 Nhiều chương trình ví dụ trong cuốn sách này dựa vào các tùy chọn và đối số dòng lệnh để xác định hành vi của chúng.
 
@@ -243,11 +242,11 @@ Các tùy chọn dòng lệnh UNIX truyền thống bao gồm một dấu gạch
 
 Mỗi chương trình ví dụ của chúng ta có cú pháp dòng lệnh không đỗi hỏi cung cấp một tiện ích trợ giúp đơn giản cho người dùng: nếu được gọi với tùy chọn `--help`, chương trình sẽ hiển thị một thông báo hướng dẫn sử dụng chỉ ra cú pháp cho các tùy chọn và đối số dòng lệnh.
 
-#### **3.5.2 Các hàm và file header chung**
+### 3.5.2 Các hàm và file header chung
 
 Hầu hết các chương trình ví dụ bao gồm một file header chứa các định nghĩa thường được yêu cầu, và chúng cũng sử dụng một tập hợp các hàm chung. Chúng ta thảo luận về file header và các hàm trong mục này.
 
-#### **File header chung**
+#### File header chung
 
 Mã nguồn 3-1 là file header được sử dụng bởi hầu như mọi chương trình trong cuốn sách này. File header này bao gồm các file header khác nhau được sử dụng bởi nhiều chương trình ví dụ, định nghĩa một kiểu dữ liệu Boolean, và định nghĩa các macro để tính giá trị nhỏ nhất và lớn nhất của hai giá trị số. Việc sử dụng file header này cho phép chúng ta làm cho các chương trình ví dụ ngắn hơn một chút.
 
@@ -276,7 +275,7 @@ typedef enum { FALSE, TRUE } Boolean;
 #endif
 ```
 
-#### **Các hàm chẩn đoán lỗi**
+#### Các hàm chẩn đoán lỗi
 
 Để đơn giản hóa việc xử lý lỗi trong các chương trình ví dụ của chúng ta, chúng ta sử dụng các hàm chẩn đoán lỗi có khai báo được hiển thị trong Mã nguồn 3-2.
 
@@ -553,7 +552,7 @@ static char *ename[] = {
 #define MAX_ENAME 132
 ```
 
-#### **Các hàm phân tích đối số dòng lệnh dạng số**
+#### Các hàm phân tích đối số dòng lệnh dạng số
 
 File header trong [Mã nguồn 3-5](#page-38-0) cung cấp khai báo cho hai hàm mà chúng ta thường xuyên sử dụng để phân tích các đối số dòng lệnh dạng số nguyên: `getInt()` và `getLong()`. Ưu điểm chính của việc sử dụng các hàm này thay vì `atoi()`, `atol()`, và `strtol()` là chúng cung cấp một số kiểm tra tính hợp lệ cơ bản cho các đối số dạng số.
 
@@ -667,11 +666,11 @@ getInt(const char *arg, int flags, const char *name)
 ```
 
 
-### **3.6 Các vấn đề về tính di động**
+## 3.6 Các vấn đề về tính di động
 
 Trong mục này, chúng ta xem xét chủ đề viết các chương trình hệ thống có tính di động (portable system programs). Chúng ta giới thiệu các macro thử nghiệm tính năng (feature test macros) và các kiểu dữ liệu hệ thống chuẩn do SUSv3 định nghĩa, sau đó xem xét một số vấn đề về tính di động khác.
 
-#### **3.6.1 Feature Test Macros**
+### 3.6.1 Feature Test Macros
 
 Các tiêu chuẩn khác nhau chi phối hành vi của các API system call và thư viện hàm (xem Mục 1.3). Một số tiêu chuẩn này được định nghĩa bởi các tổ chức tiêu chuẩn như The Open Group (Single UNIX Specification), trong khi các tiêu chuẩn khác được định nghĩa bởi hai bản thực thi UNIX quan trọng về mặt lịch sử: BSD và System V Release 4 (và System V Interface Definition liên quan).
 
@@ -697,18 +696,18 @@ Nếu được định nghĩa (với bất kỳ giá trị nào), hiển thị c
 `_POSIX_C_SOURCE`
 Nếu được định nghĩa với giá trị 1, điều này có tác dụng tương tự như `_POSIX_SOURCE`. Nếu được định nghĩa với giá trị lớn hơn hoặc bằng 199309, cũng hiển thị các định nghĩa cho POSIX.1b (realtime). Nếu được định nghĩa với giá trị lớn hơn hoặc bằng 199506, cũng hiển thị các định nghĩa cho POSIX.1c (threads). Nếu được định nghĩa với giá trị 200112, cũng hiển thị các định nghĩa cho đặc tả cơ sở POSIX.1-2001 (tức là phần mở rộng XSI bị loại trừ). (Trước phiên bản 2.3.3, các header glibc không giải thích giá trị 200112 cho `_POSIX_C_SOURCE`.) Nếu được định nghĩa với giá trị 200809, cũng hiển thị các định nghĩa cho đặc tả cơ sở POSIX.1-2008. (Trước phiên bản 2.10, các header glibc không giải thích giá trị 200809 cho `_POSIX_C_SOURCE`.)
 
-###### _XOPEN_SOURCE
+#### _XOPEN_SOURCE
 Nếu được định nghĩa (với bất kỳ giá trị nào), hiển thị các định nghĩa POSIX.1, POSIX.2, và X/Open (XPG4). Nếu được định nghĩa với giá trị 500 hoặc lớn hơn, cũng hiển thị các phần mở rộng SUSv2 (UNIX 98 và XPG5). Thiết lập thành 600 hoặc lớn hơn sẽ hiển thị thêm các phần mở rộng SUSv3 XSI (UNIX 03) và C99. (Trước phiên bản 2.2, các header glibc không giải thích giá trị 600 cho `_XOPEN_SOURCE`.) Thiết lập thành 700 hoặc lớn hơn cũng hiển thị các phần mở rộng SUSv4 XSI. (Trước phiên bản 2.10, các header glibc không giải thích giá trị 700 cho `_XOPEN_SOURCE`.) Các giá trị 500, 600, và 700 cho `_XOPEN_SOURCE` được chọn vì SUSv2, SUSv3, và SUSv4 tương ứng là các Issue 5, 6, và 7 của các đặc tả X/Open.
 
 Các macro thử nghiệm tính năng được liệt kê sau đây là đặc thù của glibc:
 
-###### _BSD_SOURCE
+#### _BSD_SOURCE
 Nếu được định nghĩa (với bất kỳ giá trị nào), hiển thị các định nghĩa BSD. Việc định nghĩa macro này cũng định nghĩa `_POSIX_C_SOURCE` với giá trị 199506. Việc thiết lập rõ ràng chỉ macro này khiến các định nghĩa BSD được ưu tiên trong một số ít trường hợp có xung đột tiêu chuẩn.
 
-###### _SVID_SOURCE
+#### _SVID_SOURCE
 Nếu được định nghĩa (với bất kỳ giá trị nào), hiển thị các định nghĩa System V Interface Definition (SVID).
 
-###### _GNU_SOURCE
+#### _GNU_SOURCE
 Nếu được định nghĩa (với bất kỳ giá trị nào), hiển thị tất cả các định nghĩa được cung cấp bằng cách thiết lập tất cả các macro trước đó, cũng như các phần mở rộng GNU khác nhau.
 
 Khi GNU C compiler được gọi mà không có tùy chọn đặc biệt, `_POSIX_SOURCE`, `_POSIX_C_SOURCE=200809` (200112 với các phiên bản glibc 2.5 đến 2.9, hoặc 199506 với các phiên bản glibc sớm hơn 2.4), `_BSD_SOURCE`, và `_SVID_SOURCE` được định nghĩa theo mặc định.
@@ -724,13 +723,13 @@ $ cc -D_POSIX_SOURCE -D_POSIX_C_SOURCE=199506 \
 
 File header `<features.h>` và trang tài liệu hướng dẫn `feature_test_macros(7)` cung cấp thêm thông tin chính xác về những giá trị nào được gán cho từng macro thử nghiệm tính năng.
 
-#### **_POSIX_C_SOURCE, _XOPEN_SOURCE, và POSIX.1/SUS**
+#### _POSIX_C_SOURCE, _XOPEN_SOURCE, và POSIX.1/SUS
 
 Chỉ các macro thử nghiệm tính năng `_POSIX_C_SOURCE` và `_XOPEN_SOURCE` được chỉ định trong POSIX.1-2001/SUSv3, vốn yêu cầu các macro này phải được định nghĩa với các giá trị tương ứng là 200112 và 600 trong các ứng dụng tuân thủ. Việc định nghĩa `_POSIX_C_SOURCE` là 200112 cung cấp sự tuân thủ đối với đặc tả cơ sở POSIX.1-2001 (tức là tuân thủ POSIX, không bao gồm phần mở rộng XSI). Việc định nghĩa `_XOPEN_SOURCE` là 600 cung cấp sự tuân thủ đối với SUSv3 (tức là tuân thủ XSI, đặc tả cơ sở cộng với phần mở rộng XSI). Các phát biểu tương tự cũng áp dụng cho POSIX.1-2008/SUSv4, vốn yêu cầu hai macro phải được định nghĩa với các giá trị 200809 và 700.
 
 SUSv3 chỉ định rằng việc thiết lập `_XOPEN_SOURCE` thành 600 sẽ cung cấp tất cả các tính năng được bật nếu `_POSIX_C_SOURCE` được đặt thành 200112. Do đó, một ứng dụng chỉ cần định nghĩa `_XOPEN_SOURCE` cho sự tuân thủ SUSv3 (tức là XSI). SUSv4 đưa ra đặc tả tương tự rằng việc thiết lập `_XOPEN_SOURCE` thành 700 sẽ cung cấp tất cả các tính năng được bật nếu `_POSIX_C_SOURCE` được đặt thành 200809.
 
-###### **Macro thử nghiệm tính năng trong các mẫu hàm và ví dụ mã nguồn**
+#### Macro thử nghiệm tính năng trong các mẫu hàm và ví dụ mã nguồn
 
 Các trang tài liệu hướng dẫn mô tả (các) macro thử nghiệm tính năng nào phải được định nghĩa để làm cho một định nghĩa hằng số hoặc khai báo hàm cụ thể hiển thị từ một file header.
 
@@ -742,7 +741,7 @@ $ cc -std=c99 -D_XOPEN_SOURCE=600
 
 Mẫu của mỗi hàm được hiển thị trong cuốn sách này chỉ ra bất kỳ macro thử nghiệm tính năng nào phải được định nghĩa để sử dụng hàm đó trong một chương trình được biên dịch với tùy chọn compiler mặc định hoặc tùy chọn trong lệnh `cc` vừa hiển thị. Các trang tài liệu hướng dẫn cung cấp mô tả chính xác hơn về (các) macro thử nghiệm tính năng được yêu cầu để hiển thị khai báo của từng hàm.
 
-#### **3.6.2 Kiểu dữ liệu hệ thống**
+### 3.6.2 Kiểu dữ liệu hệ thống
 
 <span id="page-42-0"></span>Các kiểu dữ liệu triển khai khác nhau được biểu diễn bằng các kiểu C chuẩn, ví dụ: process ID, user ID, và file offset. Mặc dù có thể sử dụng các kiểu dữ liệu cơ bản của C như `int` và `long` để khai báo các biến lưu trữ thông tin đó, điều này làm giảm tính di động trên các hệ thống UNIX, vì các lý do sau:
 
@@ -813,7 +812,7 @@ Bảng 3-1 liệt kê một số kiểu dữ liệu hệ thống mà chúng ta s
 
 Khi thảo luận về các kiểu dữ liệu trong Bảng 3-1 ở các chương sau, chúng ta sẽ thường đưa ra các phát biểu rằng một số kiểu "là một kiểu số nguyên [được chỉ định bởi SUSv3]." Điều này có nghĩa là SUSv3 yêu cầu kiểu đó phải được định nghĩa là số nguyên, nhưng không yêu cầu một kiểu số nguyên bản địa cụ thể (ví dụ: `short`, `int`, hoặc `long`) phải được sử dụng. (Thường thì chúng ta sẽ không nói kiểu dữ liệu bản địa cụ thể nào thực sự được sử dụng để biểu diễn từng kiểu dữ liệu hệ thống trong Linux, vì một ứng dụng di động nên được viết sao cho nó không cần quan tâm đến kiểu dữ liệu nào được sử dụng.)
 
-###### **In các giá trị kiểu dữ liệu hệ thống**
+#### In các giá trị kiểu dữ liệu hệ thống
 
 Khi in giá trị của một trong các kiểu dữ liệu hệ thống dạng số được hiển thị trong Bảng 3-1 (ví dụ: `pid_t` và `uid_t`), chúng ta phải cẩn thận không đưa sự phụ thuộc vào cách biểu diễn vào lời gọi `printf()`. Sự phụ thuộc vào cách biểu diễn có thể xảy ra vì quy tắc thăng cấp đối số của C chuyển đổi các giá trị kiểu `short` thành `int`, nhưng giữ nguyên các giá trị kiểu `int` và `long`. Điều này có nghĩa là, tùy thuộc vào định nghĩa của kiểu dữ liệu hệ thống, một kiểu `int` hoặc `long` sẽ được truyền trong lời gọi `printf()`. Tuy nhiên, vì `printf()` không có cách nào xác định kiểu đối số của nó tại thời điểm chạy, người gọi phải cung cấp rõ ràng thông tin này bằng cách sử dụng định dạng specifier `%d` hoặc `%ld`. Vấn đề là việc chỉ viết mã một trong các định dạng specifier này trong lời gọi `printf()` tạo ra một sự phụ thuộc vào bản thực thi. Giải pháp thông thường là sử dụng định dạng specifier `%ld` và luôn ép kiểu giá trị tương ứng thành `long`, như thế này:
 
@@ -829,11 +828,11 @@ Tiêu chuẩn C99 định nghĩa modifier độ dài `z` cho `printf()`, để c
 
 Tiêu chuẩn C99 cũng định nghĩa modifier độ dài `j`, chỉ định rằng đối số tương ứng thuộc kiểu `intmax_t` (hoặc `uintmax_t`), một kiểu số nguyên đảm bảo đủ lớn để có thể biểu diễn một số nguyên thuộc bất kỳ kiểu nào. Cuối cùng, việc sử dụng ép kiểu `(intmax_t)` cộng với định dạng specifier `%jd` nên thay thế cho ép kiểu `(long)` cộng với định dạng specifier `%ld` làm cách tốt nhất để in các giá trị kiểu dữ liệu hệ thống dạng số, vì cách tiếp cận trước cũng xử lý các giá trị `long long` và bất kỳ kiểu số nguyên mở rộng nào chẳng hạn như `int128_t`. Tuy nhiên, (một lần nữa) chúng ta tránh kỹ thuật này vì nó không thể thực hiện được trên tất cả các bản thực thi UNIX.
 
-#### **3.6.3 Các vấn đề di động khác**
+### 3.6.3 Các vấn đề di động khác
 
 Trong mục này, chúng ta xem xét một vài vấn đề di động khác mà chúng ta có thể gặp phải khi viết các chương trình hệ thống.
 
-#### **Khởi tạo và sử dụng các cấu trúc**
+#### Khởi tạo và sử dụng các cấu trúc
 
 Mỗi bản thực thi UNIX chỉ định một loạt các cấu trúc chuẩn được sử dụng trong các system call và thư viện hàm khác nhau. Như một ví dụ, hãy xem xét cấu trúc `sembuf`, vốn được sử dụng để biểu diễn một thao tác semaphore sẽ được thực hiện bởi system call `semop()`:
 
@@ -872,7 +871,7 @@ struct sembuf s = { .sem_num = 3, .sem_op = -1, .sem_flg = SEM_UNDO };
 
 Các xem xét về thứ tự của các thành viên trong các cấu trúc chuẩn cũng áp dụng nếu chúng ta muốn ghi nội dung của một cấu trúc chuẩn ra một file. Để làm điều này một cách di động, chúng ta không thể chỉ đơn giản thực hiện ghi nhị phân cấu trúc đó. Thay vào đó, các trường cấu trúc phải được ghi riêng lẻ (có lẽ dưới dạng văn bản) theo một thứ tự được chỉ định.
 
-###### **Sử dụng các macro có thể không có mặt trên tất cả các bản thực thi**
+#### Sử dụng các macro có thể không có mặt trên tất cả các bản thực thi
 
 Trong một số trường hợp, một macro có thể không được định nghĩa trên tất cả các bản thực thi UNIX. Ví dụ, macro `WCOREDUMP()` (vốn kiểm tra xem một tiến trình con có tạo file core dump hay không) có sẵn rộng rãi, nhưng nó không được chỉ định trong SUSv3. Do đó, macro này có thể không có mặt trên một số bản thực thi UNIX. Để có thể di động, chúng ta có thể sử dụng câu lệnh `#ifdef` để kiểm tra xem macro có được định nghĩa hay không trước khi sử dụng nó:
 
@@ -882,7 +881,7 @@ Trong một số trường hợp, một macro có thể không được định 
 #endif
 ```
 
-###### **Sự biến đổi trong các file header được yêu cầu giữa các bản thực thi**
+#### Sự biến đổi trong các file header được yêu cầu giữa các bản thực thi
 
 Trong một số trường hợp, các file header được yêu cầu để khai báo mẫu cho các system call và thư viện hàm khác nhau có sự biến đổi giữa các bản thực thi UNIX. Trong cuốn sách này, chúng ta hiển thị các yêu cầu trên Linux và ghi chú bất kỳ sự biến đổi nào so với SUSv3.
 
@@ -891,7 +890,7 @@ Một số tóm tắt hàm (synopsis) trong cuốn sách này hiển thị một
 Đối với nhiều hàm mà nó chỉ định, POSIX.1-1990 yêu cầu rằng file header `<sys/types.h>` phải được bao gồm trước bất kỳ file header nào khác liên quan đến hàm đó. Tuy nhiên, yêu cầu này là dư thừa, vì hầu hết các bản thực thi UNIX đương đại không yêu cầu các ứng dụng bao gồm file header này cho các hàm đó. Do đó, SUSv1 đã xóa bỏ yêu cầu này. Mặc dù vậy, khi viết các chương trình di động, khôn ngoan là nên làm cho file này trở thành một trong những file header đầu tiên được bao gồm. (Tuy nhiên, chúng ta bỏ qua file header này khỏi các chương trình ví dụ của mình vì nó không được yêu cầu trên Linux và việc bỏ qua nó cho phép chúng ta làm cho các chương trình ví dụ ngắn hơn một dòng.)
 
 
-### **3.7 Tóm tắt**
+## 3.7 Tóm tắt
 
 System call cho phép các tiến trình yêu cầu dịch vụ từ kernel. Ngay cả các system call đơn giản nhất cũng có chi phí bổ sung đáng kể so với một lời gọi hàm trong user space, vì hệ thống phải tạm thời chuyển sang kernel mode để thực thi system call, và kernel phải kiểm tra tính hợp lệ của các đối số system call và truyền dữ liệu giữa bộ nhớ người dùng và bộ nhớ kernel.
 
@@ -907,6 +906,6 @@ Khi biên dịch một ứng dụng, chúng ta có thể định nghĩa các mac
 
 Chúng ta có thể cải thiện tính di động của các chương trình hệ thống bằng cách sử dụng các kiểu dữ liệu hệ thống được định nghĩa trong các tiêu chuẩn khác nhau, thay vì các kiểu C bản địa. SUSv3 chỉ định một loạt các kiểu dữ liệu hệ thống mà một bản thực thi nên hỗ trợ và một ứng dụng nên sử dụng.
 
-#### **3.8 Bài tập**
+## 3.8 Bài tập
 
 **3-1.** Khi sử dụng system call `reboot()` đặc thù của Linux để khởi động lại hệ thống, đối số thứ hai, `magic2`, phải được chỉ định là một trong một tập hợp các số kỳ diệu (magic numbers) (ví dụ: `LINUX_REBOOT_MAGIC2`). Ý nghĩa của các số này là gì? (Chuyển đổi chúng sang hệ thập lục phân sẽ cung cấp một gợi ý.)
