@@ -764,51 +764,52 @@ pid_t mypid;
 
 Bảng 3-1 liệt kê một số kiểu dữ liệu hệ thống mà chúng ta sẽ gặp trong cuốn sách này. Đối với một số kiểu nhất định trong bảng này, SUSv3 yêu cầu kiểu đó phải được triển khai dưới dạng một kiểu số học (arithmetic type). Điều này có nghĩa là bản thực thi có thể chọn kiểu bên dưới là số nguyên hoặc số thực phẩy động (real or complex).
 
-**Bảng 3-1:** Các kiểu dữ liệu hệ thống được chọn
-| Kiểu dữ liệu | Yêu cầu kiểu SUSv3 | Mô tả |
+**Table 3-1:** Selected system data types
+
+| Data type | SUSv3 type requirement | Description |
 | ------ | ------ | ------ |
-| `blkcnt_t` | signed integer | Số lượng khối file (Mục 15.1) |
-| `blksize_t` | signed integer | Kích thước khối file (Mục 15.1) |
-| `cc_t` | unsigned integer | Ký tự đặc biệt của terminal (Mục 62.4) |
-| `clock_t` | integer hoặc real-floating | Thời gian hệ thống tính bằng clock ticks (Mục 10.7) |
-| `clockid_t` | an arithmetic type | Định danh đồng hồ cho các hàm clock và timer POSIX.1b (Mục 23.6) |
-| `comp_t` | không có trong SUSv3 | Clock ticks nén (Mục 28.1) |
-| `dev_t` | an arithmetic type | Số hiệu thiết bị, bao gồm số major và minor (Mục 15.1) |
-| `DIR` | không yêu cầu kiểu | Luồng thư mục (directory stream) (Mục 18.8) |
-| `fd_set` | structure type | Tập hợp file descriptor cho `select()` (Mục 63.2.1) |
-| `fsblkcnt_t` | unsigned integer | Số lượng khối của file system (Mục 14.11) |
-| `fsfilcnt_t` | unsigned integer | Số lượng file (Mục 14.11) |
-| `gid_t` | integer | Định danh nhóm dạng số (Mục 8.3) |
-| `id_t` | integer | Kiểu tổng quát để giữ các định danh; đủ lớn để giữ ít nhất `pid_t`, `uid_t`, và `gid_t` |
-| `in_addr_t` | 32-bit unsigned integer | Địa chỉ IPv4 (Mục 59.4) |
-| `in_port_t` | 16-bit unsigned integer | Số cổng IP (Mục 59.4) |
-| `ino_t` | unsigned integer | Số i-node của file (Mục 15.1) |
-| `key_t` | an arithmetic type | Khóa System V IPC (Mục 45.2) |
-| `mode_t` | integer | Quyền truy cập và kiểu file (Mục 15.1) |
-| `mqd_t` | không yêu cầu kiểu, nhưng không phải kiểu mảng | Mô tả hàng đợi thông điệp POSIX (POSIX message queue descriptor) |
-| `msglen_t` | unsigned integer | Số byte tối đa được cho phép trong hàng đợi thông điệp System V (Mục 46.4) |
-| `msgqnum_t` | unsigned integer | Số lượng thông điệp trong hàng đợi thông điệp System V (Mục 46.4) |
-| `nfds_t` | unsigned integer | Số lượng file descriptor cho `poll()` (Mục 63.2.2) |
-| `nlink_t` | integer | Số lượng liên kết (hard) tới một file (Mục 15.1) |
-| `off_t` | signed integer | File offset hoặc kích thước (Mục 4.7 và 15.1) |
-| `pid_t` | signed integer | Process ID, process group ID, hoặc session ID (Mục 6.2, 34.2, và 34.3) |
-| `ptrdiff_t` | signed integer | Hiệu giữa hai giá trị con trỏ, dưới dạng số nguyên có dấu |
-| `rlim_t` | unsigned integer | Giới hạn tài nguyên (Mục 36.2) |
-| `sa_family_t` | unsigned integer | Họ địa chỉ socket (Mục 56.4) |
-| `shmatt_t` | unsigned integer | Số lượng tiến trình đính kèm cho một phân đoạn bộ nhớ chia sẻ System V (Mục 48.8) |
-| `sig_atomic_t` | integer | Kiểu dữ liệu có thể được truy cập nguyên tử (atomically) (Mục 21.1.3) |
-| `siginfo_t` | structure type | Thông tin về nguồn gốc của một tín hiệu (Mục 21.4) |
-| `sigset_t` | integer hoặc structure type | Tập hợp tín hiệu (Mục 20.9) |
-| `size_t` | unsigned integer | Kích thước của một đối tượng tính bằng byte |
-| `socklen_t` | kiểu số nguyên có ít nhất 32 bits | Kích thước của cấu trúc địa chỉ socket tính bằng byte (Mục 56.3) |
-| `speed_t` | unsigned integer | Tốc độ đường truyền terminal (Mục 62.7) |
-| `ssize_t` | signed integer | Số lượng byte hoặc chỉ báo lỗi (âm) |
-| `stack_t` | structure type | Mô tả của một stack tín hiệu thay thế (Mục 21.3) |
-| `suseconds_t` | signed integer cho phép dải [–1, 1000000] | Khoảng thời gian tính bằng microgiây (Mục 10.1) |
-| `tcflag_t` | unsigned integer | Mặt nạ bit cờ chế độ terminal (Mục 62.2) |
-| `time_t` | integer hoặc real-floating | Thời gian lịch tính bằng giây kể từ Epoch (Mục 10.1) |
-| `timer_t` | an arithmetic type | Định danh bộ đếm thời gian cho các hàm interval timer POSIX.1b (Mục 23.6) |
-| `uid_t` | integer | Định danh người dùng dạng số (Mục 8.1) |
+| `blkcnt_t` | signed integer | File block count (Mục 15.1) |
+| `blksize_t` | signed integer | File block size (Mục 15.1) |
+| `cc_t` | unsigned integer | Terminal special character (Mục 62.4) |
+| `clock_t` | integer or real-floating | System time in clock ticks (Mục 10.7) |
+| `clockid_t` | an arithmetic type | Clock identifier for POSIX.1b clock and timer functions (Mục 23.6) |
+| `comp_t` | not in SUSv3 | Compressed clock ticks (Mục 28.1) |
+| `dev_t` | an arithmetic type | Device number, consisting of major and minor numbers (Mục 15.1) |
+| `DIR` | no type requirement | Directory stream (Mục 18.8) |
+| `fd_set` | structure type | File descriptor set for `select()` (Mục 63.2.1) |
+| `fsblkcnt_t` | unsigned integer | File-system block count (Mục 14.11) |
+| `fsfilcnt_t` | unsigned integer | File count (Mục 14.11) |
+| `gid_t` | integer | Numeric group identifier (Mục 8.3) |
+| `id_t` | integer | Generic type for holding identifiers; large enough to hold at least `pid_t`, `uid_t`, and `gid_t` |
+| `in_addr_t` | 32-bit unsigned integer | IPv4 address (Mục 59.4) |
+| `in_port_t` | 16-bit unsigned integer | IP port number (Mục 59.4) |
+| `ino_t` | unsigned integer | File i-node number (Mục 15.1) |
+| `key_t` | an arithmetic type | System V IPC key (Mục 45.2) |
+| `mode_t` | integer | File permissions and type (Mục 15.1) |
+| `mqd_t` | no type requirement, but shall not be an array type | POSIX message queue descriptor |
+| `msglen_t` | unsigned integer | Number of bytes allowed in System V message queue (Mục 46.4) |
+| `msgqnum_t` | unsigned integer | Counts of messages in System V message queue (Mục 46.4) |
+| `nfds_t` | unsigned integer | Number of file descriptors for `poll()` (Mục 63.2.2) |
+| `nlink_t` | integer | Count of (hard) links to a file (Mục 15.1) |
+| `off_t` | signed integer | File offset or size (Mục 4.7 và 15.1) |
+| `pid_t` | signed integer | Process ID, process group ID, or session ID (Mục 6.2, 34.2, và 34.3) |
+| `ptrdiff_t` | signed integer | Difference between two pointer values, as a signed integer |
+| `rlim_t` | unsigned integer | Resource limit (Mục 36.2) |
+| `sa_family_t` | unsigned integer | Socket address family (Mục 56.4) |
+| `shmatt_t` | unsigned integer | Count of attached processes for a System V shared memory segment (Mục 48.8) |
+| `sig_atomic_t` | integer | Data type that can be atomically accessed (Mục 21.1.3) |
+| `siginfo_t` | structure type | Information about the origin of a signal (Mục 21.4) |
+| `sigset_t` | integer or structure type | Signal set (Mục 20.9) |
+| `size_t` | unsigned integer | Size of an object in bytes |
+| `socklen_t` | integer type of at least 32 bits | Size of a socket address structure in bytes (Mục 56.3) |
+| `speed_t` | unsigned integer | Terminal line speed (Mục 62.7) |
+| `ssize_t` | signed integer | Byte count or (negative) error indication |
+| `stack_t` | structure type | Description of an alternate signal stack (Mục 21.3) |
+| `suseconds_t` | signed integer allowing range [–1, 1000000] | Microsecond time interval (Mục 10.1) |
+| `tcflag_t` | unsigned integer | Terminal mode flag bit mask (Mục 62.2) |
+| `time_t` | integer or real-floating | Calendar time in seconds since the Epoch (Mục 10.1) |
+| `timer_t` | an arithmetic type | Timer identifier for POSIX.1b interval timer functions (Mục 23.6) |
+| `uid_t` | integer | Numeric user identifier (Mục 8.1) |
 
 Khi thảo luận về các kiểu dữ liệu trong Bảng 3-1 ở các chương sau, chúng ta sẽ thường đưa ra các phát biểu rằng một số kiểu "là một kiểu số nguyên [được chỉ định bởi SUSv3]." Điều này có nghĩa là SUSv3 yêu cầu kiểu đó phải được định nghĩa là số nguyên, nhưng không yêu cầu một kiểu số nguyên bản địa cụ thể (ví dụ: `short`, `int`, hoặc `long`) phải được sử dụng. (Thường thì chúng ta sẽ không nói kiểu dữ liệu bản địa cụ thể nào thực sự được sử dụng để biểu diễn từng kiểu dữ liệu hệ thống trong Linux, vì một ứng dụng di động nên được viết sao cho nó không cần quan tâm đến kiểu dữ liệu nào được sử dụng.)
 
