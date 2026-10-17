@@ -1,9 +1,5 @@
 title: Linux
 nav:
   - index.md
-  - The Linux Programming Interface:
-      - 1. History and Standards: ch01_history_and_standards_vi.md
-      - 2. Fundamental Concepts: ch02_fundamental_concepts_vi.md
-      - 3. System Programming Concepts: ch03_system_programming_concepts_vi.md
-      - "4. File I/O: The Universal I/O Model": ch04_file_io_the_universal_io_model_vi.md
+  - the-linux-programming-interface
   - ...

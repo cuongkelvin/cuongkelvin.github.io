@@ -1,15 +1,5 @@
 title: FPGA
 nav:
   - index.md
-  - Getting Started with FPGAs:
-      - 1. Meet the FPGA: 01-gap-go-fpga.md
-      - 3. Boolean Algebra and the Look-Up Table: 03-dai-so-boolean-va-lut.md
-      - 4. Storing State with the Flip-Flop: 04-luu-tru-trang-thai-flip-flop.md
-      - 5. Testing Your Code with Simulation: 05-kiem-tra-ma-nguon-bang-mo-phong.md
-      - 6. Common FPGA Modules: 06-cac-module-fpga-pho-bien.md
-      - 7. Synthesis, Place and Route, and Crossing Clock Domains: 07-synthesis-place-route-clock-domains.md
-      - 8. The State Machine: 08-may-trang-thai.md
-      - 9. Useful FPGA Primitives: 09-cac-thanh-phan-chuyen-dung-primitives.md
-      - 10. Numbers and Math: 10-so-va-phep-toan.md
-      - 11. Getting Data In and Out with I/O and SerDes: 11-io-gpio-serdes.md
+  - getting-started-with-fpgas
   - ...
