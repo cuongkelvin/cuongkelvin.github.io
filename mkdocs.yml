@@ -5,7 +5,6 @@ theme:
   language: vi
   features:
     - navigation.tabs        # chủ đề thành tab trên đầu
-    - navigation.sections
     - navigation.indexes     # index.md làm trang tổng quan của chủ đề
     - navigation.top         # nút cuộn lên đầu trang
     - search.suggest
