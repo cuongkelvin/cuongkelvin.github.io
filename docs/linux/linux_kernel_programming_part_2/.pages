@@ -1,0 +1,10 @@
+title: Linux Kernel Programming Part 2
+nav:
+  - 1. Writing a Simple misc Character Device Driver: ch01_writing_a_simple_misc_character_device_driver.vi.md
+  - 2. User-Kernel Communication Pathways: ch02_user_kernel_communication_pathways.vi.md
+  - 3. Working with Hardware I/O Memory: ch03_working_with_hardware_i_o_memory.vi.md
+  - 4. Handling Hardware Interrupts: ch04_handling_hardware_interrupts.vi.md
+  - 5. Kernel Timers, Threads and Workqueues: ch05_working_with_kernel_timers_threads_and_workqueues.vi.md
+  - 6. Kernel Synchronization – Part 1: ch06_kernel_synchronization_part_1.vi.md
+  - 7. Kernel Synchronization – Part 2: ch07_kernel_synchronization_part_2.vi.md
+  - ...

@@ -20,6 +20,18 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách.
 - [**Chương 12 — Đồng bộ hóa trong kernel, phần 1**](linux_kernel_programming/ch12_kernel_synchronization_part_1.vi.md) — critical section, mutex vs spinlock, locking và interrupt, lỗi thường gặp
 - [**Chương 13 — Đồng bộ hóa trong kernel, phần 2**](linux_kernel_programming/ch13_kernel_synchronization_part_2.vi.md) — `atomic_t`/`refcount_t`, reader-writer spinlock, false sharing, per-CPU và RCU, memory barrier
 
+## Theo sách *Linux Kernel Programming Part 2*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung vào character device driver và đồng bộ hóa.
+
+- [**Chương 1 — Misc character device driver đơn giản**](linux_kernel_programming_part_2/ch01_writing_a_simple_misc_character_device_driver.vi.md) — viết misc driver, chép dữ liệu giữa kernel và user space, lưu ý bảo mật
+- [**Chương 2 — Giao tiếp user-kernel**](linux_kernel_programming_part_2/ch02_user_kernel_communication_pathways.vi.md) — procfs, sysfs, debugfs, netlink socket, `ioctl`, bảng so sánh các cách
+- [**Chương 3 — Hardware I/O memory**](linux_kernel_programming_part_2/ch03_working_with_hardware_i_o_memory.vi.md) — truy cập vùng nhớ phần cứng, memory-mapped I/O và port-mapped I/O
+- [**Chương 4 — Xử lý hardware interrupt**](linux_kernel_programming_part_2/ch04_handling_hardware_interrupts.vi.md) — cấp phát IRQ, viết interrupt handler, threaded interrupt, top half và bottom half
+- [**Chương 5 — Kernel timer, thread và workqueue**](linux_kernel_programming_part_2/ch05_working_with_kernel_timers_threads_and_workqueues.vi.md) — delay trong kernel, kernel timer, kernel thread, workqueue
+- [**Chương 6 — Đồng bộ hóa trong kernel, phần 1**](linux_kernel_programming_part_2/ch06_kernel_synchronization_part_1.vi.md) — critical section, mutex vs spinlock, locking và interrupt
+- [**Chương 7 — Đồng bộ hóa trong kernel, phần 2**](linux_kernel_programming_part_2/ch07_kernel_synchronization_part_2.vi.md) — `atomic_t`/`refcount_t`, reader-writer spinlock, false sharing, per-CPU, lock debugging, memory barrier
+
 ## Theo sách *Understanding the Linux Kernel*
 
 Bản dịch tiếng Việt, kèm hình minh họa của sách.
