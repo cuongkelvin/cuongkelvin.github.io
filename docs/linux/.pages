@@ -2,4 +2,5 @@ title: Linux
 nav:
   - index.md
   - linux_kernel_programming
+  - under_standing_the_linux_kernel
   - ...

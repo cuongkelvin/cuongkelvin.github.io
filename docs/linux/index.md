@@ -19,3 +19,28 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách.
 - [**Chương 11 — CPU scheduler, phần 2**](linux_kernel_programming/ch11_the_cpu_scheduler_part_2.vi.md) — CPU affinity, đặt policy và priority, cgroup, chạy Linux như RTOS
 - [**Chương 12 — Đồng bộ hóa trong kernel, phần 1**](linux_kernel_programming/ch12_kernel_synchronization_part_1.vi.md) — critical section, mutex vs spinlock, locking và interrupt, lỗi thường gặp
 - [**Chương 13 — Đồng bộ hóa trong kernel, phần 2**](linux_kernel_programming/ch13_kernel_synchronization_part_2.vi.md) — `atomic_t`/`refcount_t`, reader-writer spinlock, false sharing, per-CPU và RCU, memory barrier
+
+## Theo sách *Understanding the Linux Kernel*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách.
+
+- [**Chương 1 — Giới thiệu**](under_standing_the_linux_kernel/ch01_introduction.vi.md) — Linux so với các kernel Unix-like khác, khái niệm hệ điều hành, tổng quan filesystem và kernel Unix
+- [**Chương 2 — Đánh địa chỉ bộ nhớ**](under_standing_the_linux_kernel/ch02_memory_addressing.vi.md) — segmentation và paging, ở mức phần cứng và trong Linux
+- [**Chương 3 — Tiến trình**](under_standing_the_linux_kernel/ch03_processes.vi.md) — process, lightweight process và thread, process descriptor, process switch, tạo và hủy process
+- [**Chương 4 — Interrupt và exception**](under_standing_the_linux_kernel/ch04_interrupts_and_exceptions.vi.md) — IDT, xử lý exception và interrupt, softirq, tasklet, work queue
+- [**Chương 5 — Đồng bộ hóa trong kernel**](under_standing_the_linux_kernel/ch05_kernel_synchronization.vi.md) — các primitive đồng bộ, bảo vệ cấu trúc dữ liệu kernel, ví dụ chống race condition
+- [**Chương 6 — Đo thời gian**](under_standing_the_linux_kernel/ch06_timing_measurements.vi.md) — mạch clock và timer, kiến trúc timekeeping, software timer, system call về thời gian
+- [**Chương 7 — Lập lịch tiến trình**](under_standing_the_linux_kernel/ch07_process_scheduling.vi.md) — policy và thuật toán lập lịch, runqueue, cân bằng tải trên đa xử lý
+- [**Chương 8 — Quản lý bộ nhớ**](under_standing_the_linux_kernel/ch08_memory_management.vi.md) — quản lý page frame, memory area liên tục và không liên tục
+- [**Chương 9 — Không gian địa chỉ tiến trình**](under_standing_the_linux_kernel/ch09_process_address_space.vi.md) — memory descriptor, memory region, page fault handler, heap
+- [**Chương 10 — System call**](under_standing_the_linux_kernel/ch10_system_calls.vi.md) — POSIX API, handler và service routine, vào và ra system call, truyền tham số
+- [**Chương 11 — Signal**](under_standing_the_linux_kernel/ch11_signals.vi.md) — tạo và chuyển giao signal, system call liên quan
+- [**Chương 12 — Virtual Filesystem**](under_standing_the_linux_kernel/ch12_the_virtual_filesystem.vi.md) — cấu trúc dữ liệu VFS, loại filesystem, pathname lookup, file locking
+- [**Chương 13 — Kiến trúc I/O và device driver**](under_standing_the_linux_kernel/ch13_i_o_architecture_and_device_drivers.vi.md) — device driver model, device file, character device driver
+- [**Chương 14 — Block device driver**](under_standing_the_linux_kernel/ch14_block_device_drivers.vi.md) — generic block layer, I/O scheduler, mở block device file
+- [**Chương 15 — Page cache**](under_standing_the_linux_kernel/ch15_the_page_cache.vi.md) — lưu block trong page cache, ghi dirty page xuống đĩa, `sync()` và `fsync()`
+- [**Chương 16 — Truy cập file**](under_standing_the_linux_kernel/ch16_accessing_files.vi.md) — đọc ghi file, memory mapping, direct I/O, asynchronous I/O
+- [**Chương 17 — Thu hồi page frame**](under_standing_the_linux_kernel/ch17_page_frame_reclaiming.vi.md) — thuật toán PFRA, reverse mapping, swapping
+- [**Chương 18 — Filesystem Ext2 và Ext3**](under_standing_the_linux_kernel/ch18_the_ext2_and_ext3_filesystems.vi.md) — cấu trúc dữ liệu trên đĩa và trong bộ nhớ, quản lý không gian đĩa, journaling của Ext3
+- [**Chương 19 — Giao tiếp giữa tiến trình**](under_standing_the_linux_kernel/ch19_process_communication.vi.md) — pipe, FIFO, System V IPC, POSIX message queue
+- [**Chương 20 — Thực thi chương trình**](under_standing_the_linux_kernel/ch20_program_execution.vi.md) — định dạng file thực thi, execution domain, họ hàm `exec`
