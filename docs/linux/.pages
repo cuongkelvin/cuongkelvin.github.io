@@ -1,6 +1,5 @@
 title: Linux
 nav:
   - index.md
-  - the-linux-programming-interface
   - linux_kernel_programming
   - ...
