@@ -101,7 +101,7 @@ Bảng 8-3. Field của node descriptor
 | `struct task_struct *` | `kswapd` | Pointer đến process descriptor của kernel thread kswapd |
 | `int` | `kswapd_max_order` | Logarithmic size của free block kswapd cần tạo |
 
-Như thường lệ chủ yếu quan tâm architecture 80×86. PC tương thích IBM dùng mô hình Uniform Memory Access (UMA), nên không thực sự cần NUMA support. Tuy nhiên ngay cả khi không compile NUMA support vào kernel, Linux dùng một node chứa toàn physical memory hệ thống. Vì vậy variable `pgdat_list` trỏ đến list một phần tử — node 0 descriptor — lưu trong variable `contig_page_data`.
+Như thường lệ chủ yếu quan tâm architecture 80×86. PC IBM-compatible dùng mô hình Uniform Memory Access (UMA), nên không thực sự cần NUMA support. Tuy nhiên ngay cả khi không compile NUMA support vào kernel, Linux dùng một node chứa toàn physical memory hệ thống. Vì vậy variable `pgdat_list` trỏ đến list một phần tử — node 0 descriptor — lưu trong variable `contig_page_data`.
 
 Trên architecture 80×86, nhóm physical memory trong một node có vẻ vô dụng; tuy nhiên cách này làm memory handling code portable hơn vì kernel có thể giả định physical memory chia một hoặc nhiều node trong mọi architecture.[^2]
 
@@ -129,9 +129,9 @@ Chứa page frame memory từ 16 MB trở lên và dưới 896 MB
 
 Chứa page frame memory từ 896 MB trở lên
 
-Zone `ZONE_DMA` chứa page frame device ISA cũ có thể dùng qua DMA. (Phần “Direct Memory Access (DMA)” trong Chương 13 cung cấp thêm chi tiết DMA.)
+Zone `ZONE_DMA` chứa page frame device ISA-based cũ có thể dùng qua DMA. (Phần “Direct Memory Access (DMA)” trong Chương 13 cung cấp thêm chi tiết DMA.)
 
-Zone `ZONE_DMA` và `ZONE_NORMAL` chứa page frame “normal” kernel truy cập trực tiếp qua linear mapping trong gigabyte thứ tư linear address space (xem phần “Kernel Page Table” trong Chương 2). Ngược lại zone `ZONE_HIGHMEM` chứa page frame kernel không thể truy cập trực tiếp qua linear mapping trong gigabyte thứ tư linear address space (xem phần “Kernel mapping của high-memory page frame” sau). Zone `ZONE_HIGHMEM` luôn rỗng trên architecture 64-bit.
+Zone `ZONE_DMA` và `ZONE_NORMAL` chứa page frame “normal” kernel truy cập trực tiếp qua linear mapping trong gigabyte thứ tư linear address space (xem phần “Kernel Page Table” trong Chương 2). Ngược lại zone `ZONE_HIGHMEM` chứa page frame kernel không thể truy cập trực tiếp qua linear mapping trong gigabyte thứ tư linear address space (xem phần “Kernel mapping của High-Memory page frame” sau). Zone `ZONE_HIGHMEM` luôn rỗng trên architecture 64-bit.
 
 Mỗi memory zone có descriptor riêng type `zone`. Field trong Bảng 8-4.
 
@@ -143,7 +143,7 @@ Bảng 8-4. Field của zone descriptor
 | `unsigned long` | `pages_min` | Số reserved page của zone (xem phần “Pool reserved page frame” sau). |
 | `unsigned long` | `pages_low` | Low watermark cho page frame reclaiming; zone allocator còn dùng làm threshold value (xem phần “Zone allocator” sau). |
 | `unsigned long` | `pages_high` | High watermark cho page frame reclaiming; zone allocator còn dùng làm threshold value. |
-| `unsigned long []` | `lowmem_reserve` | Chỉ định bao nhiêu page frame mỗi zone phải reserve để xử lý critical situation thiếu memory. |
+| `unsigned long []` | `lowmem_reserve` | Chỉ định bao nhiêu page frame mỗi zone phải reserve để xử lý critical situation low-on-memory. |
 | `struct per_cpu_pageset[]` | `pageset` | Data structure triển khai cache đặc biệt của single page frame (xem phần “Per-CPU page frame cache” sau). |
 | `spinlock_t` | `lock` | Spin lock bảo vệ descriptor. |
 | `struct free_area []` | `free_area` | Nhận diện block free page frame trong zone (xem phần “Buddy system algorithm” sau). |
@@ -188,7 +188,7 @@ reserved pool size = 16 ×directly mapped memory (kilobyte)
 
 Tuy nhiên ban đầu `min_free_kbytes` không thể thấp hơn 128 hoặc cao hơn 65.536.[^4]
 
-Memory zone `ZONE_DMA` và `ZONE_NORMAL` đóng góp reserved memory bằng số page frame tỷ lệ relative size. Ví dụ nếu zone `ZONE_NORMAL` lớn gấp tám `ZONE_DMA`, bảy phần tám page frame lấy từ `ZONE_NORMAL`, một phần tám từ `ZONE_DMA`.
+Memory zone `ZONE_DMA` và `ZONE_NORMAL` đóng góp reserved memory bằng số page frame tỷ lệ relative size. Ví dụ nếu zone `ZONE_NORMAL` lớn gấp tám `ZONE_DMA`, seven-eighths page frame lấy từ `ZONE_NORMAL`, one-eighth từ `ZONE_DMA`.
 
 Field `pages_min` của descriptor `zone` lưu số reserved page frame trong zone. Như Chương 17, field còn có vai trò cho page frame reclaiming algorithm cùng field `pages_low` và `pages_high`. Field `pages_low` luôn đặt bằng 5/4 giá trị `pages_min`, `pages_high` luôn bằng 3/2 giá trị `pages_min`.
 
@@ -318,7 +318,7 @@ Macro release page frame có linear address `addr`; mở rộng thành:
 free_pages(addr, 0)
 ```
 
-### Kernel mapping của high-memory page frame
+### Kernel mapping của High-Memory page frame
 
 Linear address tương ứng cuối directly mapped physical memory, tức đầu high memory, lưu trong variable `high_memory` đặt thành 896 MB. Page frame trên boundary 896 MB nhìn chung không map trong gigabyte thứ tư kernel linear address space nên kernel không truy cập trực tiếp được. Nghĩa là mỗi page allocator function return linear address của page frame cấp không hoạt động cho high-memory page frame, tức page frame trong memory zone `ZONE_HIGHMEM`.
 
@@ -340,7 +340,7 @@ Tất nhiên không kỹ thuật nào cho address toàn RAM đồng thời. Xét
 
 #### Permanent kernel mapping
 
-Permanent kernel mapping cho kernel thiết lập mapping lâu dài high-memory page frame vào kernel address space. Dùng Page Table riêng trong master kernel page table. Variable `pkmap_page_table` lưu address Page Table, macro `LAST_PKMAP` cho số entry. Như thường lệ Page Table gồm 512 hoặc 1.024 entry tùy PAE enable hoặc disable (xem phần “Cơ chế paging Physical Address Extension (PAE)” trong Chương 2); vì vậy kernel truy cập tối đa 2 hoặc 4 MB high memory cùng lúc.
+Permanent kernel mapping cho kernel thiết lập mapping long-lasting high-memory page frame vào kernel address space. Dùng Page Table riêng trong master kernel page table. Variable `pkmap_page_table` lưu address Page Table, macro `LAST_PKMAP` cho số entry. Như thường lệ Page Table gồm 512 hoặc 1.024 entry tùy PAE enable hoặc disable (xem phần “Cơ chế paging Physical Address Extension (PAE)” trong Chương 2); vì vậy kernel truy cập tối đa 2 hoặc 4 MB high memory cùng lúc.
 
 Page Table map linear address bắt đầu từ `PKMAP_BASE`. Array `pkmap_count` gồm `LAST_PKMAP` counter, mỗi entry của Page Table `pkmap_page_table` một counter. Phân biệt ba trường hợp:
 
@@ -491,7 +491,7 @@ Argument `type` và CPU identifier lấy qua `smp_processor_id()` chỉ định 
 
 ### Thuật toán buddy system
 
-Kernel phải thiết lập một chiến lược vững chắc và hiệu quả để cấp phát các nhóm page frame liên tiếp. Khi làm vậy, nó phải xử lý một vấn đề memory management đã biết gọi là external fragmentation: việc thường xuyên yêu cầu và giải phóng các nhóm page frame liên tiếp có kích thước khác nhau có thể dẫn đến tình huống nhiều block page frame trống nhỏ bị “rải rác” bên trong các block page frame đã cấp phát. Kết quả là có thể không cấp phát được một block page frame liên tiếp lớn, ngay cả khi có đủ page trống để đáp ứng yêu cầu.
+Kernel phải thiết lập một chiến lược vững chắc và hiệu quả để cấp phát các nhóm page frame liên tiếp. Khi làm vậy, nó phải xử lý một vấn đề memory management well-known gọi là external fragmentation: việc thường xuyên yêu cầu và giải phóng các nhóm page frame liên tiếp có kích thước khác nhau có thể dẫn đến tình huống nhiều block page frame trống nhỏ bị “rải rác” bên trong các block page frame đã cấp phát. Kết quả là có thể không cấp phát được một block page frame liên tiếp lớn, ngay cả khi có đủ page trống để đáp ứng yêu cầu.
 
 Về cơ bản có hai cách tránh external fragmentation:
 
@@ -507,11 +507,11 @@ Kernel ưu tiên cách thứ hai vì ba lý do xác đáng:
 
 - Kernel có thể truy cập các vùng physical memory liên tiếp lớn thông qua page 4 MB. Điều này giảm translation lookaside buffer miss, qua đó tăng đáng kể tốc độ truy cập memory trung bình (xem phần “Translation Lookaside Buffers (TLB)” trong Chương 2).
 
-Kỹ thuật Linux dùng để giải quyết external fragmentation dựa trên thuật toán buddy system đã biết. Tất cả page frame trống được nhóm vào 11 list block, lần lượt chứa các nhóm 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 và 1024 page frame liên tiếp. Yêu cầu lớn nhất gồm 1024 page frame tương ứng với một vùng RAM liên tiếp 4 MB. Physical address của page frame đầu tiên trong một block là bội số của kích thước nhóm—ví dụ, địa chỉ đầu của block 16 page frame là bội số của 16× 2<sup>12</sup> (2<sup>12</sup> = 4.096, là page size thông thường).
+Kỹ thuật Linux dùng để giải quyết external fragmentation dựa trên thuật toán buddy system well-known. Tất cả page frame trống được nhóm vào 11 list block, lần lượt chứa các nhóm 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 và 1024 page frame liên tiếp. Yêu cầu lớn nhất gồm 1024 page frame tương ứng với một vùng RAM liên tiếp 4 MB. Physical address của page frame đầu tiên trong một block là bội số của kích thước nhóm—ví dụ, địa chỉ đầu của block 16-page-frame là bội số của 16× 2<sup>12</sup> (2<sup>12</sup> = 4.096, là page size thông thường).
 
 Chúng ta sẽ minh họa cách thuật toán hoạt động qua một ví dụ đơn giản:
 
-Giả sử có yêu cầu một nhóm 256 page frame liên tiếp (tức một megabyte). Trước tiên, thuật toán kiểm tra có block trống trong list 256 page frame hay không. Nếu không, thuật toán tìm block lớn hơn kế tiếp—một block trống trong list 512 page frame. Nếu có block như vậy, kernel cấp phát 256 trong số 512 page frame để đáp ứng yêu cầu và chèn 256 page frame còn lại vào list block trống 256 page frame. Nếu không có block trống 512 page, kernel tìm block lớn hơn kế tiếp (tức một block trống 1024 page frame). Nếu có, nó cấp phát 256 trong số 1024 page frame để đáp ứng yêu cầu, chèn 512 page frame đầu trong số 768 page frame còn lại vào list block trống 512 page frame, và chèn 256 page frame cuối vào list block trống 256 page frame. Nếu list block 1024 page frame rỗng, thuật toán bỏ cuộc và báo một tình trạng lỗi.
+Giả sử có yêu cầu một nhóm 256 page frame liên tiếp (tức một megabyte). Trước tiên, thuật toán kiểm tra có block trống trong list 256-page-frame hay không. Nếu không, thuật toán tìm block lớn hơn kế tiếp—một block trống trong list 512-page-frame. Nếu có block như vậy, kernel cấp phát 256 trong số 512 page frame để đáp ứng yêu cầu và chèn 256 page frame còn lại vào list block trống 256-page-frame. Nếu không có block trống 512-page, kernel tìm block lớn hơn kế tiếp (tức một block trống 1024-page-frame). Nếu có, nó cấp phát 256 trong số 1024 page frame để đáp ứng yêu cầu, chèn 512 page frame đầu trong số 768 page frame còn lại vào list block trống 512-page-frame, và chèn 256 page frame cuối vào list block trống 256-page-frame. Nếu list block 1024-page-frame rỗng, thuật toán bỏ cuộc và báo một tình trạng lỗi.
 
 Thao tác ngược lại, giải phóng các block page frame, là nguồn gốc tên của thuật toán này. Kernel cố gắng gộp các cặp buddy block trống có kích thước b thành một block duy nhất có kích thước 2b. Hai block được xem là buddy nếu:
 
@@ -539,7 +539,7 @@ Cuối cùng, field `private` của descriptor của page đầu tiên trong m�
 
 ##### Cấp phát một block
 
-Function `__rmqueue()` được dùng để tìm một block trống trong một zone. Function nhận hai argument: địa chỉ của zone descriptor, và `order`, biểu thị logarithm kích thước của block page trống được yêu cầu (0 cho block một page, 1 cho block hai page, v.v.). Nếu cấp phát page frame thành công, function \_\_`rmqueue()` trả về địa chỉ của page descriptor của page frame đầu tiên được cấp phát. Ngược lại, function trả về `NULL`.
+Function `__rmqueue()` được dùng để tìm một block trống trong một zone. Function nhận hai argument: địa chỉ của zone descriptor, và `order`, biểu thị logarithm kích thước của block page trống được yêu cầu (0 cho block one-page, 1 cho block two-page, v.v.). Nếu cấp phát page frame thành công, function \_\_`rmqueue()` trả về địa chỉ của page descriptor của page frame đầu tiên được cấp phát. Ngược lại, function trả về `NULL`.
 
 Function \_\_`rmqueue()` giả định bên gọi đã disable local interrupt và lấy spin lock `zone->lock`, bảo vệ các data structure của buddy system. Nó thực hiện tìm kiếm lần lượt qua từng list để tìm block khả dụng (biểu thị bởi một entry không trỏ đến chính nó), bắt đầu từ list cho `order` được yêu cầu và tiếp tục đến order lớn hơn nếu cần:
 
@@ -679,7 +679,7 @@ zone->free_area[order].nr_free++;
 
 ### Per-CPU page frame cache
 
-Như sẽ thấy ở phần sau của chương, kernel thường yêu cầu và giải phóng từng page frame. Để tăng hiệu năng hệ thống, mỗi memory zone định nghĩa một per-CPU page frame cache. Mỗi per-CPU cache bao gồm một số page frame đã cấp phát trước để dùng cho các yêu cầu memory đơn lẻ do local CPU đưa ra.
+Như sẽ thấy ở phần sau của chương, kernel thường yêu cầu và giải phóng từng page frame. Để tăng hiệu năng hệ thống, mỗi memory zone định nghĩa một per-CPU page frame cache. Mỗi per-CPU cache bao gồm một số page frame đã pre-allocated để dùng cho các yêu cầu memory đơn lẻ do local CPU đưa ra.
 
 Thực tế, có hai cache cho mỗi memory zone và mỗi CPU: hot cache, lưu page frame có nội dung nhiều khả năng nằm trong hardware cache của CPU, và cold cache.
 
@@ -733,7 +733,7 @@ Function `free_hot_cold_page()` thực hiện các thao tác sau:
 
 2\. Lấy địa chỉ của descriptor `per_cpu_pages` của cache thuộc zone được flag `cold` chọn.
 
-3\. Kiểm tra có nên rút bớt cache không: nếu `count` lớn hơn hoặc bằng `high`, gọi function `free_pages_bulk()`, truyền vào zone descriptor, số page frame cần giải phóng (field `batch`), địa chỉ list của cache, và số không (cho page frame order 0). Đến lượt function sau gọi lặp lại function `__free_pages_bulk()` để trả số page frame được chỉ định—lấy từ list của cache—về buddy system của memory zone.
+3\. Kiểm tra có nên rút bớt cache không: nếu `count` lớn hơn hoặc bằng `high`, gọi function `free_pages_bulk()`, truyền vào zone descriptor, số page frame cần giải phóng (field `batch`), địa chỉ list của cache, và số không (cho page frame 0-order). Đến lượt function sau gọi lặp lại function `__free_pages_bulk()` để trả số page frame được chỉ định—lấy từ list của cache—về buddy system của memory zone.
 
 4\. Thêm page frame cần giải phóng vào list của cache, và tăng field `count`.
 
@@ -789,7 +789,7 @@ Giá trị ngưỡng `min` được `zone_watermark_ok()` xác định như sau:
 
 - Giá trị cơ sở được chia đôi nếu flag `gfp_high` truyền làm parameter được set. Thông thường, flag này bằng một nếu flag `__GFP_HIGHMEM` được set trong `gfp_mask`, tức là nếu page frame có thể được cấp phát từ high memory.
 
-- Giá trị ngưỡng tiếp tục giảm một phần tư nếu flag `can_try_harder` truyền làm parameter được set. Flag này thường bằng một nếu flag `__GFP_WAIT` được set trong `gfp_mask`, hoặc process hiện tại là real-time process và việc cấp phát memory được thực hiện trong process context (bên ngoài interrupt handler và deferrable function).
+- Giá trị ngưỡng tiếp tục giảm one-fourth nếu flag `can_try_harder` truyền làm parameter được set. Flag này thường bằng một nếu flag `__GFP_WAIT` được set trong `gfp_mask`, hoặc process hiện tại là real-time process và việc cấp phát memory được thực hiện trong process context (bên ngoài interrupt handler và deferrable function).
 
 Function `__alloc_pages()` về cơ bản thực hiện các bước sau:
 
@@ -813,7 +813,7 @@ Function `__alloc_pages()` về cơ bản thực hiện các bước sau:
 
 10\. Nếu bước trước giải phóng được một số page frame, function thực hiện thêm một lượt quét các memory zone giống lượt quét ở bước 3. Nếu yêu cầu cấp phát memory không thể được đáp ứng, function xác định có nên tiếp tục quét memory zone không: nếu flag `__GFP_NORETRY` clear và yêu cầu cấp phát memory gồm tối đa tám page frame, hoặc một trong các flag `__GFP_REPEAT` và `__GFP_NOFAIL` được set, function gọi `blk_congestion_wait()` để cho process sleep một lúc (xem Chương 14), rồi quay lại bước 6. Ngược lại, function trả về `NULL` để báo bên gọi rằng cấp phát memory thất bại.
 
-11\. Nếu không page frame nào được giải phóng ở bước 9, kernel gặp rắc rối nghiêm trọng, vì memory trống thấp đến mức nguy hiểm và không thể reclaim page frame nào. Có lẽ đã đến lúc đưa ra quyết định quan trọng. Nếu kernel control path được phép thực hiện các thao tác phụ thuộc filesystem cần để kill một process (flag `__GFP_FS` trong `gfp_mask` được set) và flag `__GFP_NORETRY` clear, thực hiện các bước con sau:
+11\. Nếu không page frame nào được giải phóng ở bước 9, kernel gặp rắc rối nghiêm trọng, vì memory trống thấp đến mức nguy hiểm và không thể reclaim page frame nào. Có lẽ đã đến lúc đưa ra quyết định quan trọng. Nếu kernel control path được phép thực hiện các thao tác filesystem-dependent cần để kill một process (flag `__GFP_FS` trong `gfp_mask` được set) và flag `__GFP_NORETRY` clear, thực hiện các bước con sau:
 
 a. Quét lại các memory zone với ngưỡng bằng `z-> pages_high`.
 
@@ -859,7 +859,7 @@ Khái niệm slab allocator mở rộng ý tưởng này và xem memory area là
 
 - Các function của kernel có xu hướng yêu cầu lặp lại memory area cùng loại. Ví dụ, mỗi khi kernel tạo process mới, nó cấp phát memory area cho một số table có kích thước cố định như process descriptor, open file object, v.v. (xem Chương 3). Khi process kết thúc, các memory area dùng để chứa những table này có thể được tái sử dụng. Vì process được tạo và hủy khá thường xuyên, nếu không có slab allocator, kernel lãng phí thời gian cấp phát và thu hồi lặp lại các page frame chứa cùng memory area; slab allocator cho phép lưu chúng trong cache và tái sử dụng nhanh chóng.
 
-- Yêu cầu memory area có thể được phân loại theo tần suất. Yêu cầu kích thước cụ thể dự kiến xuất hiện thường xuyên có thể được xử lý hiệu quả nhất bằng cách tạo một tập object chuyên dụng có kích thước đúng, qua đó tránh internal fragmentation. Trong khi đó, kích thước hiếm gặp có thể được xử lý qua cơ chế cấp phát dựa trên object có một dãy kích thước phân bố theo cấp số nhân (như kích thước lũy thừa của 2 dùng trong các phiên bản Linux ban đầu), dù cách này dẫn đến internal fragmentation.
+- Yêu cầu memory area có thể được phân loại theo tần suất. Yêu cầu kích thước cụ thể dự kiến xuất hiện thường xuyên có thể được xử lý hiệu quả nhất bằng cách tạo một tập object special-purpose có kích thước đúng, qua đó tránh internal fragmentation. Trong khi đó, kích thước hiếm gặp có thể được xử lý qua cơ chế cấp phát dựa trên object có một dãy kích thước phân bố theo cấp số nhân (như kích thước power-of-2 dùng trong các phiên bản Linux ban đầu), dù cách này dẫn đến internal fragmentation.
 
 - Còn một lợi ích tinh tế khác khi đưa vào object có kích thước không phân bố theo cấp số nhân: địa chỉ đầu của các data structure ít có xu hướng tập trung tại những physical address có giá trị là lũy thừa của 2. Điều này lại giúp cải thiện hiệu năng hardware cache của processor.
 
@@ -911,7 +911,7 @@ Bảng 8-9. Các field của structure kmem\_list3
 
 | Kiểu | Tên | Mô tả |
 |---|---|---|
-| `struct list_head` | `slabs_partial` | Doubly linked circular list chứa slab descriptor có cả object trống và không trống |
+| `struct list_head` | `slabs_partial` | Doubly linked circular list chứa slab descriptor có cả object trống và non-free |
 | `struct list_head` | `slabs_full` | Doubly linked circular list chứa slab descriptor không có object trống |
 | `struct list_head` | `slabs_free` | Doubly linked circular list chứa slab descriptor chỉ có object trống |
 | `unsigned long` | `free_objects` | Số object trống trong cache |
@@ -1103,7 +1103,7 @@ Alignment factor lớn nhất mà slab allocator cho phép là 4.096—kích th�
 
 Thông thường, microcomputer truy cập memory cell nhanh hơn nếu physical address được căn chỉnh theo word size (tức độ rộng internal memory bus của máy tính). Do đó, mặc định function `kmem_cache_create()` căn chỉnh object theo word size do macro `BYTES_PER_WORD` chỉ định. Với processor 80×86, macro cho giá trị 4 vì word dài 32 bit.
 
-Khi tạo một slab cache mới, có thể chỉ định các object trong nó được căn chỉnh theo hardware cache cấp một. Để làm vậy, kernel set flag `SLAB_HWCACHE_ALIGN` của cache descriptor. Function `kmem_cache_create()` xử lý yêu cầu như sau:
+Khi tạo một slab cache mới, có thể chỉ định các object trong nó được căn chỉnh theo hardware cache first-level. Để làm vậy, kernel set flag `SLAB_HWCACHE_ALIGN` của cache descriptor. Function `kmem_cache_create()` xử lý yêu cầu như sau:
 
 - Nếu kích thước object lớn hơn nửa cache line, nó được căn chỉnh trong RAM theo bội số của `L1_CACHE_BYTES`—tức tại đầu line.
 
@@ -1333,7 +1333,7 @@ void * kmalloc(size_t size, int flags)
 }
 ```
 
-Function dùng table `malloc_sizes` để tìm kích thước lũy thừa của 2 gần nhất với kích thước yêu cầu. Sau đó, nó gọi `kmem_cache_alloc()` để cấp phát object, truyền vào cache descriptor cho page frame dùng được với ISA DMA hoặc cache descriptor cho page frame “normal”, tùy bên gọi có chỉ định flag `__GFP_DMA` hay không.
+Function dùng table `malloc_sizes` để tìm kích thước power-of-2 gần nhất với kích thước yêu cầu. Sau đó, nó gọi `kmem_cache_alloc()` để cấp phát object, truyền vào cache descriptor cho page frame dùng được với ISA DMA hoặc cache descriptor cho page frame “normal”, tùy bên gọi có chỉ định flag `__GFP_DMA` hay không.
 
 Object lấy được bằng cách gọi `kmalloc()` có thể được giải phóng bằng cách gọi `kfree()`:
 
@@ -1355,7 +1355,7 @@ Cache descriptor thích hợp được xác định bằng cách đọc subfield
 
 ### Memory pool
 
-Memory pool là tính năng mới của Linux 2.6. Về cơ bản, memory pool cho phép một kernel component—như block device subsystem—cấp phát một phần dynamic memory chỉ để dùng trong trường hợp khẩn cấp thiếu memory.
+Memory pool là tính năng mới của Linux 2.6. Về cơ bản, memory pool cho phép một kernel component—như block device subsystem—cấp phát một phần dynamic memory chỉ để dùng trong trường hợp khẩn cấp low-on-memory.
 
 Không nên nhầm memory pool với page frame dự trữ mô tả trong phần “The Pool of Reserved Page Frames” trước đó. Thực tế, những page frame đó chỉ có thể được dùng để đáp ứng atomic memory allocation request do interrupt handler đưa ra hoặc từ bên trong critical region. Trong khi đó, memory pool là một lượng dynamic memory dự trữ chỉ có thể được dùng bởi một kernel component cụ thể, chính là “owner” của pool. Bình thường owner không dùng lượng dự trữ; tuy nhiên, nếu dynamic memory trở nên khan hiếm đến mức mọi yêu cầu cấp phát memory thông thường đều sẽ thất bại, kernel component có thể, như phương án cuối cùng, gọi các function memory pool đặc biệt để lấy từ lượng dự trữ và nhận memory cần thiết. Vì vậy, tạo memory pool tương tự giữ sẵn thực phẩm đóng hộp dự trữ và chỉ dùng dụng cụ mở hộp khi không có thực phẩm tươi.
 
@@ -1384,7 +1384,7 @@ Khi memory element là slab object, các method `alloc` và `free` thường đ�
 
 Function `mempool_create()` tạo memory pool mới; nó nhận số memory element `min_nr`, địa chỉ các function triển khai method `alloc` và `free`, và giá trị tùy chọn cho field `pool_data`. Function cấp phát memory cho object `mempool_t` và array pointer đến memory element, rồi gọi lặp lại method `alloc` để lấy `min_nr` memory element. Ngược lại, function `mempool_destroy()` giải phóng tất cả memory element trong pool, rồi giải phóng chính array element và object `mempool_t`.
 
-Để cấp phát một element từ memory pool, kernel gọi function `mempool_alloc()`, truyền vào địa chỉ object `mempool_t` và allocation flag (xem Bảng 8-5 và Bảng 8-6 trước đó trong chương này). Về cơ bản, function cố cấp phát một memory element từ memory allocator bên dưới bằng cách gọi method `alloc`, theo allocation flag được chỉ định làm parameter. Nếu cấp phát thành công, function trả về memory element lấy được mà không đụng đến memory pool. Ngược lại, nếu cấp phát thất bại, memory element được lấy từ memory pool. Tất nhiên, quá nhiều lần cấp phát trong tình trạng thiếu memory có thể làm cạn memory pool: trong trường hợp này, nếu flag `__GFP_WAIT` không được set, `mempool_alloc()` block process hiện tại cho đến khi một memory element được trả về memory pool.
+Để cấp phát một element từ memory pool, kernel gọi function `mempool_alloc()`, truyền vào địa chỉ object `mempool_t` và allocation flag (xem Bảng 8-5 và Bảng 8-6 trước đó trong chương này). Về cơ bản, function cố cấp phát một memory element từ memory allocator bên dưới bằng cách gọi method `alloc`, theo allocation flag được chỉ định làm parameter. Nếu cấp phát thành công, function trả về memory element lấy được mà không đụng đến memory pool. Ngược lại, nếu cấp phát thất bại, memory element được lấy từ memory pool. Tất nhiên, quá nhiều lần cấp phát trong tình trạng lowon-memory có thể làm cạn memory pool: trong trường hợp này, nếu flag `__GFP_WAIT` không được set, `mempool_alloc()` block process hiện tại cho đến khi một memory element được trả về memory pool.
 
 Ngược lại, để trả một element về memory pool, kernel gọi function `mempool_free()`. Nếu memory pool chưa đầy (`curr_min` nhỏ hơn `min_nr`), function thêm element vào memory pool. Ngược lại, `mempool_free()` gọi method `free` để trả element về memory allocator bên dưới.
 
@@ -1402,7 +1402,7 @@ Chúng ta đã biết nên map memory area vào các tập page frame liên ti�
 
 - Bắt đầu từ `PKMAP_BASE`, chúng ta tìm thấy các linear address dùng cho persistent kernel mapping của high-memory page frame (xem phần “Kernel Mappings of High-Memory Page Frames” trước đó trong chương này).
 
-- Các linear address còn lại có thể được dùng cho noncontiguous memory area. Một khoảng an toàn kích thước 8 MB (macro `VMALLOC_OFFSET`) được chèn giữa cuối physical memory mapping và memory area đầu tiên; mục đích là “bắt” truy cập memory ngoài giới hạn. Vì cùng lý do, các khoảng an toàn bổ sung kích thước 4 KB được chèn để phân cách các noncontiguous memory area.
+- Các linear address còn lại có thể được dùng cho noncontiguous memory area. Một khoảng an toàn kích thước 8 MB (macro `VMALLOC_OFFSET`) được chèn giữa cuối physical memory mapping và memory area đầu tiên; mục đích là “bắt” truy cập memory out-of-bounds. Vì cùng lý do, các khoảng an toàn bổ sung kích thước 4 KB được chèn để phân cách các noncontiguous memory area.
 
 ![Hình 8-7](images/ch08/fig08-07.png)
 
@@ -1419,7 +1419,7 @@ Bảng 8-13. Các field của descriptor vm\_struct
 | Kiểu | Tên | Mô tả |
 |---|---|---|
 | `void *` | `addr` | Linear address của memory cell đầu tiên trong vùng |
-| `unsigned long` | `size` | Kích thước vùng cộng 4.096 (khoảng an toàn giữa các vùng) |
+| `unsigned long` | `size` | Kích thước vùng cộng 4.096 (khoảng an toàn inter-area) |
 | `unsigned long` | `flags` | Loại memory được noncontiguous memory area map |
 | `struct page **` | `pages` | Pointer đến array gồm `nr_pages` pointer đến page descriptor |
 | `unsigned int` | `nr_pages` | Số page mà vùng chiếm |
@@ -1496,7 +1496,7 @@ address = area->addr;
 end = address + (area->size - PAGE_SIZE);
 ```
 
-Nhớ rằng `area->size` lưu kích thước thực của vùng cộng khoảng an toàn 4 KB giữa các vùng. Sau đó, function dùng macro `pgd_offset_k` để suy ra entry trong master kernel Page Global Directory liên quan đến linear address đầu của vùng; tiếp theo, nó lấy kernel Page Table spin lock:
+Nhớ rằng `area->size` lưu kích thước thực của vùng cộng khoảng an toàn 4 KB inter-area. Sau đó, function dùng macro `pgd_offset_k` để suy ra entry trong master kernel Page Global Directory liên quan đến linear address đầu của vùng; tiếp theo, nó lấy kernel Page Table spin lock:
 
 ```c
 pgd = pgd_offset_k(address);
@@ -1574,7 +1574,7 @@ do {
 
 Địa chỉ page descriptor `page` của page frame cần map được đọc từ entry của array mà biến tại địa chỉ `pages` trỏ đến. Physical address của page frame mới được ghi vào Page Table bằng các macro `set_pte` và `mk_pte`. Vòng lặp được lặp lại sau khi cộng hằng số 4.096 (độ dài page frame) vào `address`.
 
-Lưu ý rằng `map_vm_area()` không đụng đến Page Table của process hiện tại. Do đó, khi một process trong Kernel Mode truy cập noncontiguous memory area, một Page Fault xảy ra vì các entry trong Page Table của process tương ứng với vùng đều bằng không. Tuy nhiên, Page Fault handler kiểm tra linear address gây lỗi với master kernel Page Table (là Page Global Directory `init_mm.pgd` và các page table con của nó; xem phần “Kernel Page Tables” trong Chương 2). Khi handler phát hiện một master kernel Page Table chứa entry khác không cho địa chỉ đó, nó sao chép giá trị vào Page Table entry tương ứng của process và tiếp tục thực thi process bình thường. Cơ chế này được mô tả trong phần “Page Fault Exception Handler” trong Chương 9.
+Lưu ý rằng `map_vm_area()` không đụng đến Page Table của process hiện tại. Do đó, khi một process trong Kernel Mode truy cập noncontiguous memory area, một Page Fault xảy ra vì các entry trong Page Table của process tương ứng với vùng đều bằng không. Tuy nhiên, Page Fault handler kiểm tra linear address gây lỗi với master kernel Page Table (là Page Global Directory `init_mm.pgd` và các page table con của nó; xem phần “Kernel Page Tables” trong Chương 2). Khi handler phát hiện một master kernel Page Table chứa entry non-null cho địa chỉ đó, nó sao chép giá trị vào Page Table entry tương ứng của process và tiếp tục thực thi process bình thường. Cơ chế này được mô tả trong phần “Page Fault Exception Handler” trong Chương 9.
 
 Bên cạnh function `vmalloc()`, noncontiguous memory area có thể được cấp phát bằng function `vmalloc_32()`, rất giống `vmalloc()` nhưng chỉ cấp phát page frame từ các memory zone `ZONE_NORMAL` và `ZONE_DMA`.
 

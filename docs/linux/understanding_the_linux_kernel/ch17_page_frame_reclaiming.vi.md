@@ -26,7 +26,7 @@ Do đó, một trong những mục tiêu của page frame reclaiming là duy tr�
 
 ### Chọn một target page
 
-Mục tiêu của thuật toán page frame reclaiming (PFRA) là chọn các page frame và làm cho chúng trở thành trống. Rõ ràng các page frame được PFRA chọn phải không trống, tức là chúng chưa được đưa vào một trong các mảng `free_area` mà buddy system sử dụng (xem mục “Thuật toán buddy system” trong Chương 8).
+Mục tiêu của thuật toán page frame reclaiming (PFRA) là chọn các page frame và làm cho chúng trở thành trống. Rõ ràng các page frame được PFRA chọn phải non-free, tức là chúng chưa được đưa vào một trong các mảng `free_area` mà buddy system sử dụng (xem mục “Thuật toán buddy system” trong Chương 8).
 
 PFRA xử lý các page frame theo những cách khác nhau, tùy nội dung của chúng. Chúng ta có thể phân biệt unreclaimable page, swappable page, syncable page và discardable page. Các loại này được giải thích trong Bảng 17-1.
 
@@ -53,9 +53,9 @@ Shared page frame thường được tạo khi một process sinh process con; n
 
 Mặc dù dễ xác định các page ứng viên để thu hồi memory—nói khái quát là bất kỳ page nào thuộc disk cache hoặc memory cache, hoặc User Mode address space của process—việc chọn các target page thích hợp có lẽ là vấn đề nhạy cảm nhất trong thiết kế kernel.
 
-Thực tế, công việc khó nhất của một developer làm việc trên virtual memory subsystem là tìm một thuật toán bảo đảm hiệu năng chấp nhận được cho cả desktop machine (nơi các yêu cầu memory khá hạn chế nhưng khả năng phản hồi của hệ thống là thiết yếu) lẫn các máy cấp cao như database server lớn (nơi các yêu cầu memory thường rất lớn).
+Thực tế, công việc khó nhất của một developer làm việc trên virtual memory subsystem là tìm một thuật toán bảo đảm hiệu năng chấp nhận được cho cả desktop machine (nơi các yêu cầu memory khá hạn chế nhưng khả năng phản hồi của hệ thống là thiết yếu) lẫn các máy high-level như database server lớn (nơi các yêu cầu memory thường rất lớn).
 
-Đáng tiếc, tìm một thuật toán page frame reclaiming tốt là công việc khá thực nghiệm, với rất ít hỗ trợ từ lý thuyết. Tình huống này phần nào giống việc đánh giá các yếu tố quyết định dynamic priority của process: mục tiêu chính là điều chỉnh các tham số sao cho đạt hiệu năng hệ thống tốt, mà không đặt quá nhiều câu hỏi về lý do nó hoạt động tốt. Thường thì chỉ là “hãy thử cách này và xem điều gì xảy ra”. Một tác dụng phụ khó chịu của thiết kế thực nghiệm này là code thay đổi nhanh chóng. Vì lý do đó, chúng tôi không thể bảo đảm rằng thuật toán memory reclaiming sắp mô tả—thuật toán được dùng trong Linux 2.6.11—vào thời điểm bạn đọc chương này sẽ hoàn toàn giống thuật toán được phiên bản Linux 2.6 kernel mới nhất sử dụng. Tuy nhiên, các ý tưởng chung và các quy tắc heuristic chính được mô tả ở đây vẫn nên tiếp tục có giá trị.
+Đáng tiếc, tìm một thuật toán page frame reclaiming tốt là công việc khá thực nghiệm, với rất ít hỗ trợ từ lý thuyết. Tình huống này phần nào giống việc đánh giá các yếu tố quyết định dynamic priority của process: mục tiêu chính là điều chỉnh các tham số sao cho đạt hiệu năng hệ thống tốt, mà không đặt quá nhiều câu hỏi về lý do nó hoạt động tốt. Thường thì chỉ là “hãy thử cách này và xem điều gì xảy ra”. Một tác dụng phụ khó chịu của thiết kế thực nghiệm này là code thay đổi nhanh chóng. Vì lý do đó, chúng tôi không thể bảo đảm rằng thuật toán memory reclaiming sắp mô tả—thuật toán được dùng trong Linux 2.6.11—vào thời điểm bạn đọc chương này sẽ hoàn toàn giống thuật toán được phiên bản Linux 2.6 kernel up-to-date sử dụng. Tuy nhiên, các ý tưởng chung và các quy tắc heuristic chính được mô tả ở đây vẫn nên tiếp tục có giá trị.
 
 Nhìn quá sát lá cây có thể khiến chúng ta bỏ lỡ cả khu rừng. Vì vậy, hãy trình bày một vài quy tắc chung mà PFRA áp dụng. Các quy tắc này được đưa vào những function sẽ được mô tả ở phần sau của chương này.
 
@@ -73,7 +73,7 @@ Khi PFRA muốn giải phóng một page frame được nhiều process dùng ch
 
 Chỉ thu hồi page “không được sử dụng”
 
-PFRA sử dụng một thuật toán thay thế Least Recently Used (LRU) đơn giản hóa để phân loại page thành đang sử dụng và không được sử dụng.[^2] Nếu một page không được truy cập trong thời gian dài, xác suất nó được truy cập trong tương lai gần là thấp và có thể xem nó là “không được sử dụng”; ngược lại, nếu một page mới được truy cập gần đây, xác suất nó tiếp tục được truy cập là cao và phải xem nó là “đang sử dụng”. PFRA chỉ thu hồi page không được sử dụng. Đây chỉ là một ứng dụng khác của locality principle được đề cập trong mục “Hardware Cache” ở Chương 2.
+PFRA sử dụng một thuật toán thay thế Least Recently Used (LRU) đơn giản hóa để phân loại page thành in-use và không được sử dụng.[^2] Nếu một page không được truy cập trong thời gian dài, xác suất nó được truy cập trong tương lai gần là thấp và có thể xem nó là “không được sử dụng”; ngược lại, nếu một page mới được truy cập gần đây, xác suất nó tiếp tục được truy cập là cao và phải xem nó là “đang sử dụng”. PFRA chỉ thu hồi page không được sử dụng. Đây chỉ là một ứng dụng khác của locality principle được đề cập trong mục “Hardware Cache” ở Chương 2.
 
 Ý tưởng chính đằng sau thuật toán LRU là gắn với mỗi page trong RAM một counter lưu tuổi của page—tức khoảng thời gian đã trôi qua từ lần truy cập page gần nhất. Counter này cho phép PFRA chỉ thu hồi page cũ nhất của bất kỳ process nào. Một số computer platform cung cấp hỗ trợ tinh vi cho các thuật toán LRU;<sup>†</sup> đáng tiếc, các processor 80×86 không cung cấp tính năng hardware như vậy, do đó Linux kernel không thể dựa vào một page counter theo dõi tuổi của từng page. Để đối phó với hạn chế này, Linux tận dụng bit `Accessed` nằm trong mỗi Page Table entry, được hardware tự động đặt khi page được truy cập; hơn nữa, tuổi của một page được biểu diễn bằng vị trí của page descriptor trong một trong hai danh sách khác nhau (xem mục “Các danh sách Least Recently Used (LRU)” ở phần sau của chương này).
 
@@ -89,7 +89,7 @@ Do đó, thuật toán page frame reclaiming là sự kết hợp của nhiều 
 
 Như đã nêu trong mục trước, một trong các mục tiêu của PFRA là có thể giải phóng một shared page frame. Để làm điều đó, Linux 2.6 kernel có thể nhanh chóng tìm tất cả Page Table entry trỏ đến cùng page frame. Hoạt động này được gọi là reverse mapping.
 
-Một giải pháp đơn giản cho reverse mapping là đưa vào mỗi page descriptor các field bổ sung để liên kết tất cả Page Table entry trỏ đến page frame gắn với page descriptor. Tuy nhiên, việc cập nhật các danh sách này sẽ làm tăng đáng kể kernel overhead; vì lý do đó, những giải pháp tinh vi hơn đã được xây dựng. Kỹ thuật được sử dụng trong Linux 2.6 có tên object-based reverse mapping. Về cơ bản, với bất kỳ User Mode page nào có thể thu hồi, kernel lưu các backward link đến mọi memory region trong hệ thống (các “object”) bao gồm chính page đó. Mỗi memory region descriptor lưu một pointer đến memory descriptor, rồi memory descriptor lại chứa một pointer đến Page Global Directory. Do đó, các backward link cho phép PFRA tìm tất cả Page Table entry tham chiếu đến một page cho trước. Vì số memory region descriptor ít hơn số page descriptor, việc cập nhật các backward link của một shared page tốn ít thời gian hơn. Hãy xem cách triển khai cơ chế này.
+Một giải pháp đơn giản cho reverse mapping là đưa vào mỗi page descriptor các field bổ sung để liên kết tất cả Page Table entry trỏ đến page frame gắn với page descriptor. Tuy nhiên, việc giữ các danh sách này up-to-date sẽ làm tăng đáng kể kernel overhead; vì lý do đó, những giải pháp tinh vi hơn đã được xây dựng. Kỹ thuật được sử dụng trong Linux 2.6 có tên object-based reverse mapping. Về cơ bản, với bất kỳ User Mode page nào có thể thu hồi, kernel lưu các backward link đến mọi memory region trong hệ thống (các “object”) bao gồm chính page đó. Mỗi memory region descriptor lưu một pointer đến memory descriptor, rồi memory descriptor lại chứa một pointer đến Page Global Directory. Do đó, các backward link cho phép PFRA tìm tất cả Page Table entry tham chiếu đến một page cho trước. Vì số memory region descriptor ít hơn số page descriptor, việc cập nhật các backward link của một shared page tốn ít thời gian hơn. Hãy xem cách triển khai cơ chế này.
 
 Trước hết, PFRA phải có cách xác định page cần thu hồi là shared hay non-shared, và là mapped hay anonymous. Để thực hiện điều này, kernel xem hai field của page descriptor: `_mapcount` và `mapping`.
 
@@ -175,7 +175,7 @@ a. Kiểm tra xem Page Table entry có trỏ đến target page hay không; nế
 
 b. Kiểm tra xem memory region có bị khóa (`VM_LOCKED`) hoặc được dành riêng (`VM_RESERVED`) hay không; nếu có một trong những hạn chế này, function trả về `SWAP_FAIL`.
 
-c. Kiểm tra xem bit `Accessed` bên trong Page Table entry có bị xóa hay không; nếu không, function xóa bit này và trả về `SWAP_FAIL`. Nếu bit `Accessed` được đặt, page được xem là đang sử dụng, do đó không nên thu hồi.
+c. Kiểm tra xem bit `Accessed` bên trong Page Table entry có bị xóa hay không; nếu không, function xóa bit này và trả về `SWAP_FAIL`. Nếu bit `Accessed` được đặt, page được xem là in-use, do đó không nên thu hồi.
 
 d. Kiểm tra xem page có thuộc swap cache (xem mục “Swap Cache” ở phần sau của chương này) và hiện đang được `get_user_pages()` xử lý (xem mục “Cấp phát một khoảng địa chỉ linear” trong Chương 9) hay không; trong trường hợp này, để tránh một race condition khó chịu, function trả về `SWAP_FAIL`.
 
@@ -211,7 +211,7 @@ Có một priority search tree cho mỗi file; root của nó được lưu tron
 
 Priority search tree (PST) được Linux 2.6 sử dụng dựa trên một data structure do Edward McCreight giới thiệu năm 1985 để biểu diễn một tập các khoảng chồng lấn. Tree của McCreight là sự kết hợp giữa heap và balanced search tree, và được dùng để truy vấn tập khoảng—ví dụ, “những khoảng nào nằm trong một khoảng cho trước?” và “những khoảng nào giao với một khoảng cho trước?”—trong thời gian tỉ lệ thuận với chiều cao của tree và số khoảng trong câu trả lời.
 
-Mỗi khoảng trong PST tương ứng với một node của tree, và được đặc trưng bởi hai index: radix index tương ứng với điểm bắt đầu của khoảng, và heap index tương ứng với điểm kết thúc. PST về cơ bản là một search tree trên radix index, với tính chất bổ sung giống heap là heap index của một node không bao giờ nhỏ hơn heap index của các node con.
+Mỗi khoảng trong PST tương ứng với một node của tree, và được đặc trưng bởi hai index: radix index tương ứng với điểm bắt đầu của khoảng, và heap index tương ứng với điểm kết thúc. PST về cơ bản là một search tree trên radix index, với tính chất bổ sung heap-like là heap index của một node không bao giờ nhỏ hơn heap index của các node con.
 
 Linux priority search tree khác data structure của McCreight ở hai khía cạnh quan trọng: thứ nhất, Linux tree không phải lúc nào cũng được giữ cân bằng (thuật toán cân bằng tốn kém cả về memory space lẫn execution time); thứ hai, Linux tree được điều chỉnh để lưu memory region thay cho các khoảng tuyến tính.
 
@@ -221,7 +221,7 @@ Tuy nhiên, size index làm tăng đáng kể số node khác nhau có thể xu�
 
 Hơn nữa, các process khác nhau có thể sở hữu các memory region ánh xạ chính xác cùng một phần của cùng file (hãy xét ví dụ standard C library đã đề cập ở trên). Khi đó, mọi node tương ứng với những memory region này đều có cùng radix index, heap index và size index. Khi kernel phải chèn vào PST một memory region có các index giống một node đã tồn tại, nó chèn memory region descriptor vào một doubly linked circular list có gốc tại PST node cũ hơn.
 
-Hình 17-2 trình bày một ví dụ đơn giản về priority search tree. Phía trái hình minh họa bảy memory region bao phủ sáu page đầu tiên của một file; mỗi khoảng được gắn nhãn với radix index, size index và heap index. Phía phải hình vẽ PST tương ứng. Lưu ý rằng không node con nào có heap index lớn hơn heap index của node cha. Cũng hãy quan sát rằng radix index của node con trái của bất kỳ node nào không bao giờ lớn hơn radix index của node con phải; nếu các radix index bằng nhau, thứ tự được xác định bởi size index. Giả sử PFRA phải tìm mọi memory region chứa page tại index năm. Thuật toán tìm kiếm bắt đầu ở root (0,5,5): vì khoảng tương ứng chứa page, đây là memory region đầu tiên được tìm thấy. Sau đó thuật toán thăm node con trái (0,4,4) của root và so sánh heap index (bốn) với page index: vì heap index nhỏ hơn, khoảng này không chứa page; hơn nữa, nhờ tính chất giống heap của PST, không node con nào của node này có thể chứa page. Vì vậy thuật toán nhảy thẳng đến node con phải (2,3,5) của root. Khoảng tương ứng chứa page, nên nó được lấy ra. Sau đó thuật toán thăm các node con (1,2,3) và (2,0,2), nhưng phát hiện cả hai đều không chứa page.
+Hình 17-2 trình bày một ví dụ đơn giản về priority search tree. Phía trái hình minh họa bảy memory region bao phủ sáu page đầu tiên của một file; mỗi khoảng được gắn nhãn với radix index, size index và heap index. Phía phải hình vẽ PST tương ứng. Lưu ý rằng không node con nào có heap index lớn hơn heap index của node cha. Cũng hãy quan sát rằng radix index của node con trái của bất kỳ node nào không bao giờ lớn hơn radix index của node con phải; nếu các radix index bằng nhau, thứ tự được xác định bởi size index. Giả sử PFRA phải tìm mọi memory region chứa page tại index năm. Thuật toán tìm kiếm bắt đầu ở root (0,5,5): vì khoảng tương ứng chứa page, đây là memory region đầu tiên được tìm thấy. Sau đó thuật toán thăm node con trái (0,4,4) của root và so sánh heap index (bốn) với page index: vì heap index nhỏ hơn, khoảng này không chứa page; hơn nữa, nhờ tính chất heap-like của PST, không node con nào của node này có thể chứa page. Vì vậy thuật toán nhảy thẳng đến node con phải (2,3,5) của root. Khoảng tương ứng chứa page, nên nó được lấy ra. Sau đó thuật toán thăm các node con (1,2,3) và (2,0,2), nhưng phát hiện cả hai đều không chứa page.
 
 ![Hình 17-2](images/ch17/fig17-02.png)
 
@@ -245,7 +245,7 @@ Nếu mapping là non-linear (xem mục “Non-Linear Memory Mapping” trong Ch
 
 Giải pháp duy nhất là tìm kiếm toàn bộ trong mọi non-linear memory region của file. Doubly linked list có gốc tại field `i_mmap_nonlinear` của object `address_space` của file `page->mapping` chứa descriptor của mọi non-linear memory region của file. Với mỗi memory region như vậy, `try_to_unmap_file()` gọi function `try_to_unmap_cluster()`, quét mọi Page Table entry tương ứng với các địa chỉ linear của memory region và cố gắng xóa chúng.
 
-Vì việc tìm kiếm có thể khá tốn thời gian, chỉ thực hiện một lần quét giới hạn và một quy tắc heuristic xác định phần memory region cần quét: field `vm_private_data` của descriptor `vma_area_struct` giữ cursor hiện tại trong lần quét hiện tại. Điều này có nghĩa là trong một số trường hợp, `try_to_unmap_file()` có thể bỏ lỡ page cần unmap. Khi điều này xảy ra, `try_to_unmap()` phát hiện page vẫn được mapped và trả về `SWAP_AGAIN` thay vì `SWAP_SUCCESS`.
+Vì việc tìm kiếm có thể khá time-consuming, chỉ thực hiện một lần quét giới hạn và một quy tắc heuristic xác định phần memory region cần quét: field `vm_private_data` của descriptor `vma_area_struct` giữ cursor hiện tại trong lần quét hiện tại. Điều này có nghĩa là trong một số trường hợp, `try_to_unmap_file()` có thể bỏ lỡ page cần unmap. Khi điều này xảy ra, `try_to_unmap()` phát hiện page vẫn được mapped và trả về `SWAP_AGAIN` thay vì `SWAP_SUCCESS`.
 
 ## Triển khai PFRA
 
@@ -406,7 +406,7 @@ Giá trị distress là thước đo mức độ hiệu quả của PFRA khi thu
 
 Priority trước của zone 12...7 6 5 4 3 2 1 0 Giá trị distress 0 1 3 6 12 25 50 100
 
-Cuối cùng, giá trị swappiness là một hằng số do user xác định, thường được đặt thành 60. System administrator có thể điều chỉnh giá trị này bằng cách ghi vào file /proc/sys/vm/swappiness hoặc thực hiện system call `sysctl()` thích hợp.
+Cuối cùng, giá trị swappiness là một hằng số user-defined, thường được đặt thành 60. System administrator có thể điều chỉnh giá trị này bằng cách ghi vào file /proc/sys/vm/swappiness hoặc thực hiện system call `sysctl()` thích hợp.
 
 Page chỉ được thu hồi từ address space của process nếu swap tendency của zone lớn hơn hoặc bằng 100. Vì vậy, nếu system administrator đặt swappiness thành 0, PFRA không bao giờ thu hồi page trong User Mode address space trừ khi priority trước đó của zone bằng zero (một tình huống ít khả năng xảy ra); nếu administrator đặt swappiness thành 100, PFRA thu hồi page trong User Mode address space ở mọi lần gọi.
 
@@ -624,13 +624,13 @@ Từ các chương trước, chúng ta biết kernel dùng những disk cache kh
 
 Mỗi disk cache được PFRA xem xét phải đăng ký một shrinker function tại thời điểm khởi tạo. Shrinker function nhận hai tham số: số lượng mục tiêu các page frame cần thu hồi và một tập GFP allocation flag; function thực hiện những việc cần thiết để thu hồi page từ disk cache, rồi trả về số reclaimable page còn lại trong cache.
 
-Function `set_shrinker()` đăng ký một shrinker function với PFRA. Function này cấp phát một descriptor kiểu `shrinker`, lưu địa chỉ shrinker function vào descriptor, rồi chèn descriptor vào một global list có gốc tại global variable `shrinker_list`. Function `set_shrinker()` cũng khởi tạo field `seeks` của descriptor `shrinker`: nói một cách không chính thức, đây là tham số cho biết chi phí tái tạo một phần tử cache sau khi bị loại bỏ.
+Function `set_shrinker()` đăng ký một shrinker function với PFRA. Function này cấp phát một descriptor kiểu `shrinker`, lưu địa chỉ shrinker function vào descriptor, rồi chèn descriptor vào một global list có gốc tại global variable `shrinker_list`. Function `set_shrinker()` cũng khởi tạo field `seeks` của descriptor `shrinker`: nói một cách không chính thức, đây là tham số cho biết chi phí re-create một phần tử cache sau khi bị loại bỏ.
 
 Trong Linux 2.6.11, chỉ có ít disk cache đăng ký với PFRA: ngoài dentry cache và inode cache, chỉ có disk quota layer, filesystem meta information block cache (chủ yếu dùng cho extended attribute của filesystem) và XFS journaling filesystem đăng ký shrinker function.
 
 Function của PFRA thu hồi page từ các shrinkable disk cache có tên `shrink_slab()` (tên này hơi gây hiểu nhầm, vì function ít liên quan đến các slab allocator cache). Function này được `try_to_free_pages()` gọi, như giải thích trong mục “Thu hồi khi thiếu memory” ở phần trước, và được `balance_pgdat()` gọi, được mô tả trong mục “Thu hồi định kỳ” ở phần sau.
 
-Function `shrink_slab()` cố cân bằng chi phí thu hồi từ shrinkable disk cache với chi phí thu hồi từ các LRU list (do `shrink_list()` thực hiện). Về cơ bản, function duyệt danh sách các descriptor `shrinker` để gọi các shrinker function và lấy tổng số reclaimable page trong các disk cache. Sau đó, function quét lại danh sách descriptor `shrinker`; với mỗi shrinkable disk cache, function tính theo heuristic một số lượng mục tiêu các page frame cần thu hồi—dựa trên số reclaimable page trong disk cache, chi phí tương đối để tái tạo một page trong disk cache và số page trong các LRU list—rồi gọi shrinker function để cố thu hồi các batch ít nhất 128 page.
+Function `shrink_slab()` cố cân bằng chi phí thu hồi từ shrinkable disk cache với chi phí thu hồi từ các LRU list (do `shrink_list()` thực hiện). Về cơ bản, function duyệt danh sách các descriptor `shrinker` để gọi các shrinker function và lấy tổng số reclaimable page trong các disk cache. Sau đó, function quét lại danh sách descriptor `shrinker`; với mỗi shrinkable disk cache, function tính theo heuristic một số lượng mục tiêu các page frame cần thu hồi—dựa trên số reclaimable page trong disk cache, chi phí tương đối để re-creating một page trong disk cache và số page trong các LRU list—rồi gọi shrinker function để cố thu hồi các batch ít nhất 128 page.
 
 Do giới hạn dung lượng, chúng tôi chỉ mô tả ngắn gọn các shrinker function của dentry cache và inode cache.
 
@@ -740,7 +740,7 @@ i. Gọi `cond_resched()` để kiểm tra flag `TIF_NEED_RESCHED` của process
 
 Bất chấp nỗ lực của PFRA nhằm giữ dự trữ page frame trống, áp lực lên virtual memory subsystem vẫn có thể cao đến mức toàn bộ memory hiện có bị cạn kiệt. Tình huống này có thể nhanh chóng làm đóng băng mọi hoạt động trong hệ thống: kernel liên tục cố giải phóng memory để đáp ứng một yêu cầu khẩn cấp, nhưng không thành công vì các swap area đã đầy và tất cả disk cache đều đã bị thu nhỏ. Kết quả là không process nào có thể tiếp tục thực thi, do đó cuối cùng cũng không process nào giải phóng các page frame mà nó sở hữu.
 
-Để đối phó với tình huống nghiêm trọng này, PFRA sử dụng cái gọi là out of memory (OOM) killer, chọn một process trong hệ thống và đột ngột kill nó để giải phóng các page frame của nó. OOM killer giống một bác sĩ phẫu thuật cắt bỏ tay chân của một người để cứu mạng người đó: mất một chi không phải điều tốt đẹp, nhưng đôi khi không có cách nào tốt hơn.
+Để đối phó với tình huống nghiêm trọng này, PFRA sử dụng so-called out of memory (OOM) killer, chọn một process trong hệ thống và đột ngột kill nó để giải phóng các page frame của nó. OOM killer giống một bác sĩ phẫu thuật cắt bỏ tay chân của một người để cứu mạng người đó: mất một chi không phải điều tốt đẹp, nhưng đôi khi không có cách nào tốt hơn.
 
 Function `out_of_memory()` được `__alloc_pages()` gọi khi memory trống rất ít và PFRA chưa thu hồi thành công bất kỳ page frame nào (xem mục “Zone Allocator” trong Chương 8). Function gọi `select_bad_process()` để chọn một nạn nhân trong các process hiện có, rồi gọi `oom_kill_process()` để thực hiện sự hy sinh.
 
@@ -762,9 +762,9 @@ Function `select_bad_process()` quét mọi process trong hệ thống, dùng m�
 
 ### Swap Token
 
-Như bạn có thể đã nhận ra khi đọc chương này, Linux VM subsystem—đặc biệt là PFRA—là một phần code phức tạp đến mức rất khó dự đoán hành vi của nó với workload tùy ý. Hơn nữa, có những trường hợp VM subsystem thể hiện hành vi bất thường. Một ví dụ là hiện tượng swap thrashing: về cơ bản, khi hệ thống thiếu memory trống, PFRA cố gắng hết sức giải phóng memory bằng cách ghi page xuống disk và lấy các page frame bên dưới từ một số process; tuy nhiên, đồng thời các process này muốn tiếp tục thực thi, nên chúng cố gắng truy cập các page của mình. Kết quả là kernel cấp cho các process các page frame vừa được PFRA giải phóng và đọc nội dung của chúng từ disk. Kết quả cuối cùng là page liên tục được ghi xuống rồi đọc trở lại từ disk; phần lớn thời gian dành cho việc truy cập disk, vì vậy không process nào tiến triển đáng kể đến lúc kết thúc.
+Như bạn có thể đã nhận ra khi đọc chương này, Linux VM subsystem—đặc biệt là PFRA—là một phần code phức tạp đến mức rất khó dự đoán hành vi của nó với workload tùy ý. Hơn nữa, có những trường hợp VM subsystem thể hiện hành vi bất thường. Một ví dụ là hiện tượng so-called swap thrashing: về cơ bản, khi hệ thống thiếu memory trống, PFRA cố gắng hết sức giải phóng memory bằng cách ghi page xuống disk và lấy các page frame bên dưới từ một số process; tuy nhiên, đồng thời các process này muốn tiếp tục thực thi, nên chúng cố gắng truy cập các page của mình. Kết quả là kernel cấp cho các process các page frame vừa được PFRA giải phóng và đọc nội dung của chúng từ disk. Kết quả cuối cùng là page liên tục được ghi xuống rồi đọc trở lại từ disk; phần lớn thời gian dành cho việc truy cập disk, vì vậy không process nào tiến triển đáng kể đến lúc kết thúc.
 
-Để giảm khả năng swap thrashing, một kỹ thuật do Jiang và Zhang đề xuất năm 2004 đã được triển khai trong kernel phiên bản 2.6.9: về cơ bản, một swap token được cấp cho một process duy nhất trong hệ thống; token miễn cho process khỏi page frame reclaiming, nhờ đó process có thể tiến triển đáng kể và hy vọng kết thúc ngay cả khi memory khan hiếm.
+Để giảm khả năng swap thrashing, một kỹ thuật do Jiang và Zhang đề xuất năm 2004 đã được triển khai trong kernel phiên bản 2.6.9: về cơ bản, một so-called swap token được cấp cho một process duy nhất trong hệ thống; token miễn cho process khỏi page frame reclaiming, nhờ đó process có thể tiến triển đáng kể và hy vọng kết thúc ngay cả khi memory khan hiếm.
 
 Swap token được triển khai bằng một memory descriptor pointer `swap_token_mm`. Khi một process sở hữu swap token, `swap_token_mm` được đặt thành địa chỉ memory descriptor của process.
 
@@ -780,7 +780,7 @@ Function `grab_swap_token()` thực hiện một số kiểm tra trước khi c�
 
 - Đã trôi qua ít nhất hai giây kể từ lần gọi `grab_swap_token()` gần nhất.
 
-- Process hiện đang giữ token không phát sinh major page fault kể từ lần thực thi `grab_swap_token()` gần nhất, hoặc đã giữ token ít nhất `swap_token_default_timeout` tick.
+- Process token-holding không phát sinh major page fault kể từ lần thực thi `grab_swap_token()` gần nhất, hoặc đã giữ token ít nhất `swap_token_default_timeout` tick.
 
 - Swap token chưa được cấp gần đây cho process hiện tại.
 
@@ -820,7 +820,7 @@ Các page được swap out khỏi memory được lưu trong một swap area, c
 
 Có nhiều swap area cho phép system administrator phân bố nhiều swap space trên nhiều disk để hardware có thể thao tác đồng thời trên chúng; nó cũng cho phép tăng swap space tại runtime mà không reboot hệ thống.
 
-Mỗi swap area gồm một chuỗi page slot: các block 4.096 byte dùng để chứa một swapped-out page. Page slot đầu tiên của swap area được dùng để lưu bền vững một số thông tin về swap area; định dạng của nó được mô tả bởi union `swap_header` gồm hai structure, `info` và `magic`. Structure `magic` cung cấp một string đánh dấu rõ ràng một phần disk là swap area; nó chỉ gồm một field, `magic.magic`, chứa một “magic” string 10 ký tự. Về cơ bản, structure `magic` cho phép kernel xác định rõ ràng một file hoặc partition là swap area; nội dung string, cụ thể là “SWAPSPACE2”, luôn nằm ở cuối page slot đầu tiên.
+Mỗi swap area gồm một chuỗi page slot: các block 4,096-byte dùng để chứa một swapped-out page. Page slot đầu tiên của swap area được dùng để lưu bền vững một số thông tin về swap area; định dạng của nó được mô tả bởi union `swap_header` gồm hai structure, `info` và `magic`. Structure `magic` cung cấp một string đánh dấu rõ ràng một phần disk là swap area; nó chỉ gồm một field, `magic.magic`, chứa một “magic” string 10-character. Về cơ bản, structure `magic` cho phép kernel xác định rõ ràng một file hoặc partition là swap area; nội dung string, cụ thể là “SWAPSPACE2”, luôn nằm ở cuối page slot đầu tiên.
 
 Structure `info` gồm các field sau:
 
@@ -901,7 +901,7 @@ Field `flags` chứa ba subfield chồng lấn:
 
 `SWP_ACTIVE`
 
-Field 2 bit này thực ra là sự kết hợp của `SWP_USED` và `SWP_WRITEOK`; flag được đặt khi cả hai flag trước đều được đặt.
+Field 2-bit này thực ra là sự kết hợp của `SWP_USED` và `SWP_WRITEOK`; flag được đặt khi cả hai flag trước đều được đặt.
 
 Field `swap_map` trỏ đến một mảng counter, mỗi counter cho một page slot của swap area. Nếu counter bằng 0, page slot trống; nếu dương, page slot chứa một swapped-out page. Về cơ bản, page slot counter biểu thị số process dùng chung swapped-out page. Nếu counter có giá trị `SWAP_MAP_MAX` (bằng 32.767), page được lưu trong page slot là “permanent” và không thể bị loại khỏi slot tương ứng. Nếu counter có giá trị `SWAP_MAP_BAD` (bằng 32.768), page slot được xem là bị lỗi và vì vậy không dùng được.[^6] Field `prio` là một signed integer biểu thị thứ tự mà swap subsystem nên xem xét từng swap area.
 
@@ -925,7 +925,7 @@ Index trong mảng `swap_info` của phần tử danh sách đầu tiên.
 
 `next`
 
-Index trong mảng `swap_info` của descriptor của swap area tiếp theo được chọn để swap out page. Field này được dùng để triển khai thuật toán Round Robin giữa các swap area có priority cao nhất và còn slot trống.
+Index trong mảng `swap_info` của descriptor của swap area tiếp theo được chọn để swap out page. Field này được dùng để triển khai thuật toán Round Robin giữa các swap area có maximum-priority và còn slot trống.
 
 Spin lock `swaplock` bảo vệ danh sách khỏi truy cập đồng thời trong multiprocessor system.
 
@@ -943,17 +943,17 @@ Hình 17-7. Swapped-out page identifier
 
 Function `swp_entry(type,offset)` tạo một swapped-out page identifier từ swap area index `type` và page slot index `offset`. Ngược lại, các function `swp_type` và `swp_offset` lần lượt trích xuất swap area index và page slot index từ một swapped-out page identifier.
 
-Khi một page được swap out, identifier của nó được chèn làm entry của page trong Page Table để có thể tìm lại page khi cần. Lưu ý rằng least significant bit của identifier như vậy, tương ứng với flag `Present`, luôn bị xóa để biểu thị page hiện không nằm trong RAM. Tuy nhiên, ít nhất một trong 31 bit còn lại phải được đặt vì không page nào được lưu trong slot 0 của swap area 0. Do đó, có thể nhận biết ba trường hợp khác nhau từ giá trị của một Page Table entry:
+Khi một page được swap out, identifier của nó được chèn làm entry của page trong Page Table để có thể tìm lại page khi cần. Lưu ý rằng least-significant bit của identifier như vậy, tương ứng với flag `Present`, luôn bị xóa để biểu thị page hiện không nằm trong RAM. Tuy nhiên, ít nhất một trong 31 bit còn lại phải được đặt vì không page nào được lưu trong slot 0 của swap area 0. Do đó, có thể nhận biết ba trường hợp khác nhau từ giá trị của một Page Table entry:
 
 Null entry
 
 Page không thuộc process address space, hoặc page frame bên dưới chưa được cấp cho process (demand paging).
 
-31 most significant bit đầu không phải tất cả đều bằng 0, bit cuối bằng 0
+31 most-significant bit đầu không phải tất cả đều bằng 0, bit cuối bằng 0
 
 Page hiện đang được swap out.
 
-Least significant bit bằng 1
+Least-significant bit bằng 1
 
 Page nằm trong RAM.
 
@@ -961,7 +961,7 @@ Kích thước tối đa của một swap area được xác định bởi số 
 
 Vì một page có thể thuộc address space của nhiều process (xem mục “Reverse Mapping” ở phần trước), nó có thể được swap out khỏi address space của một process mà vẫn còn trong main memory; do đó, có thể swap out cùng page nhiều lần. Tất nhiên, về mặt vật lý một page chỉ được swap out và lưu một lần, nhưng mỗi lần cố swap out nó sau đó làm tăng counter `swap_map`.
 
-Function `swap_duplicate()` thường được gọi khi cố swap out một page đã được swap out. Nó chỉ xác minh swapped-out page identifier được truyền làm tham số là hợp lệ và tăng counter `swap_map` tương ứng. Chính xác hơn, nó thực hiện các hành động sau:
+Function `swap_duplicate()` thường được gọi khi cố swap out một page swapped-out. Nó chỉ xác minh swapped-out page identifier được truyền làm tham số là hợp lệ và tăng counter `swap_map` tương ứng. Chính xác hơn, nó thực hiện các hành động sau:
 
 1\. Dùng các function `swp_type` và `swp_offset` để trích xuất swap area number và page slot index từ tham số.
 
@@ -1035,7 +1035,7 @@ b. Lưu địa chỉ descriptor của block device chứa file vào field `bdev`
 
 ##### Service routine sys\_swapoff()
 
-Service routine `sys_swapoff()` vô hiệu hóa một swap area được tham số `specialfile` xác định. Nó phức tạp và tốn thời gian hơn nhiều so với `sys_swapon()`, vì partition cần vô hiệu hóa có thể vẫn chứa page thuộc nhiều process. Do đó, function buộc phải quét swap area và swap in tất cả page hiện có. Vì mỗi lần swap-in cần một page frame mới, nó có thể thất bại nếu không còn page frame trống. Trong trường hợp này, function trả về một error code. Tất cả điều này đạt được bằng cách thực hiện các bước chính sau:
+Service routine `sys_swapoff()` vô hiệu hóa một swap area được tham số `specialfile` xác định. Nó phức tạp và time-consuming hơn nhiều so với `sys_swapon()`, vì partition cần vô hiệu hóa có thể vẫn chứa page thuộc nhiều process. Do đó, function buộc phải quét swap area và swap in tất cả page hiện có. Vì mỗi lần swap-in cần một page frame mới, nó có thể thất bại nếu không còn page frame trống. Trong trường hợp này, function trả về một error code. Tất cả điều này đạt được bằng cách thực hiện các bước chính sau:
 
 1\. Kiểm tra process hiện tại có capability `CAP_SYS_ADMIN` hay không.
 
@@ -1079,9 +1079,9 @@ e. Trả về 0 (thành công).
 
 ##### Function try\_to\_unuse()
 
-Function `try_to_unuse()` hoạt động trên một tham số index xác định swap area cần làm rỗng; nó swap in các page và cập nhật mọi Page Table của các process có page được swap out trong swap area này. Để làm điều đó, function thăm address space của tất cả kernel thread và process, bắt đầu từ memory descriptor `init_mm` được dùng làm marker. Đây là một function tốn thời gian, chủ yếu chạy với interrupt được bật. Do đó, việc đồng bộ với các process khác rất quan trọng.
+Function `try_to_unuse()` hoạt động trên một tham số index xác định swap area cần làm rỗng; nó swap in các page và cập nhật mọi Page Table của các process có page được swap out trong swap area này. Để làm điều đó, function thăm address space của tất cả kernel thread và process, bắt đầu từ memory descriptor `init_mm` được dùng làm marker. Đây là một function time-consuming, chủ yếu chạy với interrupt được bật. Do đó, việc đồng bộ với các process khác rất quan trọng.
 
-Function `try_to_unuse()` quét mảng `swap_map` của swap area. Khi function tìm thấy một page slot đang được sử dụng, trước hết nó swap in page, rồi bắt đầu tìm các process tham chiếu đến page. Thứ tự hai thao tác này rất quan trọng để tránh race condition. Khi việc truyền dữ liệu I/O đang diễn ra, page bị khóa, vì vậy không process nào có thể truy cập nó. Khi việc truyền dữ liệu I/O hoàn tất, page lại bị `try_to_unuse()` khóa, vì vậy nó không thể bị một kernel control path khác swap out lần nữa. Race condition cũng được tránh vì mỗi process tra cứu page cache trước khi bắt đầu thao tác swap-in hoặc swap-out (xem mục “Swap Cache” ở phần sau). Cuối cùng, swap area được `try_to_unuse()` xem xét được đánh dấu là không ghi được (flag `SWP_WRITEOK` không được đặt), vì vậy không process nào có thể thực hiện swap-out trên page slot của area này.
+Function `try_to_unuse()` quét mảng `swap_map` của swap area. Khi function tìm thấy một page slot in-use, trước hết nó swap in page, rồi bắt đầu tìm các process tham chiếu đến page. Thứ tự hai thao tác này rất quan trọng để tránh race condition. Khi việc truyền dữ liệu I/O đang diễn ra, page bị khóa, vì vậy không process nào có thể truy cập nó. Khi việc truyền dữ liệu I/O hoàn tất, page lại bị `try_to_unuse()` khóa, vì vậy nó không thể bị một kernel control path khác swap out lần nữa. Race condition cũng được tránh vì mỗi process tra cứu page cache trước khi bắt đầu thao tác swap-in hoặc swap-out (xem mục “Swap Cache” ở phần sau). Cuối cùng, swap area được `try_to_unuse()` xem xét được đánh dấu là không ghi được (flag `SWP_WRITEOK` không được đặt), vì vậy không process nào có thể thực hiện swap-out trên page slot của area này.
 
 Tuy nhiên, `try_to_unuse()` có thể buộc phải quét nhiều lần mảng usage counter `swap_map` của swap area. Đó là vì các memory region chứa tham chiếu đến swapped-out page có thể biến mất trong một lần quét rồi xuất hiện trở lại trong các process list.
 
@@ -1099,7 +1099,7 @@ Bây giờ hãy mô tả các thao tác chính được `try_to_unuse()` thực 
 
 4\. Trong khi function thực thi bước trước, process có thể đã bị suspend. Do đó, kiểm tra lại reference counter của page slot có bằng null hay không; nếu có, swap page này đã được một kernel control path khác giải phóng, vì vậy function tiếp tục với page slot tiếp theo.
 
-5\. Gọi `unuse_process()` trên mỗi memory descriptor trong doubly linked list có đầu là `init_mm` (xem mục “Memory Descriptor” trong Chương 9). Function tốn thời gian này quét tất cả Page Table entry của process sở hữu memory descriptor, và thay mỗi lần xuất hiện của swapped-out page identifier bằng physical address của page frame. Để phản ánh việc chuyển này, function cũng giảm page slot counter trong mảng `swap_map` (trừ khi bằng `SWAP_MAP_MAX`) và tăng usage counter của page frame.
+5\. Gọi `unuse_process()` trên mỗi memory descriptor trong doubly linked list có đầu là `init_mm` (xem mục “Memory Descriptor” trong Chương 9). Function time-consuming này quét tất cả Page Table entry của process sở hữu memory descriptor, và thay mỗi lần xuất hiện của swapped-out page identifier bằng physical address của page frame. Để phản ánh việc chuyển này, function cũng giảm page slot counter trong mảng `swap_map` (trừ khi bằng `SWAP_MAP_MAX`) và tăng usage counter của page frame.
 
 6\. Gọi `shmem_unuse()` để kiểm tra swapped-out page có được dùng làm tài nguyên IPC shared memory hay không và xử lý phù hợp trường hợp đó (xem mục “IPC Shared Memory” trong Chương 19).
 
@@ -1191,11 +1191,11 @@ Function hoạt động trên một tham số `entry` duy nhất chỉ định m
 
 Truyền page đến và từ một swap area là hoạt động có thể gây ra nhiều race condition. Cụ thể, swapping subsystem phải xử lý cẩn thận các trường hợp sau:
 
-Nhiều swap-in
+Nhiều swap-ins
 
 Hai process có thể đồng thời cố swap in cùng một shared anonymous page.
 
-Swap-in và swap-out đồng thời
+swap-ins và swap-outs đồng thời
 
 Một process có thể swap-in một page đang được PFRA swap out.
 
@@ -1211,7 +1211,7 @@ Trước khi được ghi xuống disk, mỗi page cần swap out được `shri
 
 Hình 17-8. Vai trò của swap cache
 
-Bạn có thể xem swap cache là một vùng trung chuyển chứa page descriptor của các anonymous page hiện đang được swap-in hoặc swap out. Khi swap-in hoặc swap-out kết thúc (trong trường hợp shared anonymous page, swap-in hoặc swap-out phải đã được thực hiện trên mọi process dùng chung page), page descriptor của anonymous page có thể được loại khỏi swap cache.[^9]
+Bạn có thể xem swap cache là một vùng trung chuyển chứa page descriptor của các anonymous page hiện đang swapped-in hoặc swap out. Khi swap-in hoặc swap-out kết thúc (trong trường hợp shared anonymous page, swap-in hoặc swap-out phải đã được thực hiện trên mọi process dùng chung page), page descriptor của anonymous page có thể được loại khỏi swap cache.[^9]
 
 #### Triển khai swap cache
 
@@ -1231,7 +1231,7 @@ Cuối cùng, một address space `swapper_space` duy nhất được dùng cho 
 
 ##### Các helper function của swap cache
 
-Kernel sử dụng nhiều function để xử lý swap cache; chúng chủ yếu dựa trên các function được thảo luận trong mục “Page Cache” ở Chương 15. Ở phần sau, chúng ta sẽ trình bày cách các function cấp cao hơn gọi các function ở mức tương đối thấp này để swap in và swap out page khi cần.
+Kernel sử dụng nhiều function để xử lý swap cache; chúng chủ yếu dựa trên các function được thảo luận trong mục “Page Cache” ở Chương 15. Ở phần sau, chúng ta sẽ trình bày cách các function higher-level gọi các function ở low-level này để swap in và swap out page khi cần.
 
 Các function chính xử lý swap cache là:
 
@@ -1435,4 +1435,4 @@ Như chúng ta biết, trước khi truy cập swap partition, function phải k
 
 [^9]: Trong một số trường hợp, swap cache cũng cải thiện hiệu năng hệ thống: xét một server daemon phục vụ request bằng cách tạo các process con. Dưới system load nặng, một page có thể bị swap out khỏi process cha và sẽ không bao giờ được paged in cho process cha. Không có swap cache, mỗi process con được fork ra đều cần fault page đó vào từ swap area.
 
-[^10]: System administrator có thể điều chỉnh giá trị này bằng cách ghi vào file /proc/sys/vm/page-cluster. Có thể vô hiệu hóa swap-in read-ahead bằng cách đặt `page_cluster` thành 0.
+[^10]: System administrator có thể điều chỉnh giá trị này bằng cách ghi vào file /proc/sys/vm/page-cluster. Có thể vô hiệu hóa Swap-in read-ahead bằng cách đặt `page_cluster` thành 0.

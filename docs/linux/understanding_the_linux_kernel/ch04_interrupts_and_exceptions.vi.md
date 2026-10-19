@@ -16,7 +16,7 @@ Interrupt do interval timer và I/O device phát; chẳng hạn, keystroke từ 
 
 Ngược lại, exception do lỗi lập trình hoặc điều kiện bất thường mà kernel phải xử lý gây ra. Trường hợp đầu, kernel xử lý exception bằng cách chuyển đến current process một signal quen thuộc với mọi lập trình viên Unix. Trường hợp thứ hai, kernel thực hiện mọi bước cần để phục hồi từ điều kiện bất thường, như Page Fault hoặc request kernel service qua assembly language instruction như `int` hoặc `sysenter`.
 
-Ở phần tiếp theo, chúng ta bắt đầu mô tả lý do đưa vào các signal này. Sau đó trình bày cách IRQ (Interrupt ReQuest) quen thuộc do I/O device phát tạo interrupt và mô tả chi tiết cách processor 80×86 xử lý interrupt và exception ở hardware level. Tiếp theo, trong phần “Initialize Interrupt Descriptor Table”, minh họa cách Linux initialize mọi data structure mà interrupt architecture 80×86 yêu cầu. Ba phần còn lại mô tả cách Linux xử lý interrupt signal ở software level.
+Ở phần tiếp theo, chúng ta bắt đầu mô tả lý do đưa vào các signal này. Sau đó trình bày cách IRQ (Interrupt ReQuest) well-known do I/O device phát tạo interrupt và mô tả chi tiết cách processor 80×86 xử lý interrupt và exception ở hardware level. Tiếp theo, trong phần “Initialize Interrupt Descriptor Table”, minh họa cách Linux initialize mọi data structure mà interrupt architecture 80×86 yêu cầu. Ba phần còn lại mô tả cách Linux xử lý interrupt signal ở software level.
 
 Lưu ý trước khi tiếp tục: chương này chỉ trình bày interrupt “kinh điển” chung cho mọi PC; không trình bày nonstandard interrupt của một số architecture.
 
@@ -96,7 +96,7 @@ Mỗi IRQ line có thể được disable có chọn lọc. Vì vậy có thể 
 
 Enable/disable IRQ có chọn lọc không giống global masking/unmasking maskable interrupt. Khi flag `IF` của register `eflags` được clear, CPU tạm bỏ qua mỗi maskable interrupt PIC phát. Assembly language instruction `cli` và `sti` lần lượt clear và set flag đó.
 
-PIC truyền thống được triển khai bằng cách nối “cascade” hai external chip kiểu 8259A. Mỗi chip xử lý được tối đa tám IRQ input line khác nhau. Vì INT output line của slave PIC nối với pin IRQ2 của master PIC, số IRQ line khả dụng bị giới hạn ở 15.
+PIC truyền thống được triển khai bằng cách nối “cascade” hai external chip 8259A-style. Mỗi chip xử lý được tối đa tám IRQ input line khác nhau. Vì INT output line của slave PIC nối với pin IRQ2 của master PIC, số IRQ line khả dụng bị giới hạn ở 15.
 
 #### Advanced Programmable Interrupt Controller (APIC)
 
@@ -104,7 +104,7 @@ Mô tả trước nói về PIC thiết kế cho uniprocessor system. Nếu hệ
 
 Khả năng chuyển interrupt đến mỗi CPU trong hệ thống là thiết yếu để khai thác đầy đủ tính song song của SMP architecture. Vì vậy từ Pentium III, Intel giới thiệu thành phần mới gọi là I/O Advanced Programmable Interrupt Controller (I/O APIC). Chip là phiên bản nâng cao của Programmable Interrupt Controller 8259A cũ; để hỗ trợ hệ điều hành cũ, motherboard gần đây có cả hai loại chip. Hơn nữa mọi microprocessor 80×86 hiện tại đều có local APIC. Mỗi local APIC có register 32-bit, internal clock; local timer device; và hai IRQ line bổ sung LINT0 và LINT1 dành cho local APIC interrupt. Mọi local APIC nối với external I/O APIC, tạo multi-APIC system.
 
-Hình 4-1 minh họa sơ lược cấu trúc multi-APIC system. APIC bus nối “frontend” I/O APIC với local APIC. IRQ line từ device nối với I/O APIC, do đó I/O APIC đóng vai trò router đối với local APIC. Trong motherboard của Pentium III và processor trước đó, APIC bus là serial bus ba line; từ Pentium 4, APIC bus được triển khai bằng system bus. Tuy nhiên vì APIC bus và message vô hình với software, chúng ta không trình bày thêm chi tiết.
+Hình 4-1 minh họa sơ lược cấu trúc multi-APIC system. APIC bus nối “frontend” I/O APIC với local APIC. IRQ line từ device nối với I/O APIC, do đó I/O APIC đóng vai trò router đối với local APIC. Trong motherboard của Pentium III và processor trước đó, APIC bus là serial bus three-line; từ Pentium 4, APIC bus được triển khai bằng system bus. Tuy nhiên vì APIC bus và message vô hình với software, chúng ta không trình bày thêm chi tiết.
 
 ![Hình 4-1](images/ch04/fig04-01.png)
 
@@ -134,7 +134,7 @@ Interprocessor interrupt (gọi tắt IPI) là thành phần thiết yếu của
 
 Nhiều uniprocessor system hiện tại có I/O APIC chip, có thể configure theo hai cách khác nhau:
 
-- Là external PIC chuẩn kiểu 8259A nối CPU. Local APIC bị disable và hai local IRQ line LINT0 và LINT1 lần lượt được configure thành pin INTR và NMI.
+- Là external PIC chuẩn 8259A-style nối CPU. Local APIC bị disable và hai local IRQ line LINT0 và LINT1 lần lượt được configure thành pin INTR và NMI.
 
 - Là external I/O APIC chuẩn. Local APIC được enable và mọi external interrupt nhận qua I/O APIC.
 
@@ -204,7 +204,7 @@ Page được address không có trong memory, Page Table entry tương ứng l�
 
 16 - “Floating-point error” (fault)
 
-Floating-point unit tích hợp trong CPU chip đã báo error condition như numeric overflow hoặc chia cho 0.[^4]
+floating-point unit tích hợp trong CPU chip đã báo error condition như numeric overflow hoặc chia cho 0.[^4]
 
 17 - “Alignment check” (fault)
 
@@ -212,7 +212,7 @@ Address của operand không được align đúng (ví dụ address của long 
 
 18 - “Machine check” (abort)
 
-Machine-check mechanism phát hiện CPU error hoặc bus error.
+machine-check mechanism phát hiện CPU error hoặc bus error.
 
 19 - “SIMD floating point exception” (fault)
 
@@ -239,7 +239,7 @@ Bảng 4-1. Signal do exception handler gửi
 | 12 | Stack segment fault | `stack_segment()` | `SIGBUS` |
 | 13 | General protection | `general_protection()` | `SIGSEGV` |
 | 14 | Page Fault | `page_fault()` | `SIGSEGV` |
-| 15 | Intel dành riêng | Không có | Không có |
+| 15 | Intel-reserved | Không có | Không có |
 | 16 | Floating-point error | `coprocessor_error()` | `SIGFPE` |
 | 17 | Alignment check | `alignment_check()` | `SIGBUS` |
 | 18 | Machine check | `machine_check()` | Không có |
@@ -537,7 +537,7 @@ force_sig(sig_number, current);
 
 Current process xử lý signal ngay sau exception handler kết thúc. Signal được xử lý trong User Mode bởi signal handler riêng của process (nếu có) hoặc trong Kernel Mode. Trường hợp sau kernel thường kill process (xem Chương 11). Signal exception handler gửi nằm trong Bảng 4-1.
 
-Exception handler luôn kiểm tra exception xảy ra trong User Mode hay Kernel Mode và nếu là Kernel Mode thì có do invalid argument truyền cho system call không. Phần “Dynamic address checking: fix-up code” trong Chương 10 mô tả cách kernel tự bảo vệ trước invalid argument truyền cho system call. Mọi exception khác phát trong Kernel Mode đều do kernel bug. Khi đó exception handler biết kernel hoạt động sai. Để tránh data corruption trên hard disk, handler gọi function `die()`, in nội dung mọi CPU register lên console (dump này gọi là kernel oops) và kết thúc process `current` bằng cách gọi `do_exit()` (xem “Kết thúc process” trong Chương 3).
+Exception handler luôn kiểm tra exception xảy ra trong User Mode hay Kernel Mode và nếu là Kernel Mode thì có do invalid argument truyền cho system call không. Phần “Dynamic address checking: Fix-up code” trong Chương 10 mô tả cách kernel tự bảo vệ trước invalid argument truyền cho system call. Mọi exception khác phát trong Kernel Mode đều do kernel bug. Khi đó exception handler biết kernel hoạt động sai. Để tránh data corruption trên hard disk, handler gọi function `die()`, in nội dung mọi CPU register lên console (dump này gọi là kernel oops) và kết thúc process `current` bằng cách gọi `do_exit()` (xem “Kết thúc process” trong Chương 3).
 
 Khi C function triển khai exception handling kết thúc, code thực hiện instruction `jmp` đến function `ret_from_exception()`. Function được mô tả trong phần “Trở về từ interrupt và exception” sau.
 
@@ -551,7 +551,7 @@ Interrupt handling phụ thuộc interrupt type. Ở đây phân biệt ba class
 
 I/O interrupt
 
-I/O device cần chú ý; interrupt handler tương ứng phải truy vấn device để xác định hành động phù hợp. Loại này được trình bày trong phần “I/O interrupt handling” sau. Timer interrupt Timer nào đó, local APIC timer hoặc external timer, đã phát interrupt; loại này cho kernel biết khoảng thời gian cố định đã trôi qua. Các interrupt chủ yếu được xử lý như I/O interrupt; Chương 6 thảo luận đặc điểm riêng của timer interrupt.
+I/O device cần chú ý; interrupt handler tương ứng phải truy vấn device để xác định hành động phù hợp. Loại này được trình bày trong phần “I/O interrupt handling” sau. Timer interrupt Timer nào đó, local APIC timer hoặc external timer, đã phát interrupt; loại này cho kernel biết khoảng fixed-time đã trôi qua. Các interrupt chủ yếu được xử lý như I/O interrupt; Chương 6 thảo luận đặc điểm riêng của timer interrupt.
 
 Interprocessor interrupt
 
@@ -597,11 +597,11 @@ Cần nhiều descriptor để biểu diễn cả state IRQ line lẫn function 
 
 Như Bảng 4-2, physical IRQ có thể được cấp bất kỳ vector nào từ 32–238. Tuy nhiên Linux dùng vector 128 triển khai system call.
 
-PC architecture tương thích IBM yêu cầu một số device được nối statically với IRQ line cụ thể. Đặc biệt:
+PC architecture IBM-compatible yêu cầu một số device được nối statically với IRQ line cụ thể. Đặc biệt:
 
 - Interval timer device phải nối IRQ0 line (xem Chương 6).
 
-- Slave 8259A PIC phải nối IRQ2 line (dù hiện dùng PIC tiên tiến hơn, Linux vẫn hỗ trợ PIC kiểu 8259A).
+- Slave 8259A PIC phải nối IRQ2 line (dù hiện dùng PIC tiên tiến hơn, Linux vẫn hỗ trợ PIC 8259A-style).
 
 ![Hình 4-4](images/ch04/fig04-04.png)
 
@@ -616,7 +616,7 @@ Bảng 4-2. Interrupt vector trong Linux
 | Khoảng vector | Công dụng |
 |---|---|
 | 0–19 `(0x0`–`0x13)` | Nonmaskable interrupt và exception |
-| 20–31 `(0x14`–`0x1f)` | Intel dành riêng |
+| 20–31 `(0x14`–`0x1f)` | Intel-reserved |
 | 32–127 `(0x20`–`0x7f)` | External interrupt (IRQ) |
 | 128 `(0x80)` | Programmed exception cho system call (xem Chương 10) |
 | 129–238 `(0x81`–`0xee)` | External interrupt (IRQ) |
@@ -708,7 +708,7 @@ for (i = 0; i < NR_IRQS; i++)
 
 Code tìm trong array `interrupt` để lấy interrupt handler address dùng thiết lập interrupt gate. Mỗi entry n của array `interrupt` lưu address interrupt handler cho IRQn (xem phần “Lưu register cho interrupt handler” sau). Chú ý interrupt gate tương ứng vector 128 không đổi vì dùng cho programmed exception của system call.
 
-Ngoài chip 8259A đề cập gần đầu chương, Linux hỗ trợ nhiều PIC circuit khác như SMP IO-APIC, internal 8259 PIC của Intel PIIX4 và Visual Workstation Cobalt (IO-)APIC của SGI. Để xử lý thống nhất mọi device đó, Linux dùng PIC object gồm PIC name và bảy PIC standard method. Lợi ích của cách hướng đối tượng này là driver không cần biết loại PIC cài trong hệ thống. Mỗi interrupt source mà driver thấy được nối trong suốt đến controller phù hợp. Data structure định nghĩa PIC object gọi là `hw_interrupt_type` (còn gọi là `hw_irq_controller`).
+Ngoài chip 8259A đề cập gần đầu chương, Linux hỗ trợ nhiều PIC circuit khác như SMP IO-APIC, internal 8259 PIC của Intel PIIX4 và Visual Workstation Cobalt (IO-)APIC của SGI. Để xử lý thống nhất mọi device đó, Linux dùng PIC object gồm PIC name và bảy PIC standard method. Lợi ích của cách object-oriented này là driver không cần biết loại PIC cài trong hệ thống. Mỗi interrupt source driver-visible nối trong suốt đến controller phù hợp. Data structure định nghĩa PIC object gọi là `hw_interrupt_type` (còn gọi là `hw_irq_controller`).
 
 Để cụ thể, giả sử máy tính là uniprocessor với hai 8259A PIC cung cấp 16 IRQ chuẩn. Khi đó field `handler` trong mỗi descriptor trong 16 descriptor `irq_desc_t` trỏ đến variable `i8259A_irq_type` mô tả 8259A PIC. Variable được initialize:
 
@@ -904,7 +904,7 @@ spin_unlock(&(irq_desc[irq].lock));
 
 Trước khi truy cập main IRQ descriptor, kernel acquire spin lock tương ứng. Chương 5 sẽ cho thấy spin lock bảo vệ khỏi concurrent access từ CPU khác nhau. Spin lock cần trong multiprocessor system vì interrupt cùng loại khác có thể được phát và CPU khác có thể xử lý lần interrupt mới. Không có spin lock, main IRQ descriptor bị nhiều CPU truy cập đồng thời. Như sẽ thấy, phải tuyệt đối tránh tình huống này.
 
-Sau khi acquire spin lock, function gọi method `ack` của main IRQ descriptor. Khi dùng 8259A PIC cũ, function `mask_and_ack_8259A()` tương ứng acknowledge interrupt trên PIC và disable IRQ line. Mask IRQ line bảo đảm CPU không nhận thêm interrupt loại này đến khi handler kết thúc. Nhớ function `__do_IRQ()` chạy với local interrupt bị disable; thực tế CPU control unit tự clear flag `IF` của register `eflags` vì interrupt handler được gọi qua interrupt gate của IDT. Tuy nhiên sẽ sớm thấy kernel có thể enable lại local interrupt trước khi thực thi interrupt service routine của interrupt này.
+Sau khi acquire spin lock, function gọi method `ack` của main IRQ descriptor. Khi dùng 8259A PIC cũ, function `mask_and_ack_8259A()` tương ứng acknowledge interrupt trên PIC và disable IRQ line. Mask IRQ line bảo đảm CPU không nhận thêm interrupt loại này đến khi handler kết thúc. Nhớ function `__do_IRQ()` chạy với local interrupt bị disable; thực tế CPU control unit tự clear flag `IF` của register `eflags` vì interrupt handler được gọi qua interrupt gate của IDT. Tuy nhiên sẽ sớm thấy kernel có thể re-enable local interrupt trước khi thực thi interrupt service routine của interrupt này.
 
 Tuy nhiên khi dùng I/O APIC, mọi thứ phức tạp hơn nhiều. Tùy interrupt type, acknowledge interrupt có thể do method `ack` thực hiện hoặc trì hoãn đến khi interrupt handler kết thúc (tức acknowledgment có thể do method `end` thực hiện). Trong cả hai trường hợp, có thể mặc nhiên hiểu local APIC không nhận interrupt tiếp theo loại này đến khi handler kết thúc, dù CPU khác có thể nhận các lần interrupt tiếp theo cùng loại.
 
@@ -1081,7 +1081,7 @@ Gửi IPI đến nhóm CPU chỉ định bằng bit mask
 
 Trong phần “Interrupt handling” trước, đã đề cập một số task kernel thực thi không critical: có thể trì hoãn lâu nếu cần. Nhớ interrupt service routine của interrupt handler được serialize và thường không nên có lần interrupt mới đến khi interrupt handler tương ứng kết thúc. Ngược lại, deferrable task có thể thực thi với mọi interrupt được enable. Đưa chúng ra khỏi interrupt handler giúp kernel response time ngắn. Đây là thuộc tính rất quan trọng cho nhiều time-critical application kỳ vọng interrupt request được phục vụ trong vài millisecond.
 
-Linux 2.6 giải quyết bằng hai loại non-urgent interruptible kernel function: cái gọi là deferrable function[^14] (softirq và tasklet) và function thực thi qua work queue (mô tả trong phần “Work queue” sau trong chương).
+Linux 2.6 giải quyết bằng hai loại non-urgent interruptible kernel function: so-called deferrable function[^14] (softirq và tasklet) và function thực thi qua work queue (mô tả trong phần “Work queue” sau trong chương).
 
 Softirq và tasklet liên quan chặt chẽ vì tasklet được triển khai trên softirq. Thực tế thuật ngữ “softirq” xuất hiện trong kernel source code thường biểu thị cả hai loại deferrable function. Thuật ngữ khác dùng rộng rãi là interrupt context: chỉ định kernel hiện thực thi interrupt handler hoặc deferrable function.
 
@@ -1103,9 +1103,9 @@ Disable có chọn lọc deferrable function để kernel không thực thi ngay
 
 Execution
 
-Thực thi pending deferrable function cùng mọi pending deferrable function khác cùng type; execution thực hiện tại thời điểm xác định rõ, giải thích sau trong phần “Softirq”.
+Thực thi pending deferrable function cùng mọi pending deferrable function khác cùng type; execution thực hiện tại thời điểm well-specified, giải thích sau trong phần “Softirq”.
 
-Activation và execution gắn với nhau: deferrable function được CPU cho trước activate phải thực thi trên cùng CPU. Không có lý do hiển nhiên nào gợi ý quy tắc này có lợi cho system performance. Gắn deferrable function với activating CPU về lý thuyết có thể tận dụng CPU hardware cache tốt hơn. Xét cho cùng có thể activating kernel thread truy cập data structure mà deferrable function cũng sẽ dùng. Tuy nhiên line liên quan dễ không còn trong cache khi deferrable function chạy vì execution có thể trì hoãn lâu. Hơn nữa, gắn function với CPU luôn là operation có khả năng “nguy hiểm” vì một CPU có thể trở nên rất bận còn CPU khác phần lớn idle.
+Activation và execution gắn với nhau: deferrable function được CPU cho trước activate phải thực thi trên cùng CPU. Không có lý do self-evident nào gợi ý quy tắc này có lợi cho system performance. Gắn deferrable function với activating CPU về lý thuyết có thể tận dụng CPU hardware cache tốt hơn. Xét cho cùng có thể activating kernel thread truy cập data structure mà deferrable function cũng sẽ dùng. Tuy nhiên line liên quan dễ không còn trong cache khi deferrable function chạy vì execution có thể trì hoãn lâu. Hơn nữa, gắn function với CPU luôn là operation có khả năng “nguy hiểm” vì một CPU có thể trở nên rất bận còn CPU khác phần lớn idle.
 
 ### Softirq
 
@@ -1237,17 +1237,17 @@ for(;;) {
 
 Khi được wake up, kernel thread kiểm tra softirq bit mask `local_softirq_pending()` và gọi `do_softirq()` nếu cần. Nếu không pending softirq, function đặt current process vào state `TASK_INTERRUPTIBLE` rồi gọi function `cond_resched()` thực hiện process switch nếu current process yêu cầu (flag `TIF_NEED_RESCHED` của current `thread_info` được set).
 
-Kernel thread ksoftirqd/n là giải pháp cho vấn đề đánh đổi quan trọng.
+Kernel thread ksoftirqd/n là giải pháp cho vấn đề trade-off quan trọng.
 
 Softirq function có thể tự reactivate; thực tế cả networking softirq và tasklet softirq đều làm vậy. Hơn nữa external event như packet flooding trên network card có thể activate softirq với tần suất rất cao.
 
-Khả năng xuất hiện luồng softirq khối lượng lớn liên tục tạo vấn đề được giải quyết bằng đưa vào kernel thread. Không có chúng, developer về cơ bản đối mặt hai strategy thay thế.
+Khả năng xuất hiện luồng softirq high-volume liên tục tạo vấn đề được giải quyết bằng đưa vào kernel thread. Không có chúng, developer về cơ bản đối mặt hai strategy thay thế.
 
 Strategy đầu là bỏ qua softirq mới xảy ra khi `do_softirq()` chạy. Nói cách khác function `do_softirq()` có thể xác định softirq nào pending khi bắt đầu rồi thực thi function tương ứng. Sau đó kết thúc không kiểm tra lại pending softirq. Giải pháp chưa đủ tốt. Giả sử softirq function được reactivate trong execution của `do_softirq()`. Trường hợp xấu nhất softirq không được thực thi lại đến timer interrupt tiếp theo ngay cả khi máy idle. Kết quả softirq latency time không thể chấp nhận với networking developer.
 
-Strategy thứ hai là liên tục kiểm tra lại pending softirq. Function `do_softirq()` có thể tiếp tục kiểm tra pending softirq và chỉ kết thúc khi không còn. Dù giải pháp có thể thỏa mãn networking developer, chắc chắn có thể khiến người dùng bình thường khó chịu: nếu network card nhận luồng packet tần suất cao hoặc softirq function cứ tự activate, function `do_softirq()` không bao giờ return và User Mode program gần như bị dừng.
+Strategy thứ hai là liên tục kiểm tra lại pending softirq. Function `do_softirq()` có thể tiếp tục kiểm tra pending softirq và chỉ kết thúc khi không còn. Dù giải pháp có thể thỏa mãn networking developer, chắc chắn có thể khiến người dùng bình thường khó chịu: nếu network card nhận luồng packet high-frequency hoặc softirq function cứ tự activate, function `do_softirq()` không bao giờ return và User Mode program gần như bị dừng.
 
-Kernel thread ksoftirqd/n cố giải quyết vấn đề đánh đổi khó này. Function `do_softirq()` xác định pending softirq và thực thi function tương ứng. Sau một vài iteration, nếu luồng softirq không dừng, function wake up kernel thread rồi kết thúc (bước 10 của \_\_`do_softirq()`). Kernel thread có priority thấp nên user program có cơ hội chạy; nhưng nếu máy idle, pending softirq được thực thi nhanh.
+Kernel thread ksoftirqd/n cố giải quyết vấn đề trade-off khó này. Function `do_softirq()` xác định pending softirq và thực thi function tương ứng. Sau một vài iteration, nếu luồng softirq không dừng, function wake up kernel thread rồi kết thúc (bước 10 của \_\_`do_softirq()`). Kernel thread có priority thấp nên user program có cơ hội chạy; nhưng nếu máy idle, pending softirq được thực thi nhanh.
 
 ### Tasklet
 
@@ -1567,7 +1567,7 @@ Nếu control flag `VM` trong register `eflags` của User Mode program được
 
 [^5]: Exception “Double fault” biểu thị một loại kernel misbehavior, là exception duy nhất được xử lý qua task gate (xem phần “Exception handling” sau trong chương.).
 
-[^6]: Một số Pentium model cũ có bug “f00f” nổi tiếng, cho phép User Mode program làm hệ thống đóng băng. Khi thực thi trên CPU đó, Linux dùng workaround dựa trên initialize register `idtr` bằng fix-mapped read-only linear address trỏ đến IDT thực tế (xem phần “Fix-mapped linear address” trong Chương 2).
+[^6]: Một số Pentium model cũ có bug “f00f” nổi tiếng, cho phép User Mode program làm hệ thống đóng băng. Khi thực thi trên CPU đó, Linux dùng workaround dựa trên initialize register `idtr` bằng fix-mapped read-only linear address trỏ đến IDT thực tế (xem phần “Fix-Mapped linear address” trong Chương 2).
 
 [^7]: Một assembly language “string instruction” duy nhất như `rep;movsb` có thể thao tác trên toàn block data (string).
 

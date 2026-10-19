@@ -26,13 +26,13 @@ File được mở với flag `O_DIRECT` set. Mọi read hoặc write operation 
 
 Asynchronous mode
 
-File được truy cập—qua nhóm POSIX API hoặc system call riêng Linux—sao cho thực hiện “asynchronous I/O”: nghĩa là data transfer request không bao giờ block calling process; thay vào đó được thực hiện “ở nền” trong khi ứng dụng tiếp tục thực thi bình thường. Chúng ta bàn trường hợp này trong phần “Asynchronous I/O”.
+File được truy cập—qua nhóm POSIX API hoặc system call Linux-specific—sao cho thực hiện “asynchronous I/O”: nghĩa là data transfer request không bao giờ block calling process; thay vào đó được thực hiện “ở nền” trong khi ứng dụng tiếp tục thực thi bình thường. Chúng ta bàn trường hợp này trong phần “Asynchronous I/O”.
 
 ## Đọc và ghi file
 
 Phần “The read() and write() System Calls” trong Chương 12 đã mô tả cách triển khai system call `read()` và `write()`. Service routine tương ứng cuối cùng gọi method `read` và `write` của file object, có thể phụ thuộc filesystem. Với disk-based filesystem, các method này tìm physical block chứa dữ liệu đang truy cập và kích hoạt block device driver để bắt đầu data transfer.
 
-Đọc file dựa trên page: kernel luôn truyền toàn page dữ liệu mỗi lần. Nếu process gọi system call `read()` để lấy vài byte và dữ liệu chưa trong RAM, kernel cấp phát page frame mới, điền page bằng phần file thích hợp, thêm page vào page cache, rồi cuối cùng sao chép byte yêu cầu vào process address space. Với phần lớn filesystem, đọc page dữ liệu từ file chỉ là tìm block trên disk chứa dữ liệu yêu cầu. Khi xong, kernel điền page bằng cách gửi I/O operation thích hợp đến generic block layer. Trong thực tế, method `read` của mọi disk-based filesystem được triển khai bằng function chung tên `generic_file_read()`.
+Đọc file page-based: kernel luôn truyền toàn page dữ liệu mỗi lần. Nếu process gọi system call `read()` để lấy vài byte và dữ liệu chưa trong RAM, kernel cấp phát page frame mới, điền page bằng phần file thích hợp, thêm page vào page cache, rồi cuối cùng sao chép byte yêu cầu vào process address space. Với phần lớn filesystem, đọc page dữ liệu từ file chỉ là tìm block trên disk chứa dữ liệu yêu cầu. Khi xong, kernel điền page bằng cách gửi I/O operation thích hợp đến generic block layer. Trong thực tế, method `read` của mọi disk-based filesystem được triển khai bằng function chung tên `generic_file_read()`.
 
 Write operation trên disk-based file hơi phức tạp hơn vì file size có thể tăng, nên kernel có thể cấp phát một số physical block trên disk. Tất nhiên, cách thực hiện chính xác phụ thuộc loại filesystem. Tuy nhiên, nhiều disk-based filesystem triển khai method `write` qua function chung tên `generic_file_write()`. Ví dụ gồm Ext2, System V/Coherent/Xenix và MINIX. Mặt khác, một số filesystem khác như journaling và network filesystem triển khai method `write` qua custom function.
 
@@ -188,9 +188,9 @@ int ext3_readpage(struct file *file, struct page *page)
 }
 ```
 
-Cần wrapper vì function `mpage_readpage()` nhận parameter là descriptor `page` của page cần điền và địa chỉ `get_block` của function giúp `mpage_readpage()` tìm block đúng. Wrapper riêng cho filesystem nên có thể cung cấp function thích hợp lấy block. Function này chuyển block number tương đối đầu file thành logical block number tương đối vị trí block trong disk partition (xem ví dụ Chương 18). Tất nhiên, parameter sau phụ thuộc loại filesystem mà regular file thuộc về; trong ví dụ trước, parameter là địa chỉ function `ext3_get_block()`. Function truyền làm `get_block` luôn dùng buffer head lưu thông tin quý về block device (field `b_dev`), vị trí dữ liệu yêu cầu trên device (field `b_blocknr`) và block status (field `b_state`).
+Cần wrapper vì function `mpage_readpage()` nhận parameter là descriptor `page` của page cần điền và địa chỉ `get_block` của function giúp `mpage_readpage()` tìm block đúng. Wrapper filesystem-specific nên có thể cung cấp function thích hợp lấy block. Function này chuyển block number tương đối đầu file thành logical block number tương đối vị trí block trong disk partition (xem ví dụ Chương 18). Tất nhiên, parameter sau phụ thuộc loại filesystem mà regular file thuộc về; trong ví dụ trước, parameter là địa chỉ function `ext3_get_block()`. Function truyền làm `get_block` luôn dùng buffer head lưu thông tin quý về block device (field `b_dev`), vị trí dữ liệu yêu cầu trên device (field `b_blocknr`) và block status (field `b_state`).
 
-Function `mpage_readpage()` chọn giữa hai chiến lược khi đọc page từ disk. Nếu block chứa dữ liệu yêu cầu nằm liên tiếp trên disk, function gửi read I/O operation cho generic block layer bằng một bio descriptor. Ngược lại, mỗi block trong page được đọc bằng bio descriptor khác. Function `get_block` phụ thuộc filesystem đóng vai trò thiết yếu xác định block tiếp theo trong file có phải block tiếp theo trên disk không.
+Function `mpage_readpage()` chọn giữa hai chiến lược khi đọc page từ disk. Nếu block chứa dữ liệu yêu cầu nằm liên tiếp trên disk, function gửi read I/O operation cho generic block layer bằng một bio descriptor. Ngược lại, mỗi block trong page được đọc bằng bio descriptor khác. Function `get_block` filesystem-dependent đóng vai trò thiết yếu xác định block tiếp theo trong file có phải block tiếp theo trên disk không.
 
 Cụ thể, `mpage_readpage()` thực hiện các bước sau:
 
@@ -198,7 +198,7 @@ Cụ thể, `mpage_readpage()` thực hiện các bước sau:
 
 2\. Lấy block size (lưu trong inode field `page->mapping->host->i_blkbits`) và tính hai giá trị cần để truy cập mọi block trên page: số block lưu trong page và file block number của block đầu page—tức index của block đầu page tương đối đầu file.
 
-3\. Với mỗi block trong page, gọi function `get_block` phụ thuộc filesystem truyền làm parameter để lấy logical block number, tức index của block tương đối đầu disk hoặc partition. Logical block number của mọi block trong page lưu trong local array.
+3\. Với mỗi block trong page, gọi function `get_block` filesystem-dependent truyền làm parameter để lấy logical block number, tức index của block tương đối đầu disk hoặc partition. Logical block number của mọi block trong page lưu trong local array.
 
 4\. Kiểm tra điều kiện bất thường có thể xảy ra khi thực hiện bước trước. Cụ thể, nếu một số block không liền kề trên disk, hoặc block nào đó nằm trong “file hole” (xem phần “File Holes” trong Chương 18), hoặc block buffer đã được function `get_block` điền, nhảy đến bước 11 để đọc page từng block.
 
@@ -251,7 +251,7 @@ Function `block_read_full_page()` đọc page dữ liệu từng block. Như đ�
 
 a. Nếu flag `BH_Uptodate` set, bỏ qua buffer và tiếp tục buffer tiếp theo trong page.
 
-b. Nếu flag `BH_Mapped` không set và block không vượt cuối file, gọi function `get_block` phụ thuộc filesystem có địa chỉ đã truyền làm parameter. Với regular file, function tìm trong on-disk data structure của filesystem để lấy logical block number của buffer tương đối đầu disk hoặc partition. Ngược lại, với block device file, function xem file block number là logical block number. Trong cả hai trường hợp, function lưu logical block number trong field `b_blocknr` của buffer head tương ứng và set flag `BH_Mapped`.[^2] c. Kiểm tra lại flag `BH_Uptodate` vì function `get_block` phụ thuộc filesystem có thể đã kích hoạt block I/O operation cập nhật buffer. Nếu `BH_Uptodate` set, tiếp tục buffer tiếp theo trong page.
+b. Nếu flag `BH_Mapped` không set và block không vượt cuối file, gọi function `get_block` filesystem-dependent có địa chỉ đã truyền làm parameter. Với regular file, function tìm trong on-disk data structure của filesystem để lấy logical block number của buffer tương đối đầu disk hoặc partition. Ngược lại, với block device file, function xem file block number là logical block number. Trong cả hai trường hợp, function lưu logical block number trong field `b_blocknr` của buffer head tương ứng và set flag `BH_Mapped`.[^2] c. Kiểm tra lại flag `BH_Uptodate` vì function `get_block` filesystem-dependent có thể đã kích hoạt block I/O operation cập nhật buffer. Nếu `BH_Uptodate` set, tiếp tục buffer tiếp theo trong page.
 
 d. Lưu địa chỉ buffer head trong local array `arr` và tiếp tục buffer tiếp theo trong page.
 
@@ -269,7 +269,7 @@ b. Đặt field `b_end_io` của buffer head thành địa chỉ function `end_b
 
 Function `end_buffer_async_read()` là completion method của buffer head; được thực thi ngay khi I/O data transfer trên block buffer kết thúc. Giả định không có I/O error, function set flag `BH_Uptodate` của buffer head và clear flag `BH_Async_Read`. Sau đó lấy descriptor của buffer page chứa block buffer (địa chỉ lưu trong field `b_page` của buffer head) và kiểm tra mọi block trong page up-to-date chưa; nếu có, function set flag `PG_uptodate` của page và gọi `unlock_page()`.
 
-### Read-ahead của file
+### Read-Ahead của file
 
 Nhiều disk access là tuần tự. Như sẽ thấy trong Chương 18, regular file lưu trên disk thành nhóm sector liền kề lớn để lấy nhanh với ít lần di chuyển disk head. Khi chương trình đọc hoặc sao chép file, thường truy cập tuần tự từ byte đầu đến cuối. Do đó, nhiều sector liền kề trên disk có khả năng được lấy khi xử lý chuỗi read request của process trên cùng file.
 
@@ -281,11 +281,11 @@ Read-ahead của file cần thuật toán tinh vi vì nhiều lý do:
 
 - Vì đọc từng page, read-ahead algorithm không phải xét offset trong page mà chỉ vị trí page được truy cập trong file.
 
-- Có thể tăng dần read-ahead chừng nào process còn truy cập file tuần tự.
+- Có thể tăng dần Read-ahead chừng nào process còn truy cập file tuần tự.
 
-- Phải giảm hoặc thậm chí disable read-ahead khi access hiện tại không tuần tự với lần trước (random access).
+- Phải giảm hoặc thậm chí disable Read-ahead khi access hiện tại không tuần tự với lần trước (random access).
 
-- Nên dừng read-ahead khi process tiếp tục truy cập lặp lại cùng page (chỉ dùng phần nhỏ file), hoặc khi gần như mọi page của file đã trong page cache.
+- Nên dừng Read-ahead khi process tiếp tục truy cập lặp lại cùng page (chỉ dùng phần nhỏ file), hoặc khi gần như mọi page của file đã trong page cache.
 
 - Nên kích hoạt low-level I/O device driver đúng lúc để page tương lai đã truyền xong khi process cần.
 
@@ -320,7 +320,7 @@ Khi mở file, mọi field của descriptor `file_ra_state` được đặt khô
 
 Field `prev_page` lưu index page cuối process yêu cầu trong read operation trước; ban đầu chứa giá trị `-`1.
 
-Field `ra_pages` biểu diễn kích thước tối đa tính bằng page cho current window, tức read-ahead tối đa cho phép với file. Giá trị ban đầu (mặc định) lưu trong descriptor `backing_dev_info` của block device chứa file (xem phần “Request Queue Descriptors” trong Chương 14). Ứng dụng có thể điều chỉnh read-ahead algorithm cho opened file bằng sửa field `ra_pages`; có thể làm bằng system call `posix_fadvise()`, truyền command `POSIX_FADV_NORMAL` (đặt maximum size read-ahead về mặc định, thường 32 page), `POSIX_FADV_SEQUENTIAL` (đặt maximum size gấp đôi mặc định), và `POSIX_FADV_RANDOM` (đặt maximum size không, do đó disable read-ahead vĩnh viễn).
+Field `ra_pages` biểu diễn kích thước tối đa tính bằng page cho current window, tức read-ahead tối đa cho phép với file. Giá trị ban đầu (mặc định) lưu trong descriptor `backing_dev_info` của block device chứa file (xem phần “Request Queue Descriptors” trong Chương 14). Ứng dụng có thể điều chỉnh read-ahead algorithm cho opened file bằng sửa field `ra_pages`; có thể làm bằng system call `posix_fadvise()`, truyền command `POSIX_FADV_NORMAL` (đặt maximum size read-ahead về mặc định, thường 32 page), `POSIX_FADV_SEQUENTIAL` (đặt maximum size read-ahead gấp đôi mặc định), và `POSIX_FADV_RANDOM` (đặt maximum size read-ahead bằng không, do đó disable read-ahead vĩnh viễn).
 
 Field `flags` chứa hai flag `RA_FLAG_MISS` và `RA_FLAG_INCACHE` đóng vai trò quan trọng. Flag đầu set khi không tìm thấy page đã đọc trước trong page cache (có khả năng vì kernel đã reclaim để giải phóng memory; xem Chương 17): khi đó kích thước ahead window tiếp theo sẽ tạo được giảm phần nào. Flag thứ hai set khi kernel xác định 256 page cuối process yêu cầu đều được tìm thấy trong page cache (giá trị cache hit liên tiếp lưu trong field `ra->cache_hit`). Khi đó read-ahead tắt vì kernel giả định mọi page process cần đã trong cache.
 
@@ -338,7 +338,7 @@ Khi nào thực thi read-ahead algorithm? Trong các trường hợp:
 
 #### Function page\_cache\_readahead()
 
-Function `page_cache_readahead()` đảm nhiệm mọi read-ahead operation không được system call chuyên biệt kích hoạt tường minh. Nó bổ sung current và ahead window, cập nhật kích thước theo số read-ahead hit, tức mức thành công của read-ahead strategy trong access trước đến file.
+Function `page_cache_readahead()` đảm nhiệm mọi read-ahead operation không được system call ad-hoc kích hoạt tường minh. Nó bổ sung current và ahead window, cập nhật kích thước theo số read-ahead hit, tức mức thành công của read-ahead strategy trong access trước đến file.
 
 Function được gọi khi kernel phải đáp ứng read request cho một hoặc nhiều page của file, và nhận năm parameter:
 
@@ -494,7 +494,7 @@ a. Reset flag `BH_New` nếu set (xem bên dưới).
 
 b. Nếu flag `BH_Mapped` không set, function thực hiện các bước con sau:
 
-1\. Gọi function phụ thuộc filesystem có địa chỉ `get_block` truyền làm parameter. Function này tìm trong on-disk data structure của filesystem để lấy logical block number của buffer (tương đối đầu disk partition thay vì đầu regular file). Function phụ thuộc filesystem lưu number trong field `b_blocknr` của buffer head tương ứng và set flag `BH_Mapped`. Function `get_block` có thể cấp phát physical block mới cho file (ví dụ nếu block truy cập nằm trong “lỗ hổng” của regular file; xem phần “File Holes” trong Chương 18). Khi đó set flag `BH_New`.
+1\. Gọi function filesystem-dependent có địa chỉ `get_block` truyền làm parameter. Function này tìm trong on-disk data structure của filesystem để lấy logical block number của buffer (tương đối đầu disk partition thay vì đầu regular file). Function filesystem-dependent lưu number trong field `b_blocknr` của buffer head tương ứng và set flag `BH_Mapped`. Function `get_block` có thể cấp phát physical block mới cho file (ví dụ nếu block truy cập nằm trong “lỗ hổng” của regular file; xem phần “File Holes” trong Chương 18). Khi đó set flag `BH_New`.
 
 2\. Kiểm tra giá trị flag `BH_New`; nếu set, gọi `unmap_underlying_metadata()` để kiểm tra block device buffer page nào trong page cache có chứa buffer tham chiếu cùng block trên disk không.[^5] Function về cơ bản gọi `__find_get_block()` để tìm block cũ trong page cache (xem phần “Searching Blocks in the Page Cache” trong Chương 15). Nếu tìm thấy block đó, function clear flag `BH_Dirty` và đợi mọi I/O data transfer trên buffer đó hoàn tất. Hơn nữa, nếu write operation không ghi lại toàn buffer trong page, điền phần không ghi bằng số không. Rồi xét buffer tiếp theo trong page.
 
@@ -552,7 +552,7 @@ Như bạn thấy, method `commit_write` cho block device file về cơ bản l�
 
 Kết quả cuối của system call `write()` gồm sửa nội dung một số page trong page cache—có thể cấp phát page và thêm vào page cache nếu chưa có. Trong một số trường hợp (ví dụ nếu file được mở với flag `O_SYNC`), I/O data transfer bắt đầu ngay (xem bước 6 của `generic_file_write()` trong phần “Writing to a File” trước đó). Tuy nhiên, thường I/O data transfer trì hoãn, như giải thích trong phần “Writing Dirty Pages to Disk” ở Chương 15.
 
-Khi kernel muốn thực sự bắt đầu I/O data transfer, cuối cùng gọi method `writepages` của object `address_space` của file, tìm dirty page trong radix tree và flush vào disk. Ví dụ, Ext2 filesystem triển khai method `writepages` qua function sau:
+Khi kernel muốn thực sự bắt đầu I/O data transfer, cuối cùng gọi method `writepages` của object `address_space` của file, tìm dirty page trong radix-tree và flush vào disk. Ví dụ, Ext2 filesystem triển khai method `writepages` qua function sau:
 
 ```c
 int ext2_writepages(struct address_space *mapping,
@@ -562,7 +562,7 @@ int ext2_writepages(struct address_space *mapping,
 }
 ```
 
-Như bạn thấy, function là wrapper đơn giản cho general-purpose function `mpage_writepages()`; thực tế nếu filesystem không định nghĩa method `writepages`, kernel gọi trực tiếp `mpage_writepages()`, truyền `NULL` làm argument thứ ba. Function `ext2_get_block()` đã được đề cập trong phần “Reading from a File” trước đó; là function phụ thuộc filesystem chuyển file block number thành logical block number.
+Như bạn thấy, function là wrapper đơn giản cho general-purpose function `mpage_writepages()`; thực tế nếu filesystem không định nghĩa method `writepages`, kernel gọi trực tiếp `mpage_writepages()`, truyền `NULL` làm argument thứ ba. Function `ext2_get_block()` đã được đề cập trong phần “Reading from a File” trước đó; là function filesystem-dependent chuyển file block number thành logical block number.
 
 Data structure `writeback_control` là descriptor điều khiển cách phải thực hiện writeback operation; chúng ta đã mô tả trong phần “Looking for Dirty Pages To Be Flushed” ở Chương 15.
 
@@ -590,11 +590,11 @@ d. Nếu parameter `get_block` là `NULL` (không định nghĩa method `writepa
 
 8\. Nếu function `mpage_writepage()` được gọi ở bước 4d và trả về địa chỉ bio descriptor, gọi `mpage_bio_submit()` (xem bên dưới).
 
-Filesystem điển hình như Ext2 triển khai method `writepage` làm wrapper cho general-purpose function `block_write_full_page()`, truyền địa chỉ function `get_block` phụ thuộc filesystem. Đến lượt function `block_write_full_page()` giống `block_read_full_page()` mô tả trong phần “Reading from a File” trước đó: cấp phát buffer head cho page (nếu chưa là buffer page), và gọi function `submit_bh()` trên mỗi buffer head, chỉ định operation `WRITE`. Với block device file, chúng triển khai method `writepage` bằng `blkdev_writepage()`, là wrapper cho `block_write_full_page()`.
+Filesystem điển hình như Ext2 triển khai method `writepage` làm wrapper cho general-purpose function `block_write_full_page()`, truyền địa chỉ function `get_block` filesystem-dependent. Đến lượt function `block_write_full_page()` giống `block_read_full_page()` mô tả trong phần “Reading from a File” trước đó: cấp phát buffer head cho page (nếu chưa là buffer page), và gọi function `submit_bh()` trên mỗi buffer head, chỉ định operation `WRITE`. Với block device file, chúng triển khai method `writepage` bằng `blkdev_writepage()`, là wrapper cho `block_write_full_page()`.
 
 Nhiều non-journaling filesystem dựa vào function `mpage_writepage()` thay custom method `writepage`. Điều này có thể cải thiện hiệu năng vì function `mpage_writepage()` cố gửi I/O transfer bằng cách gom nhiều page nhất có thể trong cùng bio descriptor; từ đó cho block device driver khai thác scatter-gather DMA capability của hard disk controller hiện đại.
 
-Nói ngắn gọn, function `mpage_writepage()` kiểm tra page cần ghi có chứa block không liền kề trên disk, có file hole, hoặc có block không dirty hay không up-to-date không. Nếu ít nhất một điều kiện đúng, function quay về dùng method `writepage` phụ thuộc filesystem như trên. Ngược lại, function thêm page làm segment của bio descriptor. Địa chỉ bio descriptor truyền làm parameter cho function; nếu là `NULL`, `mpage_writepage()` khởi tạo bio descriptor mới và trả địa chỉ cho calling function, đến lượt function đó truyền lại trong lời gọi `mpage_writepage()` tương lai. Theo cách này, nhiều page có thể thêm vào cùng bio. Nếu page không liền kề page thêm cuối trong bio, `mpage_writepage()` gọi `mpage_bio_submit()` để bắt đầu I/O data transfer trên bio và cấp phát bio mới cho page.
+Nói ngắn gọn, function `mpage_writepage()` kiểm tra page cần ghi có chứa block không liền kề trên disk, có file hole, hoặc có block không dirty hay không up-to-date không. Nếu ít nhất một điều kiện đúng, function quay về dùng method `writepage` filesystem-dependent như trên. Ngược lại, function thêm page làm segment của bio descriptor. Địa chỉ bio descriptor truyền làm parameter cho function; nếu là `NULL`, `mpage_writepage()` khởi tạo bio descriptor mới và trả địa chỉ cho calling function, đến lượt function đó truyền lại trong lời gọi `mpage_writepage()` tương lai. Theo cách này, nhiều page có thể thêm vào cùng bio. Nếu page không liền kề page thêm cuối trong bio, `mpage_writepage()` gọi `mpage_bio_submit()` để bắt đầu I/O data transfer trên bio và cấp phát bio mới cho page.
 
 Function `mpage_bio_submit()` đặt method `bi_end_io` của bio thành địa chỉ `mpage_end_io_write()`, rồi gọi `submit_bio()` để bắt đầu transfer (xem phần “Submitting Buffer Heads to the Generic Block Layer” trong Chương 15). Khi data transfer kết thúc thành công, completion function `mpage_end_io_write()` đánh thức process bất kỳ đợi page transfer hoàn tất và hủy bio descriptor.
 
@@ -670,7 +670,7 @@ Kiểm tra file operation `mmap` cho file cần map có định nghĩa không; n
 
 Bước 2
 
-Function `get_unmapped_area()` gọi method `get_unmapped_area` của file object nếu định nghĩa, để cấp phát khoảng linear address phù hợp memory mapping của file. Disk-based filesystem không định nghĩa method này; khi đó, như giải thích trong phần “Memory Region Handling” ở Chương 9, function `get_unmapped_area()` cuối cùng gọi method `get_unmapped_area` của memory descriptor. Bước 3 Ngoài consistency check thông thường, so sánh loại memory mapping yêu cầu (lưu trong parameter `flags` của system call `mmap()`) và flag chỉ định khi mở file (lưu trong field `file->f_mode`). Cụ thể:
+Function `get_unmapped_area()` gọi method `get_unmapped_area` của file object nếu định nghĩa, để cấp phát khoảng linear address phù hợp memory mapping của file. disk-based filesystem không định nghĩa method này; khi đó, như giải thích trong phần “Memory Region Handling” ở Chương 9, function `get_unmapped_area()` cuối cùng gọi method `get_unmapped_area` của memory descriptor. Bước 3 Ngoài consistency check thông thường, so sánh loại memory mapping yêu cầu (lưu trong parameter `flags` của system call `mmap()`) và flag chỉ định khi mở file (lưu trong field `file->f_mode`). Cụ thể:
 
   - Nếu yêu cầu shared writable memory mapping, kiểm tra file đã mở để ghi và không mở ở append mode (flag `O_APPEND` của system call `open()`).
 
@@ -802,17 +802,17 @@ Service routine `sys_msync()` gọi `msync_interval()` trên mỗi memory region
 
 4\. Nếu function đến đây, flag `MS_SYNC` set, nên function phải flush page trong memory region vào disk và cho process hiện tại sleep đến khi mọi I/O data transfer kết thúc. Để làm vậy, function lấy semaphore `i_sem` của inode của file.
 
-5\. Gọi function `filemap_fdatawrite()`, nhận địa chỉ object `address_space` của file. Function về cơ bản thiết lập descriptor `writeback_control` với synchronization mode `WB_SYNC_ALL` và kiểm tra address space có method `writepages` tích hợp không. Nếu có, gọi function tương ứng rồi trả về. Ngược lại, thực thi function `mpage_writepages()`. (Xem phần “Writing Dirty Pages to Disk” trước đó trong chương này.)
+5\. Gọi function `filemap_fdatawrite()`, nhận địa chỉ object `address_space` của file. Function về cơ bản thiết lập descriptor `writeback_control` với synchronization mode `WB_SYNC_ALL` và kiểm tra address space có method `writepages` built-in không. Nếu có, gọi function tương ứng rồi trả về. Ngược lại, thực thi function `mpage_writepages()`. (Xem phần “Writing Dirty Pages to Disk” trước đó trong chương này.)
 
 6\. Kiểm tra method `fsync` của file object có định nghĩa không; nếu có, thực thi. Với regular file, method thường chỉ flush inode object của file vào disk. Tuy nhiên, với block device file, method gọi `sync_blockdev()`, kích hoạt I/O data transfer của mọi dirty buffer của device. 7. Thực thi function `filemap_fdatawait()`. Nhớ từ phần “The Tags of the Radix Tree” ở Chương 15 rằng radix tree trong page cache xác định mọi page hiện đang ghi vào disk qua tag `PAGECACHE_TAG_WRITEBACK`. Function quét nhanh phần radix tree bao phủ khoảng linear address cho trước để tìm page có flag `PG_writeback` set; với mỗi page, gọi `wait_on_page_bit()` để sleep đến khi flag `PG_writeback` clear—tức đến khi I/O data transfer đang diễn ra trên page kết thúc.
 
 8\. Nhả semaphore `i_sem` của file và trả về.
 
-### Non-linear memory mapping
+### Non-Linear memory mapping
 
 Kernel Linux 2.6 còn cung cấp loại access method khác cho regular file: non-linear memory mapping. Về cơ bản, non-linear memory mapping là file memory mapping như mô tả trước nhưng memory page không map đến page tuần tự trên file; thay vào đó, mỗi memory page map page ngẫu nhiên (tùy ý) của dữ liệu file.
 
-Tất nhiên, User Mode application có thể đạt cùng kết quả bằng gọi lặp lại system call `mmap()`, mỗi lần trên phần file dài 4096 byte khác nhau. Tuy nhiên, cách này không hiệu quả cho non-linear mapping file lớn vì mỗi mapping page cần memory region riêng.
+Tất nhiên, User Mode application có thể đạt cùng kết quả bằng gọi lặp lại system call `mmap()`, mỗi lần trên phần file 4096-byte-long khác nhau. Tuy nhiên, cách này không hiệu quả cho non-linear mapping file lớn vì mỗi mapping page cần memory region riêng.
 
 Để hỗ trợ non-linear memory mapping, kernel dùng vài data structure bổ sung. Trước hết, flag `VM_NONLINEAR` của memory region descriptor chỉ định memory region chứa non-linear mapping. Mọi descriptor của non-linear mapping memory region cho file cho trước được tập hợp trong doubly linked circular list có gốc tại field `i_mmap_nonlinear` của object `address_space`.
 
@@ -850,9 +850,9 @@ a. Kiểm tra page descriptor đã trong page cache chưa; nếu chưa và flag 
 
 b. Nếu page descriptor trong page cache, cập nhật Page Table entry của linear address tương ứng để trỏ đến page frame và cập nhật counter page trong memory region descriptor.
 
-c. Ngược lại, nếu không tìm thấy page descriptor trong page cache, lưu offset của page của file trong 32 bit cao nhất của Page Table entry cho linear address tương ứng; đồng thời clear bit `Present` của Page Table entry và set bit `Dirty`.
+c. Ngược lại, nếu không tìm thấy page descriptor trong page cache, lưu offset của page của file trong 32 bit highest-order của Page Table entry cho linear address tương ứng; đồng thời clear bit `Present` của Page Table entry và set bit `Dirty`.
 
-Như giải thích trong phần “Demand Paging” ở Chương 9, khi xử lý demand-paging fault, function `handle_pte_fault()` kiểm tra các bit `Present` và `Dirty` trong Page Table entry; nếu giá trị tương ứng non-linear memory mapping, `handle_pte_fault()` gọi function `do_file_page()`, trích index của page file yêu cầu từ bit cao của Page Table entry; rồi `do_file_page()` gọi method `populate` của memory region để đọc page từ disk và cập nhật chính Page Table entry.
+Như giải thích trong phần “Demand Paging” ở Chương 9, khi xử lý demand-paging fault, function `handle_pte_fault()` kiểm tra các bit `Present` và `Dirty` trong Page Table entry; nếu giá trị tương ứng non-linear memory mapping, `handle_pte_fault()` gọi function `do_file_page()`, trích index của page file yêu cầu từ bit high-order của Page Table entry; rồi `do_file_page()` gọi method `populate` của memory region để đọc page từ disk và cập nhật chính Page Table entry.
 
 Vì memory page của non-linear memory mapping nằm trong page cache theo page index tương đối đầu file—thay vì index tương đối đầu memory region—non-linear memory mapping được flush disk chính xác như linear memory mapping (xem phần “Flushing Dirty Memory Mapping Pages to Disk” trước đó trong chương này).
 
@@ -966,7 +966,7 @@ Cuối cùng, ứng dụng truyền địa chỉ control block cho `aio_read()` 
 
 ### Asynchronous I/O trong Linux 2.6
 
-System library có thể triển khai asynchronous I/O hoàn toàn không cần kernel support. Về cơ bản, library function `aio_read()` hoặc `aio_write()` clone process hiện tại và cho child gọi synchronous system call `read()` hoặc `write()`; rồi parent kết thúc function `aio_read()` hoặc `aio_write()` và tiếp tục thực thi chương trình, do đó không đợi synchronous operation do child bắt đầu hoàn tất. Tuy nhiên, phiên bản POSIX function “nhà nghèo” này chậm hơn đáng kể phiên bản dùng triển khai asynchronous I/O ở kernel level.
+System library có thể triển khai asynchronous I/O hoàn toàn không cần kernel support. Về cơ bản, library function `aio_read()` hoặc `aio_write()` clone process hiện tại và cho child gọi synchronous system call `read()` hoặc `write()`; rồi parent kết thúc function `aio_read()` hoặc `aio_write()` và tiếp tục thực thi chương trình, do đó không đợi synchronous operation do child bắt đầu hoàn tất. Tuy nhiên, phiên bản POSIX function “nhà nghèo” này chậm hơn đáng kể phiên bản dùng triển khai asynchronous I/O ở kernel-level.
 
 Kernel Linux 2.6 hỗ trợ tập system call cho asynchronous I/O. Tuy nhiên, trong Linux 2.6.11, tính năng này đang phát triển, và asynchronous I/O chỉ hoạt động đúng với file mở có flag `O_DIRECT` set (xem phần trước). System call cho asynchronous I/O liệt kê trong Bảng 16-5.
 
@@ -984,7 +984,7 @@ Bảng 16-5. Linux system call cho asynchronous I/O
 
 Nếu User Mode process muốn dùng system call `io_submit()` để bắt đầu asynchronous I/O operation, phải tạo asynchronous I/O context trước.
 
-Về cơ bản, asynchronous I/O context (viết tắt AIO context) là tập data structure theo dõi tiến độ đang diễn ra của asynchronous I/O operation mà process yêu cầu. Mỗi AIO context gắn với object `kioctx`, lưu mọi thông tin liên quan context. Ứng dụng có thể tạo nhiều AIO context; mọi descriptor `kioctx` của process cho trước được tập hợp trong singly linked list có gốc tại field `ioctx_list` của memory descriptor (xem Bảng 9-2 trong Chương 9).
+Về cơ bản, asynchronous I/O context (viết tắt AIO context) là tập data structure theo dõi tiến độ on-going của asynchronous I/O operation mà process yêu cầu. Mỗi AIO context gắn với object `kioctx`, lưu mọi thông tin liên quan context. Ứng dụng có thể tạo nhiều AIO context; mọi descriptor `kioctx` của process cho trước được tập hợp trong singly linked list có gốc tại field `ioctx_list` của memory descriptor (xem Bảng 9-2 trong Chương 9).
 
 Chúng ta không bàn chi tiết object `kioctx`; tuy nhiên nên chỉ ra data structure quan trọng do object `kioctx` tham chiếu: AIO ring.
 

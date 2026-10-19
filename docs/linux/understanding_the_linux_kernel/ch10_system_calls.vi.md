@@ -4,7 +4,7 @@ CHƯƠNG 10 Chương 10
 
 ![Hình mở đầu Chương 10](images/ch10/ch10_opener.png)
 
-Hệ điều hành cung cấp cho process chạy trong User Mode một tập interface để tương tác với hardware device như CPU, disk và printer. Đặt thêm một lớp giữa ứng dụng và hardware có nhiều lợi ích. Thứ nhất, nó giúp lập trình dễ hơn bằng cách giải phóng người dùng khỏi việc nghiên cứu đặc điểm lập trình cấp thấp của hardware device. Thứ hai, nó tăng đáng kể tính bảo mật hệ thống, vì kernel có thể kiểm tra tính đúng đắn của yêu cầu ở cấp interface trước khi cố đáp ứng. Cuối cùng nhưng không kém phần quan trọng, các interface này giúp chương trình có tính khả chuyển cao hơn, vì có thể compile và thực thi đúng trên mọi kernel cung cấp cùng tập interface.
+Hệ điều hành cung cấp cho process chạy trong User Mode một tập interface để tương tác với hardware device như CPU, disk và printer. Đặt thêm một lớp giữa ứng dụng và hardware có nhiều lợi ích. Thứ nhất, nó giúp lập trình dễ hơn bằng cách giải phóng người dùng khỏi việc nghiên cứu đặc điểm lập trình low-level của hardware device. Thứ hai, nó tăng đáng kể tính bảo mật hệ thống, vì kernel có thể kiểm tra tính đúng đắn của yêu cầu ở cấp interface trước khi cố đáp ứng. Cuối cùng nhưng không kém phần quan trọng, các interface này giúp chương trình có tính khả chuyển cao hơn, vì có thể compile và thực thi đúng trên mọi kernel cung cấp cùng tập interface.
 
 Hệ thống Unix triển khai phần lớn interface giữa User Mode process và hardware device bằng system call gửi đến kernel. Chương này xem xét chi tiết cách Linux triển khai system call mà User Mode program gửi đến kernel.
 
@@ -16,7 +16,7 @@ Hệ thống Unix chứa nhiều function library cung cấp API cho lập trìn
 
 Tuy nhiên, chiều ngược lại không đúng—API không nhất thiết tương ứng với một system call cụ thể. Trước hết, API có thể cung cấp dịch vụ trực tiếp trong User Mode. (Với thứ trừu tượng như math function, có thể không có lý do thực hiện system call.) Thứ hai, một API function có thể thực hiện nhiều system call. Hơn nữa, nhiều API function có thể thực hiện cùng system call nhưng bổ sung chức năng bao quanh nó. Ví dụ, trong Linux, các API `malloc()`, `calloc()`, và `free()` được triển khai trong library libc. Code trong library này theo dõi yêu cầu cấp phát và thu hồi, và dùng system call `brk()` để mở rộng hoặc thu nhỏ heap của process (xem phần “Managing the Heap” trong Chương 9).
 
-Chuẩn POSIX nói đến API chứ không phải system call. Một hệ thống có thể được chứng nhận tuân thủ POSIX nếu cung cấp tập API thích hợp cho application program, bất kể cách triển khai các function tương ứng. Thực tế, nhiều hệ thống không phải Unix đã được chứng nhận tuân thủ POSIX, vì cung cấp mọi dịch vụ Unix truyền thống trong User Mode library.
+Chuẩn POSIX nói đến API chứ không phải system call. Một hệ thống có thể được chứng nhận POSIX-compliant nếu cung cấp tập API thích hợp cho application program, bất kể cách triển khai các function tương ứng. Thực tế, nhiều hệ thống non-Unix đã được chứng nhận POSIX-compliant, vì cung cấp mọi dịch vụ Unix truyền thống trong User Mode library.
 
 Theo góc nhìn lập trình viên, phân biệt API và system call không quan trọng—những gì quan trọng chỉ là tên function, kiểu parameter và ý nghĩa return code. Tuy nhiên, theo góc nhìn người thiết kế kernel, sự phân biệt có ý nghĩa vì system call thuộc kernel, còn User Mode library thì không.
 
@@ -205,7 +205,7 @@ Ba model-specific register được function `enable_sep_cpu()` khởi tạo, đ
 
 3\. Tính linear address cuối local TSS, và ghi giá trị này vào register `SYSENTER_CS_ESP`.[^3]
 
-Cách đặt register `SYSENTER_CS_ESP` cần được giải thích thêm. Khi system call bắt đầu, kernel stack rỗng, nên register `esp` phải trỏ đến cuối memory area 4 hoặc 8 KB chứa kernel stack và descriptor của process hiện tại (xem Hình 3-2). User Mode wrapper routine không thể đặt register này đúng vì không biết địa chỉ memory area; mặt khác, phải đặt giá trị register trước khi chuyển sang Kernel Mode. Vì thế, kernel khởi tạo register để mã hóa địa chỉ Task State Segment của local CPU. Như đã mô tả ở bước 3 của function `__switch_to()` (xem phần “Performing the Process Switch” trong Chương 3), tại mỗi process switch, kernel lưu kernel stack pointer của process hiện tại trong field `esp0` của local TSS. Do đó, system call handler đọc register `esp`, tính địa chỉ field `esp0` của local TSS, và nạp kernel stack pointer thích hợp vào chính register `esp` đó.
+Cách đặt register `SYSENTER_CS_ESP` cần được giải thích thêm. Khi system call bắt đầu, kernel stack rỗng, nên register `esp` phải trỏ đến cuối memory area 4 hoặc 8-KB chứa kernel stack và descriptor của process hiện tại (xem Hình 3-2). User Mode wrapper routine không thể đặt register này đúng vì không biết địa chỉ memory area; mặt khác, phải đặt giá trị register trước khi chuyển sang Kernel Mode. Vì thế, kernel khởi tạo register để mã hóa địa chỉ Task State Segment của local CPU. Như đã mô tả ở bước 3 của function `__switch_to()` (xem phần “Performing the Process Switch” trong Chương 3), tại mỗi process switch, kernel lưu kernel stack pointer của process hiện tại trong field `esp0` của local TSS. Do đó, system call handler đọc register `esp`, tính địa chỉ field `esp0` của local TSS, và nạp kernel stack pointer thích hợp vào chính register `esp` đó.
 
 ##### Vsyscall page
 
@@ -354,7 +354,7 @@ Tuy nhiên, để truyền parameter trong register, phải đáp ứng hai đi�
 
 Tuy nhiên, có system call cần hơn sáu parameter. Trong những trường hợp này, một register được dùng để trỏ đến memory area trong process address space chứa giá trị parameter. Tất nhiên, lập trình viên không phải quan tâm cách xử lý này. Như mọi lời gọi C function, parameter được tự động lưu trên stack khi wrapper routine được gọi. Routine này sẽ tìm cách thích hợp để truyền parameter cho kernel.
 
-Các register dùng để lưu system call number và parameter, theo thứ tự tăng dần, là `eax` (cho system call number), `ebx`, `ecx`, `edx`, `esi`, `edi`, và `ebp`. Như đã thấy, `system_call()` và `sysenter_entry()` lưu giá trị các register này trên Kernel Mode stack bằng macro `SAVE_ALL`. Do đó, khi system call service routine truy cập stack, nó thấy return address đến `system_call()` hoặc `sysenter_entry()`, tiếp theo là parameter lưu trong `ebx` (parameter đầu của system call), parameter lưu trong `ecx`, v.v. (xem phần “Saving the registers for the interrupt handler” trong Chương 4). Bố trí stack này chính xác giống lời gọi function thông thường, nên service routine có thể dễ dàng tham chiếu parameter bằng cấu trúc C language thông thường.
+Các register dùng để lưu system call number và parameter, theo thứ tự tăng dần, là `eax` (cho system call number), `ebx`, `ecx`, `edx`, `esi`, `edi`, và `ebp`. Như đã thấy, `system_call()` và `sysenter_entry()` lưu giá trị các register này trên Kernel Mode stack bằng macro `SAVE_ALL`. Do đó, khi system call service routine truy cập stack, nó thấy return address đến `system_call()` hoặc `sysenter_entry()`, tiếp theo là parameter lưu trong `ebx` (parameter đầu của system call), parameter lưu trong `ecx`, v.v. (xem phần “Saving the registers for the interrupt handler” trong Chương 4). Bố trí stack này chính xác giống lời gọi function thông thường, nên service routine có thể dễ dàng tham chiếu parameter bằng cấu trúc C-language thông thường.
 
 Hãy xem ví dụ. Service routine `sys_write()`, xử lý system call `write()`, được khai báo như sau:
 
@@ -432,7 +432,7 @@ bad_get_user:
 
 Register `eax` chứa địa chỉ `ptr` của byte đầu cần đọc. Sáu instruction đầu về cơ bản thực hiện cùng kiểm tra với macro `access_ok()`: đảm bảo 2 byte cần đọc có địa chỉ nhỏ hơn 4 GB cũng như nhỏ hơn field `addr_limit.seg` của process `current`. (Field này lưu tại offset 24 trong structure `thread_info` của `current`, xuất hiện trong operand đầu của instruction `cmpl`.)
 
-Nếu địa chỉ hợp lệ, function thực thi instruction `movzwl` để lưu dữ liệu cần đọc vào hai byte thấp nhất của register `edx`, đồng thời đặt các byte cao của `edx` thành 0; sau đó đặt return code 0 trong `eax` và kết thúc. Nếu địa chỉ không hợp lệ, function clear `edx`, đặt giá trị `-EFAULT` vào `eax`, và kết thúc.
+Nếu địa chỉ hợp lệ, function thực thi instruction `movzwl` để lưu dữ liệu cần đọc vào hai byte thấp nhất của register `edx`, đồng thời đặt các byte high-order của `edx` thành 0; sau đó đặt return code 0 trong `eax` và kết thúc. Nếu địa chỉ không hợp lệ, function clear `edx`, đặt giá trị `-EFAULT` vào `eax`, và kết thúc.
 
 Macro `put_user(x,ptr)` giống macro đã bàn, ngoại trừ ghi giá trị `x` vào process address space bắt đầu từ địa chỉ `ptr`. Tùy kích thước `x`, nó gọi macro `__put_user_asm()` (kích thước 1, 2 hoặc 4 byte) hoặc macro `__put_user_u64()` (kích thước 8 byte). Cả hai macro trả về giá trị 0 trong register `eax` nếu ghi thành công, và `-EFAULT` nếu không.
 
@@ -450,7 +450,7 @@ Bảng 10-1. Function và macro truy cập process address space
 | `strlen_user strnlen_user` | Trả về độ dài null-terminated string trong user space |
 | `clear_user __clear_user` | Điền số không vào memory area trong user space |
 
-### Kiểm tra địa chỉ động: fixup code
+### Kiểm tra địa chỉ động: Fix-up code
 
 Như đã thấy, `access_ok()` kiểm tra sơ bộ tính hợp lệ của linear address truyền làm parameter cho system call. Kiểm tra này chỉ đảm bảo User Mode process không cố can thiệp kernel address space; tuy nhiên, linear address truyền làm parameter vẫn có thể không thuộc process address space. Trong trường hợp này, Page Fault exception sẽ xảy ra khi kernel cố dùng bất kỳ địa chỉ sai nào như vậy.
 
@@ -466,7 +466,7 @@ Trước khi mô tả cách kernel phát hiện loại lỗi này, hãy xác đ�
 
 Page Fault handler có thể dễ dàng nhận ra trường hợp đầu bằng cách xác định linear address gây lỗi có nằm trong một memory region thuộc process hay không.
 
-Nó cũng có thể phát hiện trường hợp thứ hai bằng cách kiểm tra master kernel Page Table entry tương ứng có chứa entry khác không thích hợp map địa chỉ đó hay không. Giờ hãy giải thích cách handler phân biệt hai trường hợp còn lại.
+Nó cũng có thể phát hiện trường hợp thứ hai bằng cách kiểm tra master kernel Page Table entry tương ứng có chứa entry non-null thích hợp map địa chỉ đó hay không. Giờ hãy giải thích cách handler phân biệt hai trường hợp còn lại.
 
 ### Exception table
 

@@ -28,7 +28,7 @@ Hình 14-1. Kernel component chịu ảnh hưởng bởi block device operation
 
 a. Xác định block size của filesystem chứa file và tính phạm vi dữ liệu yêu cầu theo file block number. Về cơ bản, file được xem là chia thành nhiều block, và kernel xác định number (index tương đối với đầu file) của block chứa dữ liệu yêu cầu.
 
-b. Tiếp theo, mapping layer gọi function riêng của filesystem truy cập disk inode của file và xác định vị trí dữ liệu yêu cầu trên disk theo logical block number. Về cơ bản, disk được xem là chia thành block, và kernel xác định number (index tương đối với đầu disk hoặc partition) tương ứng block lưu dữ liệu yêu cầu. Vì file có thể lưu trong block không liền kề trên disk, data structure lưu trong disk inode map mỗi file block number sang logical block number.[^1]
+b. Tiếp theo, mapping layer gọi function filesystem-specific truy cập disk inode của file và xác định vị trí dữ liệu yêu cầu trên disk theo logical block number. Về cơ bản, disk được xem là chia thành block, và kernel xác định number (index tương đối với đầu disk hoặc partition) tương ứng block lưu dữ liệu yêu cầu. Vì file có thể lưu trong block không liền kề trên disk, data structure lưu trong disk inode map mỗi file block number sang logical block number.[^1]
 
 Chúng ta sẽ thấy mapping layer hoạt động trong Chương 16, và trình bày một số disk-based filesystem điển hình trong Chương 18.
 
@@ -52,7 +52,7 @@ Như bạn thấy, nhiều kernel component liên quan dữ liệu lưu trong bl
 
 - Generic block layer kết nối mọi upper và lower component, nên biết sector, block, segment và page dữ liệu.
 
-Dù có nhiều vùng dữ liệu khác nhau, chúng thường chia sẻ cùng physical RAM cell. Ví dụ, Hình 14-2 trình bày bố trí page 4.096 byte. Upper kernel component thấy page gồm bốn block buffer, mỗi buffer 1.024 byte. Ba block cuối page đang được block device driver truyền, nên được đưa vào segment bao phủ 3.072 byte cuối page. Hard disk controller xem segment gồm sáu sector 512 byte.
+Dù có nhiều vùng dữ liệu khác nhau, chúng thường chia sẻ cùng physical RAM cell. Ví dụ, Hình 14-2 trình bày bố trí page 4,096-byte. Upper kernel component thấy page gồm bốn block buffer, mỗi buffer 1.024 byte. Ba block cuối page đang được block device driver truyền, nên được đưa vào segment bao phủ 3.072 byte cuối page. Hard disk controller xem segment gồm sáu sector 512-byte.
 
 ![Hình 14-2](images/ch14/fig14-02.png)
 
@@ -66,7 +66,7 @@ Trong chương này, chúng ta mô tả lower kernel component xử lý block de
 
 Trong phần lớn disk device, sector size là 512 byte, dù có device dùng sector lớn hơn (1.024 và 2.048 byte). Lưu ý sector nên được xem là đơn vị data transfer cơ bản; không bao giờ truyền được ít hơn một sector, dù phần lớn disk device có khả năng truyền nhiều sector liền kề mỗi lần.
 
-Trong Linux, sector size được quy ước là 512 byte; nếu block device dùng sector lớn hơn, low-level block device driver tương ứng thực hiện chuyển đổi cần thiết. Do đó, nhóm dữ liệu lưu trong block device được xác định trên disk bằng vị trí—index của sector 512 byte đầu—và độ dài theo số sector 512 byte. Sector index được lưu trong biến 32 hoặc 64-bit kiểu `sector_t`.
+Trong Linux, sector size được quy ước là 512 byte; nếu block device dùng sector lớn hơn, low-level block device driver tương ứng thực hiện chuyển đổi cần thiết. Do đó, nhóm dữ liệu lưu trong block device được xác định trên disk bằng vị trí—index của sector 512-byte đầu—và độ dài theo số sector 512 byte. Sector index được lưu trong biến 32 hoặc 64-bit kiểu `sector_t`.
 
 ### Block
 
@@ -86,9 +86,9 @@ Field `b_page` lưu địa chỉ page descriptor của page frame chứa block b
 
 Chúng ta biết mỗi disk I/O operation gồm truyền nội dung một số sector liền kề từ—hoặc đến—một số RAM location. Trong gần như mọi trường hợp, disk controller trực tiếp thực hiện data transfer bằng DMA operation (xem phần “Direct Memory Access (DMA)” trong Chương 13). Block device driver chỉ kích hoạt data transfer bằng cách gửi command thích hợp đến disk controller; khi data transfer hoàn tất, controller phát interrupt để thông báo block device driver.
 
-Dữ liệu truyền bằng một DMA operation phải thuộc sector liền kề trên disk. Đây là ràng buộc vật lý: disk controller cho DMA transfer đến sector không liền kề sẽ có transfer rate kém vì di chuyển read/write head trên disk surface khá chậm.
+Dữ liệu truyền bằng một DMA operation phải thuộc sector liền kề trên disk. Đây là ràng buộc vật lý: disk controller cho DMA transfer đến sector non-adjacent sẽ có transfer rate kém vì di chuyển read/write head trên disk surface khá chậm.
 
-Disk controller cũ chỉ hỗ trợ DMA operation “đơn giản”: trong mỗi operation như vậy, dữ liệu truyền từ hoặc đến memory cell liên tiếp vật lý trong RAM. Tuy nhiên, disk controller gần đây còn có thể hỗ trợ scatter-gather DMA transfer: trong mỗi operation, dữ liệu có thể truyền từ hoặc đến nhiều memory area không liên tiếp.
+Disk controller cũ chỉ hỗ trợ DMA operation “đơn giản”: trong mỗi operation như vậy, dữ liệu truyền từ hoặc đến memory cell liên tiếp vật lý trong RAM. Tuy nhiên, disk controller gần đây còn có thể hỗ trợ so-called scatter-gather DMA transfer: trong mỗi operation, dữ liệu có thể truyền từ hoặc đến nhiều memory area không liên tiếp.
 
 Với mỗi scatter-gather DMA transfer, block device driver phải gửi cho disk controller:
 
@@ -183,7 +183,7 @@ Bảng 14-3. Các field của object gendisk
 | `int` | `number` | Không còn dùng |
 | `struct device *` | `driverfs_dev` | Pointer đến object `device` của hardware device của disk (xem phần “Components of the Device Driver Model” trong Chương 13) |
 | `struct kobject` | `kobj` | Kobject nhúng (xem phần “Kobjects” trong Chương 13) |
-| `struct timer_rand_state *` | `random` | Pointer đến data structure ghi timing interrupt của disk; được random number generator tích hợp trong kernel dùng |
+| `struct timer_rand_state *` | `random` | Pointer đến data structure ghi timing interrupt của disk; được random number generator built-in trong kernel dùng |
 | `int` | `policy` | Đặt thành 1 nếu disk read-only (cấm write operation), ngược lại 0 |
 | `atomic_t` | `sync_io` | Counter sector ghi lên disk, chỉ dùng cho RAID |
 | `unsigned long` | `stamp` | Timestamp dùng xác định thống kê disk queue usage |
@@ -329,7 +329,7 @@ Bảng 14-6. Các field của request queue descriptor
 | `struct blk_queue_tag *` | `queue_tags` | Bitmap tag trống/bận (dùng cho tagged request) |
 | `atomic_t` | `refcnt` | Reference counter của queue |
 | `unsigned int` | `in_flight` | Số pending request trong queue |
-| `unsigned int` | `sg_timeout` | Command time-out do user định nghĩa (chỉ dùng bởi SCSI generic device) |
+| `unsigned int` | `sg_timeout` | Command time-out User-defined (chỉ dùng bởi SCSI generic device) |
 | `unsigned int` | `sg_reserved_size` | Về cơ bản không dùng |
 | `struct list_head` | `drain_list` | Đầu list request tạm trì hoãn đến khi I/O scheduler được thay thế động |
 
@@ -370,12 +370,12 @@ Bảng 14-7. Các field của request descriptor
 | `struct completion *` | `waiting` | Completion để đợi data transfer kết thúc (xem phần “Completions” trong Chương 5) |
 | `void *` | `special` | Pointer đến dữ liệu dùng khi request chứa command “đặc biệt” cho hardware device |
 | `unsigned int` | `cmd_len` | Độ dài command trong field `cmd` |
-| `unsigned char []` | `cmd` | Buffer chứa command dựng trước do method `prep_rq_fn` của request queue chuẩn bị |
+| `unsigned char []` | `cmd` | Buffer chứa command pre-built do method `prep_rq_fn` của request queue chuẩn bị |
 | `unsigned int` | `data_len` | Thường là độ dài dữ liệu trong buffer được field `data` trỏ đến |
 | `void *` | `data` | Pointer device driver dùng theo dõi dữ liệu cần truyền |
 | `unsigned int` | `sense_len` | Độ dài buffer được field `sense` trỏ đến (0 nếu sense field là `NULL`) |
 | `void *` | `sense` | Pointer đến buffer dùng cho output của sense command |
-| `unsigned int` | `timeout` | Time-out của request |
+| `unsigned int` | `timeout` | time-out của request |
 | `struct request_pm_state *` | `pm` | Pointer đến data structure dùng cho power-management command |
 
 Mỗi request gồm một hoặc nhiều bio structure. Ban đầu, generic block layer tạo request chỉ chứa một bio. Sau đó I/O scheduler có thể “mở rộng” request bằng cách thêm segment mới vào bio gốc hoặc liên kết bio structure khác vào request. Điều này khả thi khi dữ liệu mới liền kề vật lý với dữ liệu đã có trong request. Field `bio` của request descriptor trỏ đến bio structure đầu trong request, còn field `biotail` trỏ đến bio cuối. Macro `rq_for_each_bio` triển khai vòng lặp qua mọi bio trong request.
@@ -435,7 +435,7 @@ Function `blk_get_request()` cố lấy request descriptor trống từ memory p
 
 Mỗi request queue có số pending request tối đa cho phép. Field `nr_requests` của request queue descriptor lưu số pending request tối đa cho phép theo mỗi chiều data transfer. Mặc định, queue có tối đa 128 pending read request và 128 pending write request. Nếu số pending read (write) request vượt `nr_requests`, queue được đánh dấu đầy bằng cách set flag `QUEUE_FLAG_READFULL` (`QUEUE_FLAG_WRITEFULL`) trong field `queue_flags` của request queue descriptor, và process có thể block đang cố thêm request theo chiều data transfer đó được cho sleep trong wait queue tương ứng của data structure `request_list`.
 
-Request queue đầy tác động xấu hiệu năng hệ thống vì buộc nhiều process sleep đợi I/O data transfer hoàn tất. Do đó, nếu số pending request theo chiều cho trước vượt giá trị lưu trong field `nr_congestion_on` của request descriptor (mặc định 113), kernel xem queue congested và cố giảm rate tạo request mới. Request queue congested thành uncongested khi số pending request giảm dưới giá trị field `nr_congestion_off` (mặc định 111). Function `blk_congestion_wait()` cho process hiện tại sleep đến khi request queue bất kỳ thành uncongested hoặc hết time-out.
+Request queue filled-up tác động xấu hiệu năng hệ thống vì buộc nhiều process sleep đợi I/O data transfer hoàn tất. Do đó, nếu số pending request theo chiều cho trước vượt giá trị lưu trong field `nr_congestion_on` của request descriptor (mặc định 113), kernel xem queue congested và cố giảm rate tạo request mới. Request queue congested thành uncongested khi số pending request giảm dưới giá trị field `nr_congestion_off` (mặc định 111). Function `blk_congestion_wait()` cho process hiện tại sleep đến khi request queue bất kỳ thành uncongested hoặc hết time-out.
 
 ### Kích hoạt block device driver
 
@@ -655,7 +655,7 @@ Driver khởi tạo spin lock rồi cấp phát disk descriptor. Như Hình 14-3
 
 Tiếp theo, driver khởi tạo một số field của descriptor `gendisk`:
 
-`foo.gd->private_data = &foo; foo.gd->major = FOO_MAJOR; foo.gd->first_minor = 0; foo.gd->minors = 16; set_capacity(foo.gd, foo_disk_capacity_in_sectors); strcpy(foo.gd->disk_name, "foo"); foo.gd->fops = &foo_ops`; Địa chỉ descriptor `foo` lưu trong `private_data` của structure `gendisk`, để low-level driver function được block I/O subsystem gọi làm method nhanh chóng tìm driver descriptor—điều này cải thiện hiệu quả nếu driver xử lý hơn một disk mỗi lần. Function `set_capacity()` khởi tạo field `capacity` bằng kích thước disk tính theo sector 512 byte—giá trị này có thể được xác định bằng cách thăm dò hardware và hỏi disk parameter.
+`foo.gd->private_data = &foo; foo.gd->major = FOO_MAJOR; foo.gd->first_minor = 0; foo.gd->minors = 16; set_capacity(foo.gd, foo_disk_capacity_in_sectors); strcpy(foo.gd->disk_name, "foo"); foo.gd->fops = &foo_ops`; Địa chỉ descriptor `foo` lưu trong `private_data` của structure `gendisk`, để low-level driver function được block I/O subsystem gọi làm method nhanh chóng tìm driver descriptor—điều này cải thiện hiệu quả nếu driver xử lý hơn một disk mỗi lần. Function `set_capacity()` khởi tạo field `capacity` bằng kích thước disk tính theo sector 512-byte—giá trị này có thể được xác định bằng cách thăm dò hardware và hỏi disk parameter.
 
 ##### Khởi tạo table block device method
 
@@ -893,7 +893,7 @@ f. Như bước 6b, đặt inode field chỉ định kích thước và sector s
 
 Khi function `blkdev_open()` kết thúc, system call `open()` tiếp tục như thường. Mọi system call tương lai trên opened file sẽ kích hoạt một default block device file operation. Như sẽ thấy trong Chương 16, mỗi data transfer đến hoặc từ block device thực sự được triển khai bằng cách gửi request đến generic block layer.
 
-[^1]: Tuy nhiên, nếu read access thực hiện trên raw block device file, mapping layer không gọi method riêng của filesystem; thay vào đó chuyển offset trong block device file thành vị trí trong disk—hoặc disk partition—tương ứng device file.
+[^1]: Tuy nhiên, nếu read access thực hiện trên raw block device file, mapping layer không gọi method filesystem-specific; thay vào đó chuyển offset trong block device file thành vị trí trong disk—hoặc disk partition—tương ứng device file.
 
 [^2]: Nếu các thuật ngữ “plugging” và “unplugging” gây khó hiểu, bạn có thể xem chúng lần lượt tương đương “deactivating” và “activating”.
 

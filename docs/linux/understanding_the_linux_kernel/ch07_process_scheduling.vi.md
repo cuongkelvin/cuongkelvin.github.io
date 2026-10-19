@@ -12,7 +12,7 @@ Chương gồm ba phần. Phần “Scheduling policy” giới thiệu các l�
 
 ## Scheduling policy
 
-Scheduling algorithm của hệ điều hành Unix truyền thống phải đáp ứng nhiều mục tiêu xung đột: process response time nhanh, throughput tốt cho background job, tránh process starvation, dung hòa nhu cầu process priority thấp và cao, v.v. Tập quy tắc dùng xác định khi nào và cách chọn process mới chạy gọi là scheduling policy.
+Scheduling algorithm của hệ điều hành Unix truyền thống phải đáp ứng nhiều mục tiêu xung đột: process response time nhanh, throughput tốt cho background job, tránh process starvation, dung hòa nhu cầu process có priority thấp và process high-priority, v.v. Tập quy tắc dùng xác định khi nào và cách chọn process mới chạy gọi là scheduling policy.
 
 Linux scheduling dựa trên kỹ thuật time sharing: nhiều process chạy theo “time multiplexing” vì CPU time chia thành slice, mỗi runnable process một slice.[^1] Tất nhiên một processor chỉ chạy được một process tại mỗi thời điểm. Nếu currently running process chưa kết thúc khi time slice hay quantum hết hạn, process switch có thể diễn ra. Time sharing dựa vào timer interrupt nên trong suốt với process. Không cần insert code bổ sung vào chương trình để bảo đảm CPU time sharing.
 
@@ -20,7 +20,7 @@ Scheduling policy còn dựa trên xếp hạng process theo priority. Đôi khi
 
 Trong Linux, process priority là dynamic. Scheduler theo dõi process làm gì và định kỳ điều chỉnh priority; bằng cách này process lâu không được dùng CPU được hỗ trợ bằng tăng priority động. Tương ứng process chạy lâu bị giảm priority.
 
-Khi nói scheduling, process truyền thống được phân loại I/O-bound hoặc CPU-bound. Loại đầu dùng nhiều I/O device và dành nhiều thời gian chờ I/O operation hoàn tất; loại sau thực hiện application tính toán số học cần nhiều CPU time.
+Khi nói scheduling, process truyền thống được phân loại I/O-bound hoặc CPU-bound. Loại đầu dùng nhiều I/O device và dành nhiều thời gian chờ I/O operation hoàn tất; loại sau thực hiện application number-crunching cần nhiều CPU time.
 
 Phân loại khác chia process thành ba class:
 
@@ -34,7 +34,7 @@ Không cần user interaction nên thường chạy background. Vì process khô
 
 Real-time process
 
-Có scheduling requirement rất nghiêm ngặt. Không bao giờ nên bị lower-priority process block và nên có response time ngắn được bảo đảm với variance tối thiểu. Real-time program điển hình là video và sound application, robot controller và chương trình thu thập data từ physical sensor.
+Có scheduling requirement rất nghiêm ngặt. Không bao giờ nên bị lower-priority process block và nên có response time ngắn được bảo đảm với variance tối thiểu. real-time program điển hình là video và sound application, robot controller và chương trình thu thập data từ physical sensor.
 
 Hai phân loại vừa nêu phần nào độc lập. Ví dụ batch process có thể I/O-bound (như database server) hoặc CPU-bound (như image-rendering program). Trong khi real-time program được scheduling algorithm trong Linux nhận diện tường minh, không có cách dễ phân biệt interactive và batch program. Scheduler Linux 2.6 triển khai heuristic algorithm tinh vi dựa trên hành vi quá khứ của process để quyết định process cho trước nên được xem là interactive hay batch. Tất nhiên scheduler có xu hướng ưu tiên interactive process hơn batch process.
 
@@ -82,7 +82,7 @@ Chọn average quantum duration luôn là dung hòa. Quy tắc kinh nghiệm Lin
 
 ## Scheduling algorithm
 
-Scheduling algorithm trong phiên bản Linux trước khá đơn giản, trực tiếp: mỗi process switch, kernel scan list runnable process, tính priority và chọn process “tốt nhất” chạy. Nhược điểm chính là thời gian chọn process tốt nhất phụ thuộc số runnable process; vì vậy algorithm quá tốn kém — tức dành quá nhiều thời gian — trong hệ thống cao cấp chạy hàng nghìn process.
+Scheduling algorithm trong phiên bản Linux trước khá đơn giản, trực tiếp: mỗi process switch, kernel scan list runnable process, tính priority và chọn process “tốt nhất” chạy. Nhược điểm chính là thời gian chọn process tốt nhất phụ thuộc số runnable process; vì vậy algorithm quá tốn kém — tức dành quá nhiều thời gian — trong hệ thống high-end chạy hàng nghìn process.
 
 Scheduling algorithm của Linux 2.6 tinh vi hơn nhiều. Theo thiết kế, scale tốt với số runnable process vì chọn process chạy trong constant time, độc lập số runnable process. Cũng scale tốt với số processor vì mỗi CPU có queue runnable process riêng. Hơn nữa algorithm mới phân biệt interactive process và batch process tốt hơn. Kết quả người dùng hệ thống tải nặng cảm thấy interactive application phản hồi nhanh hơn nhiều trong Linux 2.6 so với phiên bản trước.
 
@@ -183,13 +183,13 @@ Các runnable process đã dùng hết time quantum nên không được chạy 
 
 Tuy nhiên mô hình tổng quát phức tạp hơn chút vì scheduler cố tăng performance của interactive process. Active batch process hết time quantum luôn trở thành expired. Active interactive process hết time quantum thường vẫn active: scheduler refill time quantum và để trong tập active process. Tuy nhiên scheduler chuyển interactive process hết time quantum vào tập expired process nếu expired process lâu nhất đã chờ lâu hoặc expired process có static priority cao hơn (giá trị thấp hơn) interactive process. Kết quả tập active process cuối cùng rỗng và expired process có cơ hội chạy.
 
-### Scheduling real-time process
+### Scheduling Real-Time process
 
 Mỗi real-time process gắn với real-time priority là giá trị từ 1 (priority cao nhất) đến 99 (priority thấp nhất). Scheduler luôn ưu tiên runnable process priority cao hơn; nói cách khác real-time process ngăn execution của mọi lower-priority process chừng nào còn runnable. Khác conventional process, real-time process luôn được xem active (xem phần trước). Người dùng đổi real-time priority của process bằng system call `sched_setparam()` và `sched_setscheduler()` (xem phần “System call liên quan scheduling” sau trong chương).
 
 Nếu nhiều real-time runnable process cùng priority cao nhất, scheduler chọn process xuất hiện đầu trong list tương ứng của runqueue local CPU (xem phần “Các list process TASK\_RUNNING” trong Chương 3).
 
-Real-time process chỉ bị process khác thay thế khi một event sau xảy ra:
+real-time process chỉ bị process khác thay thế khi một event sau xảy ra:
 
 - Process bị process khác có real-time priority cao hơn preempt.
 
@@ -301,7 +301,7 @@ Scheduler dựa vào nhiều function để làm việc; quan trọng nhất:
 
 `scheduler_tick()`
 
-Giữ counter `time_slice` của `current` cập nhật
+Giữ counter `time_slice` của `current` up-to-date
 
 `try_to_wake_up()`
 
@@ -593,7 +593,7 @@ if (run_time > 1000000000)
     run_time = 1000000000;
 ```
 
-Áp dụng giới hạn thông thường 1 giây (chuyển sang nanosecond). Giá trị `run_time` dùng tính CPU usage cho process. Tuy nhiên process có average sleep time cao được ưu ái:
+Áp dụng cut-off thông thường 1 giây (chuyển sang nanosecond). Giá trị `run_time` dùng tính CPU usage cho process. Tuy nhiên process có average sleep time cao được ưu ái:
 
 ```c
 run_time /= (CURRENT_BONUS(prev) ? : 1);
@@ -734,7 +734,7 @@ clear_tsk_need_resched(prev);
 rcu_qsctr_inc(prev->thread_info->cpu);
 ```
 
-Function `clear_tsk_need_resched()` clear flag `TIF_NEED_RESCHED` của `prev`, đề phòng `schedule()` được gọi theo cách lazy. Sau đó function ghi nhận CPU đang đi qua quiescent state (xem phần “Read-copy update (RCU)” trong Chương 5).
+Function `clear_tsk_need_resched()` clear flag `TIF_NEED_RESCHED` của `prev`, đề phòng `schedule()` được gọi theo cách lazy. Sau đó function ghi nhận CPU đang đi qua quiescent state (xem phần “Read-Copy update (RCU)” trong Chương 5).
 
 Function `schedule()` còn phải giảm average sleep time của `prev`, tính vào đó CPU time slice process đã dùng:
 
@@ -852,7 +852,7 @@ Classic multiprocessor architecture
 
 Hyper-threading
 
-Hyper-threaded chip là microprocessor thực thi nhiều execution thread cùng lúc; chứa nhiều bản sao internal register và nhanh chóng switch giữa chúng. Công nghệ do Intel phát minh cho processor tận dụng machine cycle để thực thi thread khác khi current thread stalled chờ memory access. Linux thấy một hyper-threaded physical CPU như nhiều logical CPU khác nhau.
+hyper-threaded chip là microprocessor thực thi nhiều execution thread cùng lúc; chứa nhiều bản sao internal register và nhanh chóng switch giữa chúng. Công nghệ do Intel phát minh cho processor tận dụng machine cycle để thực thi thread khác khi current thread stalled chờ memory access. Linux thấy một hyper-threaded physical CPU như nhiều logical CPU khác nhau.
 
 NUMA
 
@@ -880,9 +880,9 @@ Hình 7-2. Ba ví dụ scheduling domain hierarchy
 
 Hình 7-2 (a) biểu diễn hierarchy gồm một scheduling domain cho classic multiprocessor architecture 2-CPU. Scheduling domain chỉ hai group, mỗi group một CPU.
 
-Hình 7-2 (b) biểu diễn hierarchy hai level cho multiprocessor box 2-CPU có hyper-threading technology. Top-level scheduling domain bao phủ cả bốn logical CPU, gồm hai group. Mỗi group của top-level domain tương ứng child scheduling domain và bao phủ một physical CPU. Bottom-level scheduling domain (còn gọi base scheduling domain) gồm hai group, mỗi logical CPU một group.
+Hình 7-2 (b) biểu diễn hierarchy two-level cho multiprocessor box 2-CPU có hyper-threading technology. top-level scheduling domain bao phủ cả bốn logical CPU, gồm hai group. Mỗi group của top-level domain tương ứng child scheduling domain và bao phủ một physical CPU. bottom-level scheduling domain (còn gọi base scheduling domain) gồm hai group, mỗi logical CPU một group.
 
-Cuối cùng Hình 7-2 (c) biểu diễn hierarchy hai level cho NUMA architecture 8-CPU với hai node, mỗi node bốn CPU. Top-level domain tổ chức thành hai group, mỗi group tương ứng node khác nhau. Mỗi base scheduling domain bao phủ CPU trong một node và có bốn group, mỗi group một CPU.
+Cuối cùng Hình 7-2 (c) biểu diễn hierarchy two-level cho NUMA architecture 8-CPU với hai node, mỗi node bốn CPU. top-level domain tổ chức thành hai group, mỗi group tương ứng node khác nhau. Mỗi base scheduling domain bao phủ CPU trong một node và có bốn group, mỗi group một CPU.
 
 Mỗi scheduling domain biểu diễn bằng descriptor `sched_domain`, mỗi group trong scheduling domain bằng descriptor `sched_group`. Mỗi descriptor `sched_domain` có field `groups` trỏ đến phần tử đầu list group descriptor. Hơn nữa field `parent` của structure `sched_domain` trỏ đến descriptor của parent scheduling domain nếu có.
 
@@ -1016,7 +1016,7 @@ System call service routine `sys_sched_getaffinity()` tra process descriptor b�
 
 System call `sys_sched_setaffinity()` phức tạp hơn chút. Ngoài tìm descriptor target process và cập nhật field `cpus_allowed`, function phải kiểm tra process có trong runqueue CPU không còn trong affinity mask mới không. Trường hợp xấu nhất phải chuyển process từ runqueue này sang khác. Để tránh deadlock và race condition, việc do migration kernel thread làm (mỗi CPU một thread). Mỗi khi phải chuyển process từ runqueue `rq1` sang runqueue `rq2`, system call wake up migration thread của `rq1` (`rq1->migration_thread`), đến lượt remove process khỏi `rq1` và insert vào `rq2`.
 
-### System call liên quan real-time process
+### System call liên quan Real-Time process
 
 Giờ giới thiệu nhóm system call cho process đổi scheduling discipline, đặc biệt trở thành real-time process. Như thường lệ process phải có capability `CAP_SYS_NICE` để sửa giá trị field process descriptor `rt_priority` và `policy` của bất kỳ process nào kể cả chính nó.
 

@@ -128,7 +128,7 @@ Graphic interface
 
 Disk interface
 
-Kết nối bằng cable với disk controller, thường tích hợp với disk. Ví dụ, IDE interface được kết nối bằng flat conductor cable 40 dây với intelligent disk controller nằm ngay trên disk.
+Kết nối bằng cable với disk controller, thường tích hợp với disk. Ví dụ, IDE interface được kết nối bằng flat conductor cable 40-wire với intelligent disk controller nằm ngay trên disk.
 
 Bus mouse interface
 
@@ -160,7 +160,7 @@ Circuit kết nối main PC bus với secondary bus gọi là SCSI bus. SCSI-2 b
 
 Universal serial bus (USB)
 
-General-purpose I/O interface hoạt động tốc độ cao và có thể dùng cho external device truyền thống kết nối với parallel port, serial port và SCSI interface.
+general-purpose I/O interface hoạt động tốc độ cao và có thể dùng cho external device truyền thống kết nối với parallel port, serial port và SCSI interface.
 
 ### Device controller
 
@@ -188,7 +188,7 @@ Giờ mọi thứ khác. Loại bus như PCI đặt yêu cầu cao cho thiết k
 
 - Hot-plugging (hỗ trợ chèn và tháo device trong khi hệ thống đang chạy)
 
-Kernel thực hiện power management toàn cục trên mọi hardware device trong hệ thống. Ví dụ, khi máy tính chạy pin vào state “standby”, kernel phải buộc mọi hardware device (hard disk, graphics card, sound card, network card, bus controller, v.v.) vào low-power state. Vì vậy, mỗi driver của device có thể đưa vào state “standby” phải có callback function đưa hardware device vào low-power state. Hơn nữa, hardware device phải được đưa vào state “standby” theo thứ tự chính xác, nếu không một số device có thể ở power state sai. Ví dụ, kernel phải đưa hard disk vào “standby” trước rồi đến disk controller, vì thứ tự ngược lại sẽ khiến không thể gửi command đến hard disk.
+Kernel thực hiện power management toàn cục trên mọi hardware device trong hệ thống. Ví dụ, khi máy tính battery-powered vào state “standby”, kernel phải buộc mọi hardware device (hard disk, graphics card, sound card, network card, bus controller, v.v.) vào low-power state. Vì vậy, mỗi driver của device có thể đưa vào state “standby” phải có callback function đưa hardware device vào low-power state. Hơn nữa, hardware device phải được đưa vào state “standby” theo thứ tự chính xác, nếu không một số device có thể ở power state sai. Ví dụ, kernel phải đưa hard disk vào “standby” trước rồi đến disk controller, vì thứ tự ngược lại sẽ khiến không thể gửi command đến hard disk.
 
 Để triển khai các loại operation này, Linux 2.6 cung cấp một số data structure và helper function cho góc nhìn thống nhất về mọi bus, device và device driver trong hệ thống; framework này gọi là device driver model.
 
@@ -196,7 +196,7 @@ Kernel thực hiện power management toàn cục trên mọi hardware device tr
 
 Filesystem sysfs là special filesystem giống /proc, thường mount trên directory /sys. Filesystem /proc là special filesystem đầu tiên được thiết kế cho phép User Mode application truy cập internal data structure của kernel. Filesystem /sysfs về cơ bản có cùng mục tiêu nhưng cung cấp thông tin bổ sung về kernel data structure; hơn nữa, /sysfs được tổ chức có cấu trúc hơn /proc. Có khả năng cả /proc lẫn /sysfs sẽ tiếp tục cùng tồn tại trong tương lai gần.
 
-Mục tiêu của filesystem sysfs là phơi bày quan hệ phân cấp giữa component của device driver model. Top-level directory liên quan của filesystem này là:
+Mục tiêu của filesystem sysfs là phơi bày quan hệ phân cấp giữa component của device driver model. top-level directory liên quan của filesystem này là:
 
 block
 
@@ -234,7 +234,7 @@ Vai trò chính của regular file trong filesystem sysfs là biểu diễn thu�
 
 Data structure cốt lõi của device driver model là generic data structure tên kobject, vốn gắn với filesystem sysfs: mỗi kobject tương ứng directory trong filesystem đó.
 
-Kobject được nhúng trong object lớn hơn—gọi là “container”—mô tả component của device driver model.[^2] Descriptor của bus, device và driver là ví dụ container điển hình; ví dụ, descriptor của partition đầu trong IDE disk đầu tương ứng directory /sys/block/hda/hda1.
+Kobject được nhúng trong object lớn hơn—so-called “container”—mô tả component của device driver model.[^2] Descriptor của bus, device và driver là ví dụ container điển hình; ví dụ, descriptor của partition đầu trong IDE disk đầu tương ứng directory /sys/block/hda/hda1.
 
 Nhúng kobject trong container cho phép kernel:
 
@@ -279,13 +279,13 @@ Bảng 13-3. Các field của data structure kset
 
 Field `list` là đầu doubly linked circular list kobject trong kset; field `ktype` trỏ đến cùng descriptor `kobj_type` mà mọi kobject trong kset chia sẻ.
 
-Field `kobj` là kobject nhúng trong data structure `kset`; field `parent` của kobject chứa trong kset trỏ đến kobject nhúng này. Do đó, kset là tập kobject nhưng dựa vào kobject cấp cao hơn để reference counting và liên kết trong hierarchical tree. Lựa chọn thiết kế này hiệu quả về code và cho độ linh hoạt lớn nhất. Ví dụ, các function `kset_get()` và `kset_put()`, lần lượt tăng và giảm reference counter của kset, chỉ gọi `kobject_get()` và `kobject_put()` trên kobject nhúng; vì reference counter của kset chỉ là reference counter của kobject `kobj` nhúng trong kset. Hơn nữa, nhờ kobject nhúng, data structure `kset` có thể được nhúng trong object “container”, giống hệt data structure `kobject`. Cuối cùng, kset có thể thành thành viên của kset khác: chỉ cần chèn kobject nhúng vào kset cấp cao hơn.
+Field `kobj` là kobject nhúng trong data structure `kset`; field `parent` của kobject chứa trong kset trỏ đến kobject nhúng này. Do đó, kset là tập kobject nhưng dựa vào kobject cấp cao hơn để reference counting và liên kết trong hierarchical tree. Lựa chọn thiết kế này code-efficient và cho độ linh hoạt lớn nhất. Ví dụ, các function `kset_get()` và `kset_put()`, lần lượt tăng và giảm reference counter của kset, chỉ gọi `kobject_get()` và `kobject_put()` trên kobject nhúng; vì reference counter của kset chỉ là reference counter của kobject `kobj` nhúng trong kset. Hơn nữa, nhờ kobject nhúng, data structure `kset` có thể được nhúng trong object “container”, giống hệt data structure `kobject`. Cuối cùng, kset có thể thành thành viên của kset khác: chỉ cần chèn kobject nhúng vào kset higher-level.
 
 Cũng tồn tại tập kset gọi là subsystem. Subsystem có thể chứa kset khác loại, và được biểu diễn bằng data structure `subsystem` chỉ có hai field:
 
 `kset`
 
-Kset nhúng lưu các kset trong subsystem `rwsem` Read-write semaphore bảo vệ mọi kset và kobject được chứa đệ quy trong subsystem
+Kset nhúng lưu các kset trong subsystem `rwsem` read-write semaphore bảo vệ mọi kset và kobject được chứa đệ quy trong subsystem
 
 Ngay cả data structure `subsystem` cũng có thể nhúng trong object “container” lớn hơn; do đó reference counter của container là reference counter của subsystem nhúng—tức reference counter của kobject nhúng trong kset nhúng trong subsystem. Các function `subsys_get()` và `subsys_put()` lần lượt tăng và giảm reference counter này.
 
@@ -336,7 +336,7 @@ Bảng 13-4. Các field của object device
 | `struct dma_coherent_mem *` | `dma_mem` | Pointer đến descriptor của coherent DMA memory do device dùng (xem phần “Direct Memory Access (DMA)” phía sau) |
 | `void (*)(struct device *)` | `release` | Callback function để giải phóng device descriptor |
 
-Các object `device` được tập hợp toàn cục trong subsystem `devices_subsys`, gắn với directory /sys/devices (xem phần “Kobjects” trước đó). Device được tổ chức phân cấp: device là “parent” của một số “child” device nếu child device không thể hoạt động đúng thiếu parent device. Ví dụ, trong máy tính dựa trên PCI, bridge giữa PCI bus và USB bus là parent device của mọi device trên USB bus. Field `parent` của object `device` trỏ đến descriptor của parent device, field `children` là đầu list child device, và field `node` lưu pointer đến phần tử liền kề trong children list. Quan hệ parent giữa kobject nhúng trong object `device` cũng phản ánh device hierarchy; do đó cấu trúc directory dưới /sys/devices khớp tổ chức vật lý hardware device.
+Các object `device` được tập hợp toàn cục trong subsystem `devices_subsys`, gắn với directory /sys/devices (xem phần “Kobjects” trước đó). Device được tổ chức phân cấp: device là “parent” của một số “child” device nếu child device không thể hoạt động đúng thiếu parent device. Ví dụ, trong máy tính PCI-based, bridge giữa PCI bus và USB bus là parent device của mọi device trên USB bus. Field `parent` của object `device` trỏ đến descriptor của parent device, field `children` là đầu list child device, và field `node` lưu pointer đến phần tử liền kề trong children list. Quan hệ parent giữa kobject nhúng trong object `device` cũng phản ánh device hierarchy; do đó cấu trúc directory dưới /sys/devices khớp tổ chức vật lý hardware device.
 
 Mỗi driver giữ list object `device` chứa mọi device được quản lý; field `driver_list` của object `device` lưu pointer đến phần tử liền kề, còn field `driver` trỏ đến descriptor của device driver. Hơn nữa, với mỗi loại bus có list chứa mọi device trên bus thuộc loại đó; field `bus_list` của object `device` lưu pointer đến phần tử liền kề, còn field `bus` trỏ đến bus type descriptor.
 
@@ -344,7 +344,7 @@ Reference counter theo dõi việc dùng object `device`; nó nằm trong kobjec
 
 Function `device_register()` chèn object `device` mới vào device driver model và tự động tạo directory mới cho nó dưới /sys/devices. Ngược lại, function `device_unregister()` loại device khỏi device driver model.
 
-Thông thường, object `device` được nhúng tĩnh trong descriptor lớn hơn. Ví dụ, PCI device được mô tả bằng data structure `pci_dev`; field `dev` của structure là object `device`, còn các field khác riêng cho PCI bus. Các function `device_register()` và `device_unregister()` được thực thi khi device được đăng ký hoặc hủy đăng ký trong PCI kernel layer.
+Thông thường, object `device` được nhúng tĩnh trong descriptor lớn hơn. Ví dụ, PCI device được mô tả bằng data structure `pci_dev`; field `dev` của structure là object `device`, còn các field khác riêng cho PCI bus. Các function `device_register()` và `device_unregister()` được thực thi khi device được đăng ký hoặc de-registered trong PCI kernel layer.
 
 ##### Driver
 
@@ -394,17 +394,17 @@ Bảng 13-6. Các field của object bus\_type
 | `int (*)(struct device *, unsigned long)` | `suspend` | Method lưu hardware context state và thay đổi power level của device |
 | `int (*)(struct device *)` | `resume` | Method thay đổi power level và khôi phục hardware context của device |
 
-Mỗi object `bus_type` chứa subsystem nhúng; subsystem lưu trong biến `bus_subsys` tập hợp mọi subsystem nhúng trong object `bus_type`. Subsystem `bus_subsys` gắn với directory /sys/bus; do đó, ví dụ, có directory /sys/bus/pci gắn với loại bus PCI. Per-bus subsystem thường chỉ chứa hai kset tên drivers và devices (lần lượt tương ứng các field `drivers` và `devices` của object `bus_type`).
+Mỗi object `bus_type` chứa subsystem nhúng; subsystem lưu trong biến `bus_subsys` tập hợp mọi subsystem nhúng trong object `bus_type`. Subsystem `bus_subsys` gắn với directory /sys/bus; do đó, ví dụ, có directory /sys/bus/pci gắn với loại bus PCI. per-bus subsystem thường chỉ chứa hai kset tên drivers và devices (lần lượt tương ứng các field `drivers` và `devices` của object `bus_type`).
 
 Kset `drivers` chứa descriptor `device_driver` của mọi device driver thuộc loại bus, còn kset `devices` chứa descriptor `device` của mọi device thuộc loại bus cho trước. Vì directory của kobject của device đã xuất hiện trong filesystem sysfs dưới /sys/devices, directory devices của per-bus subsystem lưu symbolic link trỏ đến directory dưới /sys/devices. Các function `bus_for_each_drv()` và `bus_for_each_dev()` lần lượt lặp qua phần tử của list driver và device.
 
-Method `match` được thực thi khi kernel phải kiểm tra device cho trước có được driver cho trước xử lý không. Dù identifier của mỗi device có định dạng riêng cho bus chứa device, function triển khai method thường đơn giản vì tìm identifier của device trong table identifier được hỗ trợ của driver. Method `hotplug` được thực thi khi device đang được đăng ký trong device driver model; function triển khai nên thêm thông tin riêng của bus để truyền làm environment variable cho User Mode program được thông báo về device mới khả dụng (xem phần “Device Driver Registration” phía sau). Cuối cùng, các method `suspend` và `resume` được thực thi khi device trên bus thuộc loại cho trước phải đổi power state.
+Method `match` được thực thi khi kernel phải kiểm tra device cho trước có được driver cho trước xử lý không. Dù identifier của mỗi device có định dạng riêng cho bus chứa device, function triển khai method thường đơn giản vì tìm identifier của device trong table identifier được hỗ trợ của driver. Method `hotplug` được thực thi khi device đang được đăng ký trong device driver model; function triển khai nên thêm thông tin bus-specific để truyền làm environment variable cho User Mode program được thông báo về device mới khả dụng (xem phần “Device Driver Registration” phía sau). Cuối cùng, các method `suspend` và `resume` được thực thi khi device trên bus thuộc loại cho trước phải đổi power state.
 
 ##### Class
 
 Mỗi class được mô tả bằng object `class`. Mọi class object thuộc subsystem `class_subsys` gắn với directory /sys/class. Hơn nữa, mỗi object `class` chứa subsystem nhúng; do đó, ví dụ có directory /sys/class/input gắn với input class của device driver model.
 
-Mỗi class object chứa list descriptor `class_device`, mỗi descriptor biểu diễn một logical device thuộc class. Structure `class_device` có field `dev` trỏ đến descriptor `device`, nên logical device luôn tham chiếu device cho trước trong device driver model. Tuy nhiên, có thể có nhiều descriptor `class_device` tham chiếu cùng device. Thực tế, hardware device có thể chứa nhiều sub-device khác nhau, mỗi sub-device cần User Mode interface khác. Ví dụ, sound card là hardware device thường chứa DSP, mixer, game port interface, v.v.; mỗi sub-device cần User Mode interface riêng nên gắn với directory riêng trong filesystem sysfs.
+Mỗi class object chứa list descriptor `class_device`, mỗi descriptor biểu diễn một logical device thuộc class. Structure `class_device` có field `dev` trỏ đến descriptor `device`, nên logical device luôn tham chiếu device cho trước trong device driver model. Tuy nhiên, có thể có nhiều descriptor `class_device` tham chiếu cùng device. Thực tế, hardware device có thể chứa nhiều sub-devices khác nhau, mỗi sub-device cần User Mode interface khác. Ví dụ, sound card là hardware device thường chứa DSP, mixer, game port interface, v.v.; mỗi sub-device cần User Mode interface riêng nên gắn với directory riêng trong filesystem sysfs.
 
 Device driver cùng class được kỳ vọng cung cấp cùng chức năng cho User Mode application; ví dụ mọi device driver của sound card nên cung cấp cách ghi sound sample đến DSP.
 
@@ -412,7 +412,7 @@ Class của device driver model về cơ bản nhằm cung cấp method chuẩn 
 
 ## Device file
 
-Như đã đề cập trong Chương 1, hệ điều hành kiểu Unix dựa trên khái niệm file, chỉ là nơi chứa thông tin tổ chức thành chuỗi byte. Theo cách này, I/O device được xem là special file gọi là device file; do đó, cùng system call dùng tương tác với regular file trên disk có thể dùng tương tác trực tiếp với I/O device. Ví dụ, cùng system call `write()` có thể dùng ghi dữ liệu vào regular file hoặc gửi đến printer bằng cách ghi vào device file /dev/lp0.
+Như đã đề cập trong Chương 1, hệ điều hành Unix-like dựa trên khái niệm file, chỉ là nơi chứa thông tin tổ chức thành chuỗi byte. Theo cách này, I/O device được xem là special file gọi là device file; do đó, cùng system call dùng tương tác với regular file trên disk có thể dùng tương tác trực tiếp với I/O device. Ví dụ, cùng system call `write()` có thể dùng ghi dữ liệu vào regular file hoặc gửi đến printer bằng cách ghi vào device file /dev/lp0.
 
 Theo đặc điểm device driver bên dưới, device file có thể thuộc hai loại: block hoặc character. Khác biệt giữa hai lớp hardware device không hoàn toàn rõ ràng. Ít nhất chúng ta có thể giả định:
 
@@ -452,9 +452,9 @@ Với kernel, tên device file không quan trọng. Nếu tạo device file tên
 
 Trong hệ thống Unix truyền thống (và phiên bản Linux trước), major number và minor number của device file dài 8 bit. Do đó có thể có tối đa 65.536 block device file và 65.536 character device file. Bạn có thể nghĩ đủ nhưng đáng tiếc không phải.
 
-Vấn đề thực là device file truyền thống được cấp phát một lần và mãi mãi trong directory /dev; do đó, mỗi logical device trong hệ thống phải có device file liên quan với device number xác định rõ. Registry chính thức của device number đã cấp phát và node directory /dev lưu trong file Documentation/devices.txt; macro tương ứng major number của device còn có thể tìm trong file include/linux/major.h.
+Vấn đề thực là device file truyền thống được cấp phát một lần và mãi mãi trong directory /dev; do đó, mỗi logical device trong hệ thống phải có device file liên quan với device number well-defined. Registry chính thức của device number đã cấp phát và node directory /dev lưu trong file Documentation/devices.txt; macro tương ứng major number của device còn có thể tìm trong file include/linux/major.h.
 
-Đáng tiếc, số hardware device khác nhau hiện lớn đến mức gần như mọi device number đã được cấp phát. Registry device number chính thức hoạt động tốt cho hệ thống Linux trung bình, nhưng có thể không phù hợp hệ thống quy mô lớn. Hơn nữa, hệ thống cao cấp có thể dùng hàng trăm hoặc hàng nghìn disk cùng loại, và minor number 8-bit không đủ. Ví dụ, registry dành device number cho 16 SCSI disk, mỗi disk có 15 partition; nếu hệ thống cao cấp có hơn 16 SCSI disk, phải thay cách gán major number và minor number chuẩn—nhiệm vụ không đơn giản đòi hỏi sửa kernel source code và khiến hệ thống khó bảo trì.
+Đáng tiếc, số hardware device khác nhau hiện lớn đến mức gần như mọi device number đã được cấp phát. Registry device number chính thức hoạt động tốt cho hệ thống Linux trung bình, nhưng có thể không phù hợp hệ thống large-scale. Hơn nữa, hệ thống high-end có thể dùng hàng trăm hoặc hàng nghìn disk cùng loại, và minor number 8-bit không đủ. Ví dụ, registry dành device number cho 16 SCSI disk, mỗi disk có 15 partition; nếu hệ thống high-end có hơn 16 SCSI disk, phải thay cách gán major number và minor number chuẩn—nhiệm vụ không đơn giản đòi hỏi sửa kernel source code và khiến hệ thống khó bảo trì.
 
 Để giải quyết vấn đề này, kích thước device number được tăng trong Linux 2.6: major number nay mã hóa trong 12 bit, còn minor number mã hóa trong 20 bit. Cả hai số thường được giữ trong một biến 32-bit kiểu `dev_t`; các macro `MAJOR` và `MINOR` lần lượt trích major number và minor number từ giá trị `dev_t`, còn macro `MKDEV` mã hóa hai device number vào giá trị `dev_t`. Để tương thích ngược, kernel xử lý đúng device file cũ mã hóa bằng device number 16-bit.
 
@@ -478,7 +478,7 @@ Device file thường được tạo sau system initialization. Điều này x�
 
 Device file nằm trong system directory tree nhưng vốn khác regular file và directory. Khi process truy cập regular file, nó truy cập một số data block trong disk partition qua filesystem; khi process truy cập device file, nó chỉ điều khiển hardware device. Ví dụ, process có thể truy cập device file để đọc nhiệt độ phòng từ digital thermometer kết nối máy tính. VFS chịu trách nhiệm che khác biệt giữa device file và regular file khỏi application program.
 
-Để làm vậy, VFS thay default file operation của device file khi mở; kết quả là mỗi system call trên device file được chuyển thành lời gọi device-related function thay vì function tương ứng của filesystem chứa nó. Device-related function thao tác hardware device để thực hiện operation process yêu cầu.<sup>†</sup>
+Để làm vậy, VFS thay default file operation của device file khi mở; kết quả là mỗi system call trên device file được chuyển thành lời gọi device-related function thay vì function tương ứng của filesystem chứa nó. device-related function thao tác hardware device để thực hiện operation process yêu cầu.<sup>†</sup>
 
 Giả sử process thực thi system call `open()` trên device file (loại block hoặc character). Operation do system call thực hiện đã được mô tả trong phần “The open() System Call” ở Chương 12. Về cơ bản, service routine tương ứng phân giải pathname đến device file và thiết lập inode object, dentry object, file object tương ứng.
 
@@ -646,7 +646,7 @@ t2 = *((unsigned char *)(io_mem + 0x100000));
 
 Statement đầu tạo khoảng linear address 2 MB mới, map physical address bắt đầu từ `0xfb000000`; statement thứ hai đọc memory location có địa chỉ `0xfc000000`. Để loại mapping sau này, device driver phải dùng function `iounmap()`.
 
-Trên một số kiến trúc khác PC, không thể truy cập I/O shared memory chỉ bằng dereference linear address trỏ đến physical memory location. Do đó, Linux định nghĩa các function phụ thuộc kiến trúc sau, nên dùng khi truy cập I/O shared memory:
+Trên một số kiến trúc khác PC, không thể truy cập I/O shared memory chỉ bằng dereference linear address trỏ đến physical memory location. Do đó, Linux định nghĩa các function architecture-dependent sau, nên dùng khi truy cập I/O shared memory:
 
 `readb()`, `readw()`, `readl()`
 
@@ -671,7 +671,7 @@ io_mem = ioremap(0xfb000000, 0x200000);
 t2 = readb(io_mem + 0x100000);
 ```
 
-Nhờ các function này, có thể che mọi phụ thuộc vào cách truy cập I/O shared memory riêng của nền tảng.
+Nhờ các function này, có thể che mọi phụ thuộc vào cách truy cập I/O shared memory platform-specific.
 
 ### Direct Memory Access (DMA)
 
@@ -685,27 +685,27 @@ DMA circuit đầu cho ISA bus cũ phức tạp, khó lập trình và giới h�
 
 Device driver có thể dùng DMA theo hai cách gọi là synchronous DMA và asynchronous DMA. Trong trường hợp đầu, process kích hoạt data transfer; trong trường hợp sau, hardware device kích hoạt data transfer.
 
-Ví dụ synchronous DMA là sound card đang phát sound track. User Mode application ghi sound data (gọi là sample) lên device file gắn với digital signal processor (DSP) của sound card. Device driver của sound card tích lũy sample trong kernel buffer. Đồng thời, device driver chỉ thị sound card sao chép sample từ kernel buffer đến DSP theo timing xác định rõ. Khi sound card truyền dữ liệu xong, nó phát interrupt, và device driver kiểm tra kernel buffer còn sample chưa phát không; nếu có, driver kích hoạt DMA data transfer khác.
+Ví dụ synchronous DMA là sound card đang phát sound track. User Mode application ghi sound data (gọi là sample) lên device file gắn với digital signal processor (DSP) của sound card. Device driver của sound card tích lũy sample trong kernel buffer. Đồng thời, device driver chỉ thị sound card sao chép sample từ kernel buffer đến DSP theo timing well-defined. Khi sound card truyền dữ liệu xong, nó phát interrupt, và device driver kiểm tra kernel buffer còn sample chưa phát không; nếu có, driver kích hoạt DMA data transfer khác.
 
 Ví dụ asynchronous DMA là network card nhận frame (data packet) từ LAN. Peripheral lưu frame trong I/O shared memory rồi phát interrupt. Device driver của network card acknowledge interrupt, rồi chỉ thị peripheral sao chép frame từ I/O shared memory vào kernel buffer. Khi data transfer hoàn tất, network card phát interrupt khác, và device driver thông báo cho upper kernel layer về frame mới.
 
 ##### Helper function cho DMA transfer
 
-Khi thiết kế driver cho device dùng DMA, người phát triển nên viết code độc lập kiến trúc và, xét DMA, độc lập bus. Mục tiêu này nay khả thi nhờ tập DMA helper function phong phú do kernel cung cấp. Helper function che khác biệt trong cơ chế DMA của các hardware architecture.
+Khi thiết kế driver cho device dùng DMA, người phát triển nên viết code architecture-independent và, xét DMA, độc lập bus. Mục tiêu này nay khả thi nhờ tập DMA helper function phong phú do kernel cung cấp. Helper function che khác biệt trong cơ chế DMA của các hardware architecture.
 
-Có hai tập con DMA helper function: tập cũ cung cấp function độc lập kiến trúc cho PCI device; tập mới hơn đảm bảo độc lập cả bus lẫn kiến trúc. Giờ chúng ta xét một số function này và chỉ ra vài đặc điểm hardware riêng của DMA.
+Có hai tập con DMA helper function: tập cũ cung cấp function architecture-independent cho PCI device; tập mới hơn đảm bảo độc lập cả bus lẫn kiến trúc. Giờ chúng ta xét một số function này và chỉ ra vài đặc điểm hardware riêng của DMA.
 
 ##### Bus address
 
 Mọi DMA transfer liên quan (ít nhất) một memory buffer chứa dữ liệu hardware device cần đọc hoặc ghi. Nói chung, trước khi kích hoạt transfer, device driver phải đảm bảo DMA circuit có thể truy cập trực tiếp RAM location.
 
-Đến đây chúng ta phân biệt ba loại memory address: logical và linear address dùng nội bộ CPU, cùng physical address là memory address CPU dùng để điều khiển data bus vật lý. Tuy nhiên, có loại memory address thứ tư: bus address. Nó tương ứng memory address mọi hardware device trừ CPU dùng để điều khiển data bus.
+Đến đây chúng ta phân biệt ba loại memory address: logical và linear address dùng nội bộ CPU, cùng physical address là memory address CPU dùng để điều khiển data bus vật lý. Tuy nhiên, có loại memory address thứ tư: so-called bus address. Nó tương ứng memory address mọi hardware device trừ CPU dùng để điều khiển data bus.
 
 Tại sao kernel cần quan tâm bus address? Trong DMA operation, data transfer diễn ra không có CPU can thiệp; data bus do I/O device và DMA circuit điều khiển trực tiếp. Do đó, khi kernel thiết lập DMA operation, nó phải ghi bus address của memory buffer liên quan vào I/O port thích hợp của DMA hoặc I/O device.
 
 Trong kiến trúc 80×86, bus address trùng physical address. Tuy nhiên, kiến trúc khác như SPARC của Sun và Alpha của Hewlett-Packard có hardware circuit gọi là I/O Memory Management Unit (IO-MMU), tương tự paging unit của microprocessor, map physical address thành bus address. Mọi I/O driver dùng DMA phải thiết lập đúng IO-MMU trước khi bắt đầu data transfer.
 
-Bus khác nhau có bus address size khác nhau. Ví dụ, bus address cho ISA dài 24 bit, nên trong kiến trúc 80×86 DMA transfer chỉ có thể thực hiện trên 16 MB physical memory thấp nhất—vì thế memory cho buffer mà DMA này dùng phải được cấp phát trong memory zone `ZONE_DMA` với flag `GFP_DMA`. Chuẩn PCI gốc định nghĩa bus address 32 bit; tuy nhiên, một số PCI hardware device ban đầu được thiết kế cho ISA bus, nên vẫn không thể truy cập RAM location trên physical address `0x00ffffff`. Chuẩn PCI-X gần đây dùng bus address 64-bit và cho phép DMA circuit truy cập trực tiếp high memory.
+Bus khác nhau có bus address size khác nhau. Ví dụ, bus address cho ISA dài 24-bits, nên trong kiến trúc 80×86 DMA transfer chỉ có thể thực hiện trên 16 MB physical memory thấp nhất—vì thế memory cho buffer mà DMA này dùng phải được cấp phát trong memory zone `ZONE_DMA` với flag `GFP_DMA`. Chuẩn PCI gốc định nghĩa bus address 32 bit; tuy nhiên, một số PCI hardware device ban đầu được thiết kế cho ISA bus, nên vẫn không thể truy cập RAM location trên physical address `0x00ffffff`. Chuẩn PCI-X gần đây dùng bus address 64-bit và cho phép DMA circuit truy cập trực tiếp high memory.
 
 Trong Linux, kiểu `dma_addr_t` biểu diễn generic bus address. Trong kiến trúc 80×86, `dma_addr_t` tương ứng integer 32-bit, trừ khi kernel hỗ trợ PAE (xem phần “The Physical Address Extension (PAE) Paging Mechanism” trong Chương 2), khi đó `dma_addr_t` tương ứng integer 64-bit.
 
@@ -725,13 +725,13 @@ Streaming DMA mapping
 
 Khi dùng mapping này, device driver phải xử lý cache coherency problem bằng synchronization helper function thích hợp. Loại mapping này còn gọi là “asynchronous” hoặc “non-coherent”.
 
-Trong kiến trúc 80×86 không bao giờ có cache coherency problem khi dùng DMA, vì chính hardware device đảm nhiệm “snooping” truy cập hardware cache. Do đó, driver cho hardware device thiết kế riêng cho kiến trúc 80×86 có thể chọn bất cứ loại nào trong hai DMA mapping type: về cơ bản tương đương. Mặt khác, trong nhiều kiến trúc—như MIPS, SPARC và một số model PowerPC—hardware device không luôn snoop hardware cache, nên cache coherency problem phát sinh. Nói chung, chọn DMA mapping type thích hợp cho driver độc lập kiến trúc không đơn giản.
+Trong kiến trúc 80×86 không bao giờ có cache coherency problem khi dùng DMA, vì chính hardware device đảm nhiệm “snooping” truy cập hardware cache. Do đó, driver cho hardware device thiết kế riêng cho kiến trúc 80×86 có thể chọn bất cứ loại nào trong hai DMA mapping type: về cơ bản tương đương. Mặt khác, trong nhiều kiến trúc—như MIPS, SPARC và một số model PowerPC—hardware device không luôn snoop hardware cache, nên cache coherency problem phát sinh. Nói chung, chọn DMA mapping type thích hợp cho driver architecture-independent không đơn giản.
 
 Theo quy tắc chung, nếu CPU và DMA processor truy cập buffer theo cách không đoán trước, bắt buộc dùng coherent DMA mapping (ví dụ buffer cho command data structure của SCSI adapter). Trong trường hợp khác, streaming DMA mapping được ưu tiên vì trong một số kiến trúc xử lý coherent DMA mapping cồng kềnh và có thể làm giảm hiệu năng hệ thống.
 
 ##### Helper function cho coherent DMA mapping
 
-Thông thường, device driver cấp phát memory buffer và thiết lập coherent DMA mapping trong giai đoạn khởi tạo; giải phóng mapping và buffer khi unload. Để cấp phát memory buffer và thiết lập coherent DMA mapping, kernel cung cấp các function phụ thuộc kiến trúc `pci_alloc_consistent()` và `dma_alloc_coherent()`. Cả hai trả về linear address và bus address của buffer mới. Trong kiến trúc 80×86, chúng trả về linear address và physical address của buffer mới. Để giải phóng mapping và buffer, kernel cung cấp function `pci_free_consistent()` và `dma_free_coherent()`.
+Thông thường, device driver cấp phát memory buffer và thiết lập coherent DMA mapping trong giai đoạn khởi tạo; giải phóng mapping và buffer khi unload. Để cấp phát memory buffer và thiết lập coherent DMA mapping, kernel cung cấp các function architecture-dependent `pci_alloc_consistent()` và `dma_alloc_coherent()`. Cả hai trả về linear address và bus address của buffer mới. Trong kiến trúc 80×86, chúng trả về linear address và physical address của buffer mới. Để giải phóng mapping và buffer, kernel cung cấp function `pci_free_consistent()` và `dma_free_coherent()`.
 
 ##### Helper function cho streaming DMA mapping
 
@@ -761,7 +761,7 @@ Kernel nhận diện hardware device và tự xử lý I/O interface. Thực t�
 
 Ví dụ phổ biến nhất của cách đầu, không dựa vào kernel device driver nào, là cách X Window System truyền thống xử lý graphic display. Cách này khá hiệu quả nhưng hạn chế X server không dùng hardware interrupt do I/O device phát. Nó còn cần nỗ lực bổ sung để cho X server truy cập I/O port cần thiết. Như đã đề cập trong phần “Task State Segment” ở Chương 3, các system call `iopl()` và `ioperm()` cấp cho process privilege truy cập I/O port. Chỉ chương trình có root privilege được gọi chúng. Nhưng có thể cung cấp chương trình đó cho user bằng cách set setuid flag của executable file (xem phần “Process Credentials and Capabilities” trong Chương 20).
 
-Phiên bản Linux gần đây hỗ trợ một số graphic card được dùng rộng rãi. Device file /dev/fb cung cấp abstraction cho frame buffer của graphic card và cho application software truy cập mà không cần biết I/O port của graphics interface. Hơn nữa, kernel hỗ trợ Direct Rendering Infrastructure (DRI) cho application software khai thác hardware của accelerated 3D graphics card. Trong mọi trường hợp, X Window System server tự xử lý theo truyền thống vẫn được áp dụng rộng rãi.
+Phiên bản Linux gần đây hỗ trợ một số graphic card được dùng rộng rãi. Device file /dev/fb cung cấp abstraction cho frame buffer của graphic card và cho application software truy cập mà không cần biết I/O port của graphics interface. Hơn nữa, kernel hỗ trợ Direct Rendering Infrastructure (DRI) cho application software khai thác hardware của accelerated 3D graphics card. Trong mọi trường hợp, X Window System server do-it-yourself theo truyền thống vẫn được áp dụng rộng rãi.
 
 Cách hỗ trợ tối thiểu được dùng xử lý external hardware device kết nối với general-purpose I/O interface. Kernel đảm nhiệm I/O interface bằng cách cung cấp device file (và do đó device driver); application program xử lý external hardware device bằng cách đọc và ghi device file.
 
@@ -771,7 +771,7 @@ Hỗ trợ tối thiểu có phạm vi ứng dụng hạn chế vì không dùng
 
 Nói chung, mọi hardware device kết nối trực tiếp I/O bus, như internal hard disk, được xử lý theo cách hỗ trợ mở rộng: kernel phải cung cấp device driver cho mỗi device đó. External device gắn với Universal Serial Bus (USB), PCMCIA port có trên nhiều laptop hoặc SCSI interface—tóm lại mọi general-purpose I/O interface trừ serial port và parallel port—cũng cần hỗ trợ mở rộng.
 
-Cần lưu ý system call chuẩn liên quan file như `open()`, `read()`, và `write()` không luôn cho ứng dụng kiểm soát đầy đủ hardware device bên dưới. Thực tế, cách tiếp cận mẫu số chung thấp nhất của VFS không dành chỗ cho special command mà một số device cần hoặc cho ứng dụng kiểm tra device có ở internal state cụ thể không.
+Cần lưu ý system call chuẩn file-related như `open()`, `read()`, và `write()` không luôn cho ứng dụng kiểm soát đầy đủ hardware device bên dưới. Thực tế, cách tiếp cận lowest-common-denominator của VFS không dành chỗ cho special command mà một số device cần hoặc cho ứng dụng kiểm tra device có ở internal state cụ thể không.
 
 System call `ioctl()` được đưa vào để đáp ứng nhu cầu đó. Ngoài file descriptor của device file và parameter 32-bit thứ hai chỉ định request, system call có thể nhận số parameter bổ sung tùy ý. Ví dụ, có request `ioctl()` riêng để lấy CD-ROM sound volume hoặc eject CD-ROM media. Application program có thể cung cấp user interface của CD player bằng những request `ioctl()` này.
 
@@ -820,7 +820,7 @@ Function `kobj_lookup()` nhận input parameter là kobject mapping domain và d
 
 ### Gán device number
 
-Để theo dõi character device number hiện được gán, kernel dùng hash table `chrdevs`, chứa khoảng device number. Hai khoảng có thể chia sẻ cùng major number nhưng không được chồng lấn, nên minor number phải khác nhau hoàn toàn. Table chứa 255 entry, và hash function mask bỏ bốn bit cao nhất của major number—do đó major number nhỏ hơn 255 được hash vào entry khác nhau. Mỗi entry trỏ đến phần tử đầu của collision list sắp theo major number và minor number tăng dần.
+Để theo dõi character device number hiện được gán, kernel dùng hash table `chrdevs`, chứa khoảng device number. Hai khoảng có thể chia sẻ cùng major number nhưng không được chồng lấn, nên minor number phải khác nhau hoàn toàn. Table chứa 255 entry, và hash function mask bỏ bốn bit higher-order của major number—do đó major number nhỏ hơn 255 được hash vào entry khác nhau. Mỗi entry trỏ đến phần tử đầu của collision list sắp theo major number và minor number tăng dần.
 
 Mỗi list element là structure `char_device_struct`, có các field trong Bảng 13-10.
 
@@ -870,7 +870,7 @@ Function `__register_chrdev_region()` thực hiện các bước sau:
 
 ##### Function register\_chrdev()
 
-Function `register_chrdev()` được driver cần khoảng device number kiểu cũ dùng: một major number và minor number từ 0 đến 255. Function nhận parameter là major number yêu cầu `major` (không để cấp phát động), tên device driver `name`, và pointer `fops` đến table file operation riêng cho character device file trong khoảng. Nó thực hiện các operation sau:
+Function `register_chrdev()` được driver cần khoảng device number old-style dùng: một major number và minor number từ 0 đến 255. Function nhận parameter là major number yêu cầu `major` (không để cấp phát động), tên device driver `name`, và pointer `fops` đến table file operation riêng cho character device file trong khoảng. Nó thực hiện các operation sau:
 
 1\. Gọi function `__register_chrdev_region()` để cấp phát khoảng yêu cầu. Nếu function trả về error code (không thể gán khoảng), kết thúc.
 
@@ -916,7 +916,7 @@ Function `chrdev_open()` nhận parameter là địa chỉ `inode` và `filp` c�
 
 ### Buffering strategy cho character device
 
-Truyền thống, hệ điều hành kiểu Unix chia hardware device thành block và character device. Tuy nhiên, phân loại này chưa nói hết. Một số device có thể truyền lượng dữ liệu đáng kể trong một I/O operation, còn số khác chỉ truyền vài character.
+Truyền thống, hệ điều hành Unix-like chia hardware device thành block và character device. Tuy nhiên, phân loại này chưa nói hết. Một số device có thể truyền lượng dữ liệu đáng kể trong một I/O operation, còn số khác chỉ truyền vài character.
 
 Ví dụ, PS/2 mouse driver nhận vài byte trong mỗi read operation tương ứng trạng thái mouse button và vị trí mouse pointer trên màn hình. Loại device này dễ xử lý nhất. Input data trước tiên được đọc từng character từ device input register và lưu trong kernel data structure thích hợp; sau đó dữ liệu được sao chép vào process address space khi thuận tiện. Tương tự, output data trước tiên được sao chép từ process address space vào kernel data structure thích hợp rồi ghi từng phần vào I/O device output register. Rõ ràng, I/O driver cho những device này không dùng DMA vì CPU time dành thiết lập DMA I/O operation tương đương thời gian chuyển dữ liệu đến hoặc từ I/O port.
 
@@ -930,7 +930,7 @@ Có thể làm bằng cách kết hợp hai kỹ thuật khác nhau:
 
 - Dùng circular buffer gồm hai hoặc nhiều phần tử, mỗi phần tử có kích thước một block dữ liệu. Khi interrupt báo đã đọc block dữ liệu mới xảy ra, interrupt handler tiến pointer đến phần tử circular buffer để dữ liệu tiếp theo lưu trong phần tử trống. Ngược lại, mỗi khi driver sao chép thành công block dữ liệu vào user address space, nó giải phóng phần tử circular buffer để sẵn sàng lưu dữ liệu mới từ hardware device.
 
-Vai trò circular buffer là làm phẳng đỉnh CPU load; ngay cả khi User Mode application nhận dữ liệu chậm lại do task khác có độ ưu tiên cao hơn, DMA vẫn có thể tiếp tục điền phần tử circular buffer vì interrupt handler thực thi thay mặt process hiện đang chạy.
+Vai trò circular buffer là làm phẳng đỉnh CPU load; ngay cả khi User Mode application nhận dữ liệu chậm lại do task khác có độ higher-priority, DMA vẫn có thể tiếp tục điền phần tử circular buffer vì interrupt handler thực thi thay mặt process hiện đang chạy.
 
 Tình huống tương tự xảy ra khi nhận packet từ network card, ngoại trừ trường hợp này luồng dữ liệu đến asynchronous. Packet được nhận độc lập nhau và khoảng thời gian giữa hai lần packet đến liên tiếp không thể đoán trước.
 

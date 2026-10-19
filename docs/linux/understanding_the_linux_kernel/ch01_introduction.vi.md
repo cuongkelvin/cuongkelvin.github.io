@@ -2,21 +2,21 @@
 
 ![Hình mở đầu Chương 1](images/ch01/ch01_opener.png)
 
-Linux[^1] là thành viên của đại gia đình hệ điều hành Unix-like. Là một thành viên tương đối mới, bất ngờ trở nên cực kỳ phổ biến từ cuối thập niên 1990, Linux đứng cùng các hệ điều hành Unix thương mại nổi tiếng như System V Release 4 (SVR4), do AT\&T phát triển (hiện thuộc sở hữu SCO Group); bản phát hành 4.4 BSD của University of California tại Berkeley (4.4BSD); Digital UNIX của Digital Equipment Corporation (nay là Hewlett-Packard); AIX của IBM; HP-UX của Hewlett-Packard; Solaris của Sun Microsystems; và Mac OS X của Apple Computer, Inc. Ngoài Linux còn có một vài kernel Unix-like open source khác như FreeBSD, NetBSD và OpenBSD.
+Linux[^1] là thành viên của đại gia đình hệ điều hành Unix-like. Là một thành viên tương đối mới, bất ngờ trở nên cực kỳ phổ biến từ cuối thập niên 1990, Linux đứng cùng các hệ điều hành Unix thương mại well-known như System V Release 4 (SVR4), do AT\&T phát triển (hiện thuộc sở hữu SCO Group); bản phát hành 4.4 BSD của University of California tại Berkeley (4.4BSD); Digital UNIX của Digital Equipment Corporation (nay là Hewlett-Packard); AIX của IBM; HP-UX của Hewlett-Packard; Solaris của Sun Microsystems; và Mac OS X của Apple Computer, Inc. Ngoài Linux còn có một vài kernel Unix-like open source khác như FreeBSD, NetBSD và OpenBSD.
 
-Linux ban đầu được Linus Torvalds phát triển năm 1991 làm hệ điều hành cho máy tính cá nhân tương thích IBM dựa trên microprocessor Intel 80386. Linus vẫn tham gia sâu vào việc cải tiến Linux, cập nhật nó theo các bước phát triển hardware và điều phối hoạt động của hàng trăm Linux developer trên khắp thế giới. Qua nhiều năm, các developer đã làm việc để đưa Linux lên các architecture khác, bao gồm Alpha của Hewlett-Packard, Itanium của Intel, AMD64 của AMD, PowerPC và zSeries của IBM.
+Linux ban đầu được Linus Torvalds phát triển năm 1991 làm hệ điều hành cho máy tính cá nhân IBM-compatible dựa trên microprocessor Intel 80386. Linus vẫn tham gia sâu vào việc cải tiến Linux, giữ nó up-to-date với các bước phát triển hardware và điều phối hoạt động của hàng trăm Linux developer trên khắp thế giới. Qua nhiều năm, các developer đã làm việc để đưa Linux lên các architecture khác, bao gồm Alpha của Hewlett-Packard, Itanium của Intel, AMD64 của AMD, PowerPC và zSeries của IBM.
 
 Một lợi ích hấp dẫn của Linux là nó không phải hệ điều hành thương mại: source code theo GNU General Public License (GPL)<sup>†</sup> được công khai và bất kỳ ai cũng có thể nghiên cứu (như chúng ta sẽ làm trong sách này); nếu download code (website chính thức là http://www.kernel.org) hoặc xem source trên Linux CD, bạn có thể khám phá từ đầu đến cuối một trong những hệ điều hành hiện đại thành công nhất. Thực tế, sách giả định bạn có sẵn source code và có thể áp dụng những gì được trình bày vào quá trình tự khám phá.
 
-Về mặt kỹ thuật, Linux là Unix kernel thực thụ, dù không phải hệ điều hành Unix hoàn chỉnh vì không bao gồm mọi Unix application, chẳng hạn filesystem utility, windowing system và graphical desktop, system administrator command, text editor, compiler, v.v. Tuy nhiên, vì phần lớn chương trình này được cung cấp miễn phí theo GPL, chúng có thể được cài đặt trên mọi hệ thống dựa trên Linux.
+Về mặt kỹ thuật, Linux là Unix kernel thực thụ, dù không phải hệ điều hành Unix hoàn chỉnh vì không bao gồm mọi Unix application, chẳng hạn filesystem utility, windowing system và graphical desktop, system administrator command, text editor, compiler, v.v. Tuy nhiên, vì phần lớn chương trình này được cung cấp miễn phí theo GPL, chúng có thể được cài đặt trên mọi hệ thống Linux-based.
 
 Vì Linux kernel cần rất nhiều software bổ sung để cung cấp môi trường hữu ích, nhiều người dùng Linux thích dựa vào commercial distribution được cung cấp trên CD-ROM để có code thường có trong hệ thống Unix chuẩn. Ngoài ra, có thể lấy code từ nhiều website khác nhau, chẳng hạn http://www.kernel.org. Một số distribution đặt Linux source code trong thư mục /usr/src/linux. Trong phần còn lại của sách, mọi file pathname đều ngầm tham chiếu thư mục Linux source code.
 
-## Linux so với các kernel Unix-like khác
+## Linux so với các kernel Unix-Like khác
 
 Các hệ thống Unix-like trên thị trường, trong đó một số có lịch sử lâu dài và dấu hiệu của những cách làm cũ, khác nhau ở nhiều khía cạnh quan trọng. Mọi biến thể thương mại đều bắt nguồn từ SVR4 hoặc 4.4BSD và đều có xu hướng tuân theo một số chuẩn chung như Portable Operating Systems based on Unix (POSIX) của IEEE và Common Applications Environment (CAE) của X/Open.
 
-Các chuẩn hiện tại chỉ quy định application programming interface (API) — tức môi trường được định nghĩa rõ ràng để user program chạy trong đó. Vì vậy, các chuẩn không áp đặt hạn chế nào lên lựa chọn thiết kế nội bộ của kernel tuân thủ chuẩn.[^2]
+Các chuẩn hiện tại chỉ quy định application programming interface (API) — tức môi trường well-defined để user program chạy trong đó. Vì vậy, các chuẩn không áp đặt hạn chế nào lên lựa chọn thiết kế nội bộ của kernel tuân thủ chuẩn.[^2]
 
 Để định nghĩa user interface chung, các kernel Unix-like thường chia sẻ ý tưởng và đặc điểm thiết kế nền tảng. Về mặt này, Linux tương đương các hệ điều hành Unix-like khác. Vì vậy, đọc sách và nghiên cứu Linux kernel cũng có thể giúp bạn hiểu các biến thể Unix khác.
 
@@ -24,11 +24,11 @@ Phiên bản 2.6 của Linux kernel hướng tới tuân thủ chuẩn IEEE POSI
 
 Khi Linus Torvalds viết kernel đầu tiên, ông tham khảo một số sách kinh điển về Unix internals như The Design of the Unix Operating System của Maurice Bach (Prentice Hall, 1986). Thực tế, Linux vẫn phần nào thiên về nền tảng Unix được mô tả trong sách của Bach (tức SVR2). Tuy nhiên, Linux không gắn chặt với biến thể cụ thể nào. Thay vào đó, nó cố gắng tiếp nhận những tính năng và lựa chọn thiết kế tốt nhất của nhiều Unix kernel khác nhau.
 
-Danh sách sau mô tả cách Linux cạnh tranh với một số Unix kernel thương mại nổi tiếng:
+Danh sách sau mô tả cách Linux cạnh tranh với một số Unix kernel thương mại well-known:
 
 Monolithic kernel
 
-Đây là chương trình lớn, phức tạp, tự thực hiện mọi việc, gồm nhiều thành phần khác nhau về logic. Về mặt này, nó khá truyền thống; phần lớn biến thể Unix thương mại là monolithic. (Ngoại lệ đáng chú ý là hệ điều hành Apple Mac OS X và GNU Hurd, cả hai bắt nguồn từ Mach của Carnegie-Mellon và theo cách tiếp cận microkernel.)
+Đây là chương trình lớn, phức tạp, do-it-yourself, gồm nhiều thành phần khác nhau về logic. Về mặt này, nó khá truyền thống; phần lớn biến thể Unix thương mại là monolithic. (Ngoại lệ đáng chú ý là hệ điều hành Apple Mac OS X và GNU Hurd, cả hai bắt nguồn từ Mach của Carnegie-Mellon và theo cách tiếp cận microkernel.)
 
 Các Unix kernel truyền thống được compile và statically link
 
@@ -44,7 +44,7 @@ Phần lớn hệ điều hành hiện đại có một dạng hỗ trợ multit
 
 Preemptive kernel
 
-Khi compile với option “Preemptible Kernel”, Linux 2.6 có thể tùy ý xen kẽ các execution flow khi chúng ở privileged mode. Ngoài Linux 2.6, một vài hệ thống Unix truyền thống, đa dụng khác như Solaris và Mach 3.0 cũng là fully preemptive kernel. SVR4.2/MP đưa vào một số preemption point cố định để có khả năng preemption hạn chế.
+Khi compile với option “Preemptible Kernel”, Linux 2.6 có thể tùy ý xen kẽ các execution flow khi chúng ở privileged mode. Ngoài Linux 2.6, một vài hệ thống Unix truyền thống, general-purpose khác như Solaris và Mach 3.0 cũng là fully preemptive kernel. SVR4.2/MP đưa vào một số preemption point cố định để có khả năng preemption hạn chế.
 
 Hỗ trợ multiprocessor
 
@@ -52,7 +52,7 @@ Một số biến thể Unix kernel tận dụng multiprocessor system. Linux 2.
 
 Filesystem
 
-Các filesystem chuẩn của Linux có nhiều loại. Bạn có thể dùng Ext2 filesystem truyền thống nếu không có nhu cầu cụ thể. Có thể chuyển sang Ext3 nếu muốn tránh kiểm tra filesystem kéo dài sau system crash. Nếu phải xử lý nhiều file nhỏ, ReiserFS filesystem có lẽ là lựa chọn tốt nhất. Ngoài Ext3 và ReiserFS, Linux còn sử dụng được một số journaling filesystem khác, bao gồm Journaling File System (JFS) của IBM AIX và XFS filesystem của Silicon Graphics IRIX. Nhờ công nghệ Virtual File System hướng đối tượng mạnh mẽ (lấy cảm hứng từ Solaris và SVR4), port filesystem từ hệ thống khác sang Linux thường dễ hơn port sang kernel khác.
+Các filesystem chuẩn của Linux có nhiều loại. Bạn có thể dùng Ext2 filesystem truyền thống nếu không có nhu cầu cụ thể. Có thể chuyển sang Ext3 nếu muốn tránh kiểm tra filesystem kéo dài sau system crash. Nếu phải xử lý nhiều file nhỏ, ReiserFS filesystem có lẽ là lựa chọn tốt nhất. Ngoài Ext3 và ReiserFS, Linux còn sử dụng được một số journaling filesystem khác, bao gồm Journaling File System (JFS) của IBM AIX và XFS filesystem của Silicon Graphics IRIX. Nhờ công nghệ Virtual File System object-oriented mạnh mẽ (lấy cảm hứng từ Solaris và SVR4), port filesystem từ hệ thống khác sang Linux thường dễ hơn port sang kernel khác.
 
 STREAMS
 
@@ -64,7 +64,7 @@ Linux miễn phí. Bạn có thể cài đặt hệ thống Unix hoàn chỉnh m
 
 Linux có thể tùy chỉnh hoàn toàn mọi thành phần. Nhờ compilation option, bạn có thể tùy chỉnh kernel bằng cách chỉ chọn những tính năng thực sự cần thiết. Hơn nữa, nhờ GPL, bạn được tự do đọc và sửa source code của kernel và mọi system program.[^3]
 
-Linux chạy trên hardware platform cấp thấp, rẻ tiền. Bạn có thể xây dựng network server bằng hệ thống Intel 80386 cũ với 4 MB RAM.
+Linux chạy trên hardware platform low-end, rẻ tiền. Bạn có thể xây dựng network server bằng hệ thống Intel 80386 cũ với 4 MB RAM.
 
 Linux mạnh mẽ. Hệ thống Linux rất nhanh vì khai thác triệt để tính năng của các hardware component. Mục tiêu chính của Linux là hiệu quả; thực tế, nhiều lựa chọn thiết kế của biến thể thương mại, như STREAMS I/O subsystem, đã bị Linus bác bỏ vì làm giảm performance.
 
@@ -80,7 +80,7 @@ Với số lượng cài đặt ước tính vài chục triệu, những ngư�
 
 ## Sự phụ thuộc hardware
 
-Linux cố gắng duy trì phân biệt rõ ràng giữa source code phụ thuộc hardware và độc lập hardware. Để làm vậy, cả thư mục arch và include đều có 23 subdirectory tương ứng các loại hardware platform được hỗ trợ. Tên chuẩn của các platform là:
+Linux cố gắng duy trì phân biệt rõ ràng giữa source code hardware-dependent và hardware-independent. Để làm vậy, cả thư mục arch và include đều có 23 subdirectory tương ứng các loại hardware platform được hỗ trợ. Tên chuẩn của các platform là:
 
 alpha
 
@@ -88,11 +88,11 @@ Workstation Alpha của Hewlett-Packard (ban đầu là Digital, sau đó Compaq
 
 arm, arm26
 
-Máy tính dựa trên ARM processor như PDA và embedded device
+Máy tính ARM processor-based như PDA và embedded device
 
 cris
 
-CPU “Code Reduced Instruction Set” được Axis sử dụng trong thin-server, như web camera hoặc development board
+CPU “Code Reduced Instruction Set” được Axis sử dụng trong thin-servers, như web camera hoặc development board
 
 frv
 
@@ -104,7 +104,7 @@ Microprocessor Hitachi h8/300 và h8S RISC 8/16-bit
 
 i386
 
-Máy tính cá nhân tương thích IBM dựa trên microprocessor 80x86
+Máy tính cá nhân IBM-compatible dựa trên microprocessor 80x86
 
 ia64
 
@@ -168,13 +168,13 @@ Mỗi hệ thống máy tính có tập chương trình cơ bản gọi là hệ
 
 Hệ điều hành phải đáp ứng hai mục tiêu chính:
 
-- Tương tác với hardware component, phục vụ mọi thành phần lập trình được ở cấp thấp trong hardware platform.
+- Tương tác với hardware component, phục vụ mọi thành phần lập trình được ở low-level trong hardware platform.
 
-- Cung cấp execution environment cho application chạy trên hệ thống máy tính (được gọi là user program).
+- Cung cấp execution environment cho application chạy trên hệ thống máy tính (so-called user program).
 
-Một số hệ điều hành cho phép mọi user program trực tiếp thao tác hardware component (ví dụ điển hình là MS-DOS). Ngược lại, hệ điều hành Unix-like che giấu mọi chi tiết cấp thấp về tổ chức vật lý của máy tính khỏi application do người dùng chạy. Khi chương trình muốn dùng hardware resource, nó phải gửi request đến hệ điều hành. Kernel đánh giá request và nếu quyết định cấp resource, tương tác với hardware component phù hợp thay mặt user program.
+Một số hệ điều hành cho phép mọi user program trực tiếp thao tác hardware component (ví dụ điển hình là MS-DOS). Ngược lại, hệ điều hành Unix-like che giấu mọi chi tiết low-level về tổ chức vật lý của máy tính khỏi application do người dùng chạy. Khi chương trình muốn dùng hardware resource, nó phải gửi request đến hệ điều hành. Kernel đánh giá request và nếu quyết định cấp resource, tương tác với hardware component phù hợp thay mặt user program.
 
-Để thực thi cơ chế này, hệ điều hành hiện đại dựa vào những hardware feature cụ thể cấm user program trực tiếp tương tác hardware component cấp thấp hoặc truy cập memory location tùy ý. Đặc biệt, hardware đưa ra ít nhất hai execution mode khác nhau cho CPU: nonprivileged mode cho user program và privileged mode cho kernel. Unix lần lượt gọi chúng là User Mode và Kernel Mode.
+Để thực thi cơ chế này, hệ điều hành hiện đại dựa vào những hardware feature cụ thể cấm user program trực tiếp tương tác hardware component low-level hoặc truy cập memory location tùy ý. Đặc biệt, hardware đưa ra ít nhất hai execution mode khác nhau cho CPU: nonprivileged mode cho user program và privileged mode cho kernel. Unix lần lượt gọi chúng là User Mode và Kernel Mode.
 
 Trong phần còn lại của chương, chúng ta giới thiệu những khái niệm cơ bản thúc đẩy thiết kế Unix trong hai thập kỷ qua, cũng như Linux và các hệ điều hành khác. Dù với tư cách người dùng Linux bạn có lẽ đã quen các khái niệm này, những phần này cố tìm hiểu sâu hơn thông thường một chút để giải thích yêu cầu chúng đặt ra cho kernel của hệ điều hành. Những xem xét tổng quát này áp dụng cho hầu như mọi hệ thống Unix-like. Hy vọng các chương khác sẽ giúp bạn hiểu Linux kernel internals.
 
@@ -200,7 +200,7 @@ Trong multiuser system, mỗi người dùng có không gian riêng trên máy; 
 
 Mọi người dùng được nhận diện bằng số duy nhất gọi là User ID, hay UID. Thường chỉ số lượng người hạn chế được phép dùng hệ thống máy tính. Khi một người dùng bắt đầu working session, hệ thống yêu cầu login name và password. Nếu không nhập cặp hợp lệ, hệ thống từ chối truy cập. Vì password được giả định là bí mật, quyền riêng tư của người dùng được bảo đảm.
 
-Để chia sẻ có chọn lọc với người dùng khác, mỗi người dùng là thành viên của một hoặc nhiều user group, được nhận diện bằng số duy nhất gọi là user group ID. Mỗi file gắn với đúng một group. Ví dụ, có thể đặt quyền truy cập sao cho người dùng sở hữu file có quyền read và write, group chỉ có quyền read, còn người dùng khác trong hệ thống bị từ chối truy cập file.
+Để chia sẻ có chọn lọc với người dùng khác, mỗi người dùng là thành viên của một hoặc nhiều user group, được nhận diện bằng số duy nhất gọi là user group ID. Mỗi file gắn với đúng một group. Ví dụ, có thể đặt quyền truy cập sao cho người dùng sở hữu file có quyền read và write, group có quyền read-only, còn người dùng khác trong hệ thống bị từ chối truy cập file.
 
 Mọi hệ điều hành Unix-like có người dùng đặc biệt tên root hay superuser. System administrator phải login dưới tên root để quản lý user account, thực hiện bảo trì như system backup và program upgrade, v.v. Root user có thể làm gần như mọi thứ vì hệ điều hành không áp dụng protection mechanism thông thường với người dùng này. Đặc biệt, root user có thể truy cập mọi file trên hệ thống và thao tác mọi user program đang chạy.
 
@@ -220,7 +220,7 @@ Hệ điều hành Unix-like áp dụng process/kernel model. Mỗi process có 
 
 Như đã nói, phần lớn Unix kernel là monolithic: mỗi kernel layer được tích hợp vào toàn bộ kernel program và chạy trong Kernel Mode thay mặt current process. Ngược lại, hệ điều hành microkernel chỉ yêu cầu kernel có tập function rất nhỏ, thường gồm một vài synchronization primitive, scheduler đơn giản và interprocess communication mechanism. Một số system process chạy trên microkernel triển khai các function ở layer hệ điều hành khác như memory allocator, device driver và system call handler.
 
-Dù nghiên cứu học thuật về hệ điều hành hướng đến microkernel, những hệ điều hành này thường chậm hơn monolithic vì explicit message passing giữa các layer hệ điều hành có chi phí. Tuy nhiên, hệ điều hành microkernel có thể có một số lợi thế lý thuyết so với monolithic. Microkernel buộc system programmer dùng cách tiếp cận modularized vì mỗi layer hệ điều hành là chương trình tương đối độc lập phải tương tác với layer khác qua software interface rõ ràng, được định nghĩa tốt. Hơn nữa, hệ điều hành microkernel hiện có có thể được port sang architecture khác khá dễ dàng vì mọi thành phần phụ thuộc hardware thường được đóng gói trong microkernel code. Cuối cùng, hệ điều hành microkernel thường tận dụng random access memory (RAM) tốt hơn monolithic vì system process không triển khai chức năng cần thiết có thể được swap out hoặc hủy.
+Dù nghiên cứu học thuật về hệ điều hành hướng đến microkernel, những hệ điều hành này thường chậm hơn monolithic vì explicit message passing giữa các layer hệ điều hành có chi phí. Tuy nhiên, hệ điều hành microkernel có thể có một số lợi thế lý thuyết so với monolithic. Microkernel buộc system programmer dùng cách tiếp cận modularized vì mỗi layer hệ điều hành là chương trình tương đối độc lập phải tương tác với layer khác qua software interface rõ ràng, well-defined. Hơn nữa, hệ điều hành microkernel hiện có có thể được port sang architecture khác khá dễ dàng vì mọi thành phần hardware-dependent thường được đóng gói trong microkernel code. Cuối cùng, hệ điều hành microkernel thường tận dụng random access memory (RAM) tốt hơn monolithic vì system process không triển khai chức năng cần thiết có thể được swap out hoặc hủy.
 
 Để đạt nhiều lợi thế lý thuyết của microkernel mà không làm giảm performance, Linux kernel cung cấp module. Module là object file có code có thể được link vào (và unlink khỏi) kernel lúc runtime. Object code thường gồm tập function triển khai filesystem, device driver hoặc tính năng khác ở upper layer của kernel. Khác với external layer của hệ điều hành microkernel, module không chạy dưới dạng process riêng. Thay vào đó, nó được thực thi trong Kernel Mode thay mặt current process, như mọi kernel function statically linked khác.
 
@@ -228,11 +228,11 @@ Các lợi thế chính khi dùng module gồm:
 
 Cách tiếp cận modularized
 
-Vì mọi module có thể được link và unlink lúc runtime, system programmer phải đưa ra software interface rõ ràng để truy cập data structure do module xử lý. Điều này giúp dễ phát triển module mới.
+Vì mọi module có thể được link và unlink lúc runtime, system programmer phải đưa ra software interface well-defined để truy cập data structure do module xử lý. Điều này giúp dễ phát triển module mới.
 
 Độc lập platform
 
-Dù có thể dựa vào hardware feature cụ thể, module không phụ thuộc hardware platform cố định. Ví dụ, disk driver module dựa trên chuẩn SCSI hoạt động tốt trên PC tương thích IBM cũng như trên Alpha của Hewlett-Packard.
+Dù có thể dựa vào hardware feature cụ thể, module không phụ thuộc hardware platform cố định. Ví dụ, disk driver module dựa trên chuẩn SCSI hoạt động tốt trên PC IBM-compatible cũng như trên Alpha của Hewlett-Packard.
 
 Sử dụng main memory tiết kiệm
 
@@ -248,7 +248,7 @@ Thiết kế hệ điều hành Unix xoay quanh filesystem với nhiều đặc 
 
 ### File
 
-Unix file là nơi chứa thông tin được cấu trúc thành byte sequence; kernel không diễn giải nội dung file. Nhiều programming library triển khai abstraction cấp cao hơn như record được cấu trúc thành field và record addressing dựa trên key. Tuy nhiên, chương trình trong những library này phải dựa vào system call do kernel cung cấp. Từ góc nhìn người dùng, file được tổ chức trong namespace có cấu trúc tree, như Hình 1-1.
+Unix file là nơi chứa thông tin được cấu trúc thành byte sequence; kernel không diễn giải nội dung file. Nhiều programming library triển khai abstraction higher-level như record được cấu trúc thành field và record addressing dựa trên key. Tuy nhiên, chương trình trong những library này phải dựa vào system call do kernel cung cấp. Từ góc nhìn người dùng, file được tổ chức trong namespace có cấu trúc tree, như Hình 1-1.
 
 ![Hình 1-1](images/ch01/fig01-01.png)
 
@@ -360,11 +360,11 @@ Executable file có flag `sticky` được set tương ứng request đến kern
 
 Khi process tạo file, owner ID của file là UID của process. Owner user group ID có thể là process group ID của process tạo file hoặc user group ID của parent directory, tùy giá trị flag `sgid` của parent directory.
 
-### System call xử lý file
+### System call File-Handling
 
-Khi người dùng truy cập nội dung regular file hoặc directory, thực chất họ truy cập data lưu trên hardware block device. Theo nghĩa này, filesystem là góc nhìn user-level về tổ chức vật lý của hard disk partition. Vì process trong User Mode không thể trực tiếp tương tác hardware component cấp thấp, mỗi file operation thực tế phải được thực hiện trong Kernel Mode. Vì vậy, hệ điều hành Unix định nghĩa nhiều system call liên quan xử lý file.
+Khi người dùng truy cập nội dung regular file hoặc directory, thực chất họ truy cập data lưu trên hardware block device. Theo nghĩa này, filesystem là góc nhìn user-level về tổ chức vật lý của hard disk partition. Vì process trong User Mode không thể trực tiếp tương tác hardware component low-level, mỗi file operation thực tế phải được thực hiện trong Kernel Mode. Vì vậy, hệ điều hành Unix định nghĩa nhiều system call liên quan xử lý file.
 
-Mọi Unix kernel rất chú trọng xử lý hardware block device hiệu quả để đạt performance tổng thể tốt. Trong các chương sau, chúng ta mô tả chủ đề liên quan xử lý file trong Linux, cụ thể cách kernel phản ứng với system call liên quan file. Để hiểu các mô tả đó, bạn cần biết cách dùng các system call xử lý file chính; chúng được mô tả ở phần tiếp theo.
+Mọi Unix kernel rất chú trọng xử lý hardware block device hiệu quả để đạt performance tổng thể tốt. Trong các chương sau, chúng ta mô tả chủ đề liên quan file-handling trong Linux, cụ thể cách kernel phản ứng với system call file-related. Để hiểu các mô tả đó, bạn cần biết cách dùng các system call xử lý file chính; chúng được mô tả ở phần tiếp theo.
 
 #### Mở file
 
@@ -390,7 +390,7 @@ Chỉ định access right của file mới tạo.
 
 System call này tạo “open file” object và return identifier gọi là file descriptor. Open file object chứa:
 
-- Một số data structure xử lý file, như tập flag chỉ định cách file được mở, field `offset` biểu thị vị trí hiện tại trong file mà operation tiếp theo bắt đầu (gọi là file pointer), v.v.
+- Một số data structure file-handling, như tập flag chỉ định cách file được mở, field `offset` biểu thị vị trí hiện tại trong file mà operation tiếp theo bắt đầu (so-called file pointer), v.v.
 
 - Một số pointer đến kernel function mà process có thể gọi. Tập function được phép phụ thuộc giá trị parameter `flag`.
 
@@ -488,7 +488,7 @@ Khi chương trình được thực thi trong User Mode, nó không thể truy c
 
 Process là thực thể động thường có thời gian tồn tại hữu hạn trong hệ thống. Công việc tạo, loại bỏ và synchronize các process hiện có được giao cho nhóm routine trong kernel.
 
-Bản thân kernel không phải process mà là process manager. Process/kernel model giả định process cần kernel service sử dụng programming construct cụ thể gọi là system call. Mỗi system call thiết lập nhóm parameter xác định process request rồi thực thi CPU instruction phụ thuộc hardware để chuyển từ User Mode sang Kernel Mode.
+Bản thân kernel không phải process mà là process manager. Process/kernel model giả định process cần kernel service sử dụng programming construct cụ thể gọi là system call. Mỗi system call thiết lập nhóm parameter xác định process request rồi thực thi CPU instruction hardware-dependent để chuyển từ User Mode sang Kernel Mode.
 
 Ngoài user process, hệ thống Unix có một vài privileged process gọi là kernel thread với các đặc điểm sau:
 
@@ -648,7 +648,7 @@ Synchronous notification
 
 Ví dụ, kernel gửi signal `SIGSEGV` đến process khi process truy cập memory location ở invalid address.
 
-Chuẩn POSIX định nghĩa khoảng 20 signal khác nhau, trong đó 2 signal do người dùng định nghĩa và có thể dùng làm cơ chế sơ khai để communication và synchronization giữa process trong User Mode. Nhìn chung, process có thể phản ứng với signal delivery theo hai cách:
+Chuẩn POSIX định nghĩa khoảng 20 signal khác nhau, trong đó 2 signal user-definable và có thể dùng làm cơ chế sơ khai để communication và synchronization giữa process trong User Mode. Nhìn chung, process có thể phản ứng với signal delivery theo hai cách:
 
 - Bỏ qua signal.
 
@@ -828,13 +828,13 @@ Hình 1-4 minh họa cách device driver giao tiếp phần còn lại của ker
 
 Hình 1-4. Device driver interface
 
-Một số user program (P) muốn thao tác hardware device. Chúng gửi request đến kernel bằng system call liên quan file thông thường và device file thường nằm trong thư mục /dev. Thực tế, device file là phần người dùng thấy được của device driver interface. Mỗi device file tham chiếu device driver cụ thể, được kernel gọi để thực hiện operation yêu cầu trên hardware component.
+Một số user program (P) muốn thao tác hardware device. Chúng gửi request đến kernel bằng system call file-related thông thường và device file thường nằm trong thư mục /dev. Thực tế, device file là phần user-visible của device driver interface. Mỗi device file tham chiếu device driver cụ thể, được kernel gọi để thực hiện operation yêu cầu trên hardware component.
 
 Khi Unix được giới thiệu, graphical terminal hiếm và đắt, nên Unix kernel chỉ trực tiếp xử lý alphanumeric terminal. Khi graphical terminal phổ biến, application chuyên dụng như X Window System được đưa vào, chạy như process chuẩn và truy cập trực tiếp I/O port của graphics interface cùng RAM video area. Một số Unix kernel gần đây, như Linux 2.6, cung cấp abstraction cho frame buffer của graphic card và cho phép application software truy cập mà không cần biết gì về I/O port của graphics interface (xem phần “Các mức hỗ trợ của kernel” trong Chương 13.)
 
 [^1]: LINUX® là nhãn hiệu đã đăng ký của Linus Torvalds. † GNU project được điều phối bởi Free Software Foundation, Inc. (http://www.gnu.org); mục tiêu là triển khai hệ điều hành hoàn chỉnh mà mọi người được tự do sử dụng. Sự hiện diện của GNU C compiler có ý nghĩa thiết yếu đối với thành công của Linux project.
 
-[^2]: Thực tế, nhiều hệ điều hành không phải Unix như Windows NT và các hậu duệ cũng tuân thủ POSIX.
+[^2]: Thực tế, nhiều hệ điều hành non-Unix như Windows NT và các hậu duệ cũng tuân thủ POSIX.
 
 [^3]: Nhiều công ty thương mại hiện hỗ trợ sản phẩm trên Linux. Tuy nhiên, nhiều sản phẩm không được phân phối theo open source license nên bạn có thể không được phép đọc hoặc sửa source code.
 

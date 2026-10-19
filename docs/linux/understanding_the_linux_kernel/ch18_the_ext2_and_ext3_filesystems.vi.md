@@ -8,7 +8,7 @@ Trong chương này, chúng ta kết thúc phần thảo luận sâu rộng về
 
 Sau khi giới thiệu Ext2 trong mục “Các đặc điểm chung của Ext2”, chúng ta mô tả các cấu trúc dữ liệu cần thiết, giống như trong các chương khác. Vì đang xem xét một cách cụ thể để lưu dữ liệu trên disk, chúng ta phải xét hai phiên bản của cùng các cấu trúc dữ liệu. Mục “Các cấu trúc dữ liệu Ext2 trên disk” trình bày các cấu trúc dữ liệu được Ext2 lưu trên disk, còn “Các cấu trúc dữ liệu Ext2 trong memory” trình bày các phiên bản tương ứng trong memory.
 
-Sau đó chúng ta đến với các thao tác thực hiện trên filesystem. Trong mục “Tạo filesystem Ext2”, chúng ta thảo luận cách tạo Ext2 trong một disk partition. Các mục tiếp theo mô tả những hoạt động của kernel mỗi khi disk được sử dụng. Phần lớn là những hoạt động ở mức tương đối thấp, liên quan đến việc cấp phát không gian disk cho inode và data block.
+Sau đó chúng ta đến với các thao tác thực hiện trên filesystem. Trong mục “Tạo filesystem Ext2”, chúng ta thảo luận cách tạo Ext2 trong một disk partition. Các mục tiếp theo mô tả những hoạt động của kernel mỗi khi disk được sử dụng. Phần lớn là những hoạt động ở low-level, liên quan đến việc cấp phát không gian disk cho inode và data block.
 
 Trong mục cuối, chúng ta mô tả ngắn gọn filesystem Ext3, bước tiến tiếp theo trong quá trình phát triển của filesystem Ext2.
 
@@ -20,7 +20,7 @@ Những phiên bản Linux đầu tiên dựa trên filesystem MINIX. Khi Linux 
 
 Các tính năng sau góp phần tạo nên hiệu quả của Ext2:
 
-- Khi tạo filesystem Ext2, người quản trị hệ thống có thể chọn block size tối ưu (từ 1.024 đến 4.096 byte), tùy theo độ dài file trung bình dự kiến. Ví dụ, block size 1.024 thích hợp hơn khi độ dài file trung bình nhỏ hơn vài nghìn byte vì nó làm giảm internal fragmentation—nghĩa là giảm sự chênh lệch giữa độ dài file và phần disk lưu nó (xem mục “Quản lý memory area” trong Chương 8, nơi đã thảo luận internal fragmentation đối với dynamic memory). Mặt khác, block size lớn hơn thường thích hợp hơn cho những file lớn hơn vài nghìn byte vì làm giảm số lần truyền dữ liệu disk, từ đó giảm system overhead.
+- Khi tạo filesystem Ext2, người quản trị hệ thống có thể chọn block size tối ưu (từ 1.024 đến 4.096 byte), tùy theo độ dài file trung bình dự kiến. Ví dụ, block size 1,024-block thích hợp hơn khi độ dài file trung bình nhỏ hơn vài nghìn byte vì nó làm giảm internal fragmentation—nghĩa là giảm sự chênh lệch giữa độ dài file và phần disk lưu nó (xem mục “Quản lý memory area” trong Chương 8, nơi đã thảo luận internal fragmentation đối với dynamic memory). Mặt khác, block size lớn hơn thường thích hợp hơn cho những file lớn hơn vài nghìn byte vì làm giảm số lần truyền dữ liệu disk, từ đó giảm system overhead.
 
 - Khi tạo filesystem Ext2, người quản trị hệ thống có thể chọn số inode cho phép đối với một partition có kích thước cho trước, tùy theo số file dự kiến lưu trên đó. Điều này tối đa hóa không gian disk thực sự có thể sử dụng.
 
@@ -32,7 +32,7 @@ Các tính năng sau góp phần tạo nên hiệu quả của Ext2:
 
 Hơn nữa, Second Extended Filesystem còn có các tính năng khác giúp nó vừa vững chắc vừa linh hoạt:
 
-- Việc cập nhật file được triển khai cẩn thận để giảm thiểu tác động của system crash. Ví dụ, khi tạo hard link mới cho một file, bộ đếm hard link trong disk inode được tăng trước, rồi tên mới được thêm vào directory thích hợp. Nhờ vậy, nếu lỗi hardware xảy ra sau khi cập nhật inode nhưng trước khi thay đổi được directory, directory vẫn nhất quán, dù bộ đếm hard link của inode sai. Việc xóa file không dẫn đến hậu quả thảm khốc, mặc dù các data block của file không thể được tự động thu hồi. Nếu làm ngược lại (thay đổi directory trước khi cập nhật inode), cùng lỗi hardware đó sẽ tạo ra sự không nhất quán nguy hiểm: xóa hard link ban đầu sẽ loại bỏ các data block của nó khỏi disk, nhưng directory entry mới lại tham chiếu đến inode không còn tồn tại. Nếu số inode đó sau này được dùng cho file khác, ghi vào directory entry lỗi thời sẽ làm hỏng file mới.
+- file-updating được triển khai cẩn thận để giảm thiểu tác động của system crash. Ví dụ, khi tạo hard link mới cho một file, bộ đếm hard link trong disk inode được tăng trước, rồi tên mới được thêm vào directory thích hợp. Nhờ vậy, nếu lỗi hardware xảy ra sau khi cập nhật inode nhưng trước khi thay đổi được directory, directory vẫn nhất quán, dù bộ đếm hard link của inode sai. Việc xóa file không dẫn đến hậu quả thảm khốc, mặc dù các data block của file không thể được tự động thu hồi. Nếu làm ngược lại (thay đổi directory trước khi cập nhật inode), cùng lỗi hardware đó sẽ tạo ra sự không nhất quán nguy hiểm: xóa hard link ban đầu sẽ loại bỏ các data block của nó khỏi disk, nhưng directory entry mới lại tham chiếu đến inode không còn tồn tại. Nếu số inode đó sau này được dùng cho file khác, ghi vào directory entry lỗi thời sẽ làm hỏng file mới.
 
 - Hỗ trợ tự động kiểm tra tính nhất quán của trạng thái filesystem lúc boot. Các kiểm tra do chương trình bên ngoài e2fsck thực hiện; chương trình có thể được kích hoạt không chỉ sau system crash mà còn sau một số lần mount filesystem định trước (một bộ đếm được tăng sau mỗi thao tác mount), hoặc sau một khoảng thời gian định trước kể từ lần kiểm tra gần nhất.
 
@@ -56,7 +56,7 @@ Một undelete option cho phép người dùng dễ dàng khôi phục nội dun
 
 Journaling
 
-Journaling tránh bước kiểm tra tốn thời gian được tự động thực hiện trên filesystem khi nó bị unmount đột ngột—ví dụ, do system crash.
+Journaling tránh bước kiểm tra time-consuming được tự động thực hiện trên filesystem khi nó bị unmount đột ngột—ví dụ, do system crash.
 
 Trên thực tế, chưa tính năng nào trong số này được chính thức đưa vào filesystem Ext2. Có thể nói Ext2 là nạn nhân của chính thành công của nó; cho đến vài năm trước, nó vẫn là filesystem được hầu hết các công ty phân phối Linux ưu tiên chọn, và hàng triệu người dùng dựa vào nó mỗi ngày hẳn sẽ nghi ngờ bất kỳ nỗ lực thay Ext2 bằng một filesystem khác.
 
@@ -90,11 +90,11 @@ Như có thể thấy từ Hình 18-1, cả superblock và group descriptor đ�
 
 Có bao nhiêu block group? Điều đó phụ thuộc cả kích thước partition lẫn block size. Ràng buộc chính là block bitmap, dùng để xác định block đã dùng và free trong một nhóm, phải được lưu trong một block duy nhất. Vì thế, mỗi block group có thể có tối đa 8×b block, với b là block size tính bằng byte. Do đó, tổng số block group xấp xỉ s/(8×b), với s là kích thước partition tính bằng block.
 
-Ví dụ, xét partition Ext2 32 GB với block size 4 KB. Trong trường hợp này, mỗi block bitmap 4 KB mô tả 32K data block—nghĩa là 128 MB. Do đó, cần tối đa 256 block group. Rõ ràng, block size càng nhỏ thì số block group càng lớn.
+Ví dụ, xét partition Ext2 32-GB với block size 4-KB. Trong trường hợp này, mỗi block bitmap 4-KB mô tả 32K data block—nghĩa là 128 MB. Do đó, cần tối đa 256 block group. Rõ ràng, block size càng nhỏ thì số block group càng lớn.
 
 ### Superblock
 
-Một disk superblock Ext2 được lưu trong cấu trúc `ext2_super_block`, có các field được liệt kê trong Bảng 18-1.[^1] Các kiểu dữ liệu `__u8`, `__u16` và `__u32` biểu diễn số không dấu có độ dài lần lượt 8, 16 và 32 bit, còn các kiểu dữ liệu `__s8`, `__s16`, `__s32` biểu diễn số có dấu dài 8, 16 và 32 bit. Để chỉ định rõ thứ tự các byte của một word hoặc double-word được lưu trên disk, kernel còn dùng các kiểu dữ liệu `__le16`, `__le32`, `__be16` và `__be32`; hai kiểu đầu lần lượt biểu diễn thứ tự little-endian cho word và double-word (byte ít quan trọng nhất được lưu tại địa chỉ cao nhất), còn hai kiểu sau biểu diễn thứ tự big-endian (byte quan trọng nhất được lưu tại địa chỉ cao nhất).
+Một disk superblock Ext2 được lưu trong cấu trúc `ext2_super_block`, có các field được liệt kê trong Bảng 18-1.[^1] Các kiểu dữ liệu `__u8`, `__u16` và `__u32` biểu diễn số không dấu có độ dài lần lượt 8, 16 và 32 bit, còn các kiểu dữ liệu `__s8`, `__s16`, `__s32` biểu diễn số có dấu dài 8, 16 và 32 bit. Để chỉ định rõ thứ tự các byte của một word hoặc double-word được lưu trên disk, kernel còn dùng các kiểu dữ liệu `__le16`, `__le32`, `__be16` và `__be32`; hai kiểu đầu lần lượt biểu diễn thứ tự little-endian cho word và double-words (byte ít quan trọng nhất được lưu tại địa chỉ cao nhất), còn hai kiểu sau biểu diễn thứ tự big-endian (byte quan trọng nhất được lưu tại địa chỉ cao nhất).
 
 Bảng 18-1. Các field của superblock Ext2
 
@@ -126,12 +126,12 @@ Bảng 18-1. Các field của superblock Ext2
 | `__le16` | `s_def_resuid` | UID mặc định cho các block được dành riêng |
 | `__le16` | `s_def_resgid` | User group ID mặc định cho các block được dành riêng |
 | `__le32` | `s_first_ino` | Số của inode không được dành riêng đầu tiên |
-| `__le16` | `s_inode_size` | Kích thước cấu trúc inode trên disk |
+| `__le16` | `s_inode_size` | Kích thước cấu trúc inode on-disk |
 | `__le16` | `s_block_group_nr` | Số block group của superblock này |
 | `__le32` | `s_feature_compat` | Bitmap các tính năng tương thích |
 | `__le32` | `s_feature_incompat` | Bitmap các tính năng không tương thích |
-| `__le32` | `s_feature_ro_compat` | Bitmap các tính năng tương thích read-only |
-| `__u8 [16]` | `s_uuid` | Định danh filesystem 128 bit |
+| `__le32` | `s_feature_ro_compat` | Bitmap các tính năng tương thích Read-only |
+| `__u8 [16]` | `s_uuid` | Định danh filesystem 128-bit |
 | `char [16]` | `s_volume_name` | Tên volume |
 | `char [64]` | `s_last_mounted` | Pathname của mount point gần nhất |
 | `__le32` | `s_algorithm_usage_bitmap` | Dùng để nén |
@@ -142,7 +142,7 @@ Bảng 18-1. Các field của superblock Ext2
 
 Field `s_inodes_count` lưu số inode, còn field `s_blocks_count` lưu số block trong filesystem Ext2.
 
-Field `s_log_block_size` biểu diễn block size dưới dạng lũy thừa của 2, lấy 1.024 byte làm đơn vị. Do đó, 0 biểu diễn block 1.024 byte, 1 biểu diễn block 2.048 byte, v.v. Field `s_log_frag_size` hiện bằng `s_log_block_size`, vì block fragmentation chưa được triển khai.
+Field `s_log_block_size` biểu diễn block size dưới dạng lũy thừa của 2, lấy 1.024 byte làm đơn vị. Do đó, 0 biểu diễn block 1,024-byte, 1 biểu diễn block 2,048-byte, v.v. Field `s_log_frag_size` hiện bằng `s_log_block_size`, vì block fragmentation chưa được triển khai.
 
 Các field `s_blocks_per_group`, `s_frags_per_group` và `s_inodes_per_group` lần lượt lưu số block, fragment và inode trong mỗi block group.
 
@@ -173,7 +173,7 @@ Các field `bg_free_blocks_count`, `bg_free_inodes_count` và `bg_used_dirs_coun
 
 Inode table gồm một dãy block liên tiếp, mỗi block chứa một số inode định trước. Số block của block đầu tiên trong inode table được lưu ở field `bg_inode_table` của group descriptor.
 
-Tất cả inode có cùng kích thước: 128 byte. Một block 1.024 byte chứa 8 inode, còn một block 4.096 byte chứa 32 inode. Để tính số block mà inode table chiếm, chia tổng số inode trong một nhóm (lưu ở field `s_inodes_per_group` của superblock) cho số inode mỗi block.
+Tất cả inode có cùng kích thước: 128 byte. Một block 1,024-byte chứa 8 inode, còn một block 4,096-byte chứa 32 inode. Để tính số block mà inode table chiếm, chia tổng số inode trong một nhóm (lưu ở field `s_inodes_per_group` của superblock) cho số inode mỗi block.
 
 Mỗi inode Ext2 là một cấu trúc `ext2_inode` có các field được minh họa trong Bảng 18-3.
 
@@ -200,7 +200,7 @@ Bảng 18-3. Các field của disk inode Ext2
 | `__le32` | `i_faddr` | Địa chỉ fragment |
 | `union` | `osd2` | Thông tin riêng cho hệ điều hành |
 
-Nhiều field liên quan đến đặc tả POSIX tương tự các field tương ứng của inode object VFS và đã được thảo luận trong mục “Inode object” ở Chương 12. Các field còn lại liên quan đến cách triển khai riêng của Ext2 và chủ yếu xử lý việc cấp phát block.
+Nhiều field liên quan đến đặc tả POSIX tương tự các field tương ứng của inode object VFS và đã được thảo luận trong mục “Inode object” ở Chương 12. Các field còn lại liên quan đến cách triển khai Ext2-specific và chủ yếu xử lý việc cấp phát block.
 
 Cụ thể, field `i_size` lưu độ dài thực tế của file tính bằng byte, còn field `i_blocks` lưu số data block (theo đơn vị 512 byte) đã được cấp phát cho file.
 
@@ -208,7 +208,7 @@ Giá trị của `i_size` và `i_blocks` không nhất thiết có liên hệ v�
 
 Field `i_block` là một array gồm `EXT2_N_BLOCKS` (thường là 15) pointer đến block, dùng để xác định các data block được cấp phát cho file (xem mục “Định địa chỉ data block” ở phần sau chương này).
 
-32 bit dành cho field `i_size` giới hạn kích thước file ở 4 GB. Thực tế, bit cao nhất của field `i_size` không được dùng, nên kích thước file tối đa bị giới hạn ở 2 GB. Tuy nhiên, filesystem Ext2 có một “mẹo lách” cho phép file lớn hơn trên các hệ thống có processor 64 bit như Opteron của AMD hoặc PowerPC G5 của IBM. Về cơ bản, field `i_dir_acl` của inode, vốn không dùng cho regular file, biểu diễn phần mở rộng 32 bit của field `i_size`. Do đó, kích thước file được lưu trong inode dưới dạng số nguyên 64 bit. Phiên bản 64 bit của filesystem Ext2 tương thích phần nào với phiên bản 32 bit vì filesystem Ext2 tạo trên kiến trúc 64 bit có thể được mount trên kiến trúc 32 bit và ngược lại. Trên kiến trúc 32 bit, không thể truy cập file lớn trừ khi mở file với flag `O_LARGEFILE` được đặt (xem mục “System call open()” trong Chương 12).
+32 bit dành cho field `i_size` giới hạn kích thước file ở 4 GB. Thực tế, bit highest-order của field `i_size` không được dùng, nên kích thước file tối đa bị giới hạn ở 2 GB. Tuy nhiên, filesystem Ext2 có một “mẹo lách” cho phép file lớn hơn trên các hệ thống có processor 64-bit như Opteron của AMD hoặc PowerPC G5 của IBM. Về cơ bản, field `i_dir_acl` của inode, vốn không dùng cho regular file, biểu diễn phần mở rộng 32-bit của field `i_size`. Do đó, kích thước file được lưu trong inode dưới dạng số nguyên 64-bit. Phiên bản 64-bit của filesystem Ext2 tương thích phần nào với phiên bản 32-bit vì filesystem Ext2 tạo trên kiến trúc 64-bit có thể được mount trên kiến trúc 32-bit và ngược lại. Trên kiến trúc 32-bit, không thể truy cập file lớn trừ khi mở file với flag `O_LARGEFILE` được đặt (xem mục “System call open()” trong Chương 12).
 
 Nhớ rằng mô hình VFS yêu cầu mỗi file có một số inode khác nhau. Trong Ext2, không cần lưu trên disk mapping giữa số inode và số block tương ứng, vì giá trị sau có thể suy ra từ số block group và vị trí tương đối trong inode table. Ví dụ, giả sử mỗi block group chứa 4.096 inode và chúng ta muốn biết địa chỉ trên disk của inode 13.021. Khi đó, inode thuộc block group thứ ba và địa chỉ disk của nó được lưu ở entry thứ 733<sup>rd</sup> của inode table tương ứng. Như có thể thấy, số inode chỉ là một key mà các routine Ext2 dùng để nhanh chóng lấy inode descriptor thích hợp trên disk.
 
@@ -277,7 +277,7 @@ Hình 18-3. Một ví dụ về directory Ext2
 
 ##### Symbolic link
 
-Như đã nêu, nếu pathname của symbolic link có tối đa 60 ký tự, nó được lưu trong field `i_block` của inode, vốn gồm một array 15 số nguyên 4 byte; vì vậy không cần data block. Tuy nhiên, nếu pathname dài hơn 60 ký tự thì cần một data block duy nhất.
+Như đã nêu, nếu pathname của symbolic link có tối đa 60 ký tự, nó được lưu trong field `i_block` của inode, vốn gồm một array 15 số nguyên 4-byte; vì vậy không cần data block. Tuy nhiên, nếu pathname dài hơn 60 ký tự thì cần một data block duy nhất.
 
 ##### Device file, pipe và socket
 
@@ -293,7 +293,7 @@ Những loại file này không cần data block. Mọi thông tin cần thiết
 
 - Ngay cả việc chỉ ghi lại một phần file hiện có cũng dẫn đến cập nhật field `s_wtime` của superblock Ext2.
 
-Vì mọi cấu trúc dữ liệu Ext2 trên disk đều được lưu trong các block của partition Ext2, kernel dùng page cache để giữ chúng cập nhật (xem mục “Ghi dirty page xuống disk” trong Chương 15).
+Vì mọi cấu trúc dữ liệu Ext2 trên disk đều được lưu trong các block của partition Ext2, kernel dùng page cache để giữ chúng up-to-date (xem mục “Ghi dirty page xuống disk” trong Chương 15).
 
 Với mỗi loại dữ liệu liên quan đến filesystem và file Ext2, Bảng 18-6 chỉ rõ cấu trúc dữ liệu trên disk dùng để biểu diễn dữ liệu đó, cấu trúc dữ liệu trong memory mà kernel dùng, và một quy tắc kinh nghiệm để xác định mức caching. Dữ liệu cập nhật rất thường xuyên luôn được cache; nghĩa là được lưu thường trực trong memory và nằm trong page cache cho đến khi partition Ext2 tương ứng được unmount. Kernel đạt kết quả này bằng cách luôn giữ usage counter của page lớn hơn 0.
 
@@ -310,13 +310,13 @@ Bảng 18-6. Các hình ảnh VFS của cấu trúc dữ liệu Ext2
 | Free inode | `ext2_inode` | Không có | Không bao giờ |
 | Free block | Array byte | Không có | Không bao giờ |
 
-Dữ liệu không bao giờ được cache không được giữ trong cache nào vì không biểu diễn thông tin có ý nghĩa. Ngược lại, dữ liệu luôn được cache luôn có mặt trong RAM, vì thế không bao giờ cần đọc dữ liệu từ disk (tuy nhiên, định kỳ phải ghi dữ liệu trở lại disk). Giữa hai cực này là chế độ động. Trong chế độ này, dữ liệu được giữ trong cache chừng nào object liên quan (inode, data block hoặc bitmap) còn được dùng; khi file được đóng hoặc data block bị xóa, thuật toán thu hồi page frame có thể loại dữ liệu tương ứng khỏi cache.
+Dữ liệu never-cached không được giữ trong cache nào vì không biểu diễn thông tin có ý nghĩa. Ngược lại, dữ liệu always-cached luôn có mặt trong RAM, vì thế không bao giờ cần đọc dữ liệu từ disk (tuy nhiên, định kỳ phải ghi dữ liệu trở lại disk). Giữa hai cực này là chế độ động. Trong chế độ này, dữ liệu được giữ trong cache chừng nào object liên quan (inode, data block hoặc bitmap) còn được dùng; khi file được đóng hoặc data block bị xóa, thuật toán thu hồi page frame có thể loại dữ liệu tương ứng khỏi cache.
 
 Một điểm thú vị là inode bitmap và block bitmap không được giữ thường trực trong memory; thay vào đó, chúng được đọc từ disk khi cần. Thực ra, nhiều lần đọc disk được tránh nhờ page cache giữ trong memory các disk block được dùng gần đây nhất (xem mục “Lưu block trong page cache” trong Chương 15).[^2]
 
 ### Superblock object Ext2
 
-Như đã nêu trong mục “Superblock object” ở Chương 12, field `s_fs_info` của superblock VFS trỏ đến cấu trúc chứa dữ liệu riêng của filesystem. Với Ext2, field này trỏ đến cấu trúc kiểu `ext2_sb_info`, bao gồm thông tin sau:
+Như đã nêu trong mục “Superblock object” ở Chương 12, field `s_fs_info` của superblock VFS trỏ đến cấu trúc chứa dữ liệu filesystem-specific. Với Ext2, field này trỏ đến cấu trúc kiểu `ext2_sb_info`, bao gồm thông tin sau:
 
 - Phần lớn các field của disk superblock
 
@@ -514,9 +514,9 @@ Việc lưu file trên disk khác với cách lập trình viên nhìn file ở 
 
 Trong mục này, chúng ta giải thích cách filesystem Ext2 quản lý không gian disk—cách cấp phát và giải phóng inode, data block. Phải giải quyết hai vấn đề chính:
 
-- Việc quản lý không gian phải cố gắng hết sức tránh file fragmentation—lưu file về mặt vật lý thành nhiều mảnh nhỏ nằm ở những disk block không liền kề. File fragmentation làm tăng thời gian trung bình của các thao tác đọc tuần tự trên file, vì disk head phải thường xuyên đổi vị trí trong khi đọc.[^4] Vấn đề này tương tự external fragmentation của RAM đã thảo luận trong mục “Thuật toán buddy system” ở Chương 8.
+- Việc quản lý không gian phải cố gắng hết sức tránh file fragmentation—lưu file về mặt vật lý thành nhiều mảnh nhỏ nằm ở những disk block non-adjacent. File fragmentation làm tăng thời gian trung bình của các thao tác đọc tuần tự trên file, vì disk head phải thường xuyên đổi vị trí trong khi đọc.[^4] Vấn đề này tương tự external fragmentation của RAM đã thảo luận trong mục “Thuật toán buddy system” ở Chương 8.
 
-- Việc quản lý không gian phải hiệu quả về thời gian; nghĩa là kernel phải nhanh chóng suy ra logical block number tương ứng trong partition Ext2 từ file offset. Khi làm vậy, kernel phải hạn chế tối đa số lần truy cập các bảng định địa chỉ lưu trên disk, vì mỗi truy cập trung gian như vậy làm tăng đáng kể thời gian truy cập file trung bình.
+- Việc quản lý không gian phải time-efficient; nghĩa là kernel phải nhanh chóng suy ra logical block number tương ứng trong partition Ext2 từ file offset. Khi làm vậy, kernel phải hạn chế tối đa số lần truy cập các bảng định địa chỉ lưu trên disk, vì mỗi truy cập trung gian như vậy làm tăng đáng kể thời gian truy cập file trung bình.
 
 ### Tạo inode
 
@@ -524,7 +524,7 @@ Hàm `ext2_new_inode()` tạo disk inode Ext2, trả về địa chỉ inode obj
 
 Hàm hoạt động trên hai tham số: địa chỉ `dir` của inode object tham chiếu đến directory mà inode mới phải được thêm vào và một `mode` chỉ loại inode đang được tạo. Đối số sau cũng bao gồm mount flag `MS_SYNCHRONOUS` (xem mục “Mount một filesystem tổng quát” trong Chương 12), yêu cầu current process bị suspend cho đến khi inode được cấp phát. Hàm thực hiện các thao tác sau:
 
-1\. Gọi `new_inode()` để cấp phát inode object VFS mới; khởi tạo field `i_sb` của nó bằng địa chỉ superblock lưu trong `dir->i_sb`, và thêm nó vào danh sách inode đang dùng cùng danh sách của superblock (xem mục “Inode object” trong Chương 12).
+1\. Gọi `new_inode()` để cấp phát inode object VFS mới; khởi tạo field `i_sb` của nó bằng địa chỉ superblock lưu trong `dir->i_sb`, và thêm nó vào danh sách inode in-use cùng danh sách của superblock (xem mục “Inode object” trong Chương 12).
 
 2\. Nếu inode mới là directory, hàm gọi `find_group_orlov()` để tìm block group phù hợp cho directory.<sup>†</sup> Hàm này triển khai các heuristic sau:
 
@@ -602,7 +602,7 @@ e. Đặt trạng thái inode thành `I_CLEAR` (nội dung inode object không c
 
 Mỗi regular file không rỗng gồm một nhóm data block. Có thể tham chiếu đến những block này bằng vị trí tương đối trong file—file block number—hoặc vị trí trong disk partition—logical block number (xem mục “Xử lý block device” trong Chương 14).
 
-Suy ra logical block number của data block tương ứng từ offset f trong file là một quá trình hai bước:
+Suy ra logical block number của data block tương ứng từ offset f trong file là một quá trình two-step:
 
 1\. Suy ra file block number từ offset f—index của block chứa ký tự ở offset f.
 
@@ -620,11 +620,11 @@ Field `i_block` trong disk inode là một array gồm `EXT2_N_BLOCKS` thành ph
 
 - 12 thành phần đầu cung cấp logical block number tương ứng với 12 block đầu tiên của file—các block có file block number từ 0 đến 11.
 
-- Thành phần ở index 12 chứa logical block number của một block, gọi là indirect block, biểu diễn array bậc hai chứa logical block number. Chúng tương ứng với file block number từ 12 đến b/4+11, với b là block size của filesystem (mỗi logical block number được lưu trong 4 byte, nên chia cho 4 trong công thức). Vì vậy, kernel phải tìm trong thành phần này pointer đến block, rồi tìm trong block đó một pointer khác đến block cuối cùng chứa nội dung file.
+- Thành phần ở index 12 chứa logical block number của một block, gọi là indirect block, biểu diễn array second-order chứa logical block number. Chúng tương ứng với file block number từ 12 đến b/4+11, với b là block size của filesystem (mỗi logical block number được lưu trong 4 byte, nên chia cho 4 trong công thức). Vì vậy, kernel phải tìm trong thành phần này pointer đến block, rồi tìm trong block đó một pointer khác đến block cuối cùng chứa nội dung file.
 
-- Thành phần ở index 13 chứa logical block number của indirect block chứa array bậc hai gồm các logical block number; tiếp đến, các entry của array bậc hai này trỏ đến các array bậc ba, lưu logical block number tương ứng với file block number từ b/ 4+12 đến (b/4)<sup>2</sup>+(b/4)+11.
+- Thành phần ở index 13 chứa logical block number của indirect block chứa array second-order gồm các logical block number; tiếp đến, các entry của array second-order này trỏ đến các array third-order, lưu logical block number tương ứng với file block number từ b/ 4+12 đến (b/4)<sup>2</sup>+(b/4)+11.
 
-- Cuối cùng, thành phần ở index 14 dùng triple indirection: các array bậc bốn lưu logical block number tương ứng với file block number từ (b/4)<sup>2</sup>+(b/4)+12 đến (b/4)<sup>3</sup>+(b/4)<sup>2</sup>+(b/4)+11.
+- Cuối cùng, thành phần ở index 14 dùng triple indirection: các array fourth-order lưu logical block number tương ứng với file block number từ (b/4)<sup>2</sup>+(b/4)+12 đến (b/4)<sup>3</sup>+(b/4)<sup>2</sup>+(b/4)+11.
 
 ![Hình 18-5](images/ch18/fig18-05.png)
 
@@ -632,11 +632,11 @@ Hình 18-5. Các cấu trúc dữ liệu dùng để định địa chỉ data b
 
 Trong Hình 18-5, số bên trong block biểu diễn file block number tương ứng. Các mũi tên, biểu diễn logical block number lưu trong thành phần array, cho thấy cách kernel đi qua các indirect block để đến block chứa nội dung thực tế của file.
 
-Chú ý cơ chế này ưu tiên file nhỏ như thế nào. Nếu file không cần quá 12 data block, mọi dữ liệu có thể được lấy bằng hai lần truy cập disk: một lần để đọc thành phần trong array `i_block` của disk inode và lần còn lại để đọc data block được yêu cầu. Tuy nhiên, với file lớn hơn, có thể cần ba hoặc thậm chí bốn lần truy cập disk liên tiếp để truy cập block cần thiết. Trên thực tế, đây là ước tính trường hợp xấu nhất, vì dentry cache, inode cache và page cache góp phần đáng kể giảm số lần truy cập disk thực sự.
+Chú ý cơ chế này ưu tiên file nhỏ như thế nào. Nếu file không cần quá 12 data block, mọi dữ liệu có thể được lấy bằng hai lần truy cập disk: một lần để đọc thành phần trong array `i_block` của disk inode và lần còn lại để đọc data block được yêu cầu. Tuy nhiên, với file lớn hơn, có thể cần ba hoặc thậm chí bốn lần truy cập disk liên tiếp để truy cập block cần thiết. Trên thực tế, đây là ước tính trường hợp worst-case, vì dentry cache, inode cache và page cache góp phần đáng kể giảm số lần truy cập disk thực sự.
 
-Cũng chú ý cách block size của filesystem ảnh hưởng đến cơ chế định địa chỉ, vì block size lớn hơn cho phép Ext2 lưu nhiều logical block number hơn trong một block. Bảng 18-11 trình bày giới hạn trên của kích thước file ứng với từng block size và từng chế độ định địa chỉ. Ví dụ, nếu block size là 1.024 byte và file chứa tối đa 268 kilobyte dữ liệu, 12 KB đầu của file có thể được truy cập qua direct mapping, còn 13–268 KB còn lại có thể được định địa chỉ qua simple indirection. File lớn hơn 2 GB phải được mở trên kiến trúc 32 bit bằng cách chỉ định opening flag `O_LARGEFILE`.
+Cũng chú ý cách block size của filesystem ảnh hưởng đến cơ chế định địa chỉ, vì block size lớn hơn cho phép Ext2 lưu nhiều logical block number hơn trong một block. Bảng 18-11 trình bày giới hạn trên của kích thước file ứng với từng block size và từng chế độ định địa chỉ. Ví dụ, nếu block size là 1.024 byte và file chứa tối đa 268 kilobyte dữ liệu, 12 KB đầu của file có thể được truy cập qua direct mapping, còn 13–268 KB còn lại có thể được định địa chỉ qua simple indirection. File lớn hơn 2 GB phải được mở trên kiến trúc 32-bit bằng cách chỉ định opening flag `O_LARGEFILE`.
 
-Bảng 18-11. Giới hạn trên của kích thước file khi định địa chỉ data block
+Bảng 18-11. Giới hạn trên của File-size khi định địa chỉ data block
 
 | Block size | Direct | 1-Indirect | 2-Indirect | 3-Indirect |
 |---|---|---|---|---|
@@ -646,7 +646,7 @@ Bảng 18-11. Giới hạn trên của kích thước file khi định địa ch
 
 ### File hole
 
-File hole là một phần của regular file chứa ký tự null và không được lưu trong bất kỳ data block nào trên disk. Hole là tính năng lâu đời của file Unix. Ví dụ, lệnh Unix sau tạo file mà các byte đầu tiên là hole:
+File hole là một phần của regular file chứa ký tự null và không được lưu trong bất kỳ data block nào trên disk. Hole là tính năng long-standing của file Unix. Ví dụ, lệnh Unix sau tạo file mà các byte đầu tiên là hole:
 
 ```c
 $ echo -n "X" | dd of=/tmp/hole bs=1024 seek=6
@@ -658,7 +658,7 @@ File hole được đưa vào để tránh lãng phí không gian disk. Chúng �
 
 Cách triển khai file hole của Ext2 dựa trên cấp phát data block động: block chỉ thực sự được gán cho file khi process cần ghi dữ liệu vào đó. Field `i_size` của mỗi inode xác định kích thước file theo góc nhìn chương trình, bao gồm cả hole, còn field `i_blocks` lưu số data block thực sự được gán cho file (theo đơn vị 512 byte).
 
-Trong ví dụ trước về lệnh `dd`, giả sử file /tmp/hole được tạo trên partition Ext2 có block size 4.096. Field `i_size` của disk inode tương ứng lưu số 6.145, còn field `i_blocks` lưu số 8 (vì mỗi block 4.096 byte gồm tám block 512 byte). Phần tử thứ hai của array `i_block` (tương ứng với block có file block number 1) lưu logical block number của block đã cấp phát, còn tất cả phần tử khác trong array là null (xem Hình 18-6).
+Trong ví dụ trước về lệnh `dd`, giả sử file /tmp/hole được tạo trên partition Ext2 có block size 4.096. Field `i_size` của disk inode tương ứng lưu số 6.145, còn field `i_blocks` lưu số 8 (vì mỗi block 4,096-byte gồm tám block 512-byte). Phần tử thứ hai của array `i_block` (tương ứng với block có file block number 1) lưu logical block number của block đã cấp phát, còn tất cả phần tử khác trong array là null (xem Hình 18-6).
 
 ![Hình 18-6](images/ch18/fig18-06.png)
 
@@ -740,31 +740,31 @@ Nhờ sự tương thích giữa Ext3 và Ext2, phần lớn mô tả trong các
 
 ### Journaling filesystem
 
-Khi disk ngày càng lớn, một lựa chọn thiết kế của filesystem Unix truyền thống (như Ext2) trở nên không phù hợp. Như đã biết từ Chương 14, các cập nhật block của filesystem có thể được giữ trong dynamic memory rất lâu trước khi được flush xuống disk. Một sự kiện nghiêm trọng như mất điện hoặc system crash do đó có thể để filesystem ở trạng thái không nhất quán. Để khắc phục, mỗi filesystem Unix truyền thống được kiểm tra trước khi mount; nếu chưa được unmount đúng cách, một chương trình chuyên biệt sẽ thực hiện kiểm tra toàn diện, tốn thời gian và sửa mọi cấu trúc dữ liệu filesystem trên disk.
+Khi disk ngày càng lớn, một lựa chọn thiết kế của filesystem Unix truyền thống (như Ext2) trở nên không phù hợp. Như đã biết từ Chương 14, các cập nhật block của filesystem có thể được giữ trong dynamic memory rất lâu trước khi được flush xuống disk. Một sự kiện nghiêm trọng như power-down hoặc system crash do đó có thể để filesystem ở trạng thái không nhất quán. Để khắc phục, mỗi filesystem Unix truyền thống được kiểm tra trước khi mount; nếu chưa được unmount đúng cách, một chương trình chuyên biệt sẽ thực hiện kiểm tra toàn diện, time-consuming và sửa mọi cấu trúc dữ liệu filesystem trên disk.
 
 Ví dụ, trạng thái filesystem Ext2 được lưu trong field `s_mount_state` của superblock trên disk. Chương trình tiện ích e2fsck được boot script gọi để kiểm tra giá trị lưu trong field này; nếu nó không bằng `EXT2_VALID_FS`, filesystem chưa được unmount đúng cách, vì vậy e2fsck bắt đầu kiểm tra mọi cấu trúc dữ liệu trên disk của filesystem.
 
 Rõ ràng, thời gian kiểm tra tính nhất quán của filesystem chủ yếu phụ thuộc số file và directory cần kiểm tra; do đó, cũng phụ thuộc kích thước disk. Ngày nay, khi filesystem đạt hàng trăm gigabyte, một lần kiểm tra tính nhất quán có thể mất hàng giờ. Downtime này là không thể chấp nhận trong bất kỳ môi trường production hoặc server high-availability nào.
 
-Mục tiêu của journaling filesystem là tránh các kiểm tra tính nhất quán tốn thời gian trên toàn filesystem bằng cách xem một vùng disk đặc biệt chứa các thao tác ghi disk gần nhất, mang tên journal. Mount lại journaling filesystem sau lỗi hệ thống chỉ mất vài giây.
+Mục tiêu của journaling filesystem là tránh các kiểm tra tính nhất quán time-consuming trên toàn filesystem bằng cách xem một vùng disk đặc biệt chứa các thao tác ghi disk gần nhất, mang tên journal. Mount lại journaling filesystem sau lỗi hệ thống chỉ mất vài giây.
 
 ### Journaling filesystem Ext3
 
-Ý tưởng đằng sau journaling của Ext3 là thực hiện mỗi thay đổi cấp cao đối với filesystem theo hai bước. Trước tiên, một bản sao các block cần ghi được lưu trong journal; sau đó, khi việc truyền dữ liệu I/O đến journal hoàn tất (nói gọn, dữ liệu được commit vào journal), các block được ghi vào filesystem. Khi việc truyền dữ liệu I/O đến filesystem kết thúc (dữ liệu được commit vào filesystem), các bản sao block trong journal bị loại bỏ.
+Ý tưởng đằng sau journaling của Ext3 là thực hiện mỗi thay đổi high-level đối với filesystem theo hai bước. Trước tiên, một bản sao các block cần ghi được lưu trong journal; sau đó, khi việc truyền dữ liệu I/O đến journal hoàn tất (nói gọn, dữ liệu được commit vào journal), các block được ghi vào filesystem. Khi việc truyền dữ liệu I/O đến filesystem kết thúc (dữ liệu được commit vào filesystem), các bản sao block trong journal bị loại bỏ.
 
 Khi khôi phục sau lỗi hệ thống, chương trình e2fsck phân biệt hai trường hợp sau:
 
-Lỗi hệ thống xảy ra trước khi commit vào journal. Các bản sao block liên quan đến thay đổi cấp cao hoặc không có trong journal hoặc chưa đầy đủ; trong cả hai trường hợp, e2fsck bỏ qua chúng.
+Lỗi hệ thống xảy ra trước khi commit vào journal. Các bản sao block liên quan đến thay đổi high-level hoặc không có trong journal hoặc chưa đầy đủ; trong cả hai trường hợp, e2fsck bỏ qua chúng.
 
 Lỗi hệ thống xảy ra sau khi commit vào journal. Các bản sao block hợp lệ và e2fsck ghi chúng vào filesystem.
 
-Trong trường hợp đầu, thay đổi cấp cao đối với filesystem bị mất, nhưng trạng thái filesystem vẫn nhất quán. Trong trường hợp thứ hai, e2fsck áp dụng toàn bộ thay đổi cấp cao, qua đó sửa mọi sự không nhất quán do các lần truyền dữ liệu I/O vào filesystem chưa hoàn tất.
+Trong trường hợp đầu, thay đổi high-level đối với filesystem bị mất, nhưng trạng thái filesystem vẫn nhất quán. Trong trường hợp thứ hai, e2fsck áp dụng toàn bộ thay đổi high-level, qua đó sửa mọi sự không nhất quán do các lần truyền dữ liệu I/O vào filesystem chưa hoàn tất.
 
 Đừng kỳ vọng quá nhiều vào journaling filesystem; nó chỉ đảm bảo tính nhất quán ở mức system call. Ví dụ, lỗi hệ thống xảy ra khi bạn đang sao chép file lớn bằng nhiều system call `write()` sẽ ngắt thao tác sao chép, do đó file sao chép sẽ ngắn hơn file gốc.
 
-Hơn nữa, journaling filesystem thường không sao chép mọi block vào journal. Thực tế, mỗi filesystem gồm hai loại block: block chứa cái gọi là metadata và block chứa dữ liệu thông thường. Với Ext2 và Ext3, có sáu loại metadata: superblock, group block descriptor, inode, block dùng cho indirect addressing (indirection block), data bitmap block và inode bitmap block. Những filesystem khác có thể dùng metadata khác.
+Hơn nữa, journaling filesystem thường không sao chép mọi block vào journal. Thực tế, mỗi filesystem gồm hai loại block: block chứa so-called metadata và block chứa dữ liệu thông thường. Với Ext2 và Ext3, có sáu loại metadata: superblock, group block descriptor, inode, block dùng cho indirect addressing (indirection block), data bitmap block và inode bitmap block. Những filesystem khác có thể dùng metadata khác.
 
-Một số journaling filesystem, như XFS của SGI và JFS của IBM, chỉ log các thao tác tác động đến metadata. Thực tế, log record của metadata đủ để khôi phục tính nhất quán của các cấu trúc dữ liệu filesystem trên disk. Tuy nhiên, vì các thao tác trên block dữ liệu file không được log, không có gì ngăn lỗi hệ thống làm hỏng nội dung file.
+Một số journaling filesystem, như XFS của SGI và JFS của IBM, chỉ log các thao tác tác động đến metadata. Thực tế, log record của metadata đủ để khôi phục tính nhất quán của các cấu trúc dữ liệu filesystem on-disk. Tuy nhiên, vì các thao tác trên block dữ liệu file không được log, không có gì ngăn lỗi hệ thống làm hỏng nội dung file.
 
 Tuy nhiên, filesystem Ext3 có thể được cấu hình để log các thao tác tác động đến cả metadata của filesystem lẫn data block của file. Vì log mọi loại thao tác ghi gây suy giảm hiệu năng đáng kể, Ext3 cho phép người quản trị hệ thống quyết định những gì phải được log; cụ thể, nó cung cấp ba journaling mode khác nhau:
 
@@ -798,7 +798,7 @@ Mô tả một cập nhật đơn lẻ đối với disk block của journaling 
 
 Atomic operation handle
 
-Bao gồm các log record liên quan đến một thay đổi cấp cao duy nhất của filesystem; thông thường, mỗi system call sửa filesystem tạo ra một atomic operation handle duy nhất.
+Bao gồm các log record liên quan đến một thay đổi high-level duy nhất của filesystem; thông thường, mỗi system call sửa filesystem tạo ra một atomic operation handle duy nhất.
 
 Transaction
 
@@ -806,7 +806,7 @@ Bao gồm nhiều atomic operation handle có các log record được đánh d�
 
 #### Log record
 
-Về cơ bản, log record là mô tả một thao tác mức thấp mà filesystem sắp đưa ra. Trong một số journaling filesystem, log record gồm chính xác dải byte bị thao tác sửa đổi, cùng vị trí bắt đầu của các byte trong filesystem. Tuy nhiên, layer JBD dùng log record gồm toàn bộ buffer bị thao tác mức thấp sửa đổi. Cách tiếp cận này có thể lãng phí nhiều không gian journal (ví dụ, khi thao tác mức thấp chỉ đổi giá trị một bit trong bitmap), nhưng cũng nhanh hơn nhiều vì layer JBD có thể làm việc trực tiếp với buffer và buffer head của chúng.
+Về cơ bản, log record là mô tả một thao tác low-level mà filesystem sắp đưa ra. Trong một số journaling filesystem, log record gồm chính xác dải byte bị thao tác sửa đổi, cùng vị trí bắt đầu của các byte trong filesystem. Tuy nhiên, layer JBD dùng log record gồm toàn bộ buffer bị thao tác low-level sửa đổi. Cách tiếp cận này có thể lãng phí nhiều không gian journal (ví dụ, khi thao tác low-level chỉ đổi giá trị một bit trong bitmap), nhưng cũng nhanh hơn nhiều vì layer JBD có thể làm việc trực tiếp với buffer và buffer head của chúng.
 
 Do đó, log record được biểu diễn trong journal dưới dạng block dữ liệu (hoặc metadata) thông thường. Tuy nhiên, mỗi block như vậy được gắn một tag nhỏ kiểu `journal_block_tag_t`, lưu logical block number của block trong filesystem và một số status flag.
 
@@ -814,15 +814,15 @@ Về sau, mỗi khi JBD xét một buffer, hoặc vì nó thuộc log record ho�
 
 ##### Atomic operation handle
 
-Mỗi system call sửa filesystem thường được chia thành một chuỗi thao tác mức thấp xử lý các cấu trúc dữ liệu disk.
+Mỗi system call sửa filesystem thường được chia thành một chuỗi thao tác low-level xử lý các cấu trúc dữ liệu disk.
 
-Ví dụ, giả sử Ext3 phải đáp ứng yêu cầu người dùng nối thêm một block dữ liệu vào regular file. Filesystem layer phải xác định block cuối của file, tìm free block trong filesystem, cập nhật data block bitmap trong block group thích hợp, lưu logical number của block mới trong inode của file hoặc trong indirect addressing block, ghi nội dung block mới, và cuối cùng cập nhật một số field của inode. Như bạn thấy, thao tác append chuyển thành nhiều thao tác mức thấp hơn trên data block và metadata block của filesystem.
+Ví dụ, giả sử Ext3 phải đáp ứng yêu cầu người dùng nối thêm một block dữ liệu vào regular file. Filesystem layer phải xác định block cuối của file, tìm free block trong filesystem, cập nhật data block bitmap trong block group thích hợp, lưu logical number của block mới trong inode của file hoặc trong indirect addressing block, ghi nội dung block mới, và cuối cùng cập nhật một số field của inode. Như bạn thấy, thao tác append chuyển thành nhiều thao tác lower-level trên data block và metadata block của filesystem.
 
-Bây giờ, hãy hình dung điều có thể xảy ra nếu lỗi hệ thống xảy ra giữa thao tác append, khi một số xử lý mức thấp đã được thực hiện nhưng số khác thì chưa. Tất nhiên, tình huống có thể tệ hơn với những thao tác cấp cao tác động đến hai hoặc nhiều file (ví dụ, di chuyển file từ directory này sang directory khác).
+Bây giờ, hãy hình dung điều có thể xảy ra nếu lỗi hệ thống xảy ra giữa thao tác append, khi một số xử lý lower-level đã được thực hiện nhưng số khác thì chưa. Tất nhiên, tình huống có thể tệ hơn với những thao tác high-level tác động đến hai hoặc nhiều file (ví dụ, di chuyển file từ directory này sang directory khác).
 
-Để ngăn dữ liệu bị hỏng, filesystem Ext3 phải đảm bảo mỗi system call được xử lý theo cách atomic. Atomic operation handle là tập hợp các thao tác mức thấp trên cấu trúc dữ liệu disk tương ứng với một thao tác cấp cao duy nhất. Khi khôi phục sau lỗi hệ thống, filesystem đảm bảo hoặc toàn bộ thao tác cấp cao được áp dụng, hoặc không thao tác mức thấp nào của nó được áp dụng.
+Để ngăn dữ liệu bị hỏng, filesystem Ext3 phải đảm bảo mỗi system call được xử lý theo cách atomic. Atomic operation handle là tập hợp các thao tác low-level trên cấu trúc dữ liệu disk tương ứng với một thao tác high-level duy nhất. Khi khôi phục sau lỗi hệ thống, filesystem đảm bảo hoặc toàn bộ thao tác high-level được áp dụng, hoặc không thao tác low-level nào của nó được áp dụng.
 
-Mỗi atomic operation handle được biểu diễn bằng descriptor kiểu `handle_t`. Để bắt đầu atomic operation, filesystem Ext3 gọi hàm JBD `journal_start()`, hàm này cấp phát atomic operation handle mới nếu cần và chèn nó vào các transaction hiện tại (xem mục tiếp theo). Vì mỗi thao tác mức thấp trên disk có thể suspend process, địa chỉ active handle được lưu trong field `journal_info` của process descriptor. Để thông báo atomic operation hoàn tất, filesystem Ext3 gọi hàm `journal_stop()`.
+Mỗi atomic operation handle được biểu diễn bằng descriptor kiểu `handle_t`. Để bắt đầu atomic operation, filesystem Ext3 gọi hàm JBD `journal_start()`, hàm này cấp phát atomic operation handle mới nếu cần và chèn nó vào các transaction hiện tại (xem mục tiếp theo). Vì mỗi thao tác low-level trên disk có thể suspend process, địa chỉ active handle được lưu trong field `journal_info` của process descriptor. Để thông báo atomic operation hoàn tất, filesystem Ext3 gọi hàm `journal_stop()`.
 
 ##### Transaction
 
@@ -880,9 +880,9 @@ Như bạn dễ đoán, chúng ta sẽ không mô tả chi tiết từng thao t�
 
 2\. Hàm `generic_file_write()` gọi method `prepare_write` của object `address_space` nhiều lần, mỗi lần cho một page dữ liệu liên quan đến thao tác ghi. Với Ext3, method này được triển khai bằng hàm `ext3_prepare_write()`. 3. Hàm `ext3_prepare_write()` bắt đầu atomic operation mới bằng cách gọi hàm JBD `journal_start()`. Handle được thêm vào active transaction. Thực ra, atomic operation handle chỉ được tạo khi thực hiện lần gọi đầu tiên đến hàm `journal_start()`. Các lần gọi sau xác minh field `journal_info` của process descriptor đã được đặt và dùng handle được tham chiếu. 4. Hàm `ext3_prepare_write()` gọi hàm `block_prepare_write()` đã mô tả trong Chương 16, truyền cho nó địa chỉ hàm `ext3_get_block()`. Nhớ rằng `block_prepare_write()` đảm nhiệm chuẩn bị các buffer và buffer head của page thuộc file.
 
-5\. Khi kernel phải xác định logical number của một block thuộc filesystem Ext3, nó thực hiện hàm `ext3_get_block()`. Hàm này thực ra tương tự `ext2_get_block()`, được mô tả trong mục “Cấp phát data block” ở phần trước. Tuy nhiên, một khác biệt then chốt là filesystem Ext3 gọi các hàm của layer JBD để đảm bảo các thao tác mức thấp được log:
+5\. Khi kernel phải xác định logical number của một block thuộc filesystem Ext3, nó thực hiện hàm `ext3_get_block()`. Hàm này thực ra tương tự `ext2_get_block()`, được mô tả trong mục “Cấp phát data block” ở phần trước. Tuy nhiên, một khác biệt then chốt là filesystem Ext3 gọi các hàm của layer JBD để đảm bảo các thao tác low-level được log:
 
-  - Trước khi đưa ra thao tác ghi mức thấp trên metadata block của filesystem, hàm gọi `journal_get_write_access()`. Về cơ bản, hàm sau thêm metadata buffer vào một danh sách của active transaction. Tuy nhiên, nó cũng phải kiểm tra metadata có nằm trong một transaction cũ chưa hoàn tất của journal không; nếu có, nó nhân bản buffer để đảm bảo các transaction cũ được commit với nội dung cũ.
+  - Trước khi đưa ra thao tác ghi low-level trên metadata block của filesystem, hàm gọi `journal_get_write_access()`. Về cơ bản, hàm sau thêm metadata buffer vào một danh sách của active transaction. Tuy nhiên, nó cũng phải kiểm tra metadata có nằm trong một transaction cũ chưa hoàn tất của journal không; nếu có, nó nhân bản buffer để đảm bảo các transaction cũ được commit với nội dung cũ.
 
   - Sau khi cập nhật buffer chứa metadata block, filesystem Ext3 gọi `journal_dirty_metadata()` để chuyển metadata buffer vào dirty list thích hợp của active transaction và log thao tác trong journal.
 
@@ -906,10 +906,10 @@ Chú ý metadata buffer do layer JBD xử lý thường không nằm trong các 
 
 Tất nhiên, các log record trong journal không bao giờ đóng vai trò chủ động cho đến khi lỗi hệ thống xảy ra. Chỉ trong lúc hệ thống reboot, chương trình tiện ích e2fsck mới quét journal lưu trong filesystem và lên lịch lại mọi thao tác ghi được các log record của những transaction hoàn tất mô tả.
 
-[^1]: Để đảm bảo tương thích giữa filesystem Ext2 và Ext3, cấu trúc dữ liệu `ext2_super_block` có một số field riêng của Ext3 không được trình bày trong Bảng 18-1.
+[^1]: Để đảm bảo tương thích giữa filesystem Ext2 và Ext3, cấu trúc dữ liệu `ext2_super_block` có một số field Ext3-specific không được trình bày trong Bảng 18-1.
 
-[^2]: Trong Linux 2.4 và các phiên bản trước, những inode bitmap và block bitmap được dùng gần đây nhất được lưu trong các cache chuyên biệt có kích thước giới hạn.
+[^2]: Trong Linux 2.4 và các phiên bản trước, những inode bitmap và block bitmap được dùng gần đây nhất được lưu trong các cache ad-hoc có kích thước giới hạn.
 
 [^3]: Phần lớn thông tin về filesystem Ext2 cũng có thể lấy được bằng các chương trình tiện ích dumpe2fs và debugfs.
 
-[^4]: Lưu ý việc phân mảnh file qua nhiều block group (Một Điều Xấu) rất khác với tính năng fragmentation block chưa được triển khai, cho phép lưu nhiều file trong một block (Một Điều Tốt). † Filesystem Ext2 còn có thể được mount với một option flag buộc kernel dùng chiến lược cấp phát cũ đơn giản hơn, được triển khai bằng hàm `find_group_dir()`.
+[^4]: Lưu ý việc phân mảnh file qua nhiều block group (Một Điều Xấu) rất khác với tính năng fragmentation block not-yetimplemented, cho phép lưu nhiều file trong một block (Một Điều Tốt). † Filesystem Ext2 còn có thể được mount với một option flag buộc kernel dùng chiến lược cấp phát cũ đơn giản hơn, được triển khai bằng hàm `find_group_dir()`.

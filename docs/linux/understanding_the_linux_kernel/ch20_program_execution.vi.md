@@ -20,7 +20,7 @@ Phần này bao gồm các command-line argument và environment variable quen t
 
 Một chương trình được lưu trên đĩa dưới dạng executable file, bao gồm cả object code của những hàm cần thực thi lẫn dữ liệu mà các hàm này sẽ xử lý. Nhiều hàm của chương trình là những service routine dành cho mọi lập trình viên; object code của chúng được chứa trong các file đặc biệt gọi là “library”. Trên thực tế, code của một hàm library có thể được sao chép tĩnh vào executable file (static library) hoặc được liên kết với process lúc runtime (shared library, vì code của chúng có thể được chia sẻ giữa nhiều process độc lập).
 
-Khi khởi chạy một chương trình, người dùng có thể cung cấp hai loại thông tin ảnh hưởng đến cách thực thi: command-line argument và environment variable. Người dùng gõ command-line argument sau tên executable file tại shell prompt. Các environment variable, như `HOME` và `PATH`, được kế thừa từ shell, nhưng người dùng có thể sửa giá trị của chúng trước khi khởi chạy chương trình.
+Khi khởi chạy một chương trình, người dùng có thể cung cấp hai loại thông tin ảnh hưởng đến cách thực thi: Command-line argument và environment variable. Người dùng gõ command-line argument sau tên executable file tại shell prompt. Các environment variable, như `HOME` và `PATH`, được kế thừa từ shell, nhưng người dùng có thể sửa giá trị của chúng trước khi khởi chạy chương trình.
 
 Trong mục “Executable file”, chúng ta giải thích execution context của một chương trình là gì. Trong mục “Executable format”, chúng ta đề cập một số executable format được Linux hỗ trợ và chỉ ra cách Linux có thể thay đổi “personality” để thực thi chương trình được biên dịch cho các hệ điều hành khác. Cuối cùng, trong mục “Các hàm exec”, chúng ta mô tả system call cho phép một process bắt đầu thực thi một chương trình mới.
 
@@ -30,7 +30,7 @@ Chương 1 đã định nghĩa process là một “execution context”. Ý ch�
 
 Giả sử một người dùng muốn liệt kê các file trong thư mục hiện tại; người đó biết rằng có thể đạt kết quả này đơn giản bằng cách gõ tên file của external command /bin/ls[^1] tại shell prompt. Command shell fork một process mới, rồi process này gọi system call `execve()` (xem mục “Các hàm exec” ở phần sau chương này), truyền một trong các tham số là chuỗi chứa pathname đầy đủ của executable file ls — trong trường hợp này là /bin/ls. Service routine `sys_execve()` tìm file tương ứng, kiểm tra executable format và sửa execution context của process hiện tại theo thông tin được lưu trong file. Kết quả là khi system call kết thúc, process bắt đầu thực thi code lưu trong executable file để liệt kê thư mục.
 
-Khi một process bắt đầu chạy một chương trình mới, execution context của nó thay đổi mạnh vì phần lớn tài nguyên thu được trong các phép tính trước đó của process bị loại bỏ. Trong ví dụ trên, khi process bắt đầu thực thi /bin/ls, nó thay các argument của shell bằng các argument mới được truyền làm tham số trong system call `execve()` và nhận một shell environment mới (xem mục “Command-line argument và shell environment” ở phần sau). Mọi page kế thừa từ parent (và được chia sẻ bằng cơ chế Copy On Write) đều được giải phóng để phép tính mới bắt đầu với một User Mode address space mới; ngay cả đặc quyền của process cũng có thể thay đổi (xem mục “Credential và capability của process” ở phần sau). Tuy nhiên, PID của process không thay đổi, và phép tính mới kế thừa từ phép tính trước mọi file descriptor đang mở chưa bị đóng tự động trong khi thực thi system call `execve()`.[^2]
+Khi một process bắt đầu chạy một chương trình mới, execution context của nó thay đổi mạnh vì phần lớn tài nguyên thu được trong các phép tính trước đó của process bị loại bỏ. Trong ví dụ trên, khi process bắt đầu thực thi /bin/ls, nó thay các argument của shell bằng các argument mới được truyền làm tham số trong system call `execve()` và nhận một shell environment mới (xem mục “Command-Line argument và shell environment” ở phần sau). Mọi page kế thừa từ parent (và được chia sẻ bằng cơ chế Copy On Write) đều được giải phóng để phép tính mới bắt đầu với một User Mode address space mới; ngay cả đặc quyền của process cũng có thể thay đổi (xem mục “Credential và capability của process” ở phần sau). Tuy nhiên, PID của process không thay đổi, và phép tính mới kế thừa từ phép tính trước mọi file descriptor đang mở chưa bị đóng tự động trong khi thực thi system call `execve()`.[^2]
 
 ### Credential và capability của process
 
@@ -52,7 +52,7 @@ Bảng 20-1. Credential truyền thống của process
 
 UID bằng 0 chỉ superuser (root), còn ID nhóm người dùng bằng 0 chỉ nhóm root. Nếu một credential của process lưu giá trị 0, kernel bỏ qua các kiểm tra quyền và cho phép process có đặc quyền thực hiện nhiều hành động, chẳng hạn quản trị hệ thống hoặc thao tác phần cứng, mà process không có đặc quyền không thể thực hiện.
 
-Khi một process được tạo, nó luôn kế thừa credential của parent. Tuy nhiên, các credential này có thể được sửa sau đó, khi process bắt đầu thực thi một chương trình mới hoặc khi nó gọi các system call thích hợp. Thông thường, các field `uid`, `euid`, `fsuid` và `suid` của một process chứa cùng một giá trị. Khi process thực thi một chương trình setuid — tức là executable file có flag setuid được bật — các field `euid` và `fsuid` được đặt thành identifier của chủ sở hữu file. Hầu hết các kiểm tra đều liên quan đến một trong hai field này: `fsuid` được dùng cho các thao tác liên quan đến file, còn `euid` được dùng cho mọi thao tác khác. Các nhận xét tương tự cũng áp dụng cho các field `gid`, `egid`, `fsgid` và `sgid` tham chiếu đến group identifier.
+Khi một process được tạo, nó luôn kế thừa credential của parent. Tuy nhiên, các credential này có thể được sửa sau đó, khi process bắt đầu thực thi một chương trình mới hoặc khi nó gọi các system call thích hợp. Thông thường, các field `uid`, `euid`, `fsuid` và `suid` của một process chứa cùng một giá trị. Khi process thực thi một chương trình setuid — tức là executable file có flag setuid được bật — các field `euid` và `fsuid` được đặt thành identifier của chủ sở hữu file. Hầu hết các kiểm tra đều liên quan đến một trong hai field này: `fsuid` được dùng cho các thao tác file-related, còn `euid` được dùng cho mọi thao tác khác. Các nhận xét tương tự cũng áp dụng cho các field `gid`, `egid`, `fsgid` và `sgid` tham chiếu đến group identifier.
 
 Để minh họa cách dùng field `fsuid`, hãy xét tình huống điển hình khi một người dùng muốn đổi mật khẩu. Mọi mật khẩu được lưu trong một file chung, nhưng người dùng không thể sửa trực tiếp file này vì nó được bảo vệ. Vì vậy, người dùng gọi một chương trình hệ thống tên /usr/bin/passwd, có flag setuid được đặt và thuộc sở hữu của superuser. Khi process được shell fork ra thực thi chương trình này, các field `euid` và `fsuid` của nó được đặt thành 0 — PID của superuser. Bây giờ process có thể truy cập file, vì khi kernel thực hiện access control, nó thấy giá trị 0 trong `fsuid`. Tất nhiên, chương trình /usr/bin/passwd không cho phép người dùng làm gì ngoài việc đổi mật khẩu của chính mình.
 
@@ -125,13 +125,13 @@ Hiện cả VFS lẫn Ext2 filesystem đều không hỗ trợ mô hình capabil
 
 Linux kernel đã tính đến capability. Chẳng hạn, hãy xét system call `nice()`, cho phép người dùng thay đổi static priority của một process. Trong mô hình truyền thống, chỉ superuser mới có thể tăng priority; do đó kernel phải kiểm tra field `euid` trong descriptor của process gọi có được đặt thành 0 hay không. Tuy nhiên, Linux kernel định nghĩa một capability tên `CAP_SYS_NICE`, tương ứng chính xác với loại thao tác này. Kernel kiểm tra giá trị của flag này bằng cách gọi hàm `capable()` và truyền giá trị `CAP_SYS_NICE` cho nó.
 
-Cách tiếp cận này hoạt động nhờ một số “compatibility hack” được thêm vào kernel code: mỗi lần process đặt các field `euid` và `fsuid` thành 0 (bằng cách gọi một trong các system call trong Bảng 20-2 hoặc thực thi chương trình setuid thuộc sở hữu superuser), kernel đặt mọi capability của process để mọi kiểm tra đều thành công. Khi process đặt lại các field `euid` và `fsuid` thành real UID của chủ sở hữu process, kernel kiểm tra flag `keep_capabilities` trong process descriptor và từ bỏ mọi capability của process nếu flag này được đặt. Một process có thể đặt và xóa flag `keep_capabilities` thông qua system call riêng của Linux là `prctl()`.
+Cách tiếp cận này hoạt động nhờ một số “compatibility hack” được thêm vào kernel code: mỗi lần process đặt các field `euid` và `fsuid` thành 0 (bằng cách gọi một trong các system call trong Bảng 20-2 hoặc thực thi chương trình setuid thuộc sở hữu superuser), kernel đặt mọi capability của process để mọi kiểm tra đều thành công. Khi process đặt lại các field `euid` và `fsuid` thành real UID của chủ sở hữu process, kernel kiểm tra flag `keep_capabilities` trong process descriptor và từ bỏ mọi capability của process nếu flag này được đặt. Một process có thể đặt và xóa flag `keep_capabilities` thông qua system call Linux-specific là `prctl()`.
 
 ##### Linux Security Modules framework
 
 Trong Linux 2.6, capability được tích hợp chặt chẽ với Linux Security Modules framework (LSM). Nói ngắn gọn, LSM framework cho phép các nhà phát triển định nghĩa một số mô hình thay thế cho bảo mật kernel.
 
-Mỗi mô hình bảo mật được triển khai bằng một tập security hook. Một security hook là hàm được kernel gọi khi sắp thực hiện một thao tác quan trọng liên quan đến bảo mật. Hàm hook xác định thao tác nên được tiếp tục hay bị từ chối.
+Mỗi mô hình bảo mật được triển khai bằng một tập security hook. Một security hook là hàm được kernel gọi khi sắp thực hiện một thao tác quan trọng security-related. Hàm hook xác định thao tác nên được tiếp tục hay bị từ chối.
 
 Các security hook được lưu trong một bảng có kiểu `security_operations`. Địa chỉ bảng hook cho mô hình bảo mật đang dùng được lưu trong biến `security_ops`. Theo mặc định, kernel sử dụng mô hình bảo mật tối thiểu được triển khai bởi bảng `dummy_security_ops`; mỗi hook trong bảng này về cơ bản kiểm tra capability tương ứng, nếu có, hoặc trả về 0 vô điều kiện (thao tác được cho phép).
 
@@ -139,7 +139,7 @@ Chẳng hạn, các service routine của các hàm `stime()` và `settimeofday(
 
 Những mô hình bảo mật tinh vi cho Linux kernel đã được xây dựng. Một ví dụ được biết đến rộng rãi là Security-Enhanced Linux (SELinux), do National Security Agency của Hoa Kỳ phát triển.
 
-### Command-line argument và shell environment
+### Command-Line argument và shell environment
 
 Khi người dùng gõ một lệnh, chương trình được nạp để đáp ứng yêu cầu có thể nhận một số command-line argument từ shell. Ví dụ, khi người dùng gõ lệnh:
 
@@ -149,7 +149,7 @@ $ ls -l /usr/bin
 
 để có danh sách đầy đủ các file trong thư mục /usr/bin, shell process tạo một process mới để thực thi lệnh. Process mới này nạp executable file /bin/ls. Trong quá trình đó, phần lớn execution context kế thừa từ shell bị mất, nhưng ba argument riêng biệt `ls`, `-l` và `/usr/bin` được giữ lại. Nói chung, process mới có thể nhận số lượng argument bất kỳ.
 
-Quy ước truyền command-line argument phụ thuộc vào ngôn ngữ bậc cao được sử dụng. Trong ngôn ngữ C, hàm `main()` của chương trình có thể nhận các tham số là một số nguyên chỉ số lượng argument được truyền cho chương trình và địa chỉ của một mảng con trỏ đến các chuỗi. Prototype sau diễn đạt chính thức chuẩn này:
+Quy ước truyền command-line argument phụ thuộc vào ngôn ngữ high-level được sử dụng. Trong ngôn ngữ C, hàm `main()` của chương trình có thể nhận các tham số là một số nguyên chỉ số lượng argument được truyền cho chương trình và địa chỉ của một mảng con trỏ đến các chuỗi. Prototype sau diễn đạt chính thức chuẩn này:
 
 ```c
 int main(int argc, char *argv[])
@@ -181,9 +181,9 @@ Hình 20-1. Các vị trí dưới đáy User Mode stack
 
 ### Library
 
-Mỗi source code file viết bằng ngôn ngữ bậc cao được chuyển đổi qua nhiều bước thành một object file, chứa machine code của các lệnh assembly tương ứng với các lệnh bậc cao. Một object file không thể được thực thi, vì nó không chứa linear address tương ứng với mỗi tham chiếu đến tên của một global symbol nằm ngoài source code file, chẳng hạn các hàm trong library hoặc các source code file khác của cùng chương trình. Việc gán, hay phân giải, các địa chỉ đó do linker thực hiện; linker tập hợp mọi object file của chương trình và xây dựng executable file. Linker cũng phân tích các hàm library được chương trình sử dụng và ghép chúng vào executable file theo cách được mô tả ở phần sau chương này.
+Mỗi source code file viết bằng ngôn ngữ high-level được chuyển đổi qua nhiều bước thành một object file, chứa machine code của các lệnh assembly tương ứng với các lệnh high-level. Một object file không thể được thực thi, vì nó không chứa linear address tương ứng với mỗi tham chiếu đến tên của một global symbol nằm ngoài source code file, chẳng hạn các hàm trong library hoặc các source code file khác của cùng chương trình. Việc gán, hay phân giải, các địa chỉ đó do linker thực hiện; linker tập hợp mọi object file của chương trình và xây dựng executable file. Linker cũng phân tích các hàm library được chương trình sử dụng và ghép chúng vào executable file theo cách được mô tả ở phần sau chương này.
 
-Hầu hết chương trình, ngay cả những chương trình đơn giản nhất, đều dùng library. Chẳng hạn, hãy xét chương trình C một dòng sau:
+Hầu hết chương trình, ngay cả những chương trình đơn giản nhất, đều dùng library. Chẳng hạn, hãy xét chương trình C one-line sau:
 
 ```c
 void main(void) { }
@@ -193,7 +193,7 @@ Mặc dù chương trình này không tính toán gì, vẫn cần rất nhiều
 
 Từ Chương 10, chúng ta biết chương trình thường gọi system call thông qua các wrapper routine trong C library. Điều này cũng đúng với C compiler. Ngoài code được tạo trực tiếp bằng cách biên dịch các câu lệnh của chương trình, mỗi executable file còn chứa một số “glue” code để xử lý tương tác giữa User Mode process với kernel. Các phần của glue code này được lưu trong C library.
 
-Ngoài C library, các hệ thống Unix còn có nhiều library hàm khác. Một hệ thống Linux thông thường thường dùng vài trăm library. Chỉ cần kể một vài ví dụ: math library libm có các hàm nâng cao cho phép toán floating point, còn X11 library libX11 tập hợp các hàm cơ bản ở mức thấp cho giao diện đồ họa X11 Window System.
+Ngoài C library, các hệ thống Unix còn có nhiều library hàm khác. Một hệ thống Linux thông thường thường dùng vài trăm library. Chỉ cần kể một vài ví dụ: math library libm có các hàm nâng cao cho phép toán floating point, còn X11 library libX11 tập hợp các hàm cơ bản ở low-level cho giao diện đồ họa X11 Window System.
 
 Mọi executable file trong các hệ thống Unix truyền thống đều dựa trên static library. Điều này có nghĩa executable file do linker tạo ra bao gồm không chỉ code của chương trình gốc mà cả code của các hàm library được chương trình tham chiếu. Một nhược điểm lớn của chương trình được liên kết tĩnh là chúng chiếm nhiều dung lượng đĩa. Thật vậy, mỗi executable file được liên kết tĩnh đều sao chép một phần library code.
 
@@ -267,7 +267,7 @@ Bảng 20-4. Các cách bố trí memory region trong kiến trúc 80x86
 | File memory mapping và anonymous memory region | Bắt đầu từ `0x40000000` (địa chỉ này tương ứng với 1/3 toàn bộ User Mode address space); các library được thêm vào tại những địa chỉ ngày càng cao | Bắt đầu gần cuối (địa chỉ thấp nhất) của User Mode stack; các library được thêm vào tại những địa chỉ ngày càng thấp |
 | User Mode stack | Bắt đầu tại `0xc0000000` và phát triển về phía địa chỉ thấp hơn |  |
 
-Như có thể thấy, các cách bố trí chỉ khác nhau ở vị trí các memory region dành cho file memory mapping và anonymous mapping. Trong cách bố trí cổ điển, các region này được đặt bắt đầu ở một phần ba toàn bộ User Mode address space, thường tại `0x40000000`; region mới hơn được thêm vào tại linear address cao hơn, nên các region mở rộng về phía User Mode stack.
+Như có thể thấy, các cách bố trí chỉ khác nhau ở vị trí các memory region dành cho file memory mapping và anonymous mapping. Trong cách bố trí cổ điển, các region này được đặt bắt đầu ở one-third toàn bộ User Mode address space, thường tại `0x40000000`; region mới hơn được thêm vào tại linear address cao hơn, nên các region mở rộng về phía User Mode stack.
 
 Ngược lại, trong cách bố trí linh hoạt, các memory region dành cho file memory mapping và anonymous mapping được đặt gần cuối User Mode stack; region mới hơn được thêm vào tại linear address thấp hơn, nên các region mở rộng về phía heap. Nhớ rằng stack cũng phát triển về phía địa chỉ thấp hơn.
 
@@ -275,7 +275,7 @@ Kernel thường dùng cách bố trí linh hoạt khi có thể xác định gi
 
 Mặt khác, nếu resource limit `RLIMIT_STACK` được đặt thành “infinity”, hoặc quản trị viên hệ thống đặt biến `sysctl_legacy_va_layout` thành 1 (bằng cách ghi vào file `/proc/sys/vm/legacy_va_layout` hoặc gọi system call `sysctl()` thích hợp), kernel không thể xác định cận trên cho kích thước User Mode stack, nên vẫn dùng cách bố trí memory region cổ điển.
 
-Vì sao cách bố trí linh hoạt được đưa vào? Ưu điểm chính của nó là cho phép process sử dụng User Mode linear address space tốt hơn. Với cách bố trí cổ điển, heap bị giới hạn dưới 1 GB, còn các memory region khác có thể chiếm tới khoảng 2 GB (trừ kích thước stack). Với cách bố trí linh hoạt, những ràng buộc này không còn: cả heap lẫn các memory region khác đều có thể tự do mở rộng cho đến khi sử dụng hết các linear address còn trống mà User Mode stack và các segment kích thước cố định của chương trình chưa dùng đến.
+Vì sao cách bố trí linh hoạt được đưa vào? Ưu điểm chính của nó là cho phép process sử dụng User Mode linear address space tốt hơn. Với cách bố trí cổ điển, heap bị giới hạn dưới 1 GB, còn các memory region khác có thể chiếm tới khoảng 2 GB (trừ kích thước stack). Với cách bố trí linh hoạt, những ràng buộc này không còn: cả heap lẫn các memory region khác đều có thể tự do mở rộng cho đến khi sử dụng hết các linear address còn trống mà User Mode stack và các segment fixed-size của chương trình chưa dùng đến.
 
 Đến đây, một thử nghiệm thực tế nhỏ có thể giúp làm sáng tỏ vấn đề. Hãy viết và biên dịch chương trình C sau:
 
@@ -316,19 +316,19 @@ ffffe000-fffff000 ---p 00000000 00:00 0
 
 Lưu ý rằng mọi region được liệt kê đều được triển khai bằng private memory mapping (chữ `p` trong cột quyền). Điều này không đáng ngạc nhiên vì những memory region này chỉ tồn tại để cung cấp dữ liệu cho process. Trong khi thực thi lệnh, process có thể sửa nội dung của các memory region này; tuy nhiên, các file trên đĩa gắn với chúng vẫn không đổi. Đây chính là cách private memory mapping hoạt động.
 
-Memory region bắt đầu từ `0x8048000` là memory mapping gắn với phần của file /tmp/memorylayout từ byte 0 đến byte 4.095. Các quyền chỉ định region có thể thực thi (chứa object code), chỉ đọc (không thể ghi vì các lệnh không thay đổi trong một lần chạy), và private. Điều này đúng, vì region ánh xạ text segment của chương trình.
+Memory region bắt đầu từ `0x8048000` là memory mapping gắn với phần của file /tmp/memorylayout từ byte 0 đến byte 4.095. Các quyền chỉ định region có thể thực thi (chứa object code), read-only (không thể ghi vì các lệnh không thay đổi trong một lần chạy), và private. Điều này đúng, vì region ánh xạ text segment của chương trình.
 
 Memory region bắt đầu từ `0x8049000` là một memory mapping khác gắn với cùng phần của /tmp/memorylayout từ byte 0 đến byte 4.095. Chương trình này nhỏ đến mức text segment, data segment và bss segment của chương trình nằm trong cùng page của file. Vì vậy, memory region chứa data segment và bss segment chồng lấn với memory region trước trong linear address space.
 
 Memory region thứ ba chứa heap của process. Lưu ý rằng nó kết thúc tại linear address `0x8051000` đã được truyền cho system call `brk()`.
 
-Hai memory region tiếp theo bắt đầu từ `0x40000000` và `0x40014000` lần lượt tương ứng với text segment và các data segment, bss segment của dynamic linker cho ELF shared library — /lib/ld-2.3.2.so trên hệ thống này. Dynamic linker không bao giờ được thực thi một mình: nó luôn được memory-map bên trong address space của một process đang thực thi một chương trình khác. Anonymous memory region bắt đầu từ `0x40015000` đã được dynamic linker cấp phát.
+Hai memory region tiếp theo bắt đầu từ `0x40000000` và `0x40014000` lần lượt tương ứng với text segment và các data segment, bss segment của dynamic linker cho ELF shared library — /lib/ld-2.3.2.so trên hệ thống này. Dynamic linker không bao giờ được thực thi một mình: nó luôn được memory-mapped bên trong address space của một process đang thực thi một chương trình khác. Anonymous memory region bắt đầu từ `0x40015000` đã được dynamic linker cấp phát.
 
-Trên hệ thống này, C library được lưu trong file /lib/libc-2.3.2.so. Text segment và các data segment, bss segment của C library được ánh xạ vào hai memory region tiếp theo, bắt đầu từ địa chỉ `0x4002f000`. Nhớ rằng các page frame trong private region có thể được chia sẻ giữa nhiều process bằng cơ chế Copy On Write, miễn là chúng không bị sửa đổi. Vì vậy, do text segment chỉ đọc, các page frame chứa executable code của C library được chia sẻ giữa hầu hết process đang thực thi (mọi process trừ những process được liên kết tĩnh). Anonymous memory region bắt đầu từ `0x4015b000` đã được C library cấp phát.
+Trên hệ thống này, C library được lưu trong file /lib/libc-2.3.2.so. Text segment và các data segment, bss segment của C library được ánh xạ vào hai memory region tiếp theo, bắt đầu từ địa chỉ `0x4002f000`. Nhớ rằng các page frame trong private region có thể được chia sẻ giữa nhiều process bằng cơ chế Copy On Write, miễn là chúng không bị sửa đổi. Vì vậy, do text segment read-only, các page frame chứa executable code của C library được chia sẻ giữa hầu hết process đang thực thi (mọi process trừ những process được liên kết tĩnh). Anonymous memory region bắt đầu từ `0x4015b000` đã được C library cấp phát.
 
 Anonymous memory region từ `0xbffeb000` đến `0xc0000000` gắn với User Mode stack. Chúng ta đã giải thích trong mục “Page Fault exception handler” của Chương 9 cách stack tự động mở rộng về phía địa chỉ thấp hơn bất cứ khi nào cần.
 
-Cuối cùng, anonymous memory region một page bắt đầu từ `0xffffe000` chứa vsyscall page của process, được truy cập khi gọi system call và khi trở về từ signal handler (xem mục “Gọi system call qua lệnh sysenter” trong Chương 10 và mục “Bắt signal” trong Chương 11).
+Cuối cùng, anonymous memory region one-page bắt đầu từ `0xffffe000` chứa vsyscall page của process, được truy cập khi gọi system call và khi trở về từ signal handler (xem mục “Gọi system call qua lệnh sysenter” trong Chương 10 và mục “Bắt signal” trong Chương 11).
 
 Bây giờ hãy chạy cùng chương trình với việc áp đặt giới hạn cho kích thước User Mode stack:
 
@@ -369,7 +369,7 @@ Bảng 20-5. Các lệnh ptrace trong kiến trúc 80×86
 | `PTRACE_GETREGS` | Đọc các register đặc quyền của CPU |
 | `PTRACE_GETSIGINFO` | Lấy thông tin về signal cuối cùng được chuyển đến process được trace |
 | `PTRACE_KILL` | Kết thúc process được trace |
-| `PTRACE_OLDSETOPTIONS` | Lệnh phụ thuộc kiến trúc, tương đương với `PTRACE_SETOPTIONS` |
+| `PTRACE_OLDSETOPTIONS` | Lệnh Architecture-dependent, tương đương với `PTRACE_SETOPTIONS` |
 | `PTRACE_PEEKDATA` | Đọc một giá trị 32-bit từ data segment |
 | `PTRACE_PEEKTEXT` | Đọc một giá trị 32-bit từ text segment |
 | `PTRACE_PEEKUSR` | Đọc các normal register và debug register của CPU |
@@ -402,7 +402,7 @@ Khi một sự kiện được theo dõi xảy ra, chương trình được trac
 
 Lệnh `PTRACE_CONT` đơn giản tiếp tục thực thi; child thực thi cho đến khi nhận một signal khác. Loại tracing này được triển khai bằng flag `PT_PTRACED` trong field `ptrace` của process descriptor, được hàm `do_signal()` kiểm tra (xem mục “Chuyển giao signal” trong Chương 11).
 
-Lệnh `PTRACE_SINGLESTEP` buộc child process thực thi lệnh assembly tiếp theo, rồi lại dừng nó. Loại tracing này được triển khai trên máy dựa trên 80x86 thông qua trap flag `TF` trong register `eflags`: khi flag được bật, một exception “Debug” được phát sinh ngay sau mỗi lệnh assembly. Exception handler tương ứng chỉ xóa flag, buộc process hiện tại dừng và gửi signal `SIGCHLD` đến parent. Lưu ý rằng đặt flag `TF` không phải thao tác có đặc quyền, nên User Mode process có thể buộc thực thi single-step ngay cả khi không có system call `ptrace()`. Kernel kiểm tra flag `PT_DTRACE` trong process descriptor để theo dõi child process có đang được single-step qua `ptrace()` hay không.
+Lệnh `PTRACE_SINGLESTEP` buộc child process thực thi lệnh assembly tiếp theo, rồi lại dừng nó. Loại tracing này được triển khai trên máy 80x86-based thông qua trap flag `TF` trong register `eflags`: khi flag được bật, một exception “Debug” được phát sinh ngay sau mỗi lệnh assembly. Exception handler tương ứng chỉ xóa flag, buộc process hiện tại dừng và gửi signal `SIGCHLD` đến parent. Lưu ý rằng đặt flag `TF` không phải thao tác có đặc quyền, nên User Mode process có thể buộc thực thi single-step ngay cả khi không có system call `ptrace()`. Kernel kiểm tra flag `PT_DTRACE` trong process descriptor để theo dõi child process có đang được single-stepped qua `ptrace()` hay không.
 
 Lệnh `PTRACE_SYSCALL` khiến process được trace tiếp tục thực thi cho đến khi một system call được gọi. Process bị dừng hai lần: lần đầu khi system call bắt đầu và lần thứ hai khi system call kết thúc. Loại tracing này được triển khai bằng flag `TIF_SYSCALL_TRACE` trong field `flags` của cấu trúc `thread_info` của process, được kiểm tra trong hàm assembly `system_call()` (xem mục “Gọi system call qua lệnh int $0x80” trong Chương 10).
 
@@ -410,7 +410,7 @@ Một process cũng có thể được trace bằng một số tính năng debug
 
 ## Executable format
 
-Executable format chuẩn của Linux có tên Executable and Linking Format (ELF). Nó được Unix System Laboratories phát triển và hiện là format được dùng rộng rãi nhất trong thế giới Unix. Một số hệ điều hành Unix nổi tiếng, như System V Release 4 và Solaris 2 của Sun, đã chọn ELF làm executable format chính.
+Executable format chuẩn của Linux có tên Executable and Linking Format (ELF). Nó được Unix System Laboratories phát triển và hiện là format được dùng rộng rãi nhất trong thế giới Unix. Một số hệ điều hành Unix well-known, như System V Release 4 và Solaris 2 của Sun, đã chọn ELF làm executable format chính.
 
 Các phiên bản Linux cũ hỗ trợ một format khác tên Assembler OUTput Format (a.out); thực tế, có một số phiên bản format này tồn tại trong thế giới Unix. Hiện nó ít được dùng vì ELF thực dụng hơn nhiều.
 
@@ -485,13 +485,13 @@ Một Windows executable file có magic number MZ trong hai byte đầu, và đ�
 
 Như đã đề cập trong Chương 1, một tính năng thú vị của Linux là khả năng thực thi các file được biên dịch cho hệ điều hành khác. Tất nhiên, điều này chỉ khả thi nếu các file chứa machine code cho cùng kiến trúc máy tính mà kernel đang chạy. Có hai loại hỗ trợ dành cho những chương trình “ngoại lai” này:
 
-- Emulated execution: cần thiết để thực thi chương trình có các system call không tuân thủ POSIX
+- Emulated execution: cần thiết để thực thi chương trình có các system call không POSIX-compliant
 
-- Native execution: áp dụng cho chương trình có các system call hoàn toàn tuân thủ POSIX
+- Native execution: áp dụng cho chương trình có các system call hoàn toàn POSIX-compliant
 
 Các chương trình Microsoft MS-DOS và Windows được emulation: không thể thực thi native vì chúng có API không được Linux nhận diện. Một emulator như DOSemu hoặc Wine (đã xuất hiện trong ví dụ cuối mục trước) được gọi để chuyển mỗi lời gọi API thành lời gọi wrapper function thực hiện emulation, rồi wrapper này dùng các system call Linux hiện có. Vì emulator chủ yếu được triển khai dưới dạng ứng dụng User Mode, chúng ta không bàn thêm về chúng.
 
-Mặt khác, những chương trình tuân thủ POSIX được biên dịch trên hệ điều hành khác Linux có thể được thực thi không quá khó khăn, vì các hệ điều hành POSIX cung cấp API tương tự nhau. (Thực ra các API phải giống hệt nhau, mặc dù không phải lúc nào cũng vậy.) Những khác biệt nhỏ mà kernel phải giải quyết thường liên quan đến cách gọi system call hoặc cách đánh số các signal khác nhau. Thông tin này được lưu trong execution domain descriptor kiểu `exec_domain`.
+Mặt khác, những chương trình POSIX-compliant được biên dịch trên hệ điều hành khác Linux có thể được thực thi không quá khó khăn, vì các hệ điều hành POSIX cung cấp API tương tự nhau. (Thực ra các API phải giống hệt nhau, mặc dù không phải lúc nào cũng vậy.) Những khác biệt nhỏ mà kernel phải giải quyết thường liên quan đến cách gọi system call hoặc cách đánh số các signal khác nhau. Thông tin này được lưu trong execution domain descriptor kiểu `exec_domain`.
 
 Một process chỉ định execution domain của mình bằng cách đặt field `personality` trong descriptor và lưu địa chỉ cấu trúc dữ liệu `exec_domain` tương ứng trong field `exec_domain` của cấu trúc `thread_info`. Process có thể thay đổi personality bằng cách gọi system call thích hợp tên `personality()`; các giá trị điển hình của tham số system call được liệt kê trong Bảng 20-6. Lập trình viên không được kỳ vọng trực tiếp thay đổi personality của chương trình; thay vào đó, system call `personality()` nên được gọi bởi glue code thiết lập execution context của process (xem mục tiếp theo).
 

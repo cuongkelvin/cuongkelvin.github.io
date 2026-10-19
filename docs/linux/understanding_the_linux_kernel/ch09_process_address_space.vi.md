@@ -2,13 +2,13 @@
 
 ![Hình mở đầu Chương 9](images/ch09/ch09_opener.png)
 
-Như đã thấy trong chương trước, một kernel function lấy dynamic memory theo cách khá trực tiếp bằng cách gọi một trong nhiều function: `__get_free_pages()` hoặc `alloc_pages()` để lấy page từ zoned page frame allocator, `kmem_cache_alloc()` hoặc `kmalloc()` để dùng slab allocator cho object chuyên dụng hoặc đa dụng, và `vmalloc()` hoặc `vmalloc_32()` để lấy noncontiguous memory area. Nếu yêu cầu có thể được đáp ứng, mỗi function này trả về địa chỉ page descriptor hoặc một linear address xác định đầu dynamic memory area đã cấp phát.
+Như đã thấy trong chương trước, một kernel function lấy dynamic memory theo cách khá trực tiếp bằng cách gọi một trong nhiều function: `__get_free_pages()` hoặc `alloc_pages()` để lấy page từ zoned page frame allocator, `kmem_cache_alloc()` hoặc `kmalloc()` để dùng slab allocator cho object chuyên dụng hoặc general-purpose, và `vmalloc()` hoặc `vmalloc_32()` để lấy noncontiguous memory area. Nếu yêu cầu có thể được đáp ứng, mỗi function này trả về địa chỉ page descriptor hoặc một linear address xác định đầu dynamic memory area đã cấp phát.
 
 Các cách đơn giản này hoạt động vì hai lý do:
 
-- Kernel là component có độ ưu tiên cao nhất của hệ điều hành. Nếu một kernel function yêu cầu dynamic memory, nó phải có lý do hợp lệ để đưa ra yêu cầu đó, và không có ích gì khi cố trì hoãn yêu cầu.
+- Kernel là component có highest-priority của hệ điều hành. Nếu một kernel function yêu cầu dynamic memory, nó phải có lý do hợp lệ để đưa ra yêu cầu đó, và không có ích gì khi cố trì hoãn yêu cầu.
 
-- Kernel tin tưởng chính nó. Mọi kernel function đều được giả định không có lỗi, nên kernel không cần đưa vào biện pháp bảo vệ nào chống lỗi lập trình.
+- Kernel tin tưởng chính nó. Mọi kernel function đều được giả định error-free, nên kernel không cần đưa vào biện pháp bảo vệ nào chống lỗi lập trình.
 
 Khi cấp phát memory cho User Mode process, tình hình hoàn toàn khác:
 
@@ -107,7 +107,7 @@ Bảng 9-2. Các field của memory descriptor
 | `unsigned long []` | `saved_auxv` | Dùng khi bắt đầu thực thi chương trình ELF (xem Chương 20) |
 | `unsigned int` | `dumpable` | Flag chỉ định process có thể tạo core dump của memory hay không |
 | `cpumask_t` | `cpu_vm_mask` | Bit mask cho lazy TLB switch (xem Chương 2) |
-| `mm_context_t` | `context` | Pointer đến table chứa thông tin riêng của kiến trúc (ví dụ địa chỉ LDT trên nền tảng 80x86) |
+| `mm_context_t` | `context` | Pointer đến table chứa thông tin architecture-specific (ví dụ địa chỉ LDT trên nền tảng 80x86) |
 | `unsigned long` | `swap_token_time` | Thời điểm process này trở nên đủ điều kiện có swap token (xem phần “The Swap Token” trong Chương 17) |
 | `char` | `recent_pagein` | Flag được set nếu một major Page Fault vừa xảy ra gần đây |
 | `int` | `core_waiters` | Số lightweight process đang dump nội dung process address space ra core file (xem phần “Deleting a Process Address Space” ở phần sau chương này) |
@@ -208,7 +208,7 @@ Một thao tác kernel thường thực hiện là tìm memory region chứa m�
 
 Tuy nhiên, dùng list chỉ thuận tiện nếu process có rất ít memory region—chẳng hạn dưới vài chục. Tìm kiếm, chèn phần tử và xóa phần tử trong list cần số thao tác có thời gian tỷ lệ tuyến tính với độ dài list.
 
-Dù hầu hết Linux process dùng rất ít memory region, một số ứng dụng lớn, như object-oriented database hoặc debugger chuyên dụng cho việc dùng `malloc()`, có hàng trăm hoặc thậm chí hàng nghìn region. Trong những trường hợp này, quản lý list memory region rất kém hiệu quả, do đó hiệu năng các system call liên quan đến memory suy giảm đến mức không chấp nhận được.
+Dù hầu hết Linux process dùng rất ít memory region, một số ứng dụng lớn, như object-oriented database hoặc debugger chuyên dụng cho việc dùng `malloc()`, có hàng trăm hoặc thậm chí hàng nghìn region. Trong những trường hợp này, quản lý list memory region rất kém hiệu quả, do đó hiệu năng các system call memory-related suy giảm đến mức không chấp nhận được.
 
 Vì thế, Linux 2.6 lưu memory descriptor trong data structure gọi là red-black tree. Trong red-black tree, mỗi phần tử (hay node) thường có hai node con: left child và right child. Các phần tử trong tree được sắp thứ tự. Với mỗi node N, tất cả phần tử của subtree có root tại left child của N đứng trước N, còn ngược lại, tất cả phần tử của subtree có root tại right child của N đứng sau N (xem Hình 9-3(`a`); key của node được viết ngay trong node. Hơn nữa, red-black tree phải đáp ứng thêm bốn quy tắc:
 
@@ -280,7 +280,7 @@ Bảng 9-5. Các flag của memory region
 | `VM_HUGETLB` | Page trong region được xử lý qua cơ chế extended paging (xem phần “Extended Paging” trong Chương 2) |
 | `VM_NONLINEAR` | Region triển khai non-linear file mapping |
 
-Page access right trong memory region descriptor có thể được kết hợp tùy ý. Ví dụ, có thể cho phép đọc nhưng không thực thi page của region. Để triển khai protection scheme này hiệu quả, các access right Read, Write và Execute gắn với page của memory region phải được sao chép vào tất cả Page Table entry tương ứng, để Paging Unit circuitry có thể kiểm tra trực tiếp. Nói cách khác, page access right quy định loại truy cập nào phải tạo Page Fault exception. Như sắp thấy, Linux giao việc xác định nguyên nhân Page Fault cho Page Fault handler, triển khai nhiều chiến lược xử lý page.
+Page access right trong memory region descriptor có thể được kết hợp tùy ý. Ví dụ, có thể cho phép đọc nhưng không thực thi page của region. Để triển khai protection scheme này hiệu quả, các access right Read, Write và Execute gắn với page của memory region phải được sao chép vào tất cả Page Table entry tương ứng, để Paging Unit circuitry có thể kiểm tra trực tiếp. Nói cách khác, page access right quy định loại truy cập nào phải tạo Page Fault exception. Như sắp thấy, Linux giao việc xác định nguyên nhân Page Fault cho Page Fault handler, triển khai nhiều chiến lược page-handling.
 
 Giá trị ban đầu của Page Table flag (phải giống nhau cho mọi page trong memory region, như đã thấy) được lưu trong field `vm_page_prot` của descriptor `vm_area_struct`. Khi thêm page, kernel đặt flag trong Page Table entry tương ứng theo giá trị field `vm_page_prot`.
 
@@ -304,7 +304,7 @@ Ngược lại, nếu kernel được compile có hỗ trợ PAE và CPU có fla
 
 - Access right Write luôn kéo theo access right Read.
 
-Hơn nữa, để trì hoãn cấp phát page frame đúng cách qua kỹ thuật “Copy On Write” (xem phía sau trong chương này), page frame được write-protect bất cứ khi nào page tương ứng không được chia sẻ bởi nhiều process.
+Hơn nữa, để trì hoãn cấp phát page frame đúng cách qua kỹ thuật “Copy On Write” (xem phía sau trong chương này), page frame được write-protected bất cứ khi nào page tương ứng không được chia sẻ bởi nhiều process.
 
 Do đó, 16 tổ hợp có thể của các access right Read, Write, Execute và Share được rút gọn theo các quy tắc sau:
 
@@ -377,7 +377,7 @@ Function trả về pointer `NULL` nếu không có region như vậy. Chính x�
 
 ##### Tìm khoảng trống: get\_unmapped\_area()
 
-Function `get_unmapped_area()` tìm trong process address space một khoảng linear address khả dụng. Parameter `len` chỉ định độ dài khoảng, còn parameter `addr` khác không chỉ định địa chỉ bắt đầu tìm kiếm. Nếu tìm kiếm thành công, function trả về địa chỉ đầu của khoảng mới; ngược lại, trả về error code `-ENOMEM`.
+Function `get_unmapped_area()` tìm trong process address space một khoảng linear address khả dụng. Parameter `len` chỉ định độ dài khoảng, còn parameter `addr` non-null chỉ định địa chỉ bắt đầu tìm kiếm. Nếu tìm kiếm thành công, function trả về địa chỉ đầu của khoảng mới; ngược lại, trả về error code `-ENOMEM`.
 
 Nếu parameter `addr` khác `NULL`, function kiểm tra địa chỉ được chỉ định nằm trong User Mode address space và được căn chỉnh theo page boundary. Tiếp theo, function gọi một trong hai method, tùy khoảng linear address được dùng cho file memory mapping hay anonymous memory mapping. Trong trường hợp đầu, function thực thi file operation `get_unmapped_area`; điều này được bàn trong Chương 16.
 
@@ -412,11 +412,11 @@ for (vma = find_vma(current->mm, addr); ; vma = vma->vm_next) {
 
 Function bắt đầu bằng cách kiểm tra để đảm bảo độ dài khoảng nằm trong `TASK_SIZE`, giới hạn áp dụng cho User Mode linear address (thường là 3 GB). Nếu `addr` khác không, function cố cấp phát khoảng bắt đầu từ `addr`. Để đảm bảo an toàn, function làm tròn giá trị `addr` lên bội số của 4 KB.
 
-Nếu `addr` bằng 0 hoặc tìm kiếm trước thất bại, function `arch_get_unmapped_area()` quét User Mode linear address space để tìm dải linear address không thuộc memory region nào và đủ lớn để chứa region mới. Để tăng tốc tìm kiếm, điểm bắt đầu tìm kiếm thường được đặt là linear address ngay sau memory region được cấp phát gần nhất. Field `mm->free_area_cache` của memory descriptor được khởi tạo bằng một phần ba User Mode linear address space—thường là 1 GB—rồi cập nhật khi tạo memory region mới. Nếu function không tìm được dải linear address phù hợp, việc tìm kiếm bắt đầu lại từ đầu—tức từ một phần ba User Mode linear address space: thực tế, một phần ba đầu User Mode linear address space dành cho memory region có linear address đầu định sẵn, thường là các segment text, data và bss của executable file (xem Chương 20).
+Nếu `addr` bằng 0 hoặc tìm kiếm trước thất bại, function `arch_get_unmapped_area()` quét User Mode linear address space để tìm dải linear address không thuộc memory region nào và đủ lớn để chứa region mới. Để tăng tốc tìm kiếm, điểm bắt đầu tìm kiếm thường được đặt là linear address ngay sau memory region được cấp phát gần nhất. Field `mm->free_area_cache` của memory descriptor được khởi tạo bằng one-third User Mode linear address space—thường là 1 GB—rồi cập nhật khi tạo memory region mới. Nếu function không tìm được dải linear address phù hợp, việc tìm kiếm bắt đầu lại từ đầu—tức từ one-third User Mode linear address space: thực tế, một phần ba đầu User Mode linear address space dành cho memory region có linear address đầu định sẵn, thường là các segment text, data và bss của executable file (xem Chương 20).
 
 Function gọi `find_vma()` để tìm memory region đầu tiên kết thúc sau điểm bắt đầu tìm kiếm, rồi lần lượt xét tất cả memory region phía sau. Có thể xảy ra ba trường hợp:
 
-- Khoảng được yêu cầu lớn hơn phần linear address space chưa quét (`addr + len > TASK_SIZE`): trong trường hợp này, function bắt đầu lại từ một phần ba User Mode address space hoặc, nếu đã thực hiện lượt tìm kiếm thứ hai, trả về `-ENOMEM` (không đủ linear address để đáp ứng yêu cầu).
+- Khoảng được yêu cầu lớn hơn phần linear address space chưa quét (`addr + len > TASK_SIZE`): trong trường hợp này, function bắt đầu lại từ one-third User Mode address space hoặc, nếu đã thực hiện lượt tìm kiếm thứ hai, trả về `-ENOMEM` (không đủ linear address để đáp ứng yêu cầu).
 
 - Lỗ hổng sau region vừa quét không đủ lớn (`vma != NULL && vma->vm_start < addr + len`). Trong trường hợp này, function xét region tiếp theo.
 
@@ -486,11 +486,11 @@ Function không phải kiểm tra sơ bộ số page frame trống.
 
 `MAP_POPULATE`
 
-Function nên cấp phát trước các page frame cần cho mapping do memory region thiết lập. Flag này chỉ có ý nghĩa với memory region map file (xem Chương 16) và IPC shared memory region (xem Chương 19).
+Function nên pre-allocate các page frame cần cho mapping do memory region thiết lập. Flag này chỉ có ý nghĩa với memory region map file (xem Chương 16) và IPC shared memory region (xem Chương 19).
 
 `MAP_NONBLOCK`
 
-Chỉ có ý nghĩa khi flag `MAP_POPULATE` được set: khi cấp phát trước page frame, function không được block.
+Chỉ có ý nghĩa khi flag `MAP_POPULATE` được set: khi pre-allocating page frame, function không được block.
 
 Function `do_mmap()` thực hiện một số kiểm tra sơ bộ giá trị `offset` rồi thực thi function `do_mmap_pgoff()`. Trong chương này, chúng ta giả định khoảng linear address mới không map file trên disk—file memory mapping được bàn chi tiết trong Chương 16. Sau đây là mô tả function `do_mmap_pgoff()` cho anonymous memory region:
 
@@ -704,7 +704,7 @@ Function `unmap_region()` duyệt một list memory region và giải phóng pag
 
 1\. Gọi `lru_add_drain()` (xem Chương 17).
 
-2\. Gọi function `tlb_gather_mmu()` để khởi tạo per-CPU variable tên `mmu_gathers`. Nội dung `mmu_gathers` phụ thuộc kiến trúc: nói chung, biến phải lưu mọi thông tin cần để cập nhật thành công page table entry của process. Trong kiến trúc 80×86, function `tlb_gather_mmu()` chỉ lưu giá trị memory descriptor pointer `mm` vào biến `mmu_gathers` của local CPU.
+2\. Gọi function `tlb_gather_mmu()` để khởi tạo per-CPU variable tên `mmu_gathers`. Nội dung `mmu_gathers` architecture-dependent: nói chung, biến phải lưu mọi thông tin cần để cập nhật thành công page table entry của process. Trong kiến trúc 80×86, function `tlb_gather_mmu()` chỉ lưu giá trị memory descriptor pointer `mm` vào biến `mmu_gathers` của local CPU.
 
 3\. Lưu địa chỉ biến `mmu_gathers` trong local variable `tlb`.
 
@@ -831,7 +831,7 @@ if (expand_stack(vma, address))
 goto good_area;
 ```
 
-Nếu flag `VM_GROWSDOWN` của region được set và exception xảy ra trong User Mode, function kiểm tra `address` có nhỏ hơn stack pointer `regs->esp` không (nó chỉ nên nhỏ hơn một chút). Vì một số assembly language instruction liên quan đến stack (như `pusha`) chỉ giảm register `esp` sau khi truy cập memory, process được cho phép một khoảng dung sai 32 byte. Nếu địa chỉ đủ cao (trong dung sai cho phép), code gọi function `expand_stack()` để kiểm tra process có được phép mở rộng cả stack lẫn address space không; nếu mọi thứ ổn, nó đặt field `vm_start` của `vma` thành `address` và trả về 0; ngược lại, trả về `-ENOMEM`.
+Nếu flag `VM_GROWSDOWN` của region được set và exception xảy ra trong User Mode, function kiểm tra `address` có nhỏ hơn stack pointer `regs->esp` không (nó chỉ nên nhỏ hơn một chút). Vì một số assembly language instruction stack-related (như `pusha`) chỉ giảm register `esp` sau khi truy cập memory, process được cho phép một khoảng dung sai 32-byte. Nếu địa chỉ đủ cao (trong dung sai cho phép), code gọi function `expand_stack()` để kiểm tra process có được phép mở rộng cả stack lẫn address space không; nếu mọi thứ ổn, nó đặt field `vm_start` của `vma` thành `address` và trả về 0; ngược lại, trả về `-ENOMEM`.
 
 Lưu ý code trước bỏ qua kiểm tra dung sai khi flag `VM_GROWSDOWN` của region được set và exception không xảy ra trong User Mode. Các điều kiện này nghĩa là kernel đang truy cập User Mode stack và code phải luôn chạy `expand_stack()`.
 
@@ -875,7 +875,7 @@ if ((fixup = search_exception_table(regs->eip)) != 0) {
 
 Trong trường hợp đầu, nó nhảy đến “fixup code”, thường gửi signal `SIGSEGV` đến `current` hoặc kết thúc system call handler với error code phù hợp (xem phần “Dynamic Address Checking: The Fix-up Code” trong Chương 10).
 
-Trong trường hợp thứ hai, function in bản dump đầy đủ các CPU register và Kernel Mode stack lên cả console lẫn system message buffer; sau đó kill process hiện tại bằng cách gọi function `do_exit()` (xem Chương 20). Đây là lỗi gọi là “Kernel oops”, đặt tên theo thông báo hiển thị. Kernel hacker có thể dùng các giá trị được dump để tái dựng điều kiện kích hoạt bug, qua đó tìm và sửa nó.
+Trong trường hợp thứ hai, function in bản dump đầy đủ các CPU register và Kernel Mode stack lên cả console lẫn system message buffer; sau đó kill process hiện tại bằng cách gọi function `do_exit()` (xem Chương 20). Đây là lỗi so-called “Kernel oops”, đặt tên theo thông báo hiển thị. Kernel hacker có thể dùng các giá trị được dump để tái dựng điều kiện kích hoạt bug, qua đó tìm và sửa nó.
 
 ### Xử lý địa chỉ gây lỗi trong address space
 
@@ -1059,7 +1059,7 @@ if (write_access) {
 
 Lần thực thi đầu tiên của macro `pte_unmap` giải phóng temporary kernel mapping cho high-memory physical address của Page Table entry do `pte_offset_map` thiết lập trước khi gọi function `handle_pte_fault()` (xem Bảng 2-7 trong phần “Page Table Handling” ở Chương 2). Cặp macro `pte_offset_map` và `pte_unmap` tiếp theo lấy và giải phóng cùng temporary kernel mapping. Phải giải phóng temporary kernel mapping trước khi gọi `alloc_page()`, vì function này có thể block process hiện tại.
 
-Function tăng field `rss` của memory descriptor để theo dõi số page frame cấp phát cho process. Sau đó, Page Table entry được đặt thành physical address của page frame, được đánh dấu writable<sup>†</sup> và dirty. Function `lru_cache_add_active()` chèn page frame mới vào các data structure liên quan đến swap; chúng ta bàn về nó trong Chương 17.
+Function tăng field `rss` của memory descriptor để theo dõi số page frame cấp phát cho process. Sau đó, Page Table entry được đặt thành physical address của page frame, được đánh dấu writable<sup>†</sup> và dirty. Function `lru_cache_add_active()` chèn page frame mới vào các data structure swap-related; chúng ta bàn về nó trong Chương 17.
 
 Ngược lại, khi xử lý truy cập đọc, nội dung page không quan trọng vì process đang truy cập nó lần đầu. Cấp cho process page chứa toàn số không an toàn hơn page cũ chứa thông tin do process khác ghi. Linux tiến thêm một bước theo tinh thần demand paging. Không cần gán ngay cho process page frame mới chứa toàn số không, vì hoàn toàn có thể cấp page hiện có gọi là zero page, qua đó trì hoãn thêm việc cấp phát page frame. Zero page được cấp phát tĩnh trong quá trình kernel initialization ở biến `empty_zero_page` (array 4.096 byte chứa toàn số không).
 
@@ -1077,7 +1077,7 @@ Vì page được đánh dấu nonwritable, nếu process cố ghi vào nó, cơ
 
 ### Copy On Write
 
-Các hệ thống Unix thế hệ đầu triển khai tạo process khá vụng về: khi system call `fork()` được đưa ra, kernel nhân đôi toàn bộ parent address space theo đúng nghĩa đen và gán bản sao cho child process. Hoạt động này khá tốn thời gian vì yêu cầu:
+Các hệ thống Unix First-generation triển khai tạo process khá vụng về: khi system call `fork()` được đưa ra, kernel nhân đôi toàn bộ parent address space theo đúng nghĩa đen và gán bản sao cho child process. Hoạt động này khá tốn thời gian vì yêu cầu:
 
 - Cấp phát page frame cho Page Table của child process
 
@@ -1089,7 +1089,7 @@ Các hệ thống Unix thế hệ đầu triển khai tạo process khá vụng 
 
 Cách tạo address space này liên quan đến nhiều lần truy cập memory, dùng nhiều CPU cycle và làm hỏng hoàn toàn nội dung cache. Cuối cùng nhưng không kém phần quan trọng, nó thường vô ích vì nhiều child process bắt đầu thực thi bằng cách load chương trình mới, qua đó loại bỏ hoàn toàn address space kế thừa (xem Chương 20).
 
-Các Unix kernel hiện đại, gồm Linux, dùng cách hiệu quả hơn gọi là Copy On Write (COW). Ý tưởng khá đơn giản: thay vì nhân đôi page frame, chúng được chia sẻ giữa parent và child process. Tuy nhiên, chừng nào còn chia sẻ thì không thể sửa chúng. Bất cứ khi nào parent hoặc child process cố ghi vào shared page frame, exception xảy ra. Tại đây, kernel sao chép page vào page frame mới và đánh dấu writable. Page frame gốc vẫn được write-protect: khi process kia cố ghi vào nó, kernel kiểm tra process ghi có phải owner duy nhất của page frame không; nếu đúng, kernel cho phép process ghi page frame.
+Các Unix kernel hiện đại, gồm Linux, dùng cách hiệu quả hơn gọi là Copy On Write (COW). Ý tưởng khá đơn giản: thay vì nhân đôi page frame, chúng được chia sẻ giữa parent và child process. Tuy nhiên, chừng nào còn chia sẻ thì không thể sửa chúng. Bất cứ khi nào parent hoặc child process cố ghi vào shared page frame, exception xảy ra. Tại đây, kernel sao chép page vào page frame mới và đánh dấu writable. Page frame gốc vẫn được write-protected: khi process kia cố ghi vào nó, kernel kiểm tra process ghi có phải owner duy nhất của page frame không; nếu đúng, kernel cho phép process ghi page frame.
 
 Field `_count` của page descriptor được dùng để theo dõi số process chia sẻ page frame tương ứng. Mỗi khi process giải phóng page frame hoặc Copy On Write được thực hiện trên nó, field `_count` giảm; page frame chỉ được giải phóng khi `_count` thành `-`1 (xem phần “Page Descriptors” trong Chương 8).
 
@@ -1111,7 +1111,7 @@ if (pte_present(entry)) {
 }
 ```
 
-Function `handle_pte_fault()` độc lập kiến trúc: nó xét mọi vi phạm page access right có thể. Tuy nhiên, trong kiến trúc 80×86, nếu page hiện diện thì truy cập là ghi và page frame được write-protect (xem phần “Handling a Faulty Address Inside the Address Space” trước đó). Do đó, function `do_wp_page()` luôn được gọi.
+Function `handle_pte_fault()` architecture-independent: nó xét mọi vi phạm page access right có thể. Tuy nhiên, trong kiến trúc 80×86, nếu page hiện diện thì truy cập là ghi và page frame được write-protected (xem phần “Handling a Faulty Address Inside the Address Space” trước đó). Do đó, function `do_wp_page()` luôn được gọi.
 
 Function `do_wp_page()`[^9] bắt đầu bằng cách suy ra page descriptor của page frame mà Page Table entry liên quan đến Page Fault exception tham chiếu. Tiếp theo, function xác định có thực sự cần nhân đôi page không. Nếu chỉ một process sở hữu page, Copy On Write không áp dụng và process phải được tự do ghi page. Về cơ bản, function đọc field `_count` của page descriptor: nếu bằng 0 (một owner), không được thực hiện COW. Thực tế, kiểm tra hơi phức tạp hơn, vì field `_count` còn tăng khi page được chèn vào swap cache (xem phần “The Swap Cache” trong Chương 17) và khi flag `PG_private` trong page descriptor được set. Tuy nhiên, khi không cần thực hiện COW, page frame được đánh dấu writable để không gây thêm Page Fault exception khi cố ghi:
 
@@ -1159,7 +1159,7 @@ pte_unmap(page_table);
 spin_unlock(&mm->page_table_lock);
 ```
 
-Function `lru_cache_add_active()` chèn page frame mới vào các data structure liên quan đến swap; xem mô tả trong Chương 17.
+Function `lru_cache_add_active()` chèn page frame mới vào các data structure swap-related; xem mô tả trong Chương 17.
 
 Cuối cùng, `do_wp_page()` giảm usage counter của `old_page` hai lần. Lần giảm đầu hoàn tác lần tăng để đảm bảo an toàn trước khi sao chép nội dung page frame; lần giảm thứ hai phản ánh process hiện tại không còn sở hữu page frame.
 
@@ -1242,7 +1242,7 @@ tsk->mm->def_flags = 0;
 
 Nhớ rằng macro `pgd_alloc()` cấp phát Page Global Directory cho process mới.
 
-Sau đó, function phụ thuộc kiến trúc `init_new_context()` được gọi: khi xử lý processor 80×86, function kiểm tra process hiện tại có sở hữu Local Descriptor Table tùy chỉnh không; nếu có, `init_new_context()` sao chép Local Descriptor Table của `current` và thêm vào address space của `tsk`.
+Sau đó, function architecture-dependent `init_new_context()` được gọi: khi xử lý processor 80×86, function kiểm tra process hiện tại có sở hữu Local Descriptor Table tùy chỉnh không; nếu có, `init_new_context()` sao chép Local Descriptor Table của `current` và thêm vào address space của `tsk`.
 
 Cuối cùng, function `dup_mmap()` được gọi để nhân đôi cả memory region lẫn Page Table của parent process. Function này chèn memory descriptor mới `tsk->mm` vào global list memory descriptor. Sau đó, nó quét list region thuộc parent process, bắt đầu từ region được `current-> mm->mmap` trỏ đến. Nó nhân đôi mỗi memory region descriptor `vm_area_struct` gặp phải và chèn bản sao vào list region và red-black tree thuộc child process.
 

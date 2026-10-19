@@ -26,7 +26,7 @@ Cho phép các process trên các máy tính khác nhau trao đổi dữ liệu 
 
 ## Pipe
 
-Pipe là cơ chế giao tiếp giữa các process được cung cấp trong mọi biến thể Unix. Pipe là luồng dữ liệu một chiều giữa các process: mọi dữ liệu mà một process ghi vào pipe đều được kernel chuyển đến một process khác, nhờ đó process này có thể đọc dữ liệu.
+Pipe là cơ chế giao tiếp giữa các process được cung cấp trong mọi biến thể Unix. Pipe là luồng dữ liệu one-way giữa các process: mọi dữ liệu mà một process ghi vào pipe đều được kernel chuyển đến một process khác, nhờ đó process này có thể đọc dữ liệu.
 
 Trong các command shell Unix, có thể tạo pipe bằng toán tử `|`. Chẳng hạn, câu lệnh sau yêu cầu shell tạo hai process được nối với nhau bằng một pipe:
 
@@ -53,9 +53,9 @@ Lệnh thứ nhất chuyển hướng đầu ra của ls vào một regular file
 
 Có thể xem pipe là các file đang mở không có image tương ứng trong các filesystem đã mount. Một process tạo pipe mới bằng system call `pipe()`, trả về một cặp file descriptor; sau đó process có thể truyền các descriptor này cho các process hậu duệ qua `fork()`, qua đó chia sẻ pipe với chúng. Các process có thể đọc từ pipe bằng system call `read()` với file descriptor thứ nhất; tương tự, chúng có thể ghi vào pipe bằng system call `write()` với file descriptor thứ hai.
 
-POSIX chỉ định nghĩa half-duplex pipe, vì vậy dù system call `pipe()` trả về hai file descriptor, mỗi process phải đóng một descriptor trước khi dùng descriptor còn lại. Nếu cần luồng dữ liệu hai chiều, các process phải dùng hai pipe khác nhau bằng cách gọi `pipe()` hai lần.
+POSIX chỉ định nghĩa half-duplex pipe, vì vậy dù system call `pipe()` trả về hai file descriptor, mỗi process phải đóng một descriptor trước khi dùng descriptor còn lại. Nếu cần luồng dữ liệu two-way, các process phải dùng hai pipe khác nhau bằng cách gọi `pipe()` hai lần.
 
-Một số hệ thống Unix, chẳng hạn System V Release 4, triển khai full-duplex pipe. Trong full-duplex pipe, cả hai descriptor đều có thể được ghi và đọc, nên có hai kênh thông tin hai chiều. Linux áp dụng một cách tiếp cận khác nữa: các file descriptor của mỗi pipe vẫn là một chiều, nhưng không cần đóng một descriptor trước khi dùng descriptor còn lại.
+Một số hệ thống Unix, chẳng hạn System V Release 4, triển khai full-duplex pipe. Trong full-duplex pipe, cả hai descriptor đều có thể được ghi và đọc, nên có hai kênh thông tin hai chiều. Linux áp dụng một cách tiếp cận khác nữa: các file descriptor của mỗi pipe vẫn là one-way, nhưng không cần đóng một descriptor trước khi dùng descriptor còn lại.
 
 Hãy trở lại ví dụ trước. Khi command shell diễn giải câu lệnh `ls|more`, về cơ bản nó thực hiện các hành động sau:
 
@@ -83,7 +83,7 @@ Child process thứ hai phải thực thi chương trình more; vì vậy, nó t
 
 Trong ví dụ đơn giản này, pipe được đúng hai process sử dụng. Tuy nhiên, do cách triển khai của nó, một pipe có thể được số lượng process tùy ý sử dụng.[^1] Rõ ràng, nếu hai hoặc nhiều process đọc hay ghi cùng một pipe, chúng phải đồng bộ hóa rõ ràng các truy cập bằng file locking (xem phần “File Locking trong Linux” ở Chương 12) hoặc IPC semaphore (xem phần “IPC Semaphore” ở phía sau chương này).
 
-Ngoài system call `pipe()`, nhiều hệ thống Unix cung cấp hai wrapper function tên là `popen()` và `pclose()` xử lý toàn bộ công việc phức tạp thường phải làm khi dùng pipe. Khi pipe đã được tạo bằng hàm `popen()`, có thể dùng nó với các hàm I/O cấp cao có trong thư viện C (`fprintf()`, `fscanf()`, v.v.
+Ngoài system call `pipe()`, nhiều hệ thống Unix cung cấp hai wrapper function tên là `popen()` và `pclose()` xử lý toàn bộ công việc phức tạp thường phải làm khi dùng pipe. Khi pipe đã được tạo bằng hàm `popen()`, có thể dùng nó với các hàm I/O high-level có trong thư viện C (`fprintf()`, `fscanf()`, v.v.
 
 Trong Linux, `popen()` và `pclose()` nằm trong thư viện C. Hàm `popen()` nhận hai tham số: pathname `filename` của một executable file và chuỗi `type` chỉ định hướng truyền dữ liệu. Nó trả về con trỏ đến cấu trúc dữ liệu `FILE`. Về cơ bản, hàm `popen()` thực hiện các thao tác sau:
 
@@ -154,9 +154,9 @@ Field `ops` trỏ đến bảng `anon_pipe_buf_ops` chứa các method của pip
 
 `release`
 
-Được gọi khi một pipe buffer đang được giải phóng. Method này triển khai một memory cache gồm một page: page frame được giải phóng không phải page frame lưu buffer, mà là page frame được cache do field `tmp_page` của cấu trúc dữ liệu `pipe_inode_info` trỏ đến (nếu không phải `NULL`). Page frame từng lưu buffer trở thành page frame được cache mới.
+Được gọi khi một pipe buffer đang được giải phóng. Method này triển khai một memory cache gồm one-page: page frame được giải phóng không phải page frame lưu buffer, mà là page frame được cache do field `tmp_page` của cấu trúc dữ liệu `pipe_inode_info` trỏ đến (nếu không phải `NULL`). Page frame từng lưu buffer trở thành page frame được cache mới.
 
-Có thể xem 16 pipe buffer là một circular buffer toàn cục: các process ghi liên tục thêm dữ liệu vào buffer lớn này, trong khi process đọc liên tục lấy dữ liệu ra. Số byte hiện được ghi trong tất cả pipe buffer nhưng chưa được đọc được gọi là kích thước pipe. Vì lý do hiệu quả, dữ liệu chưa đọc có thể trải trên nhiều pipe buffer chỉ được điền một phần: thực tế, mỗi thao tác ghi có thể sao chép dữ liệu vào một pipe buffer mới, rỗng nếu pipe buffer trước không đủ chỗ trống để lưu dữ liệu mới. Do đó, kernel phải theo dõi:
+Có thể xem 16 pipe buffer là một circular buffer toàn cục: các process ghi liên tục thêm dữ liệu vào buffer lớn này, trong khi process đọc liên tục lấy dữ liệu ra. Số byte hiện được ghi trong tất cả pipe buffer nhưng chưa được đọc là so-called kích thước pipe. Vì lý do hiệu quả, dữ liệu chưa đọc có thể trải trên nhiều pipe buffer chỉ được điền một phần: thực tế, mỗi thao tác ghi có thể sao chép dữ liệu vào một pipe buffer mới, rỗng nếu pipe buffer trước không đủ chỗ trống để lưu dữ liệu mới. Do đó, kernel phải theo dõi:
 
 - Pipe buffer chứa byte tiếp theo cần đọc và offset tương ứng trong page frame. Chỉ số pipe buffer này được lưu trong field `curbuf` của cấu trúc dữ liệu `pipe_inode_info`, còn offset được lưu trong field `offset` của object `pipe_buffer` tương ứng.
 
@@ -357,7 +357,7 @@ Tiêu chuẩn POSIX quy định hành vi của system call `open()` trên FIFO; 
 
 Một process có thể mở FIFO để đọc, ghi hoặc cả đọc lẫn ghi. Các file operations gắn với file object tương ứng được đặt thành các method đặc biệt cho ba trường hợp này.
 
-Khi một process mở FIFO, VFS thực hiện các thao tác giống như với device file (xem phần “VFS xử lý Device File” ở Chương 13). Inode object gắn với FIFO đang mở được khởi tạo bởi superblock method `read_inode` phụ thuộc filesystem; method này luôn kiểm tra inode trên đĩa có biểu diễn một special file hay không và gọi hàm `init_special_inode()` nếu cần. Đến lượt mình, hàm này đặt field `i_fop` của inode object bằng địa chỉ bảng `def_fifo_fops`. Sau đó, kernel đặt file operation table của file object thành `def_fifo_fops`, rồi thực thi method `open` của nó, được triển khai bởi `fifo_open()`.
+Khi một process mở FIFO, VFS thực hiện các thao tác giống như với device file (xem phần “VFS xử lý Device File” ở Chương 13). Inode object gắn với FIFO đang mở được khởi tạo bởi superblock method `read_inode` filesystem-dependent; method này luôn kiểm tra inode trên đĩa có biểu diễn một special file hay không và gọi hàm `init_special_inode()` nếu cần. Đến lượt mình, hàm này đặt field `i_fop` của inode object bằng địa chỉ bảng `def_fifo_fops`. Sau đó, kernel đặt file operation table của file object thành `def_fifo_fops`, rồi thực thi method `open` của nó, được triển khai bởi `fifo_open()`.
 
 Hàm `fifo_open()` khởi tạo các cấu trúc dữ liệu riêng của FIFO; cụ thể, nó thực hiện các thao tác sau:
 
@@ -371,13 +371,13 @@ Bảng 19-5. File operations của FIFO
 
 | Loại truy cập | File operations | Read method | Write method |
 |---|---|---|---|
-| Chỉ đọc | `read_fifo_fops` | `pipe_read()` | `bad_pipe_w()` |
-| Chỉ ghi | `write_fifo_fops` | `bad_pipe_r()` | `pipe_write()` |
+| Read-only | `read_fifo_fops` | `pipe_read()` | `bad_pipe_w()` |
+| Write-only | `write_fifo_fops` | `bad_pipe_r()` | `pipe_write()` |
 | Đọc/ghi | `rdwr_fifo_fops` | `pipe_read()` | `pipe_write()` |
 
-4\. Nếu access mode là chỉ đọc hoặc đọc/ghi, cộng một vào các field `readers` và `r_counter` của cấu trúc `pipe_inode_info`. Ngoài ra, nếu access mode là chỉ đọc và không có process đọc nào khác, đánh thức mọi process ghi đang sleep trong wait queue.
+4\. Nếu access mode là read-only hoặc đọc/ghi, cộng một vào các field `readers` và `r_counter` của cấu trúc `pipe_inode_info`. Ngoài ra, nếu access mode là read-only và không có process đọc nào khác, đánh thức mọi process ghi đang sleep trong wait queue.
 
-5\. Nếu access mode là chỉ ghi hoặc đọc/ghi, cộng một vào các field `writers` và `w_counter` của cấu trúc `pipe_inode_info`. Ngoài ra, nếu access mode là chỉ ghi và không có process ghi nào khác, đánh thức mọi process đọc đang sleep trong wait queue.
+5\. Nếu access mode là write-only hoặc đọc/ghi, cộng một vào các field `writers` và `w_counter` của cấu trúc `pipe_inode_info`. Ngoài ra, nếu access mode là write-only và không có process ghi nào khác, đánh thức mọi process đọc đang sleep trong wait queue.
 
 6\. Nếu không có reader hoặc không có writer, quyết định hàm nên block hay kết thúc với error code (xem Bảng 19-6).
 
@@ -385,10 +385,10 @@ Bảng 19-6. Hành vi của hàm fifo\_open()
 
 | Loại truy cập | Blocking | Nonblocking |
 |---|---|---|
-| Chỉ đọc, có writer | Trả về thành công | Trả về thành công |
-| Chỉ đọc, không có writer | Chờ một writer | Trả về thành công |
-| Chỉ ghi, có reader | Trả về thành công | Trả về thành công |
-| Chỉ ghi, không có reader | Chờ một reader | Trả về `-ENXIO` |
+| Read-only, có writer | Trả về thành công | Trả về thành công |
+| Read-only, không có writer | Chờ một writer | Trả về thành công |
+| Write-only, có reader | Trả về thành công | Trả về thành công |
+| Write-only, không có reader | Chờ một reader | Trả về `-ENXIO` |
 | Đọc/ghi | Trả về thành công | Trả về thành công |
 
 7\. Release inode semaphore và kết thúc, trả về 0 (thành công).
@@ -588,7 +588,7 @@ Hình 19-1 minh họa một IPC semaphore có ba yêu cầu đang chờ. Yêu c�
 
 Các process có thể giao tiếp với nhau bằng IPC message. Mỗi message do process tạo ra được gửi đến một IPC message queue, nơi nó ở lại cho đến khi process khác đọc.
 
-Message gồm một header có kích thước cố định và text có độ dài thay đổi; nó có thể được gắn nhãn bằng một giá trị số nguyên (message type), cho phép process lấy có chọn lọc các message từ message queue của nó.[^8] Sau khi process đọc message từ IPC message queue, kernel hủy message đó; vì vậy, chỉ một process có thể nhận một message nhất định.
+Message gồm một header có fixed-size và text có variable-length; nó có thể được gắn nhãn bằng một giá trị số nguyên (message type), cho phép process lấy có chọn lọc các message từ message queue của nó.[^8] Sau khi process đọc message từ IPC message queue, kernel hủy message đó; vì vậy, chỉ một process có thể nhận một message nhất định.
 
 Để gửi message, process gọi hàm `msgsnd()`, truyền các tham số sau:
 
@@ -735,7 +735,7 @@ Hàm `do_no_page()` đặt entry tương ứng với địa chỉ gây lỗi tro
 
 Tiêu chuẩn POSIX (IEEE Std 1003.1-2001) định nghĩa một cơ chế IPC dựa trên message queue, thường được biết đến là POSIX message queue. Chúng rất giống message queue của System V IPC đã được xem xét trong phần “IPC Message” trước đó ở chương này. Tuy nhiên, POSIX message queue có một số ưu điểm so với các queue cũ:
 
-- Interface dựa trên file đơn giản hơn nhiều cho ứng dụng
+- Interface file-based đơn giản hơn nhiều cho ứng dụng
 
 - Hỗ trợ native cho message priority (priority cuối cùng quyết định vị trí của message trong queue)
 

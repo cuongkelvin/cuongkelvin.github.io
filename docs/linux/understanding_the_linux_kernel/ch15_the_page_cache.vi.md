@@ -114,7 +114,7 @@ Trong Linux, file có thể rất lớn, thậm chí vài terabyte. Khi truy c�
 
 Field `page_tree` của object `address_space` là root của radix tree, chứa pointer đến descriptor của page của owner. Với page index biểu thị vị trí page trong disk image của owner, kernel có thể lookup rất nhanh để xác định page cần thiết đã trong page cache chưa. Khi tra cứu page, kernel diễn giải index thành path trong radix tree và nhanh chóng đến vị trí page descriptor được—hoặc nên được—lưu. Nếu tìm thấy, kernel lấy descriptor của page từ radix tree; còn có thể nhanh chóng xác định page dirty không (tức cần flush disk) và I/O transfer cho dữ liệu của page hiện có đang diễn ra không.
 
-Mỗi node của radix tree có thể có tối đa 64 pointer đến node khác hoặc page descriptor. Node ở cấp cuối lưu pointer đến page descriptor (leaf), còn node cấp cao hơn lưu pointer đến node khác (child). Mỗi node được biểu diễn bằng data structure `radix_tree_node`, chứa ba field: `slots` là array 64 pointer, `count` là counter số pointer trong node khác `NULL`, và `tags` là array flag hai thành phần sẽ bàn trong phần “The Tags of the Radix Tree” ở phần sau chương này. Root của tree được biểu diễn bằng data structure `radix_tree_root`, có ba field: `height` biểu thị chiều cao hiện tại của tree (số cấp không tính leaf), `gfp_mask` chỉ định flag dùng khi yêu cầu memory cho node mới, và `rnode` trỏ đến data structure `radix_tree_node` tương ứng node ở cấp 1 của tree (nếu có).
+Mỗi node của radix tree có thể có tối đa 64 pointer đến node khác hoặc page descriptor. Node ở cấp cuối lưu pointer đến page descriptor (leaf), còn node cấp cao hơn lưu pointer đến node khác (child). Mỗi node được biểu diễn bằng data structure `radix_tree_node`, chứa ba field: `slots` là array 64 pointer, `count` là counter số pointer trong node khác `NULL`, và `tags` là array flag two-component sẽ bàn trong phần “The Tags of the Radix Tree” ở phần sau chương này. Root của tree được biểu diễn bằng data structure `radix_tree_root`, có ba field: `height` biểu thị chiều cao hiện tại của tree (số cấp không tính leaf), `gfp_mask` chỉ định flag dùng khi yêu cầu memory cho node mới, và `rnode` trỏ đến data structure `radix_tree_node` tương ứng node ở cấp 1 của tree (nếu có).
 
 Hãy xét ví dụ đơn giản. Nếu không index nào lưu trong tree lớn hơn 63, tree height bằng một vì cả 64 leaf có thể đều lưu trong node ở cấp 1 (xem Hình 15-1(a)). Tuy nhiên, nếu page descriptor mới tương ứng index 131 phải lưu trong page cache, tree height tăng lên hai để radix tree xác định được index đến 4095 (xem Hình 15-1(b)).
 
@@ -136,7 +136,7 @@ Bảng 15-3. Index lớn nhất và maximum file size cho mỗi radix tree heigh
 | `5` | 230 -1 = 1 073 741 823 | 4 terabyte |
 | `6` | 232 -1 = 4 294 967 295 | 16 terabyte |
 
-Cách tốt nhất hiểu page lookup là nhớ lại cách paging system dùng page table chuyển linear address thành physical address. Như bàn trong phần “Regular Paging” ở Chương 2, 20 bit cao nhất của linear address chia thành hai field dài 10 bit: field đầu là offset trong Page Directory, còn field thứ hai là offset trong Page Table được Page Directory entry thích hợp trỏ đến.
+Cách tốt nhất hiểu page lookup là nhớ lại cách paging system dùng page table chuyển linear address thành physical address. Như bàn trong phần “Regular Paging” ở Chương 2, 20 bit cao nhất của linear address chia thành hai field dài 10-bit: field đầu là offset trong Page Directory, còn field thứ hai là offset trong Page Table được Page Directory entry thích hợp trỏ đến.
 
 Radix tree dùng cách tương tự. Tương đương linear address là index của page. Tuy nhiên, số field cần xét trong index của page phụ thuộc height của radix tree. Nếu radix tree height 1, chỉ biểu diễn được index từ 0 đến 63, nên 6 bit thấp nhất của index của page được diễn giải là array index `slots` cho node duy nhất ở cấp 1. Nếu radix tree height 2, index biểu diễn được từ 0 đến 4095; do đó 12 bit thấp nhất của index của page chia thành 2 field, mỗi field 6 bit; field cao dùng làm array index cho node ở cấp 1, còn field thấp dùng làm array index cho node ở cấp 2. Procedure tương tự cho mọi height khác của radix tree. Nếu height bằng 6, 2 bit cao nhất của index của page là array index cho node ở cấp 1, 6 bit tiếp là array index cho node ở cấp 2, v.v. đến 6 bit thấp nhất là array index cho node ở cấp 6.
 
@@ -144,7 +144,7 @@ Nếu index lớn nhất của radix tree nhỏ hơn index của page cần thê
 
 ### Function xử lý page cache
 
-High-level function cơ bản dùng page cache gồm tìm, thêm và loại page. Function khác dựa trên các function trước đảm bảo cache chứa phiên bản cập nhật của page cho trước.
+high-level function cơ bản dùng page cache gồm tìm, thêm và loại page. Function khác dựa trên các function trước đảm bảo cache chứa phiên bản up-to-date của page cho trước.
 
 #### Tìm page
 
@@ -202,7 +202,7 @@ c. Trả về pointer đến page descriptor đã loại khỏi tree.
 
 ##### Cập nhật page
 
-Function `read_cache_page()` đảm bảo cache chứa phiên bản cập nhật của page cho trước. Parameter là pointer `mapping` đến object `address_space`, giá trị offset `index` chỉ định page yêu cầu, pointer `filler` đến function đọc dữ liệu page từ disk (thường là function triển khai method `readpage` của address space), và pointer `data` truyền cho function `filler` (thường là `NULL`). Sau đây là mô tả đơn giản hóa những gì function làm:
+Function `read_cache_page()` đảm bảo cache chứa phiên bản up-to-date của page cho trước. Parameter là pointer `mapping` đến object `address_space`, giá trị offset `index` chỉ định page yêu cầu, pointer `filler` đến function đọc dữ liệu page từ disk (thường là function triển khai method `readpage` của address space), và pointer `data` truyền cho function `filler` (thường là `NULL`). Sau đây là mô tả đơn giản hóa những gì function làm:
 
 1\. Gọi `find_get_page()` để kiểm tra page đã ở trong page cache chưa.
 
@@ -326,9 +326,9 @@ Trong trường hợp đầu, descriptor của buffer page được chèn vào r
 
 Trong trường hợp thứ hai, descriptor của buffer page được chèn vào radix tree có root tại object `address_space` của inode trong special filesystem bdev gắn với block device (xem phần “The address\_space Object” trước đó trong chương này). Loại buffer page này phải đáp ứng ràng buộc chặt: mọi block buffer phải tham chiếu block liền kề của block device bên dưới.
 
-Ví dụ hữu ích là khi VFS muốn đọc inode block 1.024 byte chứa inode của file cho trước. Thay vì cấp phát một buffer, kernel phải cấp phát toàn page lưu bốn buffer; các buffer sẽ chứa dữ liệu nhóm bốn block liền kề trên block device, gồm inode block được yêu cầu.
+Ví dụ hữu ích là khi VFS muốn đọc inode block 1,024-byte chứa inode của file cho trước. Thay vì cấp phát một buffer, kernel phải cấp phát toàn page lưu bốn buffer; các buffer sẽ chứa dữ liệu nhóm bốn block liền kề trên block device, gồm inode block được yêu cầu.
 
-Trong chương này, chúng ta tập trung loại buffer page thứ hai, gọi là block device buffer page (đôi khi viết ngắn là blockdev’s page).
+Trong chương này, chúng ta tập trung loại buffer page thứ hai, so-called block device buffer page (đôi khi viết ngắn là blockdev’s page).
 
 Mọi block buffer trong một buffer page phải có cùng kích thước; do đó trên kiến trúc 80×86, buffer page có thể chứa từ một đến tám buffer, tùy block size.
 
@@ -614,7 +614,7 @@ Function `wakeup_bdflush()` được thực thi khi memory khan hiếm hoặc us
 
 Hơn nữa, kernel thread pdflush thực thi callback function `background_writeout()` được đánh thức bởi mọi process sửa nội dung page trong page cache và khiến tỷ lệ dirty page vượt dirty background threshold nào đó. Background threshold thường đặt thành 10% mọi page trong hệ thống, nhưng có thể điều chỉnh bằng cách ghi vào file /proc/sys/vm/dirty\_background\_ ratio.
 
-Function `background_writeout()` dựa vào structure `writeback_control`, đóng vai trò công cụ giao tiếp hai chiều: một mặt chỉ cho auxiliary function tên `writeback_inodes()` cần làm gì; mặt khác lưu thống kê số page ghi vào disk. Các field quan trọng nhất của structure như sau:
+Function `background_writeout()` dựa vào structure `writeback_control`, đóng vai trò công cụ giao tiếp two-way: một mặt chỉ cho auxiliary function tên `writeback_inodes()` cần làm gì; mặt khác lưu thống kê số page ghi vào disk. Các field quan trọng nhất của structure như sau:
 
 `sync_mode`
 

@@ -10,11 +10,11 @@ Có thể phân biệt hai loại đo thời gian chính Linux kernel phải th�
 
 - Duy trì timer — cơ chế có thể thông báo kernel (xem phần “Software timer và delay function” sau) hoặc user program (xem phần “System call setitimer() và alarm()” và “System call cho POSIX timer” sau) rằng khoảng thời gian nhất định đã trôi qua
 
-Phép đo thời gian được thực hiện bởi nhiều hardware circuit dựa trên fixed-frequency oscillator và counter. Chương gồm bốn phần khác nhau. Hai phần đầu mô tả hardware device làm nền tảng timing và cung cấp bức tranh tổng thể Linux timekeeping architecture. Các phần tiếp mô tả nhiệm vụ chính liên quan thời gian của kernel: triển khai CPU time sharing, cập nhật system time và resource usage statistics, duy trì software timer. Phần cuối thảo luận system call liên quan đo thời gian và service routine tương ứng.
+Phép đo thời gian được thực hiện bởi nhiều hardware circuit dựa trên fixed-frequency oscillator và counter. Chương gồm bốn phần khác nhau. Hai phần đầu mô tả hardware device làm nền tảng timing và cung cấp bức tranh tổng thể Linux timekeeping architecture. Các phần tiếp mô tả nhiệm vụ chính time-related của kernel: triển khai CPU time sharing, cập nhật system time và resource usage statistics, duy trì software timer. Phần cuối thảo luận system call liên quan đo thời gian và service routine tương ứng.
 
 ## Clock và timer circuit
 
-Trên architecture 80×86, kernel phải tương tác tường minh với nhiều loại clock và timer circuit. Clock circuit dùng theo dõi current time of day và đo thời gian chính xác. Timer circuit được kernel lập trình để phát interrupt ở tần số cố định định trước; periodic interrupt thiết yếu để triển khai software timer kernel và user program dùng. Giờ mô tả ngắn clock và hardware circuit có trong PC tương thích IBM.
+Trên architecture 80×86, kernel phải tương tác tường minh với nhiều loại clock và timer circuit. Clock circuit dùng theo dõi current time of day và đo thời gian chính xác. Timer circuit được kernel lập trình để phát interrupt ở tần số cố định định trước; periodic interrupt thiết yếu để triển khai software timer kernel và user program dùng. Giờ mô tả ngắn clock và hardware circuit có trong PC IBM-compatible.
 
 ### Real Time Clock (RTC)
 
@@ -36,11 +36,11 @@ Task xác định tần số thực của CPU được thực hiện trong syste
 
 ### Programmable Interval Timer (PIT)
 
-Ngoài Real Time Clock và Time Stamp Counter, PC tương thích IBM có loại device đo thời gian khác gọi là Programmable Interval Timer (PIT). Vai trò PIT tương tự đồng hồ báo thức của lò vi sóng: báo người dùng thời gian nấu đã hết. Thay vì reo chuông, device phát interrupt đặc biệt gọi là timer interrupt, thông báo kernel thêm một khoảng thời gian đã trôi qua.<sup>†</sup> Khác đồng hồ báo thức ở chỗ PIT tiếp tục phát interrupt mãi ở tần số cố định kernel thiết lập. Mỗi PC tương thích IBM có ít nhất một PIT, thường triển khai bằng CMOS chip 8254 dùng I/O port `0x40`–`0x43`.
+Ngoài Real Time Clock và Time Stamp Counter, PC IBM-compatible có loại device time-measuring khác gọi là Programmable Interval Timer (PIT). Vai trò PIT tương tự đồng hồ báo thức của lò vi sóng: báo người dùng thời gian nấu đã hết. Thay vì reo chuông, device phát interrupt đặc biệt gọi là timer interrupt, thông báo kernel thêm một khoảng thời gian đã trôi qua.<sup>†</sup> Khác đồng hồ báo thức ở chỗ PIT tiếp tục phát interrupt mãi ở tần số cố định kernel thiết lập. Mỗi PC IBM-compatible có ít nhất một PIT, thường triển khai bằng CMOS chip 8254 dùng I/O port `0x40`–`0x43`.
 
-Như sẽ thấy chi tiết các đoạn sau, Linux lập trình PIT của PC tương thích IBM phát timer interrupt trên IRQ0 ở tần số (xấp xỉ) 1000 Hz — tức mỗi millisecond một lần. Khoảng này gọi là tick, độ dài theo nanosecond lưu trong variable `tick_nsec`. Trên PC, `tick_nsec` initialize thành 999.848 nanosecond (cho clock signal frequency khoảng 1000,15 Hz), nhưng giá trị có thể được kernel tự điều chỉnh nếu máy tính đồng bộ với external clock (xem phần “System call adjtimex()” sau). Tick đánh nhịp cho mọi hoạt động hệ thống; theo nghĩa nào đó giống tiếng nhịp metronome khi nhạc công tập luyện.
+Như sẽ thấy chi tiết các đoạn sau, Linux lập trình PIT của PC IBM-compatible phát timer interrupt trên IRQ0 ở tần số (xấp xỉ) 1000-Hz — tức mỗi millisecond một lần. Khoảng này gọi là tick, độ dài theo nanosecond lưu trong variable `tick_nsec`. Trên PC, `tick_nsec` initialize thành 999.848 nanosecond (cho clock signal frequency khoảng 1000,15 Hz), nhưng giá trị có thể được kernel tự điều chỉnh nếu máy tính đồng bộ với external clock (xem phần “System call adjtimex()” sau). Tick đánh nhịp cho mọi hoạt động hệ thống; theo nghĩa nào đó giống tiếng nhịp metronome khi nhạc công tập luyện.
 
-Nhìn chung tick ngắn hơn cho timer resolution cao hơn, giúp multimedia playback mượt và response time nhanh hơn khi thực hiện synchronous I/O multiplexing (system call `poll()` và `select()`). Tuy nhiên đây là đánh đổi: tick ngắn hơn đòi CPU dành tỷ lệ thời gian lớn hơn trong Kernel Mode — tức tỷ lệ nhỏ hơn trong User Mode. Kết quả user program chạy chậm hơn.
+Nhìn chung tick ngắn hơn cho timer resolution cao hơn, giúp multimedia playback mượt và response time nhanh hơn khi thực hiện synchronous I/O multiplexing (system call `poll()` và `select()`). Tuy nhiên đây là trade-off: tick ngắn hơn đòi CPU dành tỷ lệ thời gian lớn hơn trong Kernel Mode — tức tỷ lệ nhỏ hơn trong User Mode. Kết quả user program chạy chậm hơn.
 
 Tần số timer interrupt phụ thuộc hardware architecture. Máy chậm có tick khoảng 10 millisecond (100 timer interrupt mỗi giây), máy nhanh có tick khoảng 1 millisecond (1000 hoặc 1024 timer interrupt mỗi giây).
 
@@ -64,11 +64,11 @@ outb(LATCH >> 8, 0x40);
 spin_unlock_irqrestore(&i8253_lock, flags);
 ```
 
-C function `outb()` tương đương assembly language instruction `outb`: sao chép operand đầu vào I/O port chỉ định làm operand thứ hai. Function `outb_p()` tương tự `outb()` nhưng tạo pause bằng thực thi no-op instruction để hardware không nhầm lẫn. Macro `udelay()` tạo thêm delay nhỏ (xem phần “Delay function” sau). Lời gọi `outb_p()` đầu là command cho PIT phát interrupt ở rate mới. Hai lời gọi `outb_p()` và `outb()` tiếp cung cấp interrupt rate mới cho device. Constant `LATCH` 16-bit gửi đến I/O port `0x40` 8-bit của device dưới dạng hai byte liên tiếp. Kết quả PIT phát timer interrupt ở tần số (xấp xỉ) 1000 Hz (tức mỗi 1 ms một lần).
+C function `outb()` tương đương assembly language instruction `outb`: sao chép operand đầu vào I/O port chỉ định làm operand thứ hai. Function `outb_p()` tương tự `outb()` nhưng tạo pause bằng thực thi no-op instruction để hardware không nhầm lẫn. Macro `udelay()` tạo thêm delay nhỏ (xem phần “Delay function” sau). Lời gọi `outb_p()` đầu là command cho PIT phát interrupt ở rate mới. Hai lời gọi `outb_p()` và `outb()` tiếp cung cấp interrupt rate mới cho device. Constant `LATCH` 16-bit gửi đến I/O port `0x40` 8-bit của device dưới dạng hai byte liên tiếp. Kết quả PIT phát timer interrupt ở tần số (xấp xỉ) 1000-Hz (tức mỗi 1 ms một lần).
 
 ### CPU local timer
 
-Local APIC có trong microprocessor 80×86 gần đây (xem phần “Interrupt và exception” trong Chương 4) cung cấp thêm device đo thời gian: CPU local timer.
+Local APIC có trong microprocessor 80×86 gần đây (xem phần “Interrupt và exception” trong Chương 4) cung cấp thêm device time-measuring: CPU local timer.
 
 CPU local timer là device tương tự Programmable Interval Timer vừa mô tả, có thể phát one-shot hoặc periodic interrupt. Tuy nhiên có một vài khác biệt:
 
@@ -80,7 +80,7 @@ CPU local timer là device tương tự Programmable Interval Timer vừa mô t�
 
 ### High Precision Event Timer (HPET)
 
-High Precision Event Timer (HPET) là timer chip mới do Intel và Microsoft cùng phát triển. Dù HPET chưa phổ biến trên máy người dùng cuối, Linux 2.6 đã hỗ trợ nên dành vài lời mô tả đặc điểm.
+High Precision Event Timer (HPET) là timer chip mới do Intel và Microsoft cùng phát triển. Dù HPET chưa phổ biến trên máy end-user, Linux 2.6 đã hỗ trợ nên dành vài lời mô tả đặc điểm.
 
 HPET cung cấp một số hardware timer kernel có thể tận dụng. Về cơ bản chip có tối đa tám counter độc lập 32-bit hoặc 64-bit. Mỗi counter được clock signal riêng điều khiển, tần số ít nhất 10 MHz; vì vậy counter tăng ít nhất một lần trong 100 nanosecond. Mỗi counter gắn với tối đa 32 timer, mỗi timer gồm comparator và match register. Comparator là circuit so giá trị counter với giá trị match register, phát hardware interrupt nếu khớp. Một số timer có thể enable để tạo periodic interrupt.
 
@@ -90,9 +90,9 @@ Thế hệ motherboard tiếp theo có lẽ hỗ trợ cả HPET lẫn 8254 PIT;
 
 ### ACPI Power Management Timer
 
-ACPI Power Management Timer (hay ACPI PMT) là clock device khác trong gần như mọi motherboard dựa trên ACPI. Clock signal có tần số cố định khoảng 3,58 MHz. Device thực tế là counter đơn giản tăng ở mỗi clock tick; để đọc giá trị hiện tại, kernel truy cập I/O port có address BIOS xác định trong initialization phase (xem Phụ lục A).
+ACPI Power Management Timer (hay ACPI PMT) là clock device khác trong gần như mọi motherboard ACPI-based. Clock signal có tần số cố định khoảng 3,58 MHz. Device thực tế là counter đơn giản tăng ở mỗi clock tick; để đọc giá trị hiện tại, kernel truy cập I/O port có address BIOS xác định trong initialization phase (xem Phụ lục A).
 
-ACPI Power Management Timer được ưu tiên hơn TSC nếu hệ điều hành hoặc BIOS có thể hạ động tần số hoặc điện áp CPU để tiết kiệm pin. Khi xảy ra, tần số TSC thay đổi — gây time warp và tác động khó chịu khác — còn tần số ACPI PMT không đổi. Mặt khác tần số cao của TSC counter rất tiện để đo khoảng thời gian rất ngắn.
+ACPI Power Management Timer được ưu tiên hơn TSC nếu hệ điều hành hoặc BIOS có thể hạ động tần số hoặc điện áp CPU để tiết kiệm pin. Khi xảy ra, tần số TSC thay đổi — gây time warp và tác động khó chịu khác — còn tần số ACPI PMT không đổi. Mặt khác high-frequency của TSC counter rất tiện để đo khoảng thời gian rất ngắn.
 
 Tuy nhiên nếu có HPET device, luôn nên ưu tiên hơn circuit khác vì architecture phong phú hơn. Bảng 6-2 sau trong chương minh họa cách Linux tận dụng timing circuit khả dụng.
 
@@ -100,7 +100,7 @@ Giờ đã hiểu hardware timer, có thể thảo luận cách Linux kernel kha
 
 ## Linux timekeeping architecture
 
-Linux phải thực hiện nhiều hoạt động liên quan thời gian. Ví dụ kernel định kỳ:
+Linux phải thực hiện nhiều hoạt động time-related. Ví dụ kernel định kỳ:
 
 - Cập nhật thời gian trôi qua từ system startup.
 
@@ -112,15 +112,15 @@ Linux phải thực hiện nhiều hoạt động liên quan thời gian. Ví d�
 
 - Kiểm tra khoảng thời gian gắn với mỗi software timer (xem phần “Software timer và delay function” sau) đã trôi qua chưa.
 
-Timekeeping architecture của Linux là tập kernel data structure và function liên quan dòng thời gian. Thực tế máy multiprocessor dựa trên 80×86 có timekeeping architecture hơi khác máy uniprocessor:
+Timekeeping architecture của Linux là tập kernel data structure và function liên quan dòng thời gian. Thực tế máy multiprocessor 80×86-based có timekeeping architecture hơi khác máy uniprocessor:
 
-- Trong uniprocessor system, mọi timekeeping activity được interrupt do global timer phát kích hoạt (Programmable Interval Timer hoặc High Precision Event Timer).
+- Trong uniprocessor system, mọi time-keeping activity được interrupt do global timer phát kích hoạt (Programmable Interval Timer hoặc High Precision Event Timer).
 
 - Trong multiprocessor system, mọi general activity (như xử lý software timer) được interrupt do global timer phát kích hoạt, còn CPU-specific activity (như theo dõi execution time của currently running process) được interrupt do local APIC timer phát kích hoạt.
 
 Tiếc là phân biệt hai trường hợp hơi mờ nhạt. Ví dụ một số SMP system đầu dựa trên processor Intel 80486 không có local APIC. Ngay hiện nay vẫn có SMP motherboard nhiều bug đến mức local timer interrupt hoàn toàn không dùng được. Khi đó SMP kernel phải dùng UP timekeeping architecture. Mặt khác uniprocessor system gần đây có một local APIC nên UP kernel thường dùng SMP timekeeping architecture. Tuy nhiên để đơn giản mô tả, không thảo luận trường hợp lai này và theo hai timekeeping architecture “thuần”.
 
-Timekeeping architecture của Linux còn phụ thuộc sự có mặt của Time Stamp Counter (TSC), ACPI Power Management Timer và High Precision Event Timer (HPET). Kernel dùng hai timekeeping function cơ bản: một giữ current time cập nhật và một đếm số nanosecond trôi qua trong current second. Có nhiều cách lấy giá trị sau. Một số method chính xác hơn, khả dụng nếu CPU có Time Stamp Counter hoặc HPET; method kém chính xác hơn dùng trong trường hợp ngược lại (xem phần “System call time() và gettimeofday()” sau).
+Timekeeping architecture của Linux còn phụ thuộc sự có mặt của Time Stamp Counter (TSC), ACPI Power Management Timer và High Precision Event Timer (HPET). Kernel dùng hai timekeeping function cơ bản: một giữ current time up-to-date và một đếm số nanosecond trôi qua trong current second. Có nhiều cách lấy giá trị sau. Một số method chính xác hơn, khả dụng nếu CPU có Time Stamp Counter hoặc HPET; method less-precise dùng trong trường hợp ngược lại (xem phần “System call time() và gettimeofday()” sau).
 
 ### Data structure của timekeeping architecture
 
@@ -142,7 +142,7 @@ Bảng 6-1. Field của data structure timer\_opts
 
 Method quan trọng nhất của timer object là `mark_offset` và `get_offset`. Method `mark_offset` được timer interrupt handler gọi, ghi vào data structure phù hợp thời điểm chính xác tick xảy ra. Dùng giá trị đã lưu, method `get_offset` tính thời gian theo microsecond từ timer interrupt (tick) cuối. Nhờ hai method, Linux timekeeping architecture đạt sub-tick resolution — tức kernel xác định current time với độ chính xác cao hơn nhiều tick duration. Operation này gọi là time interpolation.
 
-Variable `cur_timer` lưu address timer object tương ứng timer source “tốt nhất” có trong hệ thống. Ban đầu `cur_timer` trỏ đến `timer_none`, object tương ứng dummy timer source dùng khi kernel initialize. Trong kernel initialization, function `select_timer()` đặt `cur_timer` thành address timer object phù hợp. Bảng 6-2 cho thấy timer object phổ biến nhất trong architecture 80×86 theo thứ tự ưu tiên. Như thấy, `select_timer()` chọn HPET nếu có; nếu không chọn ACPI Power Management Timer nếu có hoặc TSC. Giải pháp cuối, `select_timer()` chọn PIT luôn có sẵn. Cột “Time interpolation” liệt kê timer source mà method `mark_offset` và `get_offset` của timer object dùng; cột “Delay” liệt kê timer source method `delay` dùng.
+Variable `cur_timer` lưu address timer object tương ứng timer source “tốt nhất” có trong hệ thống. Ban đầu `cur_timer` trỏ đến `timer_none`, object tương ứng dummy timer source dùng khi kernel initialize. Trong kernel initialization, function `select_timer()` đặt `cur_timer` thành address timer object phù hợp. Bảng 6-2 cho thấy timer object phổ biến nhất trong architecture 80×86 theo thứ tự ưu tiên. Như thấy, `select_timer()` chọn HPET nếu có; nếu không chọn ACPI Power Management Timer nếu có hoặc TSC. Giải pháp cuối, `select_timer()` chọn PIT always-present. Cột “Time interpolation” liệt kê timer source mà method `mark_offset` và `get_offset` của timer object dùng; cột “Delay” liệt kê timer source method `delay` dùng.
 
 Bảng 6-2. Timer object điển hình của architecture 80x86 theo thứ tự ưu tiên
 
@@ -164,7 +164,7 @@ Bạn có thể cho rằng `jiffies` initialize thành 0 ở system startup. Th�
 
 Tuy nhiên trong vài trường hợp kernel cần số system tick thực sự từ system boot, bất kể overflow `jiffies`. Vì vậy trên architecture 80×86, linker đồng nhất variable `jiffies` với 32 bit trọng số thấp của counter 64-bit tên `jiffies_64`. Với tick 1 millisecond, variable `jiffies_64` wraparound sau hàng trăm triệu năm nên có thể an tâm giả định không bao giờ overflow.
 
-Bạn có thể thắc mắc tại sao không khai báo trực tiếp `jiffies` là integer `unsigned long long` 64-bit trên architecture 80×86. Vì truy cập variable 64-bit trong architecture 32-bit không thể thực hiện atomically. Do đó mỗi read operation toàn bộ 64 bit cần kỹ thuật synchronization để bảo đảm counter không cập nhật khi đọc hai half-counter 32-bit; kết quả mỗi read operation 64-bit chậm hơn đáng kể read operation 32-bit.
+Bạn có thể thắc mắc tại sao không khai báo trực tiếp `jiffies` là integer `unsigned long long` 64-bit trên architecture 80×86. Vì truy cập variable 64-bit trong architecture 32-bit không thể thực hiện atomically. Do đó mỗi read operation toàn bộ 64 bit cần kỹ thuật synchronization để bảo đảm counter không cập nhật khi đọc hai half-counters 32-bit; kết quả mỗi read operation 64-bit chậm hơn đáng kể read operation 32-bit.
 
 Function `get_jiffies_64()` đọc giá trị `jiffies_64` và return:
 
@@ -203,7 +203,7 @@ Seqlock `xtime_lock` tránh race condition có thể xảy ra do concurrent acce
 
 ### Timekeeping architecture trong uniprocessor system
 
-Trong uniprocessor system, mọi hoạt động liên quan thời gian được interrupt do Programmable Interval Timer phát trên IRQ line 0 kích hoạt. Như thường lệ trong Linux, một số hoạt động thực thi sớm nhất ngay sau interrupt phát, còn hoạt động còn lại do deferrable function thực hiện (xem phần “Dynamic timer” sau).
+Trong uniprocessor system, mọi hoạt động time-related được interrupt do Programmable Interval Timer phát trên IRQ line 0 kích hoạt. Như thường lệ trong Linux, một số hoạt động thực thi sớm nhất ngay sau interrupt phát, còn hoạt động còn lại do deferrable function thực hiện (xem phần “Dynamic timer” sau).
 
 #### Initialization phase
 
@@ -230,7 +230,7 @@ Từ đây function `timer_interrupt()` được gọi mỗi tick một lần v�
 
 Function `timer_interrupt()` là interrupt service routine (ISR) của PIT hoặc HPET; thực hiện:
 
-1\. Bảo vệ kernel variable liên quan thời gian bằng `write_seqlock()` trên seqlock `xtime_lock` (xem phần “Seqlock” trong Chương 5). 2. Thực thi method `mark_offset` của timer object `cur_timer`. Như giải thích trong phần “Data structure của timekeeping architecture” trước, có bốn trường hợp:
+1\. Bảo vệ kernel variable time-related bằng `write_seqlock()` trên seqlock `xtime_lock` (xem phần “Seqlock” trong Chương 5). 2. Thực thi method `mark_offset` của timer object `cur_timer`. Như giải thích trong phần “Data structure của timekeeping architecture” trước, có bốn trường hợp:
 
 a. `cur_timer` trỏ đến object `timer_hpet`: khi đó HPET chip là nguồn timer interrupt. Method `mark_offset` kiểm tra không timer interrupt nào mất từ tick cuối; trong trường hợp hiếm này cập nhật `jiffies_64` tương ứng. Sau đó method ghi giá trị hiện tại periodic HPET counter.
 
@@ -246,7 +246,7 @@ a. Tăng giá trị `jiffies_64` thêm 1. Chú ý làm an toàn vì kernel contr
 
 b. Gọi function `update_times()` cập nhật ngày và giờ hệ thống, tính system load hiện tại; hoạt động này thảo luận sau trong phần “Cập nhật thời gian và ngày” và “Cập nhật system statistics”.
 
-c. Gọi function `update_process_times()` thực hiện nhiều accounting operation liên quan thời gian cho local CPU (xem phần “Cập nhật local CPU statistics” sau trong chương).
+c. Gọi function `update_process_times()` thực hiện nhiều accounting operation time-related cho local CPU (xem phần “Cập nhật local CPU statistics” sau trong chương).
 
 d. Gọi function `profile_tick()` (xem phần “Profiling kernel code” sau trong chương).
 
@@ -295,7 +295,7 @@ apic_timer_interrupt:
     jmp ret_from_intr
 ```
 
-Như thấy, low-level handler rất giống low-level interrupt handler khác đã mô tả trong Chương 4. High-level interrupt handler tên `smp_apic_timer_interrupt()` thực hiện:
+Như thấy, low-level handler rất giống low-level interrupt handler khác đã mô tả trong Chương 4. high-level interrupt handler tên `smp_apic_timer_interrupt()` thực hiện:
 
 1\. Lấy CPU logical number (giả sử n).
 
@@ -344,7 +344,7 @@ Function `calc_load()` mô tả trong phần “Theo dõi system load” sau tro
 
 ## Cập nhật system statistics
 
-Bên cạnh nhiệm vụ liên quan thời gian khác, kernel phải định kỳ thu thập các data dùng cho:
+Bên cạnh nhiệm vụ time-related khác, kernel phải định kỳ thu thập các data dùng cho:
 
 - Kiểm tra CPU resource limit của running process
 
@@ -370,7 +370,7 @@ d. Cập nhật một số kernel statistics lưu trong per-CPU variable `kstat`
 
 2\. Gọi `raise_softirq()` activate tasklet `TIMER_SOFTIRQ` trên local CPU (xem phần “Software timer và delay function” sau trong chương).
 
-3\. Nếu phải reclaim phiên bản cũ nào đó của RCU-protected data structure, kiểm tra local CPU đã đi qua quiescent state chưa và gọi `tasklet_schedule()` activate tasklet `rcu_tasklet` của local CPU (xem phần “Read-copy update (RCU)” trong Chương 5).
+3\. Nếu phải reclaim phiên bản cũ nào đó của RCU-protected data structure, kiểm tra local CPU đã đi qua quiescent state chưa và gọi `tasklet_schedule()` activate tasklet `rcu_tasklet` của local CPU (xem phần “Read-Copy update (RCU)” trong Chương 5).
 
 4\. Gọi function `scheduler_tick()`, giảm time slice counter của current process và kiểm tra quantum đã hết chưa. Thảo luận sâu các operation trong phần “Function scheduler\_tick()” của Chương 7.
 
@@ -436,7 +436,7 @@ struct timer_list {
 };
 ```
 
-Field `function` chứa address function cần thực thi khi timer expire. Field `data` chỉ định parameter truyền cho timer function này. Nhờ field `data`, có thể định nghĩa một general-purpose function xử lý time-out của nhiều device driver; field `data` có thể lưu device ID hoặc data có ý nghĩa khác để function phân biệt device.
+Field `function` chứa address function cần thực thi khi timer expire. Field `data` chỉ định parameter truyền cho timer function này. Nhờ field `data`, có thể định nghĩa một general-purpose function xử lý time-outs của nhiều device driver; field `data` có thể lưu device ID hoặc data có ý nghĩa khác để function phân biệt device.
 
 Field `expires` chỉ định khi nào timer expire; thời gian biểu diễn bằng số tick trôi qua từ system startup. Mọi timer có giá trị `expires` nhỏ hơn hoặc bằng giá trị `jiffies` được xem là expired hoặc decayed.
 
@@ -479,7 +479,7 @@ Tuy nhiên trong multiprocessor system, code không an toàn vì timer function 
 
 Function `del_timer_sync()` khá phức tạp và chậm vì phải xét cẩn thận trường hợp timer function tự reactivate. Nếu kernel developer biết timer function không bao giờ reactivate timer, có thể dùng function `del_singleshot_timer_sync()` đơn giản và nhanh hơn để deactivate timer và chờ timer function kết thúc.
 
-Tất nhiên có race condition loại khác. Ví dụ cách đúng sửa field `expires` của timer đã activate là dùng `mod_timer()` thay vì xóa timer rồi tạo lại. Trong cách sau, hai kernel control path muốn sửa field `expires` của cùng timer có thể gây lẫn lộn nghiêm trọng. Triển khai timer function được làm SMP-safe bằng spin lock `lock` trong mỗi object `timer_list`: mỗi khi kernel phải truy cập dynamic timer, disable interrupt và acquire spin lock này.
+Tất nhiên có race condition loại khác. Ví dụ cách đúng sửa field `expires` của timer đã activate là dùng `mod_timer()` thay vì xóa timer rồi re-creating. Trong cách sau, hai kernel control path muốn sửa field `expires` của cùng timer có thể gây lẫn lộn nghiêm trọng. Triển khai timer function được làm SMP-safe bằng spin lock `lock` trong mỗi object `timer_list`: mỗi khi kernel phải truy cập dynamic timer, disable interrupt và acquire spin lock này.
 
 ##### Data structure cho dynamic timer
 
@@ -518,7 +518,7 @@ Trong multiprocessor system, field `running_timer` trỏ đến structure `timer
 
 ##### Xử lý dynamic timer
 
-Dù data structure thông minh, xử lý software timer là hoạt động tốn thời gian không nên do timer interrupt handler thực hiện. Trong Linux 2.6, hoạt động do deferrable function, cụ thể softirq `TIMER_SOFTIRQ`, thực hiện.
+Dù data structure thông minh, xử lý software timer là hoạt động time-consuming không nên do timer interrupt handler thực hiện. Trong Linux 2.6, hoạt động do deferrable function, cụ thể softirq `TIMER_SOFTIRQ`, thực hiện.
 
 Function `run_timer_softirq()` là deferrable function gắn với softirq `TIMER_SOFTIRQ`. Về cơ bản thực hiện:
 
@@ -587,7 +587,7 @@ remaining = schedule_timeout(timespec_to_jiffies(&t)+1);
 
 Function `timespec_to_jiffies()` chuyển khoảng thời gian lưu trong structure `timespec` sang tick. Để an toàn `sys_nanosleep()` cộng một tick vào giá trị `timespec_to_jiffies()` tính.
 
-Kernel triển khai process time-out bằng dynamic timer. Xuất hiện trong function `schedule_timeout()`, về cơ bản thực thi statement sau:
+Kernel triển khai process time-outs bằng dynamic timer. Xuất hiện trong function `schedule_timeout()`, về cơ bản thực thi statement sau:
 
 ```c
 struct timer_list timer;
@@ -726,7 +726,7 @@ Chú ý cả hai system call sửa giá trị `xtime` nhưng không đổi RTC r
 
 ### System call adjtimex()
 
-Dù clock drift khiến mọi hệ thống cuối cùng lệch giờ đúng, đổi thời gian đột ngột vừa phiền về quản trị vừa rủi ro. Ví dụ hình dung lập trình viên cố build chương trình lớn và dựa vào file timestamp bảo đảm object file lỗi thời được recompile. Thay đổi lớn system time có thể khiến chương trình `make` nhầm lẫn và build sai. Giữ clock chính xác cũng quan trọng khi triển khai distributed filesystem trên network máy tính. Khi đó nên điều chỉnh clock các PC nối nhau để timestamp value gắn với inode của file được truy cập nhất quán. Vì vậy hệ thống thường được configure chạy time synchronization protocol như Network Time Protocol (NTP) định kỳ để đổi thời gian từ từ ở mỗi tick. Utility này phụ thuộc system call `adjtimex()` trong Linux.
+Dù clock drift khiến mọi hệ thống cuối cùng lệch giờ đúng, đổi thời gian đột ngột vừa phiền về quản trị vừa rủi ro. Ví dụ hình dung lập trình viên cố build chương trình lớn và dựa vào file timestamp bảo đảm object file out-of-date được recompile. Thay đổi lớn system time có thể khiến chương trình `make` nhầm lẫn và build sai. Giữ clock chính xác cũng quan trọng khi triển khai distributed filesystem trên network máy tính. Khi đó nên điều chỉnh clock các PC nối nhau để timestamp value gắn với inode của file được truy cập nhất quán. Vì vậy hệ thống thường được configure chạy time synchronization protocol như Network Time Protocol (NTP) định kỳ để đổi thời gian từ từ ở mỗi tick. Utility này phụ thuộc system call `adjtimex()` trong Linux.
 
 System call có trong nhiều biến thể Unix nhưng không nên dùng trong chương trình hướng đến portability. Nhận parameter là pointer đến structure `timex`, cập nhật kernel parameter từ giá trị trong field `timex`, return cùng structure với kernel value hiện tại. Các kernel value được `update_wall_time_one_tick()` dùng điều chỉnh nhẹ số microsecond cộng vào `xtime. tv_usec` mỗi tick.
 

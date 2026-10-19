@@ -14,7 +14,7 @@ Lập trình viên thường nói memory address là cách truy cập nội dung
 
 Logical address
 
-Nằm trong machine language instruction để chỉ định address của operand hoặc instruction. Loại address này thể hiện segmented architecture 80×86 quen thuộc, buộc lập trình viên MS-DOS và Windows chia chương trình thành segment. Mỗi logical address gồm segment và offset (hay displacement) biểu thị khoảng cách từ đầu segment đến address thực tế.
+Nằm trong machine language instruction để chỉ định address của operand hoặc instruction. Loại address này thể hiện segmented architecture 80×86 well-known, buộc lập trình viên MS-DOS và Windows chia chương trình thành segment. Mỗi logical address gồm segment và offset (hay displacement) biểu thị khoảng cách từ đầu segment đến address thực tế.
 
 Linear address (còn gọi là virtual address)
 
@@ -30,7 +30,7 @@ Memory Management Unit (MMU) biến logical address thành linear address bằng
 
 Hình 2-1. Chuyển đổi logical address
 
-Trong multiprocessor system, mọi CPU thường chia sẻ cùng memory; nghĩa là RAM chip có thể được các CPU độc lập truy cập đồng thời. Vì read hoặc write operation trên RAM chip phải thực hiện tuần tự, hardware circuit gọi là memory arbiter được đặt giữa bus và mỗi RAM chip. Vai trò là cấp quyền truy cập cho CPU nếu chip rảnh và trì hoãn nếu chip bận phục vụ request từ processor khác. Ngay cả uniprocessor system cũng dùng memory arbiter vì có processor chuyên dụng gọi là DMA controller hoạt động đồng thời với CPU (xem phần “Direct Memory Access (DMA)” trong Chương 13). Với multiprocessor system, cấu trúc arbiter phức tạp hơn vì có nhiều input port hơn. Ví dụ, dual Pentium duy trì arbiter hai port ở đầu vào mỗi chip và yêu cầu hai CPU trao đổi synchronization message trước khi cố dùng bus chung. Từ góc nhìn lập trình, arbiter được che giấu vì do hardware circuit quản lý.
+Trong multiprocessor system, mọi CPU thường chia sẻ cùng memory; nghĩa là RAM chip có thể được các CPU độc lập truy cập đồng thời. Vì read hoặc write operation trên RAM chip phải thực hiện tuần tự, hardware circuit gọi là memory arbiter được đặt giữa bus và mỗi RAM chip. Vai trò là cấp quyền truy cập cho CPU nếu chip rảnh và trì hoãn nếu chip bận phục vụ request từ processor khác. Ngay cả uniprocessor system cũng dùng memory arbiter vì có processor chuyên dụng gọi là DMA controller hoạt động đồng thời với CPU (xem phần “Direct Memory Access (DMA)” trong Chương 13). Với multiprocessor system, cấu trúc arbiter phức tạp hơn vì có nhiều input port hơn. Ví dụ, dual Pentium duy trì arbiter two-port ở đầu vào mỗi chip và yêu cầu hai CPU trao đổi synchronization message trước khi cố dùng bus chung. Từ góc nhìn lập trình, arbiter được che giấu vì do hardware circuit quản lý.
 
 ## Segmentation trong hardware
 
@@ -211,7 +211,7 @@ Phần lớn Linux User Mode application không dùng Local Descriptor Table, n�
 
 Tuy nhiên, đôi khi process cần thiết lập LDT riêng. Điều này hữu ích với application (như Wine) thực thi segment-oriented Microsoft Windows application. System call `modify_ldt()` cho phép process làm vậy.
 
-Mọi custom LDT tạo bằng `modify_ldt()` cũng cần segment riêng. Khi processor bắt đầu thực thi process có custom LDT, LDT entry trong bản sao GDT riêng của CPU được đổi tương ứng.
+Mọi custom LDT tạo bằng `modify_ldt()` cũng cần segment riêng. Khi processor bắt đầu thực thi process có custom LDT, LDT entry trong bản sao GDT CPU-specific được đổi tương ứng.
 
 User Mode application cũng có thể allocate segment mới bằng `modify_ldt()`; tuy nhiên kernel không bao giờ dùng các segment này và không cần theo dõi Segment Descriptor tương ứng vì chúng nằm trong custom LDT của process.
 
@@ -219,9 +219,9 @@ User Mode application cũng có thể allocate segment mới bằng `modify_ldt(
 
 Paging unit chuyển linear address thành physical address. Một nhiệm vụ chính là kiểm tra access type được yêu cầu so với access right của linear address. Nếu memory access không hợp lệ, nó tạo Page Fault exception (xem Chương 4 và Chương 8).
 
-Để hiệu quả, linear address được nhóm thành khoảng có độ dài cố định gọi là page; các linear address liên tục trong page được map vào physical address liên tục. Bằng cách này, kernel có thể chỉ định physical address và access right của page thay vì của mọi linear address trong đó. Theo quy ước thông thường, chúng ta dùng “page” để chỉ cả tập linear address lẫn data chứa trong nhóm address đó.
+Để hiệu quả, linear address được nhóm thành khoảng có fixed-length gọi là page; các linear address liên tục trong page được map vào physical address liên tục. Bằng cách này, kernel có thể chỉ định physical address và access right của page thay vì của mọi linear address trong đó. Theo quy ước thông thường, chúng ta dùng “page” để chỉ cả tập linear address lẫn data chứa trong nhóm address đó.
 
-Paging unit xem toàn bộ RAM được chia thành page frame độ dài cố định (đôi khi gọi là physical page). Mỗi page frame chứa một page — tức độ dài page frame trùng độ dài page. Page frame là thành phần main memory, vì vậy là storage area. Cần phân biệt page với page frame; page chỉ là block data có thể lưu trong bất kỳ page frame nào hoặc trên disk.
+Paging unit xem toàn bộ RAM được chia thành page frame fixed-length (đôi khi gọi là physical page). Mỗi page frame chứa một page — tức độ dài page frame trùng độ dài page. Page frame là thành phần main memory, vì vậy là storage area. Cần phân biệt page với page frame; page chỉ là block data có thể lưu trong bất kỳ page frame nào hoặc trên disk.
 
 Data structure map linear address sang physical address gọi là page table; được lưu trong main memory và phải được kernel initialize đúng trước khi enable paging unit.
 
@@ -247,7 +247,7 @@ Offset
 
 Chuyển đổi linear address được thực hiện qua hai bước, mỗi bước dựa trên một loại translation table. Translation table đầu gọi là Page Directory, bảng thứ hai gọi là Page Table.[^1]
 
-Mục tiêu mô hình hai cấp này là giảm lượng RAM cần cho Page Table của từng process. Nếu dùng Page Table một cấp đơn giản, cần đến 2<sup>20</sup> entry (tức 4 byte mỗi entry, 4 MB RAM) để biểu diễn Page Table của mỗi process (nếu process dùng toàn bộ linear address space 4 GB), dù process không dùng mọi address trong khoảng đó. Mô hình hai cấp giảm memory bằng cách chỉ yêu cầu Page Table cho virtual memory region process thực sự dùng.
+Mục tiêu mô hình two-level này là giảm lượng RAM cần cho Page Table của per-process. Nếu dùng Page Table one-level đơn giản, cần đến 2<sup>20</sup> entry (tức 4 byte mỗi entry, 4 MB RAM) để biểu diễn Page Table của mỗi process (nếu process dùng toàn bộ linear address space 4 GB), dù process không dùng mọi address trong khoảng đó. Mô hình two-level giảm memory bằng cách chỉ yêu cầu Page Table cho virtual memory region process thực sự dùng.
 
 Mỗi active process phải được cấp Page Directory. Tuy nhiên, không cần allocate RAM cho mọi Page Table của process cùng lúc; chỉ allocate RAM cho Page Table khi process thực sự cần sẽ hiệu quả hơn.
 
@@ -263,7 +263,7 @@ Entry của Page Directory và Page Table có cùng cấu trúc. Mỗi entry g�
 
 Flag `Present`
 
-Nếu được set, page (hoặc Page Table) được tham chiếu nằm trong main memory; nếu flag là 0, page không nằm trong main memory và các bit entry còn lại có thể được hệ điều hành dùng cho mục đích riêng. Nếu entry Page Table hoặc Page Directory cần cho address translation có flag `Present` được clear, paging unit lưu linear address vào control register tên `cr2` và tạo exception 14: Page Fault exception. (Chương 17 sẽ trình bày cách Linux dùng field này.)
+Nếu được set, page (hoặc Page Table) referred-to nằm trong main memory; nếu flag là 0, page không nằm trong main memory và các bit entry còn lại có thể được hệ điều hành dùng cho mục đích riêng. Nếu entry Page Table hoặc Page Directory cần cho address translation có flag `Present` được clear, paging unit lưu linear address vào control register tên `cr2` và tạo exception 14: Page Fault exception. (Chương 17 sẽ trình bày cách Linux dùng field này.)
 
 Field chứa 20 bit trọng số cao nhất của page frame physical address
 
@@ -415,7 +415,7 @@ Tóm lại, sau khi `cr3` được set, có thể address đến 4 GB RAM. Nếu
 
 ### Paging cho architecture 64-bit
 
-Như đã thấy ở các phần trước, two-level paging thường dùng trên microprocessor 32-bit[^3]. Tuy nhiên, two-level paging không phù hợp máy tính dùng architecture 64-bit. Hãy dùng thí nghiệm tư duy để giải thích:
+Như đã thấy ở các phần trước, Two-level paging thường dùng trên microprocessor 32-bit[^3]. Tuy nhiên, two-level paging không phù hợp máy tính dùng architecture 64-bit. Hãy dùng thí nghiệm tư duy để giải thích:
 
 Bắt đầu bằng giả định page size chuẩn 4 KB. Vì 1 KB bao phủ khoảng 2<sup>10</sup> address, 4 KB bao phủ 2<sup>12</sup> address, nên field Offset là 12 bit. Còn đến 52 bit linear address để phân bổ giữa field Table và Directory. Nếu quyết định chỉ dùng 48 trong 64 bit để addressing (hạn chế này vẫn cho address space 256 TB thoải mái!), 48`-`12 = 36 bit còn lại phải chia giữa field Table và Directory. Nếu quyết định dành 18 bit cho mỗi field, cả Page Directory lẫn Page Table của mỗi process phải có 2<sup>18</sup> entry — tức hơn 256.000 entry.
 
@@ -439,7 +439,7 @@ Như sẽ thấy trong phần “Paging trong Linux” sau trong chương, Linux
 
 Microprocessor ngày nay có clock rate vài gigahertz, trong khi dynamic RAM (DRAM) chip có access time hàng trăm clock cycle. Nghĩa là CPU có thể bị chậm đáng kể khi thực thi instruction cần lấy operand từ RAM và/hoặc lưu kết quả vào RAM.
 
-Hardware cache memory được đưa vào để giảm chênh lệch tốc độ giữa CPU và RAM. Chúng dựa trên locality principle quen thuộc, đúng với cả program lẫn data structure. Nguyên lý nói rằng do cấu trúc lặp của program và việc đóng gói data liên quan vào linear array, address gần address vừa dùng có xác suất cao được dùng trong tương lai gần. Vì vậy hợp lý khi đưa vào memory nhỏ hơn, nhanh hơn chứa code và data dùng gần nhất. Để làm vậy, đơn vị mới gọi là line được đưa vào architecture 80×86. Nó gồm vài chục byte liên tục truyền theo burst mode giữa DRAM chậm và on-chip static RAM (SRAM) nhanh dùng triển khai cache.
+Hardware cache memory được đưa vào để giảm chênh lệch tốc độ giữa CPU và RAM. Chúng dựa trên locality principle well-known, đúng với cả program lẫn data structure. Nguyên lý nói rằng do cấu trúc lặp của program và việc đóng gói data liên quan vào linear array, address gần address vừa dùng có xác suất cao được dùng trong tương lai gần. Vì vậy hợp lý khi đưa vào memory nhỏ hơn, nhanh hơn chứa code và data dùng gần nhất. Để làm vậy, đơn vị mới gọi là line được đưa vào architecture 80×86. Nó gồm vài chục byte liên tục truyền theo burst mode giữa DRAM chậm và on-chip static RAM (SRAM) nhanh dùng triển khai cache.
 
 Cache được chia thành subset các line. Ở một cực, cache có thể direct mapped, khi đó line trong main memory luôn được lưu tại đúng cùng vị trí trong cache. Ở cực kia, cache là fully associative, nghĩa là mọi line trong memory có thể được lưu ở bất kỳ vị trí nào trong cache. Nhưng phần lớn cache là N-way set associative ở mức độ nào đó, trong đó mỗi line main memory có thể lưu trong bất kỳ line nào trong N line của cache. Ví dụ, một line memory có thể được lưu ở hai line khác nhau của two-way set associative cache.
 
@@ -622,18 +622,18 @@ Bảng 2-7. Macro thao tác Page Table entry
 | `pgd_index(addr)` | Cho index (vị trí tương đối) của entry trong Page Global Directory map linear address `addr`. |
 | `pgd_offset(mm, addr)` | Nhận parameter là address của memory descriptor `cw` (xem Chương 9) và linear address `addr`. Macro cho linear address của entry trong Page Global Directory tương ứng address `addr`; Page Global Directory được tìm qua pointer trong memory descriptor. |
 | `pgd_offset_k(addr)` | Cho linear address của entry trong master kernel Page Global Directory tương ứng address `addr` (xem phần “Kernel Page Table” sau). |
-| `pgd_page(pgd)` | Cho page descriptor address của page frame chứa Page Upper Directory do Page Global Directory entry `pgd` tham chiếu. Trong hệ thống paging hai hoặc ba cấp, macro tương đương `pud_page()` áp dụng lên folded Page Upper Directory entry. |
-| `pud_offset(pgd, addr)` | Nhận parameter là pointer `pgd` đến Page Global Directory entry và linear address `addr`. Macro cho linear address của entry trong Page Upper Directory tương ứng `addr`. Trong hệ thống paging hai hoặc ba cấp, macro cho `pgd`, address của Page Global Directory entry. |
-| `pud_page(pud)` | Cho linear address của Page Middle Directory do Page Upper Directory entry `pud` tham chiếu. Trong hệ thống paging hai cấp, macro tương đương `pmd_page()` áp dụng lên folded Page Middle Directory entry. |
+| `pgd_page(pgd)` | Cho page descriptor address của page frame chứa Page Upper Directory do Page Global Directory entry `pgd` tham chiếu. Trong hệ thống paging hai hoặc three-level, macro tương đương `pud_page()` áp dụng lên folded Page Upper Directory entry. |
+| `pud_offset(pgd, addr)` | Nhận parameter là pointer `pgd` đến Page Global Directory entry và linear address `addr`. Macro cho linear address của entry trong Page Upper Directory tương ứng `addr`. Trong hệ thống paging hai hoặc three-level, macro cho `pgd`, address của Page Global Directory entry. |
+| `pud_page(pud)` | Cho linear address của Page Middle Directory do Page Upper Directory entry `pud` tham chiếu. Trong hệ thống paging two-level, macro tương đương `pmd_page()` áp dụng lên folded Page Middle Directory entry. |
 | `pmd_index(addr)` | Cho index (vị trí tương đối) của entry trong Page Middle Directory map linear address `addr`. |
-| `pmd_offset(pud, addr)` | Nhận parameter là pointer `pud` đến Page Upper Directory entry và linear address `addr`. Macro cho address của entry trong Page Middle Directory tương ứng `addr`. Trong hệ thống paging hai cấp, cho `pud`, address của Page Global Directory entry. |
-| `pmd_page(pmd)` | Cho page descriptor address của Page Table do Page Middle Directory entry `pmd` tham chiếu. Trong hệ thống paging hai cấp, `pmd` thực chất là entry của Page Global Directory. |
+| `pmd_offset(pud, addr)` | Nhận parameter là pointer `pud` đến Page Upper Directory entry và linear address `addr`. Macro cho address của entry trong Page Middle Directory tương ứng `addr`. Trong hệ thống paging two-level, cho `pud`, address của Page Global Directory entry. |
+| `pmd_page(pmd)` | Cho page descriptor address của Page Table do Page Middle Directory entry `pmd` tham chiếu. Trong hệ thống paging two-level, `pmd` thực chất là entry của Page Global Directory. |
 | `mk_pte(p,prot)` | Nhận parameter là address của page descriptor `p` và nhóm access right `prot`, rồi tạo Page Table entry tương ứng. |
 | `pte_index(addr)` | Cho index (vị trí tương đối) của entry trong Page Table map linear address `addr`. |
 | `pte_offset_kernel(dir, addr)` | Cho linear address của Page Table tương ứng linear address `addr` do Page Middle Directory `dir` map. Chỉ dùng trên master kernel page table (xem phần “Kernel Page Table” sau). |
-| `pte_offset_map(dir, addr)` | Nhận parameter là pointer `dir` đến Page Middle Directory entry và linear address `addr`; cho linear address của entry trong Page Table tương ứng linear address `addr`. Nếu Page Table được giữ trong high memory, kernel thiết lập temporary kernel mapping (xem phần “Kernel mapping của high-memory page frame” trong Chương 8), được release bằng `pte_unmap`. Macro `pte_offset_map_nested` và `pte_unmap_nested` giống hệt nhưng dùng temporary kernel mapping khác. |
+| `pte_offset_map(dir, addr)` | Nhận parameter là pointer `dir` đến Page Middle Directory entry và linear address `addr`; cho linear address của entry trong Page Table tương ứng linear address `addr`. Nếu Page Table được giữ trong High-Memory, kernel thiết lập temporary kernel mapping (xem phần “Kernel mapping của high-memory page frame” trong Chương 8), được release bằng `pte_unmap`. Macro `pte_offset_map_nested` và `pte_unmap_nested` giống hệt nhưng dùng temporary kernel mapping khác. |
 | `pte_page(x)` | Return page descriptor address của page do Page Table entry `x` tham chiếu. |
-| `pte_to_pgoff(pte)` | Trích từ nội dung `pte` của Page Table entry file offset tương ứng page thuộc non-linear file memory mapping (xem phần “Non-linear memory mapping” trong Chương 16). |
+| `pte_to_pgoff(pte)` | Trích từ nội dung `pte` của Page Table entry file offset tương ứng page thuộc non-linear file memory mapping (xem phần “Non-Linear memory mapping” trong Chương 16). |
 | `pgoff_to_pte(offset)` | Thiết lập nội dung Page Table entry cho page thuộc non-linear file memory mapping. |
 
 Nhóm function cuối trong danh sách dài này được đưa vào để đơn giản hóa tạo và xóa page table entry.
@@ -642,7 +642,7 @@ Khi dùng two-level paging, tạo hoặc xóa Page Middle Directory entry rất 
 
 Nếu PAE được enable, kernel dùng three-level paging. Khi kernel tạo Page Global Directory mới, nó cũng allocate bốn Page Middle Directory tương ứng; chúng chỉ được free khi parent Page Global Directory được release.
 
-Khi dùng paging hai hoặc ba cấp, Page Upper Directory entry luôn được map thành entry duy nhất trong Page Global Directory.
+Khi dùng paging hai hoặc three-level, Page Upper Directory entry luôn được map thành entry duy nhất trong Page Global Directory.
 
 Như thường lệ, mô tả function trong Bảng 2-8 tham chiếu architecture 80×86.
 
@@ -652,11 +652,11 @@ Bảng 2-8. Function allocate page
 |---|---|
 | `pgd_alloc(mm)` | Allocate Page Global Directory mới; nếu PAE được enable, cũng allocate ba child Page Middle Directory map User Mode linear address. Argument `mm` (address của memory descriptor) bị bỏ qua trên architecture 80x86. |
 | `pgd_free(pgd)` | Release Page Global Directory tại address `pgd`; nếu PAE được enable, cũng release ba Page Middle Directory map User Mode linear address. |
-| `pud_alloc(mm, pgd, addr)` | Trong hệ thống paging hai hoặc ba cấp, function không làm gì: chỉ return linear address của Page Global Directory entry `pgd`. |
-| `pud_free(x)` | Trong hệ thống paging hai hoặc ba cấp, macro không làm gì. |
+| `pud_alloc(mm, pgd, addr)` | Trong hệ thống paging hai hoặc three-level, function không làm gì: chỉ return linear address của Page Global Directory entry `pgd`. |
+| `pud_free(x)` | Trong hệ thống paging hai hoặc three-level, macro không làm gì. |
 | `pmd_alloc(mm, pud, addr)` | Được định nghĩa để generic three-level paging system có thể allocate Page Middle Directory mới cho linear address `addr`. Nếu PAE không được enable, function chỉ return input parameter `pud` — tức address của entry trong Page Global Directory. Nếu PAE được enable, function return linear address của Page Middle Directory entry map linear address `addr`. Argument `cw` bị bỏ qua. |
 | `pmd_free(x)` | Không làm gì vì Page Middle Directory được allocate và deallocate cùng parent Page Global Directory. |
-| `pte_alloc_map(mm, pmd, addr)` | Nhận parameter là address của Page Middle Directory entry `pmd` và linear address `addr`, return address của Page Table entry tương ứng `addr`. Nếu Page Middle Directory entry là null, function allocate Page Table mới bằng cách gọi `pte_alloc_one()`. Nếu Page Table mới được allocate, entry tương ứng `addr` được initialize và flag `User/Supervisor` được set. Nếu Page Table được giữ trong high memory, kernel thiết lập temporary kernel mapping (xem phần “Kernel mapping của high-memory page frame” trong Chương 8), được release bằng `pte_unmap`. |
+| `pte_alloc_map(mm, pmd, addr)` | Nhận parameter là address của Page Middle Directory entry `pmd` và linear address `addr`, return address của Page Table entry tương ứng `addr`. Nếu Page Middle Directory entry là null, function allocate Page Table mới bằng cách gọi `pte_alloc_one()`. Nếu Page Table mới được allocate, entry tương ứng `addr` được initialize và flag `User/Supervisor` được set. Nếu Page Table được giữ trong High-Memory, kernel thiết lập temporary kernel mapping (xem phần “Kernel mapping của high-memory page frame” trong Chương 8), được release bằng `pte_unmap`. |
 | `pte_alloc_kernel(mm, pmd, addr)` | Nếu Page Middle Directory entry `pmd` gắn với address `addr` là null, function allocate Page Table mới. Sau đó return linear address của Page Table entry gắn với `addr`. Chỉ dùng cho master kernel page table (xem phần “Kernel Page Table” sau). |
 | `pte_free(pte)` | Release Page Table gắn với page descriptor pointer `pte`. |
 | `pte_free_kernel(pte)` | Tương đương `pte_free()` nhưng dùng cho master kernel page table. |
@@ -680,7 +680,7 @@ Tại sao không load kernel bắt đầu từ megabyte RAM khả dụng đầu 
 
 - Page frame 0 được BIOS dùng lưu system hardware configuration phát hiện trong Power-On Self-Test (POST); hơn nữa BIOS của nhiều laptop ghi data lên page frame này ngay cả sau khi hệ thống initialize.
 
-- Physical address từ `0x000a0000` đến `0x000fffff` thường được dành cho BIOS routine và map internal memory của ISA graphic card. Area này là hole quen thuộc từ 640 KB đến 1 MB trong mọi PC tương thích IBM: physical address tồn tại nhưng được reserved và hệ điều hành không thể dùng page frame tương ứng.
+- Physical address từ `0x000a0000` đến `0x000fffff` thường được dành cho BIOS routine và map internal memory của ISA graphic card. Area này là hole well-known từ 640 KB đến 1 MB trong mọi PC IBM-compatible: physical address tồn tại nhưng được reserved và hệ điều hành không thể dùng page frame tương ứng.
 
 - Computer model cụ thể có thể reserve thêm page frame trong megabyte đầu. Ví dụ IBM ThinkPad map page frame `0xa0` vào `0x9f`.
 
@@ -688,7 +688,7 @@ Tại sao không load kernel bắt đầu từ megabyte RAM khả dụng đầu 
 
 Sau đó kernel thực thi function `machine_specific_memory_setup()`, tạo physical address map (xem ví dụ ở Bảng 2-9). Tất nhiên kernel tạo bảng dựa trên BIOS list nếu có; nếu không tạo theo default setup thận trọng: mọi page frame có số từ `0x9f` (`LOWMEMSIZE()`) đến `0x100` (`HIGH_MEMORY`) được đánh dấu reserved.
 
-Bảng 2-9. Ví dụ physical address map do BIOS cung cấp
+Bảng 2-9. Ví dụ physical address map BIOS-provided
 
 | Bắt đầu | Kết thúc | Type |
 |---|---|---|
@@ -744,11 +744,11 @@ Nội dung các entry đầu của Page Global Directory map linear address th�
 
 ### Kernel Page Table
 
-Kernel duy trì tập page table để dùng riêng, có root tại cái gọi là master kernel Page Global Directory. Sau system initialization, tập page table này không bao giờ được process hoặc kernel thread nào dùng trực tiếp; thay vào đó, các entry cao nhất của master kernel Page Global Directory là mô hình tham chiếu cho entry tương ứng của Page Global Directory của mọi regular process trong hệ thống.
+Kernel duy trì tập page table để dùng riêng, có root tại so-called master kernel Page Global Directory. Sau system initialization, tập page table này không bao giờ được process hoặc kernel thread nào dùng trực tiếp; thay vào đó, các entry cao nhất của master kernel Page Global Directory là mô hình tham chiếu cho entry tương ứng của Page Global Directory của mọi regular process trong hệ thống.
 
 Chúng ta giải thích cách kernel bảo đảm thay đổi master kernel Page Global Directory được truyền đến Page Global Directory mà process thực sự dùng trong phần “Linear address của noncontiguous memory area” của Chương 8.
 
-Giờ mô tả cách kernel initialize page table riêng. Đây là hoạt động hai phase. Thực tế ngay sau khi kernel image được load vào memory, CPU vẫn chạy trong real mode; vì vậy paging chưa được enable.
+Giờ mô tả cách kernel initialize page table riêng. Đây là hoạt động two-phase. Thực tế ngay sau khi kernel image được load vào memory, CPU vẫn chạy trong real mode; vì vậy paging chưa được enable.
 
 Trong phase đầu, kernel tạo address space hạn chế gồm kernel code và data segment, Page Table ban đầu và 128 KB cho một số dynamic data structure. Address space tối thiểu này chỉ vừa đủ để cài kernel vào RAM và initialize core data structure.
 
@@ -817,7 +817,7 @@ Giả định CPU là microprocessor 80×86 gần đây hỗ trợ page 4 MB và
 
 Identity mapping của những megabyte physical memory đầu (8 MB trong ví dụ) do function `startup_32()` tạo là cần thiết để hoàn tất initialization phase của kernel. Khi mapping không còn cần, kernel clear page table entry tương ứng bằng cách gọi function `zap_low_mappings()`.
 
-Thực tế mô tả này chưa nói toàn bộ sự thật. Như sẽ thấy trong phần “Fix-mapped linear address” sau, kernel còn điều chỉnh entry của Page Table tương ứng “fix-mapped linear address”.
+Thực tế mô tả này chưa nói toàn bộ sự thật. Như sẽ thấy trong phần “Fix-Mapped linear address” sau, kernel còn điều chỉnh entry của Page Table tương ứng “fix-mapped linear address”.
 
 ##### Kernel Page Table cuối cùng khi RAM size từ 896 MB đến 4096 MB
 
@@ -866,7 +866,7 @@ Chú ý mọi CPU model hỗ trợ PAE cũng hỗ trợ large page 2-MB và glob
 
 Page Global Directory entry thứ tư sau đó được sao chép vào entry đầu để phản chiếu mapping low physical memory trong 896 MB đầu của linear address space. Mapping này cần để hoàn tất initialization của SMP system: khi không còn cần, kernel clear page table entry tương ứng bằng cách gọi function `zap_low_mappings()`, như trường hợp trước.
 
-### Fix-mapped linear address
+### Fix-Mapped linear address
 
 Đã thấy phần đầu gigabyte thứ tư của kernel linear address map physical memory của hệ thống. Tuy nhiên ít nhất 128 MB linear address luôn được để sẵn vì kernel dùng để triển khai noncontiguous memory allocation và fix-mapped linear address.
 
@@ -928,7 +928,7 @@ Processor không thể tự synchronize TLB cache vì chính kernel, không ph�
 
 Linux 2.6 cung cấp nhiều TLB flush method cần áp dụng phù hợp tùy loại page table change (xem Bảng 2-11).
 
-Bảng 2-11. TLB-invalidating method độc lập architecture
+Bảng 2-11. TLB-invalidating method Architecture-independent
 
 | Tên method | Mô tả | Thường dùng khi |
 |---|---|---|
@@ -958,7 +958,7 @@ Bảng 2-12. TLB-invalidating macro cho Intel Pentium Pro và processor sau
 
 Chú ý method `flush_tlb_pgtables` không có trong Bảng 2-12: trong architecture 80×86 không cần làm gì khi page table được unlink khỏi parent table, vì vậy function triển khai method này rỗng.
 
-Architecture-independent TLB-invalidating method được mở rộng khá đơn giản sang multiprocessor system. Function chạy trên CPU gửi Interprocessor Interrupt (xem “Xử lý Interprocessor Interrupt” trong Chương 4) đến CPU khác buộc thực thi TLB-invalidating function phù hợp.
+architecture-independent TLB-invalidating method được mở rộng khá đơn giản sang multiprocessor system. Function chạy trên CPU gửi Interprocessor Interrupt (xem “Xử lý Interprocessor Interrupt” trong Chương 4) đến CPU khác buộc thực thi TLB-invalidating function phù hợp.
 
 Theo quy tắc chung, mọi process switch có nghĩa thay đổi tập active page table. Local TLB entry liên quan page table cũ phải được flush; được thực hiện tự động khi kernel ghi address của Page Global Directory mới vào control register `cr3`. Tuy nhiên kernel tránh được TLB flush trong các trường hợp sau:
 
@@ -994,6 +994,6 @@ Khi CPU nhận Interprocessor Interrupt liên quan TLB flushing và xác minh �
 
 [^5]: Bạn có thể tìm linear address của các symbol này trong file System.map, được tạo ngay sau khi compile kernel.
 
-[^6]: 128 MB linear address cao nhất được để sẵn cho nhiều loại mapping (xem phần “Fix-mapped linear address” sau trong chương và “Linear address của noncontiguous memory area” trong Chương 8). Vì vậy kernel address space còn lại để map RAM là 1 GB – 128 MB = 896 MB.
+[^6]: 128 MB linear address cao nhất được để sẵn cho nhiều loại mapping (xem phần “Fix-Mapped linear address” sau trong chương và “Linear address của noncontiguous memory area” trong Chương 8). Vì vậy kernel address space còn lại để map RAM là 1 GB – 128 MB = 896 MB.
 
 [^7]: Nhân tiện, method `flush_tlb_all` không dùng lazy TLB mode mechanism; thường được gọi mỗi khi kernel sửa Page Table entry liên quan Kernel Mode address space.

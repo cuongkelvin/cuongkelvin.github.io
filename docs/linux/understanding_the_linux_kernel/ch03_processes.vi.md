@@ -4,7 +4,7 @@
 
 Khái niệm process là nền tảng của mọi hệ điều hành multiprogramming. Process thường được định nghĩa là một instance của chương trình đang thực thi; vì vậy, nếu 16 người dùng chạy vi cùng lúc thì có 16 process riêng biệt (dù chúng có thể chia sẻ cùng executable code). Process thường được gọi là task hoặc thread trong Linux source code.
 
-Trong chương này, chúng ta thảo luận các thuộc tính tĩnh của process rồi mô tả cách kernel thực hiện process switching. Hai phần cuối mô tả cách tạo và hủy process. Chúng ta cũng mô tả cách Linux hỗ trợ multithreaded application — như đề cập trong Chương 1, nó dựa vào cái gọi là lightweight process (LWP).
+Trong chương này, chúng ta thảo luận các thuộc tính tĩnh của process rồi mô tả cách kernel thực hiện process switching. Hai phần cuối mô tả cách tạo và hủy process. Chúng ta cũng mô tả cách Linux hỗ trợ multithreaded application — như đề cập trong Chương 1, nó dựa vào so-called lightweight process (LWP).
 
 ## Process, lightweight process và thread
 
@@ -18,15 +18,15 @@ Khi process được tạo, nó gần như giống hệt parent. Nó nhận bả
 
 Trong khi Unix kernel trước đây dùng mô hình đơn giản này, hệ thống Unix hiện đại không như vậy. Chúng hỗ trợ multithreaded application — user program có nhiều execution flow tương đối độc lập chia sẻ phần lớn application data structure. Trong các hệ thống đó, process gồm nhiều user thread (hay đơn giản là thread), mỗi thread biểu diễn một execution flow của process. Ngày nay, phần lớn multithreaded application được viết bằng các tập library function chuẩn gọi là pthread (POSIX thread) library.
 
-Phiên bản Linux kernel cũ không hỗ trợ multithreaded application. Từ góc nhìn kernel, multithreaded application chỉ là process thông thường. Nhiều execution flow của multithreaded application được tạo, xử lý và schedule hoàn toàn trong User Mode, thường bằng pthread library tuân thủ POSIX.
+Phiên bản Linux kernel cũ không hỗ trợ multithreaded application. Từ góc nhìn kernel, multithreaded application chỉ là process thông thường. Nhiều execution flow của multithreaded application được tạo, xử lý và schedule hoàn toàn trong User Mode, thường bằng pthread library POSIX-compliant.
 
 Tuy nhiên, cách triển khai multithreaded application như vậy chưa thật thỏa đáng. Ví dụ, giả sử chương trình cờ vua dùng hai thread: một thread điều khiển bàn cờ đồ họa, chờ nước đi của người chơi và hiển thị nước đi của máy tính, còn thread kia tính nước đi tiếp theo. Trong khi thread đầu chờ nước đi của người, thread thứ hai nên chạy liên tục để tận dụng thời gian suy nghĩ của người chơi. Tuy nhiên, nếu chương trình cờ vua chỉ là một process, thread đầu không thể đơn giản gọi blocking system call chờ user action; nếu không thread thứ hai cũng bị block. Thay vào đó, thread đầu phải dùng kỹ thuật nonblocking phức tạp để bảo đảm process vẫn runnable.
 
 Linux dùng lightweight process để hỗ trợ multithreaded application tốt hơn. Về cơ bản, hai lightweight process có thể chia sẻ một số resource như address space, open file, v.v. Bất cứ khi nào một process sửa shared resource, process kia lập tức thấy thay đổi. Tất nhiên hai process phải tự synchronize khi truy cập shared resource.
 
-Cách đơn giản để triển khai multithreaded application là gắn một lightweight process với mỗi thread. Nhờ vậy, thread có thể truy cập cùng tập application data structure chỉ bằng chia sẻ cùng memory address space, cùng tập open file, v.v.; đồng thời mỗi thread có thể được kernel schedule độc lập để một thread sleep trong khi thread khác vẫn runnable. Ví dụ pthread library tuân thủ POSIX dùng lightweight process của Linux là LinuxThreads, Native POSIX Thread Library (NPTL) và Next Generation Posix Threading Package (NGPT) của IBM.
+Cách đơn giản để triển khai multithreaded application là gắn một lightweight process với mỗi thread. Nhờ vậy, thread có thể truy cập cùng tập application data structure chỉ bằng chia sẻ cùng memory address space, cùng tập open file, v.v.; đồng thời mỗi thread có thể được kernel schedule độc lập để một thread sleep trong khi thread khác vẫn runnable. Ví dụ pthread library POSIX-compliant dùng lightweight process của Linux là LinuxThreads, Native POSIX Thread Library (NPTL) và Next Generation Posix Threading Package (NGPT) của IBM.
 
-Multithreaded application tuân thủ POSIX được xử lý tốt nhất bởi kernel hỗ trợ “thread group”. Trong Linux, thread group về cơ bản là tập lightweight process triển khai multithreaded application và hoạt động như một thể thống nhất đối với một số system call như `getpid()`, `kill()` và `_exit()`. Chúng ta sẽ mô tả chi tiết sau trong chương.
+Multithreaded application POSIX-compliant được xử lý tốt nhất bởi kernel hỗ trợ “thread group”. Trong Linux, thread group về cơ bản là tập lightweight process triển khai multithreaded application và hoạt động như một thể thống nhất đối với một số system call như `getpid()`, `kill()` và `_exit()`. Chúng ta sẽ mô tả chi tiết sau trong chương.
 
 ## Process descriptor
 
@@ -84,7 +84,7 @@ Kernel còn dùng macro `set_task_state` và `set_current_state`: lần lượt 
 
 Theo quy tắc chung, mỗi execution context có thể được schedule độc lập phải có process descriptor riêng; do đó ngay cả lightweight process chia sẻ phần lớn kernel data structure cũng có structure `task_struct` riêng.
 
-Sự tương ứng chặt chẽ một-một giữa process và process descriptor khiến address 32-bit<sup>†</sup> của structure `task_struct` trở thành phương tiện hữu ích để kernel nhận diện process. Các address này được gọi là process descriptor pointer. Phần lớn tham chiếu kernel thực hiện đến process đều qua process descriptor pointer.
+Sự tương ứng chặt chẽ one-to-one giữa process và process descriptor khiến address 32-bit<sup>†</sup> của structure `task_struct` trở thành phương tiện hữu ích để kernel nhận diện process. Các address này được gọi là process descriptor pointer. Phần lớn tham chiếu kernel thực hiện đến process đều qua process descriptor pointer.
 
 Mặt khác, hệ điều hành Unix-like cho phép người dùng nhận diện process bằng số gọi là Process ID (hay PID), được lưu trong field `pid` của process descriptor. PID được đánh số tuần tự: PID của process mới tạo thường bằng PID của process tạo trước đó cộng một. Tất nhiên giá trị PID có upper limit; khi kernel đạt giới hạn phải bắt đầu tái sử dụng PID thấp hơn chưa dùng. Mặc định, PID tối đa là 32.767 (`PID_MAX_DEFAULT - 1`); system administrator có thể giảm giới hạn bằng cách ghi giá trị nhỏ hơn vào file /proc/sys/kernel/pid\_max (/proc là mount point của special filesystem, xem phần “Special filesystem” trong Chương 12). Trong architecture 64-bit, system administrator có thể tăng PID tối đa đến 4.194.303.
 
@@ -187,7 +187,7 @@ Linux kernel 2.6 có loại doubly linked list khác, khác biệt chính so v�
 
 Ví dụ doubly linked list đầu tiên chúng ta xem là process list, liên kết mọi process descriptor hiện có. Mỗi structure `task_struct` chứa field `tasks` có type `list_head`, với field `prev` và `next` lần lượt trỏ đến phần tử `task_struct` trước và tiếp theo.
 
-Head của process list là descriptor `init_task task_struct`; đây là process descriptor của cái gọi là process 0 hay swapper (xem phần “Kernel thread” sau trong chương). Field `tasks->prev` của `init_task` trỏ đến field `tasks` của process descriptor được insert cuối cùng vào list.
+Head của process list là descriptor `init_task task_struct`; đây là process descriptor của so-called process 0 hay swapper (xem phần “Kernel thread” sau trong chương). Field `tasks->prev` của `init_task` trỏ đến field `tasks` của process descriptor được insert cuối cùng vào list.
 
 Macro `SET_LINKS` và `REMOVE_LINKS` lần lượt dùng insert và remove process descriptor trong process list. Các macro còn xử lý quan hệ parenthood của process (xem phần “Cách tổ chức process” sau trong chương).
 
@@ -251,7 +251,7 @@ Hình 3-4 minh họa quan hệ parent và sibling của nhóm process. Process P
 
 Hơn nữa còn có quan hệ khác giữa process: process có thể là leader của process group hoặc login session (xem “Process management” trong Chương 1), leader của thread group (xem “Nhận diện process” trước trong chương) và còn có thể trace execution của process khác (xem phần “Execution tracing” trong Chương 20). Bảng 3-4 liệt kê field của process descriptor thiết lập các quan hệ này giữa process P và process khác.
 
-Bảng 3-4. Field của process descriptor thiết lập quan hệ không phải parenthood
+Bảng 3-4. Field của process descriptor thiết lập quan hệ non-parenthood
 
 | Tên field | Mô tả |
 |---|---|
@@ -305,7 +305,7 @@ Vì trong ví dụ `pidhash_shift` bằng 11, `pid_hashfn` cho giá trị từ 0
 
 Bạn có thể thắc mắc constant 0x9e370001 (= 2.654.404.609) đến từ đâu. Hash function này dựa trên nhân index với số lớn phù hợp để kết quả overflow và giá trị còn lại trong variable 32-bit có thể xem là kết quả modulus operation. Knuth gợi ý đạt kết quả tốt khi số nhân lớn là prime gần tỷ lệ vàng so với 2<sup>32</sup> (32 bit là kích thước register 80×86). Số 2.654.404.609 là prime gần 2<sup>32</sup>×(√5 – 1) ⁄ 2, đồng thời dễ nhân bằng phép cộng và bit shift vì bằng 2<sup>31</sup> + 2<sup>29</sup> – 2<sup>25</sup> + 2<sup>22</sup> – 2<sup>19</sup> – 2<sup>16</sup> + 1.
 
-Như mọi khóa khoa học máy tính cơ bản giải thích, hash function không luôn bảo đảm tương ứng một-một giữa PID và table index. Hai PID khác nhau hash vào cùng table index được gọi là colliding.
+Như mọi khóa khoa học máy tính cơ bản giải thích, hash function không luôn bảo đảm tương ứng one-to-one giữa PID và table index. Hai PID khác nhau hash vào cùng table index được gọi là colliding.
 
 Linux dùng chaining xử lý colliding PID; mỗi table entry là head của doubly linked list chứa colliding process descriptor. Hình 3-5 minh họa PID hash table với hai list. Process có PID 2.890 và 29.384 hash vào phần tử thứ 200<sup>th</sup> của bảng, còn process có PID 29.385 hash vào phần tử thứ 1.466<sup>th</sup>.
 
@@ -327,7 +327,7 @@ Bảng 3-6. Field của data structure pid
 | `struct hlist_node` | `pid_chain` | Link đến phần tử tiếp theo và trước trong hash chain list |
 | `struct list_head` | `pid_list` | Head của per-PID list |
 
-Hình 3-6 minh họa ví dụ dựa trên hash table `PIDTYPE_TGID`. Entry thứ hai của array `pid_hash` lưu address hash table, tức array structure `hlist_head` biểu diễn head của chain list. Trong chain list có root tại entry thứ 71<sup>st</sup> của hash table có hai process descriptor tương ứng PID number 246 và 4.351 (đường mũi tên kép biểu diễn một cặp forward và backward pointer). PID number được lưu trong field `nr` của structure `pid` nhúng trong process descriptor (nhân tiện, vì thread group number trùng PID của leader nên các số này cũng lưu trong field `pid` của process descriptor). Xét per-PID list của thread group 4.351: head của list được lưu trong field `pid_list` của process descriptor nằm trong hash table, còn link đến phần tử tiếp theo và trước của per-PID list cũng lưu trong field `pid_list` của mỗi list element.
+Hình 3-6 minh họa ví dụ dựa trên hash table `PIDTYPE_TGID`. Entry thứ hai của array `pid_hash` lưu address hash table, tức array structure `hlist_head` biểu diễn head của chain list. Trong chain list có root tại entry thứ 71<sup>st</sup> của hash table có hai process descriptor tương ứng PID number 246 và 4.351 (đường double-arrow biểu diễn một cặp forward và backward pointer). PID number được lưu trong field `nr` của structure `pid` nhúng trong process descriptor (nhân tiện, vì thread group number trùng PID của leader nên các số này cũng lưu trong field `pid` của process descriptor). Xét per-PID list của thread group 4.351: head của list được lưu trong field `pid_list` của process descriptor nằm trong hash table, còn link đến phần tử tiếp theo và trước của per-PID list cũng lưu trong field `pid_list` của mỗi list element.
 
 ![Hình 3-6](images/ch03/fig03-06.png)
 
@@ -472,7 +472,7 @@ for (;;) {
 finish_wait(&wq, &__wait);
 ```
 
-Vài nhận xét về function trong danh sách trên: function kiểu `sleep_on()` không thể dùng trong tình huống phổ biến cần kiểm tra điều kiện và atomically đưa process vào sleep khi điều kiện chưa đúng; vì vậy, do là nguồn race condition đã biết rõ, việc sử dụng chúng không được khuyến khích.
+Vài nhận xét về function trong danh sách trên: function kiểu `sleep_on()` không thể dùng trong tình huống phổ biến cần kiểm tra điều kiện và atomically đưa process vào sleep khi điều kiện chưa đúng; vì vậy, do là nguồn race condition well-known, việc sử dụng chúng không được khuyến khích.
 
 Hơn nữa, để insert exclusive process vào wait queue, kernel phải dùng function `prepare_to_wait_exclusive()` (hoặc gọi trực tiếp `add_wait_queue_exclusive()`); mọi helper function khác insert process dưới dạng nonexclusive. Cuối cùng, trừ khi dùng `DEFINE_WAIT` hoặc `finish_wait()`, kernel phải remove wait queue element khỏi list sau khi waiting process được wake up.
 
@@ -558,7 +558,7 @@ Trong mô tả sau, giả định local variable `prev` tham chiếu process des
 
 Phiên bản Linux cũ tận dụng hardware support của architecture 80×86 và thực hiện process switch qua instruction `far jmp`[^4] đến selector của Task State Segment Descriptor thuộc process `next`. Khi thực thi instruction, CPU thực hiện hardware context switch bằng cách tự động lưu hardware context cũ và load context mới. Nhưng Linux 2.6 dùng software thực hiện process switch vì:
 
-- Switching từng bước qua sequence instruction `mov` cho phép kiểm soát validity của data đang load tốt hơn. Đặc biệt, có thể kiểm tra giá trị segmentation register `ds` và `es` có thể bị người dùng độc hại giả mạo. Không thể kiểm tra kiểu này khi dùng một instruction `far jmp` duy nhất.
+- Switching Step-by-step qua sequence instruction `mov` cho phép kiểm soát validity của data đang load tốt hơn. Đặc biệt, có thể kiểm tra giá trị segmentation register `ds` và `es` có thể bị người dùng độc hại giả mạo. Không thể kiểm tra kiểu này khi dùng một instruction `far jmp` duy nhất.
 
 - Thời gian cần cho cách cũ và mới gần bằng nhau. Tuy nhiên không thể tối ưu hardware context switch, trong khi switching code hiện tại có thể còn chỗ cải thiện.
 
@@ -596,7 +596,7 @@ Vì vậy, mỗi process descriptor có field tên `thread` type `thread_struct`
 
 ### Thực hiện process switch
 
-Process switch chỉ có thể xảy ra tại một điểm được xác định rõ: function `schedule()`, được thảo luận chi tiết trong Chương 7. Ở đây chỉ quan tâm cách kernel thực hiện process switch.
+Process switch chỉ có thể xảy ra tại một điểm well-defined: function `schedule()`, được thảo luận chi tiết trong Chương 7. Ở đây chỉ quan tâm cách kernel thực hiện process switch.
 
 Về cơ bản, mỗi process switch gồm hai bước:
 
@@ -608,7 +608,7 @@ Một lần nữa, giả định `prev` trỏ đến descriptor của process b�
 
 #### Macro switch\_to
 
-Bước thứ hai của process switch do macro `switch_to` thực hiện. Đây là một trong những routine phụ thuộc hardware nhiều nhất của kernel và cần đôi chút công sức để hiểu chức năng.
+Bước thứ hai của process switch do macro `switch_to` thực hiện. Đây là một trong những routine hardware-dependent nhiều nhất của kernel và cần đôi chút công sức để hiểu chức năng.
 
 Trước hết, macro có ba parameter tên `prev`, `next` và `last`. Bạn dễ đoán vai trò `prev` và `next`: chỉ là placeholder cho local variable `prev` và `next`, tức input parameter lần lượt chỉ định memory location chứa descriptor address của process bị thay thế và descriptor address của process mới.
 
@@ -740,7 +740,7 @@ movl 40(%ebx),%fs
 movl 44(%ebx),%gs
 ```
 
-Register `ebx` trỏ đến structure `next_p->thread`. Code thực tế phức tạp hơn vì CPU có thể phát exception khi phát hiện segment register value không hợp lệ. Code tính đến khả năng này bằng cách tiếp cận “fix-up” (xem phần “Dynamic address checking: fix-up code” trong Chương 10).
+Register `ebx` trỏ đến structure `next_p->thread`. Code thực tế phức tạp hơn vì CPU có thể phát exception khi phát hiện segment register value không hợp lệ. Code tính đến khả năng này bằng cách tiếp cận “Fix-up” (xem phần “Dynamic address checking: fix-up code” trong Chương 10).
 
 7\. Load sáu debug register trong `dr0`,..., `dr7`[^6] bằng nội dung array `next_p-> thread.debugreg`. Chỉ thực hiện nếu `next_p` đang dùng debug register khi bị suspend (tức field `next_p->thread.debugreg[7]` khác 0). Không cần lưu các register này vì array `prev_p->thread.debugreg` chỉ được sửa khi debugger muốn theo dõi `prev`:
 
@@ -788,11 +788,11 @@ Assembly language instruction `ret` load program counter `eip` bằng return add
 
 ### Lưu và load register FPU, MMX và XMM
 
-Từ Intel 80486DX, arithmetic floating-point unit (FPU) được tích hợp vào CPU. Tên mathematical coprocessor vẫn được dùng để nhớ thời floating-point computation do chip chuyên dụng đắt tiền thực thi. Tuy nhiên để giữ compatibility với model cũ, floating-point arithmetic function được thực hiện bằng ESCAPE instruction, là instruction có prefix byte từ `0xd8` đến `0xdf`. Các instruction thao tác trên tập floating-point register trong CPU. Rõ ràng nếu process dùng ESCAPE instruction, nội dung floating-point register thuộc hardware context và nên được lưu.
+Từ Intel 80486DX, arithmetic floating-point unit (FPU) được tích hợp vào CPU. Tên mathematical coprocessor vẫn được dùng để nhớ thời floating-point computation do chip special-purpose đắt tiền thực thi. Tuy nhiên để giữ compatibility với model cũ, floating-point arithmetic function được thực hiện bằng ESCAPE instruction, là instruction có prefix byte từ `0xd8` đến `0xdf`. Các instruction thao tác trên tập floating-point register trong CPU. Rõ ràng nếu process dùng ESCAPE instruction, nội dung floating-point register thuộc hardware context và nên được lưu.
 
 Trong model Pentium sau, Intel đưa tập assembly language instruction mới vào microprocessor. Chúng gọi là MMX instruction, nhằm tăng tốc execution của multimedia application. MMX instruction thao tác trên floating-point register của FPU. Bất lợi rõ ràng của lựa chọn architecture này là lập trình viên không thể trộn floating-point instruction và MMX instruction. Lợi ích là người thiết kế hệ điều hành có thể bỏ qua instruction set mới vì cùng cơ chế trong task-switching code để lưu state của floating-point unit cũng dùng được để lưu MMX state.
 
-MMX instruction tăng tốc multimedia application vì đưa single-instruction multiple-data (SIMD) pipeline vào processor. Model Pentium III mở rộng khả năng SIMD: đưa vào SSE extension (Streaming SIMD Extensions), bổ sung khả năng xử lý floating-point value trong tám register 128-bit gọi là XMM register. Các register không chồng lấp FPU và MMX register nên có thể tự do trộn SSE và FPU/MMX instruction. Model Pentium 4 đưa thêm tính năng khác: SSE2 extension, cơ bản là mở rộng SSE hỗ trợ floating-point value độ chính xác cao hơn. SSE2 dùng cùng tập XMM register với SSE.
+MMX instruction tăng tốc multimedia application vì đưa single-instruction multiple-data (SIMD) pipeline vào processor. Model Pentium III mở rộng khả năng SIMD: đưa vào SSE extension (Streaming SIMD Extensions), bổ sung khả năng xử lý floating-point value trong tám register 128-bit gọi là XMM register. Các register không chồng lấp FPU và MMX register nên có thể tự do trộn SSE và FPU/MMX instruction. Model Pentium 4 đưa thêm tính năng khác: SSE2 extension, cơ bản là mở rộng SSE hỗ trợ floating-point value higher-precision. SSE2 dùng cùng tập XMM register với SSE.
 
 Microprocessor 80×86 không tự động lưu register FPU, MMX và XMM trong TSS. Tuy nhiên có hardware support cho phép kernel chỉ lưu register khi cần. Hardware support gồm flag `TS` (Task-Switching) trong register `cr0`, tuân theo quy tắc:
 
@@ -943,7 +943,7 @@ Bảng 3-8. Clone flag
 | Tên flag | Mô tả |
 |---|---|
 | `CLONE_VM` | Chia sẻ memory descriptor và mọi Page Table (xem Chương 9). |
-| `CLONE_FS` | Chia sẻ bảng nhận diện root directory và current working directory, cũng như giá trị bitmask dùng mask initial file permission của file mới (gọi là file umask). |
+| `CLONE_FS` | Chia sẻ bảng nhận diện root directory và current working directory, cũng như giá trị bitmask dùng mask initial file permission của file mới (so-called file umask). |
 | `CLONE_FILES` | Chia sẻ bảng nhận diện open file (xem Chương 12). |
 | `CLONE_SIGHAND` | Chia sẻ các bảng nhận diện signal handler cùng blocked và pending signal (xem Chương 11). Nếu flag đúng, flag `CLONE_VM` cũng phải được set. |
 | `CLONE_PTRACE` | Nếu đang được trace, parent muốn child cũng được trace. Hơn nữa, debugger có thể tự muốn trace child; khi đó kernel buộc flag thành 1. |

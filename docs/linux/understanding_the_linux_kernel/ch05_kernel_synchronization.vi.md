@@ -275,7 +275,7 @@ Hình 5-1. Bảo vệ critical region bằng nhiều lock
 
 Spin lock là loại lock đặc biệt thiết kế cho môi trường multiprocessor. Nếu kernel control path thấy spin lock “mở”, acquire lock và tiếp tục execution. Ngược lại nếu thấy lock bị kernel control path chạy trên CPU khác “đóng”, nó “spin”, lặp lại instruction loop ngắn đến khi lock được release.
 
-Instruction loop của spin lock biểu diễn “busy wait”. Waiting kernel control path tiếp tục chạy trên CPU dù không có gì làm ngoài lãng phí thời gian. Tuy nhiên spin lock thường tiện vì nhiều kernel resource chỉ bị lock trong phần nhỏ millisecond; vì vậy release CPU rồi reacquire sau tốn thời gian hơn nhiều.
+Instruction loop của spin lock biểu diễn “busy wait”. Waiting kernel control path tiếp tục chạy trên CPU dù không có gì làm ngoài lãng phí thời gian. Tuy nhiên spin lock thường tiện vì nhiều kernel resource chỉ bị lock trong phần nhỏ millisecond; vì vậy release CPU rồi reacquire sau time-consuming hơn nhiều.
 
 Theo quy tắc chung, kernel preemption bị disable trong mọi critical region được spin lock bảo vệ. Với uniprocessor system, bản thân lock vô dụng và spin lock primitive chỉ disable hoặc enable kernel preemption. Chú ý kernel preemption vẫn enable trong busy wait phase nên process chờ spin lock được release có thể bị process priority cao hơn thay thế.
 
@@ -484,9 +484,9 @@ Không phải mọi loại data structure đều được seqlock bảo vệ. Th
 
 Hơn nữa critical region của reader nên ngắn và writer hiếm khi acquire seqlock, nếu không repeated read access gây overhead nghiêm trọng. Cách dùng seqlock điển hình trong Linux 2.6 là bảo vệ một số data structure liên quan system time handling (xem Chương 6).
 
-### Read-copy update (RCU)
+### Read-Copy update (RCU)
 
-Read-copy update (RCU) là kỹ thuật synchronization khác thiết kế để bảo vệ data structure chủ yếu được nhiều CPU truy cập để đọc. RCU cho phép nhiều reader và nhiều writer tiếp tục đồng thời (cải tiến so với seqlock chỉ cho một writer tiếp tục). Hơn nữa RCU lock-free, tức không dùng lock hay counter chia sẻ giữa mọi CPU; lợi thế lớn so với read/write spin lock và seqlock có overhead cao do cache line snooping và invalidation.
+Read-copy update (RCU) là kỹ thuật synchronization khác thiết kế để bảo vệ data structure chủ yếu được nhiều CPU truy cập để đọc. RCU cho phép nhiều reader và nhiều writer tiếp tục đồng thời (cải tiến so với seqlock chỉ cho một writer tiếp tục). Hơn nữa RCU lock-free, tức không dùng lock hay counter chia sẻ giữa mọi CPU; lợi thế lớn so với read/write spin lock và seqlock có overhead cao do cache line-snooping và invalidation.
 
 RCU đạt kết quả đáng ngạc nhiên synchronize nhiều CPU không có shared data structure thế nào? Ý tưởng chính là giới hạn phạm vi RCU như sau:
 
@@ -643,7 +643,7 @@ Macro `down` giảm `count` và gọi function `__down()` với `count` bằng �
 
   - Nếu field `count` âm, function reset `sleepers` thành 1 và gọi `schedule()` để suspend current process. Field `count` vẫn bằng –1 và field `sleepers` bằng 1.
 
-  - Nếu field `count` không âm, function đặt `sleepers` thành 0, cố wake up process khác trong semaphore wait queue rồi thoát khi giữ semaphore. Khi thoát field `count` bằng 0 và field `sleepers` bằng 0. Giá trị cả hai field trông sai vì còn sleeping process khác. Tuy nhiên xét rằng process khác trong wait queue đã được wake up. Process này thực hiện iteration khác của loop; function `atomic_add_negative()` trừ 1 khỏi `count`, khôi phục thành –1; hơn nữa trước khi trở lại sleep, process được wake up reset `sleepers` thành 1.
+  - Nếu field `count` không âm, function đặt `sleepers` thành 0, cố wake up process khác trong semaphore wait queue rồi thoát khi giữ semaphore. Khi thoát field `count` bằng 0 và field `sleepers` bằng 0. Giá trị cả hai field trông sai vì còn sleeping process khác. Tuy nhiên xét rằng process khác trong wait queue đã được wake up. Process này thực hiện iteration khác của loop; function `atomic_add_negative()` trừ 1 khỏi `count`, khôi phục thành –1; hơn nữa trước khi trở lại sleep, process woken-up reset `sleepers` thành 1.
 
 Vậy code hoạt động đúng mọi trường hợp. Lưu ý function `wake_up()` trong `__down()` wake up tối đa một process vì sleeping process trong wait queue là exclusive (xem phần “Cách tổ chức process” trong Chương 3).
 
@@ -722,7 +722,7 @@ Nhớ function `do_softirq()` không bao giờ thực thi softirq nếu softirq 
 
 Macro `local_bh_disable` cộng 1 vào softirq counter của local CPU, còn function `local_bh_enable()` trừ 1. Vì vậy kernel có thể dùng nhiều lời gọi lồng nhau `local_bh_disable`; deferrable function chỉ enable lại bởi macro `local_bh_enable` khớp với lời gọi `local_bh_disable` đầu tiên.
 
-Sau khi giảm softirq counter, `local_bh_enable()` thực hiện hai operation quan trọng giúp bảo đảm execution kịp thời của thread chờ lâu:
+Sau khi giảm softirq counter, `local_bh_enable()` thực hiện hai operation quan trọng giúp bảo đảm execution kịp thời của thread long-waiting:
 
 1\. Kiểm tra hardirq counter và softirq counter trong field `preempt_count` của local CPU; nếu cả hai bằng 0 và có pending softirq cần thực thi, gọi `do_softirq()` activate (xem phần “Softirq” trong Chương 4).
 
@@ -801,7 +801,7 @@ Multiprocessor system như thường lệ đòi hỏi hơn. Không thể tránh 
 
 Linux kernel dùng nhiều macro kết hợp enable/disable local interrupt với spin lock handling. Bảng 5-9 mô tả tất cả. Trong uniprocessor system, các macro chỉ enable hoặc disable local interrupt và kernel preemption.
 
-Bảng 5-9. Spin lock macro có xét interrupt
+Bảng 5-9. Spin lock macro Interrupt-aware
 
 | Macro | Mô tả |
 |---|---|

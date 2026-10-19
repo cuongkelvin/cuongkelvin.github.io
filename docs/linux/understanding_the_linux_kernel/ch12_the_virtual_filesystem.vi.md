@@ -30,7 +30,7 @@ Filesystem được VFS hỗ trợ có thể được nhóm thành ba lớp chí
 
 Disk-based filesystem
 
-Chúng quản lý memory space khả dụng trong local disk hoặc device khác mô phỏng disk (như USB flash drive). Một số disk-based filesystem nổi tiếng được VFS hỗ trợ là:
+Chúng quản lý memory space khả dụng trong local disk hoặc device khác mô phỏng disk (như USB flash drive). Một số disk-based filesystem well-known được VFS hỗ trợ là:
 
   - Filesystem cho Linux như Second Extended Filesystem (Ext2) được dùng rộng rãi, Third Extended Filesystem (Ext3) mới hơn, và Reiser Filesystems (ReiserFS)[^1]
 
@@ -46,7 +46,7 @@ Chúng quản lý memory space khả dụng trong local disk hoặc device khác
 
 Network filesystem
 
-Chúng cho phép truy cập dễ dàng file trong filesystem thuộc máy tính khác trên network. Một số network filesystem nổi tiếng được VFS hỗ trợ là NFS, Coda, AFS (Andrew filesystem), CIFS (Common Internet File System, dùng trong Microsoft Windows), và NCP (NetWare Core Protocol của Novell).
+Chúng cho phép truy cập dễ dàng file trong filesystem thuộc máy tính khác trên network. Một số network filesystem well-known được VFS hỗ trợ là NFS, Coda, AFS (Andrew filesystem), CIFS (Common Internet File System, dùng trong Microsoft Windows), và NCP (NetWare Core Protocol của Novell).
 
 Special filesystem
 
@@ -56,7 +56,7 @@ Trong sách này, chúng tôi chỉ mô tả chi tiết filesystem Ext2 và Ext3
 
 Như đã đề cập trong phần “An Overview of the Unix Filesystem” ở Chương 1, directory Unix tạo thành tree có root là directory /. Root directory nằm trong root filesystem, trong Linux thường có loại Ext2 hoặc Ext3. Mọi filesystem khác có thể được “mount” trên subdirectory của root filesystem.[^2]
 
-Disk-based filesystem thường được lưu trong hardware block device như hard disk, floppy, hoặc CD-ROM. Tính năng hữu ích của VFS Linux cho phép xử lý virtual block device như /dev/loop0, có thể dùng để mount filesystem lưu trong regular file. Một ứng dụng khả dĩ là user bảo vệ filesystem riêng bằng cách lưu phiên bản mã hóa của nó trong regular file.
+disk-based filesystem thường được lưu trong hardware block device như hard disk, floppy, hoặc CD-ROM. Tính năng hữu ích của VFS Linux cho phép xử lý virtual block device như /dev/loop0, có thể dùng để mount filesystem lưu trong regular file. Một ứng dụng khả dĩ là user bảo vệ filesystem riêng bằng cách lưu phiên bản mã hóa của nó trong regular file.
 
 Virtual Filesystem đầu tiên có trong SunOS của Sun Microsystems năm 1986. Từ đó, hầu hết Unix filesystem có VFS. Tuy nhiên, VFS Linux hỗ trợ phạm vi filesystem rộng nhất.
 
@@ -64,7 +64,7 @@ Virtual Filesystem đầu tiên có trong SunOS của Sun Microsystems năm 1986
 
 Ý tưởng then chốt của VFS là đưa vào common file model có khả năng biểu diễn mọi filesystem được hỗ trợ. Model này phản ánh chặt chẽ file model do Unix filesystem truyền thống cung cấp. Điều này không đáng ngạc nhiên vì Linux muốn chạy native filesystem với overhead tối thiểu. Tuy nhiên, mỗi cách triển khai filesystem cụ thể phải chuyển cách tổ chức vật lý của nó sang common file model của VFS.
 
-Ví dụ, trong common file model, mỗi directory được xem là file chứa list file và directory khác. Tuy nhiên, một số disk-based filesystem không phải Unix dùng File Allocation Table (FAT), lưu vị trí mỗi file trong directory tree. Trong các filesystem này, directory không phải file. Để tuân theo common file model của VFS, cách Linux triển khai các filesystem dựa trên FAT phải có thể tạo ngay khi cần các file tương ứng với directory. Những file đó chỉ tồn tại dưới dạng object trong kernel memory.
+Ví dụ, trong common file model, mỗi directory được xem là file chứa list file và directory khác. Tuy nhiên, một số disk-based filesystem non-Unix dùng File Allocation Table (FAT), lưu vị trí mỗi file trong directory tree. Trong các filesystem này, directory không phải file. Để tuân theo common file model của VFS, cách Linux triển khai các filesystem FAT-based phải có thể tạo ngay khi cần các file tương ứng với directory. Những file đó chỉ tồn tại dưới dạng object trong kernel memory.
 
 Cốt yếu hơn, Linux kernel không thể hardcode function cụ thể để xử lý operation như `read()` hoặc `ioctl()`. Thay vào đó, phải dùng pointer cho mỗi operation; pointer được đặt trỏ đến function thích hợp cho filesystem cụ thể đang được truy cập.
 
@@ -216,11 +216,11 @@ Hãy mô tả ngắn gọn superblock operation, triển khai higher-level opera
 
 `alloc_inode(sb)`
 
-Cấp phát chỗ cho inode object, gồm chỗ cần cho dữ liệu riêng của filesystem.
+Cấp phát chỗ cho inode object, gồm chỗ cần cho dữ liệu filesystem-specific.
 
 `destroy_inode(inode)`
 
-Hủy inode object, gồm dữ liệu riêng của filesystem.
+Hủy inode object, gồm dữ liệu filesystem-specific.
 
 `read_inode(inode)`
 
@@ -236,7 +236,7 @@ Cập nhật filesystem inode bằng nội dung inode object truyền làm param
 
 `put_inode(inode)`
 
-Được gọi khi inode được giải phóng—reference counter giảm—để thực hiện operation riêng của filesystem.
+Được gọi khi inode được giải phóng—reference counter giảm—để thực hiện operation filesystem-specific.
 
 `drop_inode(inode)`
 
@@ -256,7 +256,7 @@ Cập nhật filesystem superblock bằng nội dung object được chỉ đị
 
 `sync_fs(sb, wait)`
 
-Được gọi khi flush filesystem để cập nhật data structure riêng của filesystem trên disk (được journaling filesystem dùng).
+Được gọi khi flush filesystem để cập nhật data structure filesystem-specific trên disk (được journaling filesystem dùng).
 
 `write_super_lockfs(super)`
 
@@ -276,7 +276,7 @@ Remount filesystem với option mới (được gọi khi cần thay đổi moun
 
 `clear_inode(inode)`
 
-Được gọi khi disk inode đang bị hủy để thực hiện operation riêng của filesystem.
+Được gọi khi disk inode đang bị hủy để thực hiện operation filesystem-specific.
 
 `umount_begin(super)`
 
@@ -284,7 +284,7 @@ Hủy mount operation vì unmount operation tương ứng đã bắt đầu (ch�
 
 `show_options(seq_file, vfsmount)`
 
-Dùng để hiển thị option riêng của filesystem
+Dùng để hiển thị option filesystem-specific
 
 `quota_read(super, type, data, size, offset)`
 
@@ -635,7 +635,7 @@ Bảng 12-5. Các field của dentry object
 | `unsigned long` | `d_time` | Được method `d_revalidate` dùng |
 | `struct dentry_operations*` | `d_op` | Dentry method |
 | `struct super_block *` | `d_sb` | Superblock object của file |
-| `void *` | `d_fsdata` | Dữ liệu phụ thuộc filesystem |
+| `void *` | `d_fsdata` | Dữ liệu Filesystem-dependent |
 | `struct rcu_head` | `d_rcu` | RCU descriptor dùng khi reclaim dentry object (xem phần “Read-Copy Update (RCU)” trong Chương 5) |
 | `struct dcookie_struct *` | `d_cookie` | Pointer đến structure do kernel profiler dùng |
 | `struct hlist_node` | `d_hash` | Pointer cho list trong hash table entry |
@@ -668,7 +668,7 @@ Xác định dentry object còn hợp lệ không trước khi dùng để phân
 
 `d_hash(dentry, name)`
 
-Tạo hash value; function này là hash function riêng của filesystem cho dentry hash table. Parameter `dentry` xác định directory chứa component. Parameter `name` trỏ đến structure chứa cả pathname component cần tra cứu lẫn giá trị do hash function tạo.
+Tạo hash value; function này là hash function filesystem-specific cho dentry hash table. Parameter `dentry` xác định directory chứa component. Parameter `name` trỏ đến structure chứa cả pathname component cần tra cứu lẫn giá trị do hash function tạo.
 
 `d_compare(dir, name1, name2)`
 
@@ -819,7 +819,7 @@ Mọi filesystem-type object được chèn vào singly linked list. Biến `fil
 
 Field `fs_supers` biểu diễn đầu (phần tử giả đầu tiên) của list superblock object tương ứng mounted filesystem thuộc loại cho trước. Backward link và forward link của phần tử list được lưu trong field `s_instances` của superblock object.
 
-Field `get_sb` trỏ đến function phụ thuộc loại filesystem cấp phát superblock object mới và khởi tạo nó (bằng cách đọc disk nếu cần). Field `kill_sb` trỏ đến function hủy superblock.
+Field `get_sb` trỏ đến function filesystem-type-dependent cấp phát superblock object mới và khởi tạo nó (bằng cách đọc disk nếu cần). Field `kill_sb` trỏ đến function hủy superblock.
 
 Field `fs_flags` lưu một số flag, liệt kê trong Bảng 12-10.
 
@@ -846,11 +846,11 @@ Filesystem khác có thể được mount—bằng initialization script hoặc 
 
 ### Namespace
 
-Trong hệ thống Unix truyền thống, chỉ có một tree mounted filesystem: bắt đầu từ root filesystem hệ thống, mỗi process có khả năng truy cập mọi file trong mounted filesystem bằng cách chỉ định pathname thích hợp. Về mặt này, Linux 2.6 tinh tế hơn: mỗi process có thể có tree mounted filesystem riêng—gọi là namespace của process.
+Trong hệ thống Unix truyền thống, chỉ có một tree mounted filesystem: bắt đầu từ root filesystem hệ thống, mỗi process có khả năng truy cập mọi file trong mounted filesystem bằng cách chỉ định pathname thích hợp. Về mặt này, Linux 2.6 tinh tế hơn: mỗi process có thể có tree mounted filesystem riêng—so-called namespace của process.
 
 Thông thường phần lớn process chia sẻ cùng namespace, là tree mounted filesystem có gốc tại root filesystem hệ thống và được init process dùng. Tuy nhiên, process nhận namespace mới nếu được tạo bằng system call `clone()` với flag `CLONE_NEWNS` set (xem phần “The clone(), fork(), and vfork() System Calls” trong Chương 3). Sau đó namespace mới được child process kế thừa nếu parent tạo chúng không có flag `CLONE_NEWNS`.
 
-Khi process mount—hoặc unmount—filesystem, nó chỉ sửa namespace của mình. Do đó, thay đổi thấy được với mọi process chia sẻ cùng namespace và chỉ chúng. Process thậm chí có thể đổi root filesystem của namespace bằng system call riêng của Linux `pivot_root()`.
+Khi process mount—hoặc unmount—filesystem, nó chỉ sửa namespace của mình. Do đó, thay đổi thấy được với mọi process chia sẻ cùng namespace và chỉ chúng. Process thậm chí có thể đổi root filesystem của namespace bằng system call Linux-specific `pivot_root()`.
 
 Namespace của process được biểu diễn bằng structure `namespace` mà field `namespace` của process descriptor trỏ đến. Các field của structure `namespace` được trình bày trong Bảng 12-11.
 
@@ -867,7 +867,7 @@ Field `list` là đầu doubly linked circular list tập hợp mọi mounted fi
 
 ### Mount filesystem
 
-Trong phần lớn kernel kiểu Unix truyền thống, mỗi filesystem chỉ có thể được mount một lần. Giả sử Ext2 filesystem lưu trong floppy disk /dev/fd0 được mount trên /flp bằng command:
+Trong phần lớn kernel Unix-like truyền thống, mỗi filesystem chỉ có thể được mount một lần. Giả sử Ext2 filesystem lưu trong floppy disk /dev/fd0 được mount trên /flp bằng command:
 
 ```c
 mount -t ext2 /dev/fd0 /flp
@@ -899,7 +899,7 @@ Bảng 12-12. Các field của data structure vfsmount
 | `int` | `mnt_expiry_mark` | Flag đặt thành true nếu filesystem được đánh dấu expired (filesystem có thể tự động unmount nếu flag set và không ai dùng). |
 | `char *` | `mnt_devname` | Device filename. |
 | `struct list_head` | `mnt_list` | Pointer cho list mounted filesystem descriptor của namespace. |
-| `struct list_head` | `mnt_fslink` | Pointer cho expire list riêng của filesystem. |
+| `struct list_head` | `mnt_fslink` | Pointer cho expire list filesystem-specific. |
 | `struct namespace *` | `mnt_namespace` | Pointer đến namespace của process đã mount filesystem. |
 
 Data structure `vfsmount` được giữ trong một số doubly linked circular list:
@@ -942,7 +942,7 @@ Giờ chúng ta sẽ mô tả action kernel thực hiện để mount filesystem
 
 System call `mount()` được dùng để mount generic filesystem; service routine `sys_mount()` nhận các parameter sau:
 
-- Pathname của device file chứa filesystem, hoặc `NULL` nếu không cần (ví dụ khi filesystem cần mount dựa trên network)
+- Pathname của device file chứa filesystem, hoặc `NULL` nếu không cần (ví dụ khi filesystem cần mount network-based)
 
 - Pathname của directory mà filesystem sẽ được mount trên đó (mount point)
 
@@ -950,7 +950,7 @@ System call `mount()` được dùng để mount generic filesystem; service rou
 
 - Mount flag (giá trị cho phép được liệt kê trong Bảng 12-14)
 
-- Pointer đến data structure phụ thuộc filesystem (có thể là `NULL`)
+- Pointer đến data structure filesystem-dependent (có thể là `NULL`)
 
 Bảng 12-14. Flag do system call mount() dùng
 
@@ -1019,7 +1019,7 @@ Function đảm nhiệm mount operation thực tế bằng cách thực hiện v
 
 1\. Gọi `get_fs_type()` để tìm trong list loại filesystem tên lưu trong parameter `fstype`; `get_fs_type()` trả vào local variable `type` địa chỉ descriptor `file_system_type` tương ứng. 2. Gọi `alloc_vfsmnt()` để cấp phát mounted filesystem descriptor mới và lưu địa chỉ vào local variable `mnt`.
 
-3\. Gọi function phụ thuộc filesystem `type->get_sb()` để cấp phát superblock mới và khởi tạo nó (xem bên dưới).
+3\. Gọi function filesystem-dependent `type->get_sb()` để cấp phát superblock mới và khởi tạo nó (xem bên dưới).
 
 4\. Khởi tạo field `mnt->mnt_sb` bằng địa chỉ superblock object mới.
 
@@ -1033,7 +1033,7 @@ Function đảm nhiệm mount operation thực tế bằng cách thực hiện v
 
 ##### Cấp phát superblock object
 
-Method `get_sb` của filesystem object thường được triển khai bằng function một dòng. Ví dụ, trong Ext2 filesystem, method được triển khai như sau:
+Method `get_sb` của filesystem object thường được triển khai bằng function one-line. Ví dụ, trong Ext2 filesystem, method được triển khai như sau:
 
 ```c
 struct super_block * ext2_get_sb(struct file_system_type *type,
@@ -1055,7 +1055,7 @@ Các operation quan trọng nhất do `get_sb_bdev()` thực hiện như sau:
 
 4\. Sao chép giá trị parameter `flags` vào field `s_flags` của superblock và đặt các field `s_id`, `s_old_blocksize`, và `s_blocksize` bằng giá trị thích hợp cho block device.
 
-5\. Gọi function phụ thuộc filesystem truyền làm argument cuối cho `get_sb_bdev()` để truy cập thông tin superblock trên disk và điền các field khác của superblock object mới.
+5\. Gọi function filesystem-dependent truyền làm argument cuối cho `get_sb_bdev()` để truy cập thông tin superblock trên disk và điền các field khác của superblock object mới.
 
 6\. Trả về địa chỉ superblock object mới.
 
@@ -1065,7 +1065,7 @@ Mount root filesystem là phần thiết yếu của system initialization. Đâ
 
 Để mô tả đơn giản, giả sử root filesystem được lưu trong partition của hard disk (dù sao cũng là trường hợp phổ biến nhất). Khi hệ thống boot, kernel tìm major number của disk chứa root filesystem trong biến `ROOT_DEV` (xem Phụ lục A). Có thể chỉ định root filesystem làm device file trong directory /dev khi compile kernel hoặc bằng cách truyền option “root” thích hợp cho initial bootstrap loader. Tương tự, mount flag của root filesystem lưu trong biến `root_mountflags`. User chỉ định các flag này bằng chương trình bên ngoài rdev trên kernel image đã compile hoặc truyền option rootflags thích hợp cho initial bootstrap loader (xem Phụ lục A).
 
-Mount root filesystem là procedure hai giai đoạn, trình bày trong danh sách sau:
+Mount root filesystem là procedure two-stage, trình bày trong danh sách sau:
 
 1\. Kernel mount special filesystem rootfs, chỉ cung cấp directory rỗng làm mount point ban đầu.
 
@@ -1138,7 +1138,7 @@ a. Gọi `sys_mknod()` (service routine của system call `mknod()`) để tạo
 
 b. Cấp phát buffer và điền list filesystem type name. List này được truyền cho kernel trong boot parameter “rootfstype” hoặc được xây dựng bằng cách quét phần tử trong singly linked list loại filesystem.
 
-c. Quét list filesystem type name xây dựng ở bước trước. Với mỗi tên, gọi `sys_mount()` để thử mount loại filesystem cho trước trên root device. Vì mỗi method riêng của filesystem dùng magic number khác nhau, mọi lời gọi `get_sb()` sẽ thất bại trừ lời gọi cố điền superblock bằng function của filesystem thực sự dùng trên root device. Filesystem được mount trên directory tên /root của filesystem rootfs.
+c. Quét list filesystem type name xây dựng ở bước trước. Với mỗi tên, gọi `sys_mount()` để thử mount loại filesystem cho trước trên root device. Vì mỗi method filesystem-specific dùng magic number khác nhau, mọi lời gọi `get_sb()` sẽ thất bại trừ lời gọi cố điền superblock bằng function của filesystem thực sự dùng trên root device. Filesystem được mount trên directory tên /root của filesystem rootfs.
 
 d. Gọi `sys_chdir("/root")` để đổi current directory của process.
 
@@ -1207,7 +1207,7 @@ Pointer đến file pathname cần phân giải.
 
 `flags`
 
-Giá trị flag biểu diễn cách file được tra cứu sẽ được truy cập. Giá trị cho phép nằm trong Bảng 12-16 phía sau.
+Giá trị flag biểu diễn cách file looked-up sẽ được truy cập. Giá trị cho phép nằm trong Bảng 12-16 phía sau.
 
 `nd`
 
@@ -1226,7 +1226,7 @@ Bảng 12-15. Các field của data structure nameidata
 | `int` | `last_type` | Loại component cuối của pathname (dùng khi flag `LOOKUP_PARENT` set) |
 | `unsigned int` | `depth` | Mức lồng symbolic link hiện tại (xem bên dưới); phải nhỏ hơn 6 |
 | `char[ ] *` | `saved_names` | Array pathname gắn với symbolic link lồng nhau |
-| `union` | `intent` | Union một thành viên chỉ định cách truy cập file |
+| `union` | `intent` | Union One-member chỉ định cách truy cập file |
 
 Các field `dentry` và `mnt` lần lượt trỏ đến dentry object và mounted filesystem object của component được phân giải cuối cùng trong pathname. Hai field này “mô tả” file được pathname cho trước xác định.
 
@@ -1335,15 +1335,15 @@ n. Đặt `nd->dentry` thành `next.dentry` và `nd->mnt` thành `next.mnt`, r�
 
 8\. Kiểm tra giá trị flag `LOOKUP_PARENT` trong biến `lookup_flags`. Sau đây, giả định flag đặt thành 0 và để trường hợp ngược lại sang phần tiếp theo.
 
-9\. Nếu tên component cuối là “.” (một dấu chấm), kết thúc thực thi và trả về giá trị 0 (không lỗi). Trong structure `nameidata` mà `nd` trỏ đến, các field `dentry` và `mnt` tham chiếu object liên quan component áp cuối của pathname (mỗi component “.” không có tác dụng trong pathname).
+9\. Nếu tên component cuối là “.” (một dấu chấm), kết thúc thực thi và trả về giá trị 0 (không lỗi). Trong structure `nameidata` mà `nd` trỏ đến, các field `dentry` và `mnt` tham chiếu object liên quan component next-to-last của pathname (mỗi component “.” không có tác dụng trong pathname).
 
 10\. Nếu tên component cuối là “..” (hai dấu chấm), cố đi lên parent directory:
 
-a. Nếu directory được phân giải cuối là root directory của process (`nd->dentry` bằng `current->fs->root` và `nd->mnt` bằng `current->fs->rootmnt`), gọi `follow_mount()` trên component áp cuối, kết thúc thực thi và trả về giá trị 0 (không lỗi). `nd->dentry` và `nd->mnt` tham chiếu object liên quan component áp cuối của pathname—tức root directory của process.
+a. Nếu directory được phân giải cuối là root directory của process (`nd->dentry` bằng `current->fs->root` và `nd->mnt` bằng `current->fs->rootmnt`), gọi `follow_mount()` trên component next-to-last, kết thúc thực thi và trả về giá trị 0 (không lỗi). `nd->dentry` và `nd->mnt` tham chiếu object liên quan component next-to-last của pathname—tức root directory của process.
 
-b. Nếu directory được phân giải cuối là root directory của filesystem `nd->mnt` (`nd->dentry` bằng `nd->mnt->mnt_root`) và filesystem `nd->mnt` không được mount trên filesystem khác (`nd->mnt` bằng `nd->mnt->mnt_parent`), không thể đi lên, nên gọi `follow_mount()` trên component áp cuối, kết thúc thực thi và trả về giá trị 0 (không lỗi). c. Nếu directory được phân giải cuối là root directory của filesystem `nd->mnt` và filesystem `nd->mnt` được mount trên filesystem khác, đặt `nd->dentry` thành `nd->mnt->mnt_mountpoint` và `nd->mnt` thành `nd->mnt->mnt_parent`, rồi bắt đầu lại bước 10.
+b. Nếu directory được phân giải cuối là root directory của filesystem `nd->mnt` (`nd->dentry` bằng `nd->mnt->mnt_root`) và filesystem `nd->mnt` không được mount trên filesystem khác (`nd->mnt` bằng `nd->mnt->mnt_parent`), không thể đi lên, nên gọi `follow_mount()` trên component next-to-last, kết thúc thực thi và trả về giá trị 0 (không lỗi). c. Nếu directory được phân giải cuối là root directory của filesystem `nd->mnt` và filesystem `nd->mnt` được mount trên filesystem khác, đặt `nd->dentry` thành `nd->mnt->mnt_mountpoint` và `nd->mnt` thành `nd->mnt->mnt_parent`, rồi bắt đầu lại bước 10.
 
-d. Nếu directory được phân giải cuối không phải root directory của mounted filesystem, đặt `nd->dentry` thành `nd->dentry->d_parent`, gọi `follow_mount()` trên parent directory, kết thúc thực thi và trả về giá trị 0 (không lỗi). `nd->dentry` và `nd->mnt` tham chiếu object liên quan component đứng trước component áp cuối của pathname.
+d. Nếu directory được phân giải cuối không phải root directory của mounted filesystem, đặt `nd->dentry` thành `nd->dentry->d_parent`, gọi `follow_mount()` trên parent directory, kết thúc thực thi và trả về giá trị 0 (không lỗi). `nd->dentry` và `nd->mnt` tham chiếu object liên quan component đứng trước component next-to-last của pathname.
 
 11\. Tên component cuối không phải “.” hay “..”, nên function phải tra cứu trong dentry cache. Nếu low-level filesystem có dentry method `d_hash` tùy chỉnh, function gọi nó để sửa hash value đã tính ở bước 5c.
 
@@ -1363,7 +1363,7 @@ d. Nếu directory được phân giải cuối không phải root directory c�
 
 ### Parent pathname lookup
 
-Trong nhiều trường hợp, đích thực của lookup operation không phải component cuối pathname mà là component áp cuối. Ví dụ, khi tạo file, component cuối biểu thị filename của file chưa tồn tại, và phần pathname còn lại chỉ định directory cần chèn link mới. Do đó, lookup operation nên lấy dentry object của component áp cuối. Ví dụ khác, unlink file xác định bằng pathname /foo/bar gồm loại bar khỏi directory foo. Vì vậy, kernel thực sự quan tâm truy cập directory foo hơn là bar.
+Trong nhiều trường hợp, đích thực của lookup operation không phải component cuối pathname mà là component next-to-last. Ví dụ, khi tạo file, component cuối biểu thị filename của file chưa tồn tại, và phần pathname còn lại chỉ định directory cần chèn link mới. Do đó, lookup operation nên lấy dentry object của component next-to-last. Ví dụ khác, unlink file xác định bằng pathname /foo/bar gồm loại bar khỏi directory foo. Vì vậy, kernel thực sự quan tâm truy cập directory foo hơn là bar.
 
 Flag `LOOKUP_PARENT` được dùng khi lookup operation phải phân giải directory chứa component cuối pathname thay vì chính component cuối.
 
@@ -1421,7 +1421,7 @@ Trong trường hợp này, function `link_path_walk()` gọi `do_follow_link()`
 
 5\. Cập nhật access time của inode object gắn với symbolic link cần phân giải.
 
-6\. Gọi function phụ thuộc filesystem triển khai method `follow_link`, truyền các parameter `dentry` và `nd`. Function này trích xuất pathname lưu trong inode của symbolic link và lưu pathname vào entry thích hợp của array `nd->saved_names`.
+6\. Gọi function filesystem-dependent triển khai method `follow_link`, truyền các parameter `dentry` và `nd`. Function này trích xuất pathname lưu trong inode của symbolic link và lưu pathname vào entry thích hợp của array `nd->saved_names`.
 
 7\. Gọi function `__vfs_follow_link()`, truyền địa chỉ `nd` và địa chỉ pathname trong array `nd->saved_names` (xem bên dưới).
 
@@ -1498,7 +1498,7 @@ Hãy mô tả hoạt động của function `sys_open()`. Nó thực hiện các
 
 3\. Gọi function `filp_open()`, truyền pathname, access mode flag và permission bit mask làm parameter. Đến lượt function này thực hiện các bước sau:
 
-a. Sao chép access mode flag vào `namei_flags`, nhưng mã hóa các access mode flag `O_RDONLY`, `O_WRONLY`, và `O_RDWR` bằng định dạng đặc biệt: bit tại index 0 (thấp nhất) của `namei_flags` chỉ được set nếu truy cập file yêu cầu read privilege; tương tự, bit tại index 1 chỉ set nếu truy cập file yêu cầu write privilege. Lưu ý không thể chỉ định trong system call `open()` rằng truy cập file không cần read privilege lẫn write privilege; tuy nhiên, điều này có ý nghĩa trong pathname lookup operation liên quan symbolic link.
+a. Sao chép access mode flag vào `namei_flags`, nhưng mã hóa các access mode flag `O_RDONLY`, `O_WRONLY`, và `O_RDWR` bằng định dạng đặc biệt: bit tại index 0 (lowest-order) của `namei_flags` chỉ được set nếu truy cập file yêu cầu read privilege; tương tự, bit tại index 1 chỉ set nếu truy cập file yêu cầu write privilege. Lưu ý không thể chỉ định trong system call `open()` rằng truy cập file không cần read privilege lẫn write privilege; tuy nhiên, điều này có ý nghĩa trong pathname lookup operation liên quan symbolic link.
 
 b. Gọi `open_namei()`, truyền pathname, access mode flag đã sửa và địa chỉ local data structure `nameidata`. Function thực hiện lookup operation như sau:
 
@@ -1582,7 +1582,7 @@ Khi nhiều process có thể truy cập file, vấn đề đồng bộ xảy ra
 
 Trong hệ thống Unix truyền thống, truy cập đồng thời cùng vị trí file tạo kết quả không thể đoán trước. Tuy nhiên, hệ thống Unix cung cấp cơ chế cho phép process lock file region để dễ tránh truy cập đồng thời.
 
-Chuẩn POSIX yêu cầu cơ chế file locking dựa trên system call `fcntl()`. Có thể lock region tùy ý của file (thậm chí một byte) hoặc lock toàn file (gồm dữ liệu được append trong tương lai). Vì process có thể chọn chỉ lock một phần file, nó cũng có thể giữ nhiều lock trên các phần khác nhau của file.
+Chuẩn POSIX yêu cầu cơ chế file-locking dựa trên system call `fcntl()`. Có thể lock region tùy ý của file (thậm chí một byte) hoặc lock toàn file (gồm dữ liệu được append trong tương lai). Vì process có thể chọn chỉ lock một phần file, nó cũng có thể giữ nhiều lock trên các phần khác nhau của file.
 
 Loại lock này không ngăn process khác không biết về locking. Giống semaphore dùng bảo vệ critical region trong code, lock được xem là “advisory” vì không hoạt động trừ khi process khác hợp tác kiểm tra sự tồn tại của lock trước khi truy cập file. Do đó, lock POSIX được gọi là advisory lock.
 
@@ -1596,9 +1596,9 @@ Dù dùng advisory hay mandatory lock, process có thể dùng cả shared read 
 
 Linux hỗ trợ mọi loại file locking: advisory và mandatory lock, cùng các system call `fcntl()` và `flock()` (`lockf()` được triển khai làm standard library function).
 
-Hành vi mong đợi của system call `flock()` trong mọi hệ điều hành kiểu Unix là chỉ tạo advisory lock, không xét mount flag `MS_MANDLOCK`. Tuy nhiên, trong Linux, một loại mandatory lock đặc biệt của `flock()` được dùng để hỗ trợ một số proprietary network filesystem. Nó gọi là share-mode mandatory lock; khi đặt, không process khác nào được mở file nếu xung đột access mode của lock. Không khuyến khích dùng tính năng này cho native Unix application vì source code kết quả sẽ không khả chuyển.
+Hành vi mong đợi của system call `flock()` trong mọi hệ điều hành Unix-like là chỉ tạo advisory lock, không xét mount flag `MS_MANDLOCK`. Tuy nhiên, trong Linux, một loại mandatory lock đặc biệt của `flock()` được dùng để hỗ trợ một số proprietary network filesystem. Đó là so-called share-mode mandatory lock; khi đặt, không process khác nào được mở file nếu xung đột access mode của lock. Không khuyến khích dùng tính năng này cho native Unix application vì source code kết quả sẽ không khả chuyển.
 
-Một loại mandatory lock khác dựa trên `fcntl()` gọi là lease được đưa vào Linux. Khi process cố mở file được lease bảo vệ, nó bị block như thường. Tuy nhiên, process sở hữu lock nhận signal. Khi được thông báo, trước tiên nó nên cập nhật file để nội dung nhất quán, rồi giải phóng lock. Nếu owner không làm trong khoảng thời gian xác định (điều chỉnh bằng cách ghi số second vào /proc/sys/fs/lease-break-time, thường 45 second), kernel tự động loại lease và cho phép process bị block tiếp tục.
+Một loại mandatory lock khác dựa trên `fcntl()` gọi là lease được đưa vào Linux. Khi process cố mở file được lease bảo vệ, nó bị block như thường. Tuy nhiên, process sở hữu lock nhận signal. Khi được thông báo, trước tiên nó nên cập nhật file để nội dung nhất quán, rồi giải phóng lock. Nếu owner không làm trong khoảng thời gian well-defined (điều chỉnh bằng cách ghi số second vào /proc/sys/fs/lease-break-time, thường 45 second), kernel tự động loại lease và cho phép process bị block tiếp tục.
 
 Process có thể lấy hoặc giải phóng advisory file lock trên file bằng hai cách:
 
@@ -1622,7 +1622,7 @@ Ngoài kiểm tra trong system call `read()` và `write()`, kernel xét sự t�
 
 Phần sau mô tả data structure chính kernel dùng để xử lý file lock tạo qua system call `flock()` (lock `FL_FLOCK`) và system call `fcntl()` (lock `FL_POSIX`).
 
-### Data structure cho file locking
+### Data structure cho File-Locking
 
 Mọi loại lock Linux được biểu diễn bằng cùng data structure `file_lock` có các field trình bày trong Bảng 12-19.
 
@@ -1645,7 +1645,7 @@ Bảng 12-19. Các field của data structure file\_lock
 | `unsigned long` | `fl_break_time` | Thời gian còn lại trước khi lease kết thúc |
 | `struct file_lock_operations *` | `fl_ops` | Pointer đến file lock operation |
 | `struct lock_manager_operations *` | `fl_mops` | Pointer đến lock manager operation |
-| `union` | `fl_u` | Thông tin riêng của filesystem |
+| `union` | `fl_u` | Thông tin Filesystem-specific |
 
 Mọi structure `lock_file` tham chiếu cùng file trên disk được tập hợp trong singly linked list, có phần tử đầu được field `i_flock` của inode object trỏ đến. Field `fl_next` của structure `lock_file` chỉ định phần tử tiếp theo trong list.
 
@@ -1687,7 +1687,7 @@ Function `flock_lock_file_wait()` thực hiện vòng lặp gồm các bước s
 
 a. Tìm trong list mà `filp->f_dentry->d_inode->i_flock` trỏ đến. Nếu tìm thấy lock `FL_FLOCK` cho cùng file object, kiểm tra loại (`LOCK_SH` hoặc `LOCK_EX`): nếu bằng loại lock mới, trả về 0 (không cần làm gì). Ngược lại, function loại phần tử cũ khỏi list lock trên inode và global file lock list, đánh thức mọi process sleep trong wait queue của lock trong list `fl_block`, và giải phóng structure `file_lock`. b. Nếu process thực hiện unlock (`LOCK_UN`), không cần làm thêm: lock không tồn tại hoặc đã được giải phóng, nên trả về 0.
 
-c. Nếu đã tìm thấy lock `FL_FLOCK` cho cùng file object—tức process đang đổi read lock đã sở hữu thành write lock (hoặc ngược lại)—cho process khác có độ ưu tiên cao hơn, cụ thể mọi process trước đó bị block trên file lock cũ, cơ hội chạy bằng cách gọi `cond_resched()`.
+c. Nếu đã tìm thấy lock `FL_FLOCK` cho cùng file object—tức process đang đổi read lock đã sở hữu thành write lock (hoặc ngược lại)—cho process khác có độ higher-priority, cụ thể mọi process trước đó bị block trên file lock cũ, cơ hội chạy bằng cách gọi `cond_resched()`.
 
 d. Tìm lại list lock trên inode để xác minh không lock `FL_FLOCK` hiện có nào xung đột lock được yêu cầu. Không được có write lock `FL_FLOCK` trong list, và hơn nữa, hoàn toàn không được có lock `FL_FLOCK` nếu process yêu cầu write lock.
 
@@ -1779,7 +1779,7 @@ c. Ngược lại, nếu có sự không tương thích nhưng process có thể
 
 [^3]: Quota system định nghĩa cho mỗi user và/hoặc group giới hạn lượng không gian có thể dùng trên filesystem cho trước (xem system call `quotactl()`).
 
-[^4]: Function `files_init()`, thực thi trong kernel initialization, đặt field `max_files` thành một phần mười RAM khả dụng tính bằng kilobyte, nhưng system administrator có thể điều chỉnh parameter bằng cách ghi vào file /proc/sys/fs/file-max. Hơn nữa, superuser luôn có thể lấy file object, ngay cả khi đã cấp phát `max_files` file object.
+[^4]: Function `files_init()`, thực thi trong kernel initialization, đặt field `max_files` thành one-tenth RAM khả dụng tính bằng kilobyte, nhưng system administrator có thể điều chỉnh parameter bằng cách ghi vào file /proc/sys/fs/file-max. Hơn nữa, superuser luôn có thể lấy file object, ngay cả khi đã cấp phát `max_files` file object.
 
 [^5]: Root directory của filesystem có thể khác root directory của process: như đã thấy trong phần “Files Associated with a Process” trước đó, root directory của process là directory tương ứng pathname “/ ”. Mặc định, root directory của process trùng root directory của root filesystem hệ thống (chính xác hơn là root directory của root filesystem trong namespace của process, mô tả trong phần tiếp theo), nhưng có thể thay bằng cách gọi system call `chroot()`.
 

@@ -22,7 +22,7 @@ Signal có hai mục đích chính:
 
 Tất nhiên, hai mục đích không loại trừ nhau, vì process thường phải phản ứng với một sự kiện bằng cách thực thi routine cụ thể.
 
-Bảng 11-1 liệt kê 31 signal đầu do Linux 2.6 xử lý cho kiến trúc 80×86 (một số signal number, như những số gắn với `SIGCHLD` hoặc `SIGSTOP`, phụ thuộc kiến trúc; hơn nữa, một số signal như `SIGSTKFLT` chỉ được định nghĩa cho kiến trúc cụ thể). Ý nghĩa default action được mô tả trong phần tiếp theo.
+Bảng 11-1 liệt kê 31 signal đầu do Linux 2.6 xử lý cho kiến trúc 80×86 (một số signal number, như những số gắn với `SIGCHLD` hoặc `SIGSTOP`, architecture-dependent; hơn nữa, một số signal như `SIGSTKFLT` chỉ được định nghĩa cho kiến trúc cụ thể). Ý nghĩa default action được mô tả trong phần tiếp theo.
 
 Bảng 11-1. 31 signal đầu trong Linux/i386
 
@@ -37,12 +37,12 @@ Bảng 11-1. 31 signal đầu trong Linux/i386
 | 6 | `SIGIOT` | Dump | Tương đương `SIGABRT` | Không |
 | 7 | `SIGBUS` | Dump | Bus error | Không |
 | 8 | `SIGFPE` | Dump | Floating-point exception | Có |
-| 9 | `SIGKILL` | Terminate | Buộc process kết thúc | Có |
+| 9 | `SIGKILL` | Terminate | Kết thúc Forced-process | Có |
 | 10 | `SIGUSR1` | Terminate | Dành cho process sử dụng | Có |
 | 11 | `SIGSEGV` | Dump | Memory reference không hợp lệ | Có |
 | 12 | `SIGUSR2` | Terminate | Dành cho process sử dụng | Có |
 | 13 | `SIGPIPE` | Terminate | Ghi vào pipe không có bên đọc | Có |
-| 14 | `SIGALRM` | Terminate | Real-timer clock | Có |
+| 14 | `SIGALRM` | Terminate | Real-timerclock | Có |
 | 15 | `SIGTERM` | Terminate | Kết thúc process | Có |
 | 16 | `SIGSTKFLT` | Terminate | Lỗi stack của coprocessor | Không |
 | 17 | `SIGCHLD` | Ignore | Child process dừng hoặc kết thúc, hoặc nhận signal nếu được trace | Có |
@@ -100,7 +100,7 @@ Kernel buộc process đích phản ứng với signal bằng cách thay đổi 
 
 Mỗi signal được tạo có thể được chuyển giao tối đa một lần. Signal là resource tiêu hao: khi đã được chuyển giao, mọi thông tin trong process descriptor tham chiếu đến sự tồn tại trước đó của chúng bị xóa.
 
-Signal đã được tạo nhưng chưa chuyển giao gọi là pending signal. Tại mỗi thời điểm, chỉ có thể tồn tại một pending signal thuộc một loại nhất định cho một process; pending signal bổ sung cùng loại đến cùng process không được đưa vào queue mà chỉ bị loại bỏ. Tuy nhiên, real-time signal khác: có thể có nhiều pending signal cùng loại.
+Signal đã được tạo nhưng chưa chuyển giao gọi là pending signal. Tại mỗi thời điểm, chỉ có thể tồn tại một pending signal thuộc một loại nhất định cho một process; pending signal bổ sung cùng loại đến cùng process không được đưa vào queue mà chỉ bị loại bỏ. Tuy nhiên, Real-time signal khác: có thể có nhiều pending signal cùng loại.
 
 Nói chung, signal có thể pending trong khoảng thời gian không thể đoán trước. Phải xét các yếu tố sau:
 
@@ -309,7 +309,7 @@ Bảng 11-7. Các field của data structure sigqueue
 | `siginfo_t` | `info` | Mô tả sự kiện làm phát sinh signal |
 | `struct user_struct *` | `user` | Pointer đến per-user data structure của owner của process (xem phần “The clone(), fork(), and vfork() System Calls” trong Chương 3) |
 
-Data structure `siginfo_t` có kích thước 128 byte, lưu thông tin về một lần xuất hiện của signal cụ thể; nó chứa các field sau:
+Data structure `siginfo_t` có kích thước 128-byte, lưu thông tin về một lần xuất hiện của signal cụ thể; nó chứa các field sau:
 
 `si_signo`
 
@@ -692,7 +692,7 @@ if (!oldset)
 
 Phần cốt lõi của function `do_signal()` gồm vòng lặp gọi lặp lại function `dequeue_signal()` cho đến khi không còn pending signal không bị block trong cả private lẫn shared pending signal queue. Return code của `dequeue_signal()` được lưu trong local variable `signr`. Nếu giá trị là 0, nghĩa là đã xử lý mọi pending signal và `do_signal()` có thể kết thúc. Chừng nào trả về giá trị khác không, vẫn có pending signal đợi xử lý. `dequeue_signal()` được gọi lại sau khi `do_signal()` xử lý signal hiện tại.
 
-`dequeue_signal()` xét trước mọi signal trong private pending signal queue, bắt đầu từ signal có number nhỏ nhất, rồi đến signal trong shared queue. Nó cập nhật data structure để chỉ rõ signal không còn pending và trả về number của signal. Nhiệm vụ này gồm clear bit tương ứng trong `current-> pending.signal` hoặc `current->signal->shared_pending.signal`, và gọi `recalc_sigpending()` để cập nhật giá trị flag `TIF_SIGPENDING`.
+`dequeue_signal()` xét trước mọi signal trong private pending signal queue, bắt đầu từ signal có lowest-numbered, rồi đến signal trong shared queue. Nó cập nhật data structure để chỉ rõ signal không còn pending và trả về number của signal. Nhiệm vụ này gồm clear bit tương ứng trong `current-> pending.signal` hoặc `current->signal->shared_pending.signal`, và gọi `recalc_sigpending()` để cập nhật giá trị flag `TIF_SIGPENDING`.
 
 Hãy xem cách function `do_signal()` xử lý mỗi pending signal có number do `dequeue_signal()` trả về. Trước tiên, nó kiểm tra receiver process `current` có đang được process khác giám sát không; trong trường hợp này, `do_signal()` gọi `do_notify_parent_cldstop()` và `schedule()` để thông báo cho monitoring process về signal handling.
 
@@ -819,7 +819,7 @@ Bit array chỉ định blocked real-time signal.
 
 `retcode`
 
-Code 8 byte thực hiện system call `sigreturn()`. Trong các phiên bản Linux trước, code này thực sự được thực thi để trở về từ signal handler; tuy nhiên trong Linux 2.6, nó chỉ được dùng làm signature để debugger nhận ra signal stack frame.
+Code 8-byte thực hiện system call `sigreturn()`. Trong các phiên bản Linux trước, code này thực sự được thực thi để trở về từ signal handler; tuy nhiên trong Linux 2.6, nó chỉ được dùng làm signature để debugger nhận ra signal stack frame.
 
 ![Hình 11-3](images/ch11/fig11-03.png)
 
@@ -949,7 +949,7 @@ Field chứa giá trị –1 (xem phần “Saving the Registers for the Excepti
 
 Do đó, giá trị không âm trong field `orig_eax` nghĩa là signal đã đánh thức process `TASK_INTERRUPTIBLE` đang sleep trong system call. Service routine nhận ra system call bị gián đoạn, nên trả về một error code đã đề cập.
 
-#### Khởi động lại system call bị gián đoạn bởi signal không được catch
+#### Khởi động lại system call bị gián đoạn bởi signal non-caught
 
 Nếu signal bị ignore tường minh hoặc default action của nó được áp dụng, `do_signal()` phân tích error code của system call để quyết định system call chưa hoàn tất có phải tự động thực thi lại không, như chỉ định trong Bảng 11-11. Nếu phải khởi động lại, function sửa hardware context `regs` để khi process trở lại User Mode, `eip` trỏ đến instruction `int $0x80` hoặc instruction `sysenter`, và `eax` chứa system call number:
 
@@ -969,7 +969,7 @@ if (regs->orig_eax >= 0) {
 
 Field `regs->eax` được điền return code của system call service routine (xem phần “Entering and Exiting a System Call” trong Chương 10). Lưu ý cả instruction `int $0x80` và `sysreturn` đều dài hai byte nên function trừ 2 khỏi `eip` để đặt nó đến instruction kích hoạt system call.
 
-Error code `ERESTART_RESTARTBLOCK` đặc biệt, vì register `eax` được đặt thành number của system call `restart_syscall()`; do đó, User Mode process không khởi động lại cùng system call bị signal gián đoạn. Error code này chỉ được dùng bởi system call liên quan đến thời gian mà khi khởi động lại cần điều chỉnh User Mode parameter. Ví dụ điển hình là system call `nanosleep()` (xem phần “An Application of Dynamic Timers: the nanosleep() System Call” trong Chương 6): giả sử process gọi nó để tạm dừng thực thi 20 millisecond, và signal xảy ra sau 10 millisecond. Nếu system call được khởi động lại như thường, tổng thời gian trễ sẽ vượt 30 millisecond.
+Error code `ERESTART_RESTARTBLOCK` đặc biệt, vì register `eax` được đặt thành number của system call `restart_syscall()`; do đó, User Mode process không khởi động lại cùng system call bị signal gián đoạn. Error code này chỉ được dùng bởi system call time-related mà khi khởi động lại cần điều chỉnh User Mode parameter. Ví dụ điển hình là system call `nanosleep()` (xem phần “An Application of Dynamic Timers: the nanosleep() System Call” trong Chương 6): giả sử process gọi nó để tạm dừng thực thi 20 millisecond, và signal xảy ra sau 10 millisecond. Nếu system call được khởi động lại như thường, tổng thời gian trễ sẽ vượt 30 millisecond.
 
 Thay vào đó, service routine của system call `nanosleep()` điền field `restart_block` trong structure `thread_info` của `current` bằng địa chỉ service routine đặc biệt dùng khi khởi động lại, và trả về `-ERESTART_RESTARTBLOCK` nếu bị gián đoạn. Service routine `sys_restart_syscall()` chỉ thực thi service routine đặc biệt của `nanosleep()`, điều chỉnh thời gian trễ để tính đến thời gian đã trôi qua giữa lúc gọi system call gốc và lúc khởi động lại.
 
@@ -1032,13 +1032,13 @@ return kill_something_info(sig, &info, pid);
 
 Đến lượt function `kill_something_info()` gọi `kill_proc_info()` (để gửi signal đến một thread group qua `group_send_sig_info()`), hoặc `kill_pg_info()` (để quét mọi process trong process group đích và gọi `send_sig_info()` cho từng process), hoặc gọi lặp lại `group_send_sig_info()` cho từng process trong hệ thống (nếu `pid` là `-1`).
 
-System call `kill()` có thể gửi mọi signal, ngay cả real-time signal có number từ 32 đến 64. Tuy nhiên, như đã thấy trong phần “Generating a Signal” trước đó, system call `kill()` không đảm bảo phần tử mới được thêm vào pending signal queue của process đích, nên có thể mất nhiều instance của pending signal. Nên gửi real-time signal bằng system call như `rt_sigqueueinfo()` (xem phần “System Calls for Real-Time Signals” phía sau).
+System call `kill()` có thể gửi mọi signal, ngay cả so-called real-time signal có number từ 32 đến 64. Tuy nhiên, như đã thấy trong phần “Generating a Signal” trước đó, system call `kill()` không đảm bảo phần tử mới được thêm vào pending signal queue của process đích, nên có thể mất nhiều instance của pending signal. Nên gửi Real-time signal bằng system call như `rt_sigqueueinfo()` (xem phần “System Calls for Real-Time Signals” phía sau).
 
 Các biến thể Unix System V và BSD còn có system call `killpg()`, có thể gửi tường minh signal đến nhóm process. Trong Linux, function được triển khai làm library function dùng system call `kill()`. Biến thể khác là `raise()`, gửi signal đến process hiện tại (tức process thực thi function). Trong Linux, `raise()` được triển khai làm library function.
 
 ### System call tkill() và tgkill()
 
-Các system call `tkill()` và `tgkill()` gửi signal đến process cụ thể trong thread group. Function `pthread_kill()` của mọi pthread library tuân thủ POSIX gọi một trong hai để gửi signal đến lightweight process cụ thể.
+Các system call `tkill()` và `tgkill()` gửi signal đến process cụ thể trong thread group. Function `pthread_kill()` của mọi pthread library POSIX-compliant gọi một trong hai để gửi signal đến lightweight process cụ thể.
 
 System call `tkill()` cần hai parameter: PID `pid` của process cần gửi signal và signal number `sig`. Service routine `sys_tkill()` điền table `siginfo`, lấy địa chỉ process descriptor, thực hiện một số permission check (như ở bước 2 trong phần “The group\_send\_sig\_info() Function”), và gọi `specific_send_sig_info()` để gửi signal.
 
@@ -1180,7 +1180,7 @@ System call `sigsuspend()` có vẻ dư thừa, vì thực thi kết hợp `sigp
 
 Trong trường hợp cụ thể này, `sigprocmask()` có thể unblock signal được chuyển giao trước khi gọi `sleep()`. Nếu điều này xảy ra, process có thể ở state `TASK_INTERRUPTIBLE` mãi mãi, đợi signal đã được chuyển giao. Mặt khác, system call `sigsuspend()` không cho phép gửi signal sau khi unblock và trước lời gọi `schedule()`, vì process khác không thể lấy CPU trong khoảng thời gian đó.
 
-### System call cho real-time signal
+### System call cho Real-Time signal
 
 Vì các system call đã xét chỉ áp dụng cho standard signal, phải đưa vào system call bổ sung để cho phép User Mode process xử lý real-time signal.
 
