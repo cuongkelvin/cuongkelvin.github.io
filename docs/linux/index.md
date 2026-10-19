@@ -78,3 +78,25 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung vào
 - [**Chương 15 — IIO framework**](linux_device_driver_development/ch15_digging_into_the_iio_framework.vi.md) — `iio_dev`, channel, triggered buffer, consumer trong kernel, ứng dụng IIO ở user space
 - [**Chương 16 — Pin controller và GPIO**](linux_device_driver_development/ch16_getting_the_most_out_of_the_pin_controller_and_gpio_subsystems.vi.md) — pin control, GPIO controller driver, GPIO consumer theo descriptor, libgpiod, GPIO aggregator
 - [**Chương 17 — Input subsystem**](linux_device_driver_development/ch17_leveraging_the_linux_kernel_input_subsystem.vi.md) — đăng ký input device, polled device, báo cáo input event, đọc event từ user space
+
+## Theo sách *Understanding Linux Network Internals*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung vào tầng mạng bên trong kernel, từ driver card mạng tới bridging.
+
+- [**Chương 1 — Giới thiệu**](understanding_linux_network_internals_book/ch01_introduction.vi.md) — thuật ngữ, các mẫu code hay gặp, công cụ user space, cách đọc mã nguồn
+- [**Chương 2 — Các cấu trúc dữ liệu chính**](understanding_linux_network_internals_book/ch02_critical_data_structures.vi.md) — `sk_buff` và `net_device`
+- [**Chương 3 — Giao tiếp user space với kernel**](understanding_linux_network_internals_book/ch03_user_space_to_kernel_interface.vi.md) — procfs và sysctl, `ioctl`, netlink
+- [**Chương 4 — Notification chain**](understanding_linux_network_internals_book/ch04_notification_chains.vi.md) — định nghĩa chain, đăng ký và phát sự kiện, các chain của tầng mạng
+- [**Chương 5 — Khởi tạo network device**](understanding_linux_network_internals_book/ch05_network_device_initialization.vi.md) — khởi tạo hệ thống và NIC, tham số module, virtual device
+- [**Chương 6 — Tầng PCI và card mạng**](understanding_linux_network_internals_book/ch06_the_pci_layer_and_network_interface_cards.vi.md) — đăng ký driver PCI cho NIC, quản lý nguồn và Wake-on-LAN
+- [**Chương 7 — Hạ tầng khởi tạo thành phần**](understanding_linux_network_internals_book/ch07_kernel_infrastructure_for_component_initialization.vi.md) — tham số lúc boot, mã khởi tạo module, các macro đánh dấu, tối ưu bộ nhớ
+- [**Chương 8 — Đăng ký và khởi tạo device**](understanding_linux_network_internals_book/ch08_device_registration_and_initialization.vi.md) — khi nào đăng ký và hủy đăng ký, cấp phát `net_device`, trạng thái device
+- [**Chương 9 — Interrupt và network driver**](understanding_linux_network_internals_book/ch09_interrupts_and_network_drivers.vi.md) — báo cho driver khi có frame đến, interrupt handler, `softnet_data`
+- [**Chương 10 — Nhận frame**](understanding_linux_network_internals_book/ch10_frame_reception.vi.md) — hàng đợi, `netif_rx`, quản lý nghẽn, xử lý `NET_RX_SOFTIRQ`
+- [**Chương 11 — Truyền frame**](understanding_linux_network_internals_book/ch11_frame_transmission.vi.md) — bật tắt việc truyền và đường đi của frame khi gửi
+- [**Chương 12 — Tài liệu tham khảo về interrupt**](understanding_linux_network_internals_book/ch12_general_and_reference_material_about_interrupts.vi.md) — thống kê, tinh chỉnh qua /proc, danh sách hàm và file liên quan
+- [**Chương 13 — Protocol handler**](understanding_linux_network_internals_book/ch13_protocol_handlers.vi.md) — tổ chức và đăng ký protocol handler, Ethernet so với IEEE 802.3
+- [**Chương 14 — Bridging: khái niệm**](understanding_linux_network_internals_book/ch14_bridging_concepts.vi.md) — repeater, bridge và router, address learning, nhiều bridge
+- [**Chương 15 — Bridging: Spanning Tree Protocol**](understanding_linux_network_internals_book/ch15_bridging_the_spanning_tree_protocol.vi.md) — bridge ID và port ID, BPDU, topology hoạt động, timer, thay đổi topology
+- [**Chương 16 — Bridging: cài đặt trong Linux**](understanding_linux_network_internals_book/ch16_bridging_linux_implementation.vi.md) — bridge device, tạo và xóa bridge, thêm port, bật tắt bridge
+- [**Chương 17 — Bridging: chủ đề khác**](understanding_linux_network_internals_book/ch17_bridging_miscellaneous_topics.vi.md) — công cụ cấu hình user space, tinh chỉnh qua /proc và /sys, thống kê
