@@ -2,13 +2,13 @@
 
 Hai chương trước đã đi khá sâu vào các khía cạnh của Linux memory management, tập trung vào chính xác cách bạn, với tư cách kernel/driver developer, có thể cấp phát động và giải phóng kernel memory hiệu quả (ngoài API, chúng ta đã trình bày những nội dung thú vị như MGLRU, DAMON và OOM killer!).
 
-Trong chương này và chương tiếp theo, bạn sẽ đi sâu vào chi tiết một chủ đề OS then chốt – CPU (hay task) scheduling trên Linux OS. Tôi sẽ cố giữ việc học vừa mang tính khái niệm vừa thực hành, bằng cách đặt (và trả lời) các câu hỏi điển hình và thực hiện những công việc phổ biến liên quan đến scheduling. Hiểu CPU scheduling hoạt động thế nào ở mức OS không chỉ quan trọng từ góc nhìn kernel developer (và driver developer), mà còn tự động giúp bạn trở thành system architect tốt hơn, ngay cả với user-space application.
+Trong chương này và chương tiếp theo, bạn sẽ đi sâu vào chi tiết một chủ đề OS then chốt – CPU (hay task) scheduling trên Linux OS. Tôi sẽ cố giữ việc học vừa mang tính khái niệm vừa hands-on, bằng cách đặt (và trả lời) các câu hỏi điển hình và thực hiện những công việc phổ biến liên quan đến scheduling. Hiểu CPU scheduling hoạt động thế nào ở mức OS không chỉ quan trọng từ góc nhìn kernel developer (và driver developer), mà còn tự động giúp bạn trở thành system architect tốt hơn, ngay cả với user-space application.
 
 Chúng ta bắt đầu bằng kiến thức nền thiết yếu; gồm khái niệm Kernel Schedulable Entity (KSE) trên Linux, cũng như các POSIX scheduling policy mà Linux triển khai. Sau đó chuyển sang dùng công cụ – `perf` và các công cụ khác – để trực quan hóa flow of control khi OS chạy task trên CPU và chuyển đổi giữa chúng. Điều này cũng có thể rất hữu ích khi cần profile app!
 
 Sau đó, chúng ta đi sâu hơn vào chính xác cách CPU scheduling hoạt động trên Linux (trong kernel space), trình bày modular scheduling class, gồm Completely Fair Scheduling (CFS), việc chạy core schedule function, “ai” và “khi nào” thực hiện, v.v. Trong quá trình đó, chúng ta cũng trình bày cách truy vấn scheduling policy và priority của thread bất kỳ trên hệ thống bằng lập trình và một cách động.
 
-Một điều cần chỉ ra ngay từ đầu: như bạn biết, CPU trên hệ thống là resource được chia sẻ giữa user, process và thread thực thi trên chúng. CPU scheduler (hay task scheduler) tất nhiên là cách phân xử quyền truy cập resource quý giá này. Tuy vậy, CPU chỉ là một resource; memory, IO device, networking và nhiều thứ khác cũng là shared resource. Linux kernel có một framework nâng cao, ăn sâu bên trong cho tính năng chia sẻ resource trừu tượng hơn và quan trọng trong thực tế: cgroup (control group)! (Thực ra sơ đồ đầu tiên, Hình 10.1, đã gợi đến nó!). Hiểu chi tiết bên trong CPU scheduling cũng phải bao gồm vai trò then chốt mà cgroup có thể đóng góp; đừng lo – chúng ta sẽ trình bày một số chi tiết then chốt về cgroup trong chương sau.
+Một điều cần chỉ ra ngay từ đầu: như bạn biết, CPU trên hệ thống là resource được chia sẻ giữa user, process và thread thực thi trên chúng. CPU scheduler (hay task scheduler) tất nhiên là cách phân xử quyền truy cập resource quý giá này. Tuy vậy, CPU chỉ là một resource; memory, IO device, networking và nhiều thứ khác cũng là shared resource. Linux kernel có một framework nâng cao, ăn sâu bên trong cho tính năng resource-sharing trừu tượng hơn và quan trọng trong thực tế: cgroup (control group)! (Thực ra sơ đồ đầu tiên, Hình 10.1, đã gợi đến nó!). Hiểu chi tiết bên trong CPU scheduling cũng phải bao gồm vai trò then chốt mà cgroup có thể đóng góp; đừng lo – chúng ta sẽ trình bày một số chi tiết then chốt về cgroup trong chương sau.
 
 Trong chương này, chúng ta trình bày các nội dung sau:
 
@@ -28,7 +28,7 @@ Giờ hãy bắt đầu chủ đề thú vị này!
 
 Tôi giả định bạn đã đọc chương trực tuyến Kernel Workspace Setup, đã chuẩn bị phù hợp một guest Virtual Machine (VM) chạy Ubuntu 22.04 LTS (hoặc bản phát hành ổn định mới hơn) và đã cài mọi package cần thiết. Nếu chưa, tôi đặc biệt khuyên bạn làm việc này trước.
 
-Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyên bạn trước tiên thiết lập môi trường workspace, bao gồm clone GitHub repository của sách để lấy code rồi thực hành trực tiếp trên đó. Có thể tìm repository tại đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`.
+Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyên bạn trước tiên thiết lập môi trường workspace, bao gồm clone GitHub repository của sách để lấy code rồi hands-on trên đó. Có thể tìm repository tại đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`.
 
 ## Tìm hiểu CPU scheduling internals – phần 1 – kiến thức nền thiết yếu
 
@@ -48,11 +48,11 @@ Một ví dụ – cùng sơ đồ (Hình 10.1) – sẽ giúp giải thích: n�
 
 Hình 10.1: Sơ đồ khái niệm cho thấy kernel layout của một vài process và các thread, stack, kthread của chúng trong kernel (trước mắt bỏ qua abstraction “cgroups” ở trên cùng; chúng ta sẽ đến nội dung đó trong chương sau)
 
-Được rồi, tôi đang yêu cầu bạn bỏ qua vấn đề lớn hiển hiện. Phần trên cùng Hình 10.1 cho thấy góc nhìn trừu tượng, rất khái niệm về cgroups kernel framework, một framework hiện ăn sâu vào chính cấu trúc kernel. Ở đây, điều tôi yêu cầu bạn hình dung – không lo gì đến các câu hỏi “tại sao/thế nào/ai/khi nào/…” – là lớp cgroup này, nếu gọi như vậy, gần như luôn hiện diện trong Linux hiện đại, và chắc chắn có thể tác động đến CPU scheduling. Trước mắt chỉ cần biết nó tồn tại; chi tiết – và thử nghiệm! – được trình bày trong chương sau.
+Được rồi, tôi đang yêu cầu bạn bỏ qua vấn đề lớn hiển hiện. Phần trên cùng Hình 10.1 cho thấy góc nhìn trừu tượng, rất khái niệm về cgroups kernel framework, một framework hiện ăn sâu vào chính cấu trúc kernel. Ở đây, điều tôi yêu cầu bạn hình dung – không lo gì đến các câu hỏi “tại sao/thế nào/ai/khi nào/…” – là lớp cgroup này, nếu gọi như vậy, gần như ever-present trong Linux hiện đại, và chắc chắn có thể tác động đến CPU scheduling. Trước mắt chỉ cần biết nó tồn tại; chi tiết – và thử nghiệm! – được trình bày trong chương sau.
 
 Xét Hình 10.1, mỗi thread – trừ kernel thread – có user stack, kernel stack và task structure (kernel thread chỉ có kernel stack và task structure; tất cả đã được giải thích kỹ trong Chương 6, Kernel Internals Essentials – Processes and Threads, tại phần Tổ chức process, thread và stack của chúng – user space và kernel space). Giờ nếu cả 11 thread đều ở runnable state, nghĩa là ready-to-run, thì tất cả cạnh tranh cho một processor core duy nhất. (Dù ít khả năng tất cả runnable đồng thời, hãy cứ xét để thảo luận). Điều then chốt cần hiểu là giờ có 11 thread cạnh tranh CPU resource, không phải ba process và ba kernel thread. Tình huống thực tế hơn là trong 11 thread tồn tại, có lẽ bốn runnable, nghĩa là nằm trong runqueue và muốn chạy, còn bảy thread ở những state khác (sleeping (trong blocking call) hoặc stopped (frozen)); bảy thread này thậm chí không phải ứng viên cho scheduler.
 
-Giờ đã hiểu KSE là thread, chúng ta sẽ (gần như) luôn nói đến thread trong ngữ cảnh scheduling. Hãy chuyển sang Linux process state machine.
+Giờ đã hiểu KSE là thread, chúng ta sẽ (gần như) luôn nói đến thread trong ngữ cảnh scheduling. Hãy chuyển sang so-called Linux process state machine.
 
 ### Linux process state machine
 
@@ -84,9 +84,9 @@ Sơ đồ sau biểu diễn Linux state machine cho process hay thread bất k�
 
 Hình 10.2: Linux process/thread state machine
 
-Sơ đồ trên cho thấy transition giữa các state bằng mũi tên (đỏ). Lưu ý để rõ ràng, một số transition (ví dụ thread có thể bị kết thúc khi sleeping hoặc stopped) không được thể hiện tường minh trong sơ đồ trên. (Để bạn biết, process chết nhưng không được parent chờ sẽ rơi vào state nửa chết nửa sống, gọi là zombie hay defunct process; đây được dự định là state tạm thời. Quy tắc phải theo để ngăn zombie ở lại hệ thống mãi là mỗi `fork()` cần system call `wait*()` tương ứng. (Linux như thường lệ có mẹo hay: kết thúc parent của các zombie khiến zombie cũng được “reap” (chết).)
+Sơ đồ trên cho thấy transition giữa các state bằng mũi tên (đỏ). Lưu ý để rõ ràng, một số transition (ví dụ thread có thể bị kết thúc khi sleeping hoặc stopped) không được thể hiện tường minh trong sơ đồ trên. (Để bạn biết, process chết nhưng không được parent chờ sẽ rơi vào state nửa chết half-alive, gọi là zombie hay defunct process; đây được dự định là state tạm thời. Quy tắc phải theo để ngăn zombie ở lại hệ thống mãi là mỗi `fork()` cần system call `wait*()` tương ứng. (Linux như thường lệ có mẹo hay: kết thúc parent của các zombie khiến zombie cũng được “reap” (chết).)
 
-Chúng ta biết mỗi thread tồn tại (cả user và kernel) có task structure riêng. Vì vậy ở mức code, task structure member tên `__state` (trước đây tên `state`) giữ “state” của task – thread – trong “state machine”. Khi runnable, nó được đặt thành giá trị `TASK_RUNNING` (biểu diễn tổng quát bằng “R”, và bên trong bằng các state `Rr` và `Rcpu` trong Hình 10.2).
+Chúng ta biết mỗi thread tồn tại (cả user và kernel) có task structure riêng. Vì vậy ở mức code, task structure member tên `__state` (trước đây tên `state`) giữ “state” của task – thread – trong so-called “state machine”. Khi runnable, nó được đặt thành giá trị `TASK_RUNNING` (biểu diễn tổng quát bằng “R”, và bên trong bằng các state `Rr` và `Rcpu` trong Hình 10.2).
 
 Wait queue là data structure nơi task ở sleep state được enqueue – nghĩa là chúng chờ event (thực chất đi đến đây bên trong blocking call). Linux có hai khả năng cho sleeping thread; thread có thể ở:
 
@@ -108,11 +108,11 @@ Trước mắt hãy tóm lược ngắn các POSIX scheduling policy và tác d�
 
 | Scheduling policy | Những điểm then chốt | Priority scale |
 |---|---|---|
-| `SCHED_OTHER` hoặc `SCHED_NORMAL` | Luôn là mặc định; thread có policy này là non-real-time; bên trong được triển khai dưới dạng Completely Fair Scheduling (CFS) class (xem phần Cơ chế hoạt động ngắn gọn của Completely Fair Scheduling (CFS) class sắp tới). Động cơ đằng sau scheduling policy này là tính công bằng (như “công bằng với mọi runnable thread, tránh để bất kỳ thread nào bị thiếu CPU time”) và throughput tổng thể. | Thread có policy này có real-time priority `0`. Non-real-time priority gọi là nice value; trải từ -20 đến +19 (số thấp hơn nghĩa là priority cao hơn), với giá trị cơ sở (ban đầu) 0 |
-| `SCHED_RR` | Động cơ đằng sau scheduling policy này là cung cấp một (soft) real-time policy mạnh tay vừa phải. Thread thuộc `sched` class này có timeslice hữu hạn (thường mặc định 100 ms). Thread `SCHED_RR` nhường processor IFF (khi và chỉ khi): • Block trên I/O (đi vào sleep). • Stop hoặc chết. • Real-time thread có priority cao hơn trở thành runnable (sẽ preempt thread này). • Timeslice hết hạn. | (Soft) real-time: 1 đến 99 (số cao hơn nghĩa là priority cao hơn) |
-| `SCHED_FIFO` | Động cơ đằng sau scheduling policy này là cung cấp một (soft) real-time policy (so với `SCHED_RR`, rất) mạnh tay. Thread `SCHED_FIFO` nhường processor IFF: • Block trên I/O (đi vào sleep). • Stop hoặc chết. • Real-time thread có priority cao hơn trở thành runnable (sẽ preempt thread này). Thực chất timeslice là vô hạn. | (Giống `SCHED_RR`) |
-| `SCHED_BATCH` | Động cơ đằng sau scheduling policy này là phù hợp cho batch job non-interactive, priority thấp, với ít preemption hơn. | Khoảng nice value (-20 đến +19) |
-| `SCHED_IDLE` | Trường hợp đặc biệt: thường kernel thread PID `0` (truyền thống gọi là `swapper`; thực tế là per-CPU idle thread) dùng policy này. Nó luôn được bảo đảm là thread priority thấp nhất hệ thống và chỉ chạy khi không thread nào khác muốn CPU. | Priority thấp nhất tất cả (hãy xem thậm chí thấp hơn nice value +19) |
+| `SCHED_OTHER` hoặc `SCHED_NORMAL` | Luôn là mặc định; thread có policy này là non-real-time; bên trong được triển khai dưới dạng Completely Fair Scheduling (CFS) class (xem phần Cơ chế hoạt động ngắn gọn của Completely Fair Scheduling (CFS) class sắp tới). Động cơ đằng sau scheduling policy này là tính công bằng (như “công bằng với mọi runnable thread, tránh để bất kỳ thread nào bị thiếu CPU time”) và throughput tổng thể. | Thread có policy này có real-time priority `0`. non-real-time priority gọi là nice value; trải từ -20 đến +19 (số thấp hơn nghĩa là priority cao hơn), với giá trị cơ sở (ban đầu) 0 |
+| `SCHED_RR` | Động cơ đằng sau scheduling policy này là cung cấp một (soft) real-time policy mạnh tay vừa phải. Thread thuộc `sched` class này có timeslice hữu hạn (thường mặc định 100 ms). Thread `SCHED_RR` nhường processor IFF (khi và chỉ khi): • Block trên I/O (đi vào sleep). • Stop hoặc chết. • real-time thread có higher-priority trở thành runnable (sẽ preempt thread này). • Timeslice hết hạn. | (Soft) real-time: 1 đến 99 (số cao hơn nghĩa là priority cao hơn) |
+| `SCHED_FIFO` | Động cơ đằng sau scheduling policy này là cung cấp một (soft) real-time policy (so với `SCHED_RR`, rất) mạnh tay. Thread `SCHED_FIFO` nhường processor IFF: • Block trên I/O (đi vào sleep). • Stop hoặc chết. • real-time thread có higher-priority trở thành runnable (sẽ preempt thread này). Thực chất timeslice là vô hạn. | (Giống `SCHED_RR`) |
+| `SCHED_BATCH` | Động cơ đằng sau scheduling policy này là phù hợp cho batch job non-interactive, low-priority, với ít preemption hơn. | Khoảng nice value (-20 đến +19) |
+| `SCHED_IDLE` | Trường hợp đặc biệt: thường kernel thread PID `0` (truyền thống gọi là `swapper`; thực tế là per-CPU idle thread) dùng policy này. Nó luôn được bảo đảm là thread lowest-priority hệ thống và chỉ chạy khi không thread nào khác muốn CPU. | Priority thấp nhất tất cả (hãy xem thậm chí thấp hơn nice value +19) |
 
 Bảng 10.1 : Các scheduling policy của Linux (POSIX-compliant) và ý nghĩa tóm lược
 
@@ -130,9 +130,9 @@ Lúc này điều quan trọng cần hiểu là trên OS như Linux, thực tế
 
 Priority scale cho thread đơn giản (sau đây từ priority thấp đến cao; tham khảo Hình 10.3):
 
-- Non-real-time thread (`SCHED_OTHER`) có real-time priority `0`; bảo đảm chúng thậm chí không thể cạnh tranh với real-time thread; còn chẳng cùng sân chơi! Vậy phân biệt priority giữa mọi non-real-time thread thế nào?
+- Non-real-time thread (`SCHED_OTHER`) có real-time priority `0`; bảo đảm chúng thậm chí không thể cạnh tranh với real-time thread; còn chẳng cùng sân chơi! Vậy priority-wise giữa mọi non-real-time thread thế nào?
 
-Dễ thôi – chúng dùng priority value (kiểu UNIX cũ) gọi là nice value, trải từ -20 đến +19, với -20 cao nhất, 0 là cơ sở hay mặc định và +19 thấp nhất. (Có các interface thích hợp trên cả command line lẫn API để truy vấn và đặt; chúng ta sẽ xử lý trong phần Truy vấn scheduling policy và priority của thread cho trước sắp tới cũng như Chương 11, The CPU Scheduler – Part 2.(Một điều cần xét: nhiều distro bật kernel feature tên autogroup (`CONFIG_SCHED_AUTOGROUP`); nó giúp tăng tốc interactive response time cho foreground terminal process và các thread của chúng. Khi bật, khái niệm truyền thống về nice value không thực sự được dùng (bên trong tận dụng cgroup). Xem thêm trong phần Đọc thêm.)
+Dễ thôi – chúng dùng priority value (UNIX-style cũ) gọi là nice value, trải từ -20 đến +19, với -20 cao nhất, 0 là cơ sở hay mặc định và +19 thấp nhất. (Có các interface thích hợp trên cả command line lẫn API để truy vấn và đặt; chúng ta sẽ xử lý trong phần Truy vấn scheduling policy và priority của thread cho trước sắp tới cũng như Chương 11, The CPU Scheduler – Part 2.(Một điều cần xét: nhiều distro bật kernel feature tên autogroup (`CONFIG_SCHED_AUTOGROUP`); nó giúp tăng tốc interactive response time cho foreground terminal process và các thread của chúng. Khi bật, khái niệm truyền thống về nice value không thực sự được dùng (bên trong tận dụng cgroup). Xem thêm trong phần Đọc thêm.)
 
 - Real-time thread (có policy `SCHED_FIFO` hay `SCHED_RR`) có real-time priority scale từ 1 đến 99, 1 thấp nhất và 99 cao nhất. Hãy nghĩ theo cách này: trên non-preemptible kernel có một CPU, thread `SCHED_FIFO` priority 99 quay trong infinite loop không thể thoát sẽ thực chất làm treo máy! (Tất nhiên ngay cả nó cũng có thể bị interrupt preempt – cả hard lẫn soft; xem Chương 6, Kernel Internals Essentials – Processes and Threads, Hình 6.1.) Hình 10.2 cho thấy thread priority scale trên Linux:
 
@@ -197,7 +197,7 @@ sẽ khiến cả ba process instance `yes` kết thúc. Vì vậy trong Hình 1
 
 Linux, với kho công cụ developer và Quality Assurance (QA) đồ sộ, có một công cụ thực sự mạnh là `perf`. Tóm lược, bộ công cụ `perf` là một cách thực hiện CPU profiling trên máy Linux. (Ngoài một vài mẹo, sách này không trình bày `perf` chi tiết.)
 
-Tương tự utility lâu đời `top` (và `htop` mới hơn), để có “góc nhìn từ trên cao” về thứ gì đang ngốn CPU (chi tiết hơn `top` rất nhiều), tập utility `perf` rất xuất sắc. Tuy nhiên lưu ý, khá khác thường với app, `perf` gắn chặt với kernel chạy bên dưới. Điều quan trọng là (ít nhất trên Ubuntu), để có `perf`, bạn cài package `linux-tools-$(uname -r)`. Đồng thời các distribution package liên quan `perf` sẽ không có cho custom kernel 6.1 đã build; vì vậy khi dùng `perf`, tôi đề nghị boot guest VM với một kernel tiêu chuẩn (hay distro kernel), cài package `linux-tools-$(uname -r)` rồi thử dùng `perf`. (Tất nhiên luôn có thể tự build `perf` từ kernel source tree, dưới folder `tools/perf/`.)
+Tương tự utility lâu đời `top` (và `htop` mới hơn), để có “thousand-foot” về thứ gì đang ngốn CPU (chi tiết hơn `top` rất nhiều), tập utility `perf` rất xuất sắc. Tuy nhiên lưu ý, khá khác thường với app, `perf` gắn chặt với kernel chạy bên dưới. Điều quan trọng là (ít nhất trên Ubuntu), để có `perf`, bạn cài package `linux-tools-$(uname -r)`. Đồng thời các distribution package liên quan `perf` sẽ không có cho custom kernel 6.1 đã build; vì vậy khi dùng `perf`, tôi đề nghị boot guest VM với một kernel tiêu chuẩn (hay distro kernel), cài package `linux-tools-$(uname -r)` rồi thử dùng `perf`. (Tất nhiên luôn có thể tự build `perf` từ kernel source tree, dưới folder `tools/perf/`.)
 
 Với `perf` được cài và hoạt động, bạn có thể thử các command liên quan `perf top` sau (tham khảo man page hoặc tutorial để biết chi tiết):
 
@@ -207,17 +207,17 @@ sudo perf top --sort comm,dso
 sudo perf top -r 90 --sort pid,comm,dso,symbol
 ```
 
-Các biến thể `perf top` nói trên không chỉ giúp có góc nhìn tổng quan thứ gì đang ngốn CPU mà còn thấy code path đang được thực thi, thậm chí cho phép zoom vào từng task để xem thêm chi tiết (điều công cụ truyền thống thường không cho làm). Nhân tiện, `comm` chỉ tên command/process và dso là viết tắt dynamic shared object. `man` page của `perf(1)` cung cấp chi tiết; dùng ký hiệu `man perf-<foo>` – ví dụ `man perf-top` – để có trợ giúp cho `perf top`.
+Các biến thể `perf top` nói trên không chỉ giúp có góc nhìn birds-eye thứ gì đang ngốn CPU mà còn thấy code path đang được thực thi, thậm chí cho phép zoom vào từng task để xem thêm chi tiết (điều công cụ truyền thống thường không cho làm). Nhân tiện, `comm` chỉ tên command/process và dso là viết tắt dynamic shared object. `man` page của `perf(1)` cung cấp chi tiết; dùng ký hiệu `man perf-<foo>` – ví dụ `man perf-top` – để có trợ giúp cho `perf top`.
 
-Nhưng quay lại điểm chính: một cách dùng `perf` là có bức tranh rõ chính xác task nào đang chạy trên CPU core nào; thực hiện qua sub-command `sched map` trong `perf`. Tuy nhiên trước tiên phải record event bằng `perf`, có thể làm trên toàn hệ thống hoặc cho process cụ thể. Để record event, chạy command:
+Nhưng quay lại điểm chính: một cách dùng `perf` là có bức tranh rõ chính xác task nào đang chạy trên CPU core nào; thực hiện qua sub-command `sched map` trong `perf`. Tuy nhiên trước tiên phải record event bằng `perf`, có thể làm system-wide hoặc cho process cụ thể. Để record event, chạy command:
 
 ```
 sudo perf sched record [command]
 ```
 
-Không có parameter sau từ khóa `record`, nó record event toàn hệ thống; truyền parameter khiến nó chỉ record event cho command process ấy và các descendant. Kết thúc recording session bằng signal SIGINT (^C). Theo mặc định, sẽ tạo binary data file tên `perf.data`; chúng ta sẽ sớm thấy cách diễn giải trực quan.
+Không có parameter sau từ khóa `record`, nó record event system-wide; truyền parameter khiến nó chỉ record event cho command process ấy và các descendant. Kết thúc recording session bằng signal SIGINT (^C). Theo mặc định, sẽ tạo binary data file tên `perf.data`; chúng ta sẽ sớm thấy cách diễn giải trực quan.
 
-#### Thử nghiệm – cách tiếp cận command line
+#### Thử nghiệm – cách tiếp cận command-line
 
 Trước tiên tất nhiên chạy process luyện CPU – `yes` – concurrently, mỗi instance affined vào CPU core khác nhau. Để dễ làm, tôi thiết lập một vài wrapper script đơn giản trong folder: `ch10/concurrent_exercise/`. Hãy chạy mẫu và xem, từ bản sao GitHub repo của sách của bạn (có tại `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`):
 
@@ -238,7 +238,7 @@ concurrency: spawning a 'yes' process on ...
 ... CPU core #5 now ...
 ```
 
-Giờ (trong cửa sổ Terminal khác), bắt đầu recording (sampling, CPU profiling) bằng `perf` (lưu ý đang record toàn hệ thống; không sao):
+Giờ (trong cửa sổ Terminal khác), bắt đầu recording (sampling, CPU profiling) bằng `perf` (lưu ý đang record system-wide; không sao):
 
 ```
 sudo perf sched record
@@ -272,7 +272,7 @@ Report file, ở đây `mymap.txt`, có định dạng sau (vì các cột khôn
 
 - Sau các cột CPU core (ở đây có sáu vì có sáu CPU) là cột Timestamp (với system uptime biểu diễn theo định dạng `sec.us`).
 
-- Sau đó là cột Legend. Ở đây mỗi thread thực thi được gán tên hai ký tự; trong lần chạy này, một ví dụ tốt (xem Hình 10.5), `A0` là `kthread` tên `migration/0:18`, `B0` là một trong các thread `yes` (`yes:6428`), `C0` là một `kthread migration/1:23` khác, v.v.
+- Sau đó là cột Legend. Ở đây mỗi thread thực thi được gán tên two-character; trong lần chạy này, một ví dụ tốt (xem Hình 10.5), `A0` là `kthread` tên `migration/0:18`, `B0` là một trong các thread `yes` (`yes:6428`), `C0` là một `kthread migration/1:23` khác, v.v.
 
 ![Hình 10.5](images/ch10/fig10-05.jpg)
 
@@ -290,11 +290,11 @@ Vậy có thể thấy sáu process `yes` (tất nhiên single-threaded) có nh�
 
 Hình 10.6: Ảnh chụp một phần khác của perf map file, cho thấy sáu process yes chạy concurrently trên sáu CPU core của máy
 
-(Để bạn biết, dấu sao cho biết một thay đổi context, thường là context switch trên core đó, đã xảy ra.) Thật bổ ích khi thấy các thread khác cũng chạy ở những thời điểm khác nhau; hiển nhiên không chỉ các anh chàng yes của chúng ta muốn chạy!
+(Để bạn biết, dấu sao cho biết một thay đổi context, thường là context-switch trên core đó, đã xảy ra.) Thật bổ ích khi thấy các thread khác cũng chạy ở những thời điểm khác nhau; hiển nhiên không chỉ yes-men của chúng ta muốn chạy!
 
 Một lần nữa, không phải làm chính xác như ở đây để kiểm thử; có thể thực thi app bất kỳ đủ CPU-bound (benchmarking program như `stress-ng`, chính kernel build, v.v. là ứng viên tốt), rồi chạy các command `perf` đã trình bày để thu thập và báo cáo chi tiết.
 
-Chúng ta vừa dùng `perf` để có “góc nhìn” dựa trên command line (hay console) về thread thực thi trên CPU core; giờ hãy tận dụng `perf` để hiển thị điều tương tự bằng đồ họa!
+Chúng ta vừa dùng `perf` để có “góc nhìn” dựa trên command-line (hay console) về thread thực thi trên CPU core; giờ hãy tận dụng `perf` để hiển thị điều tương tự bằng đồ họa!
 
 #### Thử nghiệm – cách tiếp cận đồ họa
 
@@ -314,13 +314,13 @@ Hình 10.7: Ảnh chụp một phần SVG file do perf tạo bằng data từ l�
 
 Có thể zoom vào và ra SVG file này, nghiên cứu scheduling event và CPU event mà `perf` record theo mặc định. Rõ ràng sáu concurrent process `yes` đang làm việc hết sức trên sáu CPU core (màu xanh biểu diễn state Running, như thấy trong legend ở dòng đầu). Các process khác (chủ yếu sleeping) xuất hiện bên dưới.
 
-Hình sau là ảnh chụp một phần khác khi zoom 400% vào vùng trên trái của ảnh trước; một lần nữa khá rõ process `yes` là những process ở trên CPU:
+Hình sau là ảnh chụp một phần khác khi zoom 400% vào vùng top-left của ảnh trước; một lần nữa khá rõ process `yes` là những process ở trên CPU:
 
 ![Hình 10.8](images/ch10/fig10-08.jpg)
 
-Hình 10.8: Ảnh chụp một phần SVG file của perf timechart khi zoom 400% vào vùng trên trái
+Hình 10.8: Ảnh chụp một phần SVG file của perf timechart khi zoom 400% vào vùng top-left
 
-Còn gì nữa? Dùng option switch `-I` cho `perf` timechart record, có thể yêu cầu chỉ record disk I/O event (và có vẻ cả network) trên toàn hệ thống. Điều này có thể đặc biệt hữu ích vì bottleneck hiệu năng thực sự thường do I/O activity (không phải CPU). `man` page của `perf-timechart(1)` trình bày thêm các option hữu ích.
+Còn gì nữa? Dùng option switch `-I` cho `perf` timechart record, có thể yêu cầu chỉ record disk I/O event (và có vẻ cả network) system-wide. Điều này có thể đặc biệt hữu ích vì bottleneck hiệu năng thực sự thường do I/O activity (không phải CPU). `man` page của `perf-timechart(1)` trình bày thêm các option hữu ích.
 
 Có thể chuyển binary record file `perf.data` của `perf` sang file format phổ biến Common Trace Format (CTF), bằng `perf data convert --all –-to-ctf <dir>`, trong đó argument cuối là directory lưu các CTF file. Vì sao hữu ích? CTF là native data format được GUI visualizer và analyzer tool mạnh như Trace Compass sử dụng. (Tôi thấy cách này hoạt động trên Fedora, trong khi Ubuntu có vẻ có vài vấn đề dai dẳng.)
 
@@ -338,7 +338,7 @@ Trước tiên hãy đề cập một vài console-based visualization tool:
 
   - Có thể dùng raw ftrace để trace (gần như) từng function khi thực thi sâu trong kernel; thông tin thu được gồm timestamp, CPU core đang thực thi trên đó, context thực hiện việc thực thi, interrupt state và function name.
 
-  - Frontend cho raw Ftrace là utility xuất sắc trace-cmd; về cơ bản cung cấp thông tin giống raw Ftrace nhưng dễ dùng hơn nhiều. Cũng có thể cấu hình để hiển thị parameter truyền vào kernel function. (Tôi đã build frontend đơn giản cho nó tên trccmd (`https://github.com/kaiwan/trccmd`); hãy thử.)
+  - front-end cho raw Ftrace là utility xuất sắc trace-cmd; về cơ bản cung cấp thông tin giống raw Ftrace nhưng dễ dùng hơn nhiều. Cũng có thể cấu hình để hiển thị parameter truyền vào kernel function. (Tôi đã build front-end đơn giản cho nó tên trccmd (`https://github.com/kaiwan/trccmd`); hãy thử.)
 
 - Một ít Bash scripting đơn giản có thể cho thấy thứ đang thực thi trên core cho trước (qua wrapper đơn giản trên `ps`). Trong đoạn sau, trình bày sample Bash function; ví dụ function `c0()` sau cho biết thứ hiện thực thi trên CPU core `#0`, còn `c1()` làm tương tự cho core `#1` (điều này ngụ ý đang dùng GNU `ps` thông thường chứ không phải biến thể rút gọn như `busybox ps`):
 
@@ -358,9 +358,9 @@ function c1()
 
 Một vài GUI visualization tool ở đây:
 
-- KernelShark: GUI frontend tốt cho data do raw Ftrace và `trace-cmd` tạo. (Với raw Ftrace, trước tiên phải làm `trace-cmd extract` để đưa data vào file format nó nhận biết.)
+- KernelShark: GUI front-end tốt cho data do raw Ftrace và `trace-cmd` tạo. (Với raw Ftrace, trước tiên phải làm `trace-cmd extract` để đưa data vào file format nó nhận biết.)
 
-- TraceCompass: GUI frontend xuất sắc để trực quan hóa trace do LTTng tạo; thực tế làm việc với CTF format phổ biến nên mọi trace theo format này đều có thể import rồi trực quan hóa.
+- TraceCompass: GUI front-end xuất sắc để trực quan hóa trace do LTTng tạo; thực tế làm việc với CTF format phổ biến nên mọi trace theo format này đều có thể import rồi trực quan hóa.
 
 Hãy thử các lựa chọn thay thế này!
 
@@ -374,13 +374,13 @@ Phần này đi sâu tương đối chi tiết vào kernel CPU scheduling intern
 
 Ingo Molnar, một kernel developer then chốt (cùng những người khác), đã thiết kế lại cấu trúc bên trong kernel scheduler, giới thiệu cách tiếp cận mới tên scheduling class (vào tháng 10 năm 2007 với phát hành kernel 2.6.23).
 
-Một ghi chú bên lề, từ `class` trong `scheduler classes` không phải trùng hợp; nhiều Linux kernel feature về bản chất và khá tự nhiên được thiết kế hướng đối tượng. Tất nhiên ngôn ngữ C không cho phép biểu diễn trực tiếp trong code (vì vậy rất nhiều structure có cả data member và function pointer member, mô phỏng class). Tuy vậy, thiết kế rất thường là hướng đối tượng (như sẽ thấy khá rõ với driver model trong sách Linux Kernel Programming – Part 2). Vui lòng xem phần Đọc thêm của chương để có thêm chi tiết khía cạnh này.
+Một ghi chú bên lề, từ `class` trong `scheduler classes` không phải trùng hợp; nhiều Linux kernel feature về bản chất và khá tự nhiên được thiết kế object-oriented. Tất nhiên ngôn ngữ C không cho phép biểu diễn trực tiếp trong code (vì vậy rất nhiều structure có cả data member và function pointer member, mô phỏng class). Tuy vậy, thiết kế rất thường là object-oriented (như sẽ thấy khá rõ với driver model trong sách Linux Kernel Programming – Part 2). Vui lòng xem phần Đọc thêm của chương để có thêm chi tiết khía cạnh này.
 
 Một abstraction layer được đưa vào core scheduling code, function `kernel/sched/core.c:schedule()`. Lớp này trong `schedule()` được gọi chung là scheduling class và có thiết kế modular.
 
 Lưu ý từ modular ở đây ngụ ý có thể thêm hoặc loại scheduler class khỏi in-tree kernel code; không liên quan gì Loadable Kernel Module (LKM) framework.
 
-Ý tưởng cơ bản thế này: Linux kernel (từ 6.1, và thực tế kernel 6.7 mới nhất tại thời điểm viết) chứa năm scheduling class, mỗi class gắn với một priority level. Khi core scheduler code – function `schedule()` (bản thân là thin wrapper trên `__schedule()`) – được gọi, nó lặp qua từng class theo priority order định trước, hỏi mỗi class có thread sẵn sàng chạy không (chính xác bằng cách nào sẽ sớm thấy). Trong năm scheduling class, bảo đảm một class trả lời có và chọn candidate thread để chạy tiếp; ngay khi xảy ra, core scheduling code context-switch sang thread may mắn đó (bỏ qua scheduling class còn lại) và xong việc. Flow diagram sau tóm lược thiết kế này:
+Ý tưởng cơ bản thế này: Linux kernel (từ 6.1, và thực tế kernel 6.7 mới nhất tại thời điểm viết) chứa năm scheduling class, mỗi class gắn với một priority level. Khi core scheduler code – function `schedule()` (bản thân là thin wrapper trên `__schedule()`) – được gọi, nó lặp qua từng class theo priority order định trước, hỏi mỗi class có thread sẵn sàng chạy không (chính xác bằng cách nào sẽ sớm thấy). Trong năm scheduling class, bảo đảm một class trả lời có và chọn candidate thread để chạy tiếp; ngay khi xảy ra, core scheduling code context-switches sang thread may mắn đó (bỏ qua scheduling class còn lại) và xong việc. Flow diagram sau tóm lược thiết kế này:
 
 ![Hình 10.9](images/ch10/fig10-09.jpg)
 
@@ -412,7 +412,7 @@ Mỗi thread gắn với task structure riêng (`struct task_struct`); trong tas
 
 - Cả scheduling policy lẫn priority đều dynamic, có thể truy vấn và đặt bằng lập trình (hoặc qua utility; sẽ sớm thấy).
 
-Để bạn biết, thread thuộc class `stop-sched` rất ít; vì đây là priority level cực cao. Khi stop-sched thread giành processor, kernel tắt thực thi (cũng như mọi thứ liên quan locking, interrupt và mọi thứ khác) trên tất cả core còn lại của hệ thống. Vì vậy thread class `stop-sched` thực thi - trên core mà mọi interrupt và kernel preemption bị mask - thực sự một mình, hoàn toàn không có khả năng bị preempt. Ai cần mức priority và non-preemptability này? Một ví dụ là Ftrace kernel tracing subsystem; ví dụ khác là live kernel patching. Đồng thời sched class priority kế tiếp – Deadline – dành cho real-time task có deadline gắn kèm phải đáp ứng (theo kiểu RTOS cổ điển). Vì thread `stop-sched` và `deadline` thường hiếm, chúng ta tập trung vào RT và – chủ yếu – fair (CFS) thread; thread “fair class” là những thread thường tồn tại và chạy.
+Để bạn biết, thread thuộc class `stop-sched` rất ít; vì đây là priority level cực cao. Khi stop-sched thread giành processor, kernel tắt thực thi (cũng như mọi thứ liên quan locking, interrupt và mọi thứ khác) trên tất cả core còn lại của hệ thống. Vì vậy thread class `stop-sched` thực thi - trên core mà mọi interrupt và kernel preemption bị mask - thực sự một mình, hoàn toàn không có khả năng bị preempt. Ai cần mức priority và non-preemptability này? Một ví dụ là Ftrace kernel tracing subsystem; ví dụ khác là live kernel patching. Đồng thời sched class priority kế tiếp – Deadline – dành cho real-time task có deadline gắn kèm phải đáp ứng (theo RTOS-like cổ điển). Vì thread `stop-sched` và `deadline` thường hiếm, chúng ta tập trung vào RT và – chủ yếu – fair (CFS) thread; thread “fair class” là những thread thường tồn tại và chạy.
 
 Vậy biết điều này, giờ bạn nhận ra mọi thread tuân theo scheduling policy `SCHED_FIFO` hoặc `SCHED_RR` đều map đến `rt_sched_class` (qua member `sched_class` trong task structure), mọi thread `SCHED_OTHER` (hoặc `SCHED_NORMAL`) map đến `fair_sched_class`, và các CPU idle thread (`swapper/n`, với `n` là CPU number bắt đầu từ `0`) luôn map đến scheduling class `idle_sched_class`.
 
@@ -480,7 +480,7 @@ Lưu ý trong sơ đồ trên, cách tôi thể hiện runqueue có lẽ khiến
 
 - Một thread class idle, I1
 
-Giờ hình dung ban đầu thread F2 ở trên processor core, vui vẻ thực thi code. Lúc nào đó kernel muốn context-switch sang task khác trên CPU ấy. (Điều gì kích hoạt? Sẽ sớm thấy.) Trên scheduling code path, kernel code cuối cùng đi vào kernel routine thuộc core scheduling code `kernel/sched/core.c:void schedule(void)` (một lần nữa, chi tiết mức code ở phía sau). Điều quan trọng cần hiểu trước mắt là routine `pick_next_task()`, được `schedule()` gọi và trở thành `__schedule()`, duyệt linked list các scheduler class, hỏi từng class có candidate chạy không (một lần nữa tham khảo Hình 10.9). Code path (tất nhiên về khái niệm) đại loại như sau:
+Giờ hình dung ban đầu thread F2 ở trên processor core, vui vẻ thực thi code. Lúc nào đó kernel muốn context-switch sang task khác trên CPU ấy. (Điều gì kích hoạt? Sẽ sớm thấy.) Trên scheduling code path, kernel code cuối cùng đi vào kernel routine thuộc core scheduling code `kernel/sched/core.c:void schedule(void)` (một lần nữa, chi tiết code-level ở phía sau). Điều quan trọng cần hiểu trước mắt là routine `pick_next_task()`, được `schedule()` gọi và trở thành `__schedule()`, duyệt linked list các scheduler class, hỏi từng class có candidate chạy không (một lần nữa tham khảo Hình 10.9). Code path (tất nhiên về khái niệm) đại loại như sau:
 
 1\. Core scheduler code (\_\_`schedule()`): “Này SS (stop-sched class), có thread nào muốn chạy không?” 2. SS class code: Duyệt runqueue và thực sự tìm thấy runnable thread (S1); do đó đáp: “Có, thread S1.” 3. Core scheduler code (`__schedule()`): “Tốt; hãy context-switch sang S1.”
 
@@ -488,13 +488,13 @@ Và xong việc (ít nhất cho scheduling round hay epoch này). Nhưng đổi 
 
 Rất có thể (trên hệ thống Linux tải vừa phải điển hình) không có candidate thread SS, DL hay RT muốn chạy trên CPU đang xét, và thường có ít nhất một fair (CFS) thread muốn chạy.
 
-Vì vậy cạnh tranh thường là giữa các fair (CFS) runnable thread; thread được fair class implementation (CFS) chọn sẽ là thread được context-switch đến.
+Vì vậy cạnh tranh thường là giữa các fair (CFS) runnable thread; thread được fair class implementation (CFS) chọn sẽ là thread được context-switched đến.
 
 Nếu thực sự không thread nào muốn chạy (không thread class SS/DL/RT/CFS nào muốn chạy), ngụ ý hệ thống hiện idle (anh chàng lười biếng). Giờ class `Idle` được hỏi có muốn chạy không; luôn nói có! Hợp lý; xét cho cùng nhiệm vụ CPU idle thread là chạy trên processor khi không ai khác cần/muốn. Vì vậy trong trường hợp đó kernel switch context sang idle thread, thường nhãn `swapper/n`, với `n` là CPU number đang thực thi trên đó (bắt đầu từ `0`; và đúng, tôi biết bạn có lẽ nghĩ: tại sao gọi “swapper”?… chỉ là lịch sử Unix cũ trở lại ám chúng ta – không gì khác).
 
 Đồng thời, lưu ý kernel thread `swapper/n` (CPU idle) không hiện trong danh sách `ps`, dù luôn tồn tại (nhớ code đã minh họa trong Chương 6, Kernel Internals Essentials – Processes and Threads, tại đây: `ch6/foreach/thrd_showall/thrd_showall.c` (`https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/blob/main/ch6/foreach/thrd_showall/thrd_showall.c`) Ở đó đã viết routine `disp_idle_thread()` để hiển thị vài chi tiết CPU idle thread, vì ngay cả loop `do_each_thread() { ... } while_each_thread()` của kernel đã dùng cũng không hiển thị idle thread.
 
-Sơ đồ sau tóm lược gọn cách core scheduling code gọi scheduling class theo priority order, context-switch đến thread “next” được chọn cuối cùng:
+Sơ đồ sau tóm lược gọn cách core scheduling code gọi scheduling class theo priority order, context-switching đến thread “next” được chọn cuối cùng:
 
 ![Hình 10.11](images/ch10/fig10-11.jpg)
 
@@ -525,9 +525,9 @@ __pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
     [ … ]
 ```
 
-Chú ý object orientation đang hoạt động: code `class->pick_next_task(rq)` đối với mọi mục đích thực tế gọi method `pick_next_task()` của scheduling class `class`! Return value một cách thuận tiện và có chủ ý là pointer đến task structure của task được chọn, giờ code có thể context-switch đến đó. Như cũng thấy, `pick_next_task()` trả NULL ngụ ý class hiện tại không có candidate để schedule; vì vậy chuyển sang hỏi class kế tiếp. Loop luôn kết thúc vì nếu không còn gì khác, idle class luôn trả candidate khác null để schedule, idle thread của core đó.
+Chú ý object orientation đang hoạt động: code `class->pick_next_task(rq)` đối với mọi mục đích thực tế gọi method `pick_next_task()` của scheduling class `class`! Return value một cách thuận tiện và có chủ ý là pointer đến task structure của task được chọn, giờ code có thể context-switch đến đó. Như cũng thấy, `pick_next_task()` trả NULL ngụ ý class hiện tại không có candidate để schedule; vì vậy chuyển sang hỏi class kế tiếp. Loop luôn kết thúc vì nếu không còn gì khác, idle class luôn trả candidate non-null để schedule, idle thread của core đó.
 
-Code và đoạn trên tất nhiên ngụ ý có một structure `class` được điền sẵn cho mỗi scheduling class, hiện thân điều thực sự muốn nói về scheduling class. Quả thực đúng vậy: chứa mọi operation có thể có cùng các hook hữu ích mà bạn có thể cần trong scheduling class. Nó (bất ngờ thay) tên structure `sched_class`:
+Code và đoạn trên tất nhiên ngụ ý có một structure `class` pre-populated cho mỗi scheduling class, hiện thân điều thực sự muốn nói về scheduling class. Quả thực đúng vậy: chứa mọi operation có thể có cùng các hook hữu ích mà bạn có thể cần trong scheduling class. Nó (bất ngờ thay) tên structure `sched_class`:
 
 `https://elixir.bootlin.com/linux/v6.1.25/source/kernel/sched/sched.h#L2147`
 
@@ -568,7 +568,7 @@ DEFINE_SCHED_CLASS(fair) = {
 
 Vậy giờ bạn thấy: code fair sched class dùng để chọn task chạy tiếp (khi core scheduler hỏi) là function `__pick_next_task_fair()` (thin wrapper trên `pick_next_task_fair()`). Để bạn biết, các member `task_tick` và `task_fork` là ví dụ tốt về scheduling class hook; scheduler core gọi các function này lần lượt trên mỗi timer tick (nghĩa là mỗi timer interrupt, xảy ra – ít nhất về lý thuyết – `CONFIG_HZ` lần một giây) và khi thread thuộc scheduling class này fork.
 
-Có lẽ một Linux kernel project chuyên sâu thú vị: tạo scheduling class riêng với các method và hook cụ thể, triển khai các scheduling algorithm nội bộ. Link mọi thành phần theo yêu cầu (vào scheduling classes linked list, chèn tại priority mong muốn, v.v.) và kiểm thử! Giờ sẽ thấy tại sao gọi là modular scheduling class.
+Có lẽ một Linux kernel project in-depth thú vị: tạo scheduling class riêng với các method và hook cụ thể, triển khai các scheduling algorithm nội bộ. Link mọi thành phần theo yêu cầu (vào scheduling classes linked list, chèn tại priority mong muốn, v.v.) và kiểm thử! Giờ sẽ thấy tại sao gọi là modular scheduling class.
 
 Tốt – giờ đã hiểu architecture đằng sau cách modular CPU scheduler hiện đại hoạt động, hãy xem ngắn thuật toán đằng sau CFS, có lẽ scheduling class dùng nhiều nhất trên generic Linux.
 
@@ -584,25 +584,25 @@ Chúng ta chia thảo luận thành hai phần: phần đầu xem ngắn các kh
 
 Không đi sâu quá nhiều chi tiết CFS implementation internals, nhúng trong task structure có data structure khác, `struct sched_entity`, chứa unsigned 64-bit value tên `vruntime` (hay virtual runtime) (`https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/sched.h#L556`). Ở mức đơn giản, đây là monotonic counter theo dõi lượng thời gian, theo nanosecond, thread đã tích lũy (chạy) trên processor.
 
-Trong thực tế implementation, cần nhiều điều chỉnh, kiểm tra và cân đối ở mức code. Ví dụ kernel thường reset giá trị `vruntime` về `0`, kích hoạt scheduling epoch khác. Đồng thời có nhiều tunable (hay sysctl) dưới `/proc/sys/kernel/sched_*`, giúp tinh chỉnh hành vi CPU scheduler tốt hơn (một số được ghi tài liệu tại đây: `https://www.kernel.org/doc/html/latest/admin-guide/sysctl/kernel.html`).
+Trong thực tế implementation, cần nhiều điều chỉnh, kiểm tra và cân đối code-level. Ví dụ kernel thường reset giá trị `vruntime` về `0`, kích hoạt scheduling epoch khác. Đồng thời có nhiều tunable (hay sysctl) dưới `/proc/sys/kernel/sched_*`, giúp fine-tune hành vi CPU scheduler tốt hơn (một số được ghi tài liệu tại đây: `https://www.kernel.org/doc/html/latest/admin-guide/sysctl/kernel.html`).
 
 Cách CFS chọn task chạy tiếp được gói trong function `kernel/sched/fair.c:pick_next_task_fair()`. Về lý thuyết cách CFS hoạt động hết sức đơn giản: enqueue mọi runnable task (cho CPU đó) vào CFS runqueue, là rb-tree (một loại self-balancing binary search tree), sao cho task dành ít thời gian nhất trên processor là leaf node ngoài cùng trái, các (leaf) node tiếp theo bên phải biểu diễn task chạy kế tiếp, rồi task sau nữa.
 
 Thực chất quét tree từ trái sang phải cho timeline thực thi task tương lai. Bảo đảm thế nào? Bằng cách dùng giá trị `vruntime` nói trên làm key để enqueue task vào rb-tree!
 
-Tại sao gọi vruntime chứ không chỉ runtime? Vì giá trị member vruntime không chỉ đơn giản là thời gian thread ở trên processor; có nhiều sắc thái hơn: xét priority của thread – nice value – khi tính con số rất quan trọng này (xét cho cùng “vị trí” thread trong CFS rb-tree run queue dựa vào lượng vruntime). Vì vậy cách làm: nice value càng thấp (priority càng cao), vruntime càng được scale giảm, do đó enqueue xa hơn về trái; nice value càng cao (priority càng thấp), vruntime càng được scale tăng, do đó enqueue xa hơn về phải. (Cách task scheduling này gọi chung là weighted fair queuing scheduler.)
+Tại sao gọi vruntime chứ không chỉ runtime? Vì giá trị member vruntime không chỉ đơn giản là thời gian thread ở trên processor; có nhiều sắc thái hơn: xét priority của thread – nice value – khi tính con số rất all-important này (xét cho cùng “vị trí” thread trong CFS rb-tree run queue dựa vào lượng vruntime). Vì vậy cách làm: nice value càng thấp (priority càng cao), vruntime càng được scale giảm, do đó enqueue xa hơn về trái; nice value càng cao (priority càng thấp), vruntime càng được scale tăng, do đó enqueue xa hơn về phải. (Cách task scheduling này gọi chung là weighted fair queuing scheduler.)
 
-Khi core scheduler cần schedule và hỏi CFS “có thread nào muốn chạy không?”, CFS class code – đã đề cập (function `pick_next_task_fair()`) – chạy và chỉ chọn leaf node ngoài cùng trái trên tree, trả pointer đến task structure pointer nhúng ở đó. Hãy nghĩ – theo định nghĩa đó là task có giá trị `vruntime` thấp nhất, nên thực chất đã chạy ít nhất! (Duyệt tree là thuật toán time complexity O(log n), nhưng do một số tối ưu code và caching thông minh leaf node ngoài cùng trái, implementation thực chất có time complexity O(1) rất mong muốn.) Tất nhiên code thực tế phức tạp hơn nhiều so với trình bày ở đây; cần nhiều kiểm tra và cân đối. Chúng ta không đi sâu mọi chi tiết phức tạp ở đây.
+Khi core scheduler cần schedule và hỏi CFS “có thread nào muốn chạy không?”, CFS class code – đã đề cập (function `pick_next_task_fair()`) – chạy và chỉ chọn leaf node ngoài cùng trái trên tree, trả pointer đến task structure pointer nhúng ở đó. Hãy nghĩ – theo định nghĩa đó là task có giá trị `vruntime` thấp nhất, nên thực chất đã chạy ít nhất! (Duyệt tree là thuật toán time-complexity O(log n), nhưng do một số tối ưu code và caching thông minh leaf node ngoài cùng trái, implementation thực chất có time complexity O(1) rất mong muốn.) Tất nhiên code thực tế phức tạp hơn nhiều so với trình bày ở đây; cần nhiều kiểm tra và cân đối. Chúng ta không đi sâu mọi chi tiết phức tạp ở đây.
 
 Với ai muốn học thêm CFS, đề nghị tham khảo tài liệu kernel về chủ đề tại `https://www.kernel.org/doc/html/v6.1/scheduler/sched-design-CFS.html`.
 
-Đồng thời kernel chứa nhiều tunable (sysctl) dưới `/proc/sys/kernel/sched_*` có tác động trực tiếp đến scheduling. Có thể tìm ghi chú về chúng và cách dùng tại: Analyzing the impact of sysctl scheduler tunables, IBM LTC: `https://events.static.linuxfound.org/slides/2011/linuxcon/lcna2011_rajan.pdf`, và use case thực tế xuất sắc trong bài tại `https://www.scylladb.com/2016/06/10/read-latency-and-scylla-jmx-process/`.
+Đồng thời kernel chứa nhiều tunable (sysctl) dưới `/proc/sys/kernel/sched_*` có tác động trực tiếp đến scheduling. Có thể tìm ghi chú về chúng và cách dùng tại: Analyzing the impact of sysctl scheduler tunables, IBM LTC: `https://events.static.linuxfound.org/slides/2011/linuxcon/lcna2011_rajan.pdf`, và use case real-world xuất sắc trong bài tại `https://www.scylladb.com/2016/06/10/read-latency-and-scylla-jmx-process/`.
 
 Hơn nữa, gần đây một số kernel-level scheduling tunable này chuyển sang debugfs tại: `/sys/kernel/debug/sched/*`. Vì vậy tất nhiên cần root access để xem/đổi.
 
 ##### Ghi chú về CFS scheduling period và timeslice
 
-Bạn có nhận thấy? Khác OS scheduler truyền thống, với CFS, timeslice là dynamic! Task dùng CPU từng chút (các IO-bound task) tự động tích lũy ít vruntime hơn nên dịch sang trái của CFS rb-tree. Điều ngược lại xảy ra với CPU-bound task; chúng (do vruntime value lớn hơn) dịch sang phải, giảm cơ hội nhanh chóng có CPU.
+Bạn có nhận thấy? Khác OS scheduler truyền thống, với CFS, timeslice là dynamic! Task dùng CPU từng chút (so-called các IO-bound task) tự động tích lũy ít vruntime hơn nên dịch sang trái của CFS rb-tree. Điều ngược lại xảy ra với CPU-bound task; chúng (do vruntime value lớn hơn) dịch sang phải, giảm cơ hội nhanh chóng có CPU.
 
 Trong scheduler context, scheduling period (đôi lúc gọi gây nhầm lẫn là “scheduling latency”) chỉ khoảng thời gian chạy một scheduling cycle (hay epoch) hoàn chỉnh; trong khoảng ấy, OS bảo đảm mỗi thread có cơ hội chạy trên CPU. Vậy bao nhiêu? Giá trị mặc định nằm trong `sysctl /sys/kernel/debug/sched/latency_ns` (với mặc định điển hình 24 ms trên Ubuntu 22.04 và 18 ms trên Fedora 38/39). Hơn nữa ở runtime có thể đổi – bản thân là dynamic (sẽ sớm nói thêm) – và được tính như sau:
 
@@ -610,7 +610,7 @@ Trong scheduler context, scheduling period (đôi lúc gọi gây nhầm lẫn l
 Scheduling Period length = min_granularity_ns * nr_running ;
 ```
 
-Ở đây `nr_running` là số task hiện runnable (riêng cho từng runqueue). Các scheduler tunable này trong kernel gần đây nằm trong `debugfs`; hãy tra vài giá trị trên Ubuntu 22.04 LTS x86\_64. (Cú pháp `grep . <files-spec>` dùng ở đây là cách tuyệt vời vừa liệt kê tunable (một dòng) vừa xem giá trị hiện tại! Tất nhiên cú pháp `grep -v` dùng để phủ định một số match.)
+Ở đây `nr_running` là số task hiện runnable (per-runqueue). Các scheduler tunable này trong kernel gần đây nằm trong `debugfs`; hãy tra vài giá trị trên Ubuntu 22.04 LTS x86\_64. (Cú pháp `grep . <files-spec>` dùng ở đây là cách tuyệt vời vừa liệt kê tunable (một dòng) vừa xem giá trị hiện tại! Tất nhiên cú pháp `grep -v` dùng để phủ định một số match.)
 
 ```
 # grep -E . /sys/kernel/debug/sched/* 2>/dev/null | grep -v -E  "^\/sys\/
@@ -674,17 +674,17 @@ if nr_running > (latency_ns / min_granularity_ns)
    recalculate the scheduling period
 ```
 
-(Thuật ngữ có thể gây nhầm; nhớ `latency_ns` là scheduling period.) Xem phần Đọc thêm để biết thêm CFS và các tunable liên quan scheduler này. Giờ hãy chuyển sang chủ đề (ngắn) xem task scheduling statistics do kernel duy trì (nếu được cấu hình).
+(Thuật ngữ có thể gây nhầm; nhớ `latency_ns` là scheduling period.) Xem phần Đọc thêm để biết thêm CFS và các tunable scheduler-related này. Giờ hãy chuyển sang chủ đề (ngắn) xem task scheduling statistics do kernel duy trì (nếu được cấu hình).
 
 #### Scheduling statistics
 
 Có thể xem trạng thái scheduling ở cả system granularity và process granularity không? Có, khi được cấu hình (cần `CONFIG_SCHEDSTATS=y`), kernel cung cấp các pseudofile dưới `proc`:
 
-- `/proc/schedstat` : Scheduling statistics toàn hệ thống. Có từ rất lâu; hiển thị per-CPU scheduling statistics (cũng như thông tin domain - CPU / micro-architecture hierarchy - trên SMP). Thông tin gồm số lần scheduler (và function `try_to_wake_up()`) được gọi (trên CPU core đó), tổng tích lũy mọi thời gian task chạy/chờ trên core và số timeslice trên core. Tốt nhất tham khảo tài liệu kernel chính thức: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/scheduler/sched-stats.rst`.
+- `/proc/schedstat` : Scheduling statistics System-wide. Có từ rất lâu; hiển thị per-CPU scheduling statistics (cũng như thông tin domain - CPU / micro-architecture hierarchy - trên SMP). Thông tin gồm số lần scheduler (và function `try_to_wake_up()`) được gọi (trên CPU core đó), tổng tích lũy mọi thời gian task chạy/chờ trên core và số timeslice trên core. Tốt nhất tham khảo tài liệu kernel chính thức: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/scheduler/sched-stats.rst`.
 
 - `/proc/PID/schedstat` và `/proc/PID/sched` : Granularity ở mức process/thread:
 
-  - Nội dung `/proc/PID/schedstat` gồm ba số phân cách bằng whitespace, tất cả liên quan thread có process ID PID:
+  - Nội dung `/proc/PID/schedstat` gồm ba số whitespace-delimited, tất cả liên quan thread có process ID PID:
 
   - Thời gian trên CPU (nanosecond)
 
@@ -708,7 +708,7 @@ Giờ hãy chuyển sang học cách truy vấn scheduling policy và priority c
 
 Trong phần này, bạn học cách truy vấn scheduling policy và priority của thread bất kỳ trên hệ thống qua command line. (Nhưng truy vấn và đặt bằng lập trình thì sao? Chúng ta để thảo luận đó cho Chương 11, The CPU Scheduler – Part 2, tại phần Truy vấn và đặt scheduling policy và priority của thread.)
 
-Đã học trên Linux thread là KSE; chính nó được schedule và chạy trên processor. Đồng thời Linux có nhiều lựa chọn scheduling policy (hay thuật toán) để dùng. Cả scheduling policy lẫn priority được gán riêng từng thread, với policy mặc định luôn `SCHED_OTHER` và real-time priority mặc định `0` (nói cách khác là non-real-time thread; xem Bảng 10.1).
+Đã học trên Linux thread là KSE; chính nó được schedule và chạy trên processor. Đồng thời Linux có nhiều lựa chọn scheduling policy (hay thuật toán) để dùng. Cả scheduling policy lẫn priority được gán per-thread, với policy mặc định luôn `SCHED_OTHER` và real-time priority mặc định `0` (nói cách khác là non-real-time thread; xem Bảng 10.1).
 
 Trên hệ thống Linux cho trước, luôn có thể thấy mọi process tồn tại (qua `ps -A` đơn giản), hoặc với GNU `ps`, thậm chí mọi thread tồn tại (một cách là `ps -LA`). Tuy nhiên không cho biết thực tế then chốt: các task chạy theo scheduling policy và priority nào. Truy vấn thế nào?
 
@@ -750,7 +750,7 @@ Một vài điều cần chú ý:
 
 - Cột áp chót là “nice” value của thread (nhớ khoảng -20 đến +19, với -20 priority tốt nhất, 19 tệ nhất, mặc định 0). Lưu ý nice value chỉ hợp lệ cho thread có scheduling policy `SCHED_OTHER` (cũng như batch và idle).
 
-- Cột ngoài cùng phải hiển thị CPU affinity mask (hexadecimal), cũng là per-thread attribute! Ngụ ý có thể đặt CPU core mà thread có thể được schedule trên đó (trình bày chi tiết khía cạnh này trong chương sau). Ví dụ mask value 0x3f theo binary là 0011 1111, ngụ ý thread có thể chạy trên bất kỳ core nào được đặt 1, nên ở đây là mọi core (vì tổng cộng sáu core trên hệ thống).
+- Cột far-right hiển thị CPU affinity mask (hexadecimal), cũng là per-thread attribute! Ngụ ý có thể đặt CPU core mà thread có thể được schedule trên đó (trình bày chi tiết khía cạnh này trong chương sau). Ví dụ mask value 0x3f theo binary là 0011 1111, ngụ ý thread có thể chạy trên bất kỳ core nào được đặt 1, nên ở đây là mọi core (vì tổng cộng sáu core trên hệ thống).
 
 Câu hỏi nhanh: giá trị CPU affinity mask 0x8 nghĩa là gì?
 
@@ -758,13 +758,13 @@ Câu hỏi nhanh: giá trị CPU affinity mask 0x8 nghĩa là gì?
 
 Chúng ta để bạn tự xem code của script (`ch10/query_task_sched.sh`). Đồng thời lưu ý hiệu năng và shell scripting không thực sự đi cùng nhau (nên đừng mong nhiều về hiệu năng ở đây). Hãy nghĩ – mỗi external command trong shell script (ở đây có nhiều như `awk`, `grep` và `cut`) đều có ngữ nghĩa `fork-exec-wait` và context switching. Đồng thời tất cả thực thi trong loop.
 
-Program `tuna(8)`, công cụ system monitoring, tuning và profile management mạnh dựa trên GUI (hoặc console mode), có thể dùng để truy vấn và đặt nhiều attribute; gồm scheduling policy/priority ở mức process/thread, CPU affinity mask cũng như IRQ affinity. GUI được thiết kế tốt; hãy xem! (Cài tuna: `https://tuna.readthedocs.io/en/stable/installation.html`).
+Program `tuna(8)`, công cụ system monitoring, tuning và profile management mạnh GUI-based (hoặc console-mode), có thể dùng để truy vấn và đặt nhiều attribute; gồm scheduling policy/priority ở mức process/thread, CPU affinity mask cũng như IRQ affinity. GUI well-designed; hãy xem! (Cài tuna: `https://tuna.readthedocs.io/en/stable/installation.html`).
 
 Đồng thời utility `schedtool` khá giống `chrt`, có thể dùng truy vấn và đặt bất kỳ hay mọi task scheduling parameter trên thread cho trước; man page schedtool(8) trình bày cách dùng.
 
-Bạn có thể tự hỏi liệu (vài) thread có policy `SCHED_FIFO` và real-time priority `99` luôn chiếm processor hệ thống? Không hẳn; thực tế các thread này thường sleep phần lớn thời gian. Khi kernel thực sự cần chúng làm việc, nó đánh thức. Giờ chính nhờ real-time policy và priority rất cao, gần như bảo đảm chúng ít nhiều có CPU core ngay lập tức và thực thi bao lâu cần thiết (trở lại sleep khi xong). Điểm then chốt là khi cần processor, sẽ có (hơi giống RTOS nhưng không có bảo đảm chắc chắn, scheduling latency thấp và tính deterministic mà RTOS cung cấp).
+Bạn có thể tự hỏi liệu (vài) thread có policy `SCHED_FIFO` và real-time priority `99` luôn chiếm processor hệ thống? Không hẳn; thực tế các thread này thường sleep phần lớn thời gian. Khi kernel thực sự cần chúng làm việc, nó đánh thức. Giờ chính nhờ real-time policy và priority rất cao, gần như bảo đảm chúng ít nhiều có CPU core ngay lập tức và thực thi bao lâu cần thiết (trở lại sleep khi xong). Điểm then chốt là khi cần processor, sẽ có (hơi giống RTOS nhưng không có bảo đảm iron-clad, scheduling latency thấp và tính deterministic mà RTOS cung cấp).
 
-Chính xác utility `chrt` truy vấn (và đặt) real-time scheduling policy/priority thế nào? À hẳn rõ: vì chúng ở trong task structure thuộc kernel Virtual Address Space (VAS), process `chrt` phải gọi system call. Có nhiều biến thể system call làm các việc này: `chrt` dùng `sched_getattr()` để truy vấn scheduling policy và priority, và system call `sched_setattr()` để đặt scheduling policy và priority. (Hãy chắc chắn xem `man` page của `sched(7)` để biết chi tiết các system call này và nhiều system call liên quan scheduler khác.) Chạy `strace` nhanh trên `chrt` thực sự xác minh!
+Chính xác utility `chrt` truy vấn (và đặt) real-time scheduling policy/priority thế nào? À hẳn rõ: vì chúng ở trong task structure thuộc kernel Virtual Address Space (VAS), process `chrt` phải gọi system call. Có nhiều biến thể system call làm các việc này: `chrt` dùng `sched_getattr()` để truy vấn scheduling policy và priority, và system call `sched_setattr()` để đặt scheduling policy và priority. (Hãy chắc chắn xem `man` page của `sched(7)` để biết chi tiết các system call này và nhiều system call scheduler-related khác.) Chạy `strace` nhanh trên `chrt` thực sự xác minh!
 
 ```
 $ strace chrt -p 1
@@ -795,13 +795,13 @@ Hãy bắt đầu bằng khám phá chủ đề preemption.
 
 Hãy hình dung tình huống giả định này: đang chạy trên hệ thống chỉ một CPU core. App đồng hồ kim chạy trên GUI cùng C program `a.out`, có một dòng code (ngán thật) `while (1);`. Vậy bạn nghĩ sao: process while 1 ngốn CPU sẽ chiếm CPU vô hạn, khiến GUI clock app ngừng tích tắc (kim giây ngừng hẳn) chứ?
 
-Suy nghĩ (và thử nghiệm) một chút sẽ thấy GUI clock app thực sự tiếp tục tích tắc dù app ngốn CPU nghịch ngợm! Đây thực sự là toàn bộ mục đích OS-level scheduler: có thể và thực sự preempt (đá ra!) user-space process ngốn CPU. (Đã thảo luận ngắn thuật toán CFS; CFS khiến CPU-bound process hung hăng tích lũy giá trị `vruntime` khổng lồ nên dịch xa hơn sang phải trên rb-tree runqueue, do đó tự bị phạt về processor!) Mọi OS hiện đại hỗ trợ kiểu preemption này – gọi là user-mode preemption.
+Suy nghĩ (và thử nghiệm) một chút sẽ thấy GUI clock app thực sự tiếp tục tích tắc dù app CPU-hogging nghịch ngợm! Đây thực sự là toàn bộ mục đích OS-level scheduler: có thể và thực sự preempt (đá ra!) user-space process ngốn CPU. (Đã thảo luận ngắn thuật toán CFS; CFS khiến CPU-bound process hung hăng tích lũy giá trị `vruntime` khổng lồ nên dịch xa hơn sang phải trên rb-tree runqueue, do đó tự bị phạt về processor!) Mọi OS hiện đại hỗ trợ kiểu preemption này – gọi là user-mode preemption.
 
 Nhưng giờ xét: nếu viết kernel module thực hiện cùng infinite loop `while(1)` trên single-core system thì sao? Gây vấn đề: giờ hệ thống đơn giản treo. Vì sao? Vì theo mặc định phần lớn OS kernel là non-preemptible; nghĩa là không tự preempt được!
 
-Ngoài ví dụ tầm thường này, chắc chắn có trường hợp thực tế mà khi kernel non-preemptible sẽ tác động xấu đến (real-time) thread scheduling. Hãy nghĩ: nếu high-priority thread nằm trên runqueue (nên runnable) cần chạy khẩn cấp, nhưng kernel mắc trong loop dài ở một section non-preemptible của kernel code (hoặc kernel module/driver code) thì sao? Hoặc hardware interrupt xảy ra nhưng không phục vụ được vì interrupt bị mask trong, một lần nữa, non-preemptible code section chạy lâu… Locking đóng vai trò ở đây (như sẽ học chi tiết hơn nhiều trong hai chương cuối); thực tế nhiều năm kernel có lock rất coarse-grained (và recursive) khét tiếng tên Big Kernel Lock (BKL); khi giữ, nó giữ kernel ở non-preemptible state khá lâu (với interrupt bị mask), gây ảnh hưởng nghiêm trọng hiệu năng và latency response. Nó (cuối cùng!) được loại bỏ hoàn toàn trong kernel 2.6.39.
+Ngoài ví dụ tầm thường này, chắc chắn có trường hợp real-world mà khi kernel non-preemptible sẽ tác động xấu đến (real-time) thread scheduling. Hãy nghĩ: nếu high-priority thread nằm trên runqueue (nên runnable) cần chạy khẩn cấp, nhưng kernel mắc trong loop dài ở một section non-preemptible của kernel code (hoặc kernel module/driver code) thì sao? Hoặc hardware interrupt xảy ra nhưng không phục vụ được vì interrupt bị mask trong, một lần nữa, non-preemptible code section long-ish… Locking đóng vai trò ở đây (như sẽ học chi tiết hơn nhiều trong hai chương cuối); thực tế nhiều năm kernel có lock rất coarse-grained (và recursive) khét tiếng tên Big Kernel Lock (BKL); khi giữ, nó giữ kernel ở non-preemptible state khá lâu (với interrupt bị mask), gây ảnh hưởng nghiêm trọng hiệu năng và latency response. Nó (cuối cùng!) được loại bỏ hoàn toàn trong kernel 2.6.39.
 
-Vì vậy câu hỏi xuất hiện: khi cần, kernel có thể tự preempt không? Đoán xem: nhiều năm nay Linux đã cung cấp build-time configuration option để làm kernel preemptible; tên `CONFIG_PREEMPT`. (Thực ra chỉ là bước phát triển hướng đến mục tiêu dài hạn cắt latency, cải thiện kernel response và scheduler response. Phần lớn công việc đến từ các nỗ lực trước đó và một số đang tiếp diễn: Low Latency (LowLat) patch, công việc RTLinux (cũ), đặc biệt project RTL (Real-Time Linux) (nơi Linux chạy như RTOS thực sự! Sẽ trình bày một chút thiết lập RTL trong chương sau).)
+Vì vậy câu hỏi xuất hiện: khi cần, kernel có thể tự preempt không? Đoán xem: nhiều năm nay Linux đã cung cấp build-time configuration option để làm kernel preemptible; tên `CONFIG_PREEMPT`. (Thực ra chỉ là bước phát triển hướng đến mục tiêu long-term cắt latency, cải thiện kernel response và scheduler response. Phần lớn công việc đến từ các nỗ lực trước đó và một số đang tiếp diễn: Low Latency (LowLat) patch, công việc RTLinux (cũ), đặc biệt project RTL (Real-Time Linux) (nơi Linux chạy như RTOS thực sự! Sẽ trình bày một chút thiết lập RTL trong chương sau).)
 
 Một khi kernel config option `CONFIG_PREEMPT` được bật, kernel được build và boot vào, chúng ta chạy trên preemptible kernel – nơi ở phần lớn điểm OS có khả năng tự preempt!
 
@@ -819,7 +819,7 @@ Bảng 10.4: Linux OS kernel preemption – các configuration option có sẵn
 
 Kbuild configuration file `kernel/Kconfig.preempt` chứa menu entry liên quan các preemptible kernel option. (Như sẽ thấy chương sau, khi build Linux làm RTOS, lựa chọn kernel preemption thứ tư tên `CONFIG_PREEMPT_RT` xuất hiện.)
 
-Sẽ hay nếu có thể chọn dynamic hành vi kernel preemption lúc boot phải không? Phần tiếp theo cho biết cách!
+Sẽ hay nếu có thể chọn dynamic hành vi kernel-preemption lúc boot phải không? Phần tiếp theo cho biết cách!
 
 #### Tính năng dynamic preemptible kernel
 
@@ -847,7 +847,7 @@ x86_64 GNU/Linux
 
 Bài tập đề xuất: Bật `CONFIG_PREEMPT_DYNAMIC` trên custom kernel 6.1 LTS; build rồi boot với các giá trị khác nhau cho kernel parameter `preempt`= (và xác minh đã truyền bằng cách xem `/proc/cmdline`).
 
-Được rồi, xong việc đó, chúng ta trở lại thêm chi tiết các khía cạnh nội bộ. Hãy tóm lược rất ngắn vài điểm then chốt đã học trong các phần trước. Đã học core kernel scheduling code đặt trong function `void schedule(void)`, thin wrapper trên worker function `__schedule()`, và nó duyệt modular scheduler class theo priority order, cuối cùng có thread được chọn (bởi code của một scheduling class bên dưới) để context-switch đến. Tất cả ổn; giờ một vài câu hỏi then chốt: chính xác ai gọi core code path “task scheduling” này và chính xác khi nào chạy? (Đúng điều connector nhãn “S” ở trên cùng Hình 10.9 gợi đến!) Các phần sau cố trả lời; tiếp tục nào!
+Được rồi, xong việc đó, chúng ta trở lại thêm chi tiết các khía cạnh nội bộ. Hãy tóm lược rất ngắn vài điểm then chốt đã học trong các phần trước. Đã học core kernel scheduling code đặt trong function `void schedule(void)`, thin wrapper trên worker function `__schedule()`, và nó duyệt modular scheduler class theo priority order, cuối cùng có thread được chọn (bởi code của một scheduling class bên dưới) để context-switched đến. Tất cả ổn; giờ một vài câu hỏi then chốt: chính xác ai gọi core code path “task scheduling” này và chính xác khi nào chạy? (Đúng điều connector nhãn “S” ở trên cùng Hình 10.9 gợi đến!) Các phần sau cố trả lời; tiếp tục nào!
 
 ### Ai chạy scheduler code?
 
@@ -861,7 +861,7 @@ Nói cách khác, code atomic context (nghĩa đen không thể chia) và/hoặc
 
 Đồng thời điều quan trọng cần hiểu là trong preemptible kernel, kernel preemption bị vô hiệu hóa khi schedule code path chạy; điều này cũng hợp lý.
 
-Tóm lược nhanh các điểm then chốt học ở đây: core task scheduling code trên Linux – code của `[__]schedule()` và mọi thứ nó gọi – chạy trong process context bởi process (thực ra thread) sắp tự đưa mình khỏi CPU bằng cách cuối cùng context-switch sang thread khác! Và thread đó là gì? Tất nhiên `current`! (Xem lại Hình 10.9 và Hình 10.11; các code path ở đó – trừ ô cuối dưới cùng nơi “next” thread chạy trên core – do `current` chạy). Đồng thời có “quy tắc”: không bao giờ gọi `schedule()` trong bất kỳ atomic context nào (gồm interrupt context).
+Tóm lược nhanh các điểm then chốt học ở đây: core task scheduling code trên Linux – code của `[__]schedule()` và mọi thứ nó gọi – chạy trong process context bởi process (thực ra thread) sắp tự đưa mình khỏi CPU bằng cách cuối cùng context-switching sang thread khác! Và thread đó là gì? Tất nhiên `current`! (Xem lại Hình 10.9 và Hình 10.11; các code path ở đó – trừ ô cuối dưới cùng nơi “next” thread chạy trên core – do `current` chạy). Đồng thời có “quy tắc”: không bao giờ gọi `schedule()` trong bất kỳ atomic context nào (gồm interrupt context).
 
 Nhưng khi nào xảy ra, nói cách khác chính xác khi nào `schedule()` được gọi? Đọc tiếp để biết...
 
@@ -897,31 +897,31 @@ Và hai, khi nào bit `TIF_NEED_RESCHED` được kiểm tra? Hãy xem:
 
 Bit `thread_info.flags:TIF_NEED_RESCHED` (không phải C code; chỉ để thể hiện bit “need resched” về khái niệm), khi được đặt, thực chất giống cờ đỏ báo kernel rằng phải (re)schedule sớm nhất có thể (thực chất `current` phải được preempt ngay!). Có thể đặt flag trong các context:
 
-  - Housekeeping của (Timer) Interrupt: Trên mỗi timer interrupt (về kỹ thuật trong timer `softirq` code path), thực hiện “housekeeping” liên quan scheduler; trong các công việc ở đây, câu hỏi then chốt: `current` có cần bị preempt không? Nếu có, đặt bit `TIF_NEED_RESCHED`. (Cẩn thận: chỉ đặt bit; không gọi `schedule()` ở đây, vì không được phép.)
+  - Housekeeping của (Timer) Interrupt: Trên mỗi timer interrupt (về kỹ thuật trong timer `softirq` code path), thực hiện “housekeeping” scheduler-related; trong các công việc ở đây, câu hỏi then chốt: `current` có cần bị preempt không? Nếu có, đặt bit `TIF_NEED_RESCHED`. (Cẩn thận: chỉ đặt bit; không gọi `schedule()` ở đây, vì không được phép.)
 
   - Task awakening: Khi task được đánh thức, được enqueue vào runqueue thích hợp; giờ nếu xác định nó phải preempt `current`, đặt bit `thread_info.flags:TIF_NEED_RESCHED`.
 
 - Khi nào bit “need-resched” (`TIF_NEED_RESCHED`) được kiểm tra?
 
-Scheduling Opportunity – nhận biết Process context: Cho `current` kiểm tra bit `thread_info.flags:TIF_NEED_RESCHED` có được đặt không ở một số process context “opportunity point” được thiết kế tốt; nếu bit đặt, gọi schedule code path; nếu không tiếp tục như thường.
+Scheduling Opportunity – nhận biết Process context: Cho `current` kiểm tra bit `thread_info.flags:TIF_NEED_RESCHED` có được đặt không ở một số process context “opportunity point” well-designed; nếu bit đặt, gọi schedule code path; nếu không tiếp tục như thường.
 
 Bạn có nhận thấy? Trong cả trường hợp Housekeeping của (Timer) Interrupt và Task awakening, dù chạy trong interrupt context vẫn không có gì sai. Vì không gọi `schedule()` ngay tại đây; chỉ đặt flag `TIF_NEED_RESCHED` để báo kernel cần reschedule sớm nhất có thể, và reschedule phải xảy ra tại “opportunity point” sẵn có tiếp theo! Chúng ta mở rộng thảo luận trong vài phần sau.
 
 #### Housekeeping của timer interrupt – đặt TIF\_NEED\_RESCHED
 
-Trong timer interrupt (trong code `kernel/sched/core.c:scheduler_tick()`, nơi interrupt bị tắt trên local core), kernel thực hiện meta-work (housekeeping) cần thiết để giữ scheduling trôi chảy; gồm liên tục cập nhật per-CPU runqueue thích hợp, task load balancing, v.v. Lưu ý function `schedule()` thực tế không bao giờ được gọi ở đây. Nhiều nhất là scheduling class hook function (cho process context `current` bị interrupt), `sched_class:task_tick()`, nếu khác null, được gọi (tham khảo Hình 10.13). Ví dụ với thread bất kỳ thuộc fair (CFS) class, cập nhật member `vruntime` (virtual runtime) và thời gian task ở processor (có thiên lệch theo priority) được làm ở đây, trong hook function tên `task_tick_fair()`.
+Trong timer interrupt (trong code `kernel/sched/core.c:scheduler_tick()`, nơi interrupt bị tắt trên local core), kernel thực hiện meta-work (housekeeping) cần thiết để giữ scheduling trôi chảy; gồm liên tục cập nhật per-CPU runqueue thích hợp, task load balancing, v.v. Lưu ý function `schedule()` thực tế không bao giờ được gọi ở đây. Nhiều nhất là scheduling class hook function (cho process context `current` bị interrupt), `sched_class:task_tick()`, nếu non-null, được gọi (tham khảo Hình 10.13). Ví dụ với thread bất kỳ thuộc fair (CFS) class, cập nhật member `vruntime` (virtual runtime) và thời gian task ở processor (priority-biased) được làm ở đây, trong hook function tên `task_tick_fair()`.
 
 Kỹ thuật hơn, toàn bộ công việc mô tả trong đoạn trước, code `scheduler_tick()`, chạy trong timer interrupt softirq code path, `TIMER_SOFTIRQ`.
 
-Giờ (ngoài housekeeping liên quan sched khác), khi trong timer interrupt (softirq) context này, phải quyết định: `current` có cần bị preempt không? Quyết định then chốt được đưa ra bằng kiểm tra các điều kiện sau và preempt current nếu bất kỳ điều kiện nào đúng:
+Giờ (ngoài housekeeping sched-related khác), khi trong timer interrupt (softirq) context này, phải quyết định: `current` có cần bị preempt không? Quyết định then chốt được đưa ra bằng kiểm tra các điều kiện sau và preempt current nếu bất kỳ điều kiện nào đúng:
 
-- `current` đã vượt time quantum chưa? Hơn nữa, đã vượt một ngưỡng đủ lớn so với task lân cận chưa? Đây chính là thứ tunable (hay sysctl) `/sys/kernel/debug/sched/min_granularity_ns` giữ; là effective CFS timeslice. Mặc định khác nhau (3 ms trên Ubuntu 22.04 x86\_64 và 2,25 ms trên Fedora 38/39. Nhắc nhanh, đã trình bày thông tin này, effective CFS timeslice, trong phần Ghi chú về CFS scheduling period và timeslice).
+- `current` đã vượt time quantum chưa? Hơn nữa, đã vượt một ngưỡng large-enough so với task lân cận chưa? Đây chính là thứ tunable (hay sysctl) `/sys/kernel/debug/sched/min_granularity_ns` giữ; là effective CFS timeslice. Mặc định khác nhau (3 ms trên Ubuntu 22.04 x86\_64 và 2,25 ms trên Fedora 38/39. Nhắc nhanh, đã trình bày thông tin này, effective CFS timeslice, trong phần Ghi chú về CFS scheduling period và timeslice).
 
 - Task mới sinh và chạy, hoặc vừa được đánh thức (trên CFS runqueue này), có priority cao hơn `current` không?
 
 - CFS rb-tree có task với `vruntime` thấp hơn `current` không (nói cách khác `current` không còn là leaf node ngoài cùng trái trên tree)?
 
-(Nghĩ kỹ, điểm thứ nhất và thứ ba khá giống; nếu time quantum vượt, rất có thể giá trị `vruntime` đã tăng đến mức không còn là leaf node ngoài cùng trái trong runqueue.)
+(Nghĩ kỹ, điểm thứ nhất và thứ ba khá giống; nếu time quantum vượt, rất có thể giá trị `vruntime` đã tăng đến mức không còn là leaf node left-most trong runqueue.)
 
 Giả sử kernel code path vừa mô tả quyết định task mới xứng đáng CPU hơn; rồi sao? Có gọi `schedule()`? Không! Như vừa giải thích ở trên, không gọi được `schedule()` trong interrupt context. Kernel giờ chỉ “đánh dấu” thực tế cần reschedule ngay khi khả thi, tại “scheduling opportunity point tiếp theo”, bằng đặt flag “global” – bit `TIF_NEED_RESCHED` trong `thread_info->flags`. (Lý do đặt từ global trong ngoặc kép là thực sự không phải kernel-wide global; chỉ là bit trong bitmask `thread_info->flags` của instance `current`, tên `TIF_NEED_RESCHED`. Vì sao? Truy cập bit theo cách này nhanh hơn qua global!) Hơn nữa cần ghi nhớ nếu task mới sinh hay vừa được đánh thức cần được schedule, được đặt vào runqueue thích hợp và chưa chạy ngay; sẽ chạy trong tương lai gần khi cơ hội scheduling tiếp theo đến.
 
@@ -929,7 +929,7 @@ Giả sử kernel code path vừa mô tả quyết định task mới xứng đ�
 
 Hình 10.13: Sơ đồ khái niệm cho thấy việc đặt bit thread\_info-\>flags.TIF\_NEED\_RESCHED trong context của timer softirq
 
-Hình 10.13 thể hiện điều này về khái niệm. Khi timer interrupt (hay IRQ) xảy ra, phần handler nhanh và nhỏ gọi là top-half hay hardirq chạy, rất nhanh thực hiện công việc; khi xong kernel gọi timer bottom-half hay softirq handler (phần trái Hình 10.13). Ở đây một phần công việc là timer housekeeping task như đã mô tả. Chúng ta thể hiện CFS rb-tree về khái niệm, với node x là leaf node ngoài cùng trái và c là node biểu diễn `current` (phần giữa Hình 10.13). Vì vậy trong sơ đồ `current` không còn là leaf node ngoài cùng trái (ngụ ý giá trị `vruntime` cao hơn x). Code trong các timer housekeeping code path (liên quan scheduler) phát hiện trường hợp và đặt bit `TIF_NEED_RESCHED` (`ti` viết tắt `thread_info`, trong Linux hiện đại nằm trong task structure như phần phải Hình 10.13 cho thấy).
+Hình 10.13 thể hiện điều này về khái niệm. Khi timer interrupt (hay IRQ) xảy ra, phần handler fast-andsmall so-called top-half hay hardirq chạy, rất nhanh thực hiện công việc; khi xong kernel gọi timer bottom-half hay softirq handler (phần trái Hình 10.13). Ở đây một phần công việc là timer housekeeping task như đã mô tả. Chúng ta thể hiện CFS rb-tree về khái niệm, với node x là leaf node left-most và c là node biểu diễn `current` (phần giữa Hình 10.13). Vì vậy trong sơ đồ `current` không còn là leaf node left-most (ngụ ý giá trị `vruntime` cao hơn x). Code trong các timer housekeeping code path (scheduler-related) phát hiện trường hợp và đặt bit `TIF_NEED_RESCHED` (`ti` viết tắt `thread_info`, trong Linux hiện đại nằm trong task structure như phần phải Hình 10.13 cho thấy).
 
 Nơi khác thực hiện kiểm tra tương tự là khi task được đánh thức. Khi xảy ra, task dequeue khỏi wait queue đang ở và enqueue vào CPU runqueue. Giờ nếu thấy task vừa đánh thức (trên core:runqueue ấy) phải preempt `current` (do priority cao hơn, ít `vruntime` hơn hay gì khác), bit `TIF_NEED_RESCHED` được đặt. (Thảo luận chi tiết hơn trường hợp trong phần Các entry point của CPU scheduler – tóm lược sắp tới.)
 
@@ -937,7 +937,7 @@ Cũng cần nhấn mạnh trong trường hợp điển hình (nhiều khả nă
 
 #### Phần process context – kiểm tra TIF\_NEED\_RESCHED
 
-Một mặt của vấn đề, phần timer interrupt (softirq) của scheduling housekeeping vừa mô tả, nơi có thể đặt bit `thread_info:TIF_NEED_RESCHED` để “báo” kernel rằng schedule code nên được gọi sớm nhất có thể, được thực hiện liên tục khi hệ thống chạy.
+Một mặt của vấn đề, phần timer interrupt (softirq) của scheduling housekeeping just-described, nơi có thể đặt bit `thread_info:TIF_NEED_RESCHED` để “báo” kernel rằng schedule code nên được gọi sớm nhất có thể, được thực hiện liên tục khi hệ thống chạy.
 
 Mặt còn lại là kiểm tra hay nhận biết bit có được đặt và nếu có thì gọi `schedule()`; phần sau này – gọi `schedule()` – lưu ý kỹ:
 
@@ -945,7 +945,7 @@ Mặt còn lại là kiểm tra hay nhận biết bit có được đặt và n�
 
 - chỉ tại một số “opportunity point” cụ thể rải khắp kernel code path
 
-Sau đây là các opportunity point điển hình nơi kiểm tra `thread_info->flags.TIF_NEED_RESCHED` (thường qua helper `need_resched()`):
+Sau đây là so-called các opportunity point điển hình nơi kiểm tra `thread_info->flags.TIF_NEED_RESCHED` (thường qua helper `need_resched()`):
 
 - Khi return từ system call code path.
 
@@ -953,7 +953,7 @@ Sau đây là các opportunity point điển hình nơi kiểm tra `thread_info-
 
 - Nói chung mọi chuyển đổi từ non-preemptible mode sang preemptible mode trong kernel đều là opportunity point (khi `preempt_enable()` được gọi). Điển hình là khi spinlock được unlock.
 
-Vậy hãy nghĩ: mỗi lần thread chạy user space gọi system call, thread ấy được (context-)switch sang kernel mode rồi chạy code trong kernel với kernel privilege (đây là monolithic kernel design). Tất nhiên system call có độ dài hữu hạn; khi xong có return path đã biết sẽ theo để switch lại user mode và tiếp tục thực thi ở đó.
+Vậy hãy nghĩ: mỗi lần thread chạy user space gọi system call, thread ấy được (context-)switch sang kernel mode rồi chạy code trong kernel với kernel privilege (đây là monolithic kernel design). Tất nhiên system call có độ dài hữu hạn; khi xong có return path well-known sẽ theo để switch lại user mode và tiếp tục thực thi ở đó.
 
 Trên return path này trong kernel, một scheduling opportunity point được đưa vào: kiểm tra bit `TIF_NEED_RESCHED` (trong member `flags` của structure `thread_info`) có đặt không. Nếu có, scheduler được kích hoạt bằng cách cho process context gọi `schedule()`.
 
@@ -1024,11 +1024,11 @@ Hình 10.14: Sơ đồ khái niệm cho thấy việc kiểm tra bit TIF\_NEED\_
 
 - Task mới sinh hay vừa đánh thức có priority cao hơn `current` (task hiện thực thi kernel code path) không?
 
-- CFS rb-tree có task với `vruntime` thấp hơn `current` không (nói cách khác `current` không còn là leaf node ngoài cùng trái trên tree)?
+- CFS rb-tree có task với `vruntime` thấp hơn `current` không (nói cách khác `current` không còn là leaf node left-most trên tree)?
 
 - Timer (softirq) housekeeping: kiểm tra có cần đặt bit `TIF_NEED_RESCHED` không (kiểm tra được thực hiện trong timer softirq context function `scheduler_tick()`; xem Hình 10.13). Lưu ý bit `TIF_NEED_RESCHED` có thể được đặt ở đây nhưng `schedule()` không bao giờ được gọi ở đây.
 
-- Tóm lược mọi “opportunity point”: ở đây kiểm tra bit `TIF_NEED_RESCHED` có đặt không. Sau đây là các “opportunity point” nơi kiểm tra được làm trong process context (xem Hình 10.14):
+- Tóm lược so-called mọi “opportunity point”: ở đây kiểm tra bit `TIF_NEED_RESCHED` có đặt không. Sau đây là các “opportunity point” nơi kiểm tra được làm trong process context (xem Hình 10.14):
 
 - Trên system call return path
 
@@ -1064,9 +1064,9 @@ Các comment chi tiết ngay trước core kernel scheduling function `kernel/sc
 
 #### Core scheduler code ngắn gọn
 
-Như đã nói, luôn nhớ scheduler code được chạy trong process context bởi process (thực ra thread) sắp tự đưa mình khỏi CPU bằng cách cuối cùng context-switch sang thread khác! Và thread ấy là gì? Tất nhiên `current`!
+Như đã nói, luôn nhớ scheduler code được chạy trong process context bởi process (thực ra thread) sắp tự đưa mình khỏi CPU bằng cách cuối cùng context-switching sang thread khác! Và thread ấy là gì? Tất nhiên `current`!
 
-Function `__schedule()` có (trong số các variable khác) hai local variable, pointer đến `struct` `task_struct` tên `prev` và `next`. Pointer `prev` được đặt thành `rq->curr`, không gì khác ngoài `current`! Pointer `next` sẽ được đặt thành task sắp context-switch đến và chạy tiếp! Vậy bạn thấy, `current` chạy scheduler code, tự gọi mình là previous task, thực hiện công việc chạy pick-next-task cho modular scheduling class đó (thực chất scheduling algorithm), rồi tự đưa khỏi processor bằng context-switch sang `next`! Một lần nữa, đáng xem lại Hình 10.9, hiểu rằng các code path ở đó – trừ ô cuối dưới cùng nơi “next” thread chạy trên core – do không ai khác ngoài `current` chạy!
+Function `__schedule()` có (trong số các variable khác) hai local variable, pointer đến `struct` `task_struct` tên `prev` và `next`. Pointer `prev` được đặt thành `rq->curr`, không gì khác ngoài `current`! Pointer `next` sẽ được đặt thành task sắp context-switched đến và chạy tiếp! Vậy bạn thấy, `current` chạy scheduler code, tự gọi mình là previous task, thực hiện công việc chạy pick-next-task cho modular scheduling class đó (thực chất scheduling algorithm), rồi tự đưa khỏi processor bằng context-switching sang `next`! Một lần nữa, đáng xem lại Hình 10.9, hiểu rằng các code path ở đó – trừ ô cuối dưới cùng nơi “next” thread chạy trên core – do không ai khác ngoài `current` chạy!
 
 Sau đây là vài snippet từ core scheduling code (với chú giải `<< like this >>` nhắc lại các điểm đã thảo luận): `https://elixir.bootlin.com/linux/v6.1.25/source/kernel/sched/core.c#L6435`.
 
@@ -1105,7 +1105,7 @@ Sau đây là vài lời nhanh về context switch thực tế.
 
 Để kết thúc chương, hãy xem nhanh context switch (CPU scheduler). Nhiệm vụ context switch (trong context CPU/task scheduler) khá rõ: trước khi đơn giản switch sang next task, OS phải lưu state của previous task, nghĩa là task hiện thực thi (nói cách khác state của `current`). Task structure chứa structure khác nhúng bên trong để lưu/lấy hardware context của thread; đó là member `struct thread_struct thread` (trên x86 luôn là member cuối cùng của task structure).
 
-Trong Linux, inline function `kernel/sched/core.c:context_switch()` làm công việc context switching; đến giờ tất nhiên bạn hiểu code được `current` chạy, được xem là “previous” task. Nó thực hiện switch từ task `prev` (từ `current`) sang task `next`, bên thắng scheduling round hay cuộc chiến preemption này. Context switch về cơ bản thực hiện qua hai giai đoạn rất đặc thù architecture:
+Trong Linux, inline function `kernel/sched/core.c:context_switch()` làm công việc context-switching; đến giờ tất nhiên bạn hiểu code được `current` chạy, được xem là “previous” task. Nó thực hiện switch từ task `prev` (từ `current`) sang task `next`, bên thắng scheduling round hay cuộc chiến preemption này. Context switch về cơ bản thực hiện qua hai giai đoạn rất arch-specific:
 
 - Memory (MM) switch: Switch một arch-specific CPU register để trỏ đến memory descriptor structure (`struct mm_struct`) của `next`. Trên x86\[\_64\], register tên CR3 (Control Register 3); trên ARM (AArch32), tên register TTBR0 (Translation Table Base Register 0). Vì sao? Vì từ `mm_struct`, kernel có thể “thấy” toàn bộ bức tranh memory của process, quan trọng gồm pointer đến base của paging table; đặt pointer đúng do đó khiến MMU tham chiếu paging table của `next` khi address translation lúc `next` thực thi!
 
@@ -1121,9 +1121,9 @@ Tuy nhiên chờ chút: kernel parameter `isolcpus`= giờ được xem là depr
 
 ## Tổng kết
 
-Trong chương này, bạn đã học nhiều nội dung và khía cạnh CPU scheduler (hay task scheduler) của Linux kernel linh hoạt. Trước tiên thấy KSE thực tế là thread chứ không phải process. Cũng học rằng trong monolithic OS như Linux không có “scheduler” thread trong kernel: scheduling do process context thread – thread `current` – chạy scheduling code path thực hiện, tự context-switch sang next task khi xong (qua đó tự đưa mình khỏi processor – tất nhiên timer interrupt softirq housekeeping code path cũng đóng vai trò then chốt trong scheduler-related housekeeping!).
+Trong chương này, bạn đã học nhiều nội dung và khía cạnh CPU scheduler (hay task scheduler) của Linux kernel linh hoạt. Trước tiên thấy KSE thực tế là thread chứ không phải process. Cũng học rằng trong monolithic OS như Linux không có “scheduler” thread trong kernel: scheduling do process context thread – thread `current` – chạy scheduling code path thực hiện, tự context-switching sang next task khi xong (qua đó tự đưa mình khỏi processor – tất nhiên timer interrupt softirq housekeeping code path cũng đóng vai trò then chốt trong scheduler-related housekeeping!).
 
-Sau đó có hiểu biết về các scheduling policy có sẵn mà OS triển khai. Tiếp theo hiểu để hỗ trợ nhiều CPU theo cách có scalability tuyệt vời, kernel phản ánh mạnh điều này bằng thiết kế dùng một runqueue cho mỗi CPU core, mỗi modular scheduling class (một lần nữa cgroups framework ngụ ý còn nhiều điều hơn, như sẽ học sau). Rồi trình bày cách truy vấn scheduling policy và priority của thread cho trước bất kỳ, cùng các chi tiết sâu hơn về internal implementation CPU scheduler. Chúng ta tập trung cách scheduler hiện đại tận dụng modular scheduling class design, chính xác ai chạy scheduler code thực tế (`current`!) và khi nào, kết thúc bằng ghi chú ngắn về internal code implementation của core scheduling code và context switch.
+Sau đó có hiểu biết về các scheduling policy có sẵn mà OS triển khai. Tiếp theo hiểu để hỗ trợ nhiều CPU theo cách có scalability tuyệt vời, kernel phản ánh mạnh điều này bằng thiết kế dùng một runqueue cho mỗi CPU core, mỗi modular scheduling class (một lần nữa cgroups framework ngụ ý còn nhiều điều hơn, như sẽ học sau). Rồi trình bày cách truy vấn scheduling policy và priority của thread cho trước bất kỳ, cùng các chi tiết in-depth hơn về internal implementation CPU scheduler. Chúng ta tập trung cách scheduler hiện đại tận dụng modular scheduling class design, chính xác ai chạy scheduler code thực tế (`current`!) và khi nào, kết thúc bằng ghi chú ngắn về internal code implementation của core scheduling code và context switch.
 
 Chương tiếp theo tiếp tục hành trình rất thú vị, có thêm hiểu biết và chi tiết về cơ chế bên trong kernel-level CPU scheduler. Tôi đề nghị trước tiên nắm chắc đầy đủ nội dung chương này, làm câu hỏi và bài tập đã cho, rồi sang chương tiếp theo. Bạn đang tiến triển tốt! Hãy sớm lên lịch buổi tiếp theo!
 

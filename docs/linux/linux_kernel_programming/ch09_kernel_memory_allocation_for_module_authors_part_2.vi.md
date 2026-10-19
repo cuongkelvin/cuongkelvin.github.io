@@ -22,9 +22,9 @@ Tóm lược, trong chương này, các nội dung chính được trình bày l
 
 Tôi giả định bạn đã đọc chương trực tuyến Kernel Workspace Setup, đã chuẩn bị phù hợp một guest VM (hoặc hệ thống native) chạy Ubuntu 22.04 LTS (hoặc bản phát hành ổn định mới hơn) và đã cài đặt mọi package cần thiết. Nếu chưa, tôi đặc biệt khuyên bạn thực hiện việc này trước.
 
-Ngoài ra, phần cuối chương này chủ ý chạy một app dùng rất nhiều memory, nhiều đến mức kernel sẽ có hành động quyết liệt (kết thúc một số process)! Tôi đặc biệt khuyên bạn thử những việc như vậy trên một hệ thống an toàn, cô lập, ưu tiên Linux test VM (không có data quan trọng).
+Ngoài ra, phần cuối chương này chủ ý chạy một app memory-intensive, nhiều đến mức kernel sẽ có hành động quyết liệt (kết thúc một số process)! Tôi đặc biệt khuyên bạn thử những việc như vậy trên một hệ thống an toàn, cô lập, ưu tiên Linux test VM (không có data quan trọng).
 
-Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyên bạn trước tiên thiết lập môi trường workspace, bao gồm clone GitHub repository của sách để lấy code, rồi thực hành trực tiếp trên đó. Có thể tìm GitHub repository tại `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`.
+Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyên bạn trước tiên thiết lập môi trường workspace, bao gồm clone GitHub repository của sách để lấy code, rồi hands-on trên đó. Có thể tìm GitHub repository tại `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`.
 
 ## Tạo custom slab cache
 
@@ -109,7 +109,7 @@ cache), 0, SLAB_PANIC, init_once);
 
 Function `init_once()` – constructor – khởi tạo cached object instance (vừa được cấp phát). Constructor function được gọi bất cứ khi nào cache này cấp phát page mới.
 
-Dù có vẻ trái trực giác, thực tế Linux kernel hiện đại khá hướng đối tượng xét về thiết kế. Tất nhiên code chủ yếu là C thuần truyền thống, một ngôn ngữ procedural. Tuy vậy, rất nhiều architecture implementation trong kernel (driver model là một ví dụ lớn) khá hướng đối tượng trong thiết kế: method dispatch qua virtual function pointer table, design pattern gọi là “strategy”, v.v. Xem bài viết hai phần trên LWN mô tả điều này tương đối chi tiết tại đây: Object-oriented design patterns in the kernel, part 1, tháng 6 năm 2011 (`https://lwn.net/Articles/444910/`).
+Dù có vẻ counter-intuitive, thực tế Linux kernel hiện đại khá object-oriented xét về thiết kế. Tất nhiên code chủ yếu là C thuần truyền thống, một ngôn ngữ procedural. Tuy vậy, rất nhiều architecture implementation trong kernel (driver model là một ví dụ lớn) khá object-oriented trong thiết kế: method dispatch qua virtual function pointer table, design pattern so-called “strategy”, v.v. Xem bài viết two-part trên LWN mô tả điều này tương đối chi tiết tại đây: Object-oriented design patterns in the kernel, part 1, tháng 6 năm 2011 (`https://lwn.net/Articles/444910/`).
 
 Return value của API `kmem_cache_create()` là pointer đến custom slab cache mới tạo khi thành công, và `NULL` khi thất bại. Pointer này thường được giữ global vì bạn cần truy cập nó để thực sự cấp phát object từ cache (bước tiếp theo).
 
@@ -119,7 +119,7 @@ Return value của API `kmem_cache_create()` là pointer đến custom slab cach
 
 #### Bước 2 – sử dụng memory của custom slab cache
 
-Vậy chúng ta đã tạo custom slab cache; bên trong, kernel sẽ pre-allocate nhiều object thuộc custom structure của bạn trong đó, sẵn sàng để dùng! Để dùng, bạn phải gọi API `kmem_cache_alloc()`. Nhiệm vụ của nó là với pointer đến slab cache cho trước, trả về một instance của object trên slab cache đó (thực ra đây chính là cách các API `k{m|z}alloc()` hoạt động bên trong!). Signature như sau (tất nhiên hãy nhớ luôn include header `<linux/slab.h>` cho mọi slab-based API):
+Vậy chúng ta đã tạo custom slab cache; bên trong, kernel sẽ pre-allocated nhiều object thuộc custom structure của bạn trong đó, sẵn sàng để dùng! Để dùng, bạn phải gọi API `kmem_cache_alloc()`. Nhiệm vụ của nó là với pointer đến slab cache cho trước, trả về một instance của object trên slab cache đó (thực ra đây chính là cách các API `k{m|z}alloc()` hoạt động bên trong!). Signature như sau (tất nhiên hãy nhớ luôn include header `<linux/slab.h>` cho mọi slab-based API):
 
 ```
 void *kmem_cache_alloc(struct kmem_cache *s, gfp_t gfpflags);
@@ -131,7 +131,7 @@ Hãy xem hai parameter của nó:
 
 - Parameter thứ hai là các GFP flag thông thường cần truyền (nhớ quy tắc thiết yếu cho người viết driver/module: dùng `GFP_KERNEL` cho process-context allocation thông thường khi được phép sleep an toàn, nếu không thì dùng `GFP_ATOMIC` khi ở bất kỳ atomic context nào).
 
-Như các API `k{m|z}alloc()` giờ đã quen, return value là pointer đến memory chunk mới cấp phát – một kernel virtual address.
+Như các API `k{m|z}alloc()` now-familiar, return value là pointer đến memory chunk mới cấp phát – một kernel virtual address.
 
 Hãy dùng memory object mới cấp phát, và khi xong đừng quên giải phóng bằng:
 
@@ -157,7 +157,7 @@ void kmem_cache_destroy(struct kmem_cache *);
 
 Tất nhiên parameter là pointer đến cache (custom) đã tạo ở bước đầu (return value từ API `kmem_cache_create()`).
 
-Giờ đã hiểu quy trình và các API liên quan, hãy thực hành với kernel module tự tạo custom slab cache, sử dụng rồi hủy nó.
+Giờ đã hiểu quy trình và các API liên quan, hãy hands-on với kernel module tự tạo custom slab cache, sử dụng rồi hủy nó.
 
 ### Custom slab – một demo kernel module
 
@@ -181,7 +181,7 @@ struct myctx {
 static struct kmem_cache *gctx_cachep;
 ```
 
-Trong code trên, chúng ta khai báo pointer (global) (`gctx_cachep`) đến custom slab cache sắp tạo – sẽ chứa object; cụ thể là data structure giả định thường xuyên được cấp phát rồi giải phóng, `myctx`.
+Trong code trên, chúng ta khai báo pointer (global) (`gctx_cachep`) đến custom slab cache to-be-created – sẽ chứa object; cụ thể là data structure giả định often-allocated-and-freed, `myctx`.
 
 Trong phần sau, hãy xem code tạo custom slab cache:
 
@@ -248,7 +248,7 @@ production */
 }
 ```
 
-Các comment trong code trên đã tự giải thích; hãy đọc chúng. Constructor routine, nếu được thiết lập (tùy giá trị module parameter `use_ctor`; mặc định là `1`), sẽ được kernel tự động gọi bất cứ khi nào một memory object mới được cấp phát cho cache của chúng ta. (Đồng thời, vì dùng wrapper an toàn hơn `snprintf_lkp()`, được định nghĩa trong library file `klib.c`, chúng ta cho Makefile link cả file `klib.o`.)
+Các comment trong code trên đã self-explanatory; hãy đọc chúng. Constructor routine, nếu được thiết lập (tùy giá trị module parameter `use_ctor`; mặc định là `1`), sẽ được kernel auto-invoked bất cứ khi nào một memory object mới được cấp phát cho cache của chúng ta. (Đồng thời, vì dùng wrapper an toàn hơn `snprintf_lkp()`, được định nghĩa trong library file `klib.c`, chúng ta cho Makefile link cả file `klib.o`.)
 
 Tiếp theo, trong init code path, chúng ta gọi function `use_our_cache()`. Nó cấp phát một instance của object `myctx` qua API `kmem_cache_alloc()`, và nếu custom constructor routine được bật, routine chạy để khởi tạo object. Sau đó dump memory của object để cho thấy nó thực sự được khởi tạo như code, rồi giải phóng khi xong (cho gọn, chúng ta không trình bày error code path):
 
@@ -275,7 +275,7 @@ Hình 9.1: Một số output từ kernel module slab\_custom trên x86\_64 VM
 
 Tốt! Tuy nhiên chờ đã, có một vài điểm then chốt cần lưu ý ở đây:
 
-- Vì constructor routine được bật theo mặc định (giá trị module parameter `use_ctor` là `1`), nó chạy bất cứ khi nào kernel slab layer cấp phát object instance mới cho cache mới của chúng ta. Ở đây chỉ thực hiện một `kmem_cache_alloc()`, nhưng constructor routine chạy 18 lần, nghĩa là slab code của kernel (pre)allocate 18 object cho cache hoàn toàn mới! Tất nhiên con số này có thể thay đổi.
+- Vì constructor routine được bật theo mặc định (giá trị module parameter `use_ctor` là `1`), nó chạy bất cứ khi nào kernel slab layer cấp phát object instance mới cho cache mới của chúng ta. Ở đây chỉ thực hiện một `kmem_cache_alloc()`, nhưng constructor routine chạy 18 lần, nghĩa là slab code của kernel (pre)allocate 18 object cho cache brand-new! Tất nhiên con số này có thể thay đổi.
 
 - Như thấy trong ảnh chụp trên, kích thước mỗi object dường như là 328 byte, khớp kích thước structure thực tế (như ba API sau cho biết: `sizeof()`, `kmem_cache_size()` và `ksize()`). Tuy nhiên, một lần nữa, điều này không đúng! Kích thước thực tế của object do kernel cấp phát lớn hơn; có thể thấy qua `vmstat`:
 
@@ -340,9 +340,9 @@ Parameter đầu là pointer đến structure `shrinker`. Structure này chứa 
 
 - Routine đầu, `count_objects()`, chỉ đếm và trả về số object sẽ được giải phóng (khi thực sự được gọi). Nếu trả về `0`, nghĩa là hiện chưa xác định được số memory object có thể giải phóng, hoặc thậm chí không nên thử giải phóng object nào ngay lúc này. Đồng thời, nó trả về `SHRINK_EMPTY` nếu ngay từ đầu không có object để giải phóng.
 
-- Routine thứ hai, scan\_objects(), chỉ được gọi nếu callback routine đầu trả về giá trị khác zero (ngoài SHRINK\_EMPTY). Đây là routine khi được gọi sẽ thực sự giải phóng, hay thu nhỏ, slab cache đang xét. Nó trả về số object thực sự được giải phóng trong reclaim cycle này, hoặc SHRINK\_STOP nếu reclaim attempt không thể tiến triển (do có thể deadlock).
+- Routine thứ hai, scan\_objects(), chỉ được gọi nếu callback routine đầu trả về giá trị non-zero (ngoài SHRINK\_EMPTY). Đây là routine khi được gọi sẽ thực sự giải phóng, hay thu nhỏ, slab cache đang xét. Nó trả về số object thực sự được giải phóng trong reclaim cycle này, hoặc SHRINK\_STOP nếu reclaim attempt không thể tiến triển (do có thể deadlock).
 
-Để bạn biết, API `register_shrinker()` được cập nhật gần đây trong kernel 6.0 để thêm một string định danh tên theo kiểu printf-format (commit e33c267: `https://github.com/torvalds/linux/commit/e33c267ab70de4249d22d7eab1cc7d68a889bac2`). Hơn nữa, nếu `CONFIG_SHRINKER_DEBUG` được bật (đặt thành `y`), nội dung `/sys/kernel/debug/shrinker` hiển thị mọi slab shrinker đã đăng ký. Chỉ một vài component trong kernel 6.1 dường như đang dùng shrinker interface; ví dụ, code trong `drivers/md/dm-bufio.c` (một cách thực hiện cached I/O trên device) đăng ký shrinker interface, rồi khi callback `scan_objects` được gọi, nó dùng workqueue function (`drivers/md/dm-bufio.c:shrink_work()`) để thử evict buffer theo yêu cầu.
+Để bạn biết, API `register_shrinker()` được cập nhật gần đây trong kernel 6.0 để thêm một string định danh tên theo printf-format-style (commit e33c267: `https://github.com/torvalds/linux/commit/e33c267ab70de4249d22d7eab1cc7d68a889bac2`). Hơn nữa, nếu `CONFIG_SHRINKER_DEBUG` được bật (đặt thành `y`), nội dung `/sys/kernel/debug/shrinker` hiển thị mọi slab shrinker đã đăng ký. Chỉ một vài component trong kernel 6.1 dường như đang dùng shrinker interface; ví dụ, code trong `drivers/md/dm-bufio.c` (một cách thực hiện cached I/O trên device) đăng ký shrinker interface, rồi khi callback `scan_objects` được gọi, nó dùng workqueue function (`drivers/md/dm-bufio.c:shrink_work()`) để thử evict buffer theo yêu cầu.
 
 Giờ chúng ta kết thúc thảo luận về slab layer bằng bản tóm lược nhanh ưu và nhược điểm của việc dùng lớp này cho cấp phát và giải phóng memory. Đây là điều rất quan trọng với bạn, người viết kernel/driver, và cần đặc biệt lưu tâm!
 
@@ -352,7 +352,7 @@ Trong phần này, chúng ta sẽ tóm lược rất ngắn những điều bạ
 
 Ưu điểm khi dùng các API slab allocator (hay slab cache) để cấp phát và giải phóng kernel memory như sau:
 
-- (Rất) nhanh (vì dùng các memory object đã pre-cache).
+- (Rất) nhanh (vì dùng các memory object đã pre-cached).
 
 - Bảo đảm cấp phát physically contiguous memory chunk.
 
@@ -382,7 +382,7 @@ Dù vậy, trong sách này, tôi xem việc ít nhất đề cập các công c
 
   - KMSAN (Kernel Memory Sanitizer): Công cụ tương đương trong kernel của user-space MSAN (Memory Sanitizer), có thể bắt bug UMR (Uninitialized Memory Reads) nguy hiểm (mới gần đây, từ 6.1 trở đi)
 
-  - UBSAN (Undefined Behavior Sanitizer): Bắt nhiều loại UB liên quan arithmetic và memory, bao gồm bug UMR (từ 4.5 trở đi)
+  - UBSAN (Undefined Behavior Sanitizer): Bắt nhiều loại UB liên quan arithmetic và memory-related, bao gồm bug UMR (từ 4.5 trở đi)
 
 - Các kỹ thuật SLUB debug:
 
@@ -408,7 +408,7 @@ Bạn có thể gián tiếp bắt kernel memory bug bằng:
 
 - K\[ret\]probes instrumentation
 
-- Công cụ post-mortem analysis (log, Oops analysis, kdump/crash và \[K\]GDB)
+- Công cụ Post-mortem analysis (log, Oops analysis, kdump/crash và \[K\]GDB)
 
 Được rồi. Tôi sẽ tóm lược thông tin này cùng các chi tiết cụ thể về công cụ có thể dùng trong bảng sau.
 
@@ -418,21 +418,21 @@ Bảng 9.1: Tóm lược các công cụ (và kỹ thuật) có thể dùng đ�
 
 Sau đây là vài ghi chú tương ứng các số trong ngoặc vuông ở cột thứ hai:
 
-- \[1\]: Compiler GCC/Clang hiện đại chắc chắn xuất warning cho UMR, những compiler gần đây thậm chí tự khởi tạo được local variable (nếu được cấu hình như vậy).
+- \[1\]: Compiler GCC/Clang hiện đại chắc chắn xuất warning cho UMR, những compiler gần đây thậm chí auto-initialize được local variable (nếu được cấu hình như vậy).
 
 - \[2\]: KASAN bắt được (gần như!) mọi defect OOB/UAF/UAS/double-free/leakage – tuyệt vời! Cách tiếp cận SLUB debug có thể bắt một vài loại, nhưng không phải tất cả. Vanilla kernel dường như không bắt loại nào.
 
 - \[3\]: Với vanilla kernel, ý tôi là defect này được bắt trên distro kernel thông thường (không đặt config đặc biệt cho memory checking).
 
-(Dù có nguy cơ quảng bá quá mức, tôi khuyến khích bạn cũng đọc cuốn Linux Kernel Debugging). Được rồi, giờ hãy chuyển sang học một vùng kernel memory quan trọng khác, vùng vmalloc và allocation API `vmalloc()` (cùng các API liên quan).
+(Dù có nguy cơ over-selling, tôi khuyến khích bạn cũng đọc cuốn Linux Kernel Debugging). Được rồi, giờ hãy chuyển sang học một vùng kernel memory quan trọng khác, vùng vmalloc và allocation API `vmalloc()` (cùng các API liên quan).
 
 ## Tìm hiểu và sử dụng kernel API vmalloc()
 
 Như đã học trong chương trước, xét cho cùng chỉ có một engine cho memory allocation trong kernel – page allocator (hay buddy system allocator). Xếp lớp phía trên là cơ chế slab allocator (hay slab cache). Ngoài hai lớp này, còn một address space hoàn toàn virtual khác trong virtual address space của kernel, từ đó có thể cấp phát virtual page theo ý muốn – gọi là vùng kernel vmalloc.
 
-Trong kernel segment hay VAS là vmalloc address space, còn gọi là vùng vmalloc, trải từ `VMALLOC_START` đến `VMALLOC_END-1` (địa chỉ chính xác và không gian có sẵn phụ thuộc architecture; nhân tiện, chúng ta đã trình bày tất cả điều này tương đối chi tiết trong Chương 7, Memory Management Internals – Essentials, dưới phần Xem xét kernel segment). Ban đầu nó là vùng hoàn toàn virtual, nghĩa là các virtual page ban đầu không map đến bất kỳ physical page frame nào.
+Trong kernel segment hay VAS là vmalloc address space, còn gọi là vùng vmalloc, trải từ `VMALLOC_START` đến `VMALLOC_END-1` (địa chỉ chính xác và không gian có sẵn arch-dependant; nhân tiện, chúng ta đã trình bày tất cả điều này tương đối chi tiết trong Chương 7, Memory Management Internals – Essentials, dưới phần Xem xét kernel segment). Ban đầu nó là vùng hoàn toàn virtual, nghĩa là các virtual page ban đầu không map đến bất kỳ physical page frame nào.
 
-Để ôn nhanh, hãy xem lại sơ đồ user segment và kernel segment – thực chất là VAS đầy đủ – bằng cách xem lại, chẳng hạn, Hình 7.12. Bạn sẽ tìm thấy trong Chương 7, Memory Management Internals – Essentials, dưới phần Xem xét kernel VAS.
+Để ôn nhanh, hãy re-examining sơ đồ user segment và kernel segment – thực chất là VAS đầy đủ – bằng cách xem lại, chẳng hạn, Hình 7.12. Bạn sẽ tìm thấy trong Chương 7, Memory Management Internals – Essentials, dưới phần Xem xét kernel VAS.
 
 Trong sách này, mục đích không phải đi sâu vào các chi tiết nội bộ phức tạp về vùng vmalloc của kernel. Thay vào đó, chúng ta trình bày đủ thông tin để bạn, người viết module hoặc driver, dùng vùng này nhằm cấp phát loại memory này ở runtime.
 
@@ -449,13 +449,13 @@ Một vài điểm then chốt cần lưu ý về vmalloc:
 
 - API `vmalloc()` cấp phát contiguous virtual memory cho caller. Không có bảo đảm vùng được cấp phát là physically contiguous; có thể có hoặc không (allocation càng lớn, khả năng physically contiguous càng thấp).
 
-- Nội dung các virtual page được cấp phát về lý thuyết là ngẫu nhiên; trong thực tế dường như phụ thuộc architecture (ít nhất x86\_64 có vẻ zero hóa vùng memory); tất nhiên (chấp nhận nguy cơ giảm nhẹ hiệu năng), bạn được khuyên bảo đảm zero hóa memory bằng wrapper API `vzalloc()` (signature giống hệt `vmalloc()`).
+- Nội dung các virtual page được cấp phát về lý thuyết là ngẫu nhiên; trong thực tế dường như arch-dependent (ít nhất x86\_64 có vẻ zero hóa vùng memory); tất nhiên (chấp nhận nguy cơ giảm nhẹ hiệu năng), bạn được khuyên bảo đảm zero hóa memory bằng wrapper API `vzalloc()` (signature giống hệt `vmalloc()`).
 
-- API `vmalloc()` (và liên quan) chỉ được gọi từ process context được phép sleep an toàn (hay non-atomic) (vì có thể khiến caller sleep; do đó gọi trong process context nhưng đang giữ spinlock là vi phạm quy tắc này; đừng làm vậy).
+- API `vmalloc()` (và liên quan) chỉ được gọi từ process context safe-to-sleep (hay non-atomic) (vì có thể khiến caller sleep; do đó gọi trong process context nhưng đang giữ spinlock là vi phạm quy tắc này; đừng làm vậy).
 
 - Return value của `v{m|z}alloc()` là kernel virtual address (KVA) (trong vùng vmalloc của kernel) khi thành công, hoặc `NULL` khi thất bại; dù ít khả năng thất bại, nhiệm vụ của developer tốt là kiểm tra failure case.
 
-- Điểm bắt đầu vùng vmalloc memory vừa cấp phát được bảo đảm nằm trên page boundary (nói cách khác, allocation luôn page-aligned). Điều này cho biết: các API `v{m|z}` `alloc()` được dùng cho memory allocation tương đối lớn, khi chấp nhận được việc vùng cấp phát có thể không physically contiguous.
+- Điểm bắt đầu vùng vmalloc memory vừa cấp phát được bảo đảm nằm trên page boundary (nói cách khác, allocation luôn page-aligned). Điều này cho biết: các API `v{m|z}` `alloc()` được dùng cho memory allocation large-ish, khi chấp nhận được việc vùng cấp phát có thể không physically contiguous.
 
 - Memory thực tế được cấp phát (từ page allocator) hoàn toàn có thể lớn hơn yêu cầu (vì một lần nữa, bên trong nó cấp phát đủ page để bao phủ kích thước yêu cầu).
 
@@ -520,7 +520,7 @@ Tiếp tục, code sau dùng API `vzalloc()` để lại cấp phát một conti
                 DISP_BYTES);
 ```
 
-Một vài điểm về code vừa thấy:
+Một vài điểm về code just-seen:
 
 - Thứ nhất, chú ý error handling bằng câu lệnh `goto` (tại các target label của nhiều lần dùng `goto`, nơi chúng ta dùng `vfree()` hoặc API thích hợp để giải phóng các memory buffer đã cấp phát trước theo yêu cầu), điển hình của kernel code.
 
@@ -559,7 +559,7 @@ err_out1:
 }
 ```
 
-Thực tế từ kernel 5.8.0 trở đi, API `vmalloc()` là wrapper trên function bên dưới `__vmalloc_node()` (“node” chỉ nghĩa là code nhận biết NUMA). `__vmalloc()` chỉ nhận hai parameter – kích thước cần cấp phát và GFP flags bitmask.
+Thực tế từ kernel 5.8.0 trở đi, API `vmalloc()` là wrapper trên function bên dưới `__vmalloc_node()` (“node” chỉ nghĩa là code NUMA-aware). `__vmalloc()` chỉ nhận hai parameter – kích thước cần cấp phát và GFP flags bitmask.
 
 Tuy nhiên, trên kernel trước 5.8.0, exported wrapper API `__vmalloc()` nhận thêm một parameter, page protection bitmask, qua đó có thể đặt protection cho các page được cấp phát! Có thể tận dụng để, chẳng hạn, cấp phát page read-only (chính là điều làm trong demo). Chúng ta trình bày thêm khía cạnh này trong phần Chỉ định memory protection sắp tới.
 
@@ -619,7 +619,7 @@ static void __exit vmalloc_demo_exit(void)
 
 Chúng ta để bạn tự thử và xác minh demo kernel module này.
 
-Giờ hãy tìm hiểu ngắn gọn một khía cạnh then chốt, thực sự thú vị khác – chính xác memory allocation `malloc()` trong user space trở thành physical memory như thế nào? Hãy đọc tiếp để tìm hiểu!
+Giờ hãy tìm hiểu ngắn gọn một khía cạnh then chốt, thực sự thú vị khác – chính xác memory allocation `malloc()` trong user-space trở thành physical memory như thế nào? Hãy đọc tiếp để tìm hiểu!
 
 ### Ghi chú ngắn về user-mode memory allocation và demand paging
 
@@ -633,7 +633,7 @@ p = malloc(10000);
 
 Giả định thành công. Một hiểu nhầm rất phổ biến là nghĩ rằng giờ có 10.000 byte physical RAM sẵn có từ địa chỉ `p` trở đi. Đoán xem: trên OS hiện đại như Linux, điều này đơn giản không nhất thiết đúng (ít nhất ngay lập tức)! Chúng tôi không trách bạn nghĩ vậy; đó chỉ là cách OS hiện đại hoạt động.
 
-Hiểu rõ memory allocation thực sự hoạt động thế nào với user-space API phổ biến `malloc()` và liên quan rất bổ ích – tất cả thông qua demand paging! Nghĩa là việc các API này return thành công không có ý nghĩa gì về physical memory allocation. Khi user-space `malloc()` trả về thành công, toàn bộ điều thực sự xảy ra đến lúc đó là một virtual memory region được dành trước; chưa có physical memory nào thực sự được cấp phát! Việc cấp phát physical page frame thực tế chỉ xảy ra theo từng page khi virtual page được truy cập (cho bất kỳ việc gì: đọc, ghi hoặc thực thi).
+Hiểu rõ memory allocation thực sự hoạt động thế nào với user-space API phổ biến `malloc()` và liên quan rất bổ ích – tất cả thông qua demand paging! Nghĩa là việc các API này return thành công không có ý nghĩa gì về physical memory allocation. Khi user-space `malloc()` trả về thành công, toàn bộ điều thực sự xảy ra đến lúc đó là một virtual memory region được dành trước; chưa có physical memory nào thực sự được cấp phát! Việc cấp phát physical page frame thực tế chỉ xảy ra per-page khi virtual page được truy cập (cho bất kỳ việc gì: đọc, ghi hoặc thực thi).
 
 Nhưng điều này xảy ra bên trong như thế nào? Câu trả lời: nó đơn giản là một phần, một tác dụng phụ, của memory management code thông thường dịch virtual address sang physical address tương ứng (máy còn hoạt động bằng cách nào khác?). Chúng ta đã trình bày ngắn chủ đề này trong Chương 7, Memory Management Internals – Essentials, tại phần Từ virtual address đến physical address.
 
@@ -653,7 +653,7 @@ Vì vậy, giờ có thể thấy virtual page chỉ thực sự được cấp 
 
 Điều quan trọng không kém là hiểu kỹ thuật OS demand paging (hay lazy allocation) này không áp dụng cho kernel memory allocation thực hiện qua page allocator (buddy system), slab allocator và cả vùng vmalloc memory.
 
-Vì thế, khi kernel memory được cấp phát qua kernel API, hãy hiểu physical page frame thực tế được cấp phát ngay lập tức. (Trên Linux, tất cả rất nhanh vì, hãy nhớ, khi hệ thống đã hoạt động, các buddy system allocator freelist cho từng node và zone đã map toàn bộ system physical RAM vào vùng kernel lowmem nên có thể dùng tùy ý.) `vmalloc()` (và liên quan) cuối cùng cũng dùng page allocator để đáp ứng memory allocation request; chỉ là virtual page đến từ “vùng vmalloc” được chỉ định trong kernel VAS.
+Vì thế, khi kernel memory được cấp phát qua kernel API, hãy hiểu physical page frame thực tế được cấp phát ngay lập tức. (Trên Linux, tất cả rất nhanh vì, hãy nhớ, khi hệ thống đã hoạt động, các buddy system allocator freelist cho per-node và per-zone đã map toàn bộ system physical RAM vào vùng kernel lowmem nên có thể dùng tùy ý.) `vmalloc()` (và liên quan) cuối cùng cũng dùng page allocator để đáp ứng memory allocation request; chỉ là virtual page đến từ “vùng vmalloc” được chỉ định trong kernel VAS.
 
 Bạn có thể tham khảo ngay Hình 9.9, trình bày khá rõ tất cả điều này; trước mắt bỏ qua phần OOM killer. Tất nhiên chúng ta sẽ trình bày ở phần sau.
 
@@ -742,7 +742,7 @@ Kiểm tra IoF này then chốt; nhưng chính xác tại sao? Hãy nghĩ: khi c
 ptr = kmalloc(num*sizeof(struct mystruct));
 ```
 
-Thì sao? Nếu phép nhân gây overflow thì sao? Thực tế thường xảy ra việc, do overflow và data type của size parameter là unsigned, kết quả là số nhỏ hơn dự định; hacker ác ý có thể tận dụng để cố đưa vào attack vector BoF (buffer overflow). Kết quả có thể thảm khốc, một bug nghiêm trọng về bảo mật chờ tấn công vào thời điểm bất lợi! (Xem phần Đọc thêm để biết thêm về arithmetic overflow.)
+Thì sao? Nếu phép nhân gây overflow thì sao? Thực tế thường xảy ra việc, do overflow và data type của size parameter là unsigned, kết quả là số nhỏ hơn dự định; hacker ác ý có thể tận dụng để cố đưa vào attack vector BoF (buffer overflow). Kết quả có thể thảm khốc, một bug security-critical chờ tấn công vào thời điểm bất lợi! (Xem phần Đọc thêm để biết thêm về arithmetic overflow.)
 
 Tiếp theo, API `kvcalloc()` tương đương chức năng với user-space API `calloc()`, và chỉ là wrapper đơn giản trên API `kvmalloc_array()`:
 
@@ -785,7 +785,7 @@ Với memory address (KVA) cho trước, làm sao kiểm tra allocation đến t
 
 - Dùng utility procmap; nó hiển thị mọi kernel region với các giá trị start address và end address (https://github.com/kaiwan/procmap).
 
-- Một cách khác (bằng lập trình) là qua API `is_vmalloc_addr()` đã đề cập.
+- Một cách khác (bằng lập trình) là qua API `is_vmalloc_addr()` already-mentioned.
 
 Chú ý return address của `kvmalloc()` (bước 3 trong Hình 9.3); hãy tìm nó dưới `proc`:
 
@@ -803,21 +803,21 @@ Bài tập: Một điều nhỏ để thử – trong kernel module `ch9/vmalloc
 
 #### Các helper khác – vmalloc\_exec() và vmalloc\_user()
 
-Để bạn biết, đến version 5.8.0, kernel cung cấp internal helper API `vmalloc_exec()` – một lần nữa là wrapper trên API `vmalloc()`, dùng để cấp phát virtually contiguous memory region với execute permission được đặt. Một bên sử dụng thú vị là kernel module allocation code path (`kernel/module.c:module_alloc()`); không gian cho memory (executable section) của kernel module được cấp phát qua routine này. Tuy nhiên routine không được export. Từ 5.8.0 (xem commit 7a0e27b), `vmalloc_exec()` bị loại bỏ (merge vào caller duy nhất, function `module_alloc()`). Giờ nó là wrapper trên cách chỉ định memory protection gần đây, API `__vmalloc_node_range()` (không được export nên module không dùng được). Helper routine khác được đề cập là `vmalloc_user()`; lại là wrapper trên API `__vmalloc_node_range()`, dùng để cấp phát virtually contiguous memory region được zero hóa, phù hợp để map vào user VAS. Routine này được export; ví dụ được nhiều device driver cũng như perf events ring buffer của kernel sử dụng.
+Để bạn biết, đến version 5.8.0, kernel cung cấp internal helper API `vmalloc_exec()` – một lần nữa là wrapper trên API `vmalloc()`, dùng để cấp phát virtually contiguous memory region với execute permission được đặt. Một bên sử dụng thú vị là kernel module allocation code path (`kernel/module.c:module_alloc()`); không gian cho memory (executable section) của kernel module được cấp phát qua routine này. Tuy nhiên routine không được export. Từ 5.8.0 (xem commit 7a0e27b), `vmalloc_exec()` bị loại bỏ (merge vào caller duy nhất, function `module_alloc()`). Giờ nó là wrapper trên cách chỉ định memory protection gần đây, API `__vmalloc_node_range()` (không được export nên module không dùng được). Helper routine khác được đề cập là `vmalloc_user()`; lại là wrapper trên API `__vmalloc_node_range()`, dùng để cấp phát virtually contiguous memory region được zeroed-out, phù hợp để map vào user VAS. Routine này được export; ví dụ được nhiều device driver cũng như perf events ring buffer của kernel sử dụng.
 
 #### Chỉ định memory protection
 
 Như đã thấy trong phần Thử nghiệm vmalloc(), cho đến kernel 5.8.0, có thể dễ dàng tận dụng API `__vmalloc()` để chỉ định protection cụ thể (ví dụ read-only) cho một memory region (vmalloc-ed). Nhưng sau 5.8.0, chỉ kernel routine bên dưới `__vmalloc_node_range()` làm được; vậy vấn đề là gì? Nó không được export (trong khi `__vmalloc()` có). Xét thực tế, điều này nghĩa là chỉ kernel-internal code (và in-tree driver) tận dụng được tính năng như vậy.
 
-Tất nhiên, với đủ công sức, có thể vượt giới hạn có vẻ tồn tại này: thay vì dùng các API `__vmalloc()` hay `__vmalloc_node_range()`, có thể dùng cách thay thế, có lẽ memory-map một ít kernel memory vào user space qua method `mmap()`, rồi dùng system call `mprotect()` từ user-space app để đặt protection thích hợp (hoặc tốt hơn, thậm chí thiết lập protection qua các LSM framework nổi tiếng và được kiểm thử như SELinux, AppArmor, Integrity, v.v.).
+Tất nhiên, với đủ công sức, có thể vượt giới hạn có vẻ tồn tại này: thay vì dùng các API `__vmalloc()` hay `__vmalloc_node_range()`, có thể dùng cách thay thế, có lẽ memory-map một ít kernel memory vào user space qua method `mmap()`, rồi dùng system call `mprotect()` từ user-space app để đặt protection thích hợp (hoặc tốt hơn, thậm chí thiết lập protection qua các LSM framework well-known và được kiểm thử như SELinux, AppArmor, Integrity, v.v.).
 
 Trong user-space application, có thể đặt memory protection tương tự cho memory region tùy ý qua system call `mprotect()`; hãy xem man page để biết chi tiết cách dùng (thậm chí còn cung cấp example code! Liên kết: `https://man7.org/linux/man-pages/man2/mprotect.2.html`).
 
 Chờ đã, tại sao làm memory read-only? Chỉ định memory protection lúc allocation thành, chẳng hạn, read-only có vẻ khá vô dụng: khi đó làm sao khởi tạo memory ấy với nội dung có ý nghĩa? Hãy nghĩ xem – guard page là use case hoàn hảo cho tình huống này (như các red zone region SLUB layer giữ khi ở debug mode).
 
-Được rồi, một điều tương đối mới: từ kernel 5.13, một tính năng hiệu năng về `vmalloc()` được merge, cho phép khả năng dùng huge page khi gọi `vmalloc()` (commit có tiêu đề mm/ vmalloc: hugepage vmalloc mappings, commit # 121e6f3).
+Được rồi, một điều new-ish: từ kernel 5.13, một tính năng hiệu năng về `vmalloc()` được merge, cho phép khả năng dùng huge page khi gọi `vmalloc()` (commit có tiêu đề mm/ vmalloc: hugepage vmalloc mappings, commit # 121e6f3).
 
-Huge page là page kích thước lớn được MMU hỗ trợ (thường lớn hơn nhiều so với page 4K thông thường mà tất cả đã quen và yêu thích). Ví dụ, x86\_64 dùng huge page kích thước 2 MB cho kernel region khi có thể. Dùng huge page có lợi ích giảm đáng kể TLB pressure (do đó cải thiện TLB hit rate, vì mỗi huge page 2 MB cho mức cải thiện 2 M / 4 K = 512X!).
+Huge page là page kích thước lớn MMU-supported (thường lớn hơn nhiều so với page 4K thông thường mà tất cả đã quen và yêu thích). Ví dụ, x86\_64 dùng huge page kích thước 2 MB cho kernel region khi có thể. Dùng huge page có lợi ích giảm đáng kể TLB pressure (do đó cải thiện TLB hit rate, vì mỗi huge page 2 MB cho mức cải thiện 2 M / 4 K = 512X!).
 
 Vậy có cách xác định một `vmalloc()` đã thực hiện có dùng huge page không? Có: inline function `bool is_vm_area_hugepages(const void *addr)` trả về Boolean. Tuy nhiên nó hoạt động qua `find_vm_area()`, vốn không được export; do đó không dùng được trong out-of-tree module. Đành vậy. Đồng thời, trên hệ thống nhỏ hơn (embedded), dùng huge page có thể gây lãng phí đáng kể (do internal fragmentation); kernel cung cấp parameter có thể truyền lúc boot, `nohugevmalloc`, để tắt tính năng này.
 
@@ -831,9 +831,9 @@ So sánh nhanh giữa các API `kmalloc()` (hoặc `kzalloc()`) và `vmalloc()` 
 |---|---|---|
 | Memory được cấp phát là | Physically contiguous | Virtually contiguous (không bảo đảm physical contiguity) |
 | Memory alignment | Align theo hardware (CPU) cache line | Page-aligned |
-| Granularity tối thiểu | Phụ thuộc architecture; nhỏ đến 8 byte trên x86\[\_64\] | Một page |
-| Hiệu năng | Nhanh hơn (physical RAM được cấp phát) với memory allocation nhỏ (trường hợp điển hình); lý tưởng cho allocation \< 1 page | Chậm hơn nhưng phục vụ được allocation (virtual) lớn (thậm chí trên 4 MB; kích thước phụ thuộc kích thước vùng vmalloc đặc thù architecture) |
-| Giới hạn kích thước | Kích thước giới hạn (thường đến 4 MB) | Có thể rất lớn (và phụ thuộc architecture; kích thước vùng kernel vmalloc thậm chí có thể nhiều terabyte trên hệ thống 64-bit, dù nhỏ hơn nhiều trên 32-bit) |
+| Granularity tối thiểu | Arch-dependent; nhỏ đến 8 byte trên x86\[\_64\] | Một page |
+| Hiệu năng | Nhanh hơn (physical RAM được cấp phát) với memory allocation nhỏ (trường hợp điển hình); lý tưởng cho allocation \< 1 page | Chậm hơn nhưng phục vụ được allocation (virtual) lớn (thậm chí trên 4 MB; kích thước phụ thuộc kích thước vùng vmalloc arch-specific) |
+| Giới hạn kích thước | Kích thước giới hạn (thường đến 4 MB) | Có thể rất lớn (và arch-dependant; kích thước vùng kernel vmalloc thậm chí có thể nhiều terabyte trên hệ thống 64-bit, dù nhỏ hơn nhiều trên 32-bit) |
 | Mức phù hợp | Phù hợp gần như mọi use case cần hiệu năng và lượng memory cần nhỏ, gồm DMA (tuy vậy vẫn dùng DMA API); hoạt động được trong atomic/interrupt context | Phù hợp khi cần software buffer lớn, (virtually) contiguous; chậm hơn, không dùng được trong atomic/interrupt context |
 | Debug (qua JTAG) | Dễ và trực tiếp (xét debug memory qua hardware JTAG (hoặc tương tự)) vì memory này direct-mapped | Gián tiếp; JTAG debugger, nếu được hỗ trợ, phải “duyệt” paging table để dịch virtual address sang physical address |
 
@@ -873,7 +873,7 @@ Với nhiều lựa chọn memory allocation API như vậy, làm sao chọn khi
 
 Chúng ta sẽ minh họa cả hai trường hợp trong phần này.
 
-Trước tiên, để quyết định API cần dùng theo loại, lượng và contiguity của memory sẽ cấp phát, hãy xem flowchart sau (bắt đầu ở góc trên bên phải từ nhãn Start here):
+Trước tiên, để quyết định API cần dùng theo loại, lượng và contiguity của memory sẽ cấp phát, hãy xem flowchart sau (bắt đầu ở upper-right từ nhãn Start here):
 
 ![Hình 9.5](images/ch09/fig09-05.jpg)
 
@@ -893,8 +893,8 @@ Tiếp theo, để quyết định API cần dùng theo loại memory sẽ cấp
 |---|---|---|
 | Kernel module, trường hợp điển hình: sử dụng thông thường cho lượng nhỏ (ít hơn một page), physically contiguous | Slab allocator | `kmalloc()`, `kzalloc()`, `kcalloc()`, `krealloc()` |
 | Device driver: sử dụng thông thường/điển hình cho lượng nhỏ (\< 1 page), physically contiguous; khuyên dùng cho driver trong method `probe()` hoặc init (không cần free tường minh!) | Resource-managed API | `devm_kmalloc()` và `devm_kzalloc()` |
-| Physically contiguous, dùng cho mục đích chung | Page allocator | `__get_free_page[s]()`, `get_zeroed_page()` và `alloc_page[s][_exact]()` |
-| Physically contiguous, cho Direct Memory Access (DMA) | DMA API layer chuyên dụng, với CMA (hoặc slab/page allocator) | (không trình bày ở đây: `dma_alloc_coherent()`, `dma_map_[single\|sg]()`, Linux DMA Engine API, v.v.) |
+| Physically contiguous, dùng cho general-purpose | Page allocator | `__get_free_page[s]()`, `get_zeroed_page()` và `alloc_page[s][_exact]()` |
+| Physically contiguous, cho Direct Memory Access (DMA) | DMA API layer Purpose-built, với CMA (hoặc slab/page allocator) | (không trình bày ở đây: `dma_alloc_coherent()`, `dma_map_[single\|sg]()`, Linux DMA Engine API, v.v.) |
 | Virtually contiguous (cho software-only buffer lớn) | Gián tiếp qua page allocator | `vmalloc()` và `vzalloc()` |
 | Virtually hoặc physically contiguous, khi chưa chắc runtime size | Slab hoặc vùng vmalloc | `kvmalloc[_array]()` |
 | Custom data structure (object) | Tạo và dùng custom slab cache | `kmem_cache_{create\|destroy}` `()` và `kmem_cache_{alloc\|free}()` |
@@ -909,9 +909,9 @@ Theo quy tắc kinh nghiệm chung, lựa chọn đầu tiên nên là các slab
 
 ### Đôi lời về DMA và CMA
 
-Về DMA, dù nghiên cứu và sử dụng nằm ngoài phạm vi sách, tôi vẫn muốn đề cập Linux có một tập API chuyên dụng cho DMA tên là DMA Engine. Người viết driver thực hiện DMA operation được đặc biệt mong đợi dùng các API này, không trực tiếp dùng slab allocator API hay page allocator API (những vấn đề phần cứng tinh vi thực sự xuất hiện nếu làm vậy).
+Về DMA, dù nghiên cứu và sử dụng nằm ngoài phạm vi sách, tôi vẫn muốn đề cập Linux có một tập API purpose-built cho DMA tên là DMA Engine. Người viết driver thực hiện DMA operation được đặc biệt mong đợi dùng các API này, không trực tiếp dùng slab allocator API hay page allocator API (những vấn đề phần cứng tinh vi thực sự xuất hiện nếu làm vậy).
 
-Hơn nữa, vài năm trước, các kỹ sư Samsung đã merge thành công một patch vào mainline kernel tên Contiguous Memory Allocator (CMA). Về cơ bản, nó cho phép cấp phát physically contiguous memory chunk lớn (kích thước vượt giới hạn 4 MB điển hình!). Điều này cần cho DMA trên một số device ngốn memory (muốn stream bộ phim chất lượng ultra-HD trên tablet màn hình lớn hay TV chứ?). Điều hay là CMA code được tích hợp trong suốt vào DMA Engine và DMA API. Vì vậy, như thường lệ, người viết driver thực hiện DMA operation nên cứ dùng Linux DMA Engine layer.
+Hơn nữa, vài năm trước, các kỹ sư Samsung đã merge thành công một patch vào mainline kernel tên Contiguous Memory Allocator (CMA). Về cơ bản, nó cho phép cấp phát physically contiguous memory chunk lớn (kích thước vượt giới hạn 4 MB điển hình!). Điều này cần cho DMA trên một số device memory-hungry (muốn stream bộ phim chất lượng ultra-HD trên tablet big-screen hay TV chứ?). Điều hay là CMA code được tích hợp trong suốt vào DMA Engine và DMA API. Vì vậy, như thường lệ, người viết driver thực hiện DMA operation nên cứ dùng Linux DMA Engine layer.
 
 Đồng thời, hãy hiểu thảo luận chủ yếu dành cho người viết kernel module hay device driver điển hình. Trong chính OS, nhu cầu page đơn lẻ thường khá cao (do OS phục vụ demand paging qua page fault handler, để xử lý các fault gọi là minor hay “tốt”). Vì thế, bên trong memory management subsystem thường gọi các API `__get_free_page[s]` `()` khá thường xuyên. Đồng thời, page allocator đóng vai trò quan trọng để phục vụ nhu cầu memory cho page cache (và các cache nội bộ khác).
 
@@ -921,7 +921,7 @@ Hơn nữa, vài năm trước, các kỹ sư Samsung đã merge thành công m�
 
 Như bạn biết, để tối ưu hiệu năng, kernel cố giữ working set của memory page ở vị trí cao nhất có thể trong memory pyramid (hay hierarchy).
 
-Memory pyramid (hay memory hierarchy) trên hệ thống gồm (theo thứ tự, từ kích thước nhỏ nhất nhưng tốc độ nhanh nhất đến kích thước lớn nhất nhưng tốc độ chậm nhất): CPU register, CPU cache (LI, L2, L3, ...), RAM và swap (raw disk/flash/SSD partition). Trong thảo luận sau, bỏ qua CPU register vì kích thước cực nhỏ.
+so-called Memory pyramid (hay memory hierarchy) trên hệ thống gồm (theo thứ tự, từ kích thước nhỏ nhất nhưng tốc độ nhanh nhất đến kích thước lớn nhất nhưng tốc độ chậm nhất): CPU register, CPU cache (LI, L2, L3, ...), RAM và swap (raw disk/flash/SSD partition). Trong thảo luận sau, bỏ qua CPU register vì kích thước cực nhỏ.
 
 Trong processor hiện đại, khi code thực thi và data được xử lý, processor dùng hardware cache (L1, L2, v.v.) để giữ working set page hiện tại trong multilevel CPU instruction cache và data cache. Nhưng tất nhiên CPU cache memory rất giới hạn nên sẽ sớm cạn, khiến memory tràn sang cấp hierarchy tiếp theo – RAM. Trên hệ thống hiện đại, kể cả nhiều embedded system, có khá nhiều RAM; tuy vậy đôi khi vẫn thiếu. Khi điều này xảy ra (nói đơn giản), OS chuyển những memory page không còn vừa RAM sang raw disk partition – swap. Do đó hệ thống tiếp tục hoạt động tốt, dù chịu chi phí hiệu năng đáng kể khi swap được dùng (thường xuyên) (tất nhiên ở đây nói đến user-space page có thể bị swap; như bạn biết, kernel page đơn giản là non-swappable. Nhưng một lần nữa, thường user space mới là bên ngốn tài nguyên).
 
@@ -933,7 +933,7 @@ Nhằm bảo đảm luôn có một lượng tối thiểu free memory page nh�
 
 Các kernel thread `kswapd` liên tục giám sát memory usage trên hệ thống và gọi page reclaim mechanism khi nhận thấy memory đang xuống thấp.
 
-Công việc page reclamation được làm riêng cho mỗi node:zone. Kernel dùng các mức watermark – min, low và high – cho mỗi node:zone để xác định thông minh khi nào reclaim memory page. Luôn có thể xem `/proc/zoneinfo` để biết watermark level hiện tại; lưu ý đơn vị của watermark level là page.
+Công việc page reclamation được làm riêng cho per-node:zone. Kernel dùng so-called các mức watermark – min, low và high – cho mỗi node:zone để xác định thông minh khi nào reclaim memory page. Luôn có thể xem `/proc/zoneinfo` để biết watermark level hiện tại; lưu ý đơn vị của watermark level là page.
 
 Một ví dụ nhanh (output đã cắt bớt) trên laptop x86\_64 native chạy Ubuntu 22.04 của tôi như sau:
 
@@ -953,7 +953,7 @@ Node 0, zone   Normal
 
 Ở đây tình hình khá thoải mái; trong node 0, vùng zone Normal, watermark “high” ở mức 31.716 page, và hiện có 75.060 page trống. Nếu số free page trong zone ở đâu đó giữa watermark low và min, hoặc thấp hơn, chúng ta có vấn đề. Vì vậy ở đây không có vấn đề. Đồng thời, như đã đề cập, cache thường là nạn nhân đầu của page reclamation và được thu nhỏ (thông minh) khi memory pressure tăng.
 
-Vậy nếu memory pressure thực sự tăng thì sao? Thuật toán page reclamation của kernel – gọi là PFA hay đơn giản “reclaim” – đại thể (và thường) mã hóa các bước sau:
+Vậy nếu memory pressure thực sự tăng thì sao? Thuật toán page reclamation của kernel – so-called PFA hay đơn giản “reclaim” – đại thể (và thường) mã hóa các bước sau:
 
 - Nếu số page low (zone watermark) \< free page \< page high
 
@@ -977,13 +977,13 @@ Khá gần đây, một vài tính năng mới liên quan page reclaim đã đư
 
 ### Tính năng multi-generational LRU (MGLRU) list mới
 
-Linux kernel theo truyền thống xác định page cần reclaim (thực chất evict) qua thuật toán Least Recently Used (LRU) điển hình; page không được truy cập gần đây ít khả năng cần trong tương lai gần và ngược lại. Vì vậy, theo truyền thống (nhưng đơn giản hóa), kernel duy trì một cặp LRU list: active LRU list và inactive LRU list. Điều này có vẻ hợp lý, nhưng kinh nghiệm cho thấy không phải lúc nào cũng tốt, và thực tế có thể góp phần làm chậm hệ thống! (Ví dụ, đọc tuần tự file lớn là thao tác phổ biến trong nhiều tình huống, nên page vừa đọc đi vào active list. Nhưng nếu app không cần lại các page đó thì giờ rất không tối ưu). Đồng thời, cách quét anonymous page (page không file-backed) ở runtime bằng reverse-mapping (rmap) approach (xem liên kết này để biết chi tiết: `http://lastweek.io/notes/rmap/`) được xem là tốn kém.
+Linux kernel theo truyền thống xác định page cần reclaim (thực chất evict) qua thuật toán Least Recently Used (LRU) điển hình; page không được truy cập gần đây ít khả năng cần trong tương lai gần và ngược lại. Vì vậy, theo truyền thống (nhưng đơn giản hóa), kernel duy trì một cặp LRU list: active LRU list và inactive LRU list. Điều này có vẻ hợp lý, nhưng kinh nghiệm cho thấy không phải lúc nào cũng tốt, và thực tế có thể góp phần làm chậm hệ thống! (Ví dụ, đọc tuần tự file lớn là thao tác phổ biến trong nhiều tình huống, nên page vừa đọc đi vào active list. Nhưng nếu app không cần lại các page đó thì giờ rất sub-optimal). Đồng thời, cách quét anonymous page (page không file-backed) ở runtime bằng reverse-mapping (rmap) approach (xem liên kết này để biết chi tiết: `http://lastweek.io/notes/rmap/`) được xem là tốn kém.
 
 Được merge gần đây trong kernel 6.1, tính năng multi-generational LRU (còn gọi MGLRU) mới về cơ bản có các đặc điểm sau:
 
-- Giờ có cả loạt LRU list giữa active list và inactive list để có granularity nhỏ hơn nhiều khi chọn page để reclaim; mỗi list gọi là generation. Chúng được tổ chức theo page age, từ generation trẻ nhất (generation 0, tất nhiên giữ các page được dùng gần đây nhất, các active page) đến generation già nhất (generation N-1, giữ các LRU page). Tại reclaim time, page thuộc generation cũ hơn hiển nhiên là ứng viên eviction.
+- Giờ có cả loạt LRU list giữa active list và inactive list để có granularity nhỏ hơn nhiều khi chọn page để reclaim; mỗi list gọi là generation. Chúng được tổ chức theo page age, từ generation trẻ nhất (generation 0, tất nhiên giữ các page được dùng gần đây nhất, các active page) đến generation già nhất (generation N-1, giữ các LRU page). Tại reclaim time, page older-generation hiển nhiên là ứng viên eviction.
 
-- Số generation N (và do đó số list) được đặt trong kernel code; hệ thống Android-based thường dùng số 4, cloud/enterprise server cao cấp có thể dùng giá trị cao hơn nhiều. Trong codebase mặc định, có (trong `include/linux/mmzone.h`):
+- Số generation N (và do đó số list) được đặt trong kernel code; hệ thống Android-based thường dùng số 4, cloud/enterprise server high-end có thể dùng giá trị cao hơn nhiều. Trong codebase mặc định, có (trong `include/linux/mmzone.h`):
 
 ```
  /* MAX_NR_GENS is set to 4 so that the multi-gen LRU can support twice
@@ -999,9 +999,9 @@ the
 
 - Dùng ít CPU hơn (“cho thấy mức sử dụng CPU từ kswapd giảm 51%”).
 
-- Dùng nhiều memory hơn một chút (“memory overhead \~500 byte cho mỗi memcg và mỗi node, và \~50 byte cho mỗi process”).
+- Dùng nhiều memory hơn một chút (“memory overhead \~500 byte cho per-memcg và per-node, và \~50 byte cho per-process”).
 
-Multi-generational LRU là tính năng kernel-configurable (`CONFIG_LRU_GEN`); tại thời điểm viết sách, vẫn được xem là opt-in feature và chưa gắn chặt vào memory management subsystem (code truyền thống dùng cặp active/inactive list vẫn còn, dù không dùng khi MGLRU được kích hoạt). Trên distro kernel Ubuntu 22.04 LTS của tôi, mặc định không được cấu hình. Ngay cả khi có cấu hình, mặc định có thể tắt và có thể bật qua tunable dưới debugfs (`/sys/kernel/debug/lru_gen`). (Gần đây hơn, Fedora 39 chạy distro kernel dựa trên 6.6, và Ubuntu 23.04 chạy kernel dựa trên 6.5, bật MGLRU.) Khi được cấu hình, nhiều sysctl (hay tunable) xuất hiện dưới `/sys/kernel/mm/lru_gen` và một vài trong debugfs.
+multi-generational LRU là tính năng kernel-configurable (`CONFIG_LRU_GEN`); tại thời điểm viết sách, vẫn được xem là opt-in feature và chưa gắn chặt vào memory management subsystem (code truyền thống dùng cặp active/inactive list vẫn còn, dù không dùng khi MGLRU được kích hoạt). Trên distro kernel Ubuntu 22.04 LTS của tôi, mặc định không được cấu hình. Ngay cả khi có cấu hình, mặc định có thể tắt và có thể bật qua tunable dưới debugfs (`/sys/kernel/debug/lru_gen`). (Gần đây hơn, Fedora 39 chạy distro kernel dựa trên 6.6, và Ubuntu 23.04 chạy kernel dựa trên 6.5, bật MGLRU.) Khi được cấu hình, nhiều sysctl (hay tunable) xuất hiện dưới `/sys/kernel/mm/lru_gen` và một vài trong debugfs.
 
 #### Thử nghiệm – xem histogram data từ MGLRU
 
@@ -1055,11 +1055,11 @@ Mục đích của DAMON – Data Access MONitor – là thu thập và phân t�
 
 Kernel component của DAMON về cơ bản chia target process thành các vùng bằng kích thước để giám sát data access. Nó thông minh: nếu một vùng có vẻ là hotspot, nó tiếp tục chia nhỏ. Số lần truy cập mỗi vùng được cung cấp dưới dạng histogram. Thực chất có producer-consumer architecture: DAMON kernel component là producer (tạo data access pattern của user-space process cụ thể).
 
-Consumer có thể là user-mode app hoặc chính kernel; bằng cách phân tích data access pattern của workload, chúng thậm chí có thể yêu cầu thay đổi memory region (để tối ưu access!), thực hiện qua lời gọi system call nổi tiếng `madvise()`. (Để làm vậy, DAMON thiết lập cách chỉ định “scheme”; có thể tìm chi tiết trong tài liệu kernel chính thức: `https://www.kernel.org/doc/html/v6.1/admin-guide/mm/damon/usage.html#schemes-n`.)
+Consumer có thể là user-mode app hoặc chính kernel; bằng cách phân tích data access pattern của workload, chúng thậm chí có thể yêu cầu thay đổi memory region (để tối ưu access!), thực hiện qua lời gọi system call well-known `madvise()`. (Để làm vậy, DAMON thiết lập cách chỉ định “scheme”; có thể tìm chi tiết trong tài liệu kernel chính thức: `https://www.kernel.org/doc/html/v6.1/admin-guide/mm/damon/usage.html#schemes-n`.)
 
 Để xử lý VAS rất lớn trên Linux 64-bit, DAMON bắt đầu bằng việc chỉ giám sát data access vào text segment, heap segment và stack segment (hay mapping).
 
-Giờ để phù hợp dùng trong production (đúng theo ý định), giám sát từng page trong mỗi mapping này sẽ quá tốn kém. Vì vậy (hơi giống KCSAN (Kernel Concurrency SANitizer)), thay vào đó dùng cách tiếp cận sampling-based hay thống kê, chọn một page ngẫu nhiên trong mỗi mapping và ghi lại các access đến nó, hy vọng chúng đại diện cho data access pattern điển hình của vùng. Nó dùng sự thông minh để “zoom” vào hotspot và tiếp tục chia thành nhiều vùng hơn, nhờ đó có sampling tốt hơn.
+Giờ để phù hợp dùng trong production (đúng theo ý định), giám sát từng page trong mỗi mapping này sẽ quá tốn kém. Vì vậy (hơi giống KCSAN (Kernel Concurrency SANitizer)), thay vào đó dùng cách tiếp cận sampling-based hay thống kê, chọn một page ngẫu nhiên trong mỗi mapping và ghi lại các access đến nó, hy vọng chúng đại diện cho data access pattern điển hình của vùng. Nó dùng sự thông minh để “zoom” vào hotspot và tiếp tục sub-divide, nhờ đó có sampling tốt hơn.
 
 Để dùng DAMON, có nhiều interface:
 
@@ -1073,9 +1073,9 @@ Giờ để phù hợp dùng trong production (đúng theo ý định), giám s�
 
 Thường dễ nhất là dùng frontend damo. Hãy làm vậy!
 
-#### Chạy memory workload và trực quan hóa bằng frontend damo của DAMON
+#### Chạy memory workload và trực quan hóa bằng front-end damo của DAMON
 
-Một lần chạy mẫu bằng frontend damo của DAMON có thể giúp hình dung data access pattern (của process cụ thể) mà nó trích xuất xuất sắc. Chúng ta dùng masim, một “simulator cho intensive memory access”, để có process truy cập memory (chuyên sâu) theo pattern cho trước (qua config file chỉ định cho nó. Thực tế các app `masim` và `damo` được viết bởi chính tác giả chính của DAMON patch, SeongJae Park). Để làm vậy, theo các bước:
+Một lần chạy mẫu bằng front-end damo của DAMON có thể giúp hình dung data access pattern (của process cụ thể) mà nó trích xuất xuất sắc. Chúng ta dùng masim, một “simulator cho intensive memory access”, để có process truy cập memory (chuyên sâu) theo pattern cho trước (qua config file chỉ định cho nó. Thực tế các app `masim` và `damo` được viết bởi chính tác giả chính của DAMON patch, SeongJae Park). Để làm vậy, theo các bước:
 
 1\. Cài `masim` (workload):
 
@@ -1116,7 +1116,7 @@ sudo ./damo report heats --heatmap stdout
 
 ![Hình 9.7](images/ch09/fig09-07.jpg)
 
-Hình 9.7: Ảnh chụp việc chạy memory workload “stairs” (qua masim) và frontend damo của DAMON hiển thị trực quan memory access pattern (dưới dạng “heatmap”)
+Hình 9.7: Ảnh chụp việc chạy memory workload “stairs” (qua masim) và front-end damo của DAMON hiển thị trực quan memory access pattern (dưới dạng “heatmap”)
 
 Một lưu ý bên lề: `damo` yêu cầu utility `perf` được cài và hoạt động. Giờ `perf` sẽ được cài và sẵn dùng nếu đã theo hướng dẫn cài đặt trong chương trực tuyến Kernel Workspace Setup và đang chạy kernel nguyên bản/distro, không phải custom kernel. Vấn đề là `perf` gắn chặt với kernel chạy bên dưới; do đó nếu chạy custom kernel (như 6.1.25 đã build trong các Chương 3 và 4), cần tự build `perf` từ kernel source tree của nó. Đến lượt `perf` cần Python module tên `setuptools`, vốn lại cần `pip` (đúng, đi xuống địa ngục dependency). Vì vậy, nếu cần trên custom kernel system, có thể làm: `sudo apt install` `python3-pip`.
 
@@ -1142,7 +1142,7 @@ Hãy xem lại điểm then chốt, việc memory (RAM và swap) xuống thấp.
 
 Hơn nữa, hãy hiểu trên nhiều embedded system không có swap partition (hoặc file), do đó tăng khả năng cạn kiệt memory hoàn toàn!
 
-Tuy nhiên Linux kernel, đúng là Linux, thường mạnh tay trong tình huống này; giờ gọi component có tên rất hợp OOM killer. Nhiệm vụ OOM killer là xác định rồi nhanh chóng kết thúc process ngốn memory và các descendant bằng cách gửi signal chí mạng `SIGKILL`; do đó cuối cùng có thể kết thúc cả loạt process.
+Tuy nhiên Linux kernel, đúng là Linux, thường mạnh tay trong tình huống này; giờ gọi component có tên rất hợp OOM killer. Nhiệm vụ OOM killer là xác định rồi nhanh chóng kết thúc process memory-hogger và các descendant bằng cách gửi signal chí mạng `SIGKILL`; do đó cuối cùng có thể kết thúc cả loạt process.
 
 Trích trực tiếp từ tài liệu kernel: “OOM killer chọn một task để hy sinh vì sức khỏe tổng thể của hệ thống. Task được chọn bị kết thúc với hy vọng sau khi nó thoát sẽ giải phóng đủ memory để tiếp tục hoạt động bình thường.”
 
@@ -1150,9 +1150,9 @@ Như có thể hình dung, nó cũng gây không ít tranh luận. Các phiên b
 
 Technical reviewer rất giỏi của tôi, ChiThanh Hoang, nói về OOM killer như sau: “… nói ‘khá’ gây tranh luận vẫn là nói nhẹ. Phần lớn thời gian mọi người thấy OOM kill nhưng không biết xử lý thế nào, đặc biệt trên embedded system không có swap.”
 
-Tuy nhiên vẫn có hy vọng; các kernel version gần đây dùng heuristic xác định nạn nhân OOM killer tốt hơn, thực sự hoạt động tốt hơn.
+Tuy nhiên vẫn có hy vọng; các kernel version gần đây dùng heuristic victim-id OOM killer tốt hơn, thực sự hoạt động tốt hơn.
 
-Bạn có thể tìm thêm thông tin về cải tiến OOM killer (chiến lược kích hoạt và OOM reaper thread) trong bài LWN này (tháng 12 năm 2015): Toward more predictable and reliable out-of-memory handling, Jon Corbet: `https://lwn.net/Articles/668126/`.
+Bạn có thể tìm thêm thông tin về cải tiến OOM killer (chiến lược kick-in và OOM reaper thread) trong bài LWN này (tháng 12 năm 2015): Toward more predictable and reliable out-of-memory handling, Jon Corbet: `https://lwn.net/Articles/668126/`.
 
 ### Chủ ý gọi OOM killer
 
@@ -1191,7 +1191,7 @@ Xem kernel log để biết có điều thú vị xảy ra không! Cách diễn 
 
 #### Gọi OOM killer bằng chương trình crazy allocator
 
-Đây là cách thực hành và thú vị hơn để (rất có thể) mời OOM killer vào: hãy viết user-space C program đơn giản hành xử như “crazy allocator”, thực hiện (thường) hàng chục nghìn memory allocation, ghi gì đó vào mỗi page và – tất nhiên! – không bao giờ giải phóng memory page đã cấp phát, qua đó tạo pressure cực lớn lên memory resource.
+Đây là cách hands-on và thú vị hơn để (rất có thể) mời OOM killer vào: hãy viết user-space C program đơn giản hành xử như “crazy allocator”, thực hiện (thường) hàng chục nghìn memory allocation, ghi gì đó vào mỗi page và – tất nhiên! – không bao giờ giải phóng memory page đã cấp phát, qua đó tạo pressure cực lớn lên memory resource.
 
 Dù trình bày code ở đây, chúng ta hoãn chạy nó – và kích hoạt OOM killer – một chút. Vì mọi thứ rõ ràng hơn nhiều khi hiểu các VM overcommit setting của kernel và ý nghĩa của chúng, chủ đề của phần chính tiếp theo. Vì vậy, xin bạn kiên nhẫn...
 
@@ -1235,7 +1235,7 @@ Tuy nhiên chờ đã; trước khi vui với chương trình này và hiểu đ
 
 ### Tìm hiểu ba policy VM overcommit\_memory
 
-Đây là điểm thú vị: Linux kernel tuân theo VM overcommit policy, chủ ý overcommit memory (đến một mức nhất định). Để hiểu, hãy xem VM overcommit memory setting hiện tại:
+Đây là điểm thú vị: Linux kernel tuân theo VM over-committing policy, chủ ý overcommit memory (đến một mức nhất định). Để hiểu, hãy xem VM overcommit memory setting hiện tại:
 
 ```
 $ cat /proc/sys/vm/overcommit_memory
@@ -1270,7 +1270,7 @@ vm.overcommit_memory = 0
 vm.overcommit_ratio = 50
 ```
 
-Tốt, đúng như mong đợi. Chúng ta sẽ xem chính xác ý nghĩa các VM overcommit value này từ cả góc nhìn dựa trên code lẫn thực nghiệm (chạy thử!).
+Tốt, đúng như mong đợi. Chúng ta sẽ xem chính xác ý nghĩa các VM overcommit value này từ cả góc nhìn code-based lẫn thực nghiệm (chạy thử!).
 
 #### VM overcommit từ góc nhìn code \_\_vm\_enough\_memory()
 
@@ -1332,11 +1332,11 @@ Hãy xem qua code; rõ ràng với các VM overcommit memory value 1 và 2, logi
 
   - Toàn bộ memory hierarchy pyramid cạn kiệt (mọi CPU cache + RAM + swap memory); khi đó OOM killer nhảy vào...
 
-Điều quan trọng cần hiểu là function `__vm_enough_memory()` này không được gọi mỗi lần user-mode process thử cấp phát virtual page; chỉ đôi lúc được một số kernel LSM gọi theo yêu cầu. Vì vậy ở đây tất cả khá hàn lâm, chỉ giúp có chút hiểu biết về cơ chế bên dưới, vậy thôi.
+Điều quan trọng cần hiểu là function `__vm_enough_memory()` này không được gọi mỗi lần user-mode process thử cấp phát virtual page; chỉ đôi lúc được một số kernel LSM gọi on-demand. Vì vậy ở đây tất cả khá hàn lâm, chỉ giúp có chút hiểu biết về cơ chế bên dưới, vậy thôi.
 
 ##### Ghi chú về các giới hạn Commit\* trong proc
 
-Trong nội dung pseudofile `/proc/meminfo`, bạn sẽ thấy các giới hạn VM Commit\*. Đây là trên AArch64 Raspberry Pi 4 của tôi với gần 2 GB RAM, 100 MB swap và chạy kernel nguyên bản 6.1 gần đây:
+Trong nội dung pseudofile `/proc/meminfo`, bạn sẽ thấy so-called các giới hạn VM Commit\*. Đây là trên AArch64 Raspberry Pi 4 của tôi với gần 2 GB RAM, 100 MB swap và chạy kernel nguyên bản 6.1 gần đây:
 
 ```
 # grep Commit /proc/meminfo
@@ -1381,7 +1381,7 @@ Với tunable `vm.overcommit_memory` đặt thành `0`, mặc định, không c�
 
 Vậy trên AArch64 Raspberry Pi 4 với `vm.overcommit_memory == 0` và 1.849 MB RAM, không có “huge page hay `total_huge_TLB [1]`” và 100 MB swap, hãy thực nghiệm, chạy chương trình “crazy allocator” và xem điều gì xảy ra!
 
-\[1\] Huge page là kernel feature cho phép kernel dùng memory page kích thước lớn hơn; thường dùng trên hệ thống vừa đến lớn, gồm x86\_64 theo mặc định (nhưng không mặc định trên embedded device). Ở đây nó chỉ lượng memory dành riêng cho huge page.
+\[1\] Huge page là kernel feature cho phép kernel dùng memory page larger-sized; thường dùng trên hệ thống mid-to-large, gồm x86\_64 theo mặc định (nhưng không mặc định trên embedded device). Ở đây nó chỉ lượng memory dành riêng cho huge page.
 
 Được rồi, cuối cùng hãy chạy custom app “crazy allocator” (`ch9/oom_killer_try/`; đã thấy trong phần Gọi OOM killer bằng chương trình crazy allocator). Chúng ta chạy với số lần thử two-page allocation khổng lồ – 500.000 – không bao giờ được giải phóng:
 
@@ -1417,13 +1417,13 @@ Chúng ta sẽ diễn giải chi tiết kernel log khi OOM xảy ra kỹ hơn tr
 
 Đôi khi, tùy cách cấu hình hệ thống, bạn có thể không gặp lời gọi kernel-level OOM killer dù mong đợi! Vì sao? À, thủ phạm quen thuộc – user-space framework `systemd` mạnh mẽ (và can thiệp sâu) lại hoạt động!
 
-Systemd gồm component tên `systemd-oomd`, một user-space daemon process. Nếu được cấu hình như vậy, nhiệm vụ của nó là giám sát process dùng memory quá mức. Nó làm qua kernel infrastructure cgroups (v2) thực sự mạnh mẽ (chúng ta sẽ trình bày tương đối chi tiết trong Chương 11, The CPU Scheduler– Part 2). Đồng thời các cgroup liên quan cần bật memory accounting và kernel phải hỗ trợ tính năng tương đối mới Pressure Stall Information (PSI). Xem man page `systemd-oomd.service(8)` để biết thêm chi tiết.
+Systemd gồm component tên `systemd-oomd`, một user-space daemon process. Nếu được cấu hình như vậy, nhiệm vụ của nó là giám sát process dùng memory quá mức. Nó làm qua kernel infrastructure cgroups (v2) thực sự mạnh mẽ (chúng ta sẽ trình bày tương đối chi tiết trong Chương 11, The CPU Scheduler– Part 2). Đồng thời các cgroup liên quan cần bật memory accounting và kernel phải hỗ trợ tính năng new-ish Pressure Stall Information (PSI). Xem man page `systemd-oomd.service(8)` để biết thêm chi tiết.
 
 Rất ngắn gọn, PSI là kernel feature (4.20 trở lên) cho phép hiểu sâu các tình huống do thiếu hụt resource nghiêm trọng (CPU, memory và I/O). Như tài liệu kernel chính thức về PSI nêu: “Có thước đo chính xác về tổn thất năng suất do thiếu tài nguyên giúp người dùng điều chỉnh workload theo phần cứng – hoặc cung cấp phần cứng theo nhu cầu workload.” Tài liệu kernel về PSI ở đây: `https://docs.kernel.org/accounting/psi.html`.
 
 Có thể xem `systemd-oomd` là dạng “memory monitoring agent” giữa user-space app (process) và Linux kernel (một user-space OOM killer!), nhờ đó có thể kết thúc process vượt memory usage limit. Điều này có thể là lợi thế trong một số tình huống vì tránh đưa kernel vào tình huống có thể OOM kill. Như có thể đoán, cách dùng lại gây tranh luận; Ubuntu 22.04 dường như ship với nó được bật mặc định. Các distro khác (như Arch Linux) tắt mặc định. PSI vào kernel 4.20; thực chất điều này cũng ngụ ý tương tự cho systemd-based OOM killer. (Để biết thêm, xem phần Đọc thêm của chương.)
 
-Ví dụ (thực ra lấy từ Chương 11, The CPU Scheduler – Part 2), bạn có thể thử systemd-based service unit này, chủ ý gây memory stress; thực hiện bằng cách chạy service “lowram” có chủ ý – `ch11/cgroups/cpu_constrain/systemd_svcunit/svc3_primes_lowram.service` – dưới sự quản lý của systemd qua wrapper script `setup_service` (cùng folder). Service unit gọi chương trình nổi tiếng `stress-ng` như sau:
+Ví dụ (thực ra lấy từ Chương 11, The CPU Scheduler – Part 2), bạn có thể thử systemd-based service unit này, chủ ý gây memory stress; thực hiện bằng cách chạy service “lowram” có chủ ý – `ch11/cgroups/cpu_constrain/systemd_svcunit/svc3_primes_lowram.service` – dưới sự quản lý của systemd qua wrapper script `setup_service` (cùng folder). Service unit gọi chương trình well-known `stress-ng` như sau:
 
 ```
 stress-ng --oomable --pathological --vm 1 --vm-bytes 100% --vm-populate
@@ -1505,11 +1505,11 @@ Ví dụ, đặt giá trị `vm.overcommit_memory` thành 2 trên Ubuntu guest V
 
 - What are the disadvantages of disabling memory overcommit in Linux?: `https://www.quora.com/What-are-the-disadvantages-of-disabling-memory-overcommit-in-Linux`.
 
-- Các bài blog của Chris Siebenmann về Linux memory overcommit (và Linux nói chung) rất hay, đề cập production server thực tế: `https://utcc.utoronto.ca/~cks/space/blog/__IndexChron` (tìm overcommit ở đây!).
+- Các bài blog của Chris Siebenmann về Linux memory overcommit (và Linux nói chung) rất hay, đề cập production server real-world: `https://utcc.utoronto.ca/~cks/space/blog/__IndexChron` (tìm overcommit ở đây!).
 
 Đồng thời xem phần Đọc thêm của chương để có nhiều liên kết hữu ích khác.
 
-Kinh nghiệm thực tế cho thấy không có một quy tắc cứng nhắc duy nhất về cách tốt nhất để xác định overcommit mode dùng trong production: hãy dành thời gian chạy test suite dưới tải (memory) lớn và xem điều gì tốt nhất cho project.
+Kinh nghiệm Real-world cho thấy không có một quy tắc hard-and-fast duy nhất về cách tốt nhất để xác định overcommit mode dùng trong production: hãy dành thời gian chạy test suite dưới tải (memory) lớn và xem điều gì tốt nhất cho project.
 
 Chúng ta chưa xong với OOM killer hay thậm chí chương trình crazy allocator! Phần tiếp theo rất thú vị; hãy chắc chắn nghiên cứu!
 
@@ -1521,7 +1521,7 @@ Chỉ khi thực hiện hành động trên bất kỳ byte nào của virtual p
 
 Trong app đơn giản `oom_killer_try`, chúng ta vận dụng chính ý tưởng này qua parameter thứ ba, `force_page_fault`: khi đặt thành `1`, mô phỏng chính xác tình huống này – ép xảy ra page fault – bằng cách ghi một thứ gì đó, thực sự bất kỳ thứ gì, vào một byte – byte bất kỳ – của mỗi một trong hai page được cấp phát ở mỗi loop iteration (xem lại code nếu cần: `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/blob/main/ch9/oom_killer_try/oom_killer_try.c`).
 
-Vậy giờ đã biết, hãy chạy lại app nhút nhát và khiêm tốn của chúng ta (tôi rất muốn chèn biểu tượng mặt cười ở đây!) với parameter thứ ba `force_page_fault` đặt thành `1`, để ép page fault!
+Vậy giờ đã biết, hãy re-run app nhút nhát và khiêm tốn của chúng ta (tôi rất muốn chèn biểu tượng mặt cười ở đây!) với parameter thứ ba `force_page_fault` đặt thành `1`, để ép page fault!
 
 Được rồi, trước khi chạy app, hãy kiểm tra trạng thái system memory trên máy AArch64 Raspberry Pi 4 đáng tin cậy:
 
@@ -1602,7 +1602,7 @@ Tiếp theo, xem kernel log cho thấy OOM killer thực sự đã ghé thăm! L
 
 Hình 9.8: Kernel log sau OOM killer, cho thấy kernel call stack (của process context oom\_killer\_try)
 
-Xem kỹ kernel-mode stack trong Hình 9.8, đọc từ dưới lên (bỏ qua frame bắt đầu bằng `?`); rõ ràng trình tự sự kiện hiện ra:
+Xem kỹ kernel-mode stack trong Hình 9.8, đọc bottom-up (bỏ qua frame bắt đầu bằng `?`); rõ ràng trình tự sự kiện hiện ra:
 
 - Xảy ra page fault; có thể thấy call frame: `do_mem_abort()` (trên ARM\[64\], một loại page fault – như trường hợp này – gọi là Data Abort exception, vì vậy function có tên `do_mem_abort()`) `--> do_page_fault() --> handle_mm_fault() --> […]`.
 
@@ -1610,9 +1610,9 @@ Xem kỹ kernel-mode stack trong Hình 9.8, đọc từ dưới lên (bỏ qua f
 
 - OS chạy fault-handling code (trong process context của faulting process, nghĩa là process `oom_killer_try`; thực chất `current` chạy fault-handling code (và mọi thứ tiếp sau…)).
 
-- Fault-handling code tiếp tục xác định chuyện gì thực sự xảy ra (có luồng xử lý lớn, phức tạp); ở đây xác định có minor fault, một fault tốt. Do đó bắt đầu gọi page allocator code để cấp phát page frame!
+- fault-handling code tiếp tục xác định chuyện gì thực sự xảy ra (có luồng xử lý lớn, phức tạp); ở đây xác định có minor fault, một fault tốt. Do đó bắt đầu gọi page allocator code để cấp phát page frame!
 
-- Cuối cùng đi đến code sâu trong page allocator: `__alloc_pages()`! Đúng nghĩa là trái tim của zoned buddy system allocator (hay page allocator) – engine memory allocation trong kernel, như đã thấy (tham khảo lại Hình 9.4). Điều then chốt cần hiểu là mọi bước đến giờ đều là hành vi hoàn toàn bình thường, đúng mong đợi. Xét cho cùng đó là cách physical memory được cấp phát cho user-space task! Demand paging đang hoạt động.
+- Cuối cùng đi đến code sâu trong page allocator: `__alloc_pages()`! Đúng nghĩa là trái tim của zoned buddy system allocator (hay page allocator) – engine memory allocation trong kernel, như đã thấy (tham khảo lại Hình 9.4). Điều then chốt cần hiểu là mọi bước đến giờ đều là hành vi hoàn toàn bình thường, đúng mong đợi. Xét cho cùng đó là cách physical memory được cấp phát cho user-space task! demand-paging đang hoạt động.
 
 - Nhưng (lúc nào cũng có chữ nhưng, phải không?) giờ vì tình huống memory pressure như nồi áp suất mà chúng ta chủ ý tạo, page allocator của kernel (routine `__alloc_pages()`) đơn giản không tìm được free page frame để cấp phát; nó thất bại. Gì cơ!? Điều này kích hoạt, còn ai nữa, OOM killer! Có thể thấy rõ code flow qua call stack (Hình 9.8): `__alloc_pages() -->` `__alloc_pages_slowpath()`.
 
@@ -1632,7 +1632,7 @@ Hình 9.9: Góc nhìn (đơn giản hóa) về cách demand paging – và khả
 
 Vậy là đã rõ. Lúc này có lẽ thú vị nếu nhìn lại Chương 7, MemoryManagement Internals – Essentials, Hình 7.3 và Hình 7.4, để thấy tính liên tục với Hình 9.9 ở đây, hiểu thêm cách address translation hoạt động và có thể – dù hiếm – dẫn đến tình huống OOM killer hay kernel bug (Oops!).
 
-Quay lại kernel log về cuộc tấn công chí mạng của OOM killer; ở phần sau diagnostic dump, kernel cố gắng hết sức biện minh lý do kết thúc các process cụ thể. Nó cho thấy statistics về system memory state, gồm các page allocator freelist cho mỗi node và zone, cùng bảng mọi thread tồn tại lúc OOM kill và memory usage (cùng nhiều statistics khác). Các statistics được hiển thị vì `sysctl /proc/sys/vm/oom_dump_tasks` bật (`1`) theo mặc định. Đây là mẫu (trong output sau đã bỏ cột timestamp ngoài cùng trái của `dmesg` để data dễ đọc hơn):
+Quay lại kernel log về cuộc tấn công chí mạng của OOM killer; ở phần sau diagnostic dump, kernel cố gắng hết sức biện minh lý do kết thúc các process cụ thể. Nó cho thấy statistics về system memory state, gồm các page allocator freelist cho per-node và per-zone, cùng bảng mọi thread tồn tại lúc OOM kill và memory usage (cùng nhiều statistics khác). Các statistics được hiển thị vì `sysctl /proc/sys/vm/oom_dump_tasks` bật (`1`) theo mặc định. Đây là mẫu (trong output sau đã bỏ cột timestamp ngoài cùng trái của `dmesg` để data dễ đọc hơn):
 
 ```
 $ sudo dmesg
@@ -1665,13 +1665,13 @@ Kernel hiện đại (từ 4.6 trở đi) đôi lúc dùng kernel thread chuyên
 
 Luôn còn điều khác để hiểu: như thường lệ, thực tế có nhiều sắc thái… Trước đó khi bắt đầu thảo luận demand paging và OOM, chúng ta nói, và tôi trích lại: Chỉ khi thực hiện hành động trên bất kỳ byte nào của virtual page, “chạm” vào theo bất kỳ cách nào – read, write hoặc execute – MMU mới phát sinh page fault (được tính nội bộ là minor fault), và kết quả là page fault handler của OS chạy.
 
-Điều này phần lớn đúng; chỉ là read trên page chưa tồn tại, trên unmapped memory, được xử lý khác. Thế nào? Kernel thông minh: khi một virtual unmapped memory page được đọc – hình dung thay vì ghi memory trong app `oom_killer_try`, chúng ta chỉ đọc – biết rằng page phải được cấp phát vào clean zero-filled physical memory page frame. Tuy nhiên cách này khiến kernel phục vụ mọi page read bằng cách cấp phát page frame phải khởi tạo thành zero; tốn kém! Thay vào đó kernel có cách tiếp cận lợi hiệu năng vượt trội. Nó chỉ map mọi virtual page mới được đọc lần đầu đến một kernel frame đơn lẻ bên dưới chứa toàn zero! Theo cách này, ngay cả khi thực hiện mười nghìn (hoặc mười triệu) read trên mười nghìn (hoặc mười triệu) virtual page, cuối cùng kernel chỉ physical-map một page frame đến tất cả.
+Điều này phần lớn đúng; chỉ là read trên page chưa tồn tại, trên unmapped memory, được xử lý khác. Thế nào? Kernel thông minh: khi một virtual unmapped memory page được đọc – hình dung thay vì ghi memory trong app `oom_killer_try`, chúng ta chỉ đọc – biết rằng page phải được cấp phát vào clean zero-filled physical memory page frame. Tuy nhiên cách này khiến kernel phục vụ mọi page read bằng cách cấp phát page frame phải khởi tạo thành zero; tốn kém! Thay vào đó kernel có cách tiếp cận performance-benefiting vượt trội. Nó chỉ map mọi virtual page mới được đọc lần đầu đến một kernel frame đơn lẻ bên dưới chứa toàn zero! Theo cách này, ngay cả khi thực hiện mười nghìn (hoặc mười triệu) read trên mười nghìn (hoặc mười triệu) virtual page, cuối cùng kernel chỉ physical-map một page frame đến tất cả.
 
-Thực chất kernel không phải phục vụ mọi (minor) page fault trên page mới bằng cách cấp phát frame – không, chỉ những page là mục tiêu write hoặc execute! Có lẽ một chi tiết, nhưng rất thú vị, ngụ ý có thể cấp phát lượng virtual memory khổng lồ nếu data sparse (nghĩa đen là trống); có vài app thực tế thực sự làm vậy (webkit, Address Sanitizer và KASAN). (Một lần nữa, offlinemark trình bày rất hay điều này trong bài blog: What they don’t tell you about demand paging in school, tháng 10 năm 2020: `https://offlinemark.com/2020/10/14/demand-paging/`. Hãy chắc chắn xem.)
+Thực chất kernel không phải phục vụ mọi (minor) page fault trên page mới bằng cách cấp phát frame – không, chỉ những page là mục tiêu write hoặc execute! Có lẽ một chi tiết, nhưng rất thú vị, ngụ ý có thể cấp phát lượng virtual memory khổng lồ nếu data sparse (nghĩa đen là trống); có vài app real-world thực sự làm vậy (webkit, Address Sanitizer và KASAN). (Một lần nữa, offlinemark trình bày rất hay điều này trong bài blog: What they don’t tell you about demand paging in school, tháng 10 năm 2020: `https://offlinemark.com/2020/10/14/demand-paging/`. Hãy chắc chắn xem.)
 
 ### Tìm hiểu OOM score
 
-Để tăng tốc tìm process ngốn memory nhất khi khẩn cấp (khi OOM killer được gọi), kernel gán và duy trì OOM score riêng cho từng process (luôn có thể xem giá trị trong pseudofile `/proc/<pid>/oom_score`).
+Để tăng tốc tìm process memory-hogging nhất khi khẩn cấp (khi OOM killer được gọi), kernel gán và duy trì OOM score riêng cho per-process (luôn có thể xem giá trị trong pseudofile `/proc/<pid>/oom_score`).
 
 Hơn nữa, OOM score có một khoảng; từ `0` đến `1000`:
 
@@ -1679,7 +1679,7 @@ Hơn nữa, OOM score có một khoảng; từ `0` đến `1000`:
 
 - OOM score `1000` nghĩa là process đang dùng 100 phần trăm memory có sẵn cho nó.
 
-Hiển nhiên process có OOM score cao nhất “thắng”. Phần thưởng – được chọn làm nạn nhân để OOM killer kết thúc (đúng kiểu hài hước khô khan). Nhưng khoan: kernel có heuristic bảo vệ task quan trọng. Heuristic tích hợp sẵn ngụ ý OOM killer không chọn làm nạn nhân bất kỳ root-owned process, kernel thread hay task nào có hardware device đang mở.
+Hiển nhiên process có OOM score cao nhất “thắng”. Phần thưởng – được chọn làm nạn nhân để OOM killer kết thúc (đúng kiểu hài hước khô khan). Nhưng khoan: kernel có heuristic bảo vệ task quan trọng. Heuristic baked-in ngụ ý OOM killer không chọn làm nạn nhân bất kỳ root-owned process, kernel thread hay task nào có hardware device đang mở.
 
 Nếu muốn bảo đảm một process nhất định không bao giờ bị OOM killer kết thúc thì sao? Hoàn toàn có thể, dù cần root access. Kernel cung cấp tunable `/proc/<pid>/oom_score_adj`, một giá trị OOM “adjustment” (mặc định `0`). Net OOM score là tổng giá trị `oom_score` và adjustment value:
 
@@ -1699,7 +1699,7 @@ Cách nhanh để truy vấn (và thậm chí đặt) OOM score của process c�
 
 Vậy giờ đã trình bày OOM killer, bạn nghĩ sao? Tôi mạo muội cho rằng phản ứng hợp lý là: ngay từ đầu đừng để tình huống kích hoạt OOM killer xảy ra! Có lẽ nói dễ hơn làm, công nhận, nhưng cần cẩn thận; suy nghĩ theo hướng này là quan trọng (đừng vì chuyện nhỏ mà làm mất cả điều lớn, đúng không?).
 
-Như Andries Brouwer nói trong nhận xét hài hước (tháng 9 năm 2004: `https://lwn.net/Articles/104185/`), thuật toán OOM killer có lẽ giống ném hành khách khỏi máy bay khi nhiên liệu xuống quá thấp.
+Như Andries Brouwer nói trong nhận xét tongue-in-cheek (tháng 9 năm 2004: `https://lwn.net/Articles/104185/`), thuật toán OOM killer có lẽ giống ném hành khách khỏi máy bay khi nhiên liệu xuống quá thấp.
 
 Mặt khác, một số production environment khác nhau về thiết lập từng server system; không có quy tắc nào tốt nhất cho tất cả. Trên một số setup, để OOM killer được gọi và kết thúc app hành xử sai thích hợp hơn để các app nhỏ vô tội thất bại vì không lấy được memory. Như thường lệ: không có giải pháp vạn năng. Hãy kiểm thử để tìm cách tốt nhất cho setup cụ thể của bạn.
 
@@ -1707,7 +1707,7 @@ Mặt khác, một số production environment khác nhau về thiết lập t�
 
 Một điều đã đề cập khá thường là control group (cgroup); đừng lo, khá nhiều chi tiết về kernel infrastructure then chốt, mạnh mẽ và ngầm này được trình bày trong Chương 11, The CPU Scheduler – Part 2, tại phần tên Giới thiệu cgroup (nhiều hơn một phần giới thiệu).
 
-Cgroup (hiện ở implementation v2) cho phép áp dụng resource constraint theo yêu cầu, dù resource là CPU, memory (RAM), IO, số PID tối đa (process/thread) được phép, v.v., qua các resource controller. Memory resource controller hiển nhiên dùng để áp constraint lên tổng memory usage của nhóm process trong cgroup. Để hiểu, sử dụng và do đó tận dụng nó, tôi đề nghị làm hai việc:
+Cgroup (hiện ở implementation v2) cho phép áp dụng resource constraint theo yêu cầu, dù resource là CPU, memory (RAM), IO, số PID tối đa (process/thread) được phép, v.v., qua so-called các resource controller. Memory resource controller hiển nhiên dùng để áp constraint lên tổng memory usage của nhóm process trong cgroup. Để hiểu, sử dụng và do đó tận dụng nó, tôi đề nghị làm hai việc:
 
 1\. Đọc nội dung cgroup trong Chương 11, The CPU Scheduler – Part 2, tại phần tên Giới thiệu cgroup. 2. Song song, tham khảo tài liệu kernel chính thức, đặc biệt memory controller; có tại đây: `https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files`. Bạn sẽ thấy mọi memory controller interface file có thể có và ý nghĩa chính xác. Hơn nữa, phần ngắn tên Usage Guidelines (`https://docs.kernel.org/admin-guide/cgroup-v2.html#usage-guidelines`) rất hữu ích để đọc.
 
@@ -1717,11 +1717,11 @@ Tiếp theo, vì nội dung cgroups (v2) sau này hơi thiên về chủ đề g
 
 - Kernel 4.19 giới thiệu một implementation nhỏ của cgroup-aware OOM killer component; điều này cho phép – trích lời – “khả năng kết thúc cgroup như một đơn vị duy nhất, nhờ đó bảo đảm tính toàn vẹn của workload”. Interface là pseudofile `memory.oom.group`; khi được đặt và một process trong cgroup kích hoạt OOM killer, nó kết thúc mọi process trong cgroup ấy (hoặc không process nào).
 
-- Internals: Kernel tích hợp slab memory controller (kmemcg), về cơ bản sao chép slab memory internals cho mỗi memory cgroup hiện có (`memcg`). Điều này dẫn đến mức tận dụng slab memory rất thấp trong các memcg này (vì không chia sẻ slab memory; mỗi cái có slab riêng), rồi dẫn đến vấn đề nghiêm trọng – thực chất lãng phí slab memory đáng kể. Điều này dẫn đến việc tạo slab memory controller mới (bởi Roman Gushchin và những người khác) từ Linux 5.9. Mức tiết kiệm slab memory từ 35% đến 50% (trên cả hệ thống desktop lẫn server-class).
+- Internals: Kernel tích hợp slab memory controller (kmemcg), về cơ bản sao chép slab memory internals cho mỗi memory cgroup hiện có (`memcg`). Điều này dẫn đến under-utilization trong các memcg này (vì không chia sẻ slab memory; mỗi cái có slab riêng), rồi dẫn đến vấn đề nghiêm trọng – thực chất lãng phí slab memory đáng kể. Điều này dẫn đến việc tạo slab memory controller mới (bởi Roman Gushchin và những người khác) từ Linux 5.9. Mức tiết kiệm slab memory từ 35% đến 50% (trên cả hệ thống desktop lẫn server-class).
 
 - Một cách có lẽ dễ hơn để kiểm soát cgroups memory bandwidth allocation là qua các interface systemd cung cấp. Tương tự kernel memory cgroup (memcg) interface, nó cung cấp các interface MemoryMin, MemoryLow, MemoryHigh và MemoryMax cho process trong systemd unit cụ thể (tất cả đặt thành một lượng, biểu diễn theo đơn vị byte/KB/MB/GB/TB). Hoặc có thể chỉ định memory theo phần trăm tổng RAM cho chúng. Ngay cả swap memory usage cũng có thể giới hạn qua các interface MemorySwapMax và MemoryZSwapMax.
 
-Interface MemoryHigh thường là interface được khuyên chỉ định; trích tài liệu cách dùng (từ man page tại đây: `https://man7.org/linux/man-pages/man5/systemd.resource-control.5.html` “Chỉ định throttling limit cho memory usage của các process được thực thi trong unit này. Memory usage có thể vượt giới hạn nếu không tránh khỏi, nhưng process sẽ bị làm chậm mạnh và memory bị thu hồi quyết liệt trong những trường hợp ấy. Đây là cơ chế chính để kiểm soát memory usage của unit.” Interface MemoryMax cho phép chỉ định giới hạn trên không thể thương lượng (hay tuyệt đối) cho memory usage của các process trong unit; nếu memory usage vượt threshold này, OOM killer được gọi.
+Interface MemoryHigh thường là interface được khuyên chỉ định; trích tài liệu cách dùng (từ man page tại đây: `https://man7.org/linux/man-pages/man5/systemd.resource-control.5.html` “Chỉ định throttling limit cho memory usage của các process được thực thi trong unit này. Memory usage có thể vượt giới hạn nếu không tránh khỏi, nhưng process sẽ bị làm chậm mạnh và memory bị thu hồi quyết liệt trong những trường hợp ấy. Đây là cơ chế chính để kiểm soát memory usage của unit.” Interface MemoryMax cho phép chỉ định giới hạn trên non-negotiable (hay tuyệt đối) cho memory usage của các process trong unit; nếu memory usage vượt threshold này, OOM killer được gọi.
 
 Có vài lưu ý khi thiết lập systemd-based memcg setting; hãy chắc chắn đọc kỹ tài liệu.
 
@@ -1735,7 +1735,7 @@ Sau đó tìm hiểu chính xác component OOM killer đáng sợ của kernel (
 
 Như đã đề cập, kiến thức đủ sâu về Linux memory management internals và exported API set sẽ giúp ích rất nhiều với bạn, người viết kernel module và/hoặc device driver. Thực tế như đã biết rõ, developer dành lượng thời gian đáng kể cho troubleshooting và debug code; kiến thức và kỹ năng chuyên sâu thu được trong vài chương vừa qua về kernel internals và memory management giúp bạn định hướng tốt hơn trong những mê cung này.
 
-Đến đây hoàn tất nội dung trình bày trực tiếp về Linux kernel memory management trong sách. Dù đã trình bày nhiều lĩnh vực, cũng bỏ qua hoặc chỉ lướt một số. Thực tế Linux memory management là chủ đề khổng lồ, phức tạp, rất đáng hiểu nhằm học tập, viết code hiệu quả hơn và debug tình huống phức tạp. Học cách dùng (cơ bản) utility mạnh mẽ `crash` (dùng để xem sâu trong kernel qua live session hoặc kernel dumpfile), rồi xem lại nội dung chương này và chương trước với kiến thức ấy, thực sự là cách học mạnh mẽ!
+Đến đây hoàn tất nội dung trình bày trực tiếp về Linux kernel memory management trong sách. Dù đã trình bày nhiều lĩnh vực, cũng bỏ qua hoặc chỉ lướt một số. Thực tế Linux memory management là chủ đề khổng lồ, phức tạp, rất đáng hiểu nhằm học tập, viết code hiệu quả hơn và debug tình huống phức tạp. Học cách dùng (cơ bản) utility mạnh mẽ `crash` (dùng để xem sâu trong kernel qua live session hoặc kernel dumpfile), rồi re-looking nội dung chương này và chương trước với kiến thức ấy, thực sự là cách học mạnh mẽ!
 
 Vậy bạn đã làm tốt khi hoàn thành Linux memory management! Hai chương tiếp theo sẽ giúp học một chủ đề core OS khác – cách CPU (task) scheduling được thực hiện trên Linux OS. Hãy nghỉ một chút, làm các bài tập và câu hỏi sau, xem qua tài liệu Đọc thêm thu hút bạn. Rồi với năng lượng mới, cùng tôi bước vào lĩnh vực thú vị tiếp theo!
 

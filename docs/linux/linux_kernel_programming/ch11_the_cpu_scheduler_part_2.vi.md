@@ -20,7 +20,7 @@ Chúng tôi mong bạn đã đọc (hoặc có kiến thức tương đương) C
 
 Tôi giả định bạn đã đọc toàn bộ chương Kernel Workspace Setup được đăng trực tuyến, đã chuẩn bị phù hợp một guest Virtual Machine (VM) chạy Ubuntu 22.04 LTS (hoặc bản phát hành ổn định mới hơn, hay Fedora distro gần đây) và cài mọi package cần thiết. Nếu chưa, tôi đặc biệt khuyên làm việc này trước.
 
-Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyên trước tiên thiết lập môi trường workspace, bao gồm clone GitHub repository của sách để lấy code rồi thực hành trực tiếp trên đó. Có thể tìm repository tại đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`.
+Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyên trước tiên thiết lập môi trường workspace, bao gồm clone GitHub repository của sách để lấy code rồi hands-on trên đó. Có thể tìm repository tại đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`.
 
 ## Tìm hiểu, truy vấn và đặt CPU affinity mask
 
@@ -165,7 +165,7 @@ Xong. Hãy xem man page `taskset(1)` để có đầy đủ chi tiết cách dù
 
 #### Đặt CPU affinity mask trên kernel thread
 
-Một ví dụ khá thú vị, nếu muốn minh họa synchronization technique tên per-CPU variable (như thực sự sẽ học và làm trong Chương 13, Kernel Synchronization – Part 2, tại phần Per-CPU – một example kernel module), cần tạo hai kernel thread (kthread) và bảo đảm mỗi thread chạy trên CPU core riêng. Để làm tất nhiên phải đặt tường minh CPU affinity mask của mỗi kernel thread khác nhau, không chồng lấn (để đơn giản, đặt affinity mask của kthread đầu thành `0`, mask kthread thứ hai thành `1`, nhằm bảo đảm lần lượt chỉ thực thi trên CPU core `0` và `1`). Nhưng có vấn đề...phần sau giải thích.
+Một ví dụ khá thú vị, nếu muốn minh họa synchronization technique tên per-CPU variable (như thực sự sẽ học và làm trong Chương 13, Kernel Synchronization – Part 2, tại phần Per-CPU – một example kernel module), cần tạo hai kernel thread (kthread) và bảo đảm mỗi thread chạy trên CPU core riêng. Để làm tất nhiên phải đặt tường minh CPU affinity mask của mỗi kernel thread khác nhau, non-overlapping (để đơn giản, đặt affinity mask của kthread đầu thành `0`, mask kthread thứ hai thành `1`, nhằm bảo đảm lần lượt chỉ thực thi trên CPU core `0` và `1`). Nhưng có vấn đề...phần sau giải thích.
 
 ##### Hack khả năng truy cập non-exported symbol
 
@@ -221,7 +221,7 @@ Rất tương tự, đặt scheduling policy và priority có thể thực hiệ
 
 ### Đặt policy và priority trong kernel – trên kernel thread
 
-Như giờ đã biết, kernel chắc chắn không phải process cũng không phải thread. Dù vậy Linux kernel chắc chắn có khả năng multithreaded và chứa thread, các kernel thread (hay kthread). Như các thread tương ứng user space, kernel thread có thể tạo theo yêu cầu (từ core kernel, device driver hay kernel module; kernel cung cấp API cho mục đích này).
+Như giờ đã biết, kernel chắc chắn không phải process cũng không phải thread. Dù vậy Linux kernel chắc chắn multithreaded-capable và chứa thread, so-called các kernel thread (hay kthread). Như các thread tương ứng user space, kernel thread có thể tạo theo yêu cầu (từ core kernel, device driver hay kernel module; kernel cung cấp API cho mục đích này).
 
 Chúng là schedulable entity (KSE!) và tất nhiên mỗi thread có task structure và kernel-mode stack; vì vậy như thread thông thường, cạnh tranh CPU resource, scheduling policy và priority có thể truy vấn hoặc đặt bằng lập trình theo yêu cầu.
 
@@ -271,7 +271,7 @@ Hai API đầu:
 
 - là wrapper trên `sched_setattr_nocheck()`
 
-- đặt scheduling policy của thread thành `SCHED_NORMAL` (giống `SCHED_OTHER`, nghĩa là non-real-time, do Completely Fair Scheduler (CFS) vận hành)
+- đặt scheduling policy của thread thành `SCHED_NORMAL` (giống `SCHED_OTHER`, nghĩa là non real-time, do Completely Fair Scheduler (CFS) vận hành)
 
 - đặt giá trị `nice` của thread thành parameter thứ hai
 
@@ -279,7 +279,7 @@ Hai API đầu:
 
 Hơn nữa, ba API được export theo GNU Public License (GPL), ngụ ý chỉ module được cấp phép theo GNU GPL dùng được.
 
-#### Ví dụ thực tế – threaded interrupt handler
+#### Ví dụ real-world – threaded interrupt handler
 
 Một ví dụ kernel dùng kernel thread là khi kernel (khá thường xuyên) dùng threaded interrupt (work queue là ví dụ khác). Ở đây kernel phải tạo kernel thread chuyên dụng với (soft) real-time scheduling policy `SCHED_FIFO` và real-time priority value `50` (ở giữa), để xử lý đúng threaded interrupt. Hãy xem code path liên quan, `https://elixir.bootlin.com/linux/v6.1.25/source/kernel/irq/manage.c#L1448`:
 
@@ -326,15 +326,15 @@ Hãy nghĩ một lúc: giả sử đăng nhập Linux server cùng chín ngườ
 
 Trước mắt ít nhất cứ giả định được chia (chủ yếu) công bằng. Nhưng nếu bạn, một trong mười user đăng nhập, viết user-space program trong một loop vô tội vạ spawn nhiều thread mới, mỗi thread làm nhiều CPU-intensive work (và có lẽ thêm phần thưởng là cấp phát các vùng memory lớn) ở mỗi loop iteration!? CPU bandwidth allocation (ngay cả qua CFS) không còn công bằng theo nghĩa thực sự; account của bạn thực chất chiếm CPU (và có thể cả system resource khác như memory và I/O)!
 
-Cần giải pháp tổng quát quản lý chính xác, hiệu quả CPU bandwidth (và resource khác), throttling (kiểm tra, không cho phép) tiêu thụ thêm resource khi đạt giới hạn chỉ định. Nhiều patch đề xuất được thảo luận rồi loại bỏ; cuối cùng kỹ sư Google, IBM và nơi khác đáp ứng bằng patch set đưa giải pháp control group (cgroup) hiện đại vào Linux kernel (từ version 2.6.24, tháng 10 năm 2007. Ý tưởng và implementation ban đầu do Paul Menage và Rohit Seth ở Google năm 2006.). Tóm lược, cgroup là kernel feature cho system administrator (hoặc ai có root access) thực hiện bandwidth allocation và fine-grained resource management thanh lịch trên các resource hay controller (theo cách gọi của cgroup) trên hệ thống. Lưu ý: dùng cgroup, không chỉ processor (CPU bandwidth) mà cả memory bandwidth và block I/O bandwidth (và hơn nữa) đều có thể phân chia, cấp phát và giám sát cẩn thận theo yêu cầu project hay sản phẩm.
+Cần giải pháp tổng quát quản lý chính xác, hiệu quả CPU bandwidth (và resource khác), throttling (kiểm tra, không cho phép) tiêu thụ thêm resource khi đạt giới hạn chỉ định. Nhiều patch đề xuất được thảo luận rồi loại bỏ; cuối cùng kỹ sư Google, IBM và nơi khác đáp ứng bằng patch set đưa giải pháp control group (cgroup) modern-day vào Linux kernel (từ version 2.6.24, tháng 10 năm 2007. Ý tưởng và implementation ban đầu do Paul Menage và Rohit Seth ở Google năm 2006.). Tóm lược, cgroup là kernel feature cho system administrator (hoặc ai có root access) thực hiện bandwidth allocation và fine-grained resource management thanh lịch trên các resource hay controller (theo cách gọi của cgroup) trên hệ thống. Lưu ý: dùng cgroup, không chỉ processor (CPU bandwidth) mà cả memory bandwidth và block I/O bandwidth (và hơn nữa) đều có thể phân chia, cấp phát và giám sát cẩn thận theo yêu cầu project hay sản phẩm.
 
-Vậy với ví dụ bắt đầu chủ đề – mười user trên hệ thống Linux – nếu mọi process được đặt trong cùng cgroup ấy và cgroups CPU controller được bật cho nó, khi có CPU contention sẽ thực sự chia CPU công bằng cho mỗi process! Hoặc với tư cách sysad có thể làm phức tạp hơn: chia hệ thống thành nhiều cgroup – một cho chẳng hạn build project (ví dụ Yocto build), một cho web browser, một cho virtual machine, v.v. – rồi tinh chỉnh và cấp resource (CPU, memory và I/O) cho từng cgroup tùy ý! Thực tế gần như mọi distro hiện đại tự động làm vậy nhờ systemd framework mạnh mẽ (sẽ nói thêm sau); embedded Linux cũng thường làm, gồm Android.
+Vậy với ví dụ bắt đầu chủ đề – mười user trên hệ thống Linux – nếu mọi process được đặt trong cùng cgroup ấy và cgroups CPU controller được bật cho nó, khi có CPU contention sẽ thực sự chia CPU công bằng cho mỗi process! Hoặc với tư cách sysad có thể làm phức tạp hơn: chia hệ thống thành nhiều cgroup – một cho chẳng hạn build project (ví dụ Yocto build), một cho web browser, một cho virtual machine, v.v. – rồi fine-tune và cấp resource (CPU, memory và I/O) cho từng cgroup tùy ý! Thực tế gần như mọi distro hiện đại tự động làm vậy nhờ systemd framework mạnh mẽ (sẽ nói thêm sau); embedded Linux cũng thường làm, gồm Android.
 
 Vậy giờ bạn quan tâm rồi! Bật cgroups feature thế nào? Đơn giản – là kernel feature có thể bật (hay tắt) với granularity khá nhỏ theo cách thường: cấu hình kernel. Menu liên quan (qua user interface tiện lợi `make menuconfig`) là General setup \| Control Group support. Hãy thử: `grep` kernel config file để tìm `CGROUP`; rồi nếu cần điều chỉnh kernel config, rebuild, reboot với kernel mới và kiểm thử. (Đã trình bày kernel configuration chi tiết trong Chương 2, Building the 6.x Linux Kernel from Source – Part 1, kernel build và install trong Chương 3, Building the 6.x Linux Kernel from Source – Part 2).
 
 Tin tốt: cgroup được bật mặc định trên mọi hệ thống Linux (đủ mới) chạy systemd init framework. Như vừa nói, có thể truy vấn cgroup controller được bật bằng `grep` kernel config file, sửa config tùy ý; trên hệ thống desktop và server-class thường không cần.
 
-Từ khởi đầu trong 2.6.24, cgroup như mọi kernel feature khác liên tục phát triển. Khá gần đây, đã đến lúc cgroup feature được cải tiến đủ nhiều trở nên không tương thích với bản cũ, dẫn đến thiết kế và phát hành cgroup mới tên cgroups v2 (hay đơn giản cgroups2 – Tejun Heo là maintainer); được công bố sẵn sàng production trong dòng kernel 4.5 (bản cũ giờ gọi cgroups v1 hay legacy cgroups implementation). Lưu ý tại thời điểm viết, cả hai có thể và thực sự cùng tồn tại với vài giới hạn; nhiều application và framework vẫn dùng cgroups v1 cũ, chưa migrate v2. Tuy nhiên đang thay đổi; sớm thôi nếu chưa xảy ra, cgroups2 sẽ trở thành lựa chọn trên thực tế, nên hãy lên kế hoạch dùng.
+Từ khởi đầu trong 2.6.24, cgroup như mọi kernel feature khác liên tục phát triển. Khá gần đây, đã đến lúc cgroup feature được cải tiến đủ nhiều trở nên không tương thích với bản cũ, dẫn đến thiết kế và phát hành cgroup mới tên cgroups v2 (hay đơn giản cgroups2 – Tejun Heo là maintainer); được công bố production-ready trong dòng kernel 4.5 (bản cũ giờ gọi cgroups v1 hay legacy cgroups implementation). Lưu ý tại thời điểm viết, cả hai có thể và thực sự cùng tồn tại với vài giới hạn; nhiều application và framework vẫn dùng cgroups v1 cũ, chưa migrate v2. Tuy nhiên đang thay đổi; sớm thôi nếu chưa xảy ra, cgroups2 sẽ trở thành lựa chọn trên thực tế, nên hãy lên kế hoạch dùng.
 
 Trong nội dung này, tập trung gần như hoàn toàn dùng bản hiện đại cgroups v2. Tài liệu tốt nhất là kernel chính thức, tại đây (cho kernel 6.1): `https://www.kernel.org/doc/html/v6.1/admin-guide/cgroup-v2.html`. (Để bạn biết, tài liệu cho kernel version mới nhất cũng luôn có tại: `https://docs.kernel.org/admin-guide/cgroup-v2.html`.
 
@@ -362,7 +362,7 @@ Bảng 11.1: Tóm lược cgroups v2 controller có sẵn trên hệ thống Lin
 
 Độc giả quan tâm hãy tham khảo tài liệu kernel chính thức nói trên và man page để biết chi tiết; ví dụ PIDS controller rất hữu ích để ngăn fork bomb bằng cách cho phép giới hạn số process có thể fork từ cgroup hay các descendant. (Fork bomb là DoS attack ngớ ngẩn nhưng nguy hiểm, thường gọi system call `fork()` trong infinite loop!)
 
-Tiếp theo, rất quan trọng, kernel cgroup được làm hiển thị (cung cấp) hay giao tiếp với user space thế nào? À theo cách thường trên Linux: control group được cung cấp qua synthetic filesystem hay pseudo filesystem chuyên dụng! Đó là filesystem `cgroup`, thường mount tại `/sys/fs/cgroup`. Với cgroups v2, filesystem type giờ tên `cgroup2` (chỉ cần mount \| grep cgroup để thấy). Có rất nhiều điều thú vị để khám phá bên trong; đó là những gì làm khi tiến tiếp...
+Tiếp theo, rất quan trọng, kernel cgroup được làm hiển thị (cung cấp) hay giao tiếp với user space thế nào? À theo cách thường trên Linux: control group được cung cấp qua synthetic filesystem hay pseudo filesystem purpose-built! Đó là filesystem `cgroup`, thường mount tại `/sys/fs/cgroup`. Với cgroups v2, filesystem type giờ tên `cgroup2` (chỉ cần mount \| grep cgroup để thấy). Có rất nhiều điều thú vị để khám phá bên trong; đó là những gì làm khi tiến tiếp...
 
 Hãy bắt đầu: làm sao biết controller nào được bật cho hệ thống (thực ra kernel)? Dễ thôi:
 
@@ -371,9 +371,9 @@ $ cat /sys/fs/cgroup/cgroup.controllers
 cpuset cpu io memory hugetlb pids rdma misc
 ```
 
-Rõ ràng hiển thị danh sách available controller phân cách bằng space (tôi chạy trên Fedora 38 VM x86\_64. Đồng thời lưu ý dùng `/proc/cgroups` để xem controller chỉ tương thích cgroups v1; đừng dựa vào cho cgroups v2.). Controller chính xác thấy ở đây phụ thuộc cách kernel được cấu hình.
+Rõ ràng hiển thị danh sách available controller space-separated (tôi chạy trên Fedora 38 VM x86\_64. Đồng thời lưu ý dùng `/proc/cgroups` để xem controller chỉ tương thích cgroups v1; đừng dựa vào cho cgroups v2.). Controller chính xác thấy ở đây phụ thuộc cách kernel được cấu hình.
 
-Trong cgroups v2, mọi controller được mount trong một hierarchy (hay tree) duy nhất. Khác cgroups v1 nơi nhiều controller có thể mount dưới nhiều hierarchy hay group. Init framework hiện đại systemd là bên dùng cả v1 lẫn v2 cgroup. Thực tế chính `systemd` tự mount cgroups v2 filesystem khi startup (tại `/sys/fs/cgroup/`).
+Trong cgroups v2, mọi controller được mount trong một hierarchy (hay tree) duy nhất. Khác cgroups v1 nơi nhiều controller có thể mount dưới nhiều hierarchy hay group. Init framework hiện đại systemd là bên dùng cả v1 lẫn v2 cgroup. Thực tế chính `systemd` auto-mounts cgroups v2 filesystem khi startup (tại `/sys/fs/cgroup/`).
 
 ### Khám phá cgroups v2 hierarchy
 
@@ -417,13 +417,13 @@ Cẩn thận: controller xuất hiện trong danh sách không nhất thiết ng
 echo "+cpu +io -memory" > cgroup.subtree_control
 ```
 
-Vậy giờ biết file `cgroup.subtree_control` cho danh sách controller phân cách bằng space được bật để kiểm soát resource distribution từ cgroup này đến children.
+Vậy giờ biết file `cgroup.subtree_control` cho danh sách controller space-separated được bật để kiểm soát resource distribution từ cgroup này đến children.
 
 Tài liệu kernel nêu như sau `https://docs.kernel.org/admin-guide/cgroup-v2.html`:
 
 “Top-down Constraint
 
-Resource được phân phối từ trên xuống và cgroup chỉ có thể phân phối tiếp resource nếu parent đã phân phối resource cho nó. Điều này nghĩa là mọi file ‘cgroup.subtree\_control’ không phải root chỉ chứa được controller được bật trong file ‘cgroup.subtree\_control’ của parent. Chỉ bật được controller nếu parent đã bật controller ấy, và không thể tắt controller nếu một hoặc nhiều children đang bật.”
+Resource được phân phối top-down và cgroup chỉ có thể phân phối tiếp resource nếu parent đã phân phối resource cho nó. Điều này nghĩa là mọi file ‘cgroup.subtree\_control’ non-root chỉ chứa được controller được bật trong file ‘cgroup.subtree\_control’ của parent. Chỉ bật được controller nếu parent đã bật controller ấy, và không thể tắt controller nếu một hoặc nhiều children đang bật.”
 
 Dành một lúc hiểu phát biểu ấy. Sau đây là vài core cgroup interface file hữu ích khác cần biết – chỉ hiện diện trong cgroup folder (hierarchy):
 
@@ -465,7 +465,7 @@ Hãy tiếp tục nhìn vào bên trong!
 
 Trở lại cgroup trong root của cgroups tree (hay hierarchy, xem Hình 11.3). Như nói, folder bên trong biểu diễn cgroup. Trước mắt tạm hoãn câu hỏi ai tạo (và thế nào); chỉ cần nói được systemd thiết lập lúc boot.
 
-Bắt đầu với cgroup đơn giản, được folder `init.scope` biểu diễn. Xem bên trong thấy kernel đã điền sẵn rất nhiều file (pseudo) và interface; đây là góc nhìn cắt bớt:
+Bắt đầu với cgroup đơn giản, được folder `init.scope` biểu diễn. Xem bên trong thấy kernel đã pre-populated rất nhiều file (pseudo) và interface; đây là góc nhìn cắt bớt:
 
 ```
 $ cd /sys/fs/cgroup/
@@ -516,7 +516,7 @@ Vậy giờ hy vọng bạn hiểu khả năng thấy rất nhiều interface ps
 
 Cũng nên hiểu cgroup có thể nested; một cgroup có thể chứa cgroup, bản thân chúng lại chứa cgroup. Để thấy, chỉ cần xem dưới cgroup – folder dưới root – tìm thêm folder.
 
-Lấy cgroup khác (một lần nữa systemd tạo lúc boot) – `system.slice` – rồi xem sub-folder bên dưới, tức các cgroup. Cách nhanh như sau:
+Lấy cgroup khác (một lần nữa systemd tạo lúc boot) – `system.slice` – rồi xem sub-folders bên dưới, tức các cgroup. Cách nhanh như sau:
 
 ```
 $ find /sys/fs/cgroup/system.slice/ -maxdepth 1 -type d
@@ -537,7 +537,7 @@ $
 
 Tuy nhiên đừng quên: tính năng resource-constraining của cgroup chỉ có tác dụng nếu file `cgroup.subtree_control` bên trong, hoặc trong parent cgroup, bật các controller liên quan!
 
-Vậy giờ bắt đầu bước nhỏ: trên Linux dùng systemd (gần như mọi distro hiện đại), dùng utility `systemd-cgls` (`cgls` = cgroup list) để “thấy” cgroup dưới `init.scope`; chạy utility với parameter – cgroup hierarchy muốn xem bên trong – khiến hiển thị chính xác điều đó:
+Vậy giờ bắt đầu bước nhỏ: trên Linux systemd-based (gần như mọi distro hiện đại), dùng utility `systemd-cgls` (`cgls` = cgroup list) để “thấy” cgroup dưới `init.scope`; chạy utility với parameter – cgroup hierarchy muốn xem bên trong – khiến hiển thị chính xác điều đó:
 
 ```
 $ systemd-cgls /sys/fs/cgroup/init.scope
@@ -572,7 +572,7 @@ Directory /sys/fs/cgroup/system.slice:
 [ … ]
 ```
 
-Cho thấy nhiều “service” (process – phần lớn khởi đầu dưới sự quản lý systemd) và sub-process (descendant); hay. Giờ nhìn toàn cảnh, mọi cgroup, bằng chạy utility `systemd-cgls` không parameter, sẽ cho thấy toàn cgroups hierarchy (mặc định dưới `/sys/fs/cgroup`; parameter `--no-pager` chỉ để không “page” output bằng `less`):
+Cho thấy nhiều “service” (process – phần lớn khởi đầu dưới sự quản lý systemd) và sub-processes (descendant); hay. Giờ nhìn toàn cảnh, mọi cgroup, bằng chạy utility `systemd-cgls` không parameter, sẽ cho thấy toàn cgroups hierarchy (mặc định dưới `/sys/fs/cgroup`; parameter `--no-pager` chỉ để không “page” output bằng `less`):
 
 ![Hình 11.6](images/ch11/fig11-06.jpg)
 
@@ -588,13 +588,13 @@ Quản lý cgroup thủ công có thể là việc khó khăn; systemd init fram
 
 ##### Slice và scope
 
-Như Hình 11.6 cho thấy khá rõ, systemd đủ thông minh tự xây dựng cgroup, nhóm process hợp logic. Để làm, định nghĩa và dùng các artifact – slice và scope. Slice dùng biểu diễn mọi process thuộc user nhất định, hoặc có thể biểu diễn một “nhóm” application (process) có resource được quản lý qua unit đó. (Trong Hình 11.6, với user account có UID 1000 của tôi, rõ ràng slice tên `user-1000.slice`).
+Như Hình 11.6 cho thấy khá rõ, systemd đủ thông minh auto-construct cgroup, nhóm process hợp logic. Để làm, định nghĩa và dùng các artifact – slice và scope. Slice dùng biểu diễn mọi process thuộc user nhất định, hoặc có thể biểu diễn một “nhóm” application (process) có resource được quản lý qua unit đó. (Trong Hình 11.6, với user account có UID 1000 của tôi, rõ ràng slice tên `user-1000.slice`).
 
-Scope biểu diễn việc tiếp tục chia slice hợp logic (khá líu lưỡi, phải không?); ví dụ tốt là mọi process chạy trong terminal window thường được systemd nhóm vào cgroup session-\<number\>.scope (thuật ngữ có prefix “session” vì session biểu diễn process được spawn và quản lý trong Terminal window)! Một lần nữa, trong Hình 11.6 có thể thấy rõ Terminal window, được scope tên `session-9.scope` biểu diễn, được thiết lập qua sshd và có Bash shell `(`với PID 1283555 và teletypewriter (tty) device pts/4), được biểu diễn hay tổ chức như descendant của user slice và bên trong nó là scope kiểu “session”.
+Scope biểu diễn việc tiếp tục chia slice hợp logic (khá tongue-twister, phải không?); ví dụ tốt là mọi process chạy trong terminal window thường được systemd nhóm vào cgroup session-\<number\>.scope (thuật ngữ có prefix “session” vì session biểu diễn process được spawn và quản lý trong Terminal window)! Một lần nữa, trong Hình 11.6 có thể thấy rõ Terminal window, được scope tên `session-9.scope` biểu diễn, được thiết lập qua sshd và có Bash shell `(`với PID 1283555 và teletypewriter (tty) device pts/4), được biểu diễn hay tổ chức như descendant của user slice và bên trong nó là scope kiểu “session”.
 
-Hơn nữa systemd tổ chức hierarchy với scope unit và service unit (boot time) được gán cho slice thích hợp (bên trong có cgroup riêng). Như nói, mọi user đăng nhập hệ thống cũng được xem là “slice” dưới node tổng quát `user.slice` trong tree, và app chạy tất nhiên xuất hiện dưới cgroup ấy (một lần nữa có thể thực sự thấy user slice của tôi trong Hình 11.6; xuất hiện dạng `user-1000.slice`, và dưới hierarchy này là các “scope” unit). Trích từ tài liệu systemd:
+Hơn nữa systemd tổ chức hierarchy với scope unit và service unit (boot-time) được gán cho slice thích hợp (bên trong có cgroup riêng). Như nói, mọi user đăng nhập hệ thống cũng được xem là “slice” dưới node tổng quát `user.slice` trong tree, và app chạy tất nhiên xuất hiện dưới cgroup ấy (một lần nữa có thể thực sự thấy user slice của tôi trong Hình 11.6; xuất hiện dạng `user-1000.slice`, và dưới hierarchy này là các “scope” unit). Trích từ tài liệu systemd:
 
-“Tên (slice) gồm chuỗi tên phân cách bằng gạch nối, mô tả đường dẫn từ root slice đến slice. Root slice tên `-.slice`. Ví dụ: `foo-bar.slice` là slice nằm trong `foo.slice`, bản thân nằm trong root slice `-.slice`. ...”
+“Tên (slice) gồm chuỗi tên dash-separated, mô tả đường dẫn từ root slice đến slice. Root slice tên `-.slice`. Ví dụ: `foo-bar.slice` là slice nằm trong `foo.slice`, bản thân nằm trong root slice `-.slice`. ...”
 
 (Có thể thấy root slice `-.slice` là slice đầu trong Hình 11.7).
 
@@ -630,7 +630,7 @@ Hãy xem phần systemd trong Đọc thêm của chương; có nhiều liên k�
 
 ![Hình 11.7](images/ch11/fig11-07.jpg)
 
-Hình 11.7: Ảnh chụp cho thấy cách xem cgroup hierarchy do systemd tạo ở mức slice và scope
+Hình 11.7: Ảnh chụp cho thấy cách xem cgroup hierarchy systemd-generated ở mức slice và scope
 
 Giờ đã nắm cơ bản cgroups2, đây là ảnh chụp một phần man page `cgroups(7)` làm nổi bật thêm vài điểm then chốt; hãy nghiên cứu:
 
@@ -711,7 +711,7 @@ Trở lại câu hỏi: nếu máy không chạy systemd? Khi đó không có cg
 
 ##### Tìm hiểu nhanh kernel namespace
 
-Rẽ hướng nhanh nhưng hữu ích: thú vị khi nhận ra toàn bộ câu chuyện container – cách mạnh mẽ, industry-standard và được dùng trên thực tế để quản lý application deployment – về cơ bản dựa trên hai công nghệ then chốt trong Linux kernel: cgroup và namespace. Có thể xem container về cơ bản như lightweight VM (ở mức nào đó); phần lớn công nghệ container dùng hiện nay (Docker, LXC, Kubernetes và khác), cốt lõi là kết hợp hai công nghệ tích hợp Linux kernel: cgroup và namespace.
+Rẽ hướng nhanh nhưng hữu ích: thú vị khi nhận ra toàn bộ câu chuyện container – cách mạnh mẽ, industry-standard và được dùng trên thực tế để quản lý application deployment – về cơ bản dựa trên hai công nghệ then chốt trong Linux kernel: cgroup và namespace. Có thể xem container về cơ bản như lightweight VM (ở mức nào đó); phần lớn công nghệ container dùng hiện nay (Docker, LXC, Kubernetes và khác), cốt lõi là kết hợp hai công nghệ baked-in Linux kernel: cgroup và namespace.
 
 Kernel namespace là khái niệm và structure cực kỳ quan trọng cho implementation toàn bộ ý tưởng container (structure trong kernel là `struct nsproxy`). Với namespace, kernel có thể phân chia resource sao cho một tập process trong namespace này thấy những giá trị nhất định, một tập process trong namespace khác thấy các giá trị khác. Vì sao cần? Ví dụ hai container; để isolation sạch, mỗi container phải thấy process PID 1, 2, v.v. Tương tự, mỗi container có lẽ phải có domain name và hostname riêng, tập mount riêng có nội dung duy nhất cho container (`/proc` là một ví dụ), network interface duy nhất cho mỗi container, v.v. Kernel có thể duy trì nhiều namespace; mặc định tất cả optional, nên kernel luôn duy trì khái niệm \<FOO\> global namespace cho mỗi loại (FOO là tên namespace như mount, PID, v.v.):
 
@@ -726,7 +726,7 @@ Kernel namespace là khái niệm và structure cực kỳ quan trọng cho impl
 
 Bảng 11.2: Kernel namespace
 
-Liên quan điều này: như có lẽ biết, system call `clone()` dùng bên trong để tạo thread trên Linux (`pthread_create()` gọi nó). Trong nhiều flag – dùng báo kernel cách tạo custom process, nói cách khác thread – có các flag nhãn `CLONE_NEW*` (ví dụ `CLONE_NEWPID`, `CLONE_NEWNS`, `CLONE_NEWNET`, v.v.). Chính chúng khiến kernel tạo process trong namespace mới. Các system call liên quan namespace khác gồm `setns()`, `unshare()` và `ioctl_ns()`; hãy xem man page để biết thêm.
+Liên quan điều này: như có lẽ biết, system call `clone()` dùng bên trong để tạo thread trên Linux (`pthread_create()` gọi nó). Trong nhiều flag – dùng báo kernel cách tạo custom process, nói cách khác thread – có các flag nhãn `CLONE_NEW*` (ví dụ `CLONE_NEWPID`, `CLONE_NEWNS`, `CLONE_NEWNET`, v.v.). Chính chúng khiến kernel tạo process trong namespace mới. Các system call namespace-related khác gồm `setns()`, `unshare()` và `ioctl_ns()`; hãy xem man page để biết thêm.
 
 (Một lần nữa phần Đọc thêm của chương có liên kết về kernel namespace và container tech.) Được rồi, trở lại thảo luận cgroup!
 
@@ -767,7 +767,7 @@ kernel)
 See the systemd-cgtop(1) man page for details.
 ```
 
-Cũng có thể đổi interactively field dùng để sort; man page giải thích:
+Cũng có thể đổi interactively field sorted-on; man page giải thích:
 
 ```
 ...
@@ -797,7 +797,7 @@ Với công cụ cgroups visualization hiện có, một vấn đề là không 
 
 - Với mỗi cgroup parse, trước tiên kiểm tra: nếu không populated (không live process bên trong), bỏ qua sang cgroup kế tiếp; nếu có, hiển thị một số nội dung như:
 
-- Sub-controller (thực chất nội dung pseudofile `cgroup.subtree_control` cho cgroup ấy! Tham khảo lại phần ngắn về sub-controller...)
+- Sub-controllers (thực chất nội dung pseudofile `cgroup.subtree_control` cho cgroup ấy! Tham khảo lại phần ngắn về sub-controller...)
 
 - Cgroup type (domain/domain threaded/threaded/…)
 
@@ -831,7 +831,7 @@ Hình 11.9: Ảnh chụp Bash script cgroupsv2\_explore hiển thị help screen
 
 Hình 11.10: Ảnh chụp đã cắt bớt của Bash script cgroupsv2\_explore, cho thấy output khi chạy với depth setting 1
 
-Output format tương ứng điều vừa mô tả. Chú ý ở đây (Hình 11.10) cgroup `/sys/fs/cgroup/init.scope` không có sub-controller, ngụ ý thực sự không áp resource constraint nào! Nhưng cgroup `/sys/fs/cgroup/system.slice` có sub-controller `memory` và `pids` bật, nên hệ thống giữ resource ấy trong constraint chỉ định bên trong. Cũng thấy ở đây (Hình 11.10), nhiều cgroup – từ `machine.slice` đến `sys-kernel-tracing.mount` (cùng những cgroup khác) – empty, unpopulated (không có live process bên trong).
+Output format tương ứng điều vừa mô tả. Chú ý ở đây (Hình 11.10) cgroup `/sys/fs/cgroup/init.scope` không có sub-controllers, ngụ ý thực sự không áp resource constraint nào! Nhưng cgroup `/sys/fs/cgroup/system.slice` có sub-controllers `memory` và `pids` bật, nên hệ thống giữ resource ấy trong constraint chỉ định bên trong. Cũng thấy ở đây (Hình 11.10), nhiều cgroup – từ `machine.slice` đến `sys-kernel-tracing.mount` (cùng những cgroup khác) – empty, unpopulated (không có live process bên trong).
 
 Có thể chạy script truyền cgroup cụ thể; sẽ recursively hiển thị metadata của cgroup đó cùng mọi descendant cgroup nếu có. Chúng ta thử tính năng trong phần tiếp khi tạo cgroup riêng! Trước mắt như bài tập, hãy tự thử script trên nhiều cgroup.
 
@@ -849,7 +849,7 @@ Thảo luận giả định bạn có kiến thức cơ bản về systemd và t
 
 #### Tận dụng systemd để thiết lập CPU resource constraint cho service
 
-Systemd có thể đóng vai abstraction layer trên cgroup, cho sysadmin khá dễ đặt resource constraint lên cgroup. Systemd cho administrator (hay root user) định nghĩa service tự launch lúc boot, áp cho các process nhiều attribute và/hoặc constraint bạn chỉ định trong service unit file – metadata định nghĩa chạy gì và chính xác chạy thế nào. Systemd service unit file thường tên `<foo>.service` (thường tìm thấy nhiều file do hệ thống định nghĩa dưới `/etc/systemd/system`). Là plain ASCII text file chia thành vài section: `[Unit]`, `[Service]`, `[Install]`, v.v. (hãy học chi tiết qua tài liệu trong phần Đọc thêm vừa đề cập). Ví dụ pathname đến app (service) sẽ chạy được chỉ định qua directive `ExecStart=` trong section `[Service]`. (Sẽ rất sớm thấy demo vài service unit đơn giản.)
+Systemd có thể đóng vai abstraction layer trên cgroup, cho sysadmin khá dễ đặt resource constraint lên cgroup. Systemd cho administrator (hay root user) định nghĩa service auto-launches lúc boot, áp cho các process nhiều attribute và/hoặc constraint bạn chỉ định trong service unit file – metadata định nghĩa chạy gì và chính xác chạy thế nào. Systemd service unit file thường tên `<foo>.service` (thường tìm thấy nhiều file system-defined dưới `/etc/systemd/system`). Là plain ASCII text file chia thành vài section: `[Unit]`, `[Service]`, `[Install]`, v.v. (hãy học chi tiết qua tài liệu trong phần Đọc thêm vừa đề cập). Ví dụ pathname đến app (service) sẽ chạy được chỉ định qua directive `ExecStart=` trong section `[Service]`. (Sẽ rất sớm thấy demo vài service unit đơn giản.)
 
 Trong nhiều specifier thuộc section `[Service]`, có thể chỉ định directive `CPUQuota=`; có thể đặt bằng phần trăm processor cycle (CPU time) tối đa cấp cho service! Tương tự `AllowedCPUs=n` đặt số CPU core tối đa service có thể dùng khi thực thi. Tương tự có thể áp constraint về memory, process, I/O và thậm chí network accounting cho service! Để xem chúng và hơn nữa, hãy xem man page `systemd.resource-control(5)`.
 
@@ -859,7 +859,7 @@ Man page `systemd.exec(5)` (`https://man7.org/linux/man-pages/man5/systemd.exec.
 
 ![Hình 11.11](images/ch11/fig11-11.jpg)
 
-Hình 11.11: Ảnh chụp một phần online man page systemd.exec(5), cho thấy một vài attribute liên quan CPU scheduler dễ đặt trên systemd service unit
+Hình 11.11: Ảnh chụp một phần online man page systemd.exec(5), cho thấy một vài attribute scheduler-related dễ đặt trên systemd service unit
 
 Để demo, chúng tôi viết C program tạo prime number (từ 2 đến mức tối đa chỉ định). Thiết kế nhận hai parameter:
 
@@ -871,7 +871,7 @@ Hình 11.11: Ảnh chụp một phần online man page systemd.exec(5), cho th�
 
 Nhưng khi chạy dưới CPU constraint nghiêm ngặt – thiết lập qua systemd dùng kernel technology cgroups v2! – bạn sẽ thấy chỉ tạo được (tương đối) ít prime!
 
-Ở đây không đi sâu chi tiết thiết lập systemd service unit (cũng không chương trình prime number generator); hãy đọc liên kết phần Đọc thêm về systemd. Chúng ta để bạn đọc và thử prime number generator code chi tiết; tại `ch11/cgroups/cpu_constrain/primegen/`; đồng thời systemd service unit và một vài supporting script tại `ch11/cgroups/cpu_constrain/systemd_svcunit/` (liên kết: `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/tree/main/ch11/cgroups/cpu_constrain/systemd_svcunit`).
+Ở đây không đi sâu nitty-gritty thiết lập systemd service unit (cũng không chương trình prime number generator); hãy đọc liên kết phần Đọc thêm về systemd. Chúng ta để bạn đọc và thử prime number generator code chi tiết; tại `ch11/cgroups/cpu_constrain/primegen/`; đồng thời systemd service unit và một vài supporting script tại `ch11/cgroups/cpu_constrain/systemd_svcunit/` (liên kết: `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/tree/main/ch11/cgroups/cpu_constrain/systemd_svcunit`).
 
 Setup Bash script – `setup_service` – thiết lập để service được cài và chạy ngay (tất nhiên có thể đặt chạy mỗi lần boot nhưng đây là cách kiểm thử dễ hơn nhiều, và tất nhiên không muốn làm phiền hệ thống bạn bằng chương trình prime number generator vô ích mỗi lần reboot!).
 
@@ -932,7 +932,7 @@ Vì vậy sẽ cho prime number generator process đơn giản thử tạo prime
 
 Hình 11.12: Ảnh chụp cho thấy systemd service unit đã thiết lập và thực thi prime number generator program không resource constraint
 
-Tốt! Command `systemctl status <service.unit>` hiển thị status và mọi output đã tạo (Hình 11.12; hữu ích là systemd tự lưu mọi output `stdout`, `stderr` và kernel `printk` vào log).
+Tốt! Command `systemctl status <service.unit>` hiển thị status và mọi output đã tạo (Hình 11.12; hữu ích là systemd auto-saves mọi output `stdout`, `stderr` và kernel `printk` vào log).
 
 Trong lần chạy cụ thể, tạo được prime number từ 2 đến 99.991 trong 3 giây có sẵn, không resource constraint (CPU), chạy `SCHED_FIFO` priority cao. (Tất nhiên hiểu số prime tạo được có thể khác khá nhiều tùy hardware system. Mẹo nhanh: để thấy full output, chỉ chạy `journalctl -b`.)
 
@@ -946,13 +946,13 @@ systemctl status svc1_primes_normal.service --no-pager -l
 
 để xem status service.
 
-Hơn nữa, khá thường hữu ích, command `systemctl show <service-unit-name>` hiển thị mọi setting của service unit; hãy làm, `grep` các setting liên quan CPU:
+Hơn nữa, khá thường hữu ích, command `systemctl show <service-unit-name>` hiển thị mọi setting của service unit; hãy làm, `grep` các setting CPU-related:
 
 ![Hình 11.13](images/ch11/fig11-13.jpg)
 
-Hình 11.13: Ảnh chụp cho thấy setting liên quan CPU trong service unit
+Hình 11.13: Ảnh chụp cho thấy setting CPU-related trong service unit
 
-Chúng tôi làm nổi bật vài CPU setting đã chỉ định tường minh trong service unit file `svc1_primes_normal.service`. Những setting khác tất nhiên đặt mặc định (nhân tiện setting tên `LimitCPU*` để chỉ định resource limit (kiểu cũ) cho process trong service unit).
+Chúng tôi làm nổi bật vài CPU setting đã chỉ định tường minh trong service unit file `svc1_primes_normal.service`. Những setting khác tất nhiên đặt mặc định (nhân tiện setting tên `LimitCPU*` để chỉ định resource limit (older-style) cho process trong service unit).
 
 Vậy ghi nhớ lần chạy này – không CPU constraint nào, policy `SCHED_FIFO`, RT priority 83 (và trong khoảng 3 giây) – cho khoảng 99.991 prime trên hệ thống tôi.
 
@@ -997,7 +997,7 @@ $
 
 #### Cách thủ công – cgroups v2 CPU controller
 
-Hãy thử, không, hãy làm điều thú vị (Làm hoặc không làm. Không có thử -Yoda.). Giờ chúng ta tạo thủ công cgroup mới dưới cgroups v2 hierarchy trên hệ thống. Sau đó thiết lập CPU controller cho nó và đặt upper limit do user chỉ định cho lượng CPU bandwidth process trong cgroup thực sự được dùng! Rồi chạy prime number generator program bên trong để thấy bị constraint đã đặt ảnh hưởng thế nào.
+Hãy thử, không, hãy làm điều thú vị (Làm hoặc không làm. Không có thử -Yoda.). Giờ chúng ta tạo thủ công cgroup mới dưới cgroups v2 hierarchy trên hệ thống. Sau đó thiết lập CPU controller cho nó và đặt upper limit user-specified cho lượng CPU bandwidth process trong cgroup thực sự được dùng! Rồi chạy prime number generator program bên trong để thấy bị constraint đã đặt ảnh hưởng thế nào.
 
 Ở đây phác thảo các bước thường làm để thực hiện (mọi bước yêu cầu đang chạy root access):
 
@@ -1156,9 +1156,9 @@ Có thể phân loại OS rất khái quát theo đặc tính RT như sau (xem H
 
 Hình 11.16: Phân loại OS trên RT scale
 
-Mainline hay “vanilla” Linux OS dù không phải RTOS vẫn làm rất tốt về hiệu năng mà không mấy khó khăn. Dễ đủ điều kiện soft real-time OS: đáp ứng deadline phần lớn thời gian theo “best effort” (đôi lúc nói đạt tiêu chí “five-9s”, vì đáp ứng deadline 99,999% thời gian!). Tuy vậy lĩnh vực hard real-time thực sự (ví dụ nhiều loại military operation, vận tải, robotics, telecom, factory floor automation, stock exchange, medical electronics, v.v.) yêu cầu hard real-time guarantee nên cần RTOS. Vì vậy với các lĩnh vực này plain vanilla Linux, GPOS, đơn giản không đủ.
+Mainline hay “vanilla” Linux OS dù không phải RTOS vẫn làm rất tốt performance-wise mà không mấy khó khăn. Dễ đủ điều kiện soft real-time OS: đáp ứng deadline phần lớn thời gian theo “best effort” (đôi lúc nói đạt tiêu chí “five-9s”, vì đáp ứng deadline 99,999% thời gian!). Tuy vậy lĩnh vực hard real-time thực sự (ví dụ nhiều loại military operation, vận tải, robotics, telecom, factory floor automation, stock exchange, medical electronics, v.v.) yêu cầu hard real-time guarantee nên cần RTOS. Vì vậy với các lĩnh vực này plain vanilla Linux, GPOS, đơn giản không đủ.
 
-Điểm then chốt trong context là determinism: một điểm hay bị bỏ qua về real time là software response time cho event (bên ngoài) không nhất thiết luôn rất nhanh (chẳng hạn đáp trong vài microsecond). Có thể chậm hơn nhiều (khoảng vài chục millisecond); bản thân điều đó không thực sự quan trọng trong RTOS. Điều quan trọng là hệ thống reliable và predictable, làm việc nhất quán giống nhau, luôn bảo đảm đáp ứng deadline; hệ thống như vậy được nói có deterministic response và là đặc tính then chốt real-time system.
+Điểm then chốt trong context là determinism: một điểm oft-missed về real time là software response time cho event (bên ngoài) không nhất thiết luôn rất nhanh (chẳng hạn đáp trong vài microsecond). Có thể chậm hơn nhiều (khoảng vài chục millisecond); bản thân điều đó không thực sự quan trọng trong RTOS. Điều quan trọng là hệ thống reliable và predictable, làm việc nhất quán giống nhau, luôn bảo đảm đáp ứng deadline; hệ thống như vậy được nói có deterministic response và là đặc tính then chốt real-time system.
 
 Ví dụ thời gian đáp scheduling request phải nhất quán, dự đoán được, không dao động khắp nơi. Sai lệch so với thời gian cần thiết (hay baseline) thường gọi jitter; RTOS cố giữ jitter rất nhỏ, thậm chí không đáng kể. Trong GPOS điều này thường không thể, ngay từ đầu cũng không phải design goal! Vì vậy trong non-RT system như vậy, jitter có thể khác rất nhiều, lúc thấp lúc kế tiếp rất cao.
 
@@ -1166,7 +1166,7 @@ Tổng thể, khả năng giữ response ổn định, đều, dự đoán đư�
 
 Mục tiêu khác của RT system là giảm latency và delay. Thực ra phát biểu chưa hoàn toàn chính xác: mục tiêu là giảm maximum hay worst-case latency trải nghiệm xuống mức chấp nhận; thực tế (trớ trêu) minimum latency và average latency có thể – và thường – tệ hơn non-RT system.
 
-Thomas Gleixner, cùng hỗ trợ cộng đồng, đã làm hướng đến mục tiêu chuyển Linux kernel non-RT thông thường (hay plain vanilla) thành hard RTOS từ rất lâu. Ông và cộng sự thành công từ lâu: từ kernel 2.6.18 (phát hành tháng 9 năm 2006), đã có out-of-tree patch chuyển Linux kernel thành RTOS! Có thể tìm patch cho nhiều kernel version tại: `https://mirrors.edge.kernel.org/pub/linux/kernel/projects/rt/`. Tên project cũ là “preemptible real-time” hay đơn giản `PREEMPT_RT`. Sau đó (từ tháng 10 năm 2015, kernel version 4.1 trở đi), Linux Foundation (LF) tiếp quản project – bước rất tích cực! – đổi tên thành Real-Time Linux (RTL) Collaborative Project (`https://wiki.linuxfoundation.org/realtime/rtl/start`), hay đơn giản RTL (đừng nhầm với co-kernel approach như Xenomai, RTAI hay nỗ lực cũ hiện không còn tên RTLinux).
+Thomas Gleixner, cùng hỗ trợ cộng đồng, đã làm hướng đến mục tiêu chuyển Linux kernel non-RT thông thường (hay plain vanilla) thành hard RTOS từ rất lâu. Ông và cộng sự thành công từ lâu: từ kernel 2.6.18 (phát hành tháng 9 năm 2006), đã có out-of-tree patch chuyển Linux kernel thành RTOS! Có thể tìm patch cho nhiều kernel version tại: `https://mirrors.edge.kernel.org/pub/linux/kernel/projects/rt/`. Tên project cũ là “preemptible real-time” hay đơn giản `PREEMPT_RT`. Sau đó (từ tháng 10 năm 2015, kernel version 4.1 trở đi), Linux Foundation (LF) tiếp quản project – bước rất tích cực! – đổi tên thành Real-Time Linux (RTL) Collaborative Project (`https://wiki.linuxfoundation.org/realtime/rtl/start`), hay đơn giản RTL (đừng nhầm với co-kernel approach như Xenomai, RTAI hay nỗ lực cũ now-defunct tên RTLinux).
 
 Câu hỏi thường gặp tất nhiên là “Tại sao các patch chuyển Linux thành hard real-time OS không nằm ngay trong mainline?” Hóa ra:
 
@@ -1182,7 +1182,7 @@ Chúng tôi đưa nhiều bài viết, tham khảo thú vị về RTL (và hard 
 
 Ở đây thay vì trình bày chi tiết cách patch vanilla Linux kernel, cấu hình và build như real-time kernel (RTL), chỉ hướng bạn đến tutorial ngắn trên RTL Wiki site xuất sắc: HOWTO setup Linux with PREEMPT\_RT properly: `https://wiki.linuxfoundation.org/realtime/documentation/howto/applications/preemptrt_setup`.
 
-Thực tế ấn bản đầu sách đã giải thích chuyên sâu patch, cấu hình và build RTL; hãy tham khảo chi tiết đó nếu muốn.
+Thực tế ấn bản đầu sách đã giải thích in-depth patch, cấu hình và build RTL; hãy tham khảo chi tiết đó nếu muốn.
 
 Tutorial ngắn – một phần RTL Wiki site lớn và rất hữu ích – giải thích:
 
@@ -1194,7 +1194,7 @@ Tutorial ngắn – một phần RTL Wiki site lớn và rất hữu ích – gi
 
 - Cấu hình kernel, thiết lập full kernel preemption cho RTL (`CONFIG_PREEMPT_RT=y`); xem mẹo tiếp sau
 
-- Build theo cách thường (dù sao đã trình bày chuyên sâu trong Chương 2, Building the 6.x Linux Kernel from Source – Part 1, và Chương 3, Building the 6.x Linux Kernel from Source – Part 2)
+- Build theo cách thường (dù sao đã trình bày in-depth trong Chương 2, Building the 6.x Linux Kernel from Source – Part 1, và Chương 3, Building the 6.x Linux Kernel from Source – Part 2)
 
 Vài mẹo nhanh về kernel configuration cho RTL: Để cấu hình build Linux như RTL, trong UI `make menuconfig`, đến General Setup \| Preemption Model. Giả định đã tải và áp các RTL patch (out-of-tree), sẽ thấy 4 lựa chọn ở đây (thay 3 thông thường). Lựa chọn thứ tư cần dùng: Fully Preemptible Kernel (Real-Time). Chọn (`CONFIG_PREEMPT_RT=y`). Tuy nhiên có thể chỉ thấy 3 lựa chọn đầu thông thường; vì lựa chọn thứ tư phụ thuộc `CONFIG_EXPERT` bật (`y`):
 
@@ -1254,11 +1254,11 @@ Các tình huống này và tương tự tạo ra một dạng OS abstraction v�
 
 Trong chương thứ hai về CPU (hay task) scheduling trên Linux OS này, bạn học nhiều điều then chốt. Trong đó học cách truy vấn và đặt CPU affinity mask của thread bất kỳ (user hay kernel) bằng lập trình; điều này tự nhiên dẫn đến cách truy vấn và đặt scheduling policy và priority của thread bất kỳ bằng lập trình.
 
-Toàn bộ khái niệm “hoàn toàn công bằng” (qua CFS implementation) được đặt câu hỏi, và làm sáng tỏ (khá nhiều!) giải pháp thanh lịch cgroups (v2), hiện ăn sâu Linux kernel. Đã trình bày cách systemd giúp tự tích hợp cgroup vào distro hiện đại, server và cả embedded system, tự động và dynamic tạo, duy trì nhiều cgroup (qua slice artifact và scope artifact). Thậm chí đã học cách tận dụng cgroups v2 CPU controller cấp CPU bandwidth (hay utilization) tùy muốn cho process trong sub-group, cả qua systemd unit file lẫn thủ công.
+Toàn bộ khái niệm “hoàn toàn công bằng” (qua CFS implementation) được đặt câu hỏi, và làm sáng tỏ (khá nhiều!) giải pháp thanh lịch cgroups (v2), hiện ăn sâu Linux kernel. Đã trình bày cách systemd giúp auto-integrate cgroup vào distro hiện đại, server và cả embedded system, tự động và dynamic tạo, duy trì nhiều cgroup (qua slice artifact và scope artifact). Thậm chí đã học cách tận dụng cgroups v2 CPU controller cấp CPU bandwidth (hay utilization) tùy muốn cho process trong sub-group, cả qua systemd unit file lẫn thủ công.
 
 Sau đó tìm hiểu ngắn RTOS là gì, thấy dù vanilla Linux là GPOS, RTL patch set (out-of-tree) thực sự tồn tại; khi áp rồi cấu hình và build kernel, cho chạy Linux như hard real-time system thực sự, RTOS. (Có lưu ý thiết kế và viết RT app cẩn thận quan trọng không kém cho RT system thực sự.) Kết thúc bằng đề cập nhanh một vài kernel scheduler-related routine và research project ghOSt OS của Google.
 
-Khá nhiều nội dung! Dành thời gian hiểu đúng tài liệu và thực hành trực tiếp. Khi xong, hãy cùng tôi đến khía cạnh thực sự quan trọng; cùng khám phá sự phức tạp của kernel synchronization trong hai chương cuối sách!
+Khá nhiều nội dung! Dành thời gian hiểu đúng tài liệu và hands-on. Khi xong, hãy cùng tôi đến khía cạnh thực sự quan trọng; cùng khám phá sự phức tạp của kernel synchronization trong hai chương cuối sách!
 
 ## Câu hỏi
 

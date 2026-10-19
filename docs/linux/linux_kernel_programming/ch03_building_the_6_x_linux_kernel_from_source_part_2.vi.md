@@ -4,7 +4,7 @@ Chương này tiếp nối chương trước. Trong phần Các bước biên d�
 
 Trong chương này, chúng ta tiếp tục với bốn bước còn lại. Đầu tiên là build kernel (bước 4). Sau đó, bạn học cách cài đúng các kernel module được tạo trong quá trình build (bước 5). Tiếp theo, chúng ta chạy một lệnh đơn giản để thiết lập bootloader GRUB (Grand Unified Bootloader) và tạo ảnh `initramfs` (hoặc `initrd`) (bước 6). Lý do sử dụng ảnh `initramfs` và cách tạo nó cũng được giải thích. Cuối cùng là một số chi tiết cấu hình bootloader GRUB cho x86 (bước 7).
 
-Đến cuối chương, chúng ta sẽ khởi động hệ thống bằng kernel image mới và kiểm tra nó được build đúng mong đợi. Sau cùng, bạn học cách cross-compile Linux kernel cho kiến trúc khác (với AArch 32/64, bo mạch được dùng là Raspberry Pi quen thuộc).
+Đến cuối chương, chúng ta sẽ khởi động hệ thống bằng kernel image mới và kiểm tra nó được build đúng mong đợi. Sau cùng, bạn học cách cross-compile Linux kernel cho kiến trúc khác (với AArch 32/64, bo mạch được dùng là Raspberry Pi well-known).
 
 Tóm lại, chương này bao gồm:
 
@@ -56,19 +56,19 @@ $
 
 - Target `modules` build tất cả tùy chọn cấu hình được đánh dấu `m` (module) thành kernel module (tệp `.ko`) trong cây mã nguồn. Kernel module là gì và cách lập trình chúng là chủ đề của hai chương tiếp theo.
 
-- `bzImage` là tệp kernel image riêng theo kiến trúc. Trên x86\[\_64\], đây là kernel image nén mà bootloader thực sự nạp vào RAM, giải nén trong bộ nhớ rồi khởi động; về thực chất, đó là tệp kernel image nén.
+- `bzImage` là tệp kernel image architecture-specific. Trên x86\[\_64\], đây là kernel image nén mà bootloader thực sự nạp vào RAM, giải nén trong bộ nhớ rồi khởi động; về thực chất, đó là tệp kernel image nén.
 
 Câu hỏi thường gặp: nếu `bzImage` là tệp thực sự dùng để boot và khởi tạo hệ thống thì `vmlinux` để làm gì? `vmlinux` là kernel image không nén, có thể lớn (thậm chí rất lớn nếu chứa kernel symbol sinh ra khi debug build). Dù không boot qua `vmlinux`, nó vẫn quan trọng, thực sự vô giá. Hãy giữ nó để debug kernel (cuốn Linux Kernel Debugging của tôi trình bày nội dung này!).
 
 Với hệ thống `kbuild` mà kernel sử dụng, chỉ chạy `make` tương đương `make all`.
 
-Cơ sở mã Linux kernel hiện đại rất lớn. Ước tính các kernel gần đây có khoảng 25–30 triệu dòng mã nguồn (SLOC)! Vì thế, build kernel tiêu tốn rất nhiều bộ nhớ và CPU. Một số người còn dùng nó làm stress test! (Không phải mọi dòng mã đều được biên dịch trong một lần build.) Tiện ích `make` hiện đại mạnh mẽ và hỗ trợ nhiều process. Ta có thể yêu cầu tạo nhiều process để xử lý song song các phần độc lập, tăng thông lượng và rút ngắn thời gian build. Tùy chọn là `-jn`, với `n` là giới hạn số task được tạo và chạy song song. Quy tắc kinh nghiệm để xác định là:
+Cơ sở mã Linux kernel hiện đại rất lớn. Ước tính các kernel gần đây có khoảng 25–30 triệu dòng mã nguồn (SLOC)! Vì thế, build kernel là công việc tiêu tốn nhiều bộ nhớ và CPU-intensive. Một số người còn dùng nó làm stress test! (Không phải mọi dòng mã đều được biên dịch trong một lần build.) Tiện ích `make` hiện đại mạnh mẽ và hỗ trợ multi-process. Ta có thể yêu cầu tạo nhiều process để xử lý song song các phần độc lập, tăng thông lượng và rút ngắn thời gian build. Tùy chọn là `-jn`, với `n` là giới hạn số task được tạo và chạy song song. Quy tắc kinh nghiệm để xác định là:
 
 ```
 n = number-of-CPU-cores * factor;
 ```
 
-Ở đây, `factor` bằng 2 (hoặc 1,5 trên hệ thống rất cao cấp có hàng trăm hay hàng nghìn CPU core). Về kỹ thuật, quy tắc này cần CPU core hỗ trợ thread nội bộ hay Simultaneous Multi-Threading (SMT), được Intel gọi là hyper-threading, mới hữu ích.
+Ở đây, `factor` bằng 2 (hoặc 1,5 trên hệ thống rất high-end có hàng trăm hay hàng nghìn CPU core). Về kỹ thuật, quy tắc này cần CPU core hỗ trợ thread nội bộ hay Simultaneous Multi-Threading (SMT), được Intel gọi là hyper-threading, mới hữu ích.
 
 Chi tiết về `make` song song và cách hoạt động nằm ở mục PARALLEL MAKE AND THE JOBSERVER trong trang man của `make` (mở bằng `man 1 make`).
 
@@ -89,7 +89,7 @@ Máy ảo khách của tôi có bốn CPU core, nên đặt `n=4*2=8`. Hãy buil
 
 Nhớ rằng kernel phải được cấu hình đúng trước khi build. Xem chi tiết ở Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1.
 
-Khi bắt đầu, quá trình build có thể phát cảnh báo, dù trường hợp này chưa gây dừng build:
+Khi bắt đầu, quá trình build có thể phát cảnh báo, dù trường hợp này non-fatal:
 
 ```
 $ make -j8
@@ -102,7 +102,7 @@ libelf-devel or elfutils-libelf-devel
 
 Để xử lý, dừng build bằng Ctrl + C rồi làm theo hướng dẫn cài gói `libelf-dev`. Trên Ubuntu, `sudo apt install libelf-dev` là đủ. Nếu bạn đã làm theo chương trực tuyến Kernel Workspace Setup hoặc chạy script `ch1/pkg_install4ubuntu_lkp.sh`, điều này sẽ không xảy ra.
 
-Vì build kernel dùng nhiều CPU và RAM, chạy trong máy ảo khách chậm hơn nhiều so với Linux chạy trực tiếp trên phần cứng. Có thể tiết kiệm RAM bằng cách boot máy khách ở run level 3 (multiuser có mạng, không GUI): `https://www.if-not-true-then-false.com/2012/howto-change-runlevel-on-grub2/`.
+Vì build kernel tiêu tốn rất nhiều CPU và RAM-intensive, chạy trong máy ảo khách chậm hơn nhiều so với Linux chạy trực tiếp trên phần cứng. Có thể tiết kiệm RAM bằng cách boot máy khách ở run level 3 (multiuser có mạng, không GUI): `https://www.if-not-true-then-false.com/2012/howto-change-runlevel-on-grub2/`.
 
 Hãy thực hiện cùng vài mẹo nhanh nhưng rất hữu ích:
 
@@ -200,7 +200,7 @@ Ngoài lề: nói chung cần kiểm tra gì khi build thất bại?
 
 - Kiểm tra kỹ, rồi kiểm tra lại xem đã làm đúng mọi thứ chưa; hãy xem lại mình trước khi trách cộng đồng hay mã kernel!
 
-- Đã cài đủ gói cần thiết, với phiên bản đủ mới chưa? Ví dụ, nếu cấu hình có `CONFIG_DEBUG_INFO_BTF=y` (của tôi có), cần cài `pahole` 1.16 trở lên.
+- Đã cài đủ gói cần thiết, với phiên bản up-to-date chưa? Ví dụ, nếu cấu hình có `CONFIG_DEBUG_INFO_BTF=y` (của tôi có), cần cài `pahole` 1.16 trở lên.
 
 - Cấu hình kernel có hợp lý không?
 
@@ -214,7 +214,7 @@ Build nên chạy sạch, không lỗi hay cảnh báo. Đôi khi vẫn thấy c
 
 Giả sử bước build đã thành công. Kernel image nén (trên x86\[\_64\] tên là `bzImage`) và tệp không nén `vmlinux` đã được tạo bằng cách liên kết các object file, như dòng cuối kết quả trên xác nhận (#3 nghĩa là với tôi đây là lần build thứ ba). Trong quá trình này, `kbuild` cũng hoàn tất build mọi kernel module.
 
-Mẹo nhanh: để đo thời gian chạy lệnh, thêm `time` trước lệnh (ở đây: `time make -j8 2>&1 | tee out.txt`). Cách này hoạt động, nhưng tiện ích `time(1)` chỉ cung cấp cái nhìn rất khái quát về thời gian thực thi.
+Mẹo nhanh: để đo thời gian chạy lệnh, thêm `time` trước lệnh (ở đây: `time make -j8 2>&1 | tee out.txt`). Cách này hoạt động, nhưng tiện ích `time(1)` chỉ cung cấp cái nhìn coarse-grained về thời gian thực thi.
 
 Nếu muốn CPU profiling và thống kê thời gian chính xác, hãy học tiện ích `perf` mạnh mẽ. Có thể thử `perf stat make -j8 ...`. Nên thử trên distro kernel; nếu dùng kernel tùy chỉnh, bạn phải tự build cả `perf` cho nó.
 
@@ -224,11 +224,11 @@ Giả sử mọi thứ diễn ra tốt như mong đợi, khi bước này kết 
 
 - Kernel image không nén `vmlinux` (dùng để debug)
 
-- Tệp ánh xạ symbol–address `System.map`
+- Tệp ánh xạ symbol-address `System.map`
 
 - Kernel image nén có thể boot `bzImage` (xem kết quả sau)
 
-Hãy kiểm tra! Truyền tùy chọn `-h` cho `ls` để kết quả, đặc biệt kích thước tệp, dễ đọc hơn:
+Hãy kiểm tra! Truyền tùy chọn `-h` cho `ls` để kết quả, đặc biệt kích thước tệp, human-readable hơn:
 
 ```
 $ ls -lh vmlinux System.map
@@ -254,7 +254,7 @@ swap_dev 0XB, Normal VGA
 
 Kernel image nén phiên bản `6.1.25-lkp-kernel` cho x86\_64 ở đây có kích thước khoảng 12 MB. Tiện ích `file` xác nhận rõ đó là Linux kernel boot image cho x86.
 
-`Makefile` cấp cao nhất có một số target đơn giản nhưng hữu ích để kiểm tra chuỗi phiên bản kernel, v.v. Hãy xem gần cuối tệp `Makefile` lớn này:
+`Makefile` top-level có một số target đơn giản nhưng hữu ích để kiểm tra chuỗi phiên bản kernel, v.v. Hãy xem gần cuối tệp `Makefile` lớn này:
 
 ```
 cd ${LKP_KSRC}
@@ -307,7 +307,7 @@ $ find . -name "*.ko"
 ./fs/vboxsf/vboxsf.ko
 ```
 
-Chỉ build kernel module chưa đủ. Chúng phải được cài vào vị trí quy định trong root filesystem để lúc boot hệ thống tìm thấy và nạp vào kernel memory. Vì vậy cần bước cài module tiếp theo (phần Cài đặt kernel module). Vị trí đó là `/lib/modules/$(uname -r)/`, với `$(uname -r)` cho biết phiên bản kernel.
+Chỉ build kernel module chưa đủ. Chúng phải được cài vào vị trí well-known trong root filesystem để lúc boot hệ thống tìm thấy và nạp vào kernel memory. Vì vậy cần bước cài module tiếp theo (phần Cài đặt kernel module). Vị trí well-known đó là `/lib/modules/$(uname -r)/`, với `$(uname -r)` cho biết phiên bản kernel.
 
 ### Cài đặt kernel module
 
@@ -343,7 +343,7 @@ $ ls /lib/modules
 5.19.0-40-generic/  5.19.0-41-generic/  5.19.0-42-generic/  6.1.25-lkp-kernel/
 ```
 
-Kết quả trên cho thấy với mỗi Linux kernel đã cài, có thư mục dưới `/lib/modules/` mang tên kernel release. Hãy xem thư mục kernel mới (`6.1.25-lkp-kernel`). Các kernel module vừa cài nằm trong nhiều thư mục dưới thư mục con `kernel/`:
+Kết quả trên cho thấy với mỗi Linux kernel đã cài, có thư mục dưới `/lib/modules/` mang tên kernel release. Hãy xem thư mục kernel mới (`6.1.25-lkp-kernel`). Các kernel module just-installed nằm trong nhiều thư mục dưới sub-directory `kernel/`:
 
 ```
 $ ls /lib/modules/6.1.25-lkp-kernel/kernel/
@@ -365,11 +365,11 @@ Mọi kernel module sẽ được cài vào `${STG_MYKMODS}/`. Lưu ý có thể
 
 Kỹ thuật thay vị trí cài module đặc biệt hữu ích khi build Linux kernel và module cho thiết bị nhúng. Không được ghi đè module của host bằng module của thiết bị nhúng; hậu quả sẽ rất nghiêm trọng! Thực tế ai cũng có lúc mắc lỗi này (tôi từng mắc!); khi đó ích lợi của máy ảo, đặc biệt có checkpoint để nhanh chóng quay về trạng thái tốt, trở nên rõ ràng.
 
-Bước tiếp theo là tạo ảnh `initramfs` (hoặc `initrd`) và thiết lập bootloader. Chúng ta cũng cần hiểu ảnh `initramfs` là gì và tại sao sử dụng. Phần sau phần kế tiếp sẽ đi sâu.
+Bước tiếp theo là tạo so-called ảnh `initramfs` (hoặc `initrd`) và thiết lập bootloader. Chúng ta cũng cần hiểu ảnh `initramfs` là gì và tại sao sử dụng. Phần sau phần kế tiếp sẽ đi sâu.
 
 ## Bước 6 – tạo ảnh initramfs và thiết lập bootloader
 
-Lưu ý phần này chủ yếu tập trung vào x86\[\_64\], có lẽ là kiến trúc phổ biến nhất. Tuy nhiên, các khái niệm áp dụng được cho kiến trúc khác như ARM, dù lệnh cụ thể có thể khác. Thông thường, ít nhất với Linux trên ARM, không có lệnh trực tiếp tạo initramfs như x86; phải tự thực hiện thủ công. Các dự án build hệ nhúng như Yocto và Buildroot cung cấp cách tự động hóa.
+Lưu ý phần này chủ yếu tập trung vào x86\[\_64\], có lẽ là kiến trúc phổ biến nhất. Tuy nhiên, các khái niệm áp dụng được cho kiến trúc khác như ARM, dù lệnh cụ thể có thể khác. Thông thường, ít nhất với Linux ARM-based, không có lệnh trực tiếp tạo initramfs như x86; phải tự thực hiện thủ công. Các dự án build hệ nhúng như Yocto và Buildroot cung cấp cách tự động hóa.
 
 Với quy trình build kernel cho desktop/server x86 điển hình, bước này gồm hai phần riêng:
 
@@ -422,7 +422,7 @@ Bước này đã tạo ảnh `initramfs`. Vậy bên trong `kbuild` đã làm g
 
 ### Bên trong quá trình tạo ảnh initramfs
 
-Khi chạy `sudo make install` trên x86, Makefile của kernel gọi script `scripts/install.sh`. Đây là wrapper script duyệt qua các script cài đặt riêng theo kiến trúc và chạy chúng với tham số phù hợp nếu có. Cụ thể, các vị trí được kiểm tra theo thứ tự:
+Khi chạy `sudo make install` trên x86, Makefile của kernel gọi script `scripts/install.sh`. Đây là wrapper script duyệt qua các script cài đặt arch-specific và chạy chúng với tham số phù hợp nếu có. Cụ thể, các vị trí script arch-specific được kiểm tra theo thứ tự:
 
 - `${HOME}/bin/${INSTALLKERNEL}`
 
@@ -443,7 +443,7 @@ Vẫn tập trung vào x86\[\_64\], script `arch/x86/boot/install.sh` chép các
 
 Ảnh `initramfs` cũng được tạo. Trên Ubuntu Linux x86, shell script `update-initramfs` thực hiện việc này; bản thân nó là wrapper tiện ích cho script `mkinitramfs` làm công việc thực tế.
 
-Ảnh được tạo cụ thể thế nào? Nói đơn giản, initramfs chỉ là tệp `cpio` dùng định dạng `newc`. Tiện ích `cpio` (copy-in, copy-out) lâu đời dùng để tạo archive, tức tập hợp các tệp; `tar` là công cụ nổi tiếng sử dụng `cpio` bên trong. Cách đơn giản để tạo initramfs từ nội dung thư mục, gọi là `my_initramfs`, như sau:
+Ảnh được tạo cụ thể thế nào? Nói đơn giản, initramfs chỉ là tệp `cpio` dùng định dạng `newc`. Tiện ích `cpio` (copy-in, copy-out) lâu đời dùng để tạo archive, tức tập hợp các tệp; `tar` là công cụ well-known sử dụng `cpio` bên trong. Cách đơn giản để tạo initramfs từ nội dung thư mục, so-called `my_initramfs`, như sau:
 
 ```
 find my_initramfs/ | sudo cpio -o --format=newc -R root:root | gzip -9 >
@@ -486,7 +486,7 @@ find . | sudo cpio -o --format=newc -R root:root | gzip -9 > initramfs.img
 
 ### Vì sao cần framework initramfs?
 
-Framework `initramfs` về cơ bản là trung gian giữa giai đoạn boot kernel ban đầu và user mode. Nó cho phép chạy ứng dụng hoặc script user space trước khi mount root filesystem thật, khi kernel chưa hoàn tất khởi tạo hệ thống. Điều này hữu ích trong nhiều tình huống, một số được liệt kê bên dưới. Điểm chính là `initramfs` cho phép chạy ứng dụng user mode mà kernel thông thường chưa thể chạy trong lúc boot.
+Framework `initramfs` về cơ bản là middle-man giữa giai đoạn boot kernel ban đầu và user-mode. Nó cho phép chạy ứng dụng hoặc script user space trước khi mount root filesystem thật, khi kernel chưa hoàn tất khởi tạo hệ thống. Điều này hữu ích trong nhiều tình huống, một số được liệt kê bên dưới. Điểm chính là `initramfs` cho phép chạy ứng dụng user mode mà kernel thông thường chưa thể chạy trong lúc boot.
 
 Trong thực tế, framework này cho phép thực hiện nhiều việc hữu ích, gồm:
 
@@ -504,7 +504,7 @@ Trong thực tế, framework này cho phép thực hiện nhiều việc hữu �
 
 - Và nhiều việc khác!
 
-Giả sử bạn xây dựng và bảo trì một distro Linux mới. Lúc cài đặt, người dùng có thể chọn định dạng SSD bằng f2fs (fast flash filesystem). Bạn không thể biết trước họ chọn filesystem nào trong rất nhiều loại. Vì thế, bạn build sẵn và cung cấp nhiều kernel module để đáp ứng gần như mọi khả năng. Sau khi cài xong và boot, trong tình huống này kernel cần module `f2fs.ko` để mount thành công root filesystem f2fs rồi tiếp tục.
+Giả sử bạn xây dựng và bảo trì một distro Linux mới. Lúc cài đặt, người dùng có thể chọn định dạng SSD bằng f2fs (fast flash filesystem). Bạn không thể biết trước họ chọn filesystem nào trong rất nhiều loại. Vì thế, bạn pre-build và cung cấp nhiều kernel module để đáp ứng gần như mọi khả năng. Sau khi cài xong và boot, trong tình huống này kernel cần module `f2fs.ko` để mount thành công root filesystem f2fs rồi tiếp tục.
 
 ![Hình 3.1](images/ch03/fig03-01.jpg)
 
@@ -512,9 +512,9 @@ Hình 3.1: Kernel image nằm trong RAM, còn root filesystem nằm trên đĩa 
 
 Khi bootloader hoàn tất, Linux kernel tiếp quản và chạy mã khởi tạo, chuẩn bị hệ thống. Hãy nghĩ: kernel đang chạy trong RAM (góc trên bên trái Hình 3.1), nhưng các module sắp cần vẫn nằm trên secondary storage, tức đĩa hoặc flash chip (góc dưới bên phải). Quan trọng hơn, chưa truy cập được chúng vì root filesystem chưa được mount.
 
-Đây là bài toán con gà và quả trứng: để mount root filesystem và truy cập các module trên đó, kernel cần nạp tệp `f2fs.ko` vào RAM vì nó chứa mã hỗ trợ mount và làm việc với filesystem. Nhưng tệp đó lại nằm ngay trong root filesystem f2fs, chính xác tại `/lib/modules/<kernel-ver>/kernel/fs/f2fs/f2fs.ko` (Hình 3.1).
+Đây là bài toán chicken-and-egg: để mount root filesystem và truy cập các module trên đó, kernel cần nạp tệp `f2fs.ko` vào RAM vì nó chứa mã hỗ trợ mount và làm việc với filesystem. Nhưng tệp đó lại nằm ngay trong root filesystem f2fs, chính xác tại `/lib/modules/<kernel-ver>/kernel/fs/f2fs/f2fs.ko` (Hình 3.1).
 
-Một mục đích chính của `initramfs` là giải quyết vòng luẩn quẩn này. Tệp ảnh `initramfs` là archive `cpio` nén (`cpio` là định dạng tệp phẳng được `tar` dùng). Như phần trước, script `update-initramfs` gọi `mkinitramfs` bên trong, ít nhất trên Ubuntu x86. Chúng tạo root filesystem tạm tối thiểu chứa kernel module và hạ tầng hỗ trợ như thư mục `/etc`, `/lib`, đóng gói dạng `cpio` rồi thường nén bằng gzip. Đó là ảnh `initramfs` (hay `initrd`), được đặt tại `/boot/initrd.img-<kernel-ver>`. Vậy nó giúp thế nào?
+Một mục đích chính của `initramfs` là giải quyết chicken-and-egg này. Tệp ảnh `initramfs` là archive `cpio` nén (`cpio` là định dạng flat-file được `tar` dùng). Như phần trước, script `update-initramfs` gọi `mkinitramfs` bên trong, ít nhất trên Ubuntu x86. Chúng tạo root filesystem tạm tối thiểu chứa kernel module và hạ tầng hỗ trợ như thư mục `/etc`, `/lib`, đóng gói dạng `cpio` rồi thường nén bằng gzip. Đó là so-called ảnh `initramfs` (hay `initrd`), được đặt tại `/boot/initrd.img-<kernel-ver>`. Vậy nó giúp thế nào?
 
 Lúc boot, nếu bật `initramfs`, bootloader thực hiện thêm bước: sau khi giải nén và nạp kernel image vào RAM, nó cũng nạp tệp ảnh `initramfs` được chỉ định vào RAM. Khi chạy và phát hiện ảnh `initramfs`, kernel giải nén rồi dùng nội dung bên trong qua script để nạp các kernel module cần thiết vào RAM (Hình 3.2):
 
@@ -534,9 +534,9 @@ Cách hiện đại, mạnh hơn là chuẩn UEFI (Unified Extensible Firmware I
 
 Khác biệt giữa BIOS cũ và UEFI mới là gì? Tóm tắt:
 
-- UEFI là framework hiện đại không giới hạn ở x86 (BIOS chỉ dành cho x86); chẳng hạn hệ thống ARM dùng UEFI trong khả năng Secure Boot nổi tiếng.
+- UEFI là framework hiện đại không giới hạn ở x86 (BIOS chỉ dành cho x86); chẳng hạn các hệ thống ARM-based dùng UEFI trong khả năng Secure Boot nổi tiếng.
 
-- UEFI an toàn hơn nhiều; nó chỉ cho boot hệ điều hành có chữ ký (gọi là “app”), đôi khi gây vấn đề khi dual-boot.
+- UEFI an toàn hơn nhiều; nó chỉ cho boot hệ điều hành có chữ ký (gọi là “app”), đôi khi gây vấn đề khi dual-booting.
 
 - UEFI cần partition đặc biệt riêng gọi là ESP (EFI System Partition), chứa tệp `.efi` có mã và dữ liệu khởi tạo, khác BIOS ghi chúng trong firmware (thường chip EEPROM). Vì vậy cập nhật UEFI đơn giản.
 
@@ -550,17 +550,17 @@ Khác biệt giữa BIOS cũ và UEFI mới là gì? Tóm tắt:
 
 3\. GRUB được truyền cả tệp kernel image nén (`/boot/vmlinuz-<kernel-ver>`) và ảnh `initramfs` nén (`/boot/initrd.img-<kernel-ver>`) qua tệp cấu hình, sẽ xem ở phần sau. Nói đơn giản, bootloader sẽ:
 
-  - Khởi tạo phần cứng cấp thấp.
+  - Khởi tạo phần cứng low-level.
 
   - Nạp các ảnh vào RAM, giải nén kernel image đến một mức nhất định.
 
   - Nhảy đến kernel entry point.
 
-4\. Linux kernel, giờ toàn quyền điều khiển máy, khởi tạo môi trường phần cứng và phần mềm. Thông thường nó không giả định bootloader đã làm gì trước đó. Tuy nhiên, nó dựa vào BIOS hoặc UEFI để thiết lập PCI addressing và interrupt line assignment qua bảng ACPI (hoặc Device Tree trên ARM/PPC). 5. Khi hoàn tất phần lớn khởi tạo, nếu bật `initramfs` (`CONFIG_BLK_DEV_INITRD=y`), kernel tìm ảnh `initramfs` (`initrd`) trong RAM và giải nén nếu cần (Hình 3.2). 6. Nó mount ảnh thành root filesystem tạm ngay trong RAM, trong RAM disk. 7. Giờ bộ nhớ có root filesystem nền tảng, tối thiểu và tạm thời; các startup script `initramfs-based` chạy, trong đó có việc nạp kernel module cần thiết vào RAM, tức các root filesystem driver, gồm `f2fs.ko` trong ví dụ (Hình 3.2). 8. Khi initramfs chạy, nó gọi `/sbin/init` trước (có thể là binary executable hoặc script); ngoài dọn dẹp, nhiệm vụ quan trọng là pivot-root: unmount root filesystem initramfs tạm, giải phóng bộ nhớ và mount root filesystem thật. Giờ làm được vì module hỗ trợ filesystem đã có trong RAM. 9. Khi mount thành công root filesystem thật trên đĩa hoặc flash, quá trình khởi tạo tiếp tục. Cuối cùng kernel gọi user space process đầu tiên (PID 1), thường `/sbin/init` khi dùng SysV init cũ, hoặc phổ biến hơn hiện nay là framework `systemd` mạnh hơn. 10. Framework `init` tiếp tục khởi tạo hệ thống, kích hoạt các system service theo cấu hình.
+4\. Linux kernel, giờ toàn quyền điều khiển máy, khởi tạo môi trường phần cứng và phần mềm. Thông thường nó không giả định bootloader đã làm gì trước đó. Tuy nhiên, nó dựa vào BIOS hoặc UEFI để thiết lập PCI addressing và interrupt line assignment qua bảng ACPI (hoặc Device Tree trên ARM/PPC). 5. Khi hoàn tất phần lớn khởi tạo, nếu bật `initramfs` (`CONFIG_BLK_DEV_INITRD=y`), kernel tìm ảnh `initramfs` (`initrd`) trong RAM và giải nén nếu cần (Hình 3.2). 6. Nó mount ảnh thành root filesystem tạm ngay trong RAM, trong RAM disk. 7. Giờ bộ nhớ có root filesystem nền tảng, tối thiểu và tạm thời; các startup script `initramfs-based` chạy, trong đó có việc nạp kernel module cần thiết vào RAM, tức các root filesystem driver, gồm `f2fs.ko` trong ví dụ (Hình 3.2). 8. Khi initramfs chạy, nó gọi `/sbin/init` trước (có thể là binary executable hoặc script); ngoài dọn dẹp, nhiệm vụ quan trọng là pivot-root: unmount root filesystem initramfs tạm, giải phóng bộ nhớ và mount root filesystem thật. Giờ làm được vì module hỗ trợ filesystem đã có trong RAM. 9. Khi mount thành công root filesystem thật (trên đĩa hoặc flash-based), quá trình khởi tạo tiếp tục. Cuối cùng kernel gọi user space process đầu tiên (PID 1), thường `/sbin/init` khi dùng SysV init cũ, hoặc phổ biến hơn hiện nay là framework `systemd` mạnh hơn. 10. Framework `init` tiếp tục khởi tạo hệ thống, kích hoạt các system service theo cấu hình.
 
 Một số điểm cần lưu ý:
 
-Trên Linux hiện đại, framework SysV (đọc là System Five) `init` truyền thống phần lớn đã được thay bằng systemd (system daemon) hiện đại, tối ưu hơn. Vì thế trên nhiều, nếu không phải hầu hết hệ thống Linux hiện đại, kể cả hệ nhúng, `/sbin/init` được thay bằng systemd hoặc chỉ là symbolic link đến tệp thực thi của nó. systemd được coi là tốt hơn nhờ tinh chỉnh boot process, tối ưu thời gian boot và rất nhiều tính năng khác. Xem phần Đọc thêm để tìm hiểu.
+Trên Linux hiện đại, framework SysV (đọc là System Five) `init` truyền thống phần lớn đã được thay bằng systemd (system daemon) hiện đại, tối ưu hơn. Vì thế trên nhiều, nếu không phải hầu hết hệ thống Linux hiện đại, kể cả hệ nhúng, `/sbin/init` được thay bằng systemd hoặc chỉ là symbolic link đến tệp thực thi của nó. systemd được coi là tốt hơn nhờ fine-tune boot process, tối ưu thời gian boot và rất nhiều tính năng khác. Xem phần Đọc thêm để tìm hiểu.
 
 Sách không trình bày chi tiết việc tạo root filesystem initramfs; tài liệu kernel chính thức có đề cập trong Using the initial RAM disk (initrd): `https://docs.kernel.org/admin-guide/initrd.html`.
 
@@ -572,7 +572,7 @@ Một ví dụ đơn giản tạo root filesystem là mã dự án SEALS tại `
 
 `initramfs` còn hữu ích khi khởi động máy có đĩa mã hóa.
 
-Bạn đang dùng laptop có đĩa không mã hóa? Điều đó không tốt: nếu mất hoặc bị trộm, tin tặc dễ truy cập dữ liệu bằng cách boot từ USB Linux rồi thường truy cập được mọi partition. Thông tin đăng nhập không giúp trong tình huống này. Distro hiện đại mã hóa partition dễ dàng, đây đã là phần thông thường của cài đặt. Ngoài volume-based encryption qua LUKS, dm-crypt, eCryptfs, v.v., còn nhiều công cụ mã hóa/giải mã từng tệp. Xem thêm:
+Bạn đang dùng laptop có đĩa không mã hóa? Điều đó không tốt: nếu mất hoặc bị trộm, tin tặc dễ truy cập dữ liệu bằng cách boot từ USB Linux-based rồi thường truy cập được mọi partition. Thông tin đăng nhập không giúp trong tình huống này. Distro hiện đại mã hóa partition dễ dàng, đây đã là phần thông thường của cài đặt. Ngoài volume-based encryption qua LUKS, dm-crypt, eCryptfs, v.v., còn nhiều công cụ mã hóa/giải mã từng tệp. Xem thêm:
 
 Top 10 file and disk encryption tools for Linux, tháng 1 năm 2022: `https://www.fosslinux.com/50005/top-10-file-and-disk-encryption-tools-for-linux.htm,` và Best File \& Disk Encryption Tools for Linux, Day, tháng 5 năm 2022: `https://linuxsecurity.com/features/top-8-file-and-disk-encryption-tools-for-linux`.
 
@@ -648,7 +648,7 @@ Chi tiết tạo ảnh `initramfs` (hoặc `initrd`) vượt phạm vi ở đây
 
 Hệ thống hiện đại còn có hybrid `initramfs`: ảnh `initramfs` gồm một ảnh `ramfs` sớm đặt trước ảnh `ramfs` chính/thông thường. Cần công cụ đặc biệt để đóng/mở gói, nén/giải nén chúng. Ubuntu cung cấp script `unmkinitramfs` và `mkinitramfs` tương ứng.
 
-Thử nhanh: giải ảnh `initramfs` mới tạo ở phần trước vào thư mục tạm. Nhớ rằng thực hiện trên máy ảo khách Ubuntu 22.04 LTS x86\_64. Dùng `tree` xem kết quả đã rút gọn cho dễ đọc:
+Thử nhanh: giải ảnh `initramfs` brand-new ở phần trước vào thư mục tạm. Nhớ rằng thực hiện trên máy ảo khách Ubuntu 22.04 LTS x86\_64. Dùng `tree` xem kết quả đã rút gọn cho dễ đọc:
 
 ![Hình 3.3](images/ch03/fig03-03.jpg)
 
@@ -670,7 +670,7 @@ Giờ hãy hoàn tất quy trình build kernel x86\_64 bằng một số tùy ch
 
 Chúng ta đã hoàn thành bước 1 đến 6 trong phần Các bước biên dịch kernel từ mã nguồn ở Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1. Giờ có thể reboot; trước tiên hãy lưu và đóng mọi ứng dụng, tệp. Mặc định GRUB hiện đại thậm chí không hiển thị menu khi reboot mà boot thẳng kernel mới build (ở đây chỉ mô tả Ubuntu trên x86\[\_64\]; kernel mặc định cũng có thể khác theo distro).
 
-Trên x86\[\_64\], có thể vào menu GRUB lúc đầu boot bằng cách giữ Shift. Hành vi còn phụ thuộc yếu tố khác: với firmware UEFI/BIOS mới hoặc máy ảo lồng nhau, có thể cần cách khác để buộc hiển thị menu (thử cả Esc).
+Trên x86\[\_64\], có thể vào menu GRUB lúc đầu boot bằng cách giữ Shift. Hành vi còn phụ thuộc yếu tố khác: với firmware UEFI/BIOS mới hoặc máy ảo lồng nhau, có thể cần cách khác để force-see menu (thử cả Esc).
 
 Nếu muốn xem và tùy chỉnh GRUB mỗi lần boot, để chọn kernel/hệ điều hành khác hoặc truyền kernel parameter thì sao? Điều này rất hữu ích khi phát triển, debug; hãy xem cách làm.
 
@@ -785,9 +785,9 @@ $ sudo reboot
 
 Khi hệ thống tắt xong rồi khởi động lại, bạn sẽ sớm thấy menu bootloader GRUB (phần sau có ảnh). Hãy nhấn phím bất kỳ để dừng đếm ngược!
 
-Dù có thể xóa, tôi khuyên giữ các distro kernel image gốc và tệp liên quan như `initrd, System.map`. Nếu kernel mới không boot được thì sao? (Đến Titanic còn gặp nạn!) Giữ ảnh gốc cho ta phương án dự phòng: boot distro kernel gốc, sửa lỗi rồi thử lại. Gần như luôn có thêm mục Recovery… tự động, cố đưa bạn vào root shell. Trong tình huống gần xấu nhất, thường bạn được đưa vào shell dựa trên initramfs, hoạt động từ RAM.
+Dù có thể xóa, tôi khuyên giữ các distro kernel image gốc và tệp liên quan như `initrd, System.map`. Nếu kernel brand-new không boot được thì sao? (Đến Titanic còn gặp nạn!) Giữ ảnh gốc cho ta phương án dự phòng: boot distro kernel gốc, sửa lỗi rồi thử lại. Gần như luôn có thêm mục Recovery… tự động, cố đưa bạn vào root shell. Trong tình huống gần xấu nhất, thường bạn được đưa vào shell initramfs-based, hoạt động từ RAM.
 
-Nếu mọi kernel và ảnh `/initrd` khác đều đã bị xóa hoặc hỏng, còn kernel mới duy nhất không boot được thì sao? Bạn vẫn có thể boot Linux recovery mode bằng USB; tìm trên Google sẽ thấy nhiều hướng dẫn, video. Đây là hướng dẫn Ubuntu dùng ứng dụng GUI thường có sẵn: `https://ubuntu.com/tutorials/create-a-usb-stick-on-ubuntu#1-overview`.
+Trong tình huống worst-case, nếu mọi kernel và ảnh `/initrd` khác đều đã bị xóa hoặc hỏng, còn kernel mới duy nhất không boot được thì sao? Bạn vẫn có thể boot Linux recovery mode bằng USB; tìm trên Google sẽ thấy nhiều hướng dẫn, video. Đây là hướng dẫn Ubuntu dùng ứng dụng GUI thường có sẵn: `https://ubuntu.com/tutorials/create-a-usb-stick-on-ubuntu#1-overview`.
 
 ### Boot máy ảo bằng GNU GRUB
 
@@ -811,15 +811,15 @@ Kernel boot mặc định, ở đây là `6.1.25-lkp-kernel`, được đánh d�
 
 Ảnh trên có vài mục “thêm” vì lúc chụp tôi đã build kernel 6.1.25 vài lần, bản trước được lưu thành mục “`.old`”. Cập nhật Ubuntu cũng cài thêm distro kernel mới. Ta thấy 5.19.0-43-generic và bản trước đó; ở đây bỏ qua chúng.
 
-Để có ví dụ khác, đây là menu chọn boot trên hệ thống UEFI (máy Dell x86\_64 này dùng F12 để hiện boot menu). Chú ý giao diện đồ họa phong phú và hỗ trợ con trỏ chuột:
+Để có ví dụ khác, đây là menu chọn boot trên UEFI-based (máy Dell x86\_64 này dùng F12 để hiện boot menu). Chú ý giao diện đồ họa phong phú và hỗ trợ con trỏ chuột:
 
 ![Hình 3.6](images/ch03/fig03-06.jpg)
 
-Hình 3.6: Menu chọn boot trên PC x86\_64 dùng UEFI
+Hình 3.6: Menu chọn boot trên PC x86\_64 UEFI-based
 
 4\. Trở lại máy ảo Ubuntu x86 với GRUB: chọn mục cần dùng, ở đây là kernel 6.1 LTS mới với nhãn `*Ubuntu, with Linux 6.1.25-lkp-kernel` (Hình 3.5). Nó là dòng đầu vì vừa được thêm gần nhất vào menu hệ điều hành boot được. 5. Nhấn Enter tại mục đó. Bootloader giải nén và nạp kernel cùng initramfs (hoặc `initrd`) vào RAM rồi nhảy đến Linux kernel entry point, trao quyền điều khiển cho Linux!
 
-Nếu mọi thứ tốt như mong đợi, bạn đã boot Linux kernel 6.1.25 LTS vừa build! Chúc mừng bạn hoàn thành công việc!
+Nếu mọi thứ tốt như mong đợi, bạn đã boot Linux kernel 6.1.25 LTS brand-new! Chúc mừng bạn hoàn thành công việc!
 
 Bạn còn có thể làm thêm: phần sau chỉ cách sửa và tùy chỉnh GRUB lúc runtime, tức lúc boot. Kỹ năng này đôi khi rất hữu ích, ví dụ quên mật khẩu root. Có thể dùng kỹ thuật này để vượt qua bước đó! Hãy đọc tiếp.
 
@@ -831,7 +831,7 @@ Thay vì chỉ nhấn Enter tại mục `Ubuntu, with Linux` `6.1.25-lkp-kernel`
 
 Hình 3.7: Bootloader GRUB2: sửa mục menu kernel tùy chỉnh 6.1.25-lkp-kernel
 
-Ảnh chụp sau khi cuộn xuống vài dòng; nhìn kỹ sẽ thấy con trỏ dạng gạch dưới “\_” ở đầu dòng thứ tư từ dưới lên trong khung chỉnh sửa. Tôi khoanh dòng quan trọng này để nhấn mạnh; UUID đĩa được che một phần. Đây là dòng then chốt, bắt đầu bằng từ khóa `linux` có thụt lề.
+Ảnh chụp sau khi cuộn xuống vài dòng; nhìn kỹ sẽ thấy con trỏ underscore-type “\_” ở đầu dòng thứ tư từ dưới lên trong khung chỉnh sửa. Tôi khoanh dòng quan trọng này để nhấn mạnh; UUID đĩa được che một phần. Đây là dòng then chốt, bắt đầu bằng từ khóa `linux` có thụt lề.
 
 Nó chỉ định đường dẫn kernel image nén, tiếp đến storage device ID nơi có ảnh, rồi danh sách kernel parameter GRUB truyền cho Linux kernel. Ở đây đường dẫn là `/vmlinuz-6.1.25-lkp-kernel`, bắt đầu tại `/` vì `/boot` là partition riêng.
 
@@ -867,7 +867,7 @@ $ uname -r
 6.1.25-lkp-kernel
 ```
 
-Đúng vậy, ta đang chạy Ubuntu 22.04 LTS trên kernel 6.1.25 LTS tùy chỉnh vừa build! Các cách gọi uname khác xác nhận tên phần cứng và hệ điều hành như dự kiến: GNU/Linux trên x86\_64:
+Đúng vậy, ta đang chạy Ubuntu 22.04 LTS trên kernel 6.1.25 LTS just-custom-built! Các cách gọi uname khác xác nhận tên phần cứng và hệ điều hành như dự kiến: GNU/Linux trên x86\_64:
 
 ```
 $ uname -m ; uname -o
@@ -920,11 +920,11 @@ Hoặc vì bật `CONFIG_IKCONFIG_PROC`, có thể kiểm tra tương tự bằn
 gunzip -c /proc/config.gz | grep -E "LOCALVERSION|CONFIG_HZ"
 ```
 
-Build kernel đã hoàn tất! Hãy xem lại phần Các bước biên dịch kernel từ mã nguồn ở Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1, để nắm tổng thể quy trình. Tiếp theo là phần thú vị: cross-compile kernel cho bo Raspberry Pi.
+Build kernel đã hoàn tất! Hãy xem lại phần Các bước biên dịch kernel từ mã nguồn ở Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1, để nắm high-level quy trình. Tiếp theo là phần thú vị: cross-compile kernel cho bo Raspberry Pi.
 
 ## Build kernel cho Raspberry Pi
 
-Raspberry Pi dựa trên ARM là Single-Board Computer (SBC) phổ biến, tương đối rẻ để thử nghiệm và tạo prototype. Người yêu thích, người thích mày mò và phần nào cả chuyên gia thấy nó hữu ích để học Linux nhúng, đặc biệt nhờ cộng đồng mạnh với nhiều diễn đàn hỏi đáp và hỗ trợ tốt. Chương trực tuyến Kernel Workspace Setup, phần Experimenting with the Raspberry Pi, có giới thiệu ngắn cùng ảnh bo mạch Raspberry Pi. Có một số bo tương tự Raspberry Pi khá nổi tiếng, như Orange Pi, hoạt động rất tốt; nội dung thảo luận cũng áp dụng tương tự.
+Raspberry Pi ARM-based là Single-Board Computer (SBC) phổ biến, tương đối rẻ để thử nghiệm và tạo prototype. Người yêu thích, người thích mày mò và phần nào cả chuyên gia thấy nó hữu ích để học Linux nhúng, đặc biệt nhờ cộng đồng mạnh với nhiều diễn đàn hỏi đáp và hỗ trợ tốt. Chương trực tuyến Kernel Workspace Setup, phần Experimenting with the Raspberry Pi, có giới thiệu ngắn cùng ảnh bo mạch Raspberry Pi. Có một số bo tương tự Raspberry Pi khá well-known, như Orange Pi, hoạt động rất tốt; nội dung thảo luận cũng áp dụng tương tự.
 
 Có hai cách điển hình build kernel cho thiết bị đích hay Device Under Test (DUT), ở đây là Raspberry Pi 4 Model B 64 bit:
 
@@ -950,7 +950,7 @@ Hãy bắt đầu!
 
 Chọn một staging folder, nơi build cây mã nguồn kernel Raspberry Pi và đặt cross-toolchain, rồi gán vào biến môi trường để tránh hardcode:
 
-1\. Thiết lập workspace. Đặt biến môi trường `RPI_STG` trỏ đến staging folder nơi làm việc (không bắt buộc đúng tên này; chọn tên hợp lý rồi dùng nhất quán). Hãy chọn giá trị phù hợp hệ thống; tôi dùng `~/rpi_work`:
+1\. Thiết lập workspace. Đặt biến môi trường `RPI_STG` trỏ đến staging folder nơi làm việc (không bắt buộc đúng tên này; chọn tên reasonable-sounding rồi dùng nhất quán). Hãy chọn giá trị phù hợp hệ thống; tôi dùng `~/rpi_work`:
 
 ```
 export RPI_STG=~/rpi_work
@@ -959,7 +959,7 @@ mkdir -p ${RPI_STG}/kernel_rpi
 
 Bảo đảm đủ dung lượng: cây Git kernel Raspberry Pi chiếm khoảng 1,7 GB, toolchain đơn giản chỉ hơn 40 MB. Cần ít nhất 3–4 GB để làm việc. Nếu build image thành gói Deb như phần sau, cần thêm ít nhất 1 GB; tốt nhất để trống khoảng 7–8 GB cho an toàn.
 
-2\. Tải cây mã nguồn kernel riêng của Raspberry Pi bằng cách clone kho GitHub kernel chính thức của Raspberry Pi tại `https://github.com/raspberrypi/linux/`:
+2\. Tải cây mã nguồn kernel Pi-specific bằng cách clone kho GitHub kernel chính thức của Raspberry Pi tại `https://github.com/raspberrypi/linux/`:
 
 ```
 cd ${RPI_STG}/kernel_rpi
@@ -990,7 +990,7 @@ EXTRAVERSION =
 
 Giờ cài cross-toolchain phù hợp trên host, tức máy ảo Ubuntu x86, để build. Có nhiều toolchain hoạt động được; ở đây tôi dùng cách dễ và tốt nhất để lấy, cài toolchain phù hợp. Lần xuất bản đầu có cách thứ hai phức tạp hơn qua kho “tools” GitHub của Raspberry Pi; cách đó hiện bị coi là deprecated nên không trình bày nữa.
 
-Distro hiện đại thường cung cấp gói cross-build/cross-compile sẵn dùng! Để xem một số gói GCC compiler cho các kiến trúc trên Debian/Ubuntu x86, gõ lệnh sau rồi nhấn Tab hai lần để tự hoàn thành:
+Distro hiện đại thường cung cấp gói cross-build/cross-compile ready-to-use! Để xem một số gói GCC compiler cho các kiến trúc trên Debian/Ubuntu x86, gõ lệnh sau rồi nhấn Tab hai lần để auto-complete:
 
 ```
 sudo apt install gcc-<TAB><TAB>
@@ -1037,7 +1037,7 @@ Có thể dùng toolchain khác. Ví dụ trang ARM developer cung cấp nhiều
 
 Giờ cấu hình kernel cho Raspberry Pi 4. Trước khi bắt đầu, cần ghi nhớ:
 
-- Biến môi trường `ARCH` phải là kiến trúc CPU mà phần mềm được cross-compile để chạy trên đó. Giá trị chính xác của `ARCH` là tên thư mục dưới `arch/` trong cây mã nguồn. Ví dụ đặt `ARCH` bằng `arm` cho ARM-32, `arm64` cho AArch64, `powerpc` cho PowerPC và `openrisc` cho OpenRISC.
+- Biến môi trường `ARCH` phải là kiến trúc CPU mà phần mềm được cross-compiled để chạy trên đó. Giá trị chính xác của `ARCH` là tên thư mục dưới `arch/` trong cây mã nguồn. Ví dụ đặt `ARCH` bằng `arm` cho ARM-32, `arm64` cho AArch64, `powerpc` cho PowerPC và `openrisc` cho OpenRISC.
 
 - Biến môi trường `CROSS_COMPILE` phải là cross-compiler/toolchain prefix, tức các ký tự chung đứng trước tên mọi tiện ích. Ví dụ, C compiler `gcc`, linker, C++, `objdump`, v.v. đều bắt đầu bằng `aarch64-linux-gnu-` (Hình 3.8), nên đặt `CROSS_COMPILE` bằng chuỗi đó. `Makefile` luôn gọi `${CROSS_COMPILE}<utility>` để chạy đúng công cụ. Điều này yêu cầu thư mục toolchain nằm trong `PATH`.
 
@@ -1052,7 +1052,7 @@ KERNEL=kernel8
 make ARCH=arm64 bcm2711_defconfig
 ```
 
-Kết quả là cấu hình mặc định lưu trong `.config`. Về configuration target `bcm2711_defconfig`: như phần Cấu hình kernel cho hệ thống Linux nhúng điển hình trong Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1, phải dùng tệp cấu hình riêng cho bo mạch phù hợp làm điểm khởi đầu. Ở đây `bcm2711_defconfig` là tệp đúng cho Broadcom SoC (System on Chip) trên Raspberry Pi 3, 3+, 4, 400, Zero 2 W và Raspberry Pi compute module 3, 3+, 4 để tạo cấu hình build 64 bit mặc định.
+Kết quả là cấu hình mặc định lưu trong `.config`. Về configuration target `bcm2711_defconfig`: như phần Cấu hình kernel cho hệ thống Linux nhúng điển hình trong Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1, phải dùng tệp cấu hình board-specific phù hợp làm điểm khởi đầu. Ở đây `bcm2711_defconfig` là tệp đúng cho Broadcom SoC (System on Chip) trên Raspberry Pi 3, 3+, 4, 400, Zero 2 W và Raspberry Pi compute module 3, 3+, 4 để tạo cấu hình build 64 bit mặc định.
 
 (Quan trọng: nếu build cho Raspberry Pi loại khác, xem `https://www.raspberrypi.org/documentation/linux/kernel/building.md`.)
 
@@ -1066,7 +1066,7 @@ Sự đa dạng của SoC, cách đóng gói và tên gọi gây khá nhiều nh
 make ARCH=arm64 menuconfig
 ```
 
-Nếu không, bỏ qua bước này. Nhớ rằng muốn tinh chỉnh cấu hình, trước tiên phải tạo đúng qua Bước 1 rồi mới thực hiện bước này.
+Nếu không, bỏ qua bước này. Nhớ rằng muốn fine-tune cấu hình, trước tiên phải tạo đúng qua Bước 1 rồi mới thực hiện bước này.
 
 3\. Build (cross-compile) kernel, kernel module và DTB bằng:
 
@@ -1074,7 +1074,7 @@ Nếu không, bỏ qua bước này. Nhớ rằng muốn tinh chỉnh cấu hìn
 make -j8 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all
 ```
 
-4\. Điều chỉnh `-jn` theo host build. Target `all` tạo những gì? Đó là mọi target có tiền tố `*` trong target `help` của Makefile cấp cao nhất:
+4\. Điều chỉnh `-jn` theo host build. Target `all` tạo những gì? Đó là mọi target có tiền tố `*` trong target `help` của Makefile top-level:
 
 ```
 $ make ARCH=arm64 help |grep "^\*"
@@ -1107,7 +1107,7 @@ statically linked, BuildID[sha1]=03b7<...>, with debug_info, not stripped
 
 Mục đích ở đây là minh họa cấu hình và build Linux kernel cho kiến trúc khác host biên dịch, tức cross-compile. Không đi sâu cách đưa kernel image, module, DTB và overlay lên thẻ microSD. Hãy tham khảo tài liệu build kernel Raspberry Pi đầy đủ tại `https://www.raspberrypi.com/documentation/computers/linux_kernel.html#cross-compiling-the-kernel`.
 
-Đến đây kết thúc thử nghiệm cross-compile kernel cho Raspberry Pi. Chúng ta kết thúc chương bằng một số mẹo hữu ích khác.
+Đến đây kết thúc thử nghiệm cross-compilation kernel cho Raspberry Pi. Chúng ta kết thúc chương bằng một số mẹo hữu ích khác.
 
 ## Một số mẹo về build kernel
 
@@ -1125,7 +1125,7 @@ Ví dụ, lúc viết sách, phiên bản tối thiểu được khuyến nghị
 
 ### Build kernel cho hệ thống ở nơi khác
 
-Trong hướng dẫn của sách, ta build Linux kernel trên một hệ thống, cụ thể máy khách x86\_64, rồi boot ngay trên đó. Nếu build cho nơi khác hoặc hệ thống khách hàng thì sao? Dù có thể tự đặt từng thành phần vào hệ thống từ xa, cách dễ và đúng hơn là đóng gói kernel cùng các sản phẩm liên quan như ảnh `initrd`, bộ kernel module, kernel header, v.v. thành định dạng phổ biến như `deb` của Debian hay `rpm` của Red Hat! Lệnh `help` của `Makefile` cấp cao nhất cho biết các packaging target sau (chỉ trích phần liên quan):
+Trong walk-through của sách, ta build Linux kernel trên một hệ thống, cụ thể máy khách x86\_64, rồi boot ngay trên đó. Nếu build cho nơi khác hoặc hệ thống khách hàng thì sao? Dù có thể tự đặt từng thành phần vào hệ thống từ xa, cách dễ và đúng hơn là đóng gói kernel cùng các sản phẩm liên quan như ảnh `initrd`, bộ kernel module, kernel header, v.v. thành định dạng well-known như `deb` của Debian hay `rpm` của Red Hat! Lệnh `help` của `Makefile` top-level cho biết các packaging target sau (chỉ trích phần liên quan):
 
 ```
 $ make ARCH=arm64 help
@@ -1274,7 +1274,7 @@ Dùng `tee -a <filename>` để nối kết quả vào tệp chỉ định thay 
 
 ### Cú pháp shell rút gọn cho quy trình build
 
-Giả sử đã cài đủ gói, cấu hình kernel xong và đang trên x86, có thể dùng cú pháp shell (thường Bash) rút gọn như sau, chẳng hạn trong build script không tương tác:
+Giả sử đã cài đủ gói, cấu hình kernel xong và đang trên x86, có thể dùng cú pháp shell (thường Bash) rút gọn như sau, chẳng hạn trong build script non-interactive:
 
 ```
 time make -j8 [ARCH=<...> CROSS_COMPILE=<...>] all && \
@@ -1288,7 +1288,7 @@ Trong mã trên, `&&` và `||` là cú pháp conditional list tiện lợi của
 
 - `cmd1 || cmd2`: chỉ chạy `cmd2` khi `cmd1` thất bại.
 
-Kho sách cung cấp Bash script đơn giản, mới kiểm thử ở mức tối thiểu, để build kernel x86\_64 tại `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/blob/main/ch3/kbuild.sh`. Hãy xem thử.
+Kho sách cung cấp Bash script đơn giản, minimally-tested, để build kernel x86\_64 tại `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/blob/main/ch3/kbuild.sh`. Hãy xem thử.
 
 ### Xử lý thiếu OpenSSL development header
 
@@ -1298,7 +1298,7 @@ Trong một trường hợp, build kernel x86\_64 trên Ubuntu thất bại vớ
 [...] fatal error: openssl/opensslv.h: No such file or directory
 ```
 
-Đơn giản là thiếu OpenSSL development header, được đề cập trong Minimal requirements to compile the kernel tại `https://github.com/torvalds/linux/blob/master/Documentation/process/changes.rst#openssl`. Tài liệu nêu từ v4.3 trở đi (và 3.7 nếu bật module signing), cần các gói development của `openssl`. Vì vậy script `ch1/pkg_install4ubuntu_lkp.sh` cài `libssl-dev`; gói tương đương trên distro kiểu Fedora là `openssl-devel`.
+Đơn giản là thiếu OpenSSL development header, được đề cập trong Minimal requirements to compile the kernel tại `https://github.com/torvalds/linux/blob/master/Documentation/process/changes.rst#openssl`. Tài liệu nêu từ v4.3 trở đi (và 3.7 nếu bật module signing), cần các gói development của `openssl`. Vì vậy script `ch1/pkg_install4ubuntu_lkp.sh` cài `libssl-dev`; gói tương đương trên distro Fedora-type là `openssl-devel`.
 
 Bài hỏi đáp OpenSSL missing during ./configure. How to fix cũng cho thấy cài `libssl-dev` hoặc gói tương đương giải quyết được lỗi: `https://superuser.com/questions/371901/openssl-missing-during-configure-how-to-fix`.
 
@@ -1316,13 +1316,13 @@ Trên Red Hat/Fedora/CentOS, dùng:
 dnf list installed kernel
 ```
 
-Đây là kernel cài qua package; tất nhiên không gồm các kernel tự build thủ công!
+Đây là kernel package-based; tất nhiên không gồm các kernel tự build thủ công!
 
-Có nhiều dự án Linux “builder”, tức framework đầy đủ để xây dựng toàn bộ hệ thống hoặc distro Linux, thường dùng cho Linux nhúng. Lúc viết sách, `Yocto` (`https://www.yoctoproject.org/`) được coi là tiêu chuẩn ngành; `Buildroot` (`https://buildroot.org/`) lâu đời hơn nhưng vẫn được hỗ trợ tích cực. Rất đáng tìm hiểu.
+Có nhiều dự án Linux-builder, tức framework đầy đủ để xây dựng toàn bộ hệ thống hoặc distro Linux, thường dùng cho Linux nhúng. Lúc viết sách, `Yocto` (`https://www.yoctoproject.org/`) được coi là tiêu chuẩn ngành; `Buildroot` (`https://buildroot.org/`) lâu đời hơn nhưng vẫn được hỗ trợ tích cực. Rất đáng tìm hiểu.
 
-Nếu build kernel, tạo initramfs và mọi thứ đều tốt nhưng boot không hoàn tất, kết thúc bằng kernel panic với thông báo quen thuộc như `[ end` `Kernel panic - not syncing: Attempted to kill init! …]` hoặc `[Kernel panic - not syncing:` `No working init found. …]` thì sao? Nguyên nhân thường là cấu hình kernel sai, kernel command-line parameter sai (đặc biệt root device), hoặc không thể mount root filesystem thật vì lý do nào đó. Tài liệu kernel chính thức có mẹo tại `https://www.kernel.org/doc/Documentation/admin-guide/init.rst`.
+Nếu build kernel, tạo initramfs và mọi thứ đều tốt nhưng boot không hoàn tất, kết thúc bằng kernel panic với thông báo well-known như `[ end` `Kernel panic - not syncing: Attempted to kill init! …]` hoặc `[Kernel panic - not syncing:` `No working init found. …]` thì sao? Nguyên nhân thường là cấu hình kernel sai, kernel command-line parameter sai (đặc biệt root device), hoặc không thể mount root filesystem thật vì lý do nào đó. Tài liệu kernel chính thức có mẹo tại `https://www.kernel.org/doc/Documentation/admin-guide/init.rst`.
 
-Cuối cùng, hãy nhớ cách gần như luôn hữu ích: khi không sửa được lỗi build/boot, chép chính xác thông báo vào clipboard, mở Google hay công cụ tìm kiếm khác rồi nhập tương tự `linux kernel build <ver ...> fails with <paste-your-error-message-here>`. Bạn có thể ngạc nhiên vì cách này thường hiệu quả. Nếu chưa được, nghiên cứu kỹ; khi thực sự không tìm thấy lời giải phù hợp, hãy đăng câu hỏi được suy nghĩ cẩn thận, kèm đầy đủ chi tiết liên quan trên diễn đàn thích hợp.
+Cuối cùng, hãy nhớ cách gần như luôn hữu ích: khi không sửa được lỗi build/boot, chép chính xác thông báo vào clipboard, mở Google hay công cụ tìm kiếm khác rồi nhập tương tự `linux kernel build <ver ...> fails with <paste-your-error-message-here>`. Bạn có thể ngạc nhiên vì cách này thường hiệu quả. Nếu chưa được, nghiên cứu kỹ; khi thực sự không tìm thấy lời giải phù hợp, hãy đăng câu hỏi well-thought-out-withall-relevant-details trên diễn đàn thích hợp.
 
 Đến đây kết thúc các chương về build kernel!
 
@@ -1332,11 +1332,11 @@ Chương này cùng chương trước trình bày chi tiết kiến thức chu�
 
 Chương này bắt đầu bằng build kernel và kernel module thực tế. Sau đó là cài module lên hệ thống, thực hành tạo ảnh `initramfs` (hoặc `initrd`) và giải thích lý do sử dụng.
 
-Bước cuối là tùy chỉnh đơn giản bootloader, ở đây chỉ tập trung GRUB trên x86. Tiếp đó, chúng ta boot kernel mới, kiểm tra cấu hình như mong đợi. Phần bổ sung hữu ích hướng dẫn cross-compile Linux kernel cho CPU khác, ở đây là AArch64. Cuối cùng là các mẹo hỗ trợ build.
+Bước cuối là tùy chỉnh đơn giản bootloader, ở đây chỉ tập trung GRUB trên x86. Tiếp đó, chúng ta boot kernel mới, kiểm tra cấu hình như mong đợi. Phần add-on hữu ích hướng dẫn cross-compile Linux kernel cho CPU khác, ở đây là AArch64. Cuối cùng là các mẹo hỗ trợ build.
 
 Nếu chưa thực hiện, hãy xem lại kỹ, thử các quy trình và build Linux kernel tùy chỉnh của riêng mình.
 
-Chúc mừng bạn đã build Linux kernel từ đầu! Trong dự án hay sản phẩm thực tế, có thể không cần tự làm mọi bước đã hướng dẫn. Vì sao? Có thể nhóm platform/BSP riêng phụ trách; hoặc ngày càng phổ biến, nhất là Linux nhúng, dự án dùng framework Linux builder như Yocto/Buildroot, hay kernel tùy chỉnh của nhà cung cấp SoC. Yocto thường lo các thao tác build lặp lại, dù học Yocto không hẳn dễ. Tuy vậy, bạn vẫn cần cấu hình kernel theo yêu cầu dự án; việc đó đòi hỏi kiến thức và hiểu biết đã học ở đây.
+Chúc mừng bạn đã build Linux kernel từ đầu! Trong dự án hay sản phẩm thực tế, có thể không cần tự làm mọi bước đã hướng dẫn. Vì sao? Có thể nhóm platform/BSP riêng phụ trách; hoặc ngày càng phổ biến, nhất là Linux nhúng, dự án dùng framework Linux-builder như Yocto/Buildroot, hay kernel tùy chỉnh SoC vendor-supplied. Yocto thường lo các thao tác build lặp lại, dù học Yocto không hẳn dễ. Tuy vậy, bạn vẫn cần cấu hình kernel theo yêu cầu dự án; việc đó đòi hỏi kiến thức và hiểu biết đã học ở đây.
 
 Hai chương tiếp theo đưa bạn trực tiếp vào thế giới phát triển Linux kernel, hướng dẫn viết kernel module đầu tiên.
 

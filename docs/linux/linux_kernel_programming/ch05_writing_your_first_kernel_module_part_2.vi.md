@@ -2,25 +2,25 @@
 
 Chương này là nửa sau nội dung về framework Loadable Kernel Module (LKM) và cách dùng nó để viết kernel module. Để tận dụng tối đa, tôi kỳ vọng bạn hoàn thành chương trước và thử code cùng câu hỏi/bài tập ở đó trước khi bắt đầu chương này.
 
-Trong chương này, chúng ta tiếp tục từ chỗ dừng ở chương trước. Ở đây trình bày cách dùng Makefile “tốt hơn” cho LKM, cross-compile kernel module cho ARM như ví dụ điển hình, module stacking là gì và thực hiện thế nào, cùng cách thiết lập và dùng module parameter. Trong quá trình đó, bên cạnh nhiều nội dung khác, bạn sẽ học tính ổn định kernel API/ABI (hay đúng hơn là sự thiếu ổn định!), khác biệt then chốt giữa viết user-space code và kernel code, tự load kernel module lúc boot, cùng vấn đề bảo mật và cách xử lý. Chúng ta kết thúc bằng thông tin về kernel documentation, gồm coding style, và cách bắt đầu đóng góp cho mainline kernel.
+Trong chương này, chúng ta tiếp tục từ chỗ dừng ở chương trước. Ở đây trình bày cách dùng Makefile “tốt hơn” cho LKM, cross-compiling kernel module cho ARM như ví dụ điển hình, module stacking là gì và thực hiện thế nào, cùng cách thiết lập và dùng module parameter. Trong quá trình đó, bên cạnh nhiều nội dung khác, bạn sẽ học tính ổn định kernel API/ABI (hay đúng hơn là sự thiếu ổn định!), khác biệt then chốt giữa viết user-space code và kernel code, auto-loading kernel module lúc boot, cùng vấn đề bảo mật và cách xử lý. Chúng ta kết thúc bằng thông tin về kernel documentation, gồm coding style, và cách bắt đầu đóng góp cho mainline kernel.
 
 Tóm lại, chương này trình bày các chủ đề:
 
 - Makefile template “tốt hơn” cho kernel module
 
-- Cross-compile kernel module
+- Cross-compiling kernel module
 
 - Thu thập thông tin hệ thống tối thiểu
 
 - Giấy phép kernel module
 
-- Mô phỏng tính năng “giống library” cho kernel module
+- Mô phỏng tính năng “library-like” cho kernel module
 
 - Truyền parameter cho kernel module
 
 - Floating point không được phép trong kernel
 
-- Tự load module khi hệ thống boot
+- Auto-loading module khi hệ thống boot
 
 - Kernel module và bảo mật – tổng quan
 
@@ -40,7 +40,7 @@ Code hiển thị trong sách thường chỉ là đoạn trích liên quan. Hã
 
 ## Makefile template “tốt hơn” cho kernel module
 
-Chương trước giới thiệu Makefile dùng sinh kernel module từ source code, cài đặt và dọn dẹp. Tuy nhiên, như đã nói ngắn ở đó, giờ tôi giới thiệu thứ theo tôi là Makefile vượt trội hơn, gọi là “tốt hơn”, và giải thích nó tốt hơn thế nào.
+Chương trước giới thiệu Makefile dùng sinh kernel module từ source code, cài đặt và dọn dẹp. Tuy nhiên, như đã nói ngắn ở đó, giờ tôi giới thiệu thứ theo tôi là Makefile vượt trội hơn, so-called “tốt hơn”, và giải thích nó tốt hơn thế nào.
 
 Cuối cùng, tất cả phải viết code tốt hơn, an toàn hơn, cả user space lẫn kernel space. Tin tốt là có nhiều công cụ cải thiện độ vững chắc và mức bảo mật của code, trong đó có static analyzer và dynamic analyzer (vì một số đã đề cập trong chương trực tuyến Kernel Workspace Setup, tôi không lặp lại ở đây).
 
@@ -79,9 +79,9 @@ FYI: KDIR=/lib/modules/6.1.25-lkp-kernel/build ARCH= CROSS_COMPILE= ccflags-
 y="-UDEBUG -DDYNAMIC_DEBUG_MODULE" MYDEBUG=n DBG_STRIP=n
 ```
 
-Trong Makefile, dùng biến MYDEBUG để quyết định có thực hiện ‘debug’ build không. Rõ ràng với `MYDEBUG` mặc định `n`, ta không thực hiện build gọi là `debug` (phần sau đi sâu ý nghĩa chính xác).
+Trong Makefile, dùng biến MYDEBUG để quyết định có thực hiện ‘debug’ build không. Rõ ràng với `MYDEBUG` mặc định `n`, ta không thực hiện build so-called `debug` (phần sau đi sâu ý nghĩa chính xác).
 
-Ngoài ra, biến `DBG_STRIP=n` thực chất nói với `make` `:` đừng strip debug ‘symbol’ khỏi module object. Thực tế nó mặc định `y`; Makefile đủ thông minh chỉ strip debug symbol (tuyệt đối không strip thêm gì khác khỏi module!) nếu `MYDEBUG` là `n`, tức tắt, và kernel config không dùng module-signing, tính năng cần symbol sẽ được trình bày sau trong chương. Biến `KDIR` là đường dẫn đến kernel source tree giới hạn, thực chất kernel header, có giá trị thông thường; `ARCH` và `CROSS_COMPILE` mặc định `null` vì không cross-compile module.
+Ngoài ra, biến `DBG_STRIP=n` thực chất nói với `make` `:` đừng strip debug ‘symbol’ khỏi module object. Thực tế nó mặc định `y`; Makefile đủ thông minh chỉ strip debug symbol (tuyệt đối không strip thêm gì khác khỏi module!) nếu `MYDEBUG` là `n`, tức tắt, và kernel config không dùng module-signing, tính năng cần symbol sẽ được trình bày sau trong chương. Biến `KDIR` là đường dẫn đến kernel source tree giới hạn, thực chất kernel header, có giá trị thông thường; `ARCH` và `CROSS_COMPILE` mặc định `null` vì không cross-compiling module.
 
 Được rồi, hãy dùng Makefile “tốt hơn” để đơn giản build module “template”, rồi insert, remove và xem kernel `printk's` thực sự hiện ra (ảnh Hình 5.2 cho thấy output):
 
@@ -91,7 +91,7 @@ Hình 5.2: Build module lkm\_template bằng Makefile “tốt hơn” và thử
 
 Cần lưu ý để tận dụng đầy đủ Makefile “tốt hơn”, bạn phải cài vài package/app trên hệ thống; với Ubuntu nền tảng gồm `indent(1)`, `linux-headers-$(uname -r)`, `sparse(1)`, `flawfinder(1)`, `cppcheck(1)` và `tar(1)`. (Chương trực tuyến Kernel Workspace Setup đã nêu cần cài chúng. Ngoài ra chạy script `ch1/pkg_install4ubuntu_lkp.sh` trên Ubuntu bảo đảm chúng được cài.)
 
-Cũng lưu ý các dynamic analysis target (da) gọi như vậy trong Makefile chỉ là dummy target không làm gì ngoài in thông báo. Chúng ở đó để nhắc kiểm thử code kỹ bằng cách chạy trên “debug” kernel được cấu hình phù hợp!
+Cũng lưu ý các dynamic analysis target (da) so-called trong Makefile chỉ là dummy target không làm gì ngoài in thông báo. Chúng ở đó để nhắc kiểm thử code kỹ bằng cách chạy trên “debug” kernel được cấu hình phù hợp!
 
 Nói về “debug” kernel, phần tiếp theo chỉ cách cấu hình cơ bản.
 
@@ -99,11 +99,11 @@ Nói về “debug” kernel, phần tiếp theo chỉ cách cấu hình cơ b�
 
 Để biết chi tiết cấu hình và build kernel, xem lại Chương 2, Build Linux kernel 6.x từ source code – Phần 1, và Chương 3, Build Linux kernel 6.x từ source code – Phần 2.
 
-Chạy code trên debug kernel giúp phát hiện bug và vấn đề khó thấy. Tôi rất khuyến khích, thường trong phát triển và kiểm thử!
+Chạy code trên debug kernel giúp phát hiện bug và vấn đề hard-to-spot. Tôi rất khuyến khích, thường trong phát triển và kiểm thử!
 
-Thực chất, bạn nên có hai kernel để chạy và kiểm thử: production kernel thông thường được cấu hình cẩn thận để tối ưu, và debug kernel chủ động bật nhiều kernel debug option, có thể chưa tối ưu nhưng mục đích là dùng bắt bug.
+Thực chất, bạn nên có hai kernel để chạy và kiểm thử: production kernel thông thường carefully-configured-for-optimization, và debug kernel chủ động bật nhiều kernel debug option, có thể chưa tối ưu nhưng mục đích là dùng bắt bug.
 
-Ở đây, tối thiểu tôi kỳ vọng cấu hình kernel 6.1 tùy chỉnh với các debug config sau bật, tức `y`; tìm trong `make menuconfig`, phần lớn dưới submenu `Kernel Hacking`; danh sách sau dành cho Linux 6.1.25:
+Ở đây, tối thiểu tôi kỳ vọng cấu hình kernel 6.1 tùy chỉnh với các debug config sau bật, tức `y`; tìm trong `make menuconfig`, phần lớn dưới sub-menu `Kernel Hacking`; danh sách sau dành cho Linux 6.1.25:
 
 - `CONFIG_DEBUG_KERNEL` và `CONFIG_DEBUG_INFO`
 
@@ -149,13 +149,13 @@ Thực chất, bạn nên có hai kernel để chạy và kiểm thử: producti
 
 - `CONFIG_DEBUG_BUGVERBOSE`
 
-- `CONFIG_FTRACE` (`ftrace`: Trong submenu, bật ít nhất vài “tracer”, gồm ‘Kernel Function \[Graph\] Tracer’)
+- `CONFIG_FTRACE` (`ftrace`: Trong sub-menu, bật ít nhất vài “tracer”, gồm ‘Kernel Function \[Graph\] Tracer’)
 
 - `CONFIG_BUG_ON_DATA_CORRUPTION`
 
 - `Arch-specific` (hiện dưới “x86 Debugging” trên x86):
 
-  - `CONFIG_EARLY_PRINTK` (riêng theo kiến trúc)
+  - `CONFIG_EARLY_PRINTK` (arch-specific)
 
   - `CONFIG_DEBUG_BOOT_PARAMS`
 
@@ -169,17 +169,17 @@ b) Bật vài `Ftrace` tracer hay plugin như `CONFIG_IRQSOFF_TRACER` sẽ hữu
 
 c) Nội dung chi tiết tinh chỉnh và build debug kernel nằm trong Linux Kernel Debugging.
 
-Lưu ý bật các config này gây giảm hiệu năng, nhưng không sao. Ta chạy “debug” kernel loại này với mục đích rõ ràng là bắt lỗi và bug, đặc biệt loại khó phát hiện! Nó thực sự có thể cứu nguy! Trong dự án, workflow nên gồm kiểm thử và chạy code trên cả hai:
+Lưu ý bật các config này gây giảm hiệu năng, nhưng không sao. Ta chạy “debug” kernel loại này với mục đích rõ ràng là bắt lỗi và bug, đặc biệt loại hard-to-uncover! Nó thực sự có thể life-saver! Trong dự án, workflow nên gồm kiểm thử và chạy code trên cả hai:
 
 - Hệ thống debug kernel, bật mọi kernel debug config cần thiết, tối thiểu như trên
 
-- Hệ thống production kernel, có thể phần lớn debug option trên tắt; lưu ý bật vài config gọi là “debug” ngay cả trong production cũng cực kỳ hữu ích.
+- Hệ thống production kernel, có thể phần lớn debug option trên tắt; lưu ý bật vài config so-called “debug” ngay cả trong production cũng cực kỳ hữu ích.
 
 Không cần nói cũng biết, ta sẽ dùng Makefile “tốt hơn” trên trong mọi LKM code tiếp theo của sách.
 
 Được rồi, giờ đã sẵn sàng, hãy vào tình huống thú vị, thực tế: biên dịch kernel module cho target khác, thường là ARM.
 
-## Cross-compile kernel module
+## Cross-compiling kernel module
 
 Trong Chương 3, Build Linux kernel 6.x từ source code – Phần 2, phần Build kernel cho Raspberry Pi, chúng tôi đã chỉ cách cross-compile Linux kernel cho target architecture “khác”, như ARM\[64\], PowerPC, MIPS, v.v. Về cơ bản cũng làm tương tự với kernel module; dễ cross-compile bằng cách thiết lập cross-toolchain và các biến môi trường “đặc biệt” `ARCH`, `CROSS_COMPILE` phù hợp.
 
@@ -191,13 +191,13 @@ Thú vị đây. Bạn sẽ thấy dù có vẻ đơn giản, trực tiếp, cu�
 
 Nhưng trước tiên chắc chắn cần cross-toolchain phù hợp, nên hãy trình bày ngay.
 
-### Thiết lập hệ thống để cross-compile
+### Thiết lập hệ thống để cross-compilation
 
 Điều kiện tiên quyết cross-compile kernel module khá rõ:
 
 - Cần kernel source tree cho hệ thống đích được cài trong workspace trên host, thường desktop x86\_64 (ví dụ dùng Raspberry Pi làm target; tham khảo tài liệu Raspberry Pi chính thức tại `https://www.raspberrypi.org/documentation/linux/kernel/building.md`).
 
-- Giờ cần cross toolchain host-to-target. Host thường x86\_64, còn target ở đây ARM-64, nên cần cross toolchain x86\_64-to-ARM64. Một lần nữa, như nêu rõ trong Chương 3, Build Linux kernel 6.x từ source code – Phần 2, phần Build kernel cho Raspberry Pi, phải cài toolchain x86\_64-to-ARM riêng cho Raspberry Pi trong workspace host; nếu chưa thiết lập, tham khảo vị trí vừa nêu để học cách cài.
+- Giờ cần cross toolchain host-to-target. Host thường x86\_64, còn target ở đây ARM-64, nên cần cross toolchain x86\_64-to-ARM64. Một lần nữa, như nêu rõ trong Chương 3, Build Linux kernel 6.x từ source code – Phần 2, phần Build kernel cho Raspberry Pi, phải cài toolchain x86\_64-to-ARM Pi-specific trong workspace host; nếu chưa thiết lập, tham khảo vị trí just-mentioned để học cách cài.
 
 Mẹo nhanh: Nếu chưa, cài cross-compiler `aarch64-linux-gnu` bằng `sudo` `apt install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu`.
 
@@ -211,15 +211,15 @@ compilation terminated.
 
 Nó hoạt động – chỉ là chưa truyền C program nào làm tham số để biên dịch nên nó báo lỗi.
 
-Chắc chắn cũng tra được compiler version bằng `aarch64-linux-gnu-gcc --version`, thêm chi tiết với `-v`. Ngoài lề, lựa chọn hiện đại thay GCC là Clang toolchain; nay dùng khá nhiều, gồm Android AOSP, và thậm chí tốt hơn GCC ở vài khía cạnh (xem Đọc thêm về cross-compile bằng Clang). Ở đây tiếp tục dùng GCC compiler native và cross.
+Chắc chắn cũng tra được compiler version bằng `aarch64-linux-gnu-gcc --version`, thêm chi tiết với `-v`. Ngoài lề, lựa chọn hiện đại thay GCC là Clang toolchain; nay dùng khá nhiều, gồm Android AOSP, và thậm chí tốt hơn GCC ở vài khía cạnh (xem Đọc thêm về cross-compilation bằng Clang). Ở đây tiếp tục dùng GCC compiler native và cross.
 
-Giờ hãy cross-compile module cho Raspberry Pi!
+Giờ hãy cross-compiling module cho Raspberry Pi!
 
 ### Lần thử 1 – đặt biến môi trường ARCH và CROSS\_COMPILE
 
-Cross-compile kernel module rất dễ, hoặc ta nghĩ vậy! Trước tiên bảo đảm đặt phù hợp các biến môi trường “đặc biệt” `ARCH` và `CROSS_COMPILE`. Làm theo các bước:
+Cross-compiling kernel module rất dễ, hoặc ta nghĩ vậy! Trước tiên bảo đảm đặt phù hợp các biến môi trường “đặc biệt” `ARCH` và `CROSS_COMPILE`. Làm theo các bước:
 
-1\. Hãy build lại kernel module `lkm_template` vừa thảo luận cho Raspberry Pi target; cũng có lợi thế dùng Makefile “tốt hơn”. Đây là cách build:
+1\. Hãy re-build kernel module `lkm_template` vừa thảo luận cho Raspberry Pi target; cũng có lợi thế dùng so-called Makefile “tốt hơn”. Đây là cách build:
 
 Để không làm hỏng code gốc, trước tiên tạo thư mục mới `cross` chứa bản sao code. (Nhân tiện codebase đã thiết lập sẵn tại `ch5/cross`.)
 
@@ -256,7 +256,7 @@ $
 
 (Chú ý lần này biến môi trường `ARCH` và `CROSS_COMPILE` được định nghĩa đúng.) Vì sao thất bại?
 
-Manh mối thất bại nằm ở việc nó cố dùng, build cho, kernel source tree của host hiện tại, không phải target. Vì vậy cần sửa Makefile trỏ đúng kernel source tree của target. Khá dễ thực hiện. Trong code sau, ta thấy cách viết Makefile code đã sửa điển hình:
+Manh mối cross-compilation thất bại nằm ở việc nó cố dùng, build cho, kernel source tree của host hiện tại, không phải target. Vì vậy cần sửa Makefile trỏ đúng kernel source tree của target. Khá dễ thực hiện. Trong code sau, ta thấy cách viết Makefile code đã sửa điển hình:
 
 ```
 # ch5/cross/Makefile:
@@ -310,9 +310,9 @@ Làm xong, hãy thử lại cross-compile module bằng phiên bản này để 
 
 ### Lần thử 2 – trỏ Makefile đúng kernel source tree của target
 
-Giờ với Makefile cải tiến, sửa lỗi ở phần trước, hẳn sẽ hoạt động. Trong thư mục mới để thử, `cross` (vì cross-compile, không phải đang cáu giận!), làm theo:
+Giờ với Makefile cải tiến, sửa lỗi ở phần trước, hẳn sẽ hoạt động. Trong thư mục mới để thử, `cross` (vì cross-compiling, không phải đang cáu giận!), làm theo:
 
-1\. Thử build lần hai bằng lệnh `make` phù hợp cross-compile:
+1\. Thử build lần hai bằng lệnh `make` phù hợp cross-compilation:
 
 ```
 $ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
@@ -364,11 +364,11 @@ $ file ./lkm_template.ko
 
 Tất nhiên thực tế build có thể thất bại vì nhiều lý do, không chỉ những gì tình cờ thấy ở đây… Một trường hợp khác thất bại vì target kernel source tree dùng build module vẫn ở trạng thái “nguyên sơ”. Có lẽ ngay cả `.config` cùng các header cần thiết còn chưa có ở thư mục gốc, đòi hỏi tối thiểu phải cấu hình. Để sửa, phải cấu hình và cross-compile kernel theo cách thông thường, rồi thử lại module build.
 
-### Lần thử 3 – cross-compile kernel module
+### Lần thử 3 – cross-compiling kernel module
 
 Giờ đã tạo cross-compiled kernel module bằng kernel source tree Raspberry Pi cấu hình đúng trên host, có `Module.symvers` (xem phần Lần thử 2 – trỏ Makefile đúng kernel source tree của target), nó hẳn hoạt động trên bo (chúng ta lạc quan mà).
 
-Tất nhiên phải thử thực tế mới biết. Vì vậy bật Raspberry Pi, dùng `scp` chuyển kernel module object đã cross-compile sang nó rồi thử như sau trong phiên `ssh` trên Raspberry Pi (output sau lấy trực tiếp từ thiết bị):
+Tất nhiên phải thử thực tế mới biết. Vì vậy bật Raspberry Pi, dùng `scp` chuyển kernel module object đã cross-compiled sang nó rồi thử như sau trong phiên `ssh` trên Raspberry Pi (output sau lấy trực tiếp từ thiết bị):
 
 ```
 $ sudo insmod ./lkm_template.ko
@@ -404,7 +404,7 @@ Từ output trên, rõ ràng bo Raspberry Pi ARM64 này chạy kernel `6.1.21-v8
 
 Linux kernel có quy tắc, thuộc kernel Application Binary Interface (ABI): chỉ chèn kernel module vào kernel memory nếu module được build cho chính nó – kernel version chính xác, build flag và ngay cả kernel configuration option đều quan trọng!
 
-Kernel được build cho là kernel có source location bạn chỉ định trong Makefile, trước đó qua biến `KDIR`.
+Kernel built-against là kernel có source location bạn chỉ định trong Makefile, trước đó qua biến `KDIR`.
 
 Nói cách khác, kernel module không binary-compatible với kernel khác kernel mà nó được build cho. Ví dụ build module trên Ubuntu 22.04 LTS x86\_64, nó chỉ hoạt động trên hệ thống chạy chính xác môi trường phần cứng, library và kernel này! Nó không hoạt động hay load trên Fedora 38, RHEL 8.x, Raspberry Pi, v.v., hoặc ngay cả Ubuntu 22.04 x86\_64 chạy kernel khác.
 
@@ -414,11 +414,11 @@ Dù không dùng cách này ở đây, có cách bảo đảm build và triển 
 
 Dynamic Kernel Module Support (DKMS) là chương trình/framework cho phép sinh Linux kernel module có source thường nằm ngoài kernel source tree. Ý tưởng là tự build lại DKMS module khi cài kernel mới.
 
-Lưu ý kỹ: cụm then chốt là “... tự build lại DKMS module khi cài kernel mới”, chứng minh rằng kernel module cần build cho chính xác kernel nơi triển khai. Ví dụ dùng DKMS, Oracle VirtualBox hypervisor khi chạy trên Linux host dùng DKMS tự build và cập nhật kernel module của nó.
+Lưu ý kỹ: cụm then chốt là “... auto-build lại DKMS module khi cài kernel mới”, chứng minh rằng kernel module cần build cho chính xác kernel nơi triển khai. Ví dụ dùng DKMS, Oracle VirtualBox hypervisor khi chạy trên Linux host dùng DKMS tự build và cập nhật kernel module của nó.
 
-Nhân tiện, nếu không có Raspberry Pi để thử thì sao? Đừng lo, có thể dùng bo ARM khác hoặc ngay cả virtualization! (Dự án SEALS nhắc ở Chương 1 cho phép virtualization rất đơn giản ARM-32, ARM-64 và PC x86\_64 qua QEMU.)
+Nhân tiện, nếu không có Raspberry Pi để thử thì sao? Đừng lo, có thể dùng các bo ARM-based khác hoặc ngay cả virtualization! (Dự án SEALS nhắc ở Chương 1 cho phép virtualization rất đơn giản ARM-32, ARM-64 và PC x86\_64 qua QEMU.)
 
-### Lần thử 4 – cross-compile kernel module
+### Lần thử 4 – cross-compiling kernel module
 
 Giờ đã hiểu binary compatibility issue, có vài giải pháp có thể:
 
@@ -428,13 +428,13 @@ Giờ đã hiểu binary compatibility issue, có vài giải pháp có thể:
 
 - Hoặc build lại module để khớp kernel Raspberry Pi tình cờ đang chạy.
 
-Trong dự án Linux nhúng điển hình, gần như chắc chắn có kernel cấu hình riêng cho thiết bị đích mà bạn phải làm việc cùng. Mọi module sản phẩm sẽ/phải build cho nó. Vì vậy theo cách đầu: phải boot thiết bị bằng kernel 6.1.34 tùy chỉnh đã cấu hình, build; vì module build cho nó, giờ chắc chắn phải hoạt động.
+Trong dự án Linux nhúng điển hình, gần như chắc chắn có kernel custom-configured cho thiết bị đích mà bạn phải làm việc cùng. Mọi module sản phẩm sẽ/phải build cho nó. Vì vậy theo cách đầu: phải boot thiết bị bằng kernel 6.1.34 custom-configured, build; vì module build cho nó, giờ chắc chắn phải hoạt động.
 
 Chúng ta đã trình bày build kernel Raspberry Pi trong Chương 3, Build Linux kernel 6.x từ source code – Phần 2, phần Build kernel cho Raspberry Pi. Xem lại chi tiết nếu cần.
 
-Được rồi, tôi phải giả định bạn đã theo các bước trong Chương 3, Build Linux kernel 6.x từ source code – Phần 2, phần Build kernel cho Raspberry Pi, và đến đây đã cấu hình, build kernel 6.x cho Raspberry Pi. Các chi tiết nhỏ cách chép kernel image tùy chỉnh, DTB, module file lên microSD và tương tự không được trình bày; tham khảo tài liệu Raspberry Pi chính thức tại `https://www.raspberrypi.org/documentation/linux/kernel/building.md`. Tuy vậy sẽ chỉ cách tiện chuyển kernel trên thiết bị, giả định Raspberry Pi 4B chạy kernel 64 bit:
+Được rồi, tôi phải giả định bạn đã theo các bước trong Chương 3, Build Linux kernel 6.x từ source code – Phần 2, phần Build kernel cho Raspberry Pi, và đến đây đã cấu hình, build kernel 6.x cho Raspberry Pi. Các nitty-gritty cách chép kernel image tùy chỉnh, DTB, module file lên microSD và tương tự không được trình bày; tham khảo tài liệu Raspberry Pi chính thức tại `https://www.raspberrypi.org/documentation/linux/kernel/building.md`. Tuy vậy sẽ chỉ cách tiện chuyển kernel trên thiết bị, giả định Raspberry Pi 4B chạy kernel 64 bit:
 
-1\. Chép kernel binary `Image` tự build vào partition `/boot` trên microSD thành `kernel8.img`. (Để an toàn trước tiên lưu Raspberry Pi kernel image gốc mặc định thành `kernel8.img.orig).` 2. Chép bằng `scp` kernel module vừa cross-compile (`lkm_template.ko` cho ARM64, build phần trước) từ host lên microSD, vào `/home/pi` cũng được. 3. \[Tùy chọn\] Trên bo Raspberry Pi có thể chỉ định kernel boot như sau; trường hợp này không cần vì bootloader tự chọn `kernel8.img` làm mặc định. Nếu muốn kernel khác, sửa `/boot/config.txt` trên microSD, đặt kernel image qua dòng `kernel=xxx`. 4. Lưu, reboot rồi đăng nhập và thử lại module. Hình 5.3 cho thấy LKM `lkm_template.ko` vừa cross-compile được dùng trên Raspberry Pi 4 B:
+1\. Chép kernel binary `Image` custom-built vào partition `/boot` trên microSD thành `kernel8.img`. (Để an toàn trước tiên lưu Raspberry Pi kernel image gốc mặc định thành `kernel8.img.orig).` 2. Chép bằng `scp` kernel module just-cross-compiled (`lkm_template.ko` cho ARM64, build phần trước) từ host lên microSD, vào `/home/pi` cũng được. 3. \[Tùy chọn\] Trên bo Raspberry Pi có thể chỉ định kernel boot như sau; trường hợp này không cần vì bootloader tự chọn `kernel8.img` làm mặc định. Nếu muốn kernel khác, sửa `/boot/config.txt` trên microSD, đặt kernel image qua dòng `kernel=xxx`. 4. Lưu, reboot rồi đăng nhập và thử lại module. Hình 5.3 cho thấy LKM `lkm_template.ko` just-cross-compiled được dùng trên Raspberry Pi 4 B:
 
 ![Hình 5.3](images/ch05/fig05-03.jpg)
 
@@ -446,17 +446,17 @@ Nếu thấy `rmmod` phát non-fatal error dù cleanup hook vẫn được gọi
 
 Tất nhiên Raspberry Pi khá mạnh; có thể cài Raspberry Pi OS mặc định, một dẫn xuất Debian, cùng development tool và kernel header để biên dịch module ngay trên bo! Không cần cross-compile. Nhưng ở đây theo cross-compile vì đó là điển hình và cần thiết khi làm dự án Linux nhúng.
 
-Sau đây là tóm tắt những điều vừa học về cross-compile kernel module.
+Sau đây là tóm tắt những điều vừa học về cross-compiling kernel module.
 
 ### Tóm tắt lỗi cross-build/load module và cách khắc phục
 
-Hãy tóm tắt điều đã học trong phần thú vị về cross-compile kernel module:
+Hãy tóm tắt điều đã học trong phần thú vị về cross-compiling kernel module:
 
 | Lần thử | Nguyên nhân không cross-compile hoặc chạy được | Cách sửa |
 |---|---|---|
 | 1 | Module build thất bại vì cố build target kernel module cho kernel source tree của host hiện tại x86\_64, hoặc chỉ định path không hợp lệ, thay vì kernel source tree của target. `KDIR ?= /lib/modules/$(shell uname -r)/build` | Sửa Makefile module để biến KDIR trỏ đúng kernel source tree của target: `KDIR ?= ~/rpi_work/kernel_rpi/linux` |
 | 2 | Module build thất bại ở `MODPOST` do thiếu `Module.symvers` trong target kernel source tree. | Nghĩa là target kernel tree chưa cấu hình và/hoặc build; hãy thực hiện… rồi tệp xuất hiện và module cross-build được. |
-| 3 | Module cross-compiled không load trên thiết bị Raspberry Pi, kernel báo “Invalid module format”. | Do quy tắc kernel ABI: kernel chỉ chèn module vào kernel memory nếu được build cho chính nó. Vì thế module không binary-compatible giữa các hệ thống nhưng có thể viết source portable. Lần thử #4 sửa lỗi này. |
+| 3 | Module Cross-compiled không load trên thiết bị Raspberry Pi, kernel báo “Invalid module format”. | Do quy tắc kernel ABI: kernel chỉ chèn module vào kernel memory nếu được build cho chính nó. Vì thế module không binary-compatible giữa các hệ thống nhưng có thể viết source portable. Lần thử #4 sửa lỗi này. |
 | 4 | \<Giống trên, Lần thử #3\> | Cách sửa: boot thiết bị với custom kernel 6.1 VÀ cross-compile module cho cùng kernel, tham chiếu qua biến Makefile KDIR; chép binary module lên target root filesystem rồi `insmod`. Hoạt động! |
 
 Bảng 5.1: Tóm tắt các lần thử cross-compile và chạy kernel module từ host x86\_64 đến target AArch64 Raspberry Pi 4
@@ -467,7 +467,7 @@ Framework LKM là công trình khá lớn. Còn nhiều điều để khám phá
 
 ## Thu thập thông tin hệ thống tối thiểu
 
-Đôi khi, đặc biệt viết module nhằm portable qua nhiều kiến trúc CPU, cần thực hiện công việc có điều kiện theo processor family thực tế đang chạy. Kernel cung cấp vài macro và cách xác định; ở đây build demo module đơn giản (`ch5/min_sysinfo/min_sysinfo.c`), dù còn sơ khai, thể hiện vài cách “phát hiện” chi tiết hệ thống như CPU family, bit-width và endianness. Đoạn code sau chỉ hiển thị hàm liên quan:
+Đôi khi, đặc biệt viết module nhằm portable qua nhiều kiến trúc CPU, cần thực hiện công việc có điều kiện theo processor family thực tế đang chạy. Kernel cung cấp vài macro và cách xác định; ở đây build demo module đơn giản (`ch5/min_sysinfo/min_sysinfo.c`), dù còn sơ khai, thể hiện vài cách “phát hiện” chi tiết hệ thống như CPU family, bit-width và endian-ness. Đoạn code sau chỉ hiển thị hàm liên quan:
 
 ```
 // ch5/min_sysinfo/min_sysinfo.c
@@ -527,9 +527,9 @@ EXPORT_SYMBOL(llkd_sysinfo);
 
 Chi tiết bổ sung LKM thể hiện, như kích thước primitive data type và word range, không hiển thị ở đây; hãy tham khảo source code kho GitHub và tự thử.
 
-Kernel module code trên có tính hướng dẫn vì giúp minh họa viết portable code. Nhớ module bản thân là binary object file không portable, nhưng source code có thể, có lẽ nên tùy dự án, viết để portable qua nhiều kiến trúc. Chỉ build trên hoặc cho target architecture sẽ sẵn sàng triển khai.
+Kernel module code trên có tính hướng dẫn vì giúp minh họa viết portable code. Nhớ module bản thân là binary object file non-portable, nhưng source code có thể, có lẽ nên tùy dự án, viết để portable qua nhiều kiến trúc. Chỉ build trên hoặc cho target architecture sẽ sẵn sàng triển khai.
 
-Lúc này hãy bỏ qua macro `EXPORT_SYMBOL()` dùng ở đây. Sẽ trình bày cách dùng ngay sau. Ngoài ra `my_snprintf_lkp()` là wrapper đơn giản của `snprintf()` để bảo mật tốt hơn, hiện chỉ định nghĩa trong source file hiện tại (`min_sysinfo.c`; hãy xem. Để bạn biết, khi trình bày thêm mô phỏng chức năng ‘giống library’, ta định nghĩa wrapper `snprintf_lkp()` nơi khác; lúc này đừng lo). Phần sau đi sâu bảo mật, cũng như nhiều nơi khác trong sách.
+Lúc này hãy bỏ qua macro `EXPORT_SYMBOL()` dùng ở đây. Sẽ trình bày cách dùng ngay sau. Ngoài ra `my_snprintf_lkp()` là wrapper đơn giản của `snprintf()` để bảo mật tốt hơn, hiện chỉ định nghĩa trong source file hiện tại (`min_sysinfo.c`; hãy xem. Để bạn biết, khi trình bày thêm mô phỏng chức năng ‘library-like’, ta định nghĩa wrapper `snprintf_lkp()` nơi khác; lúc này đừng lo). Phần sau đi sâu bảo mật, cũng như nhiều nơi khác trong sách.
 
 Build và chạy trên Ubuntu 22.04 LTS khách x86\_64 quen thuộc cho output này, từ lệnh `sudo dmesg` trở đi:
 
@@ -537,9 +537,9 @@ Build và chạy trên Ubuntu 22.04 LTS khách x86\_64 quen thuộc cho output n
 
 Hình 5.4: Kernel output của module min\_sysinfo đơn giản nhưng thú vị trên guest x86\_64
 
-Output hàm `llkd_sysinfo()` vừa thấy được khoanh chữ nhật ở Hình 5.4. Tiếp đến output `llkd_sysinfo2()`, tất nhiên giống nhau, chỉ chú trọng bảo mật hơn, phần sau trình bày. Nó tiếp tục dùng `sizeof()` cho biết kích thước byte các data type; cuối cùng module cho word range của kiến trúc, với mọi unsigned/signed word 8, 16, 32 và 64 bit.
+Output hàm `llkd_sysinfo()` vừa thấy được khoanh chữ nhật ở Hình 5.4. Tiếp đến output `llkd_sysinfo2()`, tất nhiên giống nhau, chỉ security-conscious hơn, phần sau trình bày. Nó tiếp tục dùng `sizeof()` cho biết kích thước byte các data type; cuối cùng module cho word range của kiến trúc, với mọi unsigned/signed word 8, 16, 32 và 64 bit.
 
-Tuyệt! Tương tự như đã minh họa, có thể cross-compile module cho target AArch64, chuyển bằng `scp` rồi chạy ở đó (output sau từ Raspberry Pi 4B chạy custom kernel 64 bit 6.1.34-v8+):
+Tuyệt! Tương tự như đã minh họa, có thể cross-compile module cross-compiled cho target AArch64, chuyển bằng `scp` rồi chạy ở đó (output sau từ Raspberry Pi 4B chạy custom kernel 64 bit 6.1.34-v8+):
 
 ```
 $ sudo insmod ./min_sysinfo.ko
@@ -569,15 +569,15 @@ signed max, signed min:
 
 Một lần nữa thấy các chi tiết, lần này liên quan nền tảng AArch64!
 
-Để bạn biết, Yocto Project mạnh mẽ (`https://www.yoctoproject.org/`) là một cách tiêu chuẩn ngành sinh toàn bộ embedded Linux BSP cho Raspberry Pi. Hoặc Ubuntu cung cấp custom Ubuntu kernel 64 bit và root filesystem cho thiết bị, dễ thử nhanh hơn nhiều (`https://wiki.ubuntu.com/ARM/RaspberryPi`).
+Để bạn biết, Yocto Project mạnh mẽ (`https://www.yoctoproject.org/`) là một cách industry-standard sinh toàn bộ embedded Linux BSP cho Raspberry Pi. Hoặc Ubuntu cung cấp custom Ubuntu kernel 64 bit và root filesystem cho thiết bị, dễ thử nhanh hơn nhiều (`https://wiki.ubuntu.com/ARM/RaspberryPi`).
 
 Tôi rất khuyến khích bạn đọc code và tự thử module.
 
-### Chú ý bảo mật hơn một chút
+### security-aware hơn một chút
 
 Tất nhiên bảo mật là mối quan tâm then chốt ngày nay. Nhà phát triển chuyên nghiệp được kỳ vọng viết secure code. Những năm gần đây có nhiều exploit Linux kernel đã biết, xem thêm Đọc thêm. Song song đó, nhiều nỗ lực cải thiện bảo mật Linux kernel đang diễn ra.
 
-Trong module trước (`ch5/min_sysinfo/min_sysinfo.c`), hãy thận trọng dùng routine kiểu cũ như `sprintf`, `strlen`, v.v.; đúng, chúng có trong kernel! Static analyzer giúp rất nhiều để bắt bug tiềm ẩn liên quan bảo mật và loại khác; rất khuyến khích dùng. Chương trực tuyến Kernel Workspace Setup đề cập vài static analysis tool hữu ích cho kernel. Khối output sau dùng một target `sa` trong Makefile “tốt hơn” chạy static analyzer tương đối đơn giản `flawfinder`, do David Wheeler viết, trên source code trong `ch5/min_sysinfo/`:
+Trong module trước (`ch5/min_sysinfo/min_sysinfo.c`), hãy thận trọng dùng routine older-style như `sprintf`, `strlen`, v.v.; đúng, chúng có trong kernel! Static analyzer giúp rất nhiều để bắt bug tiềm ẩn security-related và loại khác; rất khuyến khích dùng. Chương trực tuyến Kernel Workspace Setup đề cập vài static analysis tool hữu ích cho kernel. Khối output sau dùng một target `sa` trong Makefile “tốt hơn” chạy static analyzer tương đối đơn giản `flawfinder`, do David Wheeler viết, trên source code trong `ch5/min_sysinfo/`:
 
 ```
 $ make [tab][tab]
@@ -679,9 +679,9 @@ Comment sau chép từ kernel header `include/linux/module.h`, cho biết rõ li
  [ ... ]
 ```
 
-Nó tiếp tục nói dùng `MODULE_LICENSE`() phần lớn là nỗ lực lịch sử thất bại nhằm truyền thêm thông tin trong chuỗi `MODULE_LICENSE`. Mục đích chính nay là kiểm tra và đánh dấu module `Proprietary`, hạn chế dùng symbol exported theo GPL, sẽ nói sau. Nó cũng giúp cộng đồng, người dùng cuối và module vendor nhanh xem codebase có open source không.
+Nó tiếp tục nói dùng `MODULE_LICENSE`() phần lớn là nỗ lực lịch sử thất bại nhằm truyền thêm thông tin trong chuỗi `MODULE_LICENSE`. Mục đích chính nay là kiểm tra và đánh dấu module `Proprietary`, hạn chế dùng symbol exported theo GPL, sẽ nói sau. Nó cũng giúp cộng đồng, người dùng cuối và module vendor nhanh xem codebase có open-source không.
 
-Kernel source tree có thư mục `LICENSES/` chứa thông tin chi tiết các giấy phép liên quan; chạy nhanh `ls` cho thấy các thư mục con:
+Kernel source tree có thư mục `LICENSES/` chứa thông tin chi tiết các giấy phép liên quan; chạy nhanh `ls` cho thấy các sub-folders:
 
 ```
 $ ls <...>/linux-6.1.25/LICENSES/
@@ -694,15 +694,15 @@ Một số câu trả lời FAQ về GPL tại `https://www.gnu.org/licenses/gpl
 
 Thông tin thêm về licensing model, không lạm dụng macro `MODULE_LICENSE`, đặc biệt multi-/dual-licensing, nằm trong tài liệu tham khảo phần Đọc thêm chương này.
 
-Giờ quay lại kỹ thuật. Phần sau giải thích cách mô phỏng hiệu quả tính năng giống library trong kernel space.
+Giờ quay lại kỹ thuật. Phần sau giải thích cách mô phỏng hiệu quả tính năng library-like trong kernel space.
 
-## Mô phỏng tính năng “giống library” cho kernel module
+## Mô phỏng tính năng “library-like” cho kernel module
 
-Một khác biệt lớn giữa lập trình user mode và kernel mode là ở kernel hoàn toàn không có khái niệm “library” quen thuộc. Library về cơ bản là tập hợp/archive API, giúp nhà phát triển đạt các mục tiêu quan trọng: không phát minh lại bánh xe, software reuse, modularity, portability và tương tự. Nhưng trong Linux kernel, library theo nghĩa truyền thống đơn giản không tồn tại. Dù vậy, thư mục `lib/` trong kernel source tree chứa routine giống library, nhiều routine được build vào kernel image nên có sẵn cho nhà phát triển kernel/module lúc runtime.
+Một khác biệt lớn giữa lập trình user-mode và kernel-mode là ở kernel hoàn toàn không có khái niệm “library” quen thuộc. Library về cơ bản là tập hợp/archive API, giúp nhà phát triển đạt các mục tiêu quan trọng: không phát minh lại bánh xe, software reuse, modularity, portability và tương tự. Nhưng trong Linux kernel, library theo nghĩa truyền thống đơn giản không tồn tại. Dù vậy, thư mục `lib/` trong kernel source tree chứa routine library-like, nhiều routine được build vào kernel image nên có sẵn cho nhà phát triển kernel/module lúc runtime.
 
-Tin tốt là nói tổng quát có hai kỹ thuật đạt chức năng “giống library” trong kernel space cho kernel module:
+Tin tốt là nói tổng quát có hai kỹ thuật đạt chức năng “library-like” trong kernel space cho kernel module:
 
-- Đầu tiên là chủ động “link vào” module object nhiều source file, gồm code gọi là “library”.
+- Đầu tiên là chủ động “link vào” module object nhiều source file, gồm code so-called “library”.
 
 - Thứ hai là kỹ thuật module stacking.
 
@@ -710,7 +710,7 @@ Hãy đọc tiếp để thảo luận chi tiết hơn. Có lẽ tiết lộ tr�
 
 ### Mô phỏng library bằng link nhiều source file
 
-Đến đây chỉ làm module rất đơn giản, có đúng một C source file. Còn tình huống thực tế khá điển hình một module có nhiều C source file? Mọi source file phải được biên dịch rồi link thành một binary object `.ko` duy nhất.
+Đến đây chỉ làm module rất đơn giản, có đúng một C source file. Còn tình huống real-world khá điển hình một module có nhiều C source file? Mọi source file phải được biên dịch rồi link thành một binary object `.ko` duy nhất.
 
 Ví dụ build dự án kernel module `projx`. Gồm ba C source file: `prj1.c`, `prj2.c` và `prj3.c`. Muốn module cuối tên `projx.ko`. Makefile là nơi chỉ định các quan hệ như sau:
 
@@ -721,7 +721,7 @@ projx-objs := prj1.o prj2.o prj3.o
 
 Trong code trên, chú ý label `projx` dùng sau chỉ thị `obj-m` và làm tiền tố cho `-objs` ở dòng sau. Tất nhiên dùng label bất kỳ thay `projx` được. Makefile ví dụ yêu cầu kernel build system biên dịch ba C source file thành object file `.o` riêng, rồi link tất cả thành binary kernel module object cuối `projx.ko`, đúng mong muốn.
 
-Thực sự ta dùng chính cơ chế này build “library” routine nhỏ trong source tree của sách; source file của ‘kernel library’ ở gốc source tree tại `klib.h` và `klib.c`. Tất nhiên ý tưởng là module khác dùng hàm ở đây bằng cách link vào! Ví dụ ở Chương 8, Kernel Memory Allocation for Module Authors – Phần 1, kernel module code `ch8/lowlevel_mem/lowlevel_mem.c` gọi hàm trong library code tại relative path `../../klib.c`. Việc “link vào” library code được thực hiện bằng thêm các dòng sau vào Makefile module `lowlevel_mem`, với tiền tố in đậm:
+Thực sự ta dùng chính cơ chế này build “library” routine nhỏ trong source tree của sách; source file của ‘kernel library’ ở gốc source tree tại `klib.h` và `klib.c`. Tất nhiên ý tưởng là module khác dùng hàm ở đây bằng cách link vào! Ví dụ ở Chương 8, Kernel Memory Allocation for Module Authors – Phần 1, kernel module code `ch8/lowlevel_mem/lowlevel_mem.c` gọi hàm trong library code tại relative path `../../klib.c`. Việc “link vào” so-called library code được thực hiện bằng thêm các dòng sau vào Makefile module `lowlevel_mem`, với tiền tố in đậm:
 
 ```
 FNAME_C := lowlevel_mem
@@ -737,7 +737,7 @@ Tiếp theo, hiểu điều nền tảng: scope của function và variable tron
 
 ### Tìm hiểu function scope và variable scope trong kernel module
 
-Trước khi đi sâu, xem nhanh lại cơ bản là ý hay. Khi lập trình C, bạn hiểu:
+Trước khi đi sâu, re-look cơ bản là ý hay. Khi lập trình C, bạn hiểu:
 
 - Variable khai báo local trong hàm hiển nhiên local với nó và chỉ có scope trong hàm (local variable ‘biến mất’ khi hàm trả về nên gọi là “automatic”. Bug phổ biến là cố tham chiếu local/automatic variable ngoài scope; thường gọi Use After Scope (UAS) hoặc Use After Return (UAR) defect).
 
@@ -770,7 +770,7 @@ EXPORT_SYMBOL(my_foo);
 
 Giờ cả hai có scope ngoài module, chú ý từ khóa `static` được chủ động bỏ trong code block trên. Module khác có thể “thấy” và dùng. Chính ý tưởng này được dùng theo hai cách chính:
 
-- Thứ nhất, kernel export qua macro `EXPORT_SYMBOL*()` tập con global variable và function được cân nhắc kỹ, thuộc core functionality và các subsystem khác. Giờ chúng visible nên dùng được từ kernel module! Sẽ thấy ví dụ ngay sau.
+- Thứ nhất, kernel export qua macro `EXPORT_SYMBOL*()` tập con global variable và function well-thought-out, thuộc core functionality và các subsystem khác. Giờ chúng visible nên dùng được từ kernel module! Sẽ thấy ví dụ ngay sau.
 
   - Ý tưởng này còn dẫn đến hệ quả rất quan trọng: out-of-tree kernel module chỉ truy cập function/variable trong kernel đã được export rõ ràng.
 
@@ -820,13 +820,13 @@ Nhớ thảo luận ngắn về giấy phép module. Linux kernel có đề xu�
 
 Để xem mọi exported symbol, đến gốc kernel source tree và chạy `make export_report`. Tuy nhiên chỉ hoạt động trên kernel tree đã cấu hình và build.
 
-Giờ xem cách then chốt khác đạt tính năng giống library: module stacking.
+Giờ xem cách then chốt khác đạt tính năng library-like: module stacking.
 
 ### Tìm hiểu module stacking
 
 Ý tưởng quan trọng thứ hai ở đây, module stacking, là điều giờ chúng ta đi sâu.
 
-Module stacking là khái niệm phần nào cung cấp tính năng “giống library” cho tác giả module. Ở đây thường thiết kế dự án/sản phẩm có một hay nhiều “core” kernel module, nhiệm vụ hoạt động như một dạng library. Nó gồm data structure và functionality, function/API, được export cho module khác trong dự án và bất kỳ ai muốn dùng, như phần trước thảo luận.
+Module stacking là khái niệm phần nào cung cấp tính năng “library-like” cho tác giả module. Ở đây thường thiết kế dự án/sản phẩm có một hay nhiều “core” kernel module, nhiệm vụ hoạt động như một dạng library. Nó gồm data structure và functionality, function/API, được export cho module khác trong dự án và bất kỳ ai muốn dùng, như phần trước thảo luận.
 
 Để hiểu rõ, xem vài ví dụ thực tế. Đầu tiên trên host Ubuntu 22.04.3 LTS native Linux của tôi, tôi chạy máy ảo khách qua ứng dụng hypervisor Oracle VirtualBox 7.0. Chạy nhanh `lsmod` trên host, lọc chuỗi `vbox`, cho:
 
@@ -839,17 +839,17 @@ vboxdrv                614400  3 vboxnetadp,vboxnetflt
 
 Nhớ từ thảo luận trước, trong bốn cột, cột ba là usage count. Nó `0` ở hàng đầu nhưng `3` ở hàng ba. Không chỉ vậy, kernel module `vboxdrv` có hai module liệt kê bên phải sau usage count. Nếu module xuất hiện sau cột ba, đó là module dependency; đọc như sau: module bên phải phụ thuộc module bên trái.
 
-Vì vậy trong ví dụ, `vboxnetadp` và `vboxnetflt` phụ thuộc `vboxdrv`. Phụ thuộc thế nào? Tất nhiên gọi function/API và/hoặc dùng data structure trong core module `vboxdrv`! Nói chung module xuất hiện bên phải cột ba nghĩa là gọi một hay nhiều function và/hoặc dùng data structure của module bên trái, tăng usage count; usage count là ví dụ reference counter tốt, ở đây thực chất atomic variable 32 bit, điều đi sâu trong chương cuối. Thực chất `vboxdrv` giống “library” theo nghĩa giới hạn, không mang hàm ý user-space library thông thường trừ cung cấp modular functionality. Trong snapshot này thấy usage count `3`, các module phụ thuộc được stack trên nó – đúng nghĩa đen! Bạn thấy ở hai dòng `lsmod` phía trên. Cũng chú ý `vboxnetflt` có usage count dương (`1`) nhưng không module nào bên phải; vẫn nghĩa là thứ gì đang dùng, thường process/thread.
+Vì vậy trong ví dụ, `vboxnetadp` và `vboxnetflt` phụ thuộc `vboxdrv`. Phụ thuộc thế nào? Tất nhiên gọi function/API và/hoặc dùng data structure trong core module `vboxdrv`! Nói chung module xuất hiện bên phải cột ba nghĩa là gọi một hay nhiều function và/hoặc dùng data structure của module bên trái, tăng usage count; usage count là ví dụ reference counter tốt, ở đây thực chất atomic variable 32 bit, điều đi sâu trong chương cuối. Thực chất `vboxdrv` giống “library” theo nghĩa giới hạn, không mang hàm ý library user-mode thông thường trong user space trừ cung cấp modular functionality. Trong snapshot này thấy usage count `3`, các module phụ thuộc được stack trên nó – đúng nghĩa đen! Bạn thấy ở hai dòng `lsmod` phía trên. Cũng chú ý `vboxnetflt` có usage count dương (`1`) nhưng không module nào bên phải; vẫn nghĩa là thứ gì đang dùng, thường process/thread.
 
 Để bạn biết, các Oracle VirtualBox kernel module thấy trong ví dụ thực sự là triển khai VirtualBox Guest Additions. Về cơ bản là para-virtualization construct, giúp tăng tốc máy ảo khách. Oracle VirtualBox cũng cung cấp tương tự cho host Windows/macOS, như mọi virtualization vendor lớn.
 
-Ví dụ module stacking khác như đã hứa: kernel có generic core driver HID (Human Interface Device), thường chạy dạng module; nhiều driver khác ‘phụ thuộc’ được stack trên nó, tận dụng chính tính năng “giống library” đang bàn; ảnh làm rõ:
+Ví dụ module stacking khác như đã hứa: kernel có generic core driver HID (Human Interface Device), thường chạy dạng module; nhiều driver khác ‘phụ thuộc’ được stack trên nó, tận dụng chính tính năng “library-like” đang bàn; ảnh làm rõ:
 
 ![Hình 5.5](images/ch05/fig05-05.jpg)
 
-Hình 5.5: Module “hid” của kernel có nhiều HID driver khác phụ thuộc, minh họa cách “module stacking”
+Hình 5.5: Module “hid” của kernel có nhiều driver HID-related khác phụ thuộc, minh họa cách “module-stacking”
 
-Đây là chút scripting nhanh để xem mọi module có usage count khác không; thường nhưng không luôn có dependent module bên phải; tiếp tục sort output số tăng dần theo usage count:
+Đây là chút scripting nhanh để xem mọi module có usage count non-zero; thường nhưng không luôn có dependent module bên phải; tiếp tục sort output số tăng dần theo usage count:
 
 ```
 lsmod | awk '$3 > 0 {print $0}' | sort -k3n
@@ -1016,7 +1016,7 @@ Hình 5.6: Chạy module-stacking proof-of-concept demo: cửa sổ trên là sh
 
 Nghiên cứu Hình 5.6; đúng, giờ hoạt động như mong đợi!
 
-Chú ý với `core_lkm`, usage count tăng lên `1`, giờ thấy `user_lkm` bên phải, chỉ phụ thuộc `core_lkm`. (Nhớ module ở các cột ngoài cùng bên phải output `lsmod` phụ thuộc module cột ngoài cùng bên trái.)
+Chú ý với `core_lkm`, usage count tăng lên `1`, giờ thấy `user_lkm` bên phải, chỉ phụ thuộc `core_lkm`. (Nhớ module ở các cột extreme-right output `lsmod` phụ thuộc module cột extreme-left.)
 
 4\. Giờ gỡ module. Việc gỡ cũng có ordering dependency như insert. Cố gỡ `core_lkm` trước thất bại vì hiển nhiên còn module khác trong kernel memory dựa vào code/data của nó; tức vẫn được dùng:
 
@@ -1025,7 +1025,7 @@ $ sudo rmmod core_lkm
 rmmod: ERROR: Module core_lkm is in use by: user_lkm
 ```
 
-Lưu ý nếu module đã cài trên hệ thống, có thể dùng `modprobe -r <modules...>` để gỡ mọi module liên quan; việc cài được trình bày phần Tự load module khi hệ thống boot.
+Lưu ý nếu module đã cài trên hệ thống, có thể dùng `modprobe -r <modules...>` để gỡ mọi module liên quan; việc cài được trình bày phần Auto-loading module khi hệ thống boot.
 
 5\. Thông báo thất bại `rmmod` trên tự nó đã rõ. Vậy hãy làm đúng:
 
@@ -1057,7 +1057,7 @@ int exp_int = 200;
 EXPORT_SYMBOL_GPL(exp_int);
 ```
 
-Số nguyên `exp_int` chỉ visible với module chạy theo GPL. Vậy bài tập: đổi `#if 1` trong `core_lkm.c` thành `#if 0`, giờ phát hành chỉ MIT. Build lại và thử. Nó thất bại ngay ở build:
+Số nguyên `exp_int` chỉ visible với module chạy theo GPL. Vậy bài tập: đổi `#if 1` trong `core_lkm.c` thành `#if 0`, giờ phát hành MIT-only. Build lại và thử. Nó thất bại ngay ở build:
 
 ```
 $ make
@@ -1119,13 +1119,13 @@ $ sudo insmod ./core_lkm.ko        # now it's ok
 
 Mẹo: Luôn xem kernel log bằng `dmesg` hay `journalctl`. Nó thường giúp chỉ ra điều thực sự sai.
 
-### Mô phỏng tính năng ‘giống library’ – tóm tắt và kết luận
+### Mô phỏng tính năng ‘library-like’ – tóm tắt và kết luận
 
 Hãy tóm tắt ngắn các điểm then chốt đã học để mô phỏng library-like feature trong kernel module space. Ta khám phá hai kỹ thuật:
 
 - Kỹ thuật đầu dùng link nhiều source file thành một module.
 
-- Khác module stacking, nơi thực sự build nhiều module và “stack” lên nhau.
+- Khác module-stacking, nơi thực sự build nhiều module và “stack” lên nhau.
 
 Không chỉ hoạt động tốt, kỹ thuật đầu còn có lợi thế:
 
@@ -1135,7 +1135,7 @@ Không chỉ hoạt động tốt, kỹ thuật đầu còn có lợi thế:
 
 Nhược điểm cách “link” đầu tiên: khi link nhiều file, kích thước module có thể khá lớn.
 
-Đến đây kết thúc học tính năng mạnh của kernel programming: link nhiều source file thành một module và/hoặc dùng thiết kế module stacking; cả hai cho phát triển dự án kernel tinh vi hơn. (Hãy làm sample code và bài tập gợi ý trước chủ đề sau.)
+Đến đây kết thúc học tính năng mạnh của kernel programming: link nhiều source file thành một module và/hoặc dùng thiết kế module-stacking; cả hai cho phát triển dự án kernel tinh vi hơn. (Hãy làm sample code và bài tập gợi ý trước chủ đề sau.)
 
 Giờ có thể truyền parameter vào kernel module không? Phần sau chỉ cách!
 
@@ -1275,7 +1275,7 @@ Xem kỹ lại cách dùng `module_param()` trong source file `modparams1.c`:
 module_param(mp_debug_level, int, 0660);
 ```
 
-Chú ý parameter thứ ba, permission hay mode: `0660`, tất nhiên số bát phân, nghĩa owner/group đọc-ghi, người khác không truy cập. Hơi khó hiểu đến khi nhận ra nếu permission/mode khác không, pseudofile được tạo dưới filesystem `sysfs`, biểu diễn module parameter, tại `/sys/module/<module-name>/parameters/`:
+Chú ý parameter thứ ba, permission hay mode: `0660`, tất nhiên số bát phân, nghĩa owner/group read-write, người non-zero truy cập. Hơi khó hiểu đến khi nhận ra nếu permission/mode khác không, pseudofile được tạo dưới filesystem `sysfs`, biểu diễn module parameter, tại `/sys/module/<module-name>/parameters/`:
 
 `sysfs` thường mount dưới `/sys`. Mặc định mọi pseudofile trong đó có owner/group root.
 
@@ -1338,7 +1338,7 @@ preferred. Consider using octal permissions '0660'.
 
 Vậy cộng đồng kernel không đồng ý. Vì thế chỉ dùng ký hiệu bát phân “thông thường” `0660`. (Thú vị là commit 6.3 gần đây sửa chính điều này cho vài driver: dm: avoid using symbolic permissions: `https://github.com/torvalds/linux/commit/6a808034724b5` `a36f8e0b712427bfbe9e667d296`.)
 
-Nhắc lại để nhấn mạnh mẹo hữu ích: từ điều đã học, để cung cấp debug instrumentation “động”, module parameter kiểu `debug_level` có vẻ tốt. Tuy nhiên tôi cho rằng dynamic debug tích hợp của Linux kernel tốt hơn nhiều (`CONFIG_DYNAMIC_DEBUG`)! Chủ đề then chốt đã nói ngắn ở Chương 4, Viết kernel module đầu tiên – Phần 1, phần Giới thiệu tính năng dynamic debug mạnh mẽ của kernel. Có thể học thêm từ tài liệu chính thức (`https://www.kernel.org/doc/html/v6.1/admin-guide/dynamic-debug-howto.html`) và chương ba cuốn Linux Kernel Debugging của tôi.
+Nhắc lại để nhấn mạnh mẹo hữu ích: từ điều đã học, để cung cấp debug instrumentation “động”, module parameter kiểu `debug_level` có vẻ tốt. Tuy nhiên tôi cho rằng dynamic debug built-in của Linux kernel tốt hơn nhiều (`CONFIG_DYNAMIC_DEBUG`)! Chủ đề then chốt đã nói ngắn ở Chương 4, Viết kernel module đầu tiên – Phần 1, phần Giới thiệu tính năng dynamic debug mạnh mẽ của kernel. Có thể học thêm từ tài liệu chính thức (`https://www.kernel.org/doc/html/v6.1/admin-guide/dynamic-debug-howto.html`) và chương ba cuốn Linux Kernel Debugging của tôi.
 
 ### Tìm hiểu module parameter data type và validation
 
@@ -1437,7 +1437,7 @@ sudo insmod <path/to/>dm-bufio.ko current_allocated_bytes=4096 ...
 
 Bên trong, variable thực `dm_bufio_current_allocated` giờ được gán `4096`.
 
-#### Kernel parameter liên quan phần cứng
+#### Kernel parameter Hardware-related
 
 Vì bảo mật, module/kernel parameter chỉ định hardware-specific value có macro riêng `module_param_hw[_named|array]()`. David Howells gửi patch series hỗ trợ các hardware parameter mới ngày 1 tháng 12 năm 2016. Patch email (`https://lwn.net/Articles/708274/`) đề cập:
 
@@ -1449,7 +1449,7 @@ This will enable such parameters to be locked down in the core parameter
 parser for secure boot support.  [...]
 ```
 
-Đến đây kết thúc thảo luận kernel module parameter. Giờ chuyển sang khía cạnh hơi đặc biệt khi viết kernel code: dùng floating point trong kernel.
+Đến đây kết thúc thảo luận kernel module parameter. Giờ chuyển sang khía cạnh hơi đặc biệt khi viết kernel code: dùng floating-point trong kernel.
 
 ## Floating point không được phép trong kernel
 
@@ -1469,7 +1469,7 @@ Cuốn LDD lâu đời, Linux Device Drivers của Corbet, Rubini và Kroah-Hart
 
 Vậy bạn hỏi làm temperature conversion như ví dụ thế nào? Đơn giản: truyền giá trị millidegree Celsius nguyên sang user space và làm FP ở đó!
 
-Trong khá nhiều trường hợp, làm một số việc trong kernel đơn giản là sai; user space mới đúng chỗ, có vài ngoại lệ như mọi quy tắc. Gồm floating-point arithmetic, file I/O (đúng, đừng cố đọc/ghi file trong kernel qua code path giống system call) và chạy ứng dụng, dù kernel có cung cấp khả năng khá bất ngờ nhưng đôi khi hữu ích qua UMH (user-mode helper) API như `call_usermodehelper*()` (thận trọng khi dùng!), v.v.
+Trong khá nhiều trường hợp, làm một số việc trong kernel đơn giản là sai; user space mới đúng chỗ, có vài ngoại lệ như mọi quy tắc. Gồm floating-point arithmetic, file I/O (đúng, đừng cố đọc/ghi file trong kernel qua code path call-like) và chạy ứng dụng, dù kernel có cung cấp khả năng khá bất ngờ nhưng đôi khi hữu ích qua UMH (user-mode helper) API như `call_usermodehelper*()` (thận trọng khi dùng!), v.v.
 
 ### Buộc FP trong kernel
 
@@ -1507,7 +1507,7 @@ Dòng then chốt là `Please remove unsupported %f in format string`.
 
 Dù không thấy trong Hình 5.7, phía dưới, section bắt đầu `Call Trace:` tất nhiên cho xem state hiện tại kernel-mode stack của process/thread bị “bắt” trong code path `WARN_ONCE()` trên (hãy chờ, bạn học chi tiết then chốt user-/kernel-mode stack và hơn nữa ở Chương 6, Kernel Internals Essentials – Processes and Threads).
 
-Có thể diễn giải kernel stack từ dưới lên, giúp rất nhiều debug. Đây là phần rút gọn output `Call Trace:`, tiếp nối Hình 5.7:
+Có thể diễn giải kernel stack bottom-up, giúp rất nhiều debug. Đây là phần rút gọn output `Call Trace:`, tiếp nối Hình 5.7:
 
 ```
 [ … ]
@@ -1541,9 +1541,9 @@ Bài tập: Nếu bỏ `printk()` gây lỗi thì sao? Có hoạt động không
 
 Giờ chuyển sang thực hành cách cài và auto-load module lúc startup.
 
-## Tự load module khi hệ thống boot
+## Auto-loading module khi hệ thống boot
 
-Đến nay ta viết out-of-tree module đơn giản trong thư mục riêng và phải load thủ công, thường qua `insmod` hay `modprobe(8)`. Với phần lớn dự án/sản phẩm thực tế, cần out-of-tree module tự load lúc boot. Phần này trình bày cách đạt được.
+Đến nay ta viết out-of-tree module đơn giản trong thư mục riêng và phải load thủ công, thường qua `insmod` hay `modprobe(8)`. Với phần lớn dự án/sản phẩm real-world, cần out-of-tree module auto-loaded lúc boot. Phần này trình bày cách đạt được.
 
 Giả sử module `foo.ko`. Giả định có source code và Makefile. Để auto-load lúc boot, trước tiên cần cài module vào vị trí quy định trên hệ thống. Để làm vậy, kỳ vọng Makefile có target `install`, thường:
 
@@ -1559,7 +1559,7 @@ install:
         sudo make -C $(KDIR) M=$(PWD) modules_install
 ```
 
-Để minh họa “auto-load”, chúng tôi đưa các bước cài và tự load kernel module `ch5/min_sysinfo` lúc boot:
+Để minh họa “auto-load”, chúng tôi đưa các bước cài và auto-load kernel module `ch5/min_sysinfo` lúc boot:
 
 1\. Trước tiên chuyển đến source directory của module:
 
@@ -1628,7 +1628,7 @@ alias symbol:llkd_sysinfo min_sysinfo
 alias symbol:llkd_sysinfo2 min_sysinfo
 ```
 
-4\. Bảo đảm module vừa cài auto-load lúc boot. Một cách là tạo config file `/etc/modules-load.d/<foo>.conf`, với \<`foo`\> là tên module; tất nhiên cần root tạo tệp. Trường hợp đơn giản thực sự dễ: chỉ đặt tên module trong file là xong. Dòng bắt đầu `#` được coi comment và bỏ qua. Ví dụ `min_sysinfo`:
+4\. Bảo đảm module just-installed auto-loaded lúc boot. Một cách là tạo config file `/etc/modules-load.d/<foo>.conf`, với \<`foo`\> là tên module; tất nhiên cần root tạo tệp. Trường hợp đơn giản thực sự dễ: chỉ đặt tên module trong file là xong. Dòng bắt đầu `#` được coi comment và bỏ qua. Ví dụ `min_sysinfo`:
 
 ```
 $ sudo vim /etc/modules-load.d/min_sysinfo.conf
@@ -1642,7 +1642,7 @@ min_sysinfo
 $
 ```
 
-Trên Linux hiện đại, initialization framework thực tế là systemd. Cách còn đơn giản hơn auto-load là báo systemd load: chỉ nhập tên module đã cài vào file có sẵn `/etc/modules-load.d/modules.conf`.
+Trên Linux hiện đại, initialization framework thực tế là systemd. Cách còn đơn giản hơn auto-load là báo systemd load: chỉ nhập tên module đã cài vào file pre-existing `/etc/modules-load.d/modules.conf`.
 
 5\. Reboot bằng `sync; sudo reboot`.
 
@@ -1654,9 +1654,9 @@ Khi hệ thống lên, dùng `lsmod` tìm module và xem kernel log bằng `dmes
 
 ![Hình 5.8](images/ch05/fig05-08.jpg)
 
-Hình 5.8: Module min\_sysinfo đã tự load vào kernel memory lúc boot
+Hình 5.8: Module min\_sysinfo đã auto-loaded vào kernel memory lúc boot
 
-Vậy xong: module `min_sysinfo` thực sự auto-load vào kernel space khi boot! (“Platform details”, output module, thực sự nằm tiếp trong kernel log; chỉ là không phải mọi dòng đều khớp `grep` đã chạy.)
+Vậy xong: module `min_sysinfo` thực sự auto-loaded vào kernel space khi boot! (“Platform details”, output module, thực sự nằm tiếp trong kernel log; chỉ là không phải mọi dòng đều khớp `grep` đã chạy.)
 
 Nhớ phải build module trước rồi install; để tự động hóa, Makefile “tốt hơn” có nội dung sau trong target cài module `install`:
 
@@ -1683,7 +1683,7 @@ Nó bảo đảm build trước, sau là install và chủ động `depmod`. (Ma
 
 Cách khác auto-load là “thủ công” load qua startup script gọi `modprobe(8)`, bản thông minh hơn insmod, nói thêm phần sau.
 
-Nếu module tự load cần parameter truyền lúc load thì sao? Có hai cách: modprobe config file dưới `/etc/modprobe.d/`, hoặc nếu module built-in trong kernel, qua kernel command line.
+Nếu module auto-loaded cần parameter truyền lúc load thì sao? Có hai cách: so-called modprobe config file dưới `/etc/modprobe.d/`, hoặc nếu module built-in trong kernel, qua kernel command line.
 
 Ở đây chỉ cách đầu: thiết lập config file `modprobe`, ví dụ dùng tên LKM `mykmod`; lần nữa cần root tạo file `/etc/modprobe.d/mykmod.conf`; truyền parameter bên trong như:
 
@@ -1698,7 +1698,7 @@ Ví dụ modprobe config `/etc/modprobe.d/alsa-base.conf` trên Ubuntu 22.04 LTS
 options snd-cmipci mpu_port=0x330 fm_port=0x388
 ```
 
-Ở đây hiểu: nếu cần module `snd-cmipci`, nó được load vào kernel memory cùng module parameter `mpu_port=0x330 fm_port=0x388`. Sau đây thêm vài điểm về auto-loading.
+Ở đây hiểu: nếu cần module `snd-cmipci`, nó được load vào kernel memory cùng module parameter `mpu_port=0x330 fm_port=0x388`. Sau đây thêm vài điểm auto-loading-related.
 
 ### Module auto-loading – chi tiết bổ sung
 
@@ -1708,9 +1708,9 @@ Khi module đã cài qua `sudo make install` như trên, cũng insert tương t�
 sudo modprobe min_sysinfo
 ```
 
-Ngoài lề thú vị, xét trường hợp có nhiều kernel module object cần load, ví dụ thiết kế module stacking; modprobe đủ thông minh load đúng thứ tự (đã nói cần ở phần Tìm hiểu module stacking), đáp ứng dependency và mọi thứ hoạt động!
+Ngoài lề thú vị, xét trường hợp có nhiều kernel module object cần load, ví dụ thiết kế module-stacking; modprobe đủ thông minh load đúng thứ tự (đã nói cần ở phần Tìm hiểu module stacking), đáp ứng dependency và mọi thứ hoạt động!
 
-`modprobe` biết thứ tự đúng thế nào? Khi build local, quá trình sinh `modules.order`. Nó cho tiện ích như `modprobe` biết thứ tự load để resolve mọi dependency. Khi module cài vào kernel, tức `/lib/modules/$(uname -r)/extra/` hay vị trí tương tự, `depmod` sinh `/lib/modules/$(uname -r)/modules.dep`. Chứa dependency information, chỉ module có phụ thuộc module khác không. Dùng thông tin, modprobe load đúng thứ tự. Để cụ thể, hãy cài các module ví dụ module stacking:
+`modprobe` biết thứ tự đúng thế nào? Khi build local, quá trình sinh `modules.order`. Nó cho tiện ích như `modprobe` biết thứ tự load để resolve mọi dependency. Khi module cài vào kernel, tức `/lib/modules/$(uname -r)/extra/` hay vị trí tương tự, `depmod` sinh `/lib/modules/$(uname -r)/modules.dep`. Chứa dependency information, chỉ module có phụ thuộc module khác không. Dùng thông tin, modprobe load đúng thứ tự. Để cụ thể, hãy cài các module ví dụ module-stacking:
 
 ```
 $ cd <...>/ch5/modstacking
@@ -1731,7 +1731,7 @@ total 248
 -rw-r--r-- 1 root root 117097 Oct 12 16:37 user_lkm.ko
 ```
 
-Rõ ràng hai module ví dụ (`core_lkm.ko` và `user_lkm.ko`) giờ cài dưới vị trí mong đợi `/lib/modules/$(uname -r)/extra/`, và thấy depmod đã chạy.
+Rõ ràng hai module trong ví dụ module-stacking (`core_lkm.ko` và `user_lkm.ko`) giờ cài dưới vị trí mong đợi `/lib/modules/$(uname -r)/extra/`, và thấy depmod đã chạy.
 
 Giờ xem:
 
@@ -1747,9 +1747,9 @@ Vì vậy `modprobe`, phân tích `/lib/modules/$(uname -r)/modules.order`, nh�
 
 Nhân chủ đề này, file sinh `/lib/modules/$(uname -r)/modules.symbols` có thông tin mọi exported module symbol. Tương tự trong module directory, `Module.symvers` chứa cùng thông tin. (Ngoài ra mọi symbol kernel symbol table, exported và private, cùng virtual address thấy qua pseudofile `/proc/kallsyms` với root; xem man page `nm(1)` để hiểu ký hiệu.)
 
-Tiếp theo trên Linux hiện đại, thực ra systemd lo auto-load module lúc boot bằng phân tích file như `/etc/modules-load.d/*`; service phụ trách là `systemd-modules-load.service(8)`, xem man page `modules-load.d(5)` để biết chi tiết.
+Tiếp theo trên Linux hiện đại, thực ra systemd lo auto-loading module lúc boot bằng phân tích file như `/etc/modules-load.d/*`; service phụ trách là `systemd-modules-load.service(8)`, xem man page `modules-load.d(5)` để biết chi tiết.
 
-Ngược lại đôi khi module auto-load hoạt động sai, gây lockup/delay hoặc không hoạt động, nên muốn tắt auto-load. Có thể blacklist module. Chỉ định trên kernel command line, tiện khi mọi cách khác thất bại, hoặc trong config `/etc/modules-load.d/<foo>.conf` vừa nói. Trên command line qua `module_blacklist=mod1,mod2,...`, tài liệu kernel cho cú pháp/giải thích:
+Ngược lại đôi khi module auto-loaded hoạt động sai, gây lockup/delay hoặc không hoạt động, nên muốn tắt auto-loaded. Có thể blacklist module. Chỉ định trên kernel command line, tiện khi mọi cách khác thất bại, hoặc trong config `/etc/modules-load.d/<foo>.conf` vừa nói. Trên command line qua `module_blacklist=mod1,mod2,...`, tài liệu kernel cho cú pháp/giải thích:
 
 ```
 module_blacklist=  [KNL] Do not load a comma-separated list of
@@ -1776,15 +1776,15 @@ ignore_loglevel [KNL] Ignore loglevel setting - this will print /all/
 
 Fastboot! Ngoài ra kernel parameter `initcall_debug` giúp xác định chức năng kernel chạy lâu khi boot; thuộc việc làm hệ thống “fast boot”, yêu cầu của một số dự án. (Về điều này, nhớ xem `systemd-analyze`, Perl script `scripts/bootgraph.pl` trong kernel tree và hơn nữa. Xem Đọc thêm.)
 
-Như đã nói đầu chương, có framework thay thế tự build lại third-party module, tên Dynamic Kernel Module Support (DKMS). Tài liệu Đọc thêm chương cũng cung cấp liên kết hữu ích. Kết lại, tự load module vào bộ nhớ lúc startup là chức năng hữu ích, thường bắt buộc trong sản phẩm.
+Như đã nói đầu chương, có framework thay thế auto-rebuilding third-party module, tên Dynamic Kernel Module Support (DKMS). Tài liệu Đọc thêm chương cũng cung cấp liên kết hữu ích. Kết lại, auto-loading module vào bộ nhớ lúc startup là chức năng hữu ích, thường bắt buộc trong sản phẩm.
 
-Build sản phẩm chất lượng cao đòi hiểu kỹ bảo mật và kiến thức tích hợp nó; đó là trọng tâm phần sau.
+Build sản phẩm high-quality đòi hiểu kỹ bảo mật và kiến thức tích hợp nó; đó là trọng tâm phần sau.
 
 ## Kernel module và bảo mật – tổng quan
 
-Thực tế trớ trêu là nỗ lực khổng lồ cải thiện bảo mật user space đã mang lại lợi ích lớn những năm gần đây. Người dùng độc hại thực hiện Buffer Overflow (BoF) attack khá dễ vài thập niên trước, nhưng nay thực sự khó thực hiện tốt. Vì sao? Vì nhiều lớp cơ chế bảo mật tăng cường ngăn nhiều nhóm tấn công này.
+Thực tế trớ trêu là nỗ lực khổng lồ cải thiện bảo mật user-space đã mang lại lợi ích lớn những năm gần đây. Người dùng độc hại thực hiện Buffer Overflow (BoF) attack khá dễ vài thập niên trước, nhưng nay thực sự khó thực hiện tốt. Vì sao? Vì nhiều lớp cơ chế bảo mật beefed-up ngăn nhiều nhóm tấn công này.
 
-Kể nhanh vài biện pháp: compiler protection (`-fstack-protector[...]`, `-Wformat-security`, `-D_FORTIFY_SOURCE=3`), partial/full RELRO, sanity/security checker tốt hơn (`checksec.sh`, address sanitizer, PaxTest, static analysis tool, v.v.), secure library, cơ chế bảo vệ phần cứng (NX, SMEP, SMAP, v.v.), \[K\]ASLR, kiểm thử tốt hơn qua fuzzing, v.v. Phù.
+Kể nhanh vài biện pháp: compiler protection (`-fstack-protector[...]`, `-Wformat-security`, `-D_FORTIFY_SOURCE=3`), partial/full RELRO, sanity/security checker tốt hơn (`checksec.sh`, address sanitizer, PaxTest, static analysis tool, v.v.), secure library, cơ chế bảo vệ hardware-level (NX, SMEP, SMAP, v.v.), \[K\]ASLR, kiểm thử tốt hơn qua fuzzing, v.v. Phù.
 
 Điều trớ trêu là kernel-space attack ngày càng phổ biến trong vài năm qua! Đã chứng minh chỉ lộ một kernel virtual address hợp lệ cùng symbol tương ứng cho attacker thông minh cũng có thể giúp tìm vị trí internal kernel structure then chốt, mở đường đủ loại privilege escalation (privesc) attack. Sắp tới sẽ liệt kê, mô tả ngắn vài security/hardening feature Linux kernel cung cấp. Tuy nhiên cuối cùng, là kernel developer, bạn có vai trò lớn: trước hết viết secure code! Dùng Makefile “tốt hơn” là cách bắt đầu tốt, nhiều target liên quan bảo mật, ví dụ mọi static analysis target. Trong phần bảo mật và module này, trình bày vài chủ đề liên quan; bắt đầu với proc-based `sysctl` then chốt.
 
@@ -1827,11 +1827,11 @@ kernel.dmesg_restrict = 0
 
 Rõ ràng là 0, nghĩa không hạn chế (đây là workstation Fedora 39; Ubuntu gần đây đặt 1).
 
-Linux kernel dùng mô hình POSIX capability mạnh, fine-granularity. Capability `CAP_SYS_ADMIN` về cơ bản bao trùm quyền root/superuser/sysadmin truyền thống. `CAP_SYSLOG` cho process/thread thực hiện privileged operation `syslog(2)`.
+Linux kernel dùng mô hình POSIX capability mạnh, fine-granularity. Capability `CAP_SYS_ADMIN` về cơ bản catch-all quyền root/superuser/sysadmin truyền thống. `CAP_SYSLOG` cho process/thread thực hiện privileged operation `syslog(2)`.
 
 #### Đôi lời về sysctl kptr\_restrict
 
-Như đã nói, “leak” kernel address cùng symbol liên quan có thể dẫn đến info-leak-based attack. Để ngăn, trước tiên tác giả kernel/module nên đơn giản tránh in kernel address. Nếu phải in, luôn dùng format kiểu `printf` tương đối mới, riêng cho kernel: thay `%p` hoặc `%px` quen thuộc để in kernel virtual address, nên dùng format specifier `%pK`. Dùng `%px` bảo đảm in actual address; có thể hữu ích debug nhưng chắc chắn muốn tránh trong production. Các printk format specifier giúp thế nào? Đọc tiếp...
+Như đã nói, “leak” kernel address cùng symbol liên quan có thể dẫn đến info-leak-based attack. Để ngăn, trước tiên tác giả kernel/module nên đơn giản tránh in kernel address. Nếu phải in, luôn dùng format kiểu `printf` new-ish, kernel-specific: thay `%p` hoặc `%px` quen thuộc để in kernel virtual address, nên dùng format specifier `%pK`. Dùng `%px` bảo đảm in actual address; có thể hữu ích debug nhưng chắc chắn muốn tránh trong production. Các printk format specifier giúp thế nào? Đọc tiếp...
 
 Sysctl `kptr_restrict`, từ 2.6.38, ảnh hưởng output `printk()` khi in kernel address; dùng `printk("&var = %pK\n", &var);` thay `printk("&var = %p\n", &var);` quen thuộc được coi là security best practice. Hiểu chính xác tunable `kptr_restrict` hoạt động là then chốt:
 
@@ -1849,7 +1849,7 @@ in Linux 2.6.39. Since Linux 3.4, only users with the CAP_SYS_ADMIN capability
 can change the value in this file.
 ```
 
-Một lần nữa, giá trị mặc định `sysctl` này trên Ubuntu và Fedora đủ mới của chúng ta lần lượt 1 và 0. Có thể dùng `sysctl` xem và với root thay kernel sysctl; trên máy ảo Ubuntu 22.04:
+Một lần nữa, giá trị mặc định `sysctl` này trên Ubuntu và Fedora recent-enough của chúng ta lần lượt 1 và 0. Có thể dùng `sysctl` xem và với root thay kernel sysctl; trên máy ảo Ubuntu 22.04:
 
 ```
 $ sysctl kernel.dmesg_restrict kernel.kptr_restrict
@@ -1875,9 +1875,9 @@ b) Để debug, nếu phải in actual kernel address không sửa đổi, nên 
 
 c) Tài liệu kernel chi tiết `printk` format specifier tại `https://www.kernel.org/doc/html/latest/core-api/printk-formats.html#how-to-get-printk-format-specifiers-right`; hãy đọc.
 
-Tất nhiên biện pháp bảo mật chỉ có tác dụng khi nhà phát triển dùng; trong kernel source tree 6.1.25 có tổng khoảng hơn 87.000 lần dùng routine `printk`() (\~ 33k) và liên quan (`pr_*()` : \~ 54k). Trong đó chỉ vỏn vẹn 24 dùng format specifier chú trọng bảo mật `%pK`! (Để biết, tôi grep các file `*.[ch]` trong kernel source tree với regex `printk\(.*\%pK` và `pr_.*\` `(.*\%pK` . Dù khó hoàn hảo, cho ước tính khá tốt. Lần xuất bản đầu tìm chỉ 14 chỗ dùng `%pK` trong kernel source tree 5.4.0; vì thế đang cải thiện, chậm.)
+Tất nhiên biện pháp bảo mật chỉ có tác dụng khi nhà phát triển dùng; trong kernel source tree 6.1.25 có tổng khoảng hơn 87.000 lần dùng routine `printk`() (\~ 33k) và liên quan (`pr_*()` : \~ 54k). Trong đó chỉ vỏn vẹn 24 dùng format specifier security-aware `%pK`! (Để biết, tôi grep các file `*.[ch]` trong kernel source tree với regex `printk\(.*\%pK` và `pr_.*\` `(.*\%pK` . Dù khó hoàn hảo, cho ước tính khá tốt. Lần xuất bản đầu tìm chỉ 14 chỗ dùng `%pK` trong kernel source tree 5.4.0; vì thế đang cải thiện, chậm.)
 
-Với hardware-level defect xuất hiện đầu 2018, nay nổi tiếng Meltdown, Spectre và các processor speculation security issue khác, xuất hiện cảm giác cấp thiết mới về phát hiện information leakage để developer/admin ngăn chặn.
+Với hardware-level defect xuất hiện đầu 2018, nay well-known Meltdown, Spectre và các processor speculation security issue khác, xuất hiện cảm giác cấp thiết mới về phát hiện information leakage để developer/admin ngăn chặn.
 
 Perl script hữu ích `scripts/leaking_addresses.pl` được phát hành mainline 4.14 tháng 11 năm 2017 (tôi vui đã góp tay công việc quan trọng: `https://github.com/torvalds/linux/commit/1410fe4eea22959bd31c05e4c1846f1718300bde`), cùng thêm kiểm tra phát hiện kernel address leak.
 
@@ -1988,15 +1988,15 @@ built with the CONFIG_MODULES option enabled.
 
 ### Giới thiệu kernel lockdown LSM
 
-Kernel hardening feature còn mạnh hơn là LSM (Linux Security Module) tương đối gần đây, từ 5.4, tên lockdown; khá nghiêm và can thiệp sâu nên mặc định tắt. Tóm lại nó ngăn user-mode app/script sửa kernel đang chạy qua Integrity mode. Lockdown mode còn chặt hơn, Confidential, đồng thời ngăn trích kernel information được coi bí mật, giúp ngăn info leak và hơn nữa.
+Kernel hardening feature còn mạnh hơn là LSM (Linux Security Module) tương đối gần đây, từ 5.4, tên lockdown; khá nghiêm và can thiệp sâu nên mặc định tắt. Tóm lại nó ngăn user-mode app/script sửa kernel đang chạy qua so-called Integrity mode. Lockdown mode còn chặt hơn, Confidential, đồng thời ngăn trích kernel information được coi bí mật, giúp ngăn info leak và hơn nữa.
 
-Lưu ý lockdown có thể tự bật khi dùng Secure Boot mode trên (U)EFI x86 hoặc AArch64! Điều này có thể khiến module không load, tôi từng gặp một lần. Bảo mật có thể và thực sự thường là con dao hai lưỡi.
+Lưu ý lockdown có thể auto-enabled khi dùng Secure Boot mode trên (U)EFI x86 hoặc AArch64! Điều này có thể khiến module không load, tôi từng gặp một lần. Bảo mật có thể và thực sự thường là con dao double-edged.
 
 Thông tin thêm lockdown LSM trong Đọc thêm.
 
-Kết lại, tất nhiên kernel security hardening và malicious attack là trò mèo đuổi chuột. Ví dụ security hardening measure (K)ASLR, sẽ nói ý nghĩa trong các chương Linux memory management tới, khá thường bị vượt qua. Cũng xem Effectively bypassing kptr\_restrict on Android: `http://bits-please.blogspot.com/2015/08/effectively-bypassing-kptrrestrict-on.html`. Bảo mật không dễ; luôn là công việc tiếp diễn. Gần như không cần nói: developer cả user/kernel space cần nắm security posture yêu cầu và thực tế, phải viết security-aware code, dùng tool và test xác minh liên tục. (Thêm việc nhưng phải làm.)
+Kết lại, tất nhiên kernel security hardening và malicious attack là trò cat-and-mouse. Ví dụ security hardening measure (K)ASLR, sẽ nói ý nghĩa trong các chương Linux memory management tới, khá thường bị vượt qua. Cũng xem Effectively bypassing kptr\_restrict on Android: `http://bits-please.blogspot.com/2015/08/effectively-bypassing-kptrrestrict-on.html`. Bảo mật không dễ; luôn là công việc tiếp diễn. Gần như không cần nói: developer cả user/kernel space cần nắm security posture yêu cầu và thực tế, phải viết security-aware code, dùng tool và test xác minh liên tục. (Thêm việc nhưng phải làm.)
 
-Hãy kết thúc chương bằng một ít về cộng đồng kernel: coding style guideline và chỉ dẫn nhanh kiểu how-to về upstream contribution.
+Hãy kết thúc chương bằng một ít về cộng đồng kernel: coding style guideline và chỉ dẫn nhanh how-to-style về upstream contribution.
 
 ## Hướng dẫn coding style cho nhà phát triển kernel
 
@@ -2004,7 +2004,7 @@ Nhiều dự án lớn chỉ định coding guideline riêng; cộng đồng Lin
 
 Hơn nữa, thuộc code-submission checklist khá đầy đủ cho developer như bạn muốn upstream code, bạn được kỳ vọng chạy patch qua Perl script kiểm tra code phù hợp Linux kernel coding style: `scripts/checkpatch.pl`.
 
-Mặc định script chỉ chạy trên patch `git` định dạng đúng. Có thể chạy với standalone C code như out-of-tree module code như sau, đúng điều Makefile “tốt hơn” thực hiện:
+Mặc định script chỉ chạy trên patch `git` well-formatted. Có thể chạy với standalone C code như out-of-tree module code như sau, đúng điều Makefile “tốt hơn” thực hiện:
 
 ```
 <kernel-src>/scripts/checkpatch.pl --no-tree -f <filename>.c
@@ -2034,17 +2034,17 @@ Thực ra có thể sinh toàn bộ Linux kernel documentation qua `make pdfdocs
 
 Hình 5.10: Một phần kernel development documentation vừa sinh
 
-Là phần của kernel development process và để giữ tiêu chuẩn chất lượng, checklist chặt chẽ bắt buộc theo, dạng hướng dẫn dài, thực sự thuộc kernel patch submission process; phiên bản mới nhất hiện có không dưới 24 mục. Checklist chính thức tại Linux Kernel patch submission checklist: `https://www.kernel.org/doc/html/latest/process/submit-checklist.html#linux-kernel-patch-submission-checklist`.
+Là phần của kernel development process và để giữ tiêu chuẩn chất lượng, checklist chặt chẽ must-befollowed, dạng hướng dẫn dài, thực sự thuộc kernel patch submission process; phiên bản mới nhất hiện có không dưới 24 mục. Checklist chính thức tại Linux Kernel patch submission checklist: `https://www.kernel.org/doc/html/latest/process/submit-checklist.html#linux-kernel-patch-submission-checklist`.
 
 Dù có vẻ nặng nề với kernel newbie, làm cẩn thận checklist tăng tính chặt chẽ và uy tín công việc, cuối cùng cho code tốt hơn. Tôi rất khuyến khích đọc kernel patch submission checklist và thử các quy trình trong đó.
 
-Có mẹo thực hành, cách gần như bảo đảm trở thành kernel hacker không? Tất nhiên tiếp tục đọc sách này! Ha ha, đúng, ngoài ra hãy tham gia Eudyptula Challenge tuyệt vời (`http://www.eudyptula-challenge.org/`) Ồ chờ, rất tiếc tại thời điểm viết nó đã đóng.
+Có mẹo hands-on, cách gần như bảo đảm trở thành kernel hacker không? Tất nhiên tiếp tục đọc sách này! Ha ha, đúng, ngoài ra hãy tham gia Eudyptula Challenge tuyệt vời (`http://www.eudyptula-challenge.org/`) Ồ chờ, rất tiếc tại thời điểm viết nó đã đóng.
 
 Đừng lo; đây là site đăng mọi challenge và solution, nhưng đừng gian lận! Hãy xem và thử challenge. Sẽ tăng tốc kỹ năng kernel hacking đáng kể: `https://github.com/agelastic/eudyptula`.
 
 ## Tổng kết
 
-Trong chương này, chương hai về viết module qua LKM, đã trình bày nhiều phần còn lại của chủ đề quan trọng: dùng Makefile “tốt hơn”, mẹo cấu hình debug kernel (rất quan trọng!), cross-compile module, thu thập platform information tối thiểu từ module và ngay cả một ít giấy phép. Cũng xem mô phỏng library-like feature theo hai cách: đầu thường được ưu tiên là linking, thứ hai module stacking; dùng module parameter, tránh floating-point arithmetic, tự load module lúc boot, v.v. Mối quan tâm bảo mật, đặc biệt module và cách xử lý, quan trọng và đã trình bày. Cuối cùng khép lại với kernel coding style guideline và cách bắt đầu đóng góp mainline. Vậy chúc mừng! Giờ bạn biết phát triển kernel module và thậm chí bắt đầu hành trình kernel upstream contribution.
+Trong chương này, chương hai về viết module qua LKM, đã trình bày nhiều phần còn lại của chủ đề quan trọng: dùng Makefile “tốt hơn”, mẹo cấu hình debug kernel (rất quan trọng!), cross-compiling module, thu thập platform information tối thiểu từ module và ngay cả một ít giấy phép. Cũng xem mô phỏng library-like feature theo hai cách: đầu thường được ưu tiên là linking, thứ hai module-stacking; dùng module parameter, tránh floating-point arithmetic, auto-loading module lúc boot, v.v. Mối quan tâm bảo mật, đặc biệt module và cách xử lý, quan trọng và đã trình bày. Cuối cùng khép lại với kernel coding style guideline và cách bắt đầu đóng góp mainline. Vậy chúc mừng! Giờ bạn biết phát triển kernel module và thậm chí bắt đầu hành trình kernel upstream contribution.
 
 Trong chương tiếp theo, chủ đề đầu của Phần 2 – Tìm hiểu và làm việc với kernel, ta đi sâu chủ đề thú vị, cần thiết. Bắt đầu khám phá khá sâu Linux kernel internals về architecture, cách encapsulate process/thread và hơn nữa.
 

@@ -20,7 +20,7 @@ Trong chương này, chúng ta sẽ trình bày các hướng dẫn sau:
 
 ## Yêu cầu kỹ thuật
 
-Nếu đã cẩn thận làm theo chương trực tuyến Kernel Workspace Setup, một phần điều kiện kỹ thuật tiên quyết sau đây đã được đáp ứng. (Chương đầu còn đề cập nhiều công cụ và dự án open source hữu ích; tôi chắc chắn khuyến khích bạn xem qua ít nhất một lần.) Để thuận tiện, chúng tôi tóm tắt một số điểm then chốt ở đây.
+Nếu đã cẩn thận làm theo chương trực tuyến Kernel Workspace Setup, một phần điều kiện kỹ thuật tiên quyết sau đây đã được đáp ứng. (Chương đầu còn đề cập nhiều công cụ và dự án open-source hữu ích; tôi chắc chắn khuyến khích bạn xem qua ít nhất một lần.) Để thuận tiện, chúng tôi tóm tắt một số điểm then chốt ở đây.
 
 Để build và dùng external kernel module (hay out-of-tree kernel module) trên bản phân phối Linux hoặc hệ thống tùy chỉnh, bạn cần:
 
@@ -28,13 +28,13 @@ Nếu đã cẩn thận làm theo chương trực tuyến Kernel Workspace Setup
 
 - Tối thiểu phải cài hai thành phần sau:
 
-  - Toolchain: Gồm compiler, assembler, linker/loader, C library và nhiều thành phần khác. Nếu build cho hệ thống cục bộ như giả định hiện tại, mọi bản phân phối Linux hiện đại đều có native toolchain cài sẵn. Nếu chưa, chỉ cần cài gói GCC cho bản phân phối là đủ; trên Linux dựa trên Ubuntu hoặc Debian, dùng:
+  - Toolchain: Gồm compiler, assembler, linker/loader, C library và nhiều thành phần khác. Nếu build cho hệ thống cục bộ như giả định hiện tại, mọi bản phân phối Linux hiện đại đều có native toolchain cài sẵn. Nếu chưa, chỉ cần cài gói GCC cho bản phân phối là đủ; trên hệ thống Linux dựa trên Ubuntu hoặc Debian-based, dùng:
 
 ```
 sudo apt install gcc
 ```
 
-  - Kernel header: Các header này được dùng khi biên dịch LKM. Thực tế, bạn cài gói không chỉ cài kernel header mà còn đưa các thành phần cần thiết khác như kernel Makefile lên hệ thống. Một lần nữa, mọi bản phân phối Linux hiện đại đều sẽ/nên cài sẵn kernel header. Nếu chưa (có thể kiểm tra bằng `dpkg` như ở đây), chỉ cần cài gói cho bản phân phối; trên Linux dựa trên Ubuntu hoặc Debian, dùng:
+  - Kernel header: Các header này được dùng khi biên dịch LKM. Thực tế, bạn cài gói không chỉ cài kernel header mà còn đưa các thành phần cần thiết khác như kernel Makefile lên hệ thống. Một lần nữa, mọi bản phân phối Linux hiện đại đều sẽ/nên cài sẵn kernel header. Nếu chưa (có thể kiểm tra bằng `dpkg` như ở đây), chỉ cần cài gói cho bản phân phối; trên hệ thống Linux dựa trên Ubuntu hoặc Debian-based, dùng:
 
 ```
 $ sudo apt install linux-headers-generic
@@ -64,7 +64,7 @@ Trong phần này, chúng ta bắt đầu hiểu sâu hơn về Linux kernel. C�
 
 ### User space và kernel space
 
-Microprocessor hiện đại hỗ trợ thực thi code ở tối thiểu hai privilege level. Ví dụ thực tế, họ Intel/AMD x86\[-64\] hỗ trợ bốn privilege level (gọi là ring level), họ AArch32 (ARM-32) hỗ trợ đến bảy mode (ARM gọi là execution mode; sáu privileged và một non-privileged), còn họ AArch64 (ARM-64/ARMv8) hỗ trợ bốn exception level (EL0 đến EL3, với EL0 ít đặc quyền nhất, EL3 nhiều nhất).
+Microprocessor hiện đại hỗ trợ thực thi code ở tối thiểu hai privilege level. Ví dụ real-world, họ Intel/AMD x86\[-64\] hỗ trợ bốn privilege level (gọi là ring level), họ AArch32 (ARM-32) hỗ trợ đến bảy mode (ARM gọi là execution mode; sáu privileged và một non-privileged), còn họ AArch64 (ARM-64/ARMv8) hỗ trợ bốn exception level (EL0 đến EL3, với EL0 ít đặc quyền nhất, EL3 nhiều nhất).
 
 Điểm then chốt là để bảo mật và ổn định nền tảng, mọi hệ điều hành hiện đại chạy trên các bộ xử lý này dùng ít nhất hai privilege level hay execution mode, dẫn đến tách Virtual Address Space (VAS) thành hai virtual address space phân biệt rõ:
 
@@ -82,13 +82,13 @@ Sau đây là vài chi tiết Linux system architecture; hãy đọc tiếp.
 
 ### Library API và system call API
 
-Ứng dụng user space thường dựa vào Application Programming Interface (API) để làm việc. Library về cơ bản là tập hợp hay archive các API, cho phép dùng interface chuẩn hóa, viết tốt và kiểm thử tốt (cùng các lợi ích thông thường: không phải phát minh lại bánh xe, portability, standardization, v.v.). Linux có nhiều library: ngay cả hàng trăm trên hệ thống cấp doanh nghiệp cũng không hiếm. Trong số đó, mọi ứng dụng Linux user mode dạng thực thi được “tự động liên kết” với một library quan trọng luôn được dùng: `glibc` – GNU standard C library, như bạn sẽ học. Tuy nhiên, library chỉ có trong user mode; kernel không dùng các user-mode library này (nói thêm ở chương sau).
+Ứng dụng user space thường dựa vào Application Programming Interface (API) để làm việc. Library về cơ bản là tập hợp hay archive các API, cho phép dùng interface chuẩn hóa, well-written và well-tested (cùng các lợi ích thông thường: không phải phát minh lại bánh xe, portability, standardization, v.v.). Linux có nhiều library: ngay cả hàng trăm trên hệ thống enterprise-class cũng không hiếm. Trong số đó, mọi ứng dụng Linux user mode dạng thực thi được “auto-linked” với một library quan trọng always-used: `glibc` – GNU standard C library, như bạn sẽ học. Tuy nhiên, library chỉ có trong user mode; kernel không dùng các user-mode library này (nói thêm ở chương sau).
 
-Ví dụ library API là `printf(3)`, `scanf(3)`, `strcmp(3)`, `malloc(3)` và `free(3)` quen thuộc. (Nhớ lại phần Using the Linux man pages trong chương trực tuyến Kernel Workspace Setup.)
+Ví dụ library API là `printf(3)`, `scanf(3)`, `strcmp(3)`, `malloc(3)` và `free(3)` well-known. (Nhớ lại phần Using the Linux man pages trong chương trực tuyến Kernel Workspace Setup.)
 
 Giờ đến điểm then chốt: nếu user và kernel là các address space riêng, ở privilege level khác nhau, làm sao user process vốn bị giới hạn trong user space như vừa học truy cập kernel? Câu trả lời ngắn: qua system call. System call là API đặc biệt theo nghĩa nó là cách hợp lệ duy nhất, theo kiểu synchronous, để process hoặc thread user space truy cập kernel. Nói cách khác, system call là entry point hợp lệ duy nhất vào kernel space.
 
-Chúng, tức system call, có sẵn khả năng chuyển từ user mode không đặc quyền sang kernel mode có đặc quyền (nói thêm về điều này và monolithic design ở Chương 6, Kernel Internals Essentials – Processes and Threads, phần Process and interrupt contexts). Ví dụ system call gồm `fork(2)`, `execve(2)`, `open(2)`, `read(2)`, `write(2)`, `socket(2)`, `accept(2)`, `chmod(2)`, v.v.
+Chúng, tức system call, built-in khả năng chuyển từ user mode non-privileged sang kernel mode có đặc quyền (nói thêm về điều này và monolithic design ở Chương 6, Kernel Internals Essentials – Processes and Threads, phần Process and interrupt contexts). Ví dụ system call gồm `fork(2)`, `execve(2)`, `open(2)`, `read(2)`, `write(2)`, `socket(2)`, `accept(2)`, `chmod(2)`, v.v.
 
 Tra mọi library API và system call API trong man page trực tuyến:
 
@@ -106,23 +106,23 @@ Tất nhiên, sách tập trung hoàn toàn vào kernel space. Linux kernel ngà
 
 - Core kernel: Code này xử lý các công việc chuyên sâu điển hình của hệ điều hành hiện đại, gồm tạo/hủy process và thread ở user/kernel, CPU scheduling, synchronization primitive, signaling, timer, interrupt handling, namespace, cgroup, module support, crypto và nhiều nội dung khác.
 
-- Memory Management (MM): Xử lý mọi công việc liên quan bộ nhớ, gồm thiết lập và duy trì Virtual Address Space (VAS) của kernel và process.
+- Memory Management (MM): Xử lý mọi công việc memory-related, gồm thiết lập và duy trì Virtual Address Space (VAS) của kernel và process.
 
 - VFS (để hỗ trợ filesystem): Virtual Filesystem Switch (VFS) là abstraction layer trên các filesystem thực tế được triển khai trong Linux kernel (ví dụ `ext[2|4]`, `vfat`, `ntfs`, `msdos`, `iso9660`, `f2fS`, `ufS` và nhiều loại khác).
 
 - Block I/O: Các code path triển khai file I/O thực tế, từ filesystem xuống tận block device driver và mọi thứ ở giữa (thực sự khá nhiều!), đều nằm ở đây.
 
-- Network protocol stack: Linux nổi tiếng với triển khai chính xác, tuân thủ từng chi tiết RFC và chất lượng cao của các network protocol quen thuộc lẫn ít quen thuộc ở mọi lớp của mô hình, có lẽ TCP/IP nổi tiếng nhất.
+- Network protocol stack: Linux nổi tiếng với triển khai chính xác, to-the-letter-of-the-RFC và high-quality của các network protocol well-known lẫn not-so-well-known ở mọi lớp của mô hình, có lẽ TCP/IP nổi tiếng nhất.
 
 - Inter-Process Communication (IPC) support: Các cơ chế IPC được triển khai ở đây; Linux hỗ trợ message queue, shared memory, semaphore (cả SysV cũ lẫn POSIX mới) và các cơ chế IPC khác.
 
 - Sound support: Mọi code triển khai audio ở đây, từ firmware đến driver và codec.
 
-- Virtualization support: Linux đã rất phổ biến với cloud provider lớn lẫn nhỏ, một lý do lớn là virtualization engine Kernel-based Virtual Machine (KVM) chất lượng cao, chiếm ít tài nguyên.
+- Virtualization support: Linux đã rất phổ biến với cloud provider lớn lẫn nhỏ, một lý do lớn là virtualization engine Kernel-based Virtual Machine (KVM) high-quality, low-footprint.
 
 Tất cả tạo thành các kernel subsystem chính; ngoài ra còn có:
 
-- Code riêng theo kiến trúc, nghĩa là riêng theo CPU
+- Code Arch-specific, nghĩa là CPU-specific
 
 - Kernel initialization
 
@@ -132,7 +132,7 @@ Tất cả tạo thành các kernel subsystem chính; ngoài ra còn có:
 
 Nhớ rằng trong Chương 2, Build Linux kernel 6.x từ source code – Phần 1, phần Tham quan ngắn kernel source tree đã đưa ra bố cục code trong source tree tương ứng các subsystem chính và thành phần khác.
 
-Ai cũng biết Linux kernel theo monolithic kernel architecture, trái với microkernel architecture. Về cơ bản, monolithic design là thiết kế trong đó mọi thành phần kernel đã đề cập ở phần này cùng nằm trong và chia sẻ kernel VAS (hay kernel segment). Điều này thấy rõ trong sơ đồ sau:
+Việc Linux kernel tuân theo monolithic kernel architecture (trái với microkernel architecture) là một thực tế well-known. Về cơ bản, monolithic design là thiết kế trong đó mọi thành phần kernel đã đề cập ở phần này cùng nằm trong và chia sẻ kernel VAS (hay kernel segment). Điều này thấy rõ trong sơ đồ sau:
 
 ![Hình 4.2](images/ch04/fig04-02.jpg)
 
@@ -140,13 +140,13 @@ Hình 4.2: Linux kernel space – các subsystem và khối chính
 
 Điều khác cần biết là tất nhiên đây là virtual address space, không phải physical address space. Kernel ánh xạ virtual page sang physical page frame ở độ hạt page, dùng các khối phần cứng như Memory Management Unit (MMU), processor và Translation Lookaside Buffer (TLB) cache để tăng hiệu quả. Nó dùng master kernel paging table ánh xạ kernel virtual page sang physical frame (RAM), và với từng process user space đang tồn tại, ánh xạ user virtual page của process sang physical page frame qua paging table riêng của từng process.
 
-Nội dung sâu hơn về kiến thức thiết yếu của kernel, memory management architecture và internals đang chờ bạn ở Chương 6, Kernel Internals Essentials – Processes and Threads, cùng các chương tiếp theo.
+Nội dung in-depth hơn về kiến thức thiết yếu của kernel, memory management architecture và internals đang chờ bạn ở Chương 6, Kernel Internals Essentials – Processes and Threads, cùng các chương tiếp theo.
 
 Giờ đã hiểu cơ bản user và kernel virtual address space, hãy tiếp tục và bắt đầu hành trình vào framework LKM.
 
 ## Khám phá LKM
 
-Kernel module là phương tiện cung cấp chức năng cấp kernel mà không phải làm việc trong kernel source tree và static kernel image.
+Kernel module là phương tiện cung cấp chức năng kernel-level mà không phải làm việc trong kernel source tree và static kernel image.
 
 Hãy hình dung tình huống cần thêm tính năng hỗ trợ vào Linux kernel – có thể device driver mới để dùng chip ngoại vi phần cứng cụ thể, filesystem mới hoặc I/O scheduler mới. Một cách hiển nhiên là cập nhật kernel source tree bằng code mới, rồi cấu hình, build, kiểm thử và triển khai.
 
@@ -158,7 +158,7 @@ Framework LKM cho phép biên dịch một đoạn kernel code, thường bên n
 
 Code nguồn kernel module thường gồm một hay nhiều tệp C, header và Makefile, được build (tất nhiên qua `make`) thành kernel module. Bản thân kernel module chỉ là binary object file, không phải binary executable. Ở Linux 2.4 trở về trước, tên tệp kernel module có hậu tố `.o`; trên Linux 2.6 hiện đại trở đi, thay vào đó có hậu tố `.ko` (kernel object). Khi build xong, có thể chèn tệp `.ko`, tức kernel module, vào kernel đang chạy lúc runtime, thực chất biến nó thành một phần kernel.
 
-Lưu ý không phải `all` chức năng kernel đều có thể cung cấp qua LKM. Nhiều tính năng core như CPU (task) scheduler code cốt lõi, memory management, signaling, timer, interrupt management code path, driver riêng theo nền tảng điều khiển pin controller, clock, v.v., chỉ phát triển được trong chính kernel. Tương tự, kernel module chỉ được truy cập một tập con của toàn bộ kernel API và data variable; nói thêm sau.
+Lưu ý không phải `all` chức năng kernel đều có thể cung cấp qua LKM. Nhiều tính năng core như CPU (task) scheduler code cốt lõi, memory management, signaling, timer, interrupt management code path, driver platform-specific điều khiển pin controller, clock, v.v., chỉ phát triển được trong chính kernel. Tương tự, kernel module chỉ được truy cập một tập con của toàn bộ kernel API và data variable; nói thêm sau.
 
 Bạn có thể hỏi: làm sao chèn module object vào kernel lúc runtime? Hãy giữ đơn giản – câu trả lời là qua tiện ích `insmod`. Lúc này bỏ qua chi tiết, sẽ được giải thích ở phần Chạy kernel module sắp tới. Hình sau khái quát việc build rồi chèn kernel module vào kernel memory:
 
@@ -205,7 +205,7 @@ $ ls /lib/modules/6.1.25-lkp-kernel/kernel/
 arch/  crypto/  drivers/  fs/  lib/  net/  sound/
 ```
 
-Ở đây, nhìn cấp cao nhất của `kernel/` dưới `/lib/modules/$(uname -r)` cho distro kernel (Ubuntu 22.04 LTS chạy kernel `5.19.0-45-generic`), ta thấy nhiều thư mục con, chứa thực sự vài nghìn kernel module. Trái lại, với kernel tự build (xem chi tiết ở Chương 2, Build Linux kernel 6.x từ source code – Phần 1, và Chương 3, Build Linux kernel 6.x từ source code – Phần 2), số lượng ít hơn nhiều. Bạn nhớ từ thảo luận ở Chương 2, Build Linux kernel 6.x từ source code – Phần 1, rằng chúng ta chủ động dùng target `localmodconfig` để giữ build tương đối nhỏ và nhanh. Vì vậy, ví dụ kernel 6.1.25 tùy chỉnh ở đây chỉ có khoảng hơn 70 kernel module được build cho nó.
+Ở đây, nhìn cấp cao nhất của `kernel/` dưới `/lib/modules/$(uname -r)` cho distro kernel (Ubuntu 22.04 LTS chạy kernel `5.19.0-45-generic`), ta thấy nhiều sub-folders, chứa thực sự vài nghìn kernel module. Trái lại, với kernel tự build (xem chi tiết ở Chương 2, Build Linux kernel 6.x từ source code – Phần 1, và Chương 3, Build Linux kernel 6.x từ source code – Phần 2), số lượng ít hơn nhiều. Bạn nhớ từ thảo luận ở Chương 2, Build Linux kernel 6.x từ source code – Phần 1, rằng chúng ta chủ động dùng target `localmodconfig` để giữ build tương đối nhỏ và nhanh. Vì vậy, ví dụ kernel 6.1.25 tùy chỉnh ở đây chỉ có khoảng hơn 70 kernel module được build cho nó.
 
 Một lĩnh vực dùng rất nhiều kernel module là device driver. Ví dụ, hãy xem network device driver được thiết kế dạng kernel module. Bạn tìm thấy một số với các thương hiệu quen thuộc dưới thư mục `kernel/drivers/net/ethernet` của distro kernel:
 
@@ -213,7 +213,7 @@ Một lĩnh vực dùng rất nhiều kernel module là device driver. Ví dụ,
 
 Hình 4.4: Nội dung Ethernet network driver của distro kernel (kernel module)
 
-Phổ biến trên nhiều laptop dùng Intel là Ethernet adapter Intel 1GbE Network Interface Card (NIC). Network device driver điều khiển nó tên `e1000` (hệ thống mới hơn có thể dùng mẫu mới hơn, vì thế dùng module driver `e1000e`).
+Phổ biến trên nhiều laptop Intel-based là Ethernet adapter Intel 1GbE Network Interface Card (NIC). Network device driver điều khiển nó tên `e1000` (hệ thống mới hơn có thể dùng mẫu mới hơn, vì thế dùng module driver `e1000e`).
 
 Cách tiện lợi tra mọi kernel module hiện trong kernel memory là tiện ích `lsmod` (đọc là “list mod(ules)” – chúng ta sẽ học thêm định dạng kết quả sau). Máy khách Ubuntu 22.04 x86\_64 chạy trên laptop host x86\_64 cho thấy nó thực sự dùng driver này:
 
@@ -327,11 +327,11 @@ Cách làm và lý do sẽ sớm được giải thích rất chi tiết. Dù nh
 
 ### Phân tích từng phần
 
-Các phần nhỏ sau giải thích gần như từng dòng C code LKM Hello, world trên. Nhớ rằng dù chương trình có vẻ rất nhỏ và đơn giản, vẫn có nhiều điều cần hiểu về nó và framework LKM xung quanh. Phần còn lại chương tập trung vào đây và đi sâu chi tiết. Tôi rất khuyến khích bạn dành thời gian đọc và hiểu các nền tảng này trước. Nó sẽ giúp rất nhiều trong tình huống về sau có thể khó debug.
+Các phần nhỏ sau giải thích gần như từng dòng C code LKM Hello, world trên. Nhớ rằng dù chương trình có vẻ rất nhỏ và đơn giản, vẫn có nhiều điều cần hiểu về nó và framework LKM xung quanh. Phần còn lại chương tập trung vào đây và đi sâu chi tiết. Tôi rất khuyến khích bạn dành thời gian đọc và hiểu các nền tảng này trước. Nó sẽ giúp rất nhiều trong tình huống về sau có thể difficult-to-debug.
 
 #### Kernel header
 
-Đầu tiên trong code, chúng ta dùng `#include` để hiển nhiên đưa vào một vài header. Khác phát triển ứng dụng C user space, đây là kernel header, như phần Yêu cầu kỹ thuật đã đề cập. Nhớ từ Chương 3, Build Linux kernel 6.x từ source code – Phần 2, kernel module được cài dưới một nhánh cụ thể chỉ root có quyền ghi.
+Đầu tiên trong code, chúng ta dùng `#include` để hiển nhiên đưa vào một vài header. Khác phát triển ứng dụng C user space, đây là kernel header, như phần Yêu cầu kỹ thuật đã đề cập. Nhớ từ Chương 3, Build Linux kernel 6.x từ source code – Phần 2, kernel module được cài dưới một nhánh cụ thể root-writable.
 
 Hãy kiểm tra lại (ở đây đang chạy máy ảo khách Ubuntu x86\_64 với distro kernel 5.19.0-45-generic):
 
@@ -391,7 +391,7 @@ Code `module_{init|exit}()` là macro chỉ định entry point và exit point t
 
 - Hàm `helloworld_lkm_exit()` là exit point.
 
-Bạn gần như có thể coi entry/exit point là cặp constructor/destructor của kernel module. Tất nhiên về kỹ thuật không phải vậy, vì đây không phải C++ hướng đối tượng mà là C thuần. Tuy nhiên, có lẽ đó là phép so sánh hữu ích.
+Bạn gần như có thể coi entry/exit point là cặp constructor/destructor của kernel module. Tất nhiên về kỹ thuật không phải vậy, vì đây không phải C++ object-oriented mà là C thuần. Tuy nhiên, có lẽ đó là phép so sánh hữu ích.
 
 #### Giá trị trả về
 
@@ -450,7 +450,7 @@ Nếu cấp phát bộ nhớ thực sự thất bại (rất ít khả năng nh�
 
   - `errno` được đặt bằng `ENOMEM`, phản ánh việc chèn kernel module thất bại do không cấp phát được bộ nhớ.
 
-Ngược lại, framework kỳ vọng hàm `init` trả `0` khi thành công. Thực tế ở kernel cũ, không trả `0` khi thành công khiến kernel module bị unload đột ngột ngay khỏi kernel memory. Ngày nay việc gỡ này không xảy ra; thay vào đó kernel phát cảnh báo đã trả giá trị khác không đáng ngờ. Hơn nữa, compiler hiện đại thường phát hiện việc không trả giá trị khi cần, gây thông báo tương tự `error: no return statement` `in function returning non-void [-Werror=return-type]`.
+Ngược lại, framework kỳ vọng hàm `init` trả `0` khi thành công. Thực tế ở kernel cũ, không trả `0` khi thành công khiến kernel module bị unload đột ngột ngay khỏi kernel memory. Ngày nay việc gỡ này không xảy ra; thay vào đó kernel phát cảnh báo đã trả giá trị non-zero đáng ngờ. Hơn nữa, compiler hiện đại thường phát hiện việc không trả giá trị khi cần, gây thông báo tương tự `error: no return statement` `in function returning non-void [-Werror=return-type]`.
 
 Không có nhiều điều để nói về cleanup routine. Nó không nhận tham số, không trả gì (`void`). Nhiệm vụ là làm mọi cleanup cần thiết, như giải phóng memory object, có thể đặt một số register, v.v. tùy thiết kế module, trước khi kernel module bị unload khỏi kernel memory.
 
@@ -604,7 +604,7 @@ Giờ hoạt động (biến kết quả `$?` bằng `0` nghĩa là lệnh shell
 
 ### Xem nhanh lần đầu kernel printk()
 
-Để phát thông báo, nhà phát triển C user space thường dùng glibc API `printf()` đáng tin cậy, hoặc `cout` khi viết C++. Tuy nhiên, cần hiểu kernel space không có library user mode hay loại khác. Vì vậy đơn giản không truy cập được API `printf()` quen thuộc. Thay vào đó, về cơ bản nó được triển khai lại trong kernel thành API `printk()`. Tò mò code nằm đâu? Nó được định nghĩa dạng macro trong source tree tại `include/linux/printk.h:printk(fmt, …)`. Hàm thực tế tại `kernel/printk/printk.c:_printk()`. Thực tế triển khai nội bộ `printk` khá phức tạp, gồm wrapper layer cho `printk` indexing và nhiều nội dung khác; xem phần Đọc thêm.
+Để phát thông báo, nhà phát triển C user space thường dùng glibc API `printf()` đáng tin cậy, hoặc `cout` khi viết C++. Tuy nhiên, cần hiểu kernel space không có library user mode hay loại khác. Vì vậy đơn giản không truy cập được API `printf()` quen thuộc. Thay vào đó, về cơ bản nó re-implemented trong kernel thành API `printk()`. Tò mò code nằm đâu? Nó được định nghĩa dạng macro trong source tree tại `include/linux/printk.h:printk(fmt, …)`. Hàm thực tế tại `kernel/printk/printk.c:_printk()`. Thực tế triển khai nội bộ `printk` khá phức tạp, gồm wrapper layer cho `printk` indexing và nhiều nội dung khác; xem phần Đọc thêm.
 
 May là để kernel hoặc kernel module phát thông báo qua `printk()` thì đơn giản, rất giống `printf()`. Trong module đơn giản của chúng ta, công việc diễn ra ở đây:
 
@@ -650,7 +650,7 @@ $ sudo dmesg | tail -n2
 
 Cuối cùng nó đây: thông báo Hello, world của chúng ta!
 
-Bạn có thể thấy thông báo trong kernel log như `loading out-of-tree module` `taints kernel`, và có thể cả `module verification failed: signature and/or` `required key missing - tainting kernel`. Lúc này có thể bỏ qua. Vì bảo mật, phần lớn distro Linux hiện đại đánh dấu kernel là tainted (nghĩa đen “nhiễm bẩn” hay “ô nhiễm”) nếu chèn kernel module bên thứ ba/out-of-tree/external hoặc không có chữ ký. (Thực ra còn giống cách phủ nhận trách nhiệm mang tính pháp lý kiểu “nếu từ thời điểm này có chuyện, chúng tôi không chịu trách nhiệm, v.v...” – bạn hiểu rồi đấy!)
+Bạn có thể thấy thông báo trong kernel log như `loading out-of-tree module` `taints kernel`, và có thể cả `module verification failed: signature and/or` `required key missing - tainting kernel`. Lúc này có thể bỏ qua. Vì bảo mật, phần lớn distro Linux hiện đại đánh dấu kernel là tainted (nghĩa đen “nhiễm bẩn” hay “ô nhiễm”) nếu chèn kernel module bên thứ ba/out-of-tree/external hoặc non-signed. (Thực ra còn giống cách cover-up pseudo-legal kiểu “nếu từ thời điểm này có chuyện, chúng tôi không chịu trách nhiệm, v.v...” – bạn hiểu rồi đấy!)
 
 Trong kernel log hiển thị bởi `dmesg`, các số trong ngoặc vuông ở cột ngoài cùng bên trái là timestamp đơn giản dạng `[seconds.microseconds]`, tức thời gian từ lúc hệ thống boot (tuy nhiên không nên coi hoàn toàn chính xác). Nhân tiện, timestamp này là biến `Kconfig`, một tùy chọn cấu hình kernel tên `CONFIG_PRINTK_TIME`; có thể ghi đè bằng kernel parameter `printk.time` (liên kết: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/admin-guide/kernel-parameters.txt#L4504`).
 
@@ -847,7 +847,7 @@ Làm sao khắc phục? Hãy đọc tiếp...
 
 ### Kernel logging và journalctl của systemd
 
-Giống ứng dụng user space dùng log, kernel cũng vậy; tính năng gọi là kernel logging, cần trên mọi hệ thống trừ những hệ thống hạn chế tài nguyên nhất. Giải pháp hiển nhiên cho các vấn đề logging vào memory buffer nhỏ và volatile vừa nói là ghi, thực ra nối thêm, từng kernel `printk` vào tệp trên secondary storage non-volatile. Đó chính là cách phần lớn distro Linux hiện đại được thiết lập. Vị trí kernel log file khác theo distro: theo quy ước, distro dựa trên Red Hat ghi vào `/var/log/messages`, còn dựa trên Debian vào `/var/log/syslog`. Trước đây kernel `printk` kết nối với system logger daemon user space (`syslogd`) để log vào tệp, qua đó tự động hưởng tính năng tinh vi hơn như log rotation, compression và archival.
+Giống ứng dụng user space dùng log, kernel cũng vậy; tính năng gọi là kernel logging, cần trên mọi hệ thống trừ những hệ thống resource-constrained nhất. Giải pháp hiển nhiên cho các vấn đề logging vào memory buffer nhỏ và volatile vừa nói là ghi, thực ra nối thêm, từng kernel `printk` vào tệp trên secondary storage non-volatile. Đó chính là cách phần lớn distro Linux hiện đại được thiết lập. Vị trí kernel log file khác theo distro: theo quy ước, distro Red Hat-based ghi vào `/var/log/messages`, còn Debian-based vào `/var/log/syslog`. Trước đây kernel `printk` kết nối với system logger daemon user space (`syslogd`) để log vào tệp, qua đó tự động hưởng tính năng tinh vi hơn như log rotation, compression và archival.
 
 Tuy nhiên, trong vài năm qua, system logging được framework system initialization mới hữu ích và mạnh mẽ systemd tiếp quản hoàn toàn; nó thay hoặc thường hoạt động cùng framework SysV init cũ. Thực sự systemd giờ thường được dùng ngay cả trên thiết bị Linux nhúng. Trong systemd, daemon process tên `systemd-journal` thực hiện logging, còn `journalctl` là user interface của nó.
 
@@ -907,25 +907,25 @@ Show a live log display from a system service apache.service:
     journalctl -f -u apache
 ```
 
-Hơn nữa, `journalctl` giúp tìm log theo thời gian theo cách dễ dùng, ví dụ xem mọi kernel log được ghi trong nửa giờ qua:
+Hơn nữa, `journalctl` giúp tìm log time-based theo cách human-friendly, ví dụ xem mọi kernel log được ghi trong nửa giờ qua:
 
 ```
 journalctl -k --since="30 min ago"
 ```
 
-Tất nhiên log kernel message vào tệp non-volatile rất hữu ích. Tuy nhiên có tình huống, thường do hạn chế phần cứng, khiến không thể thực hiện. Ví dụ thiết bị Linux nhúng nhỏ, rất ít tài nguyên có thể dùng internal flash chip nhỏ làm lưu trữ. Không chỉ nhỏ và gần hết chỗ vì ứng dụng, library, kernel, driver, bootloader, chip flash còn có giới hạn thực tế về số erase-write cycle chịu được trước khi hao mòn. Vì vậy ghi vài triệu lần có thể làm nó hỏng! Do đó đôi khi nhà thiết kế chủ động dùng và/hoặc bổ sung external flash rẻ hơn như thẻ (micro)SD/MMC (MultiMediaCard) cho dữ liệu không trọng yếu để giảm tác động, vì dễ và rẻ để thay.
+Tất nhiên log kernel message vào tệp non-volatile rất hữu ích. Tuy nhiên có tình huống, thường do hạn chế phần cứng, khiến không thể thực hiện. Ví dụ thiết bị Linux nhúng nhỏ, resource-constrained có thể dùng internal flash chip nhỏ làm lưu trữ. Không chỉ nhỏ và gần hết chỗ vì ứng dụng, library, kernel, driver, bootloader, chip flash-based còn có giới hạn thực tế về số erase-write cycle chịu được trước khi hao mòn. Vì vậy ghi vài triệu lần có thể làm nó hỏng! Do đó đôi khi nhà thiết kế chủ động dùng và/hoặc bổ sung external flash rẻ hơn như thẻ (micro)SD/MMC (MultiMediaCard) cho dữ liệu non-critical để giảm tác động, vì dễ và rẻ để thay.
 
 Hãy tiếp tục tìm hiểu log level của `printk`.
 
 ### Dùng printk log level
 
-Khi phát thông báo vào kernel log qua API `printk` và các API liên quan, thường phải chỉ định logging level. Để hiểu và dùng các log level `printk`, hãy bắt đầu bằng chép lại dòng code duy nhất đó – `printk` đầu tiên trong kernel module `helloworld_lkm` nổi tiếng thế giới:
+Khi phát thông báo vào kernel log qua API `printk` và các API liên quan, thường phải chỉ định logging level. Để hiểu và dùng các log level `printk`, hãy bắt đầu bằng chép lại dòng code duy nhất đó – `printk` đầu tiên trong kernel module `helloworld_lkm` world-famous:
 
 ```
 printk(KERN_INFO "Hello, world\n");
 ```
 
-Giờ giải quyết điều lớn còn bỏ ngỏ: `KERN_INFO` chính xác nghĩa là gì? Trước tiên hãy cẩn thận; nó không phải tham số như phản xạ đầu tiên có thể khiến bạn nghĩ. Không! Chú ý giữa nó và format string “Hello, world\\n” không có dấu phẩy, chỉ khoảng trắng. `KERN_INFO` là một trong tám log level mà kernel `printk` có thể được log. Cần hiểu ngay rằng log level này không phải priority specifier bất kỳ loại nào; nó cho phép lọc thông báo dựa trên log level. Kernel định nghĩa tám log level có thể có cho `printk`; đây là chúng:
+Giờ giải quyết điều lớn còn bỏ ngỏ: `KERN_INFO` chính xác nghĩa là gì? Trước tiên hãy cẩn thận; nó không phải tham số như knee-jerk có thể khiến bạn nghĩ. Không! Chú ý giữa nó và format string “Hello, world\\n” không có dấu phẩy, chỉ khoảng trắng. `KERN_INFO` là một trong tám log level mà kernel `printk` có thể được log. Cần hiểu ngay rằng log level này không phải priority specifier bất kỳ loại nào; nó cho phép lọc thông báo dựa trên log level. Kernel định nghĩa tám log level có thể có cho `printk`; đây là chúng:
 
 ```
 // include/linux/kern_levels.h
@@ -1077,7 +1077,7 @@ Thông thường ta bảo đảm chỉ `pr_cont()` cuối có ký tự newline.
 
 Từ đây, thông thường ta chỉ dùng macro kiểu `pr_foo() (or pr_*())` khi phát thông báo `printk` vào kernel log.
 
-Hơn nữa, rất quan trọng: tác giả driver phải dùng macro `dev_*()`. Điều này đòi truyền thêm tham số đầu, pointer đến thiết bị liên quan (`struct device *`). Chúng được định nghĩa tại `https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/dev_printk.h#L137`. Lý do là driver core tự thêm chi tiết hữu ích trước driver `printk`, giúp log tốt hơn và nhanh nhận ra chi tiết. Ví dụ khi viết I2C driver, thông báo `dev_*()` gồm tên driver, số I2C bus và địa chỉ chip! Đây là ví dụ từ I2C RTC driver được làm lại:
+Hơn nữa, rất quan trọng: tác giả driver phải dùng macro `dev_*()`. Điều này đòi truyền thêm tham số đầu, pointer đến thiết bị liên quan (`struct device *`). Chúng được định nghĩa tại `https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/dev_printk.h#L137`. Lý do là driver core auto-prefixes chi tiết hữu ích trước driver `printk`, giúp log tốt hơn và nhanh nhận ra chi tiết. Ví dụ khi viết I2C driver, thông báo `dev_*()` gồm tên driver, số I2C bus và địa chỉ chip! Đây là ví dụ từ I2C RTC driver được làm lại:
 
 ```
 ks3231 1-0068: IRQ! #5
@@ -1099,7 +1099,7 @@ Nhớ rằng đầu ra `printk` có thể đến tối đa ba nơi:
 
 - Cuối cùng, trình bày ở đây, là console device
 
-Theo truyền thống, console device thuần là tính năng kernel, cửa sổ Terminal ban đầu mà người dùng hay superuser đăng nhập (`/dev/console`) trong môi trường không đồ họa. Thú vị là Linux cho định nghĩa nhiều console: cửa sổ teletype terminal (tty) như `/dev/console`, text-mode VGA console, framebuffer, hoặc ngay cả serial port qua USB (thường gặp khi phát triển hệ nhúng; xem thêm Linux console ở phần Đọc thêm của chương).
+Theo truyền thống, console device thuần là tính năng kernel, cửa sổ Terminal ban đầu mà người dùng hay superuser đăng nhập (`/dev/console`) trong môi trường non-graphical. Thú vị là Linux cho định nghĩa nhiều console: cửa sổ teletype terminal (tty) như `/dev/console`, text-mode VGA console, framebuffer, hoặc ngay cả serial port qua USB (thường gặp khi phát triển hệ nhúng; xem thêm Linux console ở phần Đọc thêm của chương).
 
 Ví dụ, khi kết nối bo Raspberry Pi với laptop x86\_64 qua cáp USB-to-RS232 TTL UART, tức USB-to-serial (xem phần Đọc thêm để có bài blog về phụ kiện rất hữu ích này và cách thiết lập trên Raspberry Pi), rồi dùng Terminal emulator như `minicom` hay `screen`, đây là thiết bị `tty` xuất hiện trên Raspberry Pi – chính là serial port:
 
@@ -1115,7 +1115,7 @@ $ cat /proc/sys/kernel/printk
 4    4    1    7
 ```
 
-Ta diễn giải bốn số trên thành log level `printk` (`0` cao nhất, `7` thấp nhất về “khẩn cấp”). Ý nghĩa chuỗi bốn số nguyên như sau:
+Ta diễn giải bốn số trên thành log level `printk` (`0` cao nhất, `7` thấp nhất về “khẩn cấp”). Ý nghĩa chuỗi four-integer như sau:
 
 - Log level console hiện tại. Hệ quả then chốt là mọi thông báo có mức nhỏ hơn giá trị này cũng được gửi ra console device!
 
@@ -1123,11 +1123,11 @@ Ta diễn giải bốn số trên thành log level `printk` (`0` cao nhất, `7`
 
 - Log level tối thiểu cho phép.
 
-- Log level mặc định lúc boot.
+- Log level mặc định boot-time.
 
 Ta thấy log level `4` tương ứng `KERN_WARNING`. Vì vậy khi số đầu là `4`, thực tế là mặc định điển hình trên distro Linux, mọi printk có log level dưới 4 được gửi ra console, ngoài việc log vào kernel log buffer và tệp tất nhiên. Thực chất với thiết lập này, các kernel message ở mức sau mặc định cũng được tự động gửi ra console: `KERN_EMERG`, `KERN_ALERT`, `KERN_CRIT` và `KERN_ERR`.
 
-Kernel message ở log level `0 [KERN_EMERG]` luôn được in ra console, thực sự ra mọi cửa sổ Terminal không GUI cùng kernel log buffer và log file, bất kể thiết lập.
+Kernel message ở log level `0 [KERN_EMERG]` luôn được in ra console, thực sự ra mọi cửa sổ Terminal non-GUI cùng kernel log buffer và log file, bất kể thiết lập.
 
 Cần lưu ý khi làm Linux nhúng hoặc phát triển kernel, bạn rất thường làm việc trên console device, như ví dụ Raspberry Pi vừa nêu. Trên Raspberry Pi 4 model B của tôi chạy distro và kernel nguyên bản, đây là thiết lập log level `printk` mặc định:
 
@@ -1197,13 +1197,13 @@ Giờ thảo luận đầu ra khi chạy kernel module `printk_loglvl` trên Ras
 
 Trên Raspberry Pi (ở đây tôi dùng Raspberry Pi 4 model B chạy Raspberry Pi OS mặc định), đăng nhập rồi lấy root shell qua `sudo -s` đơn giản. Sau đó build kernel module.
 
-Nếu cài image Raspberry Pi mặc định trên thiết bị, mọi development tool, kernel header và các thành phần khác cần thiết đều cài sẵn! Vì vậy đăng nhập bo, build module và thử. Hình 4.8 là ảnh chạy kernel module `printk_loglvl` trên bo Raspberry Pi. Cũng cần hiểu ta chạy trên console device vì dùng cáp USB-to-serial đã nói qua Terminal emulator `minicom`, không chỉ qua kết nối SSH:
+Nếu cài image Raspberry Pi mặc định trên thiết bị, mọi development tool, kernel header và các thành phần khác cần thiết đều pre-installed! Vì vậy đăng nhập bo, build module và thử. Hình 4.8 là ảnh chạy kernel module `printk_loglvl` trên bo Raspberry Pi. Cũng cần hiểu ta chạy trên console device vì dùng cáp USB-to-serial đã nói qua Terminal emulator `minicom`, không chỉ qua kết nối SSH:
 
 ![Hình 4.8](images/ch04/fig04-08.jpg)
 
 Hình 4.8: Cửa sổ Terminal emulator minicom – console – với đầu ra kernel module printk\_loglvl
 
-Chú ý khác biệt nhỏ với môi trường x86\_64: ở đây mặc định số nguyên đầu trong `/proc/sys/kernel/printk`, tức console log level hiện tại, là `3`, không phải `4`. Điều đó nghĩa là mọi kernel `printk` ở log level dưới 3 xuất hiện trực tiếp trên console. Xem ảnh: đúng là vậy! Hơn nữa, như mong đợi, `printk` ở log level “emergency” (`0, KERN_EMERG`) luôn xuất hiện trên console, thực sự trên mọi cửa sổ Terminal không GUI đang mở.
+Chú ý khác biệt nhỏ với môi trường x86\_64: ở đây mặc định số nguyên đầu trong `/proc/sys/kernel/printk`, tức console log level hiện tại, là `3`, không phải `4`. Điều đó nghĩa là mọi kernel `printk` ở log level dưới 3 xuất hiện trực tiếp trên console. Xem ảnh: đúng là vậy! Hơn nữa, như mong đợi, `printk` ở log level “emergency” (`0, KERN_EMERG`) luôn xuất hiện trên console, thực sự trên mọi cửa sổ Terminal non-GUI đang mở.
 
 Giờ đến phần thú vị: hãy đặt console log level hiện tại bằng `8`, tất nhiên với root (nhớ đó là số đầu của `/proc/sys/kernel/printk`). Như vậy mọi `printk` phải hiện trực tiếp trên console. Ta kiểm thử chính điều này:
 
@@ -1234,7 +1234,7 @@ rpi #
 
 Mọi `printk` trừ `KERN_DEBUG` đều thấy vì đang xem kernel log qua `dmesg`. Vậy làm sao hiện debug message? Phần sau trình bày.
 
-#### Bật kernel message ở debug level
+#### Bật kernel message ở debug-level
 
 Ta vừa thấy có thể phát `printk` ở nhiều log level; tất cả xuất hiện trừ debug-level message. À đúng, `pr_debug()` cùng `dev_dbg()` là trường hợp hơi đặc biệt; trừ khi symbol `DEBUG` được định nghĩa cho kernel module, `printk` ở `KERN_DEBUG` không xuất hiện. Có thể sửa Makefile kernel module để bật. Có ít nhất hai cách thiết lập:
 
@@ -1254,7 +1254,7 @@ ccflags_y += -DDEBUG
 
 Trước đây biến Makefile để truyền thêm C compiler flag tên `EXTRA_CFLAGS`; giờ bị coi là deprecated, nên dùng biến mới hơn `ccflags_y`.
 
-Trong Makefile của chúng ta, ban đầu chủ động để `-DDEBUG` bị comment. Giờ để thử, bỏ comment một trong các dòng sau (tôi đề nghị dòng đầu, biến `ccflags_y`):
+Trong Makefile của chúng ta, ban đầu chủ động để `-DDEBUG` commented-out. Giờ để thử, bỏ comment một trong các dòng sau (tôi đề nghị dòng đầu, biến `ccflags_y`):
 
 ```
 # Enable the pr_debug() as well (rm the comment from one of the lines below)
@@ -1263,7 +1263,7 @@ Trong Makefile của chúng ta, ban đầu chủ động để `-DDEBUG` bị co
 #CFLAGS_printk_loglvl.o := -DDEBUG
 ```
 
-Sau khi sửa, build lại rồi chèn bằng script `lkm`. Ảnh một phần Hình 4.10 của kết quả `lkm` cho thấy rõ mã màu `dmesg`: `KERN_ALERT / KERN_CRIT / KERN_ERR` lần lượt có nền đỏ/chữ đỏ đậm/chữ đỏ, còn `KERN_WARNING` chữ đen đậm, giúp con người nhanh nhận ra kernel message quan trọng:
+Sau khi sửa, build lại rồi chèn bằng script `lkm`. Ảnh một phần Hình 4.10 của kết quả `lkm` cho thấy rõ color-coding `dmesg`: `KERN_ALERT / KERN_CRIT / KERN_ERR` lần lượt có nền đỏ/chữ đỏ đậm/chữ đỏ, còn `KERN_WARNING` chữ đen đậm, giúp con người nhanh nhận ra kernel message quan trọng:
 
 ![Hình 4.10](images/ch04/fig04-10.jpg)
 
@@ -1273,9 +1273,9 @@ Chúng tôi làm nổi bật hai `printk` phát ở `KERN_DEBUG`. Lưu ý hành 
 
 Như đã nói, tác giả device driver cần chú ý kỹ rằng phải dùng macro đặc biệt `dev_*()` để phát `printk`, không phải `pr_*()` thông thường của kernel và module thuần. Điều đó nghĩa là truyền thêm tham số đầu, pointer đến thiết bị liên quan (`struct device *`). Chúng được định nghĩa tại `https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/dev_printk.h#L137`.
 
-Ngoài ra, `pr_devel()` dành cho debug `printk` nội bộ kernel mà đầu ra không bao giờ nên hiển thị trên hệ thống production.
+Ngoài ra, `pr_devel()` dành cho debug `printk` kernel-internal mà đầu ra không bao giờ nên hiển thị trên hệ thống production.
 
-Giờ trở lại phần đầu ra console. Vậy có cách được bảo đảm khác để mọi `printk` được đưa ra console, có lẽ nhằm debug kernel/driver nếu không vì gì khác? Có – chỉ cần truyền kernel parameter lúc boot tên `ignore_level`. Để biết thêm, hãy tra mô tả trong tài liệu kernel chính thức: `https://www.kernel.org/doc/html/latest/admin-guide/kernel-parameters.html`.
+Giờ trở lại phần đầu ra console. Vậy có cách được bảo đảm khác để mọi `printk` được đưa ra console, có lẽ nhằm debug kernel/driver nếu không vì gì khác? Có – chỉ cần truyền kernel parameter boot-time tên `ignore_level`. Để biết thêm, hãy tra mô tả trong tài liệu kernel chính thức: `https://www.kernel.org/doc/html/latest/admin-guide/kernel-parameters.html`.
 
 Ngoài ra, có thể bật bỏ qua log level `printk` lúc runtime bằng cách echo Y vào pseudofile sau, cho phép mọi `printk` xuất hiện trên console device:
 
@@ -1293,7 +1293,7 @@ Lưu ý quan trọng: Dùng API/macro `printk` và liên quan với mục đích
 
 Là lập trình viên, chúng ta cần kỹ thuật debug. Có lẽ nổi tiếng nhất là instrumentation, đặt debug print ở vị trí chiến lược trong codebase. Xem log, ta hiểu control flow và có thể tìm ra bug.
 
-Với Linux kernel, debug print và print khác được phát vào kernel log qua các biến thể `printk`: macro `printk()` thông thường, macro `pr_*()` được ưu tiên và `dev_*()` cho driver; những print ở `KERN_DEBUG` gọi là debug print. Vì vậy các mục sau đều là print call site ở “debug level” có thể có:
+Với Linux kernel, debug print và print khác được phát vào kernel log qua các biến thể `printk`: macro `printk()` thông thường, macro `pr_*()` được ưu tiên và `dev_*()` cho driver; những print ở `KERN_DEBUG` so-called debug print. Vì vậy các mục sau đều là print call site ở “debug-level” có thể có:
 
 - `pr_debug("<fmt str>"[, args…]);`
 
@@ -1341,7 +1341,7 @@ $ head -n1 /proc/dynamic_debug/control
 # filename:lineno [module]function flags format
 ```
 
-Dòng đầu cho biết định dạng. Mọi field đều rõ nghĩa trừ field then chốt `flags`; điều kỳ diệu nằm ở đây!
+Dòng đầu cho biết định dạng. Mọi field đều self-explanatory trừ field then chốt `flags`; điều kỳ diệu nằm ở đây!
 
 Tóm tắt về `flags`: nếu giá trị `=_`, debug print tắt, thường là mặc định; ví dụ tra vài debug print call site cho module driver e1000:
 
@@ -1407,7 +1407,7 @@ Phần sau nói về tính năng logging rất hữu ích khác: rate limiting.
 
 ### Rate limiting cho printk
 
-Khi phát `printk` từ code path chạy rất thường xuyên, lượng `printk` lớn có thể nhanh chóng làm tràn kernel log buffer trong RAM, nhớ nó là circular buffer, ghi đè thông tin có thể then chốt. Ngoài ra, log file non-volatile cứ tăng với thông báo kernel log gần như lặp vô hạn cũng không tốt, lãng phí dung lượng đĩa hoặc tệ hơn là flash. Ví dụ, nghĩ đến `printk` khá lớn trong interrupt handler code path. Nếu hardware interrupt được gọi ở tần số 100 Hz, tức 100 lần mỗi giây, thì sao?
+Khi phát `printk` từ code path chạy rất thường xuyên, lượng `printk` lớn có thể nhanh chóng làm tràn kernel log buffer trong RAM, nhớ nó là circular buffer, ghi đè thông tin có thể then chốt. Ngoài ra, log file non-volatile ever-growing với thông báo kernel log gần như lặp vô hạn cũng không tốt, lãng phí dung lượng đĩa hoặc tệ hơn là flash. Ví dụ, nghĩ đến `printk` large-ish trong interrupt handler code path. Nếu hardware interrupt được gọi ở tần số 100 Hz, tức 100 lần mỗi giây, thì sao?
 
 Để giảm các vấn đề này, kernel cung cấp lựa chọn thay thế thú vị, hữu ích: rate-limited `printk`. Macro `pr_<foo>_ratelimited()` (với `<foo>` là emerg, alert, crit, err, warn, notice, info hay debug) có cú pháp giống hệt `printk` thông thường; điểm then chốt là nó thực sự chặn các print thông thường khi đáp ứng điều kiện nhất định.
 
@@ -1447,7 +1447,7 @@ ratelimit_test:ratelimit_test_init():45: [51] ratelimited printk @ KERN_INFO
 [6]
 ```
 
-#### Các macro rate-limiting nên dùng
+#### Các macro Rate-limiting nên dùng
 
 Kernel cung cấp các macro sau để rate-limit print/logging (nên dùng `#include <linux/kernel.h>`):
 
@@ -1461,7 +1461,7 @@ Bảo đảm ưu tiên macro `pr_*_ratelimited()` thay `printk_ratelimited()`; t
 
 Kernel module ví dụ minh họa rate-limited `printk` có trong kho GitHub cuốn Linux Kernel Debugging của tôi tại `https://github.com/PacktPublishing/Linux-Kernel-Debugging/tree/main/ch3/ratelimit_test`. Hãy thử.
 
-Ví dụ cấp code, trong số nhiều ví dụ ở kernel tree, dùng rate-limited driver-debug `printk` nằm trong AMD GPU driver: `https://elixir.bootlin.com/linux/v6.1.25/source/drivers/gpu/drm/amd/amdgpu/sdma_v4_0.c#L2146`:
+Ví dụ code-level, trong số nhiều ví dụ ở kernel tree, dùng rate-limited driver-debug `printk` nằm trong AMD GPU driver: `https://elixir.bootlin.com/linux/v6.1.25/source/drivers/gpu/drm/amd/amdgpu/sdma_v4_0.c#L2146`:
 
 ```
  dev_dbg_ratelimited(adev->dev,
@@ -1510,7 +1510,7 @@ $ sudo bash -c "echo \"test_script: @user msg 1\" > /dev/kmsg"
 
 Cú pháp dùng ở lần thử hai hoạt động, nhưng lấy root shell (`sudo -s`) rồi làm những việc như vậy đơn giản hơn.
 
-Thêm điều nữa. `dmesg` có nhiều tùy chọn giúp kết quả dễ đọc; chúng tôi thể hiện vài tùy chọn qua alias mẫu cho `dmesg` rồi dùng nó:
+Thêm điều nữa. `dmesg` có nhiều tùy chọn giúp kết quả human-readable; chúng tôi thể hiện vài tùy chọn qua alias mẫu cho `dmesg` rồi dùng nó:
 
 ```
 $ alias dmesg='sudo dmesg --decode --nopager --color --ctime'
@@ -1530,7 +1530,7 @@ user  :info  : [Mon Jul 10 08:25:27 2023] test_script: test msg at KERN_INFO
 
 Ta thấy thông báo sau phát ở log level `6`, như chỉ định trong `echo`.
 
-Thực sự không có cách phân biệt kernel message do người dùng sinh và do kernel `printk()` sinh; chúng trông giống hệt. Vì thế tất nhiên có thể đơn giản chèn hay thêm signature byte/chuỗi đặc biệt vào thông báo như `@user ...`, giúp phân biệt các print do người dùng sinh với kernel.
+Thực sự không có cách phân biệt kernel message user-generated và do kernel `printk()` sinh; chúng trông giống hệt. Vì thế tất nhiên có thể đơn giản chèn hay thêm signature byte/chuỗi đặc biệt vào thông báo như `@user ...`, giúp phân biệt các print user-generated với kernel.
 
 Hơi ngoài lề, sau đây là điều cần lưu ý.
 
@@ -1585,11 +1585,11 @@ Tiếp theo, tìm hiểu vấn đề viết code portable liên quan `printk`.
 
 ### Portability và printk format specifier
 
-Có câu hỏi cần suy nghĩ về kernel API `printk` linh hoạt: làm sao bảo đảm đầu ra `printk` đúng, định dạng chính xác và hoạt động tốt như nhau trên mọi CPU bất kể bit width? Vấn đề portability xuất hiện ở đây; tin tốt là làm quen các format specifier cung cấp giúp rất nhiều, thực chất cho phép viết `printk` độc lập kiến trúc.
+Có câu hỏi cần suy nghĩ về kernel API `printk` linh hoạt: làm sao bảo đảm đầu ra `printk` đúng, định dạng chính xác và hoạt động tốt như nhau trên mọi CPU bất kể bit width? Vấn đề portability xuất hiện ở đây; tin tốt là làm quen các format specifier cung cấp giúp rất nhiều, thực chất cho phép viết `printk` arch-independent.
 
 Cần hiểu `size_t`, đọc là `size type`, là `typedef` cho số nguyên unsigned; tương tự `ssize_t` (signed size type) là `typedef` cho số nguyên signed.
 
-Đây là vài format specifier `printk` thông dụng dễ nhớ cần lưu ý khi viết code portable:
+Đây là vài format specifier `printk` thông dụng top-of-mind cần lưu ý khi viết code portable:
 
 - Với số nguyên `size_t` và `ssize_t`, unsigned và signed, lần lượt dùng `%zu` và `%zd`.
 
@@ -1637,7 +1637,7 @@ Dòng đầu cho biết định dạng mỗi dòng, khá trực quan. Ví dụ k
 
 (Ha! Chúng ta đã thấy chính ví dụ `printk` này trong phần Dùng printk log level!) Vậy hãy nghĩ: user-space monitoring daemon giờ tra được log message của kernel vmlinux và mọi kernel module qua printk index debugfs entry, kiểm tra có đúng mong đợi không; nếu không có thể khắc phục như báo vấn đề hoặc việc khác.
 
-Hơn nữa, khi tắt `PRINTK_INDEX`, hoàn toàn không có overhead. Tuy nhiên khi bật `printk` indexing, có ít nhất hai vấn đề có thể xảy ra: thứ nhất nhiều production system không có `debugfs`, thứ hai tốn thêm bộ nhớ giữ hàng nghìn format string trong kernel image (trong `vmlinux` 6.1.25 của tôi, tính năng phát hiện gần 12.000 `printk`!). Tuy vậy, nó giải quyết hoặc ít nhất giảm một vấn đề, nên đã vào mainline kernel.
+Hơn nữa, khi tắt `PRINTK_INDEX`, hoàn toàn non-inclusion overhead. Tuy nhiên khi bật `printk` indexing, có ít nhất hai vấn đề có thể xảy ra: thứ nhất nhiều production system không có `debugfs`, thứ hai tốn thêm bộ nhớ giữ hàng nghìn format string trong kernel image (trong `vmlinux` 6.1.25 của tôi, tính năng phát hiện gần 12.000 `printk`!). Tuy vậy, nó giải quyết hoặc ít nhất giảm một vấn đề, nên đã vào mainline kernel.
 
 Bài tập: Build kernel với tính năng này bật và dùng thử.
 
@@ -1651,7 +1651,7 @@ Sau khi tìm hiểu khá nhiều về kernel `printk` lâu đời và các API l
 
 ## Tìm hiểu kiến thức cơ bản về Makefile của kernel module
 
-Có thể bạn đã nhận ra chúng ta thường theo quy tắc mỗi kernel module một thư mục. Đúng, chắc chắn giúp tổ chức gọn gàng. Vậy lấy kernel module thứ hai `ch4/printk_loglvl`. Để build, chỉ `cd` vào thư mục, gõ `make` và hy vọng may mắn, xong! Có kernel module object mới `printk_loglevel.ko`, rồi có thể áp dụng `insmod/rmmod`. Nhưng chính xác nó được build thế nào khi gõ `make?` Giải thích điều đó là mục đích phần này.
+Có thể bạn đã nhận ra chúng ta thường theo quy tắc one-kernel-module-per-directory. Đúng, chắc chắn giúp tổ chức gọn gàng. Vậy lấy kernel module thứ hai `ch4/printk_loglvl`. Để build, chỉ `cd` vào thư mục, gõ `make` và hy vọng may mắn, xong! Có kernel module object mới `printk_loglevel.ko`, rồi có thể áp dụng `insmod/rmmod`. Nhưng chính xác nó được build thế nào khi gõ `make?` Giải thích điều đó là mục đích phần này.
 
 Trước hết, chúng tôi kỳ vọng bạn hiểu cơ bản `make` và Makefile. Nếu chưa đừng lo, đã cung cấp liên kết tìm hiểu trong phần Đọc thêm, đoạn Makefiles: introductory stuff, của chương. . Hãy xem! (Liên kết: `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/blob/main/Further_Reading.md#chapter-4-writing-your-first-kernel-module-lkms-part-1---further-reading`).
 
@@ -1692,9 +1692,9 @@ Các `rule(s)` luôn bắt đầu bằng ký tự `[Tab]`, không phải khoản
 
 Hãy nắm cơ bản cách Makefile module này hoạt động. Trước tiên điểm then chốt: hệ thống `Kbuild` của kernel mà ta đã nhắc và dùng từ Chương 2, Build Linux kernel 6.x từ source code – Phần 1, chủ yếu dùng hai chuỗi biến của phần mềm cần build, nối trong hai biến `obj-y` và `obj-m`.
 
-Chuỗi `obj-y` chứa danh sách nối mọi object cần build và merge vào kernel image cuối – `vmlinux` không nén và `[b][z]Image` nén có thể boot. Nghĩ thì hợp lý: `y` trong `obj-y` là Yes. Mọi kernel built-in và tùy chọn `Kconfig` đặt `Y` khi cấu hình hoặc mặc định `Y` được nối qua mục này, build và cuối cùng kết hợp thành kernel image bởi hệ thống `Kbuild`.
+Chuỗi `obj-y` chứa danh sách nối mọi object cần build và merge vào kernel image cuối – `vmlinux` không nén và `[b][z]Image` nén boot-able. Nghĩ thì hợp lý: `y` trong `obj-y` là Yes. Mọi kernel built-in và tùy chọn `Kconfig` đặt `Y` khi cấu hình hoặc mặc định `Y` được nối qua mục này, build và cuối cùng kết hợp thành kernel image bởi hệ thống `Kbuild`.
 
-Mặt khác, giờ dễ thấy `obj-m` là danh sách nối mọi kernel object cần build riêng thành kernel module! Đó chính xác là lý do Makefile có dòng cực kỳ quan trọng sau, dòng 4:
+Mặt khác, giờ dễ thấy `obj-m` là danh sách nối mọi kernel object cần build riêng thành kernel module! Đó chính xác là lý do Makefile có dòng all-important sau, dòng 4:
 
 ```
 obj-m += printk_loglvl.o
@@ -1717,9 +1717,9 @@ lrwxrwxrwx 1 root root    31 May  5 10:51 build -> /home/c2kp/kernels/
 linux-6.1.25/
 ```
 
-2\. Rõ ràng process `make` chuyển đến `~/kernels/linux-6.1.25/`, trường hợp này trỏ về kernel source tree 6.1.25 gốc, vì đang chạy kernel tùy chỉnh đã build trước. Khi đến, nó tự phân tích nội dung Makefile cấp cao nhất của kernel, tức Makefile ở gốc source tree này. Đây là điểm then chốt. Makefile cấp cao nhất khá lớn và tinh vi, trên 6.1.25 dài hơn 2.000 dòng, chứa chi tiết và biến build then chốt. Nhờ luôn được phân tích mỗi lần ngay cả khi build out-of-tree module, bảo đảm mọi kernel module gắn chặt kernel được build cho, nói thêm sau một chút. Điều này cũng bảo đảm module build bằng chính cùng bộ quy tắc, tức cấu hình compiler/linker (tùy chọn `*CFLAGS*`, compiler option switch, v.v.), như chính kernel image. Điều đó cần cho binary compatibility. 3. Tiếp theo, vẫn dòng 11 Makefile, bạn thấy khởi tạo biến `M` bằng thư mục làm việc hiện tại và target chỉ định là `modules`; vì thế process `make` giờ chuyển đến thư mục biến `M` chỉ định, `$(PWD)`, chính thư mục ban đầu (dòng 2 `PWD := $(shell pwd)` trong Makefile khởi tạo đúng giá trị)!
+2\. Rõ ràng process `make` chuyển đến `~/kernels/linux-6.1.25/`, trường hợp này trỏ về kernel source tree 6.1.25 gốc, vì đang chạy kernel tùy chỉnh đã build trước. Khi đến, nó tự phân tích nội dung Makefile top-level của kernel, tức Makefile ở gốc source tree này. Đây là điểm then chốt. Makefile top-level khá lớn và tinh vi, trên 6.1.25 dài hơn 2.000 dòng, chứa chi tiết và biến build then chốt. Nhờ luôn được phân tích mỗi lần ngay cả khi build out-of-tree module, bảo đảm mọi kernel module gắn chặt kernel được build cho, nói thêm sau một chút. Điều này cũng bảo đảm module build bằng chính cùng bộ quy tắc, tức cấu hình compiler/linker (tùy chọn `*CFLAGS*`, compiler option switch, v.v.), như chính kernel image. Điều đó cần cho binary compatibility. 3. Tiếp theo, vẫn dòng 11 Makefile, bạn thấy khởi tạo biến `M` bằng thư mục làm việc hiện tại và target chỉ định là `modules`; vì thế process `make` giờ chuyển đến thư mục biến `M` chỉ định, `$(PWD)`, chính thư mục ban đầu (dòng 2 `PWD := $(shell pwd)` trong Makefile khởi tạo đúng giá trị)!
 
-Thú vị là đây là recursive build: quá trình build, sau khi quan trọng nhất là phân tích Makefile cấp cao nhất, giờ chuyển về thư mục kernel module và build các module ở đó.
+Thú vị là đây là recursive build: quá trình build, sau khi quan trọng nhất là phân tích Makefile top-level, giờ chuyển về thư mục kernel module và build các module ở đó.
 
 Dòng 12 và 13 tạo target `install`, trình bày chương sau; dòng 14 và 15 tạo target `clean`.
 
@@ -1729,7 +1729,7 @@ Bạn có thấy khi build kernel module cũng sinh khá nhiều intermediate wo
 
 ![Hình 4.13](images/ch04/fig04-13.jpg)
 
-Hình 4.13: Build (make) và “make clean” kernel module printk\_loglvl, trên Ubuntu 22.04 khách x86\_64 chạy kernel 6.1.25 LTS tự build
+Hình 4.13: Build (make) và “make clean” kernel module printk\_loglvl, trên Ubuntu 22.04 khách x86\_64 chạy kernel 6.1.25 LTS custom-built
 
 Có thể tra mục đích `modules.order`, `modules.builtin` và tệp khác trong tài liệu kernel tại `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/kbuild/kbuild.rst`. Ngoài ra như đã nói, chương sau giới thiệu và dùng biến thể Makefile tinh vi hơn, một Makefile “tốt hơn”. Nó được thiết kế giúp nhà phát triển kernel module/driver cải thiện chất lượng code bằng target liên quan kiểm tra kernel coding style, static analysis, đóng gói đơn giản và dummy target cho dynamic analysis.
 
@@ -1737,7 +1737,7 @@ Có thể tra mục đích `modules.order`, `modules.builtin` và tệp khác tr
 
 ## Tổng kết
 
-Trong chương này, chúng ta trình bày cơ bản Linux kernel architecture và LKM. Bạn học kernel module là gì, vì sao hữu ích. Sau đó viết kernel module đơn giản nhưng hoàn chỉnh, Hello, world rất cơ bản. Tiếp theo đi sâu cách hoạt động và coding convention cần theo, cùng thực hành chính xác cách build, load, xem danh sách và unload module. Kernel logging với `printk` và các API liên quan được trình bày khá chi tiết, cùng giải thích logging level của `printk`, kiểm soát đầu ra console và hơn nữa. Sau đó là chi tiết phát kernel message thuần debug level, quan trọng hơn là giới thiệu dùng dynamic debug của kernel. Tiếp đến rate-limiting `printk`, sinh kernel message từ user space, chuẩn hóa định dạng đầu ra và hiểu tính năng `printk` indexing mới. Chương khép lại bằng kiến thức cơ bản Makefile kernel module và cách hoạt động trong LKM.
+Trong chương này, chúng ta trình bày cơ bản Linux kernel architecture và LKM. Bạn học kernel module là gì, vì sao hữu ích. Sau đó viết kernel module đơn giản nhưng hoàn chỉnh, Hello, world rất cơ bản. Tiếp theo đi sâu cách hoạt động và coding convention cần theo, cùng thực hành chính xác cách build, load, xem danh sách và unload module. Kernel logging với `printk` và các API liên quan được trình bày khá chi tiết, cùng giải thích logging level của `printk`, kiểm soát đầu ra console và hơn nữa. Sau đó là chi tiết phát kernel message thuần debug-level, quan trọng hơn là giới thiệu dùng dynamic debug của kernel. Tiếp đến rate-limiting `printk`, sinh kernel message từ user space, chuẩn hóa định dạng đầu ra và hiểu tính năng `printk` indexing mới. Chương khép lại bằng kiến thức cơ bản Makefile kernel module và cách hoạt động trong LKM.
 
 Tôi rất khuyến khích bạn làm việc với sample code qua kho GitHub sách, làm câu hỏi/bài tập, rồi sang chương tiếp theo, nơi tiếp tục trình bày viết Linux kernel module!
 

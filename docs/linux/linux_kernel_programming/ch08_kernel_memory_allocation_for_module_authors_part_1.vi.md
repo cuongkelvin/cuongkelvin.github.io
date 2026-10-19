@@ -1,8 +1,8 @@
 # Chương 8. Kernel Memory Allocation dành cho người viết module – Phần 1
 
-Trong hai chương trước, một chương về các khía cạnh bên trong và architecture của kernel, chương kia về những kiến thức thiết yếu của memory management internals, chúng ta đã trình bày các khía cạnh then chốt nhằm cung cấp kiến thức nền cần thiết cho chương này và chương tiếp theo. Trong chương này và chương sau, chúng ta sẽ đi vào việc thực sự cấp phát và giải phóng kernel memory bằng nhiều cách. Chúng ta sẽ minh họa qua các kernel module mà bạn có thể kiểm thử và điều chỉnh, giải thích kỹ lý do và cách thức cấp phát, đồng thời cung cấp nhiều mẹo thực tế để kernel developer hoặc driver developer như bạn đạt hiệu quả tối đa khi làm việc với memory trong kernel module của mình.
+Trong hai chương trước, một chương về các khía cạnh bên trong và architecture của kernel, chương kia về những kiến thức thiết yếu của memory management internals, chúng ta đã trình bày các khía cạnh then chốt nhằm cung cấp kiến thức nền cần thiết cho chương này và chương tiếp theo. Trong chương này và chương sau, chúng ta sẽ đi vào việc thực sự cấp phát và giải phóng kernel memory bằng nhiều cách. Chúng ta sẽ minh họa qua các kernel module mà bạn có thể kiểm thử và điều chỉnh, giải thích kỹ lý do và cách thức cấp phát, đồng thời cung cấp nhiều mẹo real-world để kernel developer hoặc driver developer như bạn đạt hiệu quả tối đa khi làm việc với memory trong kernel module của mình.
 
-Trong chương này, chúng ta sẽ trình bày hai memory allocator chính của kernel – Page Allocator (PA) (còn gọi là Buddy System Allocator (BSA)) và slab allocator. Chúng ta sẽ đi sâu vào các chi tiết khi làm việc với API của chúng trong kernel module. Chúng ta sẽ đi xa hơn việc chỉ xem cách dùng API, minh họa rõ vì sao hiệu quả sử dụng memory chưa tối ưu trong nhiều trường hợp và cách khắc phục những tình huống này. Chương 9, Kernel Memory Allocation for Module Authors – Part 2, sẽ tiếp tục nội dung về các kernel memory allocator, đi sâu vào một vài lĩnh vực nâng cao hơn.
+Trong chương này, chúng ta sẽ trình bày hai memory allocator chính của kernel – Page Allocator (PA) (còn gọi là Buddy System Allocator (BSA)) và slab allocator. Chúng ta sẽ đi sâu vào các nitty-gritty khi làm việc với API của chúng trong kernel module. Chúng ta sẽ đi xa hơn việc chỉ xem cách dùng API, minh họa rõ vì sao hiệu quả sử dụng memory chưa tối ưu trong nhiều trường hợp và cách khắc phục những tình huống này. Chương 9, Kernel Memory Allocation for Module Authors – Part 2, sẽ tiếp tục nội dung về các kernel memory allocator, đi sâu vào một vài lĩnh vực nâng cao hơn.
 
 Trong chương này, chúng ta sẽ trình bày các chủ đề sau:
 
@@ -22,13 +22,13 @@ Trong chương này, chúng ta sẽ trình bày các chủ đề sau:
 
 Tôi giả định rằng bạn đã đọc chương trực tuyến Kernel Workspace Setup, đã chuẩn bị phù hợp một guest Virtual Machine (VM) chạy Ubuntu 22.04 LTS (hoặc một bản phát hành ổn định mới hơn) và đã cài đặt tất cả package cần thiết. Nếu chưa, tôi đặc biệt khuyên bạn thực hiện việc này trước.
 
-Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyên bạn trước tiên hãy thiết lập môi trường workspace, bao gồm clone GitHub repository của sách (`https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`) để lấy code, rồi thực hành trực tiếp trên đó.
+Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyên bạn trước tiên hãy thiết lập môi trường workspace, bao gồm clone GitHub repository của sách (`https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`) để lấy code, rồi hands-on trên đó.
 
 Các chủ đề ở đây giả định bạn ít nhất đã quen ở mức cơ bản với process Virtual Address Space (VAS) và kiến thức nền về virtual memory (gồm các khái niệm physical memory layout như UMA và NUMA); chúng ta đã trình bày các nội dung này trong Chương 6, Kernel Internals Essentials – Processes and Threads, và Chương 7, Memory Management Internals – Essentials. Điều quan trọng là bảo đảm bạn hiểu chúng trước khi đi vào nội dung sau.
 
 ## Giới thiệu kernel memory allocator
 
-Cấp phát động rồi sau đó giải phóng kernel memory – cả physical lẫn virtual – là chủ đề then chốt ở đây. Linux kernel, như mọi OS khác, cần một thuật toán và implementation vững chắc để thực hiện nhiệm vụ thực sự then chốt này. Engine (de)allocation chính trong Linux OS được gọi là PA hay BSA. Bên trong, nó dùng thuật toán gọi là buddy system để tổ chức và phân chia hiệu quả các chunk system RAM trống. Bạn sẽ tìm thấy thêm nội dung về thuật toán trong phần Tìm hiểu và sử dụng kernel page allocator (hay BSA) của chương này.
+Cấp phát động rồi sau đó giải phóng kernel memory – cả physical lẫn virtual – là chủ đề then chốt ở đây. Linux kernel, như mọi OS khác, cần một thuật toán và implementation vững chắc để thực hiện nhiệm vụ thực sự then chốt này. Engine (de)allocation chính trong Linux OS so-called PA hay BSA. Bên trong, nó dùng thuật toán gọi là buddy system để tổ chức và phân chia hiệu quả các chunk system RAM trống. Bạn sẽ tìm thấy thêm nội dung về thuật toán trong phần Tìm hiểu và sử dụng kernel page allocator (hay BSA) của chương này.
 
 Trong chương này và xuyên suốt cuốn sách, khi chúng tôi dùng ký hiệu (de)allocate, hãy đọc nó theo cả hai từ: allocate và deallocate.
 
@@ -46,7 +46,7 @@ Hình 8.1: Engine page allocator của Linux với slab allocator xếp lớp ph
 
 Một vài điều cần làm rõ ngay từ đầu:
 
-- Linux kernel cùng mọi core component và subsystem của nó (trừ chính memory management subsystem và có lẽ một vài bên sử dụng rất đặc thù architecture) cuối cùng đều dùng page allocator (hay BSA) để cấp phát và giải phóng memory. Điều này bao gồm những thành phần non-core như kernel module và device driver.
+- Linux kernel cùng mọi core component và subsystem của nó (trừ chính memory management subsystem và có lẽ một vài bên sử dụng rất arch-specific) cuối cùng đều dùng page allocator (hay BSA) để cấp phát và giải phóng memory. Điều này bao gồm những thành phần non-core như kernel module và device driver.
 
 - Slab allocator và page allocator nằm hoàn toàn trong kernel (virtual) address space và không thể được truy cập trực tiếp từ user space.
 
@@ -76,7 +76,7 @@ Chúng ta sẽ chia thảo luận này thành một vài phần liên quan. Hãy
 
 #### Tìm hiểu cách tổ chức page allocator freelist
 
-Chìa khóa của thuật toán page allocator (buddy system) là metadata structure chính bên trong nó. Nó được gọi là buddy system freelist và gồm một array pointer trỏ đến các doubly linked circular list (quá đỗi phổ biến!). Index của array pointer này được gọi là order của list – đó là số mũ để nâng 2 lên. Độ dài array trải từ `0` đến `MAX_ORDER-1`. Giá trị `MAX_ORDER` phụ thuộc architecture; trên nền tảng x86 và ARM, nó là 11, trong khi trên hệ thống tương đối lớn như Itanium, nó là 17. Vì thế, trên x86 và ARM, order (các index) trải từ 2<sup>0</sup> đến 2<sup>10</sup>; nghĩa là từ 1 đến 1.024. Điều đó nghĩa là gì? Hãy đọc tiếp...
+Chìa khóa của thuật toán page allocator (buddy system) là metadata structure chính bên trong nó. Nó được gọi là buddy system freelist và gồm một array pointer trỏ đến các doubly linked circular list (oh-so-common!). Index của array pointer này được gọi là order của list – đó là số mũ để nâng 2 lên. Độ dài array trải từ `0` đến `MAX_ORDER-1`. Giá trị `MAX_ORDER` arch-dependent; trên nền tảng x86 và ARM, nó là 11, trong khi trên hệ thống large-ish như Itanium, nó là 17. Vì thế, trên x86 và ARM, order (các index) trải từ 2<sup>0</sup> đến 2<sup>10</sup>; nghĩa là từ 1 đến 1.024. Điều đó nghĩa là gì? Hãy đọc tiếp...
 
 Mỗi doubly linked circular list trỏ đến các page frame trống và physically contiguous có kích thước 2<sup>order</sup> page. Vì thế, giả định page size 4 KB, chúng ta có mười một list (0-10) với đặc điểm kích thước sau:
 
@@ -110,13 +110,13 @@ Hình 8.3: Ảnh chụp có chú giải của output /proc/buddyinfo mẫu
 
 Như có thể nhận ra từ Hình 8.3, VM của chúng ta là máy pseudo-NUMA với một node (`Node 0`) và hai zone (`DMA` và `DMA32`). (Chúng ta đã trình bày NUMA là gì và các chủ đề liên quan trong Chương 7, Memory Management Internals – Essentials, dưới phần Tổ chức physical RAM). Các số sau `zone XXX` là số page frame trống (physically contiguous!) trên list order 0, order 1, order 2, …, đến tận order `MAX_ORDER-1` (ở đây, 11 – 1 = 10). Vậy hãy lấy một vài ví dụ từ output trên (Hình 8.3):
 
-- Có 35 chunk RAM trống một page trong list order `0` của node `0`, zone DMA.
+- Có 35 chunk RAM trống single-page trong list order `0` của node `0`, zone DMA.
 
 - Trong node `0`, zone DMA32, order `3`, con số hiển thị trong Hình 8.3 là 678; giờ lấy 2<sup>order</sup> = 2<sup>3</sup> = 8 page frame = 32 KB (giả định page size 4 KB); điều này nghĩa là hiện có 678 chunk RAM trống physically contiguous, mỗi chunk 32 KB, trên list đó.
 
 Điều quan trọng cần lưu ý là bản thân mỗi chunk được bảo đảm là physically contiguous RAM. Đồng thời, hãy chú ý kích thước memory chunk ở một order cụ thể luôn gấp đôi order trước (và bằng một nửa order tiếp theo). Tất nhiên đặc tính toán học này luôn đúng vì tất cả đều là lũy thừa của 2.
 
-Lưu ý `MAX_ORDER` có thể (và thực tế có) thay đổi theo architecture. Trên hệ thống x86 và ARM thông thường, nó là `11`, cho kích thước chunk lớn nhất có thể là 4 MB physically contiguous RAM ở order 10 của các freelist (vì order cuối sẽ là 2<sup>10</sup> = 1024 page frame = 1024 \* 4KB = 4096 KB = 4 MB). Một ví dụ khác, trên một số enterprise server cao cấp chạy processor Itanium (IA-64), `MAX_ORDER` có thể cao đến `17` (nghĩa là kích thước chunk lớn nhất ở order (17-1), do đó là 2<sup>16</sup> = 65.536 page = các chunk physically contiguous RAM 512 MB ở order 16 của freelist, với page size 4 KB). IA-64 MMU hỗ trợ đến tám page size, trải từ chỉ 4 KB đến tận 256 MB. Thêm một ví dụ, với page size 16 MB, list order 16 có thể có các chunk physically contiguous RAM kích thước 65.536 \* 16 MB = 1 TB mỗi chunk!
+Lưu ý `MAX_ORDER` có thể (và thực tế có) thay đổi theo architecture. Trên hệ thống x86 và ARM thông thường, nó là `11`, cho kích thước chunk lớn nhất có thể là 4 MB physically contiguous RAM ở order 10 của các freelist (vì order cuối sẽ là 2<sup>10</sup> = 1024 page frame = 1024 \* 4KB = 4096 KB = 4 MB). Một ví dụ khác, trên một số enterprise server high-end chạy processor Itanium (IA-64), `MAX_ORDER` có thể cao đến `17` (nghĩa là kích thước chunk lớn nhất ở order (17-1), do đó là 2<sup>16</sup> = 65.536 page = các chunk physically contiguous RAM 512 MB ở order 16 của freelist, với page size 4 KB). IA-64 MMU hỗ trợ đến tám page size, trải từ chỉ 4 KB đến tận 256 MB. Thêm một ví dụ, với page size 16 MB, list order 16 có thể có các chunk physically contiguous RAM kích thước 65.536 \* 16 MB = 1 TB mỗi chunk!
 
 Một điểm then chốt khác: kernel giữ nhiều PA/BSA freelist – một cho mỗi node:zone hiện diện trên hệ thống! Điều này tạo ra cách tự nhiên để cấp phát memory trên hệ thống NUMA.
 
@@ -138,7 +138,7 @@ Có thể giải thích chiến lược cấp phát và giải phóng thực t�
 
 Tại sao chúng ta nói page allocator freelist của node:zone thích hợp (gần nhất)? Có nghĩa là có nhiều hơn một freelist sao? Đúng vậy! Chúng ta nhắc lại: thực tế sẽ có nhiều PA freelist data structure, mỗi cái cho một node:zone trên hệ thống. (Cũng xem thêm chi tiết trong phần Page allocator internals – một vài chi tiết nữa sắp tới.)
 
-4\. Nếu không có lấy một memory chunk trên list order 5 (nghĩa là nếu nó null), hãy kiểm tra list tại order kế tiếp; nghĩa là linked list order 6 (nếu không trống, nó sẽ có các memory chunk 2<sup>6</sup> page = 256 KB được enqueue trên đó, mỗi chunk gấp đôi kích thước chúng ta muốn). 5. Nếu list order 6 không null, lấy (dequeue) một memory chunk từ đó (kích thước sẽ là 256 KB, gấp đôi cần thiết), rồi thực hiện như sau:
+4\. Nếu không có lấy một memory chunk trên list order 5 (nghĩa là nếu nó null), hãy kiểm tra list tại order kế tiếp; nghĩa là linked list order 6 (nếu không trống, nó sẽ có các memory chunk 2<sup>6</sup> page = 256 KB được enqueue trên đó, mỗi chunk gấp đôi kích thước chúng ta muốn). 5. Nếu list order 6 non-null, lấy (dequeue) một memory chunk từ đó (kích thước sẽ là 256 KB, gấp đôi cần thiết), rồi thực hiện như sau:
 
   - Cập nhật list (order 6) để phản ánh rằng một chunk vừa được lấy đi.
 
@@ -154,7 +154,7 @@ Tại sao chúng ta nói page allocator freelist của node:zone thích hợp (g
 
 Chúng ta có thể cắt hay chia đôi memory chunk vì mỗi chunk trên list được bảo đảm là physically contiguous memory. Sau khi cắt, có hai nửa; mỗi nửa được gọi là buddy block, vì vậy thuật toán có tên đó. Xét chặt chẽ, nó được gọi là binary buddy system vì chúng ta dùng memory chunk có kích thước là lũy thừa của 2. Chính xác hơn, buddy block được định nghĩa là một block cùng kích thước và nằm liền kề về mặt vật lý với một block khác.
 
-Bạn sẽ hiểu rằng mô tả trên mang tính khái niệm. Code implementation thực tế chắc chắn phức tạp và được tối ưu hơn. Nhân tiện, code – “trái tim” của zoned buddy allocator, đúng như comment của nó nói, nằm ở đây: `mm/page_alloc.c:__alloc_pages()` (để bạn biết, tại đây trên 6.1.25: `https://elixir.bootlin.com/linux/v6.1.25/source/mm/page_alloc.c#L5523`). Vì ngoài phạm vi sách, chúng ta sẽ không cố đi sâu vào chi tiết mức code của allocator.
+Bạn sẽ hiểu rằng mô tả trên mang tính khái niệm. Code implementation thực tế chắc chắn phức tạp và được tối ưu hơn. Nhân tiện, code – “trái tim” của zoned buddy allocator, đúng như comment của nó nói, nằm ở đây: `mm/page_alloc.c:__alloc_pages()` (để bạn biết, tại đây trên 6.1.25: `https://elixir.bootlin.com/linux/v6.1.25/source/mm/page_alloc.c#L5523`). Vì ngoài phạm vi sách, chúng ta sẽ không cố đi sâu vào chi tiết code-level của allocator.
 
 #### Xem xét một vài tình huống
 
@@ -162,23 +162,23 @@ Giờ đã có kiến thức cơ bản về thuật toán, hãy xét một vài 
 
 ##### Trường hợp đơn giản nhất
 
-Giả sử một kernel-space device driver (hoặc một core code nào đó) yêu cầu 128 KB và nhận một memory chunk từ list order 5 của một trong các freelist data structure. Vào một thời điểm sau đó, nó nhất thiết sẽ (nên/phải) giải phóng memory chunk bằng một trong các API giải phóng của page allocator. Giờ thuật toán của API “free” này tính toán – qua order (và do đó kích thước) của chunk – rằng chunk vừa được giải phóng thuộc list order 5; vì vậy nó enqueue chunk vào đó. (Bạn sẽ sớm thấy một parameter của cả API alloc lẫn free là order của list.)
+Giả sử một kernel-space device driver (hoặc một core code nào đó) yêu cầu 128 KB và nhận một memory chunk từ list order 5 của một trong các freelist data structure. Vào một thời điểm sau đó, nó nhất thiết sẽ (nên/phải) giải phóng memory chunk bằng một trong các API giải phóng của page allocator. Giờ thuật toán của allocator-free này tính toán – qua order (và do đó kích thước) của chunk – rằng chunk just-freed thuộc list order 5; vì vậy nó enqueue chunk vào đó. (Bạn sẽ sớm thấy một parameter của cả API alloc lẫn free là order của list.)
 
 ##### Trường hợp phức tạp hơn
 
-Giờ giả sử, khác trường hợp đơn giản trước, khi device driver yêu cầu 128 KB, list order 5 là null; vì thế, theo thuật toán page allocator, chúng ta đến list ở order tiếp theo, 6, và kiểm tra nó. Giả sử nó không null; giờ thuật toán dequeue một chunk order 6 kích thước 256 KB rồi chia (hay cắt) đôi. Vậy giờ có hai nửa nằm liền kề về mặt vật lý và có kích thước bằng nhau – các buddy block. Giờ một buddy block (kích thước 128 KB) được đưa cho bên yêu cầu, còn buddy block kia (cũng kích thước 128 KB) được enqueue vào list order 5.
+Giờ giả sử, khác trường hợp đơn giản trước, khi device driver yêu cầu 128 KB, list order 5 là null; vì thế, theo thuật toán page allocator, chúng ta đến list ở order tiếp theo, 6, và kiểm tra nó. Giả sử nó non-null; giờ thuật toán dequeue một chunk order 6 kích thước 256 KB rồi chia (hay cắt) đôi. Vậy giờ có hai nửa nằm liền kề về mặt vật lý và có kích thước bằng nhau – các buddy block. Giờ một buddy block (kích thước 128 KB) được đưa cho bên yêu cầu, còn buddy block kia (cũng kích thước 128 KB) được enqueue vào list order 5.
 
-Đặc tính thực sự thú vị của buddy system là điều xảy ra khi bên yêu cầu (driver), vào một thời điểm sau đó, giải phóng memory chunk. Như mong đợi, thuật toán tính toán (qua order của chunk) rằng chunk vừa được giải phóng thuộc list order 5. Nhưng trước khi cứ thế enqueue vào đó, nó tìm buddy block của chunk, và trong trường hợp này, nó (có thể) tìm thấy! Giờ nó gộp hai buddy block thành một block lớn hơn (kích thước 256 KB) rồi đặt (enqueue) block đã gộp vào list order 6. Thật tuyệt – nó thậm chí còn giúp defragment memory!
+Đặc tính thực sự thú vị của buddy system là điều xảy ra khi bên yêu cầu (driver), vào một thời điểm sau đó, giải phóng memory chunk. Như mong đợi, thuật toán tính toán (qua order của chunk) rằng chunk just-freed thuộc list order 5. Nhưng trước khi cứ thế enqueue vào đó, nó tìm buddy block của chunk, và trong trường hợp này, nó (có thể) tìm thấy! Giờ nó gộp hai buddy block thành một block lớn hơn (kích thước 256 KB) rồi đặt (enqueue) block đã gộp vào list order 6. Thật tuyệt – nó thậm chí còn giúp defragment memory!
 
 ##### Trường hợp bộc lộ nhược điểm
 
-Giờ hãy làm tình huống thú vị hơn bằng cách không dùng kích thước tròn theo lũy thừa của 2 thuận tiện làm yêu cầu cấp phát. Lần này giả sử device driver yêu cầu một memory chunk kích thước 132 KB. Buddy system allocator sẽ làm gì? Vì tất nhiên không thể cấp phát ít memory hơn yêu cầu, nó cấp phát nhiều hơn – bạn đoán đúng rồi (xem Hình 8.2) – memory chunk có sẵn tiếp theo với kích thước thích hợp (bằng hoặc lớn hơn yêu cầu) nằm ở order 7 của freelist, kích thước 256 KB. Nhưng bên sử dụng (driver) chỉ nhìn thấy và dùng 132 KB đầu của chunk 256 KB được cấp phát. Phần còn lại (124 KB) bị lãng phí (hãy nghĩ xem, gần 50% lãng phí!). Điều này gọi là internal fragmentation (hay lãng phí) và là nhược điểm nghiêm trọng của binary buddy system!
+Giờ hãy làm tình huống thú vị hơn bằng cách không dùng kích thước tròn theo lũy thừa của 2 thuận tiện làm yêu cầu cấp phát. Lần này giả sử device driver yêu cầu một memory chunk kích thước 132 KB. Buddy system allocator sẽ làm gì? Vì tất nhiên không thể cấp phát ít memory hơn yêu cầu, nó cấp phát nhiều hơn – bạn đoán đúng rồi (xem Hình 8.2) – memory chunk có sẵn tiếp theo với appropriately-sized (bằng hoặc lớn hơn yêu cầu) nằm ở order 7 của freelist, kích thước 256 KB. Nhưng bên sử dụng (driver) chỉ nhìn thấy và dùng 132 KB đầu của chunk 256 KB được cấp phát. Phần còn lại (124 KB) bị lãng phí (hãy nghĩ xem, gần 50% lãng phí!). Điều này gọi là internal fragmentation (hay lãng phí) và là nhược điểm nghiêm trọng của binary buddy system!
 
 Tuy nhiên, bạn sẽ biết rằng thực sự có cách giảm thiểu điều này: một patch đã được đóng góp để xử lý các tình huống tương tự (qua các API `alloc_pages_exact()` / `free_pages_exact()`). Chúng ta sẽ sớm trình bày các API để sử dụng page allocator.
 
 #### Page allocator internals – một vài chi tiết nữa
 
-Trong cuốn sách này, chúng ta không định đi sâu vào chi tiết mức code của page allocator internals. Dù vậy, vấn đề là thế này: về mặt data structure, structure `zone` chứa một array các structure `free_area`, tức những “freelist” của page allocator. Điều này hợp lý; như đã học, có thể có (và thường có) nhiều page allocator freelist trên hệ thống, một cho mỗi node:zone; hãy xem chúng ở mức code:
+Trong cuốn sách này, chúng ta không định đi sâu vào chi tiết mức code của page allocator internals. Dù vậy, vấn đề là thế này: về mặt data structure, structure `zone` chứa một array các structure `free_area`, tức so-called những “freelist” của page allocator. Điều này hợp lý; như đã học, có thể có (và thường có) nhiều page allocator freelist trên hệ thống, một cho mỗi node:zone; hãy xem chúng code-level:
 
 ```
 // include/linux/mmzone.h
@@ -201,7 +201,7 @@ struct free_area {
 
 Tại sao structure `free_area` chứa một array linked list thay vì chỉ một list? Không đi sâu vào chi tiết, chúng ta sẽ đề cập rằng kernel layout cho các buddy system freelist phức tạp hơn những gì đã trình bày đến giờ: từ kernel 2.6.24, mỗi freelist đã thấy tiếp tục được chia thành nhiều freelist riêng lẻ (đến 6) để phục vụ các page migration type khác nhau (nói đến việc kernel có thể thực sự migrate hay di chuyển page để giảm tác động của fragmentation hay không. Có năm migration type có thể có (không nhất thiết tất cả đều được bật): unmovable, movable, reclaimable, CMA và isolate). Điều này cần thiết để xử lý các vấn đề phức tạp khi cố giữ memory (RAM) được defragment.
 
-Bên cạnh đó, như đã nói, các freelist này tồn tại cho mỗi node:zone trên hệ thống. Vì vậy, ví dụ, trên một hệ thống NUMA thực sự có 4 node và 3 zone mỗi node, sẽ có 12 (4 x 3) freelist. Không chỉ vậy, giờ chúng ta nhận ra mỗi structure `free_area` thực sự gồm (đến) 6 freelist, một cho mỗi migration type. Vì thế, trên hệ thống như vậy, tổng cộng đến 6 x 12 = 72 freelist data structure sẽ tồn tại trên toàn hệ thống!
+Bên cạnh đó, như đã nói, các freelist này tồn tại cho mỗi node:zone trên hệ thống. Vì vậy, ví dụ, trên một hệ thống NUMA thực sự có 4 node và 3 zone mỗi node, sẽ có 12 (4 x 3) freelist. Không chỉ vậy, giờ chúng ta nhận ra mỗi structure `free_area` thực sự gồm (đến) 6 freelist, một cho mỗi migration type. Vì thế, trên hệ thống như vậy, tổng cộng đến 6 x 12 = 72 freelist data structure sẽ tồn tại system-wide!
 
 Nếu quan tâm, hãy tìm hiểu sâu các chi tiết; output `/proc/buddyinfo` chỉ là một góc nhìn tóm lược thuận tiện về trạng thái buddy system freelist (như Hình 8.3 cho thấy). Để có góc nhìn chi tiết và sát thực hơn (thuộc loại vừa đề cập, hiển thị mọi freelist), hãy xem `/proc/pagetypeinfo` (yêu cầu root access); nó hiển thị mọi freelist (cũng chia theo page migration type). Tuy nhiên, lưu ý không nhất thiết cả sáu migration type đều được định nghĩa trên một hệ thống.
 
@@ -229,11 +229,11 @@ Có thể tìm thấy mọi API prototype sau trong `include/linux/gfp.h`:
 
 | Tên API hoặc macro | Ghi chú | API signature hoặc macro |
 |---|---|---|
-| `__get_free_page()` | Cấp phát đúng một page frame. Memory được cấp phát sẽ có nội dung ngẫu nhiên; đây là macro, một wrapper quanh API `__get_free_pages()`. Return value là pointer đến kernel logical address của memory vừa được cấp phát. | `#define __get_free_page(gfp_mask) \ __get_free_pages((gfp_mask), 0)` |
-| `__get_free_pages()` | Cấp phát 2<sup>order</sup> page frame physically contiguous. Memory được cấp phát sẽ có nội dung ngẫu nhiên; return value là pointer đến kernel logical address của memory vừa được cấp phát. | `unsigned long __get_free_pages(gfp_t gfp_mask,` `unsigned int order);` |
-| `get_zeroed_page()` | Cấp phát đúng một page frame; nội dung được đặt thành ASCII zero (`NULL`; nghĩa là được zero hóa); return value là pointer đến kernel logical address của memory vừa được cấp phát. | `unsigned long get_zeroed_page(gfp_t gfp_mask);` |
-| `alloc_page()` | Cấp phát đúng một page frame. Memory được cấp phát sẽ có nội dung ngẫu nhiên; đây là macro (wrapper) trên API `alloc_pages()`; return value là pointer đến metadata structure `page` của memory vừa được cấp phát; có thể chuyển nó thành kernel logical address qua function `page_address()`. | `#define alloc_page(gfp_mask) \ alloc_pages(gfp_mask, 0)` |
-| `alloc_pages()` | Cấp phát 2<sup>order</sup> page frame physically contiguous. Memory được cấp phát sẽ có nội dung ngẫu nhiên; return value là pointer đến đầu metadata structure `page` của memory vừa được cấp phát; có thể chuyển nó thành kernel logical address qua function `page_address()`. | `struct page *` `alloc_pages(gfp_t gfp_mask,` `unsigned int order);` |
+| `__get_free_page()` | Cấp phát đúng một page frame. Memory được cấp phát sẽ có nội dung ngẫu nhiên; đây là macro, một wrapper quanh API `__get_free_pages()`. Return value là pointer đến kernel logical address của memory just-allocated. | `#define __get_free_page(gfp_mask) \ __get_free_pages((gfp_mask), 0)` |
+| `__get_free_pages()` | Cấp phát 2<sup>order</sup> page frame physically contiguous. Memory được cấp phát sẽ có nội dung ngẫu nhiên; return value là pointer đến kernel logical address của memory just-allocated. | `unsigned long __get_free_pages(gfp_t gfp_mask,` `unsigned int order);` |
+| `get_zeroed_page()` | Cấp phát đúng một page frame; nội dung được đặt thành ASCII zero (`NULL`; nghĩa là được zero hóa); return value là pointer đến kernel logical address của memory just-allocated. | `unsigned long get_zeroed_page(gfp_t gfp_mask);` |
+| `alloc_page()` | Cấp phát đúng một page frame. Memory được cấp phát sẽ có nội dung ngẫu nhiên; đây là macro (wrapper) trên API `alloc_pages()`; return value là pointer đến metadata structure `page` của memory just-allocated; có thể chuyển nó thành kernel logical address qua function `page_address()`. | `#define alloc_page(gfp_mask) \ alloc_pages(gfp_mask, 0)` |
+| `alloc_pages()` | Cấp phát 2<sup>order</sup> page frame physically contiguous. Memory được cấp phát sẽ có nội dung ngẫu nhiên; return value là pointer đến đầu metadata structure `page` của memory just-allocated; có thể chuyển nó thành kernel logical address qua function `page_address()`. | `struct page *` `alloc_pages(gfp_t gfp_mask,` `unsigned int order);` |
 
 Bảng 8.1: Low-level allocator (BSA/page) – các allocation API được export phổ biến
 
@@ -261,7 +261,7 @@ Project Linux Driver Verification (LDV): trong chương trực tuyến Kernel Wo
 
 Về chủ đề hiện tại, đây là một quy tắc, dưới dạng điều cấm, nghĩa là bạn không được làm như sau: “Dùng blocking memory allocation khi đang giữ spinlock” (`http://linuxtesting.org/ldv/online?action=show_rule&rule_id=0043`). Khi giữ spinlock, bạn không được làm bất kỳ điều gì có thể block; bao gồm kernel-space memory allocation với bất kỳ flag nào ngoài `GFP_ATOMIC`. Vì thế, rất quan trọng, bạn phải dùng flag `GFP_ATOMIC` khi thực hiện memory allocation trong bất kỳ atomic context hay non-blocking context nào, như khi giữ spinlock (bạn sẽ biết điều này không áp dụng cho mutex lock; bạn được phép thực hiện các hoạt động blocking khi giữ mutex). Vi phạm quy tắc này dẫn đến mất ổn định và thậm chí làm xuất hiện khả năng deadlock (ngầm). Trang LDV đề cập một device driver đã vi phạm chính quy tắc này và bản sửa sau đó (`https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=5` `b0691508aa99d309101a49b4b084dc16b3d7019`). Hãy xem: patch thể hiện rõ (trong ngữ cảnh API `kzalloc()`, sẽ được trình bày sớm) flag `GFP_KERNEL` được thay bằng flag `GFP_ATOMIC`.
 
-Một GFP flag thường dùng khác là `__GFP_ZERO`. Dùng nó cho kernel biết bạn muốn memory page được zero hóa. Nó thường được bitwise-OR với các flag `GFP_KERNEL` hoặc `GFP_ATOMIC` để trả về memory được khởi tạo thành zero (nhìn chung là một thực hành lập trình tốt!).
+Một GFP flag thường dùng khác là `__GFP_ZERO`. Dùng nó cho kernel biết bạn muốn memory page được zeroed-out. Nó thường được bitwise-ORed với các flag `GFP_KERNEL` hoặc `GFP_ATOMIC` để trả về memory được khởi tạo thành zero (nhìn chung là một thực hành lập trình tốt!).
 
 Các kernel developer đã dành công sức ghi tài liệu chi tiết về GFP flag. Hãy xem `include/linux/gfp_types.h`. Bên trong có một comment dài và chi tiết; tiêu đề là DOC: Useful GFP flag combinations (trên 6.1.25, tại đây: `https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/gfp_types.h#L263`).
 
@@ -287,11 +287,11 @@ Giờ hãy chuyển sang một số hướng dẫn hữu ích cần tuân theo k
 
 #### Một vài hướng dẫn cần tuân thủ khi cấp phát và giải phóng kernel memory
 
-Như mọi C/C++ application developer có kinh nghiệm đều biết, cấp phát rồi sau đó giải phóng memory là nguồn bug dồi dào! Chủ yếu vì C là unmanaged language xét về memory; do đó bạn có thể khá dễ gặp đủ loại memory bug. Bao gồm các bug nổi tiếng memory leakage, buffer overflow/underflow cho cả read/write, double-free và Use After Free (UAF).
+Như mọi C/C++ application developer có kinh nghiệm đều biết, cấp phát rồi sau đó giải phóng memory là nguồn bug dồi dào! Chủ yếu vì C là unmanaged language xét về memory; do đó bạn có thể khá dễ gặp đủ loại memory bug. Bao gồm các bug well-known memory leakage, buffer overflow/underflow cho cả read/write, double-free và Use After Free (UAF).
 
 Đáng tiếc, kernel space cũng không khác; chỉ là hậu quả tệ hơn (rất nhiều)! Hãy đặc biệt cẩn thận! Vui lòng chú ý bảo đảm những điều sau:
 
-- Ưu tiên routine khởi tạo memory vừa được cấp phát thành zero.
+- Ưu tiên routine khởi tạo memory just-allocated thành zero.
 
 - Suy xét và dùng GFP flag thích hợp khi thực hiện allocation; sẽ nói thêm trong phần GFP flag – tìm hiểu sâu hơn, nhưng tóm lược hãy lưu ý:
 
@@ -303,13 +303,13 @@ Như mọi C/C++ application developer có kinh nghiệm đều biết, cấp ph
 
 - Chỉ thử giải phóng memory mà bạn đã cấp phát trước đó; không cần nói cũng biết (nhưng chúng ta vẫn nói!), đừng quên giải phóng nó, đừng dùng sai pointer và đừng double-free nó.
 
-- Đừng thử truy cập memory đã được giải phóng (điều này gây bug UAF).
+- Đừng thử truy cập memory already-freed (điều này gây bug UAF).
 
 - Giữ pointer gốc của memory chunk an toàn khỏi việc tái sử dụng, thao tác (`ptr ++` hoặc tương tự) và corruption, để bạn có thể giải phóng đúng khi hoàn tất.
 
 - Kiểm tra (và kiểm tra lại!) các parameter truyền cho API. Nó yêu cầu pointer đến block đã cấp phát trước đó, hay pointer đến structure `page` bên dưới của block?
 
-Bạn thấy khó và/hoặc lo về các vấn đề trong production? Đừng quên, bạn có sự trợ giúp từ các công cụ static analysis và dynamic analysis của kernel (cũng như bên thứ ba)! Hãy chắc chắn học cách dùng các công cụ static analysis mạnh mẽ trong kernel (Coccinelle, `sparse` và các công cụ khác như `cppcheck` hay `smatch`). Với dynamic analysis, hãy học cách cài đặt và dùng KASAN (Kernel Address Sanitizer). Cuốn Linux Kernel Debugging trình bày điều này và nhiều hơn nữa...
+Bạn thấy khó và/hoặc lo về các vấn đề trong production? Đừng quên, bạn có sự trợ giúp từ các công cụ static analysis và dynamic analysis của kernel (cũng như third-party)! Hãy chắc chắn học cách dùng các công cụ static analysis mạnh mẽ trong kernel (Coccinelle, `sparse` và các công cụ khác như `cppcheck` hay `smatch`). Với dynamic analysis, hãy học cách cài đặt và dùng KASAN (Kernel Address Sanitizer). Cuốn Linux Kernel Debugging trình bày điều này và nhiều hơn nữa...
 
 Cũng hãy nhớ Makefile template “tốt hơn” tôi cung cấp trong Chương 5, Writing Your First Kernel Module – Part 2, tại phần Một Makefile template tốt hơn. Nó chứa các target dùng nhiều công cụ trong số này; hãy sử dụng nó!
 
@@ -317,7 +317,7 @@ Cũng hãy nhớ Makefile template “tốt hơn” tôi cung cấp trong Chươ
 
 #### Viết kernel module để demo cách dùng các page allocator API
 
-Giờ hãy thực hành với các low-level page allocator API và free API đã học đến đây. Trong phần này, chúng ta sẽ trình bày các đoạn code liên quan (không phải từng dòng), kèm giải thích khi cần, từ demo kernel module (`ch8/lowlevel_mem/lowlevel_mem.c`).
+Giờ hãy hands-on với các low-level page allocator API và free API đã học đến đây. Trong phần này, chúng ta sẽ trình bày các đoạn code liên quan (không phải từng dòng), kèm giải thích khi cần, từ demo kernel module (`ch8/lowlevel_mem/lowlevel_mem.c`).
 
 Trong worker routine chính, `bsa_alloc()`, của LKM nhỏ, chúng ta nhấn mạnh một số code comment cho thấy điều đang cố đạt được. Một vài điểm cần lưu ý:
 
@@ -455,7 +455,7 @@ if (!gptr3)
 pr_info("3.  get_zeroed_page()   1 page      %px\n", gptr3);
 ```
 
-Như thấy trong đoạn trên, chúng ta cấp phát một page memory nhưng bảo đảm nó được zero hóa bằng cách dùng API PA `get_zeroed_page()`. `pr_info()` hiển thị KVA thực tế (dùng format specifier `%px` hay `%pK` cũng giúp in địa chỉ theo cách portable, bất kể bạn chạy hệ thống 32-bit hay 64-bit).
+Như thấy trong đoạn trên, chúng ta cấp phát một page memory nhưng bảo đảm nó được zero hóa bằng cách dùng API PA `get_zeroed_page()`. `pr_info()` hiển thị KVA thực tế (dùng format specifier `%px` hay `%pK` cũng giúp in địa chỉ theo cách port-able, bất kể bạn chạy hệ thống 32-bit hay 64-bit).
 
 5\. Tiếp theo, chúng ta cấp phát một page bằng API `alloc_page()`. Hãy cẩn thận ở đây! Nó không trả về pointer đến page được cấp phát, mà là pointer đến metadata structure `page` biểu diễn page đó; đây là function signature: `struct page * alloc_page(gfp_mask)`. Vì thế phải dùng helper `page_address()` để chuyển nó thành kernel logical address (hoặc virtual address):
 
@@ -486,7 +486,7 @@ Trong đoạn code trên, chúng ta kết hợp `alloc_pages()` được bọc t
 
 Điều thú vị là chúng ta dùng nhiều câu lệnh `goto` cục bộ trong code (hãy xem qua code trong repo). Nhìn kỹ, bạn sẽ thấy nó thực sự giữ các error handling code path sạch và hợp lý! Đây quả thực là một phần của Linux kernel coding style guideline.
 
-Cách dùng câu lệnh `goto` (thường gây tranh luận mang tính hàn lâm) trong Linux được ghi tài liệu rõ ràng ngay đây: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/process/coding-style.rst#L526`. Tôi khuyến khích bạn xem! Một khi hiểu usage pattern, bạn sẽ thấy nó giúp giảm các cleanup error về memory leakage (và tương tự) vốn quá thường gặp!
+Cách dùng câu lệnh `goto` (thường gây tranh luận mang tính hàn lâm) trong Linux được ghi tài liệu rõ ràng ngay đây: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/process/coding-style.rst#L526`. Tôi khuyến khích bạn xem! Một khi hiểu usage pattern, bạn sẽ thấy nó giúp giảm các cleanup error về memory leakage (và tương tự) vốn all-too-typical!
 
 7\. Cuối cùng, trong cleanup method, trước khi được loại khỏi kernel memory, chúng ta giải phóng mọi memory chunk vừa cấp phát trong cleanup code của kernel module. 8. Để link library code `klib` với kernel module `lowlevel_mem_lkm`, `Makefile` thay đổi để có nội dung sau (hãy nhớ chúng ta đã học cách compile nhiều source file thành một kernel module trong Chương 5, Writing Your First Kernel Module – Part 2, tại phần Thực hiện library emulation qua nhiều source file):
 
@@ -516,7 +516,7 @@ Hình 8.5: Output của kernel module lowlevel\_mem\_lkm trên Raspberry Pi 4 Mo
 
 Hãy xem! Trong bước 0 của output ở Hình 8.5, “library” routine `show_phy_pages()` cho thấy rõ KVA `0xc000 0000` có pa (physical address) `0x0`, KVA `0xc000 1000` có pa `0x1000`, v.v., cho năm page (cùng PFN ở ngoài cùng bên phải); bạn có thể thực sự thấy identity mapping 1:1 của physical RAM page frame đến kernel virtual page (trong vùng lowmem của kernel segment)!
 
-Tiếp theo, sau khi hiển thị header line, memory allocation đầu tiên bằng API `__get_free_page()` diễn ra như mong đợi. Thú vị hơn là trường hợp 2. Ở đây (phần giữa đến dưới của Hình 8.5), có thể thấy rõ physical address và PFN của mỗi page được cấp phát (từ 0 đến 7, tổng cộng 8 page, qua API `__get_free_pages()`, điểm #3 trong phần giải thích code) là liên tiếp, cho thấy (một lần nữa) các memory page được cấp phát thực sự physically contiguous!
+Tiếp theo, sau khi hiển thị header line, memory allocation đầu tiên bằng API `__get_free_page()` diễn ra như mong đợi. Thú vị hơn là trường hợp 2. Ở đây (phần middle-to-lower của Hình 8.5), có thể thấy rõ physical address và PFN của mỗi page được cấp phát (từ 0 đến 7, tổng cộng 8 page, qua API `__get_free_pages()`, điểm #3 trong phần giải thích code) là liên tiếp, cho thấy (một lần nữa) các memory page được cấp phát thực sự physically contiguous!
 
 ##### Thử nghiệm trên x86\_64 VM
 
@@ -540,7 +540,7 @@ Dù bề ngoài mọi thứ có vẻ tốt đẹp và vô hại, tôi khuyến k
 
 Để hiểu tại sao, bạn phải hiểu ít nhất kiến thức cơ bản về thuật toán page allocator và các freelist data structure của nó. Phần có tên Cơ chế hoạt động nền tảng của page allocator đã trình bày điều này (nếu chưa đọc, vui lòng đọc).
 
-Trong phần Xem xét một vài tình huống, bạn đã thấy khi đưa ra allocation request với số page thuận tiện, tròn hoàn toàn theo lũy thừa của hai (lưu ý, page, không phải byte), mọi thứ diễn ra rất suôn sẻ. Tuy nhiên, khi không như vậy – giả sử driver yêu cầu 132 KB memory – chúng ta gặp vấn đề lớn: internal fragmentation hay mức lãng phí rất cao (như đã thấy, theo mặc định điều này dẫn đến allocation 256 KB, do đó gây lãng phí 256 - 132 = 124 KB). Đây là nhược điểm nghiêm trọng và phải được giải quyết. Chúng ta sẽ thấy cách, thực ra theo hai cách. Hãy đọc tiếp!
+Trong phần Xem xét một vài tình huống, bạn đã thấy khi đưa ra allocation request với số page thuận tiện, powers-of-two-size (lưu ý, page, không phải byte), mọi thứ diễn ra rất suôn sẻ. Tuy nhiên, khi không như vậy – giả sử driver yêu cầu 132 KB memory – chúng ta gặp vấn đề lớn: internal fragmentation hay mức lãng phí rất cao (như đã thấy, theo mặc định điều này dẫn đến allocation 256 KB, do đó gây lãng phí 256 - 132 = 124 KB). Đây là nhược điểm nghiêm trọng và phải được giải quyết. Chúng ta sẽ thấy cách, thực ra theo hai cách. Hãy đọc tiếp!
 
 ##### Cặp page allocator API “exact”
 
@@ -548,7 +548,7 @@ Nhận ra khả năng gây lãng phí memory rất lớn của page allocator (h
 
 Trong dòng `2.6.27-rc1`, ngày 24 tháng 7 năm 2008, Timur Tabi gửi một patch để giảm thiểu vấn đề lãng phí của page allocator. Đây là commit liên quan: `https://github.com/torvalds/linux/commit/2be0ffe2b29bd31d3debd0877797892ff2d91f4c`.
 
-Dùng các API này dẫn đến allocation hiệu quả hơn cho những memory chunk tương đối lớn (nhiều page), với ít lãng phí hơn hẳn. Cặp API mới (ít nhất thì nó mới vào năm 2008) để cấp phát và giải phóng memory như sau:
+Dùng các API này dẫn đến allocation hiệu quả hơn cho những memory chunk large-ish (nhiều page), với ít lãng phí hơn hẳn. Cặp API mới (ít nhất thì nó mới vào năm 2008) để cấp phát và giải phóng memory như sau:
 
 ```
 #include <linux/gfp.h>
@@ -556,7 +556,7 @@ void *alloc_pages_exact(size_t size, gfp_t gfp_mask);
 void free_pages_exact(void *virt, size_t size);
 ```
 
-Parameter đầu của API `alloc_pages_exact()`, `size`, tính bằng byte: hiển nhiên đó là số byte cần cấp phát; parameter thứ hai là giá trị GFP flag “thông thường” đã thảo luận (trong phần Làm việc với GFP flag; `GFP_KERNEL` cho các trường hợp process context điển hình có thể sleep, và `GFP_ATOMIC` cho các trường hợp interrupt context hoặc atomic context không thể sleep).
+Parameter đầu của API `alloc_pages_exact()`, `size`, tính bằng byte: hiển nhiên đó là số byte cần cấp phát; parameter thứ hai là giá trị GFP flag “thông thường” đã thảo luận (trong phần Làm việc với GFP flag; `GFP_KERNEL` cho các trường hợp process context điển hình might-sleep, và `GFP_ATOMIC` cho các trường hợp interrupt context hoặc atomic context t-sleep).
 
 Lưu ý memory được API này cấp phát vẫn được bảo đảm physically contiguous. Đồng thời, lượng có thể cấp phát một lần (với một function call) bị giới hạn bởi `MAX_ORDER`; thực tế, điều này đúng với mọi regular page allocation API khác đã thấy đến giờ. Chúng ta sẽ thảo luận nhiều hơn về khía cạnh này trong phần Giới hạn kích thước của API kmalloc sắp tới. Ở đó, bạn sẽ nhận ra thảo luận thực ra không chỉ giới hạn ở slab cache mà còn cả page allocator!
 
@@ -570,7 +570,7 @@ Trước khi bắt đầu phần này, chúng ta đã đề cập hai cách gi�
 
 ### GFP flag – tìm hiểu sâu hơn
 
-Đối với thảo luận về low-level page allocator API, parameter đầu của mỗi function là GFP mask. Khi thảo luận API và cách dùng, chúng ta đã đề cập một quy tắc then chốt.
+Đối với thảo luận về low-level page allocator API, parameter đầu của mỗi function là so-called GFP mask. Khi thảo luận API và cách dùng, chúng ta đã đề cập một quy tắc then chốt.
 
 Nếu kernel/driver code của bạn đang chạy trong process context và được phép sleep an toàn, dùng flag `GFP_KERNEL`. Nếu hiện không được phép sleep an toàn (thường khi ở bất kỳ atomic context nào, gồm interrupt context, hoặc khi giữ spinlock), bạn phải dùng flag `GFP_ATOMIC`.
 
@@ -590,7 +590,7 @@ Một cách khác để nghĩ về tình huống này là xem xét: chính xác 
 
 Điều này thực sự quan trọng cần ghi nhớ! (Chúng ta đã trình bày ngắn gọn process context và interrupt context là gì trong Chương 4, Writing Your First Kernel Module – Part 1, tại phần Process context và interrupt context. Hơn nữa, như trình bày ở đó, bạn luôn có thể dùng macro `in_task()` để xác định code hiện đang chạy trong process context hay interrupt context). Tương tự, có thể dùng macro `in_atomic()`; nếu code ở atomic context – nơi nó thường phải chạy đến hoàn tất mà không bị gián đoạn – macro trả về `True`; nếu không, `False`. Hãy đặc biệt lưu ý: bạn có thể ở process context nhưng đồng thời là atomic – ví dụ, khi giữ một số loại lock (spinlock; tất nhiên chúng ta sẽ trình bày trong hai chương cuối về synchronization); điều ngược lại không thể xảy ra (nghĩa là trong interrupt context, code luôn atomic).
 
-##### Ghi chú ngắn về các GFP flag khác dùng nội bộ
+##### Ghi chú ngắn về các GFP flag khác internal-usage
 
 Ngoài những GFP flag mà chúng ta, với tư cách người viết module/driver, tập trung vào – `GFP_KERNEL` và `GFP_ATOMIC` – kernel có nhiều flag `[__]GFP_*` khá đặc biệt khác được dùng nội bộ; một số có mục đích rõ ràng là reclaim memory. Chúng gồm (nhưng không giới hạn ở) `__GFP_IO`, `__GFP_FS`, `__GFP_DIRECT_RECLAIM`, `__GFP_KSWAPD_RECLAIM`, `__GFP_RECLAIM` và `__GFP_NORETRY`.
 
@@ -623,7 +623,7 @@ Hãy kết thúc phần về page allocator/BSA bằng cách tóm lược nhanh 
 
 Page allocator/BSA – ưu điểm:
 
-- Nhanh; dùng identity-mapped RAM của kernel (được lấy và map lúc boot); page nằm trong vùng lowmem nên đã được pre-map; không cần thiết lập page table.
+- Nhanh; dùng identity-mapped RAM của kernel (được lấy và map lúc boot); page nằm trong vùng lowmem nên đã được pre-mapped; không cần thiết lập page table.
 
 - Bảo đảm memory chunk physically contiguous và CPU cacheline-aligned.
 
@@ -651,17 +651,17 @@ Giờ hãy xem xét những ý tưởng này chi tiết hơn.
 
 ### Ý tưởng object caching
 
-Được rồi, chúng ta bắt đầu với ý tưởng thiết kế đầu tiên – khái niệm cache các object phổ biến. Từ lâu, một SunOS developer, Jeff Bonwick, nhận thấy một số kernel object – thường là data structure – được cấp phát và giải phóng thường xuyên trong OS. Vì thế ông nghĩ đến việc pre-allocate chúng trong một dạng cache. Điều này phát triển thành thứ chúng ta gọi là slab cache.
+Được rồi, chúng ta bắt đầu với ý tưởng thiết kế đầu tiên – khái niệm cache các object phổ biến. Từ lâu, một SunOS developer, Jeff Bonwick, nhận thấy một số kernel object – thường là data structure – được cấp phát và giải phóng thường xuyên trong OS. Vì thế ông nghĩ đến việc pre-allocating chúng trong một dạng cache. Điều này phát triển thành thứ chúng ta gọi là slab cache.
 
-Vì vậy, trên Linux OS cũng thế, kernel (như một phần khởi tạo lúc boot) pre-allocate một số lượng khá lớn object vào nhiều slab cache. Lý do: hiệu năng! Khi core kernel code (hoặc device driver) cần memory cho một object trong số này, nó trực tiếp yêu cầu slab allocator. Nếu đã được cache, allocation gần như tức thì (điều ngược lại cũng đúng lúc deallocation). Bạn có thể tự hỏi tất cả có thực sự cần thiết không? Thực sự có!
+Vì vậy, trên Linux OS cũng thế, kernel (như một phần khởi tạo lúc boot) pre-allocates một số lượng khá lớn object vào nhiều slab cache. Lý do: hiệu năng! Khi core kernel code (hoặc device driver) cần memory cho một object trong số này, nó trực tiếp yêu cầu slab allocator. Nếu đã được cache, allocation gần như tức thì (điều ngược lại cũng đúng lúc deallocation). Bạn có thể tự hỏi tất cả có thực sự cần thiết không? Thực sự có!
 
-Một ví dụ tốt về yêu cầu hiệu năng cao nằm trong các critical code path của network subsystem và block I/O subsystem. Chính vì lý do này, nhiều network data structure và block I/O data structure (socket buffer của network stack, `sk_buff`, `biovec` của block layer và tất nhiên các data structure hay object cốt lõi `task_struct`, là một vài ví dụ tốt) được kernel tự động cache (pre-allocate) trong slab cache. Tương tự, filesystem metadata structure (như các structure `inode` và `dentry`, v.v.), memory descriptor (`struct mm_struct`) và nhiều structure khác được pre-allocate trên slab cache. Có thể thấy những cached object này không? Có, chỉ thêm một chút nữa, chúng ta sẽ làm chính điều này (qua `/proc/slabinfo`).
+Một ví dụ tốt về yêu cầu hiệu năng cao nằm trong các critical code path của network subsystem và block I/O subsystem. Chính vì lý do này, nhiều network data structure và block I/O data structure (socket buffer của network stack, `sk_buff`, `biovec` của block layer và tất nhiên các data structure hay object cốt lõi `task_struct`, là một vài ví dụ tốt) được kernel auto-cached (pre-allocated) trong slab cache. Tương tự, filesystem metadata structure (như các structure `inode` và `dentry`, v.v.), memory descriptor (`struct mm_struct`) và nhiều structure khác được pre-allocated trên slab cache. Có thể thấy những cached object này không? Có, chỉ thêm một chút nữa, chúng ta sẽ làm chính điều này (qua `/proc/slabinfo`).
 
 Lý do khác khiến slab allocator (hay giờ chính xác hơn là SLUB allocator) có hiệu năng vượt trội đơn giản là khi traditional heap-based allocator cấp phát và giải phóng memory thường xuyên, cuối cùng chúng tạo “hole” trong memory (fragmentation). Vì slab object được cấp phát một lần (lúc boot) vào cache và được giải phóng về đó (vì thế không thực sự được “giải phóng”), hiệu năng vẫn cao. Tất nhiên, kernel hiện đại đủ thông minh để bắt đầu giải phóng slab cache một cách thích hợp khi memory pressure – nhu cầu về RAM quý giá – lên quá cao.
 
-Một lần nữa, thường có khoảng cách giữa lý thuyết và thực hành; đôi lúc khi RAM xuống rất thấp, kernel phản ứng khá mạnh tay, đưa ra vũ khí hạng nặng – Out-Of-Memory (OOM) killer! (Đừng lo, chúng ta thảo luận chuyên sâu trong Chương 9, Kernel Memory Allocation for Module Authors – Part 2, tại phần Stayin’ alive – OOM killer). Hãy kiên nhẫn và để thảo luận đó đến lúc ấy.
+Một lần nữa, thường có khoảng cách giữa lý thuyết và thực hành; đôi lúc khi RAM xuống rất thấp, kernel phản ứng khá heavy-handed, đưa ra vũ khí hạng nặng – Out-Of-Memory (OOM) killer! (Đừng lo, chúng ta thảo luận chuyên sâu trong Chương 9, Kernel Memory Allocation for Module Authors – Part 2, tại phần Stayin’ alive – OOM killer). Hãy kiên nhẫn và để thảo luận đó đến lúc ấy.
 
-Có thể tra cứu trạng thái hiện tại của slab cache – các object cache, số object trong một cache, số đang dùng, kích thước mỗi object, v.v. – theo nhiều cách: góc nhìn thô qua filesystem `proc` và `sysfs`, hoặc góc nhìn dễ đọc hơn qua nhiều frontend utility như `smem`, `vmstat`, `slabtop` (cùng eBPF `slabratetop`) và `slabinfo` (app do kernel cung cấp).
+Có thể tra cứu trạng thái hiện tại của slab cache – các object cache, số object trong một cache, số đang dùng, kích thước mỗi object, v.v. – theo nhiều cách: góc nhìn thô qua filesystem `proc` và `sysfs`, hoặc góc nhìn human-readable hơn qua nhiều frontend utility như `smem`, `vmstat`, `slabtop` (cùng eBPF `slabratetop`) và `slabinfo` (app kernel-supplied).
 
 #### Một vài câu hỏi thường gặp về mức sử dụng (slab) memory và câu trả lời
 
@@ -700,7 +700,7 @@ FIELD DESCRIPTION FOR SLAB MODE
        pages: Number of pages with at least one active object
 ```
 
-##### Làm thế nào xem mức sử dụng memory tổng thể trên toàn hệ thống?
+##### Làm thế nào xem mức sử dụng memory tổng thể system-wide?
 
 Có nhiều cách; một cách là qua utility `smem`:
 
@@ -754,11 +754,11 @@ Một lưu ý bên lề quan trọng: học cách dùng và diễn giải vô s�
 
 ##### Trong nhiều slab cache hiện được cấp phát (và chứa một ít data), cache nào chiếm nhiều kernel memory nhất?
 
-Một lần nữa, utility `slabinfo` dễ dàng trả lời: một cách là chạy với switch `-B` để hiển thị không gian chiếm theo byte, cho phép dễ dàng sort theo cột này. Đơn giản hơn nữa, option switch `-S` khiến `slabinfo` sort slab cache theo kích thước (lớn nhất trước), hiển thị các đơn vị kích thước đẹp, dễ đọc.
+Một lần nữa, utility `slabinfo` dễ dàng trả lời: một cách là chạy với switch `-B` để hiển thị không gian chiếm theo byte, cho phép dễ dàng sort theo cột này. Đơn giản hơn nữa, option switch `-S` khiến `slabinfo` sort slab cache theo kích thước (lớn nhất trước), hiển thị các đơn vị kích thước đẹp, human-readable.
 
 Như hy vọng giờ đã rõ, các cache mà kernel duy trì có thể dùng lượng memory (RAM) đáng kể (trong đó có page cache, dcache, icache, slab cache, v.v.)! Thực ra đây là đặc điểm phổ biến trên Linux khiến người mới bối rối: kernel có thể và sẽ dùng RAM để caching, qua đó cải thiện hiệu năng rất nhiều. Tất nhiên nó được thiết kế để thông minh giảm lượng memory dùng cho caching khi memory pressure tăng. Như đã đề cập, một tỷ lệ memory đáng kể có thể được dùng cho caching (đặc biệt page cache; nó dùng để cache nội dung file khi I/O được thực hiện trên file). Điều này ổn miễn là memory pressure thấp.
 
-Xem `/proc/meminfo` để có chi tiết mức sử dụng system memory với granularity nhỏ; có rất nhiều field được hiển thị. Man page `proc(5)` mô tả chúng dưới phần `/proc/meminfo`.
+Xem `/proc/meminfo` để có chi tiết mức sử dụng system memory với fine-granularity; có rất nhiều field được hiển thị. Man page `proc(5)` mô tả chúng dưới phần `/proc/meminfo`.
 
 Giờ đã hiểu động cơ đằng sau slab allocator (vẫn còn nội dung khác về điều này), hãy đi sâu vào học cách dùng các API nó cung cấp cho cả core kernel lẫn người viết module/driver.
 
@@ -784,19 +784,19 @@ Cả hai function `kmalloc()` và `kzalloc()` đều nhận hai parameter:
 
 - Parameter đầu cần truyền là kích thước memory chunk cần thiết theo byte.
 
-- Parameter thứ hai là loại memory cần cấp phát, chỉ định qua các GFP flag giờ đã quen thuộc. (Chúng ta đã trình bày chủ đề này trong các phần Làm việc với GFP flag và GFP flag – tìm hiểu sâu hơn. Nếu chưa quen, tôi đề nghị bạn đọc những phần đó trước.)
+- Parameter thứ hai là loại memory cần cấp phát, chỉ định qua các GFP flag now-familiar. (Chúng ta đã trình bày chủ đề này trong các phần Làm việc với GFP flag và GFP flag – tìm hiểu sâu hơn. Nếu chưa quen, tôi đề nghị bạn đọc những phần đó trước.)
 
 Để giảm nguy cơ bug Integer Overflow (IoF), bạn nên tránh tính động kích thước memory cần cấp phát (parameter đầu của các API này). Tài liệu kernel cảnh báo chính xác về điều này:
 
 `https://www.kernel.org/doc/html/latest/process/deprecated.html#open-coded-arithmetic-in-allocator-arguments`. Nhìn chung, luôn tránh dùng những thứ đã deprecated trong kernel; chúng thậm chí được ghi tài liệu tại đây: Deprecated Interfaces, Language Features, Attributes, and Conventions: `https://www.kernel.org/doc/html/latest/process/deprecated.html#deprecated-interfaces-language-features-attributes-and-conventions`.
 
-Được rồi, quay lại API; khi cấp phát thành công, return value là một pointer, kernel logical address (hãy nhớ, nó vẫn là virtual address, KVA, không phải physical address) của đầu memory chunk (hay slab) vừa cấp phát. Quả thực, bạn sẽ nhận thấy ngoại trừ parameter thứ hai, các API `kmalloc()` và `kzalloc()` rất giống API tương ứng trong user space, các API glibc `malloc()` (và liên quan) quá quen thuộc. Tuy nhiên đừng hiểu nhầm: bên trong, chúng hoàn toàn khác. API `malloc()` trả về user-space virtual address (UVA) và, như đã nói, không có tương quan trực tiếp giữa user-mode `malloc()` và các kernel-mode API `kmalloc()`/`kzalloc()` (chúng ta thường viết gọn cặp API then chốt này là `k{m|z}alloc()`). Vì vậy, không, gọi `malloc()` không dẫn đến lời gọi `k{m|z}alloc()` ngay lập tức; sẽ nói thêm sau!
+Được rồi, quay lại API; khi cấp phát thành công, return value là một pointer, kernel logical address (hãy nhớ, nó vẫn là virtual address, KVA, không phải physical address) của đầu memory chunk (hay slab) vừa cấp phát. Quả thực, bạn sẽ nhận thấy ngoại trừ parameter thứ hai, các API `kmalloc()` và `kzalloc()` rất giống API tương ứng trong user space, các API glibc `malloc()` (và liên quan) all-too-familiar. Tuy nhiên đừng hiểu nhầm: bên trong, chúng hoàn toàn khác. API `malloc()` trả về user-space virtual address (UVA) và, như đã nói, không có tương quan trực tiếp giữa user-mode `malloc()` và các kernel-mode API `kmalloc()`/`kzalloc()` (chúng ta thường viết gọn cặp API then chốt này là `k{m|z}alloc()`). Vì vậy, không, gọi `malloc()` không dẫn đến lời gọi `k{m|z}alloc()` ngay lập tức; sẽ nói thêm sau!
 
-Tiếp theo, điều quan trọng cần hiểu là memory do các slab allocator API này trả về được bảo đảm physically contiguous. Hơn nữa, một lợi ích then chốt khác là return address được bảo đảm nằm trên CPU cacheline boundary; nghĩa là nó được hardware cacheline-aligned. Cả hai điểm đều là lợi ích cải thiện hiệu năng quan trọng.
+Tiếp theo, điều quan trọng cần hiểu là memory do các slab allocator API này trả về được bảo đảm physically contiguous. Hơn nữa, một lợi ích then chốt khác là return address được bảo đảm nằm trên CPU cacheline boundary; nghĩa là nó được hardware cacheline-aligned. Cả hai điểm đều là lợi ích performance-enhancing quan trọng.
 
 Mọi CPU đọc và ghi data (từ và đến CPU cache \<-\> RAM) theo một atomic unit gọi là CPU cacheline. Kích thước cacheline thay đổi theo CPU. Thường bạn có thể tra cứu bằng utility `getconf` – ví dụ, thử `getconf -a|grep CACHE_LINESIZE` (lưu ý đơn vị là byte, không phải bit). Trên CPU hiện đại, cacheline cho instruction và data thường được tách riêng (bản thân CPU cache cũng vậy). CPU cacheline size điển hình là 64 byte. Chúng ta trình bày (rất nhiều) nội dung khác về chủ đề này trong Chương 13, Kernel Synchronization – Part 2, tại phần Tìm hiểu kiến thức cơ bản về CPU caching, cache effect và false sharing. Bạn cũng có thể tham khảo phần Đọc thêm để biết thêm.
 
-Nội dung memory chunk ngay sau khi `kmalloc()` cấp phát là ngẫu nhiên (một lần nữa, giống `malloc()`). Quả thực, lý do API `kzalloc()` được ưu tiên và khuyên dùng là nó đặt memory được cấp phát thành zero, ngăn nhiều loại bug (như bug Uninitialized Memory Reads (UMR) phổ biến). Một số người có thể lập luận rằng khởi tạo memory slab tốn thời gian, do đó giảm hiệu năng. Phản biện của chúng ta là trừ khi memory allocation code nằm trong code path có yêu cầu thời gian cực kỳ nghiêm ngặt (điều mà bạn hoàn toàn có thể lập luận là ngay từ đầu đã không phải thiết kế tốt, nhưng đôi khi không thể tránh), bạn nên khởi tạo memory khi cấp phát như một best practice. Nhờ vậy có thể tránh rất nhiều memory bug và tác dụng phụ về bảo mật.
+Nội dung memory chunk ngay sau khi `kmalloc()` cấp phát là ngẫu nhiên (một lần nữa, giống `malloc()`). Quả thực, lý do API `kzalloc()` được ưu tiên và khuyên dùng là nó đặt memory được cấp phát thành zero, ngăn nhiều loại bug (như bug Uninitialized Memory Reads (UMR) phổ biến). Một số người có thể lập luận rằng khởi tạo memory slab tốn thời gian, do đó giảm hiệu năng. Phản biện của chúng ta là trừ khi memory allocation code nằm trong code path time-critical (điều mà bạn hoàn toàn có thể lập luận là ngay từ đầu đã không phải thiết kế tốt, nhưng đôi khi không thể tránh), bạn nên khởi tạo memory khi cấp phát như một best practice. Nhờ vậy có thể tránh rất nhiều memory bug và tác dụng phụ về bảo mật.
 
 Nhiều phần Linux kernel core code chắc chắn dùng slab layer cho memory. Trong đó có các time-critical code path – ví dụ tốt nằm trong network subsystem và block I/O subsystem. Để tối đa hiệu năng, slab layer code (thực ra là SLUB) được viết theo hướng lockless (qua một công nghệ lock-free gọi là per-CPU variable). Chúng ta trình bày lock-free kernel synchronization trong Chương 13, Kernel Synchronization – Part 2, tại phần Lock-free programming với per-CPU và RCU. Đồng thời, xem thêm về các thách thức hiệu năng và implementation detail của slab layer trong phần Đọc thêm.
 
@@ -847,7 +847,7 @@ Chúng tôi cung cấp demo chính trường hợp này trong LKM tại đây: `
 
 ##### Dùng kfree\_sensitive() (trước đây là kzfree()) để giải phóng slab memory
 
-Về việc khởi tạo memory buffer sau (hoặc trong) allocation, cũng như đã đề cập đối với allocation, điều tương tự đúng với giải phóng memory. Bạn nên hiểu API `kfree()` chỉ trả slab vừa giải phóng về cache tương ứng, giữ nguyên nội dung memory bên trong! Vì vậy, ngay trước khi giải phóng memory chunk, một best practice (hơi chặt chẽ) là xóa sạch (ghi đè) nội dung memory. Điều này đặc biệt đúng vì lý do bảo mật (như trường hợp info-leak, khi attacker ác ý có thể quét freed memory để tìm bí mật). Linux kernel cung cấp API `kfree_sensitive()` cho chính mục đích này (signature giống hệt `kfree()`).
+Về việc khởi tạo memory buffer sau (hoặc trong) allocation, cũng như đã đề cập đối với allocation, điều tương tự đúng với giải phóng memory. Bạn nên hiểu API `kfree()` chỉ trả slab just-freed về cache tương ứng, giữ nguyên nội dung memory bên trong! Vì vậy, ngay trước khi giải phóng memory chunk, một best practice (hơi chặt chẽ) là xóa sạch (ghi đè) nội dung memory. Điều này đặc biệt đúng vì lý do bảo mật (như trường hợp info-leak, khi attacker ác ý có thể quét freed memory để tìm bí mật). Linux kernel cung cấp API `kfree_sensitive()` cho chính mục đích này (signature giống hệt `kfree()`).
 
 API từng được đặt tên (sai) là `kzfree()` trong các kernel trước; từ 5.9, điều này được sửa, đổi tên thành `kfree_sensitive()`. Lý do được giải thích trong commit tại đây: `https://github.com/torvalds/linux/commit/453431a54934d917153c65211b2dabf45562ca88`.
 
@@ -872,7 +872,7 @@ CPU caching có thể mang lại cải thiện hiệu năng rất lớn. Vì v�
 
 - Cố gắng align các structure member sao cho một member đơn lẻ không “rơi ra ngoài cacheline”. Thường compiler trợ giúp về việc này, và bạn thậm chí có thể dùng compiler attribute để chỉ định tường minh.
 
-- Truy cập memory tuần tự mang lại hiệu năng cao nhờ CPU caching hiệu quả. Tuy nhiên, chúng ta không thể nghiêm túc đề xuất biến mọi data structure thành array! Designer và developer có kinh nghiệm biết dùng linked list là cực kỳ phổ biến. Nhưng điều đó không thực sự làm giảm hiệu năng sao? Có, ở một mức độ nào đó. Vì vậy, một đề xuất: khi dùng linked list, giữ “node” của list là một data structure lớn (với các “hot” member cùng nhau ở đầu). Theo cách này, chúng ta cố tối đa lợi ích của cả hai trường hợp vì structure lớn về cơ bản là một array. (Hãy nghĩ xem, list task structure đã thấy trong Chương 6, Kernel Internals Essentials – Processes and Threads, task list là ví dụ thực tế hoàn hảo của linked list với data structure lớn làm node).
+- Truy cập memory tuần tự mang lại hiệu năng cao nhờ CPU caching hiệu quả. Tuy nhiên, chúng ta không thể nghiêm túc đề xuất biến mọi data structure thành array! Designer và developer có kinh nghiệm biết dùng linked list là cực kỳ phổ biến. Nhưng điều đó không thực sự làm giảm hiệu năng sao? Có, ở một mức độ nào đó. Vì vậy, một đề xuất: khi dùng linked list, giữ “node” của list là một data structure lớn (với các “hot” member cùng nhau ở đầu). Theo cách này, chúng ta cố tối đa lợi ích của cả hai trường hợp vì structure lớn về cơ bản là một array. (Hãy nghĩ xem, list task structure đã thấy trong Chương 6, Kernel Internals Essentials – Processes and Threads, task list là ví dụ real-world hoàn hảo của linked list với data structure lớn làm node).
 
 - Xem thêm các kỹ thuật tận dụng CPU cache trong phần Đọc thêm.
 
@@ -886,7 +886,7 @@ Chúng ta sẽ rẽ sang một chút – dù rất quan trọng – trước khi
 
 Hình 8.7: Ảnh chụp sudo vmstat -m hiển thị các slab cache kmalloc-n
 
-Điều đó rất thú vị! Kernel có hàng loạt slab cache chuyên dụng cho generic memory `kmalloc` với kích thước khác nhau, trải từ 8.192 byte xuống chỉ 8 byte! Điều này khiến chúng ta nhận ra điều then chốt – với page allocator, nếu yêu cầu chẳng hạn 12 byte memory, cuối cùng nó sẽ cho cả một page (4 KB) – lãng phí quá cao. Ở đây, với slab allocator, allocation request 12 byte cuối cùng thực sự chỉ cấp phát 16 byte (từ cache áp chót thấy trong Hình 8.7)! Tuyệt vời. Hẳn đã khá rõ tại sao nó hoạt động như vậy: kernel slab allocator dùng cách tiếp cận best-fit. Hơn nữa, nếu yêu cầu một lượng (12 byte) nằm giữa hai slab cache (`kmalloc-8` và `kmalloc-16`), hiển nhiên kernel sẽ chọn cache lớn hơn (vì luôn có thể cấp phát nhiều hơn yêu cầu, không bao giờ ít hơn). Vì vậy, thực tế nó cấp phát một “slab” 16 byte trong khi để chúng ta nghĩ kích thước là 12 byte.
+Điều đó rất thú vị! Kernel có hàng loạt slab cache chuyên dụng cho generic memory `kmalloc` với kích thước khác nhau, trải từ 8.192 byte xuống chỉ 8 byte! Điều này khiến chúng ta nhận ra điều then chốt – với page allocator, nếu yêu cầu chẳng hạn 12 byte memory, cuối cùng nó sẽ cho cả một page (4 KB) – lãng phí quá cao. Ở đây, với slab allocator, allocation request 12 byte cuối cùng thực sự chỉ cấp phát 16 byte (từ cache second-to-last thấy trong Hình 8.7)! Tuyệt vời. Hẳn đã khá rõ tại sao nó hoạt động như vậy: kernel slab allocator dùng cách tiếp cận best-fit. Hơn nữa, nếu yêu cầu một lượng (12 byte) nằm giữa hai slab cache (`kmalloc-8` và `kmalloc-16`), hiển nhiên kernel sẽ chọn cache lớn hơn (vì luôn có thể cấp phát nhiều hơn yêu cầu, không bao giờ ít hơn). Vì vậy, thực tế nó cấp phát một “slab” 16 byte trong khi để chúng ta nghĩ kích thước là 12 byte.
 
 Đồng thời, lưu ý những điều sau:
 
@@ -894,7 +894,7 @@ Hình 8.7: Ảnh chụp sudo vmstat -m hiển thị các slab cache kmalloc-n
 
 - Kích thước chính xác của các slab cache cho `kmalloc` thay đổi theo architecture. Trên hệ thống Raspberry Pi (CPU ARM, tất nhiên), các cache generic memory `kmalloc-N` trải từ 64 byte đến 8.192 byte.
 
-- Ảnh chụp trên cũng cho một gợi ý. Rất thường xuyên, nhu cầu là những memory fragment nhỏ đến cực nhỏ. Ví dụ, trong ảnh chụp trên, cột có nhãn `Num` biểu diễn Số object hiện đang active; số lớn nhất đến từ slab cache `kmalloc` 8 byte và 16 byte (tất nhiên không phải lúc nào cũng như vậy). Mẹo nhanh: dùng utility `slabtop` (cần chạy với tư cách root): các hàng ở phía trên cho thấy những slab cache hiện được dùng thường xuyên.
+- Ảnh chụp trên cũng cho một gợi ý. Rất thường xuyên, nhu cầu là những memory fragment small-to-tiny. Ví dụ, trong ảnh chụp trên, cột có nhãn `Num` biểu diễn Số object hiện đang active; số lớn nhất đến từ slab cache `kmalloc` 8 byte và 16 byte (tất nhiên không phải lúc nào cũng như vậy). Mẹo nhanh: dùng utility `slabtop` (cần chạy với tư cách root): các hàng ở phía trên cho thấy những slab cache hiện được dùng thường xuyên.
 
 Tất nhiên Linux tiếp tục phát triển. Từ mainline kernel 5.0, có một loại cache `kmalloc` mới được giới thiệu, gọi là reclaimable cache (định dạng tên là `kmalloc-rcl-N`). Vì thế, thực hiện `grep` như trước trên kernel 5.x trở lên cũng sẽ cho thấy các cache này:
 
@@ -910,11 +910,11 @@ kmalloc-2k                 1072   1072   2048     16
 [...]
 ```
 
-Các cache mới `kmalloc-rcl-N` giúp cải thiện hiệu quả bên trong (để reclaim page khi có pressure và làm biện pháp chống fragmentation). Tuy nhiên, người viết module như bạn không cần bận tâm những chi tiết này. (Có thể xem commit cho công việc này tại đây: `https://github.com/torvalds/linux/commit/1291523f2c1d631fea34102fd241fb54a4e8f7a0`.)
+Các cache mới `kmalloc-rcl-N` giúp cải thiện hiệu quả bên trong (để reclaim page khi có pressure và làm biện pháp anti-fragmentation). Tuy nhiên, người viết module như bạn không cần bận tâm những chi tiết này. (Có thể xem commit cho công việc này tại đây: `https://github.com/torvalds/linux/commit/1291523f2c1d631fea34102fd241fb54a4e8f7a0`.)
 
 `vmstat -m` về cơ bản là wrapper trên nội dung `/sys/kernel/slab` của kernel (sẽ trình bày thêm sau). Có thể xem chi tiết sâu bên trong slab cache bằng các utility như `slabinfo`, `slabtop`, cũng như utility mạnh mẽ `crash` (trên hệ thống “live”, crash command liên quan là `kmem -s` (hoặc `kmem -S`)).
 
-Được rồi! Đến lúc lại thực hành code để minh họa cách dùng các slab allocator API!
+Được rồi! Đến lúc lại hands-on code để minh họa cách dùng các slab allocator API!
 
 #### Viết kernel module sử dụng slab API cơ bản
 
@@ -964,7 +964,7 @@ in the Makefile */
 32);
 ```
 
-Trong code trên, cũng hãy chú ý chúng ta dùng kernel convenience routine `print_hex_dump_bytes()` làm cách thuận tiện để dump buffer memory theo định dạng dễ đọc. Signature của nó là:
+Trong code trên, cũng hãy chú ý chúng ta dùng kernel convenience routine `print_hex_dump_bytes()` làm cách thuận tiện để dump buffer memory theo định dạng human-readable. Signature của nó là:
 
 ```
 void print_hex_dump_bytes(const char *prefix_str, int prefix_type,
@@ -1092,7 +1092,7 @@ Hình 8.10: Ảnh chụp một phần cho thấy phần dưới output dmesg (c�
 
 À, nhìn dòng output cuối (Hình 8.10): `kmalloc()` thất bại khi thử cấp phát trên 4 MB (ở đây tại 4.300.800 byte), chính xác như mong đợi; trước đó đều thành công.
 
-Đồng thời, giờ có thể thấy phần đầu stack backtrace; tất nhiên đọc từ dưới lên và mọi thứ rất rõ – bạn có thể thực sự thấy `kmalloc()` cuối cùng đi vào `__alloc_pages()`, mà vì thất bại nên dẫn đến diễn biến này.
+Đồng thời, giờ có thể thấy phần đầu stack backtrace; tất nhiên đọc bottom-up và mọi thứ rất rõ – bạn có thể thực sự thấy `kmalloc()` cuối cùng đi vào `__alloc_pages()`, mà vì thất bại nên dẫn đến diễn biến này.
 
 Một lưu ý thú vị bên lề, chú ý chúng ta đã (rất chủ ý) thực hiện allocation đầu tiên trong loop với size `0`; nó không thất bại (nhưng không có nghĩa bạn sử dụng nó):
 
@@ -1118,7 +1118,7 @@ Vậy là đã rõ: cả lý thuyết lẫn thực hành, giờ bạn có thể 
 
 Theo kinh nghiệm, nếu thí nghiệm trên không cho maximum allocation bằng kích thước tối đa chúng ta xác định (nghĩa là 4 MB), tại sao không thử trên guest system vừa boot? Khi đó khả năng có free RAM chunk 4 MB physically contiguous tốt hơn nhiều.
 
-Bạn chưa chắc về điều này? Hãy lại thực nghiệm và xem nội dung `/proc/buddyinfo` – trên cả hệ thống đang được dùng lẫn vừa boot – để xác định có memory chunk hay không. Trong command-line snippet sau, trên hệ thống Ubuntu x86\_64 native đang dùng của tôi (đã chạy hơn 7 ngày, có 32 GB RAM), chúng ta tra cứu, tô đậm số lượng free chunk order 10 – nghĩa là các RAM chunk trống 4 MB – trong zone `Normal` (output xuống dòng):
+Bạn chưa chắc về điều này? Hãy lại thực nghiệm và xem nội dung `/proc/buddyinfo` – trên cả hệ thống in-use lẫn vừa boot – để xác định có memory chunk hay không. Trong command-line snippet sau, trên hệ thống Ubuntu x86\_64 native in-use của tôi (đã chạy hơn 7 ngày, có 32 GB RAM), chúng ta tra cứu, tô đậm số lượng free chunk order 10 – nghĩa là các RAM chunk trống 4 MB – trong zone `Normal` (output xuống dòng):
 
 ```
 $ grep -w "Normal" /proc/buddyinfo
@@ -1164,7 +1164,7 @@ Một vài điểm liên quan về cách dùng các API này:
 
 - Parameter thứ hai và thứ ba là những parameter thông thường như với các API `k{m|z}alloc()` – số byte cần cấp phát và GFP flag cần dùng. Tuy nhiên parameter đầu là pointer đến `struct device`. Khá hiển nhiên, nó biểu diễn device mà driver của bạn đang điều khiển (mọi driver đều có thể truy cập structure này).
 
-- Vì memory do các API này cấp phát được tự động giải phóng (khi driver detach hoặc module bị loại bỏ), bạn không phải làm gì (để giải phóng memory). Tuy nhiên, có thể giải phóng qua API `devm_kfree()`. Dù vậy, việc bạn làm thủ công thường là dấu hiệu cho thấy dùng managed API không phù hợp.
+- Vì memory do các API này cấp phát được auto-freed (khi driver detach hoặc module bị loại bỏ), bạn không phải làm gì (để giải phóng memory). Tuy nhiên, có thể giải phóng qua API `devm_kfree()`. Dù vậy, việc bạn làm thủ công thường là dấu hiệu cho thấy dùng managed API không phù hợp.
 
 - Licensing: Managed API chỉ được export (và do đó có sẵn) cho module được cấp phép theo GPL.
 
@@ -1196,7 +1196,7 @@ Trong nhiều resource controller thuộc cgroups framework có một controller
 
 ## Những lưu ý khi dùng slab allocator
 
-Chúng ta sẽ chia thảo luận này thành ba phần. Trước tiên xem lại một số kiến thức nền cần thiết (đã trình bày trước), rồi thực sự làm rõ vấn đề đang hướng đến qua hai use case – use case đầu rất đơn giản; use case thứ hai là trường hợp sát thực tế hơn của vấn đề đang xét.
+Chúng ta sẽ chia thảo luận này thành ba phần. Trước tiên re-examine một số kiến thức nền cần thiết (đã trình bày trước), rồi thực sự làm rõ vấn đề đang hướng đến qua hai use case – use case đầu rất đơn giản; use case thứ hai là trường hợp sát real-world hơn của vấn đề đang xét.
 
 ### Chi tiết nền tảng và kết luận
 
@@ -1206,13 +1206,13 @@ Chúng ta sẽ chia thảo luận này thành ba phần. Trước tiên xem lạ
 
 - Điều này ổn, trừ khi không ổn. Khi lượng memory yêu cầu rất nhỏ, hoặc chỉ vượt một ngưỡng nhất định một chút, mức lãng phí (hay internal fragmentation) có thể rất lớn.
 
-- Trong hoạt động hằng ngày của OS và các driver, yêu cầu các phần của một page (ít hơn (nhiều) so với 4.096 byte) rất phổ biến. Vì thế, slab allocator được xếp lớp trên page allocator (xem Hình 8.1) được thiết kế với object cache cùng các generic memory cache nhỏ để đáp ứng hiệu quả yêu cầu lượng memory nhỏ.
+- Trong hoạt động day-to-day của OS và các driver, yêu cầu các phần của một page (ít hơn (nhiều) so với 4.096 byte) rất phổ biến. Vì thế, slab allocator được xếp lớp trên page allocator (xem Hình 8.1) được thiết kế với object cache cùng các generic memory cache nhỏ để đáp ứng hiệu quả yêu cầu lượng memory nhỏ.
 
 - Page allocator bảo đảm page physically contiguous và memory hardware cacheline-aligned.
 
 - Slab allocator cũng bảo đảm memory physically contiguous và hardware cacheline-aligned.
 
-Vậy thật tuyệt – điều này dẫn đến kết luận rằng khi lượng memory cần thiết tương đối lớn và là lũy thừa chính xác (hoặc gần) của 2, hãy dùng page allocator. Khi lượng khá nhỏ (ít hơn một page), hãy dùng slab allocator. Quả thực, kernel source code của `kmalloc()` có một comment tóm lược gọn gàng cách nên dùng API `kmalloc()` (được chép lại bằng chữ đậm như sau):
+Vậy thật tuyệt – điều này dẫn đến kết luận rằng khi lượng memory cần thiết large-ish và là lũy thừa chính xác (hoặc gần) của 2, hãy dùng page allocator. Khi lượng khá nhỏ (ít hơn một page), hãy dùng slab allocator. Quả thực, kernel source code của `kmalloc()` có một comment tóm lược gọn gàng cách nên dùng API `kmalloc()` (được chép lại bằng chữ đậm như sau):
 
 ```
 // include/linux/slab.h
@@ -1261,7 +1261,7 @@ sizeof struct mysmallctx = 20 bytes
 *actual* size allocated = 32 bytes
 ```
 
-Vậy chúng ta thử cấp phát 20 byte bằng `kzalloc()`, nhưng thực sự nhận 32 byte, gây lãng phí 12 byte, hay 60%! Điều này đúng như mong đợi. Hãy nhớ các slab cache `kmalloc-N` – trên x86, có một cache 16 byte và một cache 32 byte (trong nhiều cache khác). Vì vậy, khi yêu cầu một lượng nằm giữa hai cache, hiển nhiên nhận memory từ cache lớn hơn (các allocator về cơ bản dùng một phiên bản của cách tiếp cận best-fit). (Nhân tiện, để bạn biết, trên hệ thống Raspberry Pi dựa trên ARM, slab cache nhỏ nhất cho `kmalloc` là 64 byte, vì vậy tất nhiên ở đó chúng ta nhận 64 byte khi yêu cầu 20 byte.)
+Vậy chúng ta thử cấp phát 20 byte bằng `kzalloc()`, nhưng thực sự nhận 32 byte, gây lãng phí 12 byte, hay 60%! Điều này đúng như mong đợi. Hãy nhớ các slab cache `kmalloc-N` – trên x86, có một cache 16 byte và một cache 32 byte (trong nhiều cache khác). Vì vậy, khi yêu cầu một lượng nằm giữa hai cache, hiển nhiên nhận memory từ cache lớn hơn (các allocator về cơ bản dùng một phiên bản của cách tiếp cận best-fit). (Nhân tiện, để bạn biết, trên hệ thống Raspberry Pi ARM-based, slab cache nhỏ nhất cho `kmalloc` là 64 byte, vì vậy tất nhiên ở đó chúng ta nhận 64 byte khi yêu cầu 20 byte.)
 
 Lưu ý API `ksize()` chỉ hoạt động trên slab memory đã được cấp phát; bạn không thể dùng nó trên return value của bất kỳ page allocator API nào (đã thấy trong phần Học cách sử dụng các page allocator API).
 
@@ -1303,7 +1303,7 @@ static int test_maxallocsz(void)
 }
 ```
 
-Output của kernel module này thực sự thú vị để xem! Trong hình sau, chúng ta trình bày ảnh chụp một phần output tôi nhận trên Ubuntu 22.04 LTS guest x86\_64 chạy kernel 6.1 tự build (được load qua convenience script `lkm`):
+Output của kernel module này thực sự thú vị để xem! Trong hình sau, chúng ta trình bày ảnh chụp một phần output tôi nhận trên Ubuntu 22.04 LTS guest x86\_64 chạy kernel 6.1 custom-built (được load qua convenience script `lkm`):
 
 ![Hình 8.11](images/ch08/fig08-11.jpg)
 
@@ -1315,7 +1315,7 @@ Nhân tiện, trong module này, chúng ta thậm chí không viết module exit
 
 #### Diễn giải output từ trường hợp 2
 
-Nhìn kỹ ảnh chụp trên (Hình 8.11; ở đây chúng ta chỉ bỏ qua kernel diagnostics được macro `WARN_ONCE()` xuất ra, macro được gọi vì kernel-level memory allocation thất bại!). Dù khá rõ nghĩa, phần then chốt trong output Hình 8.11 có timestamp từ `dmesg` (bỏ qua), tiếp theo là bốn cột như header line cho thấy:
+Nhìn kỹ ảnh chụp trên (Hình 8.11; ở đây chúng ta chỉ bỏ qua kernel diagnostics được macro `WARN_ONCE()` xuất ra, macro được gọi vì kernel-level memory allocation thất bại!). Dù khá self-explanatory, phần then chốt trong output Hình 8.11 có timestamp từ `dmesg` (bỏ qua), tiếp theo là bốn cột như header line cho thấy:
 
 - `kmalloc(n)`: Số byte được `kmalloc()` yêu cầu (trong đó `n` là lượng cần thiết).
 
@@ -1358,17 +1358,17 @@ Tốt hơn nữa, bạn có thể kiểm tra kích thước slab memory được
 
 #### Vẽ đồ thị
 
-Một lưu ý thú vị bên lề, chúng ta có thể dùng utility nổi tiếng `gnuplot` để vẽ đồ thị từ data thu thập trước đó. Phải sửa kernel module ở mức tối thiểu để chỉ xuất những gì muốn vẽ: lượng memory cần (hay được yêu cầu) cấp phát (trục x) và tỷ lệ phần trăm lãng phí xảy ra ở runtime (trục y). Bạn có thể tìm code của kernel module được sửa nhẹ trong GitHub repository của sách tại đây: `ch8/slab4_actualsz_wstg_plot` (`https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/tree/main/ch8/slab4_actualsz_wstg_plot`).
+Một lưu ý thú vị bên lề, chúng ta có thể dùng utility well-known `gnuplot` để vẽ đồ thị từ data thu thập trước đó. Phải sửa kernel module ở mức tối thiểu để chỉ xuất những gì muốn vẽ: lượng memory cần (hay được yêu cầu) cấp phát (trục x) và tỷ lệ phần trăm lãng phí xảy ra ở runtime (trục y). Bạn có thể tìm code của kernel module được sửa nhẹ trong GitHub repository của sách tại đây: `ch8/slab4_actualsz_wstg_plot` (`https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/tree/main/ch8/slab4_actualsz_wstg_plot`).
 
-Chúng ta cũng giảm “step size” xuống 20 KB (từ 200K) để đồ thị chi tiết hơn. Vì vậy, chúng ta build và insert kernel module này, “xử lý” kernel log, lưu data theo định dạng cột thích hợp như `gnuplot` yêu cầu (trong file tên `plotdata.txt`). Tin tốt: tất cả việc này, gồm tạo đồ thị (qua `gnuplot`), được tự động hóa bằng helper script `plot_graph.sh`; chỉ cần chạy và xem! (Để hiểu cơ chế hoạt động của utility gnuplot rất hữu ích, tham khảo phần Đọc thêm của chương này.)
+Chúng ta cũng giảm “step size” xuống 20 KB (từ 200K) để đồ thị chi tiết hơn. Vì vậy, chúng ta build và insert kernel module này, “xử lý” kernel log, lưu data column-wise thích hợp như `gnuplot` yêu cầu (trong file tên `plotdata.txt`). Tin tốt: tất cả việc này, gồm tạo đồ thị (qua `gnuplot`), được tự động hóa bằng helper script `plot_graph.sh`; chỉ cần chạy và xem! (Để hiểu cơ chế hoạt động của utility gnuplot rất hữu ích, tham khảo phần Đọc thêm của chương này.)
 
 Chúng tôi cũng cung cấp một file `Readme` hữu ích trong directory này của GitHub repo để hướng dẫn bạn. Và đây, đồ thị:
 
 ![Hình 8.12](images/ch08/fig08-12.jpg)
 
-Hình 8.12: Đồ thị được gnuplot tạo cho thấy kích thước kmalloc() yêu cầu (trục x, byte) so với mức lãng phí phát sinh (trục y, theo phần trăm)
+Hình 8.12: Đồ thị được gnuplot tạo cho thấy kích thước kmalloc() yêu cầu (x-axis, byte) so với mức lãng phí phát sinh (y-axis, theo phần trăm)
 
-Đồ thị dạng “răng cưa” này giúp trực quan hóa điều vừa học. Kích thước allocation request của `kmalloc()` (hoặc `kzalloc()`, hay thực sự bất kỳ page allocator API nào) càng gần một trong các freelist size định sẵn của kernel, lượng lãng phí càng ít. Nhưng ngay khi vượt ngưỡng, mức lãng phí tăng vọt – xuất hiện đỉnh nhọn! – đến gần 100% (như các đường gần như thẳng đứng hoàn hảo trong đồ thị trên cho thấy).
+Đồ thị dạng “saw-tooth” này giúp trực quan hóa điều vừa học. Kích thước allocation request của `kmalloc()` (hoặc `kzalloc()`, hay thực sự bất kỳ page allocator API nào) càng gần một trong các freelist size định sẵn của kernel, lượng lãng phí càng ít. Nhưng ngay khi vượt ngưỡng, mức lãng phí tăng vọt – xuất hiện đỉnh nhọn! – đến gần 100% (như các đường gần như thẳng đứng hoàn hảo trong đồ thị trên cho thấy).
 
 ### Tìm internal fragmentation (lãng phí) trong kernel
 
@@ -1458,7 +1458,7 @@ Output được sort theo mức lãng phí lớn nhất; hai entry đầu đư�
 age=6363993/6363993/6363994 pid=1 cpus=0
 ```
 
-Function `populate_error_injection_list()` (tại offset `0x8d` byte vào function, có độ dài `0x110` byte) thực hiện 975 yêu cầu memory, mỗi yêu cầu 64 byte (xét cho cùng đây là cache `kmalloc-64`), lãng phí 16 byte mỗi lần, do đó tổng lãng phí 975 \* 16 = 15.600 byte. Stack trace (đọc từ dưới lên) cho thấy lịch sử, đường đi đến đây (rất tốt cho debug!).
+Function `populate_error_injection_list()` (tại offset `0x8d` byte vào function, có độ dài `0x110` byte) thực hiện 975 yêu cầu memory, mỗi yêu cầu 64 byte (xét cho cùng đây là cache `kmalloc-64`), lãng phí 16 byte mỗi lần, do đó tổng lãng phí 975 \* 16 = 15.600 byte. Stack trace (đọc bottom-up) cho thấy lịch sử, đường đi đến đây (rất tốt cho debug!).
 
 Hãy tìm hiểu sâu hơn: function nằm ở đây: `lib/error-inject.c:populate_error_injection_list()`; xem code của nó (ver 6.1.25) cho thấy một memory allocation duy nhất qua slab layer tại đây:
 
@@ -1471,7 +1471,7 @@ if (!ent)
 […]
 ```
 
-Giờ structure instance đang được cấp phát – `struct ei_entry` – có kích thước 46+2 = 48 byte (trên 64-bit; kiểm tra bằng cách tra cứu, ghi nhớ padding có thể xuất hiện do yêu cầu alignment (ở đây có 2 byte padding)). Vì vậy, mỗi allocation được đáp ứng bởi, đoán xem, slab cache `kmalloc-64` (best-fit), do đó lãng phí đúng 64 - 48 = 16 byte. Điều này có vẻ chấp nhận được, nhưng dường như đã xảy ra (đến giờ) 975 lần, cuối cùng lãng phí 15.600 byte! Ngay cả thế cũng chưa quá tệ nếu memory được giải phóng nhanh; nếu không thì sao? À, khi đó chúng ta gặp vấn đề (bao gồm anh chàng OOM killer khá sẵn sàng ra tay) … ít nhất giờ có thể debug hiệu quả!
+Giờ structure instance đang được cấp phát – `struct ei_entry` – có kích thước 46+2 = 48 byte (trên 64-bit; kiểm tra bằng cách tra cứu, ghi nhớ padding có thể xuất hiện do yêu cầu alignment (ở đây có 2 byte padding)). Vì vậy, mỗi allocation được đáp ứng bởi, đoán xem, slab cache `kmalloc-64` (best-fit), do đó lãng phí đúng 64 - 48 = 16 byte. Điều này có vẻ chấp nhận được, nhưng dường như đã xảy ra (đến giờ) 975 lần, cuối cùng lãng phí 15.600 byte! Ngay cả thế cũng chưa quá tệ nếu memory được giải phóng nhanh; nếu không thì sao? À, khi đó chúng ta gặp vấn đề (bao gồm anh chàng OOM killer trigger-happy) … ít nhất giờ có thể debug hiệu quả!
 
 Bài tập: Diễn giải trace instance thứ hai thấy ở trên.
 
@@ -1479,7 +1479,7 @@ Hãy đặc biệt lưu ý – wastage tracking chỉ dành cho các slab cache 
 
 ##### Chạy script để xem SLUB wastage hay loss
 
-Để giảm công sức tra cứu pseudofile `/sys/kernel/debug/slab/kmalloc-*/alloc_traces`, tôi viết nhanh một custom script (`ch8/wastage_kmalloc_slabs.sh`); nó chỉ hiển thị dòng đầu (không phải stack trace) của các allocation instance có lãng phí, sort theo lãng phí cao nhất trước, cho mọi cache `kmalloc-*` (về cơ bản nó lặp qua output của lệnh: `grep -r -H -w waste /sys/kernel/debug/slab/kmalloc-[1-9]*/alloc_traces`). Không chỉ vậy, nó tách slab allocation do các routine kernel (nội bộ) và kernel module thực hiện. Để output dễ đọc, nó chỉ hiển thị mười bên “lãng phí” hàng đầu; các output “report” chứa đầy đủ chi tiết được chỉ ra. Hãy đọc code và thử.
+Để giảm công sức tra cứu pseudofile `/sys/kernel/debug/slab/kmalloc-*/alloc_traces`, tôi viết nhanh một custom script (`ch8/wastage_kmalloc_slabs.sh`); nó chỉ hiển thị dòng đầu (không phải stack trace) của các allocation instance có lãng phí, sort theo lãng phí cao nhất trước, cho mọi cache `kmalloc-*` (về cơ bản nó lặp qua output của lệnh: `grep -r -H -w waste /sys/kernel/debug/slab/kmalloc-[1-9]*/alloc_traces`). Không chỉ vậy, nó tách slab allocation do các routine kernel (nội bộ) và kernel module thực hiện. Để output human-readable, nó chỉ hiển thị mười bên “lãng phí” hàng đầu; các output “report” chứa đầy đủ chi tiết được chỉ ra. Hãy đọc code và thử.
 
 Lưu ý: Để thử script này, bạn phải chạy kernel 6.1 gần đây (hoặc mới hơn) và boot hệ thống với `slub_debug=FZPU` được truyền trên kernel command line.
 
@@ -1505,7 +1505,7 @@ Vậy, đến đây chúng ta đã trình bày lượng nội dung đáng kể. 
 
 | Slab allocator: ưu điểm | Slab allocator: nhược điểm |
 |---|---|
-| Nhanh – dùng identity-mapped RAM của kernel (được lấy và map lúc boot); page nằm trong vùng lowmem nên đã pre-map; không cần thiết lập page table (giống page allocator/BSA). | Có giới hạn trên về lượng có thể cấp phát bằng một API call; thực tế, giả định MAX\_ORDER=11 và page size 4K, đó là 4 MB. |
+| Nhanh – dùng identity-mapped RAM của kernel (được lấy và map lúc boot); page nằm trong vùng lowmem nên đã pre-mapped; không cần thiết lập page table (giống page allocator/BSA). | Có giới hạn trên về lượng có thể cấp phát bằng một API call; thực tế, giả định MAX\_ORDER=11 và page size 4K, đó là 4 MB. |
 | Bảo đảm memory chunk physically contiguous và CPU cacheline-aligned. | Bảo mật: theo mặc định, freed memory không được xóa, có thể dẫn đến các tình huống info-leakage. Có thể build kernel với `CONFIG_PAGE_POISONING` hoặc dùng `kfree_sensitive()` (có thể ảnh hưởng nhẹ đến hiệu năng). |
 | Khả năng cấp phát các phần của một page (thường từ nhỏ đến 8 byte (trên x86) đến 8K). | Phải kiểm tra cẩn thận allocation (bằng `ksize()` hoặc slab tool hay `alloc_traces`) để bảo đảm không có quá nhiều lãng phí. |
 
@@ -1523,13 +1523,13 @@ Có ít nhất ba kernel-level implementation khác nhau, loại trừ lẫn nha
 
 - `CONFIG_SLUB`
 
-- `CONFIG_SLOB` Implementation đầu (`SLAB`) là phiên bản ban đầu, được hỗ trợ tốt nhưng chưa được tối ưu nhiều. Implementation thứ hai, `SLUB`, còn gọi là Unqueued Allocator, là cải tiến lớn so với implementation đầu về hiệu quả memory, hiệu năng và diagnostics tốt hơn, và được chọn theo mặc định. Allocator `SLOB` (còn gọi là Simple Allocator) là một sự đơn giản hóa mạnh và, theo kernel config help, “không hoạt động hiệu quả trên hệ thống lớn”. Tài liệu kernel chính thức có một trang hữu ích về SLUB tại đây: Short users guide for SLUB (`https://www.kernel.org/doc/html/latest/mm/slub.html`; phần lớn nội dung ở đây liên quan đến diễn giải và phân tích output `slabinfo`, điều tôi trình bày tương đối chi tiết trong cuốn Linux Kernel Debugging).
+- `CONFIG_SLOB` Implementation đầu (`SLAB`) là phiên bản ban đầu, well-supported nhưng under-optimized. Implementation thứ hai, `SLUB`, còn gọi là Unqueued Allocator, là cải tiến lớn so với implementation đầu về hiệu quả memory, hiệu năng và diagnostics tốt hơn, và được chọn theo mặc định. Allocator `SLOB` (còn gọi là Simple Allocator) là một sự đơn giản hóa mạnh và, theo kernel config help, “không hoạt động hiệu quả trên hệ thống lớn”. Tài liệu kernel chính thức có một trang hữu ích về SLUB tại đây: Short users guide for SLUB (`https://www.kernel.org/doc/html/latest/mm/slub.html`; phần lớn nội dung ở đây liên quan đến diễn giải và phân tích output `slabinfo`, điều tôi trình bày tương đối chi tiết trong cuốn Linux Kernel Debugging).
 
 ## Tổng kết
 
-Trong chương này, bạn đã học – ở mức chi tiết khá tốt – cách cả page allocator (hay buddy system allocator) lẫn slab allocator hoạt động. Hãy nhớ “engine” thực sự của việc cấp phát (và giải phóng) RAM trong kernel cuối cùng là page allocator (hay buddy system allocator), với slab allocator được xếp lớp phía trên để cung cấp tối ưu cho các allocation request điển hình có kích thước ít hơn một page, và để cấp phát hiệu quả nhiều kernel data structure (“object”) quen thuộc.
+Trong chương này, bạn đã học – ở mức chi tiết khá tốt – cách cả page allocator (hay buddy system allocator) lẫn slab allocator hoạt động. Hãy nhớ “engine” thực sự của việc cấp phát (và giải phóng) RAM trong kernel cuối cùng là page allocator (hay buddy system allocator), với slab allocator được xếp lớp phía trên để cung cấp tối ưu cho các allocation request điển hình có less-than-a-page-in-size, và để cấp phát hiệu quả nhiều kernel data structure (“object”) well-known.
 
-Bạn đã học cách dùng hiệu quả các API do cả page allocator lẫn slab allocator cung cấp, với nhiều demo kernel module hỗ trợ minh họa theo hướng thực hành. Khá nhiều sự tập trung được dành (hoàn toàn đúng đắn) cho vấn đề thực tế khi developer đưa ra (slab) memory request với một số N byte nhất định, nhưng bạn đã học rằng điều này có thể rất không tối ưu, khi kernel thực sự cấp phát nhiều hơn hẳn (mức lãng phí có thể lên rất gần 100%)! Giờ bạn biết cách kiểm tra và giảm thiểu các trường hợp này. Làm tốt lắm!
+Bạn đã học cách dùng hiệu quả các API do cả page allocator lẫn slab allocator cung cấp, với nhiều demo kernel module hỗ trợ minh họa theo hướng hands-on. Khá nhiều sự tập trung được dành (hoàn toàn đúng đắn) cho vấn đề thực tế khi developer đưa ra (slab) memory request với một số N byte nhất định, nhưng bạn đã học rằng điều này có thể rất sub-optimal, khi kernel thực sự cấp phát nhiều hơn hẳn (mức lãng phí có thể lên rất gần 100%)! Giờ bạn biết cách kiểm tra và giảm thiểu các trường hợp này. Làm tốt lắm!
 
 Chương sau trình bày thêm các allocation strategy tối ưu, cũng như một số chủ đề nâng cao hơn về kernel memory allocation, gồm tạo custom slab cache, dùng các allocation interface `vmalloc` của kernel, tìm hiểu OOM killer và nhiều nội dung khác. Vì vậy, trước hết hãy bảo đảm đã hiểu nội dung chương này và thực hành với kernel module cùng bài tập (như sau). Sau đó, hãy chuyển sang chương tiếp theo!
 

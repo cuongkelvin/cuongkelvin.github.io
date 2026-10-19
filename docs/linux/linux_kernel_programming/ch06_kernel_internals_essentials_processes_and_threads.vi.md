@@ -22,7 +22,7 @@ Tóm lại, đây là các chủ đề trong chương:
 
 Tôi giả định bạn đã đọc chương trực tuyến Kernel Workspace Setup, chuẩn bị phù hợp máy ảo khách (Virtual Machine – VM) chạy Ubuntu 22.04 LTS hoặc stable release mới hơn, và cài mọi package cần thiết. Nếu chưa, tôi khuyên thực hiện trước.
 
-Ngoài ra, nếu chưa, hãy clone kho GitHub sách để lấy code tại `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`; chúng ta hãy trực tiếp thực hành với nó.
+Ngoài ra, nếu chưa, hãy clone kho GitHub sách để lấy code tại `https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`; chúng ta hãy hands-on với nó.
 
 Tôi giả định bạn quen các khái niệm virtual memory cơ bản, bố cục segment/mapping của user-mode process Virtual Address Space (VAS), stack, v.v. Tuy vậy, chúng ta dành vài trang giải thích các nền tảng này trong phần Tìm hiểu cơ bản process VAS ngay sau.
 
@@ -34,19 +34,19 @@ Trước hết, processor hiện đại thực thi code ở các privilege level
 
 Cũng rất quan trọng hiểu phần lớn hệ điều hành hiện đại có monolithic design. Monolithic nghĩa đen là một khối đá lớn duy nhất. Chúng ta để phần giải thích chính xác nó áp dụng cho hệ điều hành yêu thích thế nào sang sau một chút! Lúc này chỉ hiểu monolithic như sau: khi process/thread phát system call, nó chuyển sang kernel mode có đặc quyền, thực thi kernel code và có thể làm việc trên kernel data. Đúng, không có kernel hay kernel thread thực thi thay; process/thread phát system call được chuyển sang kernel mode và tự thực thi kernel code. Vì vậy nói kernel code thực thi trong context của user-space process/thread – execution context này gọi process context. Hãy nghĩ, phần đáng kể của kernel chạy chính cách này, gồm phần lớn device driver code. (Ngay cả xử lý processor exception như page fault/system call, cùng CPU scheduling, cũng thực hiện trong process context.)
 
-Bạn có thể hỏi: giờ hiểu điều này, ngoài process context kernel code còn thực thi cách nào? Có cách khác: khi hardware interrupt từ ngoại vi như bàn phím, network card, đĩa, v.v. phát sinh, CPU control unit lưu current context rồi lập tức chuyển CPU sang chạy interrupt handler code, tức interrupt service routine (ISR). Code này cũng chạy ở kernel mode có đặc quyền – thực chất đây là cách khác, asynchronous, chuyển vào kernel mode nếu chưa ở đó! Interrupt code path của nhiều device driver chạy như vậy; giờ nói kernel/driver code thực thi theo cách này đang chạy trong interrupt context.
+Bạn có thể hỏi: giờ hiểu điều này, ngoài process context kernel code còn thực thi cách nào? Có cách khác: khi hardware interrupt từ ngoại vi như bàn phím, network card, đĩa, v.v. phát sinh, CPU control unit lưu current context rồi lập tức re-vectors sang chạy interrupt handler code, tức interrupt service routine (ISR). Code này cũng chạy ở kernel mode có đặc quyền – thực chất đây là cách khác, asynchronous, chuyển vào kernel mode nếu chưa ở đó! Interrupt code path của nhiều device driver chạy như vậy; giờ nói kernel/driver code thực thi theo cách này đang chạy trong interrupt context.
 
 (Một lần nữa để bạn biết, nhiều driver hiện đại dùng threaded interrupt model, trong đó phần lớn interrupt processing diễn ra trong context kernel thread, thực chất process context.)
 
 Vậy từng và mọi phần kernel code, hay module/driver code, được đi vào và thực thi trong một trong hai context:
 
-- Process context: Đi vào kernel space vì process/thread phát system call hoặc xảy ra processor exception như page fault, kernel code được thực thi, kernel data được xử lý; thường synchronous.
+- Process context: Đi vào Kernel-space vì process/thread phát system call hoặc xảy ra processor exception như page fault, kernel code được thực thi, kernel data được xử lý; thường synchronous.
 
-- Interrupt context: Đi vào kernel space vì peripheral chip assert hardware interrupt, kernel và/hoặc driver code được thực thi, kernel data được xử lý; asynchronous.
+- Interrupt context: Đi vào Kernel-space vì peripheral chip assert hardware interrupt, kernel và/hoặc driver code được thực thi, kernel data được xử lý; asynchronous.
 
 Hình 6.1 thể hiện góc nhìn khái niệm: user-mode process và thread chạy trong user context không đặc quyền; user-mode thread có thể chuyển sang kernel mode có đặc quyền bằng system call. Sơ đồ cũng cho thấy Linux có pure kernel thread; rất giống user-mode thread, khác biệt then chốt là chỉ chạy trong kernel space, thậm chí không “thấy” user VAS. Chuyển synchronous sang kernel mode qua system call hay processor exception khiến task giờ chạy kernel code trong process context. (Kernel thread cũng chạy kernel code trong process context.)
 
-Tuy nhiên hardware interrupt là chuyện khác – chúng preempt bất kỳ thứ gì, kể cả kernel code, khiến execution chuyển asynchronous sang kernel privilege nếu chưa ở đó. Code chúng thực thi, thường interrupt handler của kernel hoặc device driver, chạy trong interrupt context.
+Tuy nhiên hardware interrupt là chuyện khác – chúng preempt bất kỳ thứ gì, kể cả kernel code, khiến execution chuyển asynchronous sang kernel privilege nếu chưa ở đó. Code chúng thực thi, thường interrupt handler của kernel hoặc device driver, chạy trong so-called interrupt context.
 
 Hình 6.1 có thêm chi tiết – interrupt context top half/bottom half, kernel thread và work queue; các chi tiết này cùng nhiều nội dung khác được trình bày trong sách đồng hành Linux Kernel Programming – Part 2.
 
@@ -74,19 +74,19 @@ Hãy phân tích nhanh các segment/mapping từ dưới lên:
 
 - Data segment: Ngay trên text mapping. Nơi lưu global và static data variable (mode `rw-`). Thực tế có ba data segment riêng:
 
-  - Initialized data segment: Global/static variable được khởi tạo trước nằm ở đây – static/fixed size.
+  - Initialized data segment: Global/static variable Pre-initialized nằm ở đây – static/fixed size.
 
-  - Uninitialized data segment: Global/static variable chưa khởi tạo nằm ở đây, tự khởi tạo `0` lúc runtime; vùng này đôi khi gọi bss – static/fixed size.
+  - Uninitialized data segment: Global/static variable chưa khởi tạo nằm ở đây, auto-initialized `0` lúc runtime; vùng này đôi khi gọi bss – static/fixed size.
 
-  - Heap segment: Standard C library API cấp phát/giải phóng bộ nhớ, họ routine `malloc()` quen thuộc, lấy bộ nhớ ở đây. Điều đó cũng chưa hoàn toàn đúng. Trên glibc hiện đại, chỉ `malloc()` yêu cầu dưới `MMAP_THRESHOLD` byte, mặc định 128 KB, lấy từ heap. Yêu cầu lớn hơn được cấp thành mapping riêng trong process VAS qua system call mạnh mẽ `mmap()`, gọi anonymous hay anon mapping. Heap là dynamic segment, có thể tăng/giảm kích thước. Ta thường nói heap ‘phát triển lên’ về virtual address cao hơn. Vị trí cuối trên heap có thể tham chiếu hợp lệ gọi program break, lấy được bằng sbrk(0).
+  - Heap segment: Standard C library API cấp phát/giải phóng bộ nhớ, họ routine `malloc()` quen thuộc, lấy bộ nhớ ở đây. Điều đó cũng chưa hoàn toàn đúng. Trên glibc hiện đại, chỉ `malloc()` yêu cầu dưới `MMAP_THRESHOLD` byte, mặc định 128 KB, lấy từ heap. Yêu cầu lớn hơn được cấp thành mapping riêng trong process VAS qua system call mạnh mẽ `mmap()`, gọi anonymous hay anon mapping. Heap là dynamic segment, có thể tăng/giảm kích thước. Ta thường nói heap ‘phát triển lên’ về virtual address cao hơn. Vị trí cuối trên heap reference-able hợp lệ gọi program break, lấy được bằng sbrk(0).
 
 - Shared library (text, data): Mọi shared library mà process dynamic link được map lúc runtime qua loader gọi mmap() vào process VAS, đâu đó giữa đỉnh heap và stack của thread `main()` (mode `r-x`/`rw-`). Vùng chung giữa heap và stack này cũng chứa stack memory của các thread khác ngoài main(), anonymous memory và shared memory region.
 
-- Stack: Memory region dùng Last In, First Out (LIFO) semantics; stack triển khai cơ chế function call của ngôn ngữ bậc cao, thực chất giữ execution context của thread. Stack frame đảm nhiệm parameter passing, tạo/hủy local variable và truyền return value. Đây là dynamic segment. Trên mọi processor hiện đại gồm x86/ARM, stack ‘phát triển xuống’ về virtual address thấp hơn, gọi fully descending stack. Mỗi lần gọi function, stack frame hay call frame được cấp phát, khởi tạo theo yêu cầu; bố cục chính xác rất phụ thuộc CPU, phải tham khảo CPU Application Binary Interface (ABI) tương ứng – xem Đọc thêm. Register Stack Pointer (SP) hoặc tương đương của processor core luôn trỏ current frame, đỉnh stack; vì stack phát triển về virtual address thấp, đỉnh stack thực chất là virtual address thấp nhất! Không trực quan nhưng đúng (mode `rw-`). (Tất nhiên còn nhiều điều; stack frame thực sự không được cấp phát, khởi tạo mỗi lần gọi function vì quá chậm. Tương tự không deallocate khi function return; bạn học thêm khi tiến tới.)
+- Stack: Memory region dùng Last In, First Out (LIFO) semantics; stack triển khai cơ chế function call của ngôn ngữ high-level, thực chất giữ execution context của thread. Stack frame đảm nhiệm parameter passing, tạo/hủy local variable và truyền return value. Đây là dynamic segment. Trên mọi processor hiện đại gồm x86/ARM, stack ‘phát triển xuống’ về virtual address thấp hơn, gọi fully descending stack. Mỗi lần function-calling, stack frame hay call frame được cấp phát, khởi tạo theo yêu cầu; bố cục chính xác rất CPU-dependent, phải tham khảo CPU Application Binary Interface (ABI) tương ứng – xem Đọc thêm. Register Stack Pointer (SP) hoặc tương đương của processor core luôn trỏ current frame, đỉnh stack; vì stack phát triển về virtual address thấp, đỉnh stack thực chất là virtual address thấp nhất! non-intuitive nhưng đúng (mode `rw-`). (Tất nhiên còn nhiều điều; stack frame thực sự không được cấp phát, khởi tạo mỗi lần gọi function vì quá chậm. Tương tự không deallocate khi function return; bạn học thêm khi tiến tới.)
 
 Tất nhiên bạn hiểu process phải có ít nhất một thread thực thi, thread là execution path trong process; thread được bảo đảm đó tất nhiên là function `main()`. Trong Hình 6.2, ví dụ có ba thread thực thi `main`, `thrd2` và `thrd3`. Như mong đợi, mọi thread chia sẻ mọi thứ trong process VAS trừ stack; như đã biết, mỗi thread có private stack. Stack của `main` ở đỉnh process user VAS; stack `thrd2` và `thrd3` có thể cấp bất cứ đâu giữa library mapping và stack `main`, được minh họa bằng hai ô xanh trong vùng này.
 
-Tôi thiết kế, triển khai tiện ích mà tôi thấy khá hữu ích để học/dạy và debug, tên procmap (`https://github.com/kaiwan/procmap`); công cụ visualization process VAS trên console. Nó thực sự hiện toàn bộ process VAS khá chi tiết; ta bắt đầu dùng ở chương sau. Nhưng đừng vì vậy chờ mới thử; hãy clone và thử trên Linux ngay, cần root access.
+Tôi thiết kế, triển khai tiện ích mà tôi thấy khá hữu ích để học/dạy và debug, tên procmap (`https://github.com/kaiwan/procmap`); công cụ visualization process VAS console-based. Nó thực sự hiện toàn bộ process VAS khá chi tiết; ta bắt đầu dùng ở chương sau. Nhưng đừng vì vậy chờ mới thử; hãy clone và thử trên Linux ngay, cần root access.
 
 Giờ hiểu cơ bản process VAS, đến lúc đi sâu hơn khá nhiều vào kernel internals liên quan process VAS, user/kernel address space, thread và stack.
 
@@ -104,7 +104,7 @@ Lý do khác tập trung thread thay process sẽ rõ hơn ở Chương 10, The 
 
 Tất nhiên quy tắc tốt nào cũng có ngoại lệ: kernel thread, viết ngắn kthread, chỉ sống trong kernel nên chỉ có “tầm nhìn” kernel virtual address space, không “thấy” userland. Vì vậy kthread chỉ thực thi kernel-space code path nên mỗi kthread chỉ một stack – kernel-space stack.
 
-Điều này có thể khiến bạn hỏi dùng stack nào khi xử lý hardware interrupt handler; dù phụ thuộc kiến trúc, kernel thường duy trì một IRQ stack mỗi core cho đúng mục đích này.
+Điều này có thể khiến bạn hỏi dùng stack nào khi xử lý hardware interrupt handler; dù arch-dependant, kernel thường duy trì một IRQ stack mỗi core cho đúng mục đích này.
 
 Ví dụ nhanh làm rõ điểm then chốt: khi chạy process C ‘Hello, world’ K\&R kinh điển, kernel tạo process; nó thiết lập, khởi tạo nhiều object, gồm process task structure, process VAS với user-mode stack, cùng kernel-mode stack riêng. Khi chạy, tất nhiên process đầu tiên thực thi API `printf()` trong user mode, dùng user-space stack của `main()`. Sau khi chuẩn bị, `printf()` phát system call `write()`! Khiến process chuyển kernel mode và thực sự ghi chuỗi `Hello, world\n` qua code path lớp `tty` trong kernel ra stdout device. Vì giờ thực thi kernel code ở kernel mode, nó dùng kernel-space stack của mình.
 
@@ -156,11 +156,11 @@ Mỗi process gồm vài segment, chính xác là mapping. Nói chung user-mode 
 
 - Text: Code; `r-x`
 
-- Data segment: `rw-`; gồm ba mapping riêng – initialized data segment, uninitialized data segment hay `bss`, và `heap` ‘phát triển lên’
+- Data segment: `rw-`; gồm ba mapping riêng – initialized data segment, uninitialized data segment hay `bss`, và `heap` ‘upward-growing’
 
 - Library mapping: Cho text/data của từng shared library process dynamic link vào:
 
-- Các stack phát triển xuống.
+- Các stack Downward-growing.
 
 Về stack, lần chạy mẫu trước cho thấy hiện có 398 user-mode thread trên hệ thống. Nghĩa là cũng có 398 user-space stack, vì mỗi user-mode thread tồn tại có một user-mode stack. Về các user-space thread stack này có thể nói:
 
@@ -172,7 +172,7 @@ Ngoài lề nhưng quan trọng: trên Linux, system call `foo()` bất kỳ th�
 
 (Trước đây worker routine triển khai system call `fork()` trong kernel tên `_do_fork()`; từ kernel 5.10 đổi thành `kernel_clone()`; commit `# cad6967ac108`.)
 
-- Ngoài ra Pthreads creation library API `pthread_create()` trên Linux gọi system call rất riêng Linux `clone()` (code trong kernel tại `kernel/fork.c:sys_clone()`). Cuối cùng system call gọi `kernel_clone();` parameter truyền, đặc biệt giá trị `flags`, báo kernel chính xác cách tạo custom process – nói cách khác một thread!
+- Ngoài ra Pthreads creation library API `pthread_create()` trên Linux gọi system call rất Linux-specific `clone()` (code trong kernel tại `kernel/fork.c:sys_clone()`). Cuối cùng system call gọi `kernel_clone();` parameter truyền, đặc biệt giá trị `flags`, báo kernel chính xác cách tạo custom process – nói cách khác một thread!
 
 - User-space stack tất nhiên dynamic; có thể tăng/giảm đến stack size resource limit `RLIMIT_STACK`, thường 8 MB; dùng `prlimit` tra được.
 
@@ -202,9 +202,9 @@ Một lần nữa từ chạy mẫu thấy hệ thống hiện có 398 user-mode
 
 Một lần nữa cần cực rõ: mỗi user-mode thread có hai stack – user-mode và kernel-mode. Ngoại lệ là kernel thread, chỉ có kernel-mode stack vì không có user mapping, do đó không user-space segment. Dưới Hình 6.5 có ba kernel thread `kthrd1`, `kthrd2`, `kthrdn`; trong chạy mẫu trước, `kthrdn` có n=116. Hơn nữa mỗi kernel thread được cấp task structure và kernel-mode stack lúc tạo.
 
-Kernel-mode stack giống user-mode stack ở phần lớn khía cạnh – mỗi lần gọi function trong kernel space, stack frame được thiết lập (bố cục riêng kiến trúc, thuộc CPU ABI document; xem Đọc thêm). CPU có register theo dõi vị trí stack hiện tại, thường Stack Pointer (SP), stack “phát triển” về virtual address thấp. Nhưng khác user-mode stack dynamic, kernel-mode stack fixed size và nhỏ.
+kernel-mode stack giống user-mode stack ở phần lớn khía cạnh – mỗi lần gọi function trong kernel space, stack frame được thiết lập (bố cục riêng kiến trúc, thuộc CPU ABI document; xem Đọc thêm). CPU có register theo dõi vị trí stack hiện tại, thường Stack Pointer (SP), stack “phát triển” về virtual address thấp. Nhưng khác user-mode stack dynamic, kernel-mode stack fixed size và nhỏ.
 
-Hệ quả quan trọng kích thước kernel-mode stack khá nhỏ, hai hoặc bốn page, đối với nhà phát triển kernel/driver: rất thận trọng không overflow kernel stack bằng công việc dùng nhiều stack như local variable lớn hoặc recursion.
+Hệ quả quan trọng kích thước kernel-mode stack khá nhỏ, two-page hoặc four-page, đối với nhà phát triển kernel/driver: rất thận trọng không overflow kernel stack bằng công việc stack-intensive như local variable lớn hoặc recursion.
 
 Có kernel configurable `CONFIG_FRAME_WARN` cảnh báo dùng kernel stack cao lúc compile time; đây là text liên quan trong `lib/Kconfig.debug`:
 
@@ -260,7 +260,7 @@ config FRAME_WARN:
 
   - Để bạn biết, `grep "KernelStack" /proc/meminfo` cho biết bộ nhớ hiện dùng cho kernel stack. Tra man page proc(5) để biết chi tiết.
 
-Như đã đề cập ngắn, nhiều kiến trúc gồm x86/ARM64 hỗ trợ per-CPU stack riêng cho interrupt handling, gọi IRQ stack. Khi external hardware interrupt xảy ra, CPU control unit lập tức chuyển control cuối cùng đến interrupt handling code, có thể trong device driver. Per-CPU interrupt stack riêng dùng giữ stack frame cho interrupt code path; giúp tránh áp lực quá lớn lên kernel-mode stack nhỏ hiện có của process/thread bị interrupt. IRQ stack size giống kernel-mode stack size của kiến trúc. (Ngoài ra x86\_64 hỗ trợ nhiều loại stack hơn, nhưng không đi sâu.)
+Như đã đề cập ngắn, nhiều kiến trúc gồm x86/ARM64 hỗ trợ per-CPU stack riêng cho interrupt handling, gọi IRQ stack. Khi external hardware interrupt xảy ra, CPU control unit lập tức re-vectors cuối cùng đến interrupt handling code, có thể trong device driver. per-CPU interrupt stack riêng dùng giữ stack frame cho interrupt code path; giúp tránh áp lực quá lớn lên kernel-mode stack nhỏ hiện có của process/thread bị interrupt. IRQ stack size giống kernel-mode stack size của kiến trúc. (Ngoài ra x86\_64 hỗ trợ nhiều loại stack hơn, nhưng không đi sâu.)
 
 Giờ hiểu tổ chức tổng thể user/kernel space theo process/thread và stack, hãy xem cách thực sự xem nội dung kernel-space stack và user-space stack. Ngoài hữu ích cho học tập, kiến thức này giúp rất nhiều khi debug.
 
@@ -295,9 +295,9 @@ $
 
 Trong output trên, mỗi dòng biểu diễn call frame hay stack frame trên stack. Để giải kernel stack backtrace, nên biết:
 
-- Tên hiển thị là function đã gọi – ví dụ mục thứ hai ở đây tên `do_syscall_64()`, vì luôn đọc stack trace từ dưới lên.
+- Tên hiển thị là function đã gọi – ví dụ mục thứ hai ở đây tên `do_syscall_64()`, vì luôn đọc stack trace bottom-up.
 
-- Function call graph có thứ tự dưới lên; vì thế output nên đọc từ dưới lên. Ở đây nghĩa là, bỏ mục đầu dưới cùng, call graph như sau: `do_syscall_64() --> __x64_sys_wait4() --> __do_sys_wait4() -->` `kernel_wait4() --> do_wait()`.
+- Function call graph có thứ tự dưới lên; vì thế output nên đọc bottom-up. Ở đây nghĩa là, bỏ mục đầu dưới cùng, call graph như sau: `do_syscall_64() --> __x64_sys_wait4() --> __do_sys_wait4() -->` `kernel_wait4() --> do_wait()`.
 
 - Mỗi dòng output biểu diễn call frame, thực chất một function trong call chain.
 
@@ -353,7 +353,7 @@ options=10, usage=0x0) at ../sysdeps/unix/sysv/linux/wait4.c:27
 [Inferior 1 (process 2549) detached]
 ```
 
-Và đây rồi! User-mode stack của Bash cùng mọi call frame hiện ra, đọc từ dưới lên! Một lần nữa mỗi dòng dưới `Thread 1 (process …)`, Thread 1 là thread `main()`, biểu diễn call frame; đọc từ dưới lên. Rõ ràng Bash thực thi command rồi cuối cùng gọi `__GI___wait4()`; trên Linux hiện đại chỉ là glibc wrapper của system call thực `wait4()`! Cột ngoài cùng trái như `#3` là call frame number; frame `#0` được coi đỉnh stack, tức function thực thi gần nhất, cuối call chain.
+Và đây rồi! User-mode stack của Bash cùng mọi call frame hiện ra, đọc bottom-up! Một lần nữa mỗi dòng dưới `Thread 1 (process …)`, Thread 1 là thread `main()`, biểu diễn call frame; đọc từ dưới lên. Rõ ràng Bash thực thi command rồi cuối cùng gọi `__GI___wait4()`; trên Linux hiện đại chỉ là glibc wrapper của system call thực `wait4()`! Cột ngoài cùng trái như `#3` là call frame number; frame `#0` được coi đỉnh stack, tức function thực thi gần nhất, cuối call chain.
 
 Một lần nữa bỏ qua call frame có label/tiền tố `??`. (Nhân tiện gstack hoạt động tốt trên máy ảo khách Fedora 38/39 x86\_64 của tôi.)
 
@@ -367,11 +367,11 @@ Giờ đến cách hiện đại xem stack.
 
 Giờ thú vị hơn: học kiến thức rất cơ bản dùng cách hiện đại mạnh mẽ, tận dụng công nghệ gần đây tại thời điểm viết tên extended Berkeley Packet Filter (eBPF). Đã đề cập eBPF project trong chương trực tuyến Kernel Workspace Setup, phần Additional useful projects. BPF cũ đã có lâu, dùng network packet tracing; eBPF là đổi mới tương đối mới, chỉ có từ Linux kernel 4.x, tất nhiên nghĩa phải dùng Linux 4.x trở lên để theo cách này.
 
-Dùng trực tiếp kernel-level BPF bytecode technology bên dưới cực kỳ khó; tin tốt là có nhiều frontend dễ dùng, tool và script. Trong số frontend, BPF Compiler Collection (BCC) và bpftrace được coi rất hữu ích. (Sơ đồ BCC performance analysis tool hiện tại ở `https://github.com/iovisor/bcc/blob/master/images/bcc_tracing_tools_2019.png`; danh sách eBPF frontend tại `http://www.brendangregg.com/ebpf.html#frontends`.)
+Dùng trực tiếp kernel-level BPF bytecode technology bên dưới cực kỳ khó; tin tốt là có nhiều frontend easy-to-use, tool và script. Trong số frontend, BPF Compiler Collection (BCC) và bpftrace được coi rất hữu ích. (Sơ đồ BCC performance analysis tool hiện tại ở `https://github.com/iovisor/bcc/blob/master/images/bcc_tracing_tools_2019.png`; danh sách eBPF frontend tại `http://www.brendangregg.com/ebpf.html#frontends`.)
 
 Ở đây chỉ demo nhanh BCC tool `stackcount`; ít nhất trên Ubuntu, tool eBPF có hậu tố `-bpfcc`, nên tên `stackcount-bpfcc`. Lợi thế khác là tool cho xem cả kernel stack và user-mode stack cùng lúc, không cần tool riêng.
 
-Cài BCC tool cho host distro bằng hướng dẫn tại `https://github.com/iovisor/bcc/blob/master/INSTALL.md`. Còn cài trên Linux VM khách chạy custom kernel 6.1? Có thể, dù kernel trước đây có thể gây vấn đề và đòi chạy distro kernel như Ubuntu/Fedora cung cấp.
+Cài BCC tool cho host distro bằng hướng dẫn tại `https://github.com/iovisor/bcc/blob/master/INSTALL.md`. Còn cài trên Linux VM khách chạy custom kernel 6.1? Có thể, dù kernel trước đây có thể gây vấn đề và đòi chạy distro kernel như Fedora-supplied.
 
 Hình 6.6 là ảnh màn hình help ngắn gọn tiện ích hiện khi chạy với parameter `–h`:
 
@@ -385,7 +385,7 @@ Ví dụ sau dùng BCC tool `stackcount-bpfcc` trên host Ubuntu 22.04 LTS x86\_
 
 Kernel symbol, ngay cả nhiều production system, thường được bật đủ để ít nhất thấy tên function; thực tế sysctl `kptr_restrict` ảnh hưởng rõ ràng, tra tại `https://sysctl-explorer.net/kernel/kptr_restrict/`. Mặt khác hơi trớ trêu, thường ứng dụng không compile với symbol, vì hay dùng compiler option `–fomit-frame-pointer`, nên tên function có thể không hiện ở user-mode call stack. Compile với `–fno-omit-frame-pointer` hoặc dùng debug symbol package giải quyết được khi debug.
 
-Với `stackcount[-bpfcc]`, phải chỉ định function quan tâm; thú vị là có thể user-space hoặc kernel-space function, dùng wildcard hay ngay cả regex! Chỉ khi các function đó được gọi, stack mới trace và report. Hình 6.7 là ảnh một phần demo stackcount script hoạt động; khi `ping` liên tục ping, thấy rõ kernel call stack và user-mode call stack không rõ bằng vì không có user-space symbol:
+Với `stackcount[-bpfcc]`, phải chỉ định function quan tâm; thú vị là có thể user-space hoặc kernel-space function, dùng wildcard hay ngay cả regex! Chỉ khi các function đó được gọi, stack mới trace và report. Hình 6.7 là ảnh một phần demo stackcount script hoạt động; khi `ping` liên tục ping, thấy rõ kernel call stack và user-mode call stack not-so-clear vì không có user-space symbol:
 
 ![Hình 6.7](images/ch06/fig06-07.jpg)
 
@@ -393,9 +393,9 @@ Hình 6.7: Một phần script ch6/stackcount\_eg.sh đang chạy, kernel/user s
 
 Tùy chọn `--delimited` in delimiter `--`, biểu thị ranh giới kernel-mode và user-mode stack của process. (Đáng tiếc phần lớn production user-mode app đã strip symbolic information, nên phần lớn user-mode stack frame chỉ hiện `[unknown]`.) Ít nhất trên hệ thống này kernel stack frame rất rõ; truyền `--verbose` còn in virtual address của text/code function bên trái. Một lần nữa lưu ý `stackcount-bpfcc` chỉ hoạt động Linux 4.6+, cần root. Xem man page để biết chi tiết.
 
-Lưu ý eBPF program có thể thất bại vì bật kernel lockdown tương đối mới, dù mặc định tắt. Đây là Linux Security Module (LSM) tăng mức bảo mật cứng rắn trên Linux. Tất nhiên bảo mật là dao hai lưỡi; hệ thống rất an toàn ngầm nghĩa vài thứ không hoạt động như mong đợi, gồm một số eBPF program. Tham khảo Đọc thêm về kernel lockdown.
+Lưu ý eBPF program có thể thất bại vì bật kernel lockdown tương đối mới, dù mặc định tắt. Đây là Linux Security Module (LSM) tăng mức bảo mật cứng rắn trên Linux. Tất nhiên bảo mật là dao double-edged; hệ thống rất an toàn ngầm nghĩa vài thứ không hoạt động như mong đợi, gồm một số eBPF program. Tham khảo Đọc thêm về kernel lockdown.
 
-Ngoài lề thú vị, hữu ích: Brendan Gregg đã xây dựng từ một thời gian trước visualization tooling mạnh tên rất hợp Flame Graphs; stack trace visualization trên code path được profile, giúp nhanh thấy code thường chiếm CPU, có tính năng zoom vào/ra call path! Xem Đọc thêm để có liên kết eBPF, BCC, bpftrace và Flame Graphs.
+Ngoài lề thú vị, hữu ích: Brendan Gregg đã xây dựng từ một thời gian trước visualization tooling mạnh tên rất hợp Flame Graphs; stack trace visualization trên code path được profile, giúp nhanh thấy code frequently-on-the-cpu, có tính năng zoom vào/ra call path! Xem Đọc thêm để có liên kết eBPF, BCC, bpftrace và Flame Graphs.
 
 Ở đây mới chạm bề mặt; eBPF tool như BCC/bpftrace thực sự là cách hiện đại mạnh để system app tracing và performance analysis trên Linux, và observability nói chung. Profiling tool hữu ích khác gồm perf, Flame Graphs và nhiều công cụ khác. Hãy dành thời gian học dùng các tool mạnh này!
 
@@ -417,7 +417,7 @@ Như vừa nói, sơ đồ sau là nỗ lực tổng hợp, trình bày mọi th
 
 Hình 6.8: Góc nhìn từ độ cao 10.000 foot về process, thread, stack, task structure và nhiều thành phần khác của user/kernel VAS
 
-Phù, khá nhiều nhỉ? Khối đỏ lớn trong kernel segment sơ đồ trên về khái niệm bao quát core kernel code/data, các subsystem chính; cũng hiện per-thread task structure và kernel-mode stack. Còn lại coi non-core, gồm device driver. (Có thể coi arch-specific code là core; ở đây chỉ hiện riêng.) Cũng đừng để thông tin trên làm quá tải; chỉ tập trung điều hiện cần – process, thread, task structure, stack. Nếu chưa rõ, nhớ đọc lại nội dung trước.
+Phù, khá nhiều nhỉ? Khối đỏ lớn trong kernel segment sơ đồ trên về khái niệm bao quát core kernel code/data, các subsystem chính; cũng hiện per-thread task structure và kernel-mode stack. Còn lại coi non-core, gồm device driver. (Có thể coi arch-specific code là core; ở đây chỉ hiện riêng.) Cũng đừng để thông tin trên làm quá tải; chỉ tập trung điều hiện cần – process, thread, task structure, stack. Nếu chưa rõ, nhớ re-read nội dung trước.
 
 Giờ chuyển sang thực sự hiểu và học cách tham chiếu metadata structure then chốt hay “root” của từng thread tồn tại – task structure.
 
@@ -539,13 +539,13 @@ Giờ biết rõ hơn member task structure, chính xác truy cập nó và memb
 
 Bạn nhớ lần chạy mẫu script `countem.sh` trước, trong phần Chạy script nhỏ xem số process và thread tồn tại, tìm thấy tổng 514 thread cả user/kernel. Nghĩa là tổng 514 task structure object trong kernel memory.
 
-Chúng cần tổ chức để kernel dễ truy cập khi cần. Vì thế mọi task structure object trong kernel memory được nối trên circular doubly linked list gọi task list. Cách tổ chức này cần để các kernel code path duyệt, thường có `procfs` code cùng nhiều code khác. Dù vậy hãy nghĩ: khi process/thread chạy kernel code trong process context, làm sao biết `task_struct` nào thuộc mình giữa có thể hàng trăm, nghìn structure trong kernel memory? Hóa ra không đơn giản. Kernel developer phát triển cách bảo đảm tìm được task structure cụ thể biểu diễn thread hiện chạy kernel code một cách hiệu quả. Đạt qua macro `current`. Hãy nghĩ như sau:
+Chúng cần tổ chức để kernel dễ truy cập khi cần. Vì thế mọi task structure object trong kernel memory được nối trên circular doubly linked list gọi task list. Cách tổ chức này cần để các kernel code path duyệt, thường có `procfs` code cùng nhiều code khác. Dù vậy hãy nghĩ: khi process/thread chạy kernel code trong process context, làm sao biết `task_struct` nào thuộc mình giữa có thể hàng trăm, nghìn structure trong kernel memory? Hóa ra non-trivial. Kernel developer phát triển cách bảo đảm tìm được task structure cụ thể biểu diễn thread hiện chạy kernel code một cách hiệu quả. Đạt qua macro `current`. Hãy nghĩ như sau:
 
 - Tra `current` cho pointer đến `struct task_struct` của thread đang chạy kernel code ngay lúc này – tức process context hiện chạy trên processor core, chính core thực hiện lookup!
 
-- `current` tương tự, tất nhiên không hoàn toàn, pointer `this` trong ngôn ngữ hướng đối tượng.
+- `current` tương tự, tất nhiên không hoàn toàn, pointer `this` trong ngôn ngữ object-oriented.
 
-Triển khai macro `current` rất riêng theo kiến trúc/CPU. Ở đây không đi sâu mọi chi tiết triển khai phức tạp. Đủ nói nó được thiết kế kỹ để nhanh, thường thuật toán O(1). Ví dụ trên vài kiến trúc Reduced Instruction Set Computer (RISC) có nhiều general-purpose register như PowerPC/AArch64, một register dành riêng giữ `current`!
+implementation-level macro `current` rất riêng theo kiến trúc/CPU. Ở đây không đi sâu mọi chi tiết triển khai phức tạp. Đủ nói nó được thiết kế kỹ để nhanh, thường thuật toán O(1). Ví dụ trên vài kiến trúc Reduced Instruction Set Computer (RISC) có nhiều general-purpose register như PowerPC/AArch64, một register dành riêng giữ `current`!
 
 Tôi rất khuyến khích duyệt kernel source tree xem triển khai `current` dưới `arch/<arch>/asm/current.h`. Trên ARM32 phép tính O(1) cho kết quả; AArch64/PowerPC lưu trong register nên lookup cực nhanh. Trên x86\_64 triển khai dùng công nghệ lock-free, biến `per-CPU`, để giữ `current`, tránh costly locking; trình bày ở Chương 13, Kernel Synchronization – Phần 2, phần Per-CPU variables. Tất cả cần để dùng macro `current` trong module code là include header `<linux/sched.h>`.
 
@@ -556,7 +556,7 @@ Có thể dùng `current` dereference task structure lấy thông tin; ví dụ 
 current->pid, current->comm
 ```
 
-Phần sau bạn thấy kernel module đầy đủ duyệt task list, in vài chi tiết từ mỗi task structure gặp.
+Phần sau bạn thấy kernel module full-fledged duyệt task list, in vài chi tiết từ mỗi task structure gặp.
 
 ### Xác định context
 
@@ -570,7 +570,7 @@ Chúng loại trừ nhau – tại bất kỳ thời điểm, kernel code chạy
 
 Vì sao cần xác định context kernel/driver code đang chạy? Quy tắc vàng kernel là không sleep hay block trong bất kỳ atomic context; làm vậy gây kernel bug. Có thể lockup hệ thống, thường gây kernel panic.
 
-Vì sao? Trước tiên hiểu sleeping nghĩa context-switch: CPU chuyển chạy task khác trong khi task trước sleep. Vì thế sleeping gọi scheduler code rồi context switch, sẽ nói chi tiết Chương 10, The CPU Scheduler – Phần 1, và Chương 11, The CPU Scheduler – Phần 2. Đây thực sự là cách mọi blocking API hoạt động. Nhưng chạy atomic context như hardware interrupt, cả software interrupt/softirq, hoặc khi giữ spinlock, phải hoàn tất công việc không block, không sleep, không nhường CPU. Vì thế dùng từ “atomic”; nghĩa chạy đến hoàn tất không gián đoạn.
+Vì sao? Trước tiên hiểu sleeping nghĩa context-switching: CPU chuyển chạy task khác trong khi task trước sleep. Vì thế sleeping gọi scheduler code rồi context switch, sẽ nói chi tiết Chương 10, The CPU Scheduler – Phần 1, và Chương 11, The CPU Scheduler – Phần 2. Đây thực sự là cách mọi blocking API hoạt động. Nhưng chạy atomic context như hardware interrupt, cả software interrupt/softirq, hoặc khi giữ spinlock, phải hoàn tất công việc không block, không sleep, không nhường CPU. Vì thế dùng từ “atomic”; nghĩa chạy đến hoàn tất không gián đoạn.
 
 Giờ biết quy tắc đừng sleep trong atomic context, câu hỏi: làm sao biết code path có đang atomic context không? Đây là cách dễ xác định context kernel/driver code hiện thực thi:
 
@@ -586,7 +586,7 @@ Macro `in_task()` trả Boolean; `True` nếu code chạy process/task context, 
 
 Có thể bạn đã thấy dùng `in_interrupt()` – trả `True` nghĩa code ở interrupt context, `False` thì không. Tuy nhiên khuyến nghị code hiện đại không dựa macro này vì Bottom Half (BH) disabling có thể ảnh hưởng hoạt động. Vì thế khuyến nghị `in_task()` thay.
 
-Nhưng chờ! Có thể hơi rắc rối: `in_task()` trả `True` đúng là nghĩa process context, nhưng riêng sự thật đó không bảo đảm hiện atomic không hay sleep an toàn không. Ví dụ chạy kernel/driver code trong process context nhưng giữ spinlock, loại lock rất phổ biến trong kernel; code giữa lock/unlock, critical section, phải chạy atomically! Nghĩa là dù process/task context, code vẫn gây kernel-level bug nếu cố gọi API có khả năng block/sleep! Đừng lo, locking trình bày kỹ ở hai chương cuối.)
+Nhưng chờ! Có thể hơi rắc rối: `in_task()` trả `True` đúng là nghĩa process context, nhưng riêng sự thật đó không bảo đảm hiện atomic không hay sleep an toàn không. Ví dụ chạy kernel/driver code trong process context nhưng giữ spinlock, loại lock rất phổ biến trong kernel; code giữa lock/unlock, so-called critical section, phải chạy atomically! Nghĩa là dù process/task context, code vẫn gây kernel-level bug nếu cố gọi API có khả năng block/sleep! Đừng lo, locking trình bày kỹ ở hai chương cuối.)
 
 Cũng cẩn thận: theo định nghĩa, dùng macro `current` chỉ coi hợp lệ khi chạy process context.
 
@@ -649,9 +649,9 @@ Như in đậm trong code snippet trên, thấy với một số member có th�
 
 Tuyệt! Code snippet trên thực sự cho biết cách truy cập trực tiếp vài `task_struct` member qua `current`; nhưng không phải mọi member có thể hoặc nên truy cập trực tiếp. Thay vào đó kernel cung cấp helper method truy cập; hãy bàn ngắn tiếp theo.
 
-### Kernel helper method tích hợp và optimization
+### Kernel helper method Built-in và optimization
 
-Trong code ví dụ trước, dùng vài helper/accessor method tích hợp kernel để lấy các member task structure. Đây là cách được khuyến nghị; ví dụ dùng `task_pid_nr()` xem PID thay trực tiếp `current->pid`. Tương tự process credential trong task structure, như effective UID (`EUID`) và các member tương tự đã hiện, được trừu tượng trong `struct cred`, truy cập qua helper routine như `from_kuid()` đã dùng. Tương tự còn nhiều helper method; tra trong `include/linux/sched.h` ngay dưới định nghĩa `struct task_struct`, từ đây: `https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/sched.h#L1547`.
+Trong code ví dụ trước, dùng vài helper/accessor method built-in kernel để lấy các member task structure. Đây là cách được khuyến nghị; ví dụ dùng `task_pid_nr()` xem PID thay trực tiếp `current->pid`. Tương tự process credential trong task structure, như effective UID (`EUID`) và các member tương tự đã hiện, được trừu tượng trong `struct cred`, truy cập qua helper routine như `from_kuid()` đã dùng. Tương tự còn nhiều helper method; tra trong `include/linux/sched.h` ngay dưới định nghĩa `struct task_struct`, từ đây: `https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/sched.h#L1547`.
 
 Vì sao vậy? Sao không chỉ truy cập trực tiếp task structure member qua `current-><member-name>`? Có nhiều lý do thực tế: thứ nhất có thể truy cập cần lấy lock, sẽ nói chi tiết locking/synchronization ở hai chương cuối. Thứ hai có thể có cách tối ưu hơn; thứ ba có thể không nên truy cập trực tiếp vì chỉ có nghĩa trong namespace task thuộc về, v.v... Thực tế khái niệm then chốt kernel namespace và control group/cgroup là nền tảng container technology; ta bàn cgroup chi tiết, namespace một ít ở Chương 11, The CPU Scheduler – Phần 2, phần An introduction to cgroups.
 
@@ -683,9 +683,9 @@ Ngoài luyện dùng `current`, điểm then chốt module này (`ch6/current_af
 
 Chú ý cẩn thận, rõ: không “kernel” hay kernel thread nào thực thi code module; chính user-space process/thread, bằng phát system call (nhớ cả insmod/rmmod đều phát system call), chuyển vào kernel space và thực thi module code. Monolithic kernel hoạt động vậy.
 
-Để bạn biết, microkernel architecture có lẽ là cách đối lập hoàn toàn monolithic. Nó dùng message passing, không system call, truyền message từ user app/process đến server process thực hiện công việc. Đến lượt chúng khi cần trao đổi với microkernel nhỏ, cũng qua message. Nếu làm tốt cũng cho performance tuyệt vời; tuy nhiên có vẻ khó thiết kế, triển khai tốt microkernel OS, nghĩ đến GNU Hurd. Tất nhiên chúng thực sự tồn tại: QNX, VxWorks và ENEA là ví dụ thực tế, hard real-time rất tốt; Minix của Tannenbaum chủ yếu là microkernel dùng trong lớp học.
+Để bạn biết, microkernel architecture có lẽ là cách đối lập hoàn toàn monolithic. Nó dùng message-passing, không system call, truyền message từ user app/process đến server process thực hiện công việc. Đến lượt chúng khi cần trao đổi với microkernel nhỏ, cũng qua message. Nếu làm tốt cũng cho performance tuyệt vời; tuy nhiên có vẻ khó thiết kế, triển khai tốt micro-kernel-based, nghĩ đến GNU Hurd. Tất nhiên chúng thực sự tồn tại: QNX, VxWorks và ENEA là ví dụ real-world, hard real-time rất tốt; Minix của Tannenbaum chủ yếu là microkernel dùng trong lớp học.
 
-Trở lại monolithic và Linux: kiểu thực thi kernel code này, như Hình 6.10, gọi chạy process context, trái interrupt context. Tuy nhiên Linux kernel không nghiêm ngặt thuần monolithic; nếu vậy chỉ là một khối memory hardcode. Thay vào đó như mọi hệ điều hành hiện đại, Linux hỗ trợ modularization qua LKM.
+Trở lại monolithic và Linux: kiểu thực thi kernel code này, như Hình 6.10, gọi chạy process context, trái interrupt context. Tuy nhiên Linux kernel không nghiêm ngặt thuần monolithic; nếu vậy chỉ là một khối memory hard-coded. Thay vào đó như mọi hệ điều hành hiện đại, Linux hỗ trợ modularization qua LKM.
 
 Ngoài lề, lưu ý có thể tạo và chạy kernel thread trong kernel space; giống user-mode thread, được schedule chạy CPU và thực thi kernel code trong process context.
 
@@ -704,7 +704,7 @@ pr_info(
      current->stack, current->stack); [...]
 ```
 
-Nhớ thảo luận Chương 5, Viết kernel module đầu tiên – Phần 2, phần Đôi lời về sysctl kptr\_restrict: khi in address, trước tiên thực sự không nên in trong production, tôi khuyến khích không dùng `%p` hay `%px` thông thường mà `%pK`. Đó là điều làm trong code trước, nhằm bảo mật, ngăn kernel information leak. Trên hệ thống tinh chỉnh bảo mật tốt, `%pK` chỉ hiển thị zeroed-out hay hashed value thay actual address. Để thể hiện, cũng in actual kernel address bằng `0x%px`, chỉ để đối chiếu.
+Nhớ thảo luận Chương 5, Viết kernel module đầu tiên – Phần 2, phần Đôi lời về sysctl kptr\_restrict: khi in address, trước tiên thực sự không nên in trong production, tôi khuyến khích không dùng `%p` hay `%px` thông thường mà `%pK`. Đó là điều làm trong code trước, nhằm bảo mật, ngăn kernel information leak. Trên hệ thống well-tuned, `%pK` chỉ hiển thị zeroed-out hay hashed value thay actual address. Để thể hiện, cũng in actual kernel address bằng `0x%px`, chỉ để đối chiếu.
 
 Khá thú vị, ở đây `%pK` có vẻ không tác dụng – hai address in cùng giá trị, như Hình 6.10; điều này đúng mong đợi vì sysctl `kptr_restrict` mặc định 1 và đang root.
 
@@ -714,7 +714,7 @@ Giờ chuyển điều khá thú vị: phần sau học duyệt task list Linux 
 
 ## Duyệt các task list của kernel
 
-Như đã nói, mọi task structure tổ chức trong kernel memory trên linked list gọi task list để duyệt được. List data structure tiến hóa thành circular doubly linked list rất phổ biến. Thực tế core kernel code làm việc với list được tách vào header `list.h`; nổi tiếng và được kỳ vọng dùng cho mọi công việc dựa list.
+Như đã nói, mọi task structure tổ chức trong kernel memory trên linked list gọi task list để duyệt được. List data structure tiến hóa thành circular doubly linked list rất phổ biến. Thực tế core kernel code làm việc với list được tách vào header `list.h`; well-known và được kỳ vọng dùng cho mọi công việc list-based.
 
 Data structure `include/linux/types.h:list_head` tạo doubly linked circular list cơ bản; như mong đợi gồm hai pointer, một đến member `prev`, một đến `next` trên list:
 
@@ -726,7 +726,7 @@ struct list_head {
 
 Dễ duyệt các list liên quan task qua macro tiện lợi trong header `include/linux/sched/signal.h` cho version \>= 4.11; lưu ý kernel 4.10 trở xuống macro ở `include/linux/sched.h`.
 
-Giờ như thường lệ hãy thực nghiệm và thực hành! Các phần sau viết module duyệt kernel task list hai cách:
+Giờ như thường lệ hãy thực nghiệm và hands-on! Các phần sau viết module duyệt kernel task list hai cách:
 
 - Một: Duyệt kernel task list và hiện mọi process tồn tại, vì vậy chỉ thread `main()` hay `T0` mỗi process.
 
@@ -782,7 +782,7 @@ Trước khi tiếp tục code, cần xem chi tiết hơn member TGID và PID c�
 
 #### Phân biệt process và thread – TGID và PID
 
-Hãy nghĩ: vì Linux kernel dùng task structure riêng (`struct task_struct`) biểu diễn mỗi thread, và member duy nhất bên trong là Process IDentifier (PID), nghĩa trong Linux kernel mỗi thread có PID riêng. Nảy sinh câu hỏi, một câu đố: trong multithreaded process, làm sao nhiều thread cùng process chia sẻ PID chung như POSIX Threads standard POSIX.1c yêu cầu? Thực tế không chia sẻ: mỗi thread của multithreaded process, thực sự từng thread tồn tại trên Linux hiện đại, có PID riêng! Nhưng chờ, không vi phạm Pthreads standard sao? Đúng, một thời gian rất lâu trước Linux không tuân chuẩn, gây porting issue cùng nhiều vấn đề khác.
+Hãy nghĩ: vì Linux kernel dùng task structure riêng (`struct task_struct`) biểu diễn mỗi thread, và member duy nhất bên trong là Process IDentifier (PID), nghĩa trong Linux kernel mỗi thread có PID riêng. Nảy sinh câu hỏi, một câu đố: trong multithreaded process, làm sao nhiều thread cùng process chia sẻ PID chung như POSIX Threads standard POSIX.1c yêu cầu? Thực tế không chia sẻ: mỗi thread của multithreaded process, thực sự từng thread tồn tại trên Linux hiện đại, có PID riêng! Nhưng chờ, không vi phạm Pthreads standard sao? Đúng, một thời gian rất lâu trước Linux non-compliant, gây porting issue cùng nhiều vấn đề khác.
 
 Để sửa vấn đề user-space standard khó chịu, Ingo Molnar của Red Hat đề xuất và đưa vào mainline một patch từ dòng kernel 2.5. Member mới Thread Group IDentifier hay TGID được thêm vào task structure.
 
@@ -822,7 +822,7 @@ Label `ps` được diễn giải:
 
 - Cột hai `LWP`, nghĩa đen LightWeight Process hay thread, biểu diễn member `pid` trong kernel task structure cho task.
 
-Lưu ý chỉ GNU ps mới truyền parameter như `-LA` để thấy thread; triển khai `ps` nhẹ như busybox không làm được. Nhưng không vấn đề: luôn tra cùng chi tiết dưới procfs. Ví dụ dưới `/proc/2301/task` thấy thư mục con biểu diễn worker thread. Đoán xem: thực chất GNU `ps` cũng hoạt động như vậy bên trong!
+Lưu ý chỉ GNU ps mới truyền parameter như `-LA` để thấy thread; triển khai `ps` nhẹ như busybox không làm được. Nhưng không vấn đề: luôn tra cùng chi tiết dưới procfs. Ví dụ dưới `/proc/2301/task` thấy sub-folders biểu diễn worker thread. Đoán xem: thực chất GNU `ps` cũng hoạt động như vậy bên trong!
 
 Được rồi, đến code...
 
@@ -900,7 +900,7 @@ Tham chiếu code block trước, cặp macro `do_each_thread() { ... } while_ea
 
 - Theo chiến lược đặt vài temporary variable tên `tmp1, tmp2, tmp3` để fetch và thiết lập data item cần, rồi in một lần mỗi loop iteration.
 
-- Để thiết lập data cần report, C programmer thường dùng `sprintf()`; nhưng lưu ý chắc chắn có thể thành security issue do buffer overflow vulnerability quen thuộc và exploit liên quan. Vì vậy được dạy dùng `snprintf()` thay.
+- Để thiết lập data cần report, C programmer thường dùng `sprintf()`; nhưng lưu ý chắc chắn có thể thành security issue do buffer overflow vulnerability well-known và exploit liên quan. Vì vậy được dạy dùng `snprintf()` thay.
 
 Đúng, nhưng còn cải thiện được: viết wrapper routine nhỏ `snprintf_lkp()`, định nghĩa trong ‘library’ source file `klib.c`. Nó chủ động kiểm tra, cảnh báo mọi buffer overflow, tăng security posture hơn nữa.
 

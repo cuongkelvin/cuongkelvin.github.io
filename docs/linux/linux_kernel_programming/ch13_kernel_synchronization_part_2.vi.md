@@ -46,7 +46,7 @@ Tốt nhưng vẫn làm tốt hơn nữa! Thao tác global integer hóa ra phổ
 
 ### Interface refcount\_t mới hơn so với atomic\_t cũ hơn
 
-Trước bắt đầu quan trọng đề cập: đến hết version 4.10 đã có tập interface thao tác integer atomically, gọi interface `atomic_t`. Từ kernel 4.11 có tập interface mới, tốt hơn tên API `refcount_t`, thiết kế thao tác reference counter của kernel-space object. Tập mới cải thiện mạnh security posture kernel – qua bảo vệ Integer Overflow (IoF) và Use After Free (UAF) cải thiện nhiều, cùng memory ordering guarantee mà API `atomic_t` cũ thiếu. Interface `refcount_t`, như nhiều security technology khác trên Linux, bắt nguồn công việc PaX Team – `https://pax.grsecurity.net/` (còn gọi `PAX_REFCOUNT`).
+Trước bắt đầu quan trọng đề cập: đến hết version 4.10 đã có tập interface thao tác integer atomically, gọi interface `atomic_t`. Từ kernel 4.11 có tập interface mới, tốt hơn tên API `refcount_t`, thiết kế thao tác reference counter của kernel-space object. Tập mới cải thiện mạnh security posture kernel – qua bảo vệ Integer Overflow (IoF) và Use After Free (UAF) much-improved, cùng memory ordering guarantee mà API `atomic_t` cũ thiếu. Interface `refcount_t`, như nhiều security technology khác trên Linux, bắt nguồn công việc PaX Team – `https://pax.grsecurity.net/` (còn gọi `PAX_REFCOUNT`).
 
 Dù vậy thực tế (tại thời điểm viết) interface `atomic_t` cũ vẫn dùng rất nhiều trong kernel core và driver (đang chuyển đổi chậm, interface `atomic_t` cũ chuyển sang model và API set `refcount_t` mới). Vì vậy chủ đề này trình bày cả hai, chỉ khác biệt và đề cập API `refcount_t` thay API `atomic_t` nào khi áp dụng. Xem interface `refcount_t` như variant của interface `atomic_t` (cũ), chuyên reference counting.
 
@@ -129,7 +129,7 @@ static inline void put_task_struct(struct task_struct *t)
 
 Ví dụ refcounting method khác trong kernel là `kernel/user.c` (giúp theo dõi số process, file, v.v. user đã dùng qua per-user structure).
 
-Ảnh sau (Hình 13.1) cho thấy grep source file để tìm dòng chứa string `refcount` (không phân biệt hoa thường); do đó thấy cách code initialize, increment/decrement và set vài variable `refcount_t`:
+Ảnh sau (Hình 13.1) cho thấy grep source file để tìm dòng chứa string `refcount` (case-insensitive); do đó thấy cách code initialize, increment/decrement và set vài variable `refcount_t`:
 
 ![Hình 13.1](images/ch13/fig13-01.jpg)
 
@@ -220,13 +220,13 @@ Lưu ý mọi routine – cả operator `atomic[64]_*` 32-bit và 64-bit – arc
 
 ### Ghi chú internal implementation
 
-Về internal implementation, atomic integer operator `foo()` thường là macro thành inline function, rồi gọi arch-specific function `arch_foo()`. (Ví dụ x86 dùng assembly prefix `LOCK` nổi tiếng trong internal implementation, còn họ ARM thường dùng cách tổng quát hơn với memory ordering semantic.)
+Về internal implementation, atomic integer operator `foo()` thường là macro thành inline function, rồi gọi arch-specific function `arch_foo()`. (Ví dụ x86 dùng assembly prefix `LOCK` well-known trong internal implementation, còn họ ARM thường dùng cách tổng quát hơn với memory ordering semantic.)
 
 Prefix `LOCK` của x86 không instruction; là prefix cho instruction (ví dụ `lock` `orb %b1,%0`). Bảo đảm core chạy instruction theo sau LOCK sở hữu độc quyền cache line đang thao tác; đồng thời control unit không cho hardware interrupt – vì một machine-level instruction đang thực thi – và có memory ordering guarantee.
 
 Như luôn, xem qua tài liệu kernel chính thức atomic operator luôn tốt (trong kernel source tree tại `Documentation/atomic_t.txt`, hay: `https://www.kernel.org/doc/Documentation/atomic_t.txt`). Phân loại gọn nhiều atomic integer API thành tập riêng. Để biết arch-specific memory ordering issue tác động internal implementation (ghi chú nhanh tiếp sau). Nếu quan tâm, xem trang tài liệu kernel chính thức tại `https://www.kernel.org/doc/html/latest/core-api/refcount-vs-atomic.html#refcount-t-api-compared-to-atomic-t`.
 
-Khá trái trực giác, ít nhất với generic arch-independent refcount implementation, API `refcount_t` bên trong được triển khai trên API set `atomic_t` (cũ). Ví dụ API `refcount_set()` – đặt giá trị variable `refcount` atomically thành parameter truyền – triển khai trong kernel như sau:
+Khá non-intuitively, ít nhất với generic arch-independent refcount implementation, API `refcount_t` bên trong được triển khai trên API set `atomic_t` (cũ). Ví dụ API `refcount_set()` – đặt giá trị variable `refcount` atomically thành parameter truyền – triển khai trong kernel như sau:
 
 ```
 // include/linux/refcount.h
@@ -510,13 +510,13 @@ Tôi chạy demo LKM trên:
 
 Rõ ràng cách hiện đại – qua RMW atomic bitwise API `set_bit()` – so với RMW “thủ công” cũ dùng spinlock bảo vệ, nhanh và dễ hơn nhiều.
 
-Công viết code qua một lời gọi `set_bit()` thay vì lấy spinlock, làm từng bước (RMW sequence), release spinlock cũng đơn giản hơn nhiều. Bước 4 đến 9 (Hình 13.3) cho thấy nhiều bit operation điển hình thực hiện trên memory variable (cùng kết quả), qua RMW bitwise atomic operator mạnh, thực sự dễ dùng.
+Công viết code qua một lời gọi `set_bit()` thay vì lấy spinlock, làm từng bước (RMW sequence), release spinlock cũng đơn giản hơn nhiều. Bước 4 đến 9 (Hình 13.3) cho thấy nhiều bit operation điển hình thực hiện trên memory variable (cùng kết quả), qua RMW bitwise atomic operator mạnh, thực sự easy-to-use.
 
 #### Tìm bitmask hiệu quả
 
 Liên quan phần nào atomic bitwise operator, phần này xem rất ngắn API hiệu quả cao trong kernel để tìm bitmask – hóa ra operation khá phổ biến trong kernel.
 
-Nhiều thuật toán phụ thuộc tìm bitmask thật nhanh; nhiều scheduling algorithm (như `SCHED_FIFO` và `SCHED_RR`, đã học Chương 10, The CPU Scheduler – Part 1, và Chương 11, The CPU Scheduler – Part 2) thường cần bên trong. Triển khai hiệu quả trở nên quan trọng (đặc biệt OS-level code path rất nhạy hiệu năng). Vì vậy như danh sách sau, kernel cung cấp vài API quét bitmask cho trước (prototype trong header `include/linux/find.h`):
+Nhiều thuật toán phụ thuộc tìm bitmask thật nhanh; nhiều scheduling algorithm (như `SCHED_FIFO` và `SCHED_RR`, đã học Chương 10, The CPU Scheduler – Part 1, và Chương 11, The CPU Scheduler – Part 2) thường cần bên trong. Triển khai hiệu quả trở nên quan trọng (đặc biệt OS-level code path rất performance-sensitive). Vì vậy như danh sách sau, kernel cung cấp vài API quét bitmask cho trước (prototype trong header `include/linux/find.h`):
 
 - `unsigned long find_first_bit(const unsigned long *addr, unsigned long size)`: Tìm bit set đầu trong memory region, trả bit number của bit set đầu; nếu không (không bit nào set), trả `@size`.
 
@@ -547,7 +547,7 @@ spin_unlock(mylist_lock);
 
 Vậy vấn đề? Tất nhiên hiệu năng! Hình dung nhiều thread trên multicore system đến code fragment ít nhiều cùng lúc; mỗi thread thử lấy spinlock nhưng chỉ một winner có, duyệt một phần list rồi unlock, cho thread kế tiếp đi. Nói cách khác như mong đợi, execution giờ serialized, rất có thể chậm đi đáng kể. Nhưng có thể nói không tránh được – hay có?
 
-Reader-writer spinlock xuất hiện. Với locking construct này, mọi thread read protected data object phải yêu cầu read lock (shared), còn thread cần write access phải yêu cầu exclusive write lock. Read lock được cấp ngay cho thread hỏi miễn không có write lock hiện dùng. Thực chất construct cho mọi reader concurrent access data, nghĩa thực chất không locking thực sự. Ổn miễn chỉ reader. Ngay khi writer thread đến sẽ yêu cầu write lock. Giờ ngữ nghĩa locking thường áp dụng: writer phải chờ mọi reader unlock. Khi đó writer có exclusive write lock, tiếp tục. Giờ reader hay writer nào thử access đều buộc chờ, spin trên unlock của writer.
+reader-writer spinlock xuất hiện. Với locking construct này, mọi thread read protected data object phải yêu cầu read lock (shared), còn thread cần write access phải yêu cầu exclusive write lock. Read lock được cấp ngay cho thread hỏi miễn không có write lock hiện dùng. Thực chất construct cho mọi reader concurrent access data, nghĩa thực chất không locking thực sự. Ổn miễn chỉ reader. Ngay khi writer thread đến sẽ yêu cầu write lock. Giờ ngữ nghĩa locking thường áp dụng: writer phải chờ mọi reader unlock. Khi đó writer có exclusive write lock, tiếp tục. Giờ reader hay writer nào thử access đều buộc chờ, spin trên unlock của writer.
 
 Vì vậy tình huống data access pattern read rất thường, write hiếm, tức read-mostly, non-blocking critical section khá dài, reader-writer spinlock có vẻ phù hợp. (Có nhược điểm; chính xác gì và thay thế sẽ xem phần sau.)
 
@@ -567,9 +567,9 @@ void read_lock(rwlock_t *lock);
 void write_lock(rwlock_t *lock);
 ```
 
-Ví dụ layer `tty` của kernel có code xử lý Secure Attention Key (SAK). SAK là security feature, cách ngăn credentials hack kiểu Trojan horse; hoạt động bằng kết thúc mọi process gắn với TTY device khi user nhấn SAK (`https://www.kernel.org/doc/html/latest/security/sak.html`).
+Ví dụ layer `tty` của kernel có code xử lý Secure Attention Key (SAK). SAK là security feature, cách ngăn credentials hack Trojan horse-type; hoạt động bằng kết thúc mọi process gắn với TTY device khi user nhấn SAK (`https://www.kernel.org/doc/html/latest/security/sak.html`).
 
-Khi xảy ra (user nhấn SAK, mặc định map qua tính năng magic SysRq của kernel đến tổ hợp `Alt-SysRq-k`), trong code path, SAK code duyệt mọi task, kết thúc toàn session và thread đang mở TTY device. Để làm phải lấy ở read mode reader-writer spinlock dành duyệt task list tên `tasklist_lock`. Code liên quan (cắt bớt) dưới, làm nổi bật `read_[un]lock()` trên `tasklist_lock`:
+Khi xảy ra (user nhấn SAK, mặc định map qua tính năng so-called magic SysRq của kernel đến tổ hợp `Alt-SysRq-k`), trong code path, SAK code duyệt mọi task, kết thúc toàn session và thread đang mở TTY device. Để làm phải lấy ở read mode reader-writer spinlock dành duyệt task list tên `tasklist_lock`. Code liên quan (cắt bớt) dưới, làm nổi bật `read_[un]lock()` trên `tasklist_lock`:
 
 ```
 // drivers/tty/tty_io.c
@@ -595,11 +595,11 @@ nr(p), p->comm);
 
 Trong Chương 6, Kernel Internals Essentials – Processes and Threads, phần Duyệt task list kernel, đề cập module đơn giản trong codebase – `ch6/list_demo` – làm vài operation rất đơn giản trên linked list (tận dụng routine header `list.h` kernel). Tuy nhiên demo giữ đơn giản nên không dùng kernel synchronization construct nào. Tất nhiên hoàn toàn sai; chắc chắn cần bảo vệ critical section khỏi concurrent access (ngăn data race)! Vậy giờ có reader-writer spinlock (cơ bản), hãy bảo vệ.
 
-Code tại `ch13/2_list_demo_rdwrlock`. Về code ngoài usage reader-writer spinlock thực tế, còn đổi khá đáng kể: dùng code `misc` device driver từ companion volume Linux Kernel Programming – Part 2 làm dạng wrapper trên list demo (ở đây dùng cách build nhiều source file: code `misc` driver trong `ch13/2_list_demo_rdwrlock/miscdrv_wrapper.c`, công việc list thực tế trong `ch13/2_list_demo_rdwrlock/list_demo_rdwrlock.c`).
+Code tại `ch13/2_list_demo_rdwrlock`. Code-wise ngoài usage reader-writer spinlock thực tế, còn đổi khá đáng kể: dùng code `misc` device driver từ companion volume Linux Kernel Programming – Part 2 làm dạng wrapper trên list demo (ở đây dùng cách build nhiều source file: code `misc` driver trong `ch13/2_list_demo_rdwrlock/miscdrv_wrapper.c`, công việc list thực tế trong `ch13/2_list_demo_rdwrlock/list_demo_rdwrlock.c`).
 
 Có thể hỏi sao gói demo module `rwlock` trong `misc` driver? Khá hữu ích; nhờ vậy làm I/O – read/write – trên device node (do đó list!) bất cứ lúc muốn. Nếu không chỉ thao tác list trong method `init/cleanup` module qua utility `insmod/rmmod` thường. Theo cách này tùy ý read, nơi code duyệt list, và write, chèn vài node cuối list (dùng wrapper Bash script đơn giản tên `run` làm chính điều này).
 
-Về code đây phần liên quan list manipulation (`ch13/2_list_demo_rdwrlock/list_demo_rdwrlock.c`):
+Code-wise đây phần liên quan list manipulation (`ch13/2_list_demo_rdwrlock/list_demo_rdwrlock.c`):
 
 ```
 [ … ]
@@ -672,13 +672,13 @@ Như spinlock thường có vài variation điển hình reader-writer spinlock 
 
 ### Vấn đề hiệu năng reader-writer spinlock
 
-Thực sự có vấn đề hiệu năng nghiêm trọng. Một vấn đề điển hình đáng tiếc writer có thể starve khi block chờ nhiều reader. Nghĩ xem: giả định chẳng hạn ba reader thread hiện giữ (đã acquire) reader-writer spinlock. Giờ writer đến muốn lock. Tất nhiên phải chờ cả ba reader unlock. Nhưng nếu trong lúc đó thêm reader đến (hoàn toàn có thể)? Thành thảm họa writer, giờ chờ lâu hơn – thực chất rất dễ starve. (Có thể cần instrument/profile kỹ code path hoặc dùng kernel locking statistics (phần tới) để xác định thực sự đúng vậy không.)
+Thực sự có vấn đề hiệu năng nghiêm trọng với reader-writer spinlock. Một vấn đề điển hình đáng tiếc writer có thể starve khi block chờ nhiều reader. Nghĩ xem: giả định chẳng hạn ba reader thread hiện giữ (đã acquire) reader-writer spinlock. Giờ writer đến muốn lock. Tất nhiên phải chờ cả ba reader unlock. Nhưng nếu trong lúc đó thêm reader đến (hoàn toàn có thể)? Thành thảm họa writer, giờ chờ lâu hơn – thực chất rất dễ starve. (Có thể cần instrument/profile kỹ code path hoặc dùng kernel locking statistics (phần tới) để xác định thực sự đúng vậy không.)
 
 Không chỉ vậy cache effect – còn gọi false sharing hay cache ping-pong – có thể và thực sự xảy ra khá thường khi nhiều reader thread trên CPU core khác đọc cùng shared state parallel (khi giữ reader-writer spinlock); thực tế thảo luận phần Tìm hiểu cơ bản CPU caching, cache effect và false sharing sắp tới). Tài liệu kernel chính thức spinlock (`https://www.kernel.org/doc/Documentation/locking/spinlocks.txt`) nói gần như vậy. Trích trực tiếp: “LƯU Ý! reader-writer lock cần nhiều atomic memory operation hơn spinlock đơn giản. Trừ khi reader critical section dài, tốt hơn chỉ dùng spinlock.” Thực tế cộng đồng kernel đang cố loại reader-writer spinlock tối đa, chuyển lock-free technique tốt hơn (như RCU, advanced lock-free technology). Vì vậy dùng reader-writer spinlock vô cớ không được khuyên.
 
 Tài liệu kernel gọn, súc tích về spinlock usage (do chính Linus Torvalds viết), rất đáng đọc, tại: `https://www.kernel.org/doc/Documentation/locking/spinlocks.txt`.
 
-### Reader-writer semaphore
+### reader-writer semaphore
 
 Trước đã nói semaphore object (Chương 12, Kernel Synchronization – Part 1, phần Semaphore và mutex), so mutex. Ở đó hiểu ưu tiên chỉ dùng mutex.
 
@@ -688,7 +688,7 @@ Hoàn tất thảo luận, chỉ đề cập vài synchronization mechanism liê
 
 Rồi có sequence lock; dùng write-mostly (trái reader-write spinlock/semaphore hợp read-mostly), nơi write vượt xa read trên variable được bảo vệ. Như hình dung không quá phổ biến; ví dụ tốt sequence lock là cập nhật global `jiffies_64`.
 
-Giá trị gọi `jiifies` chuyển thành function `get_jiffies_64()`, trên hệ thống 32-bit đọc lượng global data `jiffies_64` 64-bit dưới sequence lock bảo vệ (không dirty read). (Nói hơi đơn giản) global `jiffies_64` được cập nhật – ghi – mỗi timer interrupt. Ai tò mò, update code global `jiffies_64` bắt đầu tại `kernel/time/tick-sched.c:tick_do_update_jiffies64()`. Function xác định có cần update jiffies, nếu có gọi `do_timer(++ticks);` cập nhật thực tế. Suốt đó API `write_seq[un]` `lock(&jiffies_lock);` bảo vệ write-mostly critical section.
+Giá trị gọi so-called `jiifies` chuyển thành function `get_jiffies_64()`, trên hệ thống 32-bit đọc lượng global data `jiffies_64` 64-bit dưới sequence lock bảo vệ (không dirty read). (Nói hơi đơn giản) global `jiffies_64` được cập nhật – ghi – mỗi timer interrupt. Ai tò mò, update code global `jiffies_64` bắt đầu tại `kernel/time/tick-sched.c:tick_do_update_jiffies64()`. Function xác định có cần update jiffies, nếu có gọi `do_timer(++ticks);` cập nhật thực tế. Suốt đó API `write_seq[un]` `lock(&jiffies_lock);` bảo vệ write-mostly critical section.
 
 Tốt; xong reader-writer spinlock, chuyển chủ đề thú vị khác CPU caching và cache effect có thể ảnh hưởng nghiêm trọng hiệu năng code.
 
@@ -731,7 +731,7 @@ Hình 13.5: Sơ đồ khái niệm – thread trên CPU core 1 đọc myarr\[0\]
 
 Lợi ích? Hẳn rõ: access vài phần tử sequential memory tiếp (đến tận byte 63) tăng tốc mạnh vì kiểm tra trong cache trước (L1 rồi L2, L3, khả năng cache hit tăng).
 
-Lý do nhanh hơn (nhiều) đơn giản: access CPU cache memory thường một đến vài nanosecond (một chữ số) (L1 nhanh nhất, nhỏ nhất; Lowest Level Cache (LLC), ở đây L3, chậm nhất và lớn nhất (tương đối)). Access RAM khoảng 50 đến 100 nanosecond (tất nhiên số chính xác phụ thuộc hardware system và số tiền sẵn chi!). Đó tất nhiên toàn mục đích cache: memory gốc được cache chậm hơn cache rất nhiều (nghĩ web browser cache web page).
+Lý do nhanh hơn (nhiều) đơn giản: access CPU cache memory thường một đến vài nanosecond (single-digit) (L1 nhanh nhất, nhỏ nhất; Lowest Level Cache (LLC), ở đây L3, chậm nhất và lớn nhất (tương đối)). Access RAM khoảng 50 đến 100 nanosecond (tất nhiên số chính xác phụ thuộc hardware system và số tiền sẵn chi!). Đó tất nhiên toàn mục đích cache: memory gốc được cache chậm hơn cache rất nhiều (nghĩ web browser cache web page).
 
 Hơn nữa caching tận dụng nguyên tắc locality of reference:
 
@@ -753,7 +753,7 @@ Tuy nhiên có rủi ro, mọi thứ có thể và thực sự sai. Một liên 
 
 Trước hiểu khái niệm then chốt cache coherency. Multicore SMP system có hai CPU core trở lên, mỗi core có private internal cache (và Translation Lookaside Buffer (TLB)). Cache thường theo policy tối ưu read-ahead, write-behind (với main memory, RAM). Nghĩa data tất nhiên đọc vào CPU cache read-ahead (như vừa học, read/write thực sự theo atomic unit cacheline, không byte đơn. Vì vậy read-ahead tối ưu fetch tiếp có thể xảy ra, tận dụng cả spatial và temporal locality of reference, bản thân chỉ nghĩa “memory vừa xử lý có khả năng xử lý lại tương lai gần”, cả không gian (spatial locality) và thời gian (temporal locality)).
 
-Còn write memory? Do cache writeback policy chi phối. Khi data item (variable trong program) sửa (ghi), xử lý trong internal cache local core, không flush đến (unified cache có thể có và) main memory (RAM) đến lúc sau, lại tối ưu hiệu năng; là write-behind policy hoạt động (trái write-through flush ngay).
+Còn write memory? Do cache writeback policy chi phối. Khi data item (variable trong program) sửa (ghi), xử lý trong internal cache local core, không flush đến (unified cache có thể có và) main memory (RAM) đến lúc sau, lại tối ưu hiệu năng; là so-called write-behind policy hoạt động (trái write-through flush ngay).
 
 Lấy ví dụ đơn giản. Multicore SMP system 2 core (như Hình 13.4 khái niệm). Giả sử global integer N trong RAM giá trị 55. Giờ lúc t0.1 (Bảng 13.3), thread trên core #0 muốn sửa giá trị – chẳng hạn 41; giờ hiểu hoạt động bên trong. Giả định CPU cache như Hình 13.4 (L1, L2, shared L3), giá trị N (55) trước đọc RAM (qua bus) vào L3 cache (t0.2), rồi local internal cache (L1/L2) core 0 (t0.3).
 
@@ -763,7 +763,7 @@ Nhưng giờ nếu (t2.1) thread trên core 1 cũng muốn làm cùng data (nh�
 
 Vấn đề giờ rõ: phải đọc giá trị N hiện tại, cộng 1. Nhưng nếu đọc từ RAM (55), stale; giá trị “mới nhất” không 55, là 41 trong internal cache core 0! Vậy thấy có thể data inconsistency khi cùng data item shared giữa các mức system memory hierarchy (ở đây nhiều core, local L1/L2 cache, unified L3 cache, RAM), sửa trong một cache. Là trái tim cache coherency problem. Giữ mọi bản sao data object sync (nhất quán) với main memory là yêu cầu computing đúng; khả năng giữ processor cache và RAM sync gọi cache coherence.
 
-Duy trì CPU cache coherency là một quá trình ngốn điện nhất (nghĩa ảnh hưởng đáng kể hệ thống dùng pin và cả hệ thống khác).
+Duy trì CPU cache coherency là một quá trình power-hungry nhất (nghĩa ảnh hưởng đáng kể hệ thống battery-backed và cả hệ thống khác).
 
 Timeline dọc cho thấy data value example variable N lan qua memory hierarchy trong Bảng 13.3:
 
@@ -783,7 +783,7 @@ Timeline dọc cho thấy data value example variable N lan qua memory hierarchy
 
 Bảng 13.3: Timeline dọc cho thấy data value lan qua memory hierarchy ngay cả operation đơn giản do cần cache coherence
 
-Mô tả từng bước nhiều transaction trong Bảng 13.3 dưới:
+Mô tả step-by-step nhiều transaction trong Bảng 13.3 dưới:
 
 1\. Thời điểm t0.1: Sync (N=55):
 
@@ -809,15 +809,15 @@ Mô tả từng bước nhiều transaction trong Bảng 13.3 dưới:
 
 7\. Trên cache core 1, stale value giờ cập nhật (từ giá trị mới cập nhật trong RAM), xử lý rồi flush lại phản ánh thực tế mới. 8. t3: Phát hiện internal cache core 0 không sync, cập nhật. 9. Giờ giá trị mới đặt, mọi CPU cache coherent với nhau và RAM!
 
-Độc giả tinh ý giờ bắt đầu thấy cache coherence handling rất hay nhưng về hiệu năng (và điện năng) có thể rất tốn! Thực sự thấy ngay cả memory transaction đơn giản (read/write, load/store) trên SMP thường cần nhiều sequence write-invalidate và/hoặc flush chỉ để giữ mọi thứ sync.
+Độc giả tinh ý giờ bắt đầu thấy cache coherence handling rất hay nhưng performance-wise (và power-wise) có thể rất tốn! Thực sự thấy ngay cả memory transaction đơn giản (read/write, load/store) trên SMP thường cần nhiều sequence write-invalidate và/hoặc flush chỉ để giữ mọi thứ sync.
 
 Cache behavior này, write từ cache-to-RAM rồi cần cập nhật RAM-to-cache tương ứng trên core khác, thường gọi “cache bouncing” hay cache “ping-pong”! (Hình 13.7 sắp thấy cho biết vấn đề tệ hơn trên multicore SMP system nhiều core.) Thực sự không tốt hiệu năng/điện năng, chính là điểm truyền đạt. (Đừng lo phần false sharing tiếp đi chi tiết hơn.)
 
-Bên lề thú vị, chính xác hệ thống xử lý cache coherence problem thế nào? Cách điển hình dùng hardware-based cache coherence protocol; có nhiều (snooping hay bus-watching protocol tên MESI, MOESI, Illinois, v.v., rồi directory-based protocol). Chỉ cần nói rất arch-dependent, AMD64/x86\_64 hiện đại và phần lớn ARM processor thường dùng hardware protocol MOESI dựa bus snooping. (Chữ viết tắt các cache state cacheline có thể ở, MOESI là Modified Owned Exclusive Shared Invalid. Protocol về cơ bản phát hiện shared copy trên cache khác qua shared internal bus. Để biết ARM Cortex-A9 dùng MESI.) Một số processor dùng software coherence scheme (thường triển khai sâu trong OS) giữ cache coherent (như MIPS); một số kết hợp hardware/software. Không đi sâu hơn; xem liên kết Đọc thêm.
+Bên lề thú vị, chính xác hệ thống xử lý cache coherence problem thế nào? Cách điển hình dùng hardware-based cache coherence protocol; có nhiều (snooping hay bus-watching protocol tên MESI, MOESI, Illinois, v.v., rồi so-called directory-based protocol). Chỉ cần nói rất arch-dependant, AMD64/x86\_64 hiện đại và phần lớn ARM processor thường dùng hardware protocol MOESI snooping-based. (Chữ viết tắt các cache state cacheline có thể ở, MOESI là Modified Owned Exclusive Shared Invalid. Protocol về cơ bản phát hiện shared copy trên cache khác qua shared internal bus. Để biết ARM Cortex-A9 dùng MESI.) Một số processor dùng software coherence scheme (thường triển khai sâu trong OS) giữ cache coherent (như MIPS); một số kết hợp hardware/software. Không đi sâu hơn; xem liên kết Đọc thêm.
 
 #### Vấn đề false sharing
 
-Cache coherence mechanism có vẻ ít nhất phần nào tốt, giữ memory sync giữa processor core, cache và RAM. Tuy nhiên có thể có trường hợp xấu về hiệu năng/điện năng. Để hiểu vấn đề, xét hai variable khai báo:
+Cache coherence mechanism có vẻ ít nhất phần nào tốt, giữ memory sync giữa processor core, cache và RAM. Tuy nhiên có thể có trường hợp xấu về hiệu năng/power-wise. Để hiểu vấn đề, xét hai variable khai báo:
 
 ```
 u16 ax = 1, bx = 2;
@@ -857,7 +857,7 @@ Thú vị, implementation trước của data structure then chốt memory manag
 
 Đo hiệu năng cẩn thận, so baseline “normal”, giúp thấy outlier, có lẽ nhận ra slowdown do false sharing.
 
-Technical reviewer rất giỏi Chi Thanh Hoang bổ sung dùng processor feature hay bỏ qua nhưng hữu ích – performance measurement counter (PMC) – để tinh chỉnh cache-miss/flush event chắc chắn giúp thu hẹp vấn đề hiệu năng; dùng tool như perf (và eBPF).
+Technical reviewer rất giỏi Chi Thanh Hoang bổ sung dùng processor feature hay bỏ qua nhưng hữu ích – performance measurement counter (PMC) – để fine-tune cache-miss/flush event chắc chắn giúp thu hẹp vấn đề hiệu năng; dùng tool như perf (và eBPF).
 
 Sửa kiểu false sharing thế nào? Dễ: chỉ bảo đảm variable đủ xa nhau để không cùng cacheline (thường chèn dummy padding byte giữa variable). Vậy làm như sau có lẽ ổn (hệ thống cacheline 64-byte):
 
@@ -871,7 +871,7 @@ Compiler không hỗ trợ sao? Tùy; một số khuyên pragma directive (GCC g
 
 Tiếp để thấy còn tệ hơn, xét NUMA system lớn (SMP) có nhiều socket và physical CPU core (có thể threaded) (trình bày NUMA Chương 7, Memory Management Internals – Essentials, phần Tổ chức physical RAM; ví dụ Hình 7.22).
 
-Giờ hình dung multithreaded application trên hệ thống; giả sử spawn một thread mỗi CPU core (kỹ thuật khá phổ biến). Ngay mỗi thread chỉ increment global integer atomically trên NUMA system ấy cũng mất hiệu năng rất lớn (lại rất ngốn điện). Vì sao? Nghĩ: nếu mọi thread, do đó mọi core, thao tác cùng shared data item, dù access synchronize atomic cẩn thận nên an toàn (có lẽ operator `refcount_t` / `atomic_t`), variable vẫn phải cache trong local cache mỗi core khi làm, tất nhiên phải giữ cache coherence giữa mọi core cùng làm data! Có thể gây traffic khổng lồ hai chiều: cache invalidation/flush đến RAM và update từ RAM đến cache core khác làm data! Thú vị ở đây không phải data safety (mối quan tâm chính lâu nay) mà hiệu năng (điện năng). Trớ trêu càng nhiều socket và core, scale càng kém.
+Giờ hình dung multithreaded application trên hệ thống; giả sử spawn một thread mỗi CPU core (kỹ thuật khá phổ biến). Ngay mỗi thread chỉ increment global integer atomically trên NUMA system ấy cũng mất hiệu năng rất lớn (lại rất power-hungry). Vì sao? Nghĩ: nếu mọi thread, do đó mọi core, thao tác cùng shared data item, dù access synchronize atomic cẩn thận nên an toàn (có lẽ operator `refcount_t` / `atomic_t`), variable vẫn phải cache trong local cache mỗi core khi làm, tất nhiên phải giữ cache coherence giữa mọi core cùng làm data! Có thể gây traffic khổng lồ hai chiều: cache invalidation/flush đến RAM và update từ RAM đến cache core khác làm data! Thú vị ở đây không phải data safety (mối quan tâm chính lâu nay) mà hiệu năng (điện năng). Trớ trêu càng nhiều socket và core, scale càng kém.
 
 Paul E. McKenney, trong thuyết trình (What is RCU, Prof Paul E. McKenney, 2013; YouTube video (IISc, Bangalore): `https://www.youtube.com/watch?v=obDzjElRj9c&list=PLIlI4QbmdBqH9-L1QOq6O5Yxt-YVjRsFZ`), thể hiện tình huống:
 
@@ -879,13 +879,13 @@ Paul E. McKenney, trong thuyết trình (What is RCU, Prof Paul E. McKenney, 201
 
 Hình 13.7: Làm shared data trên NUMA system lớn nhiều core, dù bảo đảm data safety, có thể mất hiệu năng lớn (tăng điện năng) do cache coherence/false sharing. Nguồn (c): What is RCU, Prof Paul E. McKenney
 
-Giờ như nói data access có thể atomic nên an toàn, nhưng câu hỏi triệu đô: làm sao thực sự tránh vấn đề hiệu năng (và điện năng)? Lock-free programming technique giúp nhiều, phần tiếp đi chính điều đó.
+Giờ như nói data access có thể atomic nên an toàn, nhưng câu hỏi million-dollar: làm sao thực sự tránh vấn đề hiệu năng (và điện năng)? Lock-free programming technique giúp nhiều, phần tiếp đi chính điều đó.
 
 ## Lock-free programming với per-CPU và RCU
 
 Như học khi thao tác shared writable data, critical section phải bảo vệ cách nào đó. Locking có lẽ công nghệ phổ biến nhất. Tuy nhiên không hồng hoàn toàn vì hiệu năng có thể giảm.
 
-Để thấy khá trực giác, xét vài so sánh thế giới vật lý về lock:
+Để thấy khá trực giác, xét vài so sánh physical-world về lock:
 
 - Một là phễu, ống phễu – “critical section” – chỉ đủ một thread mỗi lần đi qua, không hơn.
 
@@ -905,11 +905,11 @@ Như tên, per-CPU variable giữ bản sao variable, data item đang xét, mộ
 
 (Đại thể tương tự local variable; vì local trên private stack mỗi thread nên không shared giữa thread, không critical section, không cần locking.) Ở đây cũng loại nhu cầu locking – thành lock-free technology!
 
-Nghĩ xem: hệ thống bốn live CPU core thì per-CPU variable về cơ bản array bốn phần tử: phần tử `0` biểu diễn data value CPU đầu, `1` data value CPU core hai, v.v. (xem Hình 13.9). Hiểu vậy sẽ thấy per-CPU variable cũng gần tương tự user-space Pthreads Thread Local Storage (TLS), nơi mỗi thread khi sinh tự nhận bản sao mọi TLS variable đánh dấu keyword `__thread` (còn hơn thế; tham khảo Hands-On System Programming with Linux để chi tiết). Ở đó và đây với per-CPU variable, hẳn rõ thường chỉ nên dùng per-CPU cho data item nhỏ. Vì data item được tái tạo (copy) một instance mỗi CPU core (hệ thống cao cấp vài trăm, thậm chí nghìn core, overhead tăng). Lại có trade-off: khả năng lock-free đổi thêm RAM usage.
+Nghĩ xem: hệ thống bốn live CPU core thì per-CPU variable về cơ bản array bốn phần tử: phần tử `0` biểu diễn data value CPU đầu, `1` data value CPU core hai, v.v. (xem Hình 13.9). Hiểu vậy sẽ thấy per-CPU variable cũng gần tương tự user-space Pthreads Thread Local Storage (TLS), nơi mỗi thread khi sinh tự nhận bản sao mọi TLS variable đánh dấu keyword `__thread` (còn hơn thế; tham khảo Hands-On System Programming with Linux để chi tiết). Ở đó và đây với per-CPU variable, hẳn rõ thường chỉ nên dùng per-CPU cho data item nhỏ. Vì data item được tái tạo (copy) một instance mỗi CPU core (hệ thống high-end vài trăm, thậm chí nghìn core, overhead tăng). Lại có trade-off: khả năng lock-free đổi thêm RAM usage.
 
 Tóm lược, per-CPU variable tốt tăng hiệu năng time-sensitive code path vì:
 
-- Tránh lock tốn kém, phá hiệu năng.
+- Tránh lock tốn kém, performance-busting.
 
 - Access và thao tác per-CPU variable cho trước bảo đảm luôn trên CPU core nhất định; cùng thực tế không bao giờ shared, loại cache effect tốn như cache ping-pong/false sharing (phần Tìm hiểu cơ bản CPU caching, cache effect và false sharing). Cũng giảm điện năng.
 
@@ -931,7 +931,7 @@ Tiếp cận helper API và macro (method) per-CPU data bằng chia hai phần. 
 
 ##### Allocate, initialize và free per-CPU variable
 
-Nhìn chung hai loại per-CPU variable: statically và dynamically allocated. Statically allocated được cấp memory ngay compile time, thường qua macro `DEFINE_PER_CPU()` hay `DECLARE_PER_CPU()`. Dùng loại `DEFINE` cho allocate/initialize một lần. Ví dụ allocate integer đơn lẻ tên `pcpa` như per-CPU variable; tự khởi tạo 0:
+Nhìn chung hai loại per-CPU variable: statically và dynamically allocated. Statically allocated per-CPU variable được cấp memory ngay compile time, thường qua macro `DEFINE_PER_CPU()` hay `DECLARE_PER_CPU()`. Dùng loại `DEFINE` cho allocate/initialize một lần. Ví dụ allocate integer đơn lẻ tên `pcpa` như per-CPU variable; auto-initialized 0:
 
 ```
 #include <linux/percpu.h>
@@ -962,7 +962,7 @@ Như học resource-managed API variant `devm_*()` cho phép (thường khi vi�
 
 Câu hỏi then chốt tất nhiên chính xác access/load (read) và update/store (write) per-CPU variable thế nào? Kernel cung cấp nhiều helper routine; dùng ví dụ đơn giản hiểu.
 
-Định nghĩa statically một integer per-CPU variable, sau muốn access/in giá trị hiện tại. Nên hiểu vì per-CPU, giá trị lấy tự tính dựa (hay index) CPU core code hiện chạy; nói cách khác code sau chạy core `1` thì thực chất fetch `pcpa[1]` (không chính xác vậy; chỉ khái niệm nhưng hiểu ý). Vậy định nghĩa statically integer per-CPU variable tên `pcpa` (tự khởi tạo 0):
+Định nghĩa statically một integer per-CPU variable, sau muốn access/in giá trị hiện tại. Nên hiểu vì per-CPU, giá trị lấy auto-calculated dựa (hay index) CPU core code hiện chạy; nói cách khác code sau chạy core `1` thì thực chất fetch `pcpa[1]` (không chính xác vậy; chỉ khái niệm nhưng hiểu ý). Vậy định nghĩa statically integer per-CPU variable tên `pcpa` (auto-initialized 0):
 
 ```
 DEFINE_PER_CPU(int, pcpa);
@@ -1037,11 +1037,11 @@ Tương tự kernel cung cấp routine làm pointer đến variable cần per-CP
 
 #### Per-CPU – kernel module ví dụ
 
-Buổi thực hành sample per-CPU demo kernel module chắc chắn giúp học lock-free technology mạnh (code `ch13/3_lockfree/percpu`). Ở đây định nghĩa/dùng hai per-CPU variable:
+Buổi hands-on sample per-CPU demo kernel module chắc chắn giúp học lock-free technology mạnh (code `ch13/3_lockfree/percpu`). Ở đây định nghĩa/dùng hai per-CPU variable:
 
-- Per-CPU integer statically allocated/initialized
+- per-CPU integer statically allocated/initialized
 
-- Per-CPU data structure dynamically allocated
+- per-CPU data structure dynamically allocated
 
 Cách thú vị minh họa per-CPU variable: cho demo kernel module spawn vài kernel thread (kthread). Gọi `thrd_0`, `thrd_1`. Hơn nữa khi tạo xong, dùng CPU affinity mask feature task structure qua API `sched_setaffinity()` để affine kernel thread `thrd_0` trên CPU `0`, `thrd_1` trên CPU `1` (nên chỉ được schedule trên các core này; tất nhiên phải test trên hệ thống (VM/native) ít nhất hai CPU core).
 
@@ -1157,9 +1157,9 @@ Hãy chú ý module của chúng ta đã hoàn thành công việc như thế n�
 
 Trong vài dòng output cuối ở Hình 13.10, bạn có thể thấy tổng hợp giá trị của các per-CPU data variable trên CPU `0` và CPU `1` (cũng như trên các core còn lại; chúng ta hiển thị chúng qua function `disp_our_percpu_vars()`). Rõ ràng, đối với per-CPU integer `pcpa` (cũng như các member `rx` và `tx` của data structure `pcp_ctx`), các giá trị khác nhau đúng như mong đợi mà không có explicit locking.
 
-Kernel module vừa trình bày sử dụng macro `for_each_online_cpu(i)` để hiển thị giá trị của các per-CPU variable trên từng online CPU. Tuy nhiên, nếu chẳng hạn VM có sáu CPU nhưng bạn chỉ muốn hai CPU “hoạt động” lúc runtime thì sao? Có nhiều cách thực hiện: một cách là truyền parameter `maxcpus=n` cho kernel của hệ thống khi boot; cách khác là thao tác pseudofile `/sys/devices/system/cpu/cpuN/online` (root có quyền ghi), trong đó N là số CPU core (giá trị này thường mặc định là 1, nghĩa là core đang online; ghi 0 vào đó với quyền root sẽ đưa core về offline, mặc dù không thể làm vậy với CPU core 0).
+Kernel module vừa trình bày sử dụng macro `for_each_online_cpu(i)` để hiển thị giá trị của các per-CPU variable trên từng online CPU. Tuy nhiên, nếu chẳng hạn VM có sáu CPU nhưng bạn chỉ muốn hai CPU “hoạt động” lúc runtime thì sao? Có nhiều cách thực hiện: một cách là truyền parameter `maxcpus=n` cho kernel của hệ thống khi boot; cách khác là thao tác pseudofile `/sys/devices/system/cpu/cpuN/online` (root-writable), trong đó N là số CPU core (giá trị này thường mặc định là 1, nghĩa là core đang online; ghi 0 vào đó với quyền root sẽ đưa core về offline, mặc dù không thể làm vậy với CPU core 0).
 
-#### Sử dụng per-CPU trong kernel
+#### Sử dụng Per-CPU trong kernel
 
 Per-CPU variable được sử dụng khá nhiều trong Linux kernel; hãy xem hai trường hợp sử dụng khá thú vị.
 
@@ -1180,7 +1180,7 @@ static __always_inline struct task_struct *get_current(void)
 
 Macro `DECLARE_PER_CPU()` khai báo variable tên `current_task` là per-CPU variable có type `struct task_struct *`. Inline function `get_current()` (là phần triển khai current trên x86) gọi helper `this_cpu_read_stable()` trên per-CPU variable này, qua đó đọc giá trị của `current` trên CPU core mà nó đang chạy (đọc comment tại `https://elixir.bootlin.com/linux/v6.1.25/source/arch/x86/include/asm/percpu.h#L214` để biết chi tiết về routine này).
 
-Nhân tiện, giờ đã hiểu cách lấy (đọc) giá trị (per-CPU) của `current`, một câu hỏi thường gặp xuất hiện: per-CPU variable `current_task` được cập nhật ở đâu? Hãy nghĩ xem: kernel phải thay đổi (cập nhật) `current` mỗi khi context-switch sang task khác. Chính xác là như vậy – nó thực sự được cập nhật trong context-switching code; trên x86, vị trí đó là: `arch/x86/kernel/process_64.c:__switch_to()` `https://elixir.bootlin.com/linux/v6.1.25/source/arch/x86/kernel/process_64.c#L558`:
+Nhân tiện, giờ đã hiểu cách lấy (đọc) giá trị (per-CPU) của `current`, một câu hỏi thường gặp xuất hiện: per-CPU variable `current_task` được cập nhật ở đâu? Hãy nghĩ xem: kernel phải thay đổi (cập nhật) `current` mỗi khi context-switches sang task khác. Chính xác là như vậy – nó thực sự được cập nhật trong context-switching code; trên x86, vị trí đó là: `arch/x86/kernel/process_64.c:__switch_to()` `https://elixir.bootlin.com/linux/v6.1.25/source/arch/x86/kernel/process_64.c#L558`:
 
 ```
 __no_kmsan_checks
@@ -1195,7 +1195,7 @@ __switch_to(struct task_struct *prev_p, struct task_struct *next_p)
 
 ##### Sử dụng per-CPU data trên network receive path
 
-Một trường hợp sử dụng per-CPU data thú vị khác nằm sâu trong kernel network stack. Nói thật đơn giản, khi nhận được network packet qua hardware interrupt, packet thường được DMA vào memory của kernel (tức network device driver). Cơ chế được gọi là bottom-half, network receive `softirq`, sau đó tiếp quản việc xử lý, đẩy packet lên protocol stack (đến các layer cao hơn). Rất lâu trước đây (tức hàng thập kỷ), nó enqueue các packet trên receive path vào một global data structure. Tất nhiên điều này tạo ra performance bottleneck rất lớn; phải bảo vệ truy cập structure này bằng lock (spinlock); contention có thể tăng cao và performance liên tục giảm (đặc biệt trên hệ thống cao cấp có nhiều core và network adapter đồng thời xử lý network packet).
+Một trường hợp sử dụng per-CPU data thú vị khác nằm sâu trong kernel network stack. Nói thật đơn giản, khi nhận được network packet qua hardware interrupt, packet thường được DMA vào memory của kernel (tức network device driver). Cơ chế so-called bottom-half, network receive `softirq`, sau đó tiếp quản việc xử lý, đẩy packet lên protocol stack (đến các layer cao hơn). Rất lâu trước đây (tức hàng thập kỷ), nó enqueue các packet trên receive path vào một global data structure. Tất nhiên điều này tạo ra performance bottleneck rất lớn; phải bảo vệ truy cập structure này bằng lock (spinlock); contention có thể tăng cao và performance liên tục giảm (đặc biệt trên hệ thống higher-end có nhiều core và network adapter đồng thời xử lý network packet).
 
 Nhận ra điều này, các networking developer chuyển sang sử dụng per-CPU data cho data structure của global receive queue (tên là `softnet_data`). Vì vậy giờ nó có dạng sau:
 
@@ -1232,11 +1232,11 @@ Tốt lắm! Bây giờ hãy chuyển sang tìm hiểu một công nghệ lock-f
 
 RCU là công nghệ synchronization lock-free cho phép reader chạy đồng thời với writer. Nó được merge vào Linux kernel từ tháng 10 năm 2002.
 
-Theo cách truyền thống, hay trước khi có RCU, khi làm việc với chẳng hạn một global linked list hoặc tree data structure lớn (rất thường gặp trong kernel), kernel developer (và/hoặc driver developer) sử dụng spinlock hoặc reader-writer (spin)lock để xử lý vấn đề concurrency. Tuy nhiên, như đã học, những lock này có thể nhanh chóng trở nên rất tốn kém, gây performance bottleneck lớn cũng như tiêu thụ nhiều điện năng, đặc biệt trên hệ thống (NUMA) cao cấp (thực sự có hàng nghìn core!). Vì vậy, dù vẫn hoạt động, performance ngày càng tệ; nói cách khác, nó không scalable (RCU đã trở thành giải pháp thay thế lý tưởng cho reader-writer lock).
+Theo cách truyền thống, hay trước khi có RCU, khi làm việc với chẳng hạn một global linked list hoặc tree data structure lớn (rất thường gặp trong kernel), kernel developer (và/hoặc driver developer) sử dụng spinlock hoặc reader-writer (spin)lock để xử lý vấn đề concurrency. Tuy nhiên, như đã học, những lock này có thể nhanh chóng trở nên rất tốn kém, gây performance bottleneck lớn cũng như tiêu thụ nhiều điện năng, đặc biệt trên hệ thống (NUMA) high-end (thực sự có hàng nghìn core!). Vì vậy, dù vẫn hoạt động, performance ngày càng tệ; nói cách khác, nó không scalable (RCU đã trở thành giải pháp thay thế lý tưởng cho reader-writer lock).
 
 Với RCU, các reader có thể chạy song song với nhau cùng với writer (hoặc updater). Reader thread không cần lock. Đúng vậy, không có thao tác acquire/release lock, không có atomic instruction, không cập nhật shared memory và không có memory barrier (ngoại trừ processor DEC Alpha cần memory barrier). Vì chính những thao tác này thường làm giảm performance, loại bỏ nhu cầu sử dụng chúng khiến RCU rất nhanh và có giá trị.
 
-Tuy nhiên, hãy chờ một chút – cách tiếp cận “không có lock” này không áp dụng được cho writer (updater); chúng vẫn cần được bảo vệ khỏi nhau (thường bằng spinlock). Nhưng việc reader không bao giờ cần locking đơn giản hóa đáng kể thiết kế và nhờ đó có thể giảm mạnh khả năng deadlock. Giờ chúng ta nhận ra RCU rất xuất sắc và được thiết kế để cung cấp synchronization trong các tình huống read-mostly, vốn rất nhiều trong kernel! (Theo quy tắc kinh nghiệm, hãy dùng RCU khi read chiếm từ 90% workload trở lên so với write).
+Tuy nhiên, hãy chờ một chút – cách tiếp cận “không có lock” này không áp dụng được cho writer (updater); chúng vẫn cần được bảo vệ khỏi nhau (thường bằng spinlock). Nhưng việc reader không bao giờ cần locking đơn giản hóa đáng kể thiết kế và nhờ đó có thể giảm mạnh khả năng deadlock. Giờ chúng ta nhận ra RCU rất xuất sắc và được thiết kế để cung cấp synchronization trong các tình huống read-mostly, vốn rất nhiều trong kernel! (Theo thumb-rule, hãy dùng RCU khi read chiếm từ 90% workload trở lên so với write).
 
 Ngoài ra, xét kỹ thuật hơn, RCU hoạt động tốt nhất trong tình huống read-mostly và khi việc đọc data không nhất quán (hoặc stale) không quá quan trọng với reader. Data càng cần “nhất quán”, và càng dành nhiều thời gian cập nhật, RCU càng ít hữu ích. (Nếu muốn hình dung trực quan, bạn có thể xem trước Hình 13.19).
 
@@ -1250,25 +1250,25 @@ Chúng ta tiếp cận chủ đề ở ba “cấp độ”, từ giải thích 
 
 ##### Giải thích RCU Cấp độ 1 (không có code, chỉ có khái niệm và rất đơn giản)
 
-Sau đây là giải thích RCU Cấp độ 1 từng bước; lúc này đừng lo về chi tiết – phần tiếp theo sẽ có các sơ đồ minh họa những khái niệm này:
+Sau đây là giải thích RCU Cấp độ 1 step-by-step; lúc này đừng lo về chi tiết – phần tiếp theo sẽ có các sơ đồ minh họa những khái niệm này:
 
-1\. Các RCU reader (hay subscriber) thread có thể đọc shared writable data object song song mà không bị áp đặt locking; điều này khiến RCU rất nhẹ và rất nhanh (và phù hợp với tình huống read-mostly)! 2. Khi một writer (hay publisher hoặc updater) thread xuất hiện, nó không phải thực hiện RCU locking. Việc nó phải làm là tạo bản sao của data object – object dùng chung đang được thao tác đồng thời – và làm việc trên bản sao đó. Tuy nhiên, lưu ý writer phải tự bảo vệ khỏi concurrent access, tránh giẫm chân nhau (thường dùng spinlock để serialize chúng). 3. Các reader có sẵn – chạy trước khi writer xuất hiện – tiếp tục đọc data object “cũ”; đó là góc nhìn thực tế của chúng và điều đó hoàn toàn ổn. Writer và mọi reader “mới” sau đó (chạy sau khi writer xuất hiện) chỉ làm việc trên data object “mới”, góc nhìn thực tế của chúng! (Vậy ai có góc nhìn thực tế “đúng”? Cả hai. Khá giống vật lý lượng tử pha metaverse, phải không?) 4. Writer giờ cập nhật (ghi vào và do đó sửa đổi) data object mới được sao chép đang xét, thay đổi nó. Các reader có sẵn tiếp tục làm việc song song trên object cũ. 5. Writer hoàn thành công việc và cập nhật data object pointer (cũ) một cách atomic để trỏ đến object mới, bảo đảm nó và mọi reader sau đó sẽ thấy phiên bản mới đã cập nhật. Lưu ý các reader có sẵn vẫn tiếp tục làm việc (đọc) từ data object cũ song song. 6. Khi tất cả RCU reader có sẵn hoàn tất việc đọc, writer hủy (free) data object cũ.
+1\. Các RCU reader (hay subscriber) thread có thể đọc shared writable data object song song mà không bị áp đặt locking; điều này khiến RCU rất nhẹ và rất nhanh (và phù hợp với tình huống read-mostly)! 2. Khi một writer (hay publisher hoặc updater) thread xuất hiện, nó không phải thực hiện RCU locking. Việc nó phải làm là tạo bản sao của data object – object dùng chung đang được thao tác đồng thời – và làm việc trên bản sao đó. Tuy nhiên, lưu ý writer phải tự bảo vệ khỏi concurrent access, tránh giẫm chân nhau (thường dùng spinlock để serialize chúng). 3. Các reader pre-existing – chạy trước khi writer xuất hiện – tiếp tục đọc data object “cũ”; đó là góc nhìn thực tế của chúng và điều đó hoàn toàn ổn. Writer và mọi reader “mới” sau đó (chạy sau khi writer xuất hiện) chỉ làm việc trên data object “mới”, góc nhìn thực tế của chúng! (Vậy ai có góc nhìn thực tế “đúng”? Cả hai. Khá giống vật lý lượng tử pha metaverse, phải không?) 4. Writer giờ cập nhật (ghi vào và do đó sửa đổi) data object mới được sao chép đang xét, thay đổi nó. Các reader pre-existing tiếp tục làm việc song song trên object cũ. 5. Writer hoàn thành công việc và cập nhật data object pointer (cũ) một cách atomic để trỏ đến object mới, bảo đảm nó và mọi reader sau đó sẽ thấy phiên bản mới đã cập nhật. Lưu ý các reader pre-existing vẫn tiếp tục làm việc (đọc) từ data object cũ song song. 6. Khi tất cả RCU reader pre-existing hoàn tất việc đọc, writer hủy (free) data object cũ.
 
-Và công việc đã xong, (phần lớn) lock-free. Phần duy nhất không lock-free là khi có nhiều writer; chúng phải serialize với nhau bằng spinlock. Nhưng hãy nghĩ xem – theo định nghĩa, chúng ta dùng RCU trong tình huống chủ yếu là read; vì thế writer chiếm tỷ lệ rất nhỏ trong tổng thời gian, khiến phần lớn hoạt động là lock-free.
+Và công việc đã xong, (phần lớn) lock-free. Phần duy nhất không lock-free là khi có nhiều writer; chúng phải serialize với nhau bằng spinlock. Nhưng hãy nghĩ xem – theo định nghĩa, chúng ta dùng RCU trong tình huống mostly-read; vì thế writer chiếm tỷ lệ rất nhỏ trong tổng thời gian, khiến phần lớn hoạt động là lock-free.
 
 ##### Giải thích RCU Cấp độ 2 (không có code, chỉ có khái niệm và nhiều chi tiết hơn)
 
-Sau đây là giải thích RCU Cấp độ 2 từng bước:
+Sau đây là giải thích RCU Cấp độ 2 step-by-step:
 
 1\. Các RCU reader (hay subscriber) tiếp tục không bị cản trở, song song với nhau; không có locking dưới bất kỳ dạng nào, không có atomic operation, thậm chí không có memory barrier (có một ngoại lệ: processor DEC Alpha cần memory barrier). Đây chính là mục đích của RCU: sử dụng trong tình huống chủ yếu là read, giữ cho read song song và nhanh. Hãy xét data structure mẫu `struct X`, với pointer trỏ đến nó (`ptr_x`); Hình 13.11 cho thấy nó được nhiều RCU reader chạy trên các core khác nhau truy cập đồng thời để đọc:
 
 ![Hình 13.11](images/ch13/fig13-11.jpg)
 
-Hình 13.11: Một vài RCU reader chạy read-side critical section song song; không cần locking! Code trong read-side critical section (các đường mũi tên kép) cần non-blocking
+Hình 13.11: Một vài RCU reader chạy read-side critical section song song; không cần locking! Code trong read-side critical section (các đường double-arrow) cần non-blocking
 
 Tuy nhiên, hãy lưu ý: mặc định các RCU read-side critical section này cần atomic và non-blocking; chúng chạy với kernel preemption bị disable (giống như per-CPU critical section). Ngoài ra, như sơ đồ cho thấy, nhiều RCU reader có thể chạy tuần tự trên cùng một core (trường hợp reader 3 và 4 ở đây trên core 2).
 
-Bạn đọc bản sách in có thể tìm thấy tất cả sơ đồ màu của sách tại đây: `https://packt.link/gbp/9781803232225`.
+Bạn đọc Hard-copy có thể tìm thấy tất cả sơ đồ màu của sách tại đây: `https://packt.link/gbp/9781803232225`.
 
 2\. Một writer (hay publisher hoặc updater) thread xuất hiện. Nó cũng tiếp tục, nhưng việc đầu tiên nó làm là tạo bản sao của data object đang xét! (Bạn có thể xem trước Hình 13.14, tại vòng tròn (đỏ) có số `1` bên trong.)
 
@@ -1278,11 +1278,11 @@ Hình 13.12: Một writer thread xuất hiện và tạo bản sao của data ob
 
 Tuy nhiên, lưu ý rằng nhiều writer đồng thời phải tự bảo vệ khỏi concurrent access, tránh giẫm chân nhau (thường dùng spinlock để serialize chúng).
 
-3\. Các RCU reader có sẵn (hay “cũ”) tiếp tục làm việc trên data object cũ (RCU reader 1, 2 và 3); writer và mọi reader “mới” sau đó (RCU reader 4) chỉ làm việc trên data object “mới”. Nhờ vậy chúng không xung đột, không có data race và mỗi bên thấy phiên bản thực tế của mình! 4. Writer giờ cập nhật (ghi vào và do đó sửa đổi) data object đang xét, thay đổi nó. Các reader có sẵn tiếp tục làm việc song song trên object cũ. (Xem Hình 13.14 và vòng tròn (đỏ) có số 2 bên trong.) 5. Writer hoàn thành công việc và cập nhật pointer một cách atomic để trỏ đến object mới, bảo đảm nó và mọi reader sau đó (như RCU reader 4 và 5 trong Hình 13.13) sẽ thấy phiên bản mới đã cập nhật. Lưu ý các reader có sẵn tiếp tục làm việc (đọc) từ data object cũ song song. (Xem Hình 13.14 và vòng tròn (đỏ) có số 3 bên trong.)
+3\. Các RCU reader pre-existing (hay “cũ”) tiếp tục làm việc trên data object cũ (RCU reader 1, 2 và 3); writer và mọi reader “mới” sau đó (RCU reader 4) chỉ làm việc trên data object “mới”. Nhờ vậy chúng không xung đột, không có data race và mỗi bên thấy phiên bản thực tế của mình! 4. Writer giờ cập nhật (ghi vào và do đó sửa đổi) data object đang xét, thay đổi nó. Các reader pre-existing tiếp tục làm việc song song trên object cũ. (Xem Hình 13.14 và vòng tròn (đỏ) có số 2 bên trong.) 5. Writer hoàn thành công việc và cập nhật pointer một cách atomic để trỏ đến object mới, bảo đảm nó và mọi reader sau đó (như RCU reader 4 và 5 trong Hình 13.13) sẽ thấy phiên bản mới đã cập nhật. Lưu ý các reader pre-existing tiếp tục làm việc (đọc) từ data object cũ song song. (Xem Hình 13.14 và vòng tròn (đỏ) có số 3 bên trong.)
 
 ![Hình 13.13](images/ch13/fig13-13.jpg)
 
-Hình 13.13: Các RCU reader có sẵn (1 đến 3) tham chiếu thực tế cũ; writer và reader mới (4 và 5) thấy thực tế mới. Ai đúng? Cả hai đều đúng (có cảm giác “lượng tử”, phải không?)
+Hình 13.13: Các RCU reader pre-existing (1 đến 3) tham chiếu thực tế cũ; writer và reader mới (4 và 5) thấy thực tế mới. Ai đúng? Cả hai đều đúng (có cảm giác “lượng tử”, phải không?)
 
 Trước khi tiếp tục, có một vài quy tắc quan trọng cần tuân thủ và một định nghĩa cần nêu:
 
@@ -1290,9 +1290,9 @@ Trước khi tiếp tục, có một vài quy tắc quan trọng cần tuân th�
 
 - Quy tắc 2: Cũng như mọi synchronization hoặc locking primitive khác, chỉ được truy cập data object được lock bảo vệ khi đang giữ lock. Vì vậy, với RCU read, bạn chỉ được đọc data object khi ở trong RCU read-side critical section và cập nhật (ghi) chúng khi ở trong RCU write-side critical section. Ngay khi reader rời read-side critical section (đừng lo, chúng ta sẽ đến cách định nghĩa chính xác nó), nó được xem là đã đi vào quiescent state. Mọi read thực hiện bên ngoài RCU read-side critical section, nói cách khác khi ở quiescent state, đều không được phép và bị xem là không hợp lệ.
 
-- RCU Grace Period (GP): Khoảng thời gian mà mọi reader thread đều đã đi qua ít nhất một quiescent state. Thực chất, đây là khoảng thời gian mà sau đó bảo đảm không còn reader có sẵn nào (vì khi ở quiescent state, theo định nghĩa chúng ở ngoài read-side critical section). Writer cần biết điều này (chúng ta sẽ thấy ngay lý do).
+- RCU Grace Period (GP): Khoảng thời gian mà mọi reader thread đều đã đi qua ít nhất một quiescent state. Thực chất, đây là khoảng thời gian mà sau đó bảo đảm không còn reader pre-existing nào (vì khi ở quiescent state, theo định nghĩa chúng ở ngoài read-side critical section). Writer cần biết điều này (chúng ta sẽ thấy ngay lý do).
 
-6\. Tất nhiên writer phải free object cũ (thực chất hủy nó và ngăn memory leak), nhưng không được làm vậy cho đến khi bảo đảm mọi reader có sẵn đã hoàn thành RCU read-side critical section. Làm vậy sẽ gây bug UAF (Use After Free) sau đó! Thực tế, với RCU, giờ nó được đặt tên là bug UAFBR (UAF by RCU); các bug như vậy có thể dẫn đến lỗ hổng có thể khai thác, nên hãy cẩn thận! (Nhân tiện, một vấn đề bảo mật gần đây tên StackRot (tháng 6 năm 2023) dựa trên chính lỗ hổng này: `https://github.com/lrh2000/StackRot#stackrot-cve-2023-3269-linux-kernel-privilege-escalation-vulnerability.)`
+6\. Tất nhiên writer phải free object cũ (thực chất hủy nó và ngăn memory leak), nhưng không được làm vậy cho đến khi bảo đảm mọi reader pre-existing đã hoàn thành RCU read-side critical section. Làm vậy sẽ gây bug UAF (Use After Free) sau đó! Thực tế, với RCU, giờ nó được đặt tên là bug UAFBR (UAF by RCU); các bug như vậy có thể dẫn đến lỗ hổng có thể khai thác, nên hãy cẩn thận! (Nhân tiện, một vấn đề bảo mật gần đây tên StackRot (tháng 6 năm 2023) dựa trên chính lỗ hổng này: `https://github.com/lrh2000/StackRot#stackrot-cve-2023-3269-linux-kernel-privilege-escalation-vulnerability.)`
 
 Trở lại vấn đề: writer chờ một RCU grace period (hay GP) rồi free object cũ! (Xem Hình 13.14, với các vòng tròn (đỏ) có số 4 và 5 tương ứng. Bạn có thể tự hỏi chính xác writer biết một GP đã trôi qua bằng cách nào. Phần tiếp theo sẽ trình bày; lúc này cứ tin như vậy.)
 
@@ -1300,9 +1300,9 @@ Trở lại vấn đề: writer chờ một RCU grace period (hay GP) rồi free
 
 Hình 13.14: Sau khi cập nhật data object, writer chờ một RCU GP (đến đường thẳng đứng đậm), rồi free object cũ; các reader sau đó làm việc trên data object mới. Các vòng tròn (đỏ) có số bên trong thể hiện các bước của writer
 
-Giờ từ những gì đã học về CPU scheduling, bạn sẽ nhận ra mọi thread cuối cùng đều context-switch khỏi processor vì một lý do nào đó. Ở đây, các RCU reader thread có sẵn thực hiện read theo cách non-blocking và tất nhiên đến một lúc nào đó sẽ đọc xong. Tại thời điểm này, vì đã xong, hoặc có thể muộn hơn một chút, chúng thực hiện context switch. Trong Hình 13.14, vòng tròn (xanh lá) có dấu chéo (chữ X bên trong) biểu thị context switch mà mọi RCU reader có sẵn (và có thể cả reader mới) cuối cùng đều thực hiện.
+Giờ từ những gì đã học về CPU scheduling, bạn sẽ nhận ra mọi thread cuối cùng đều context-switch khỏi processor vì một lý do nào đó. Ở đây, các RCU reader thread pre-existing thực hiện read theo cách non-blocking và tất nhiên đến một lúc nào đó sẽ đọc xong. Tại thời điểm này, vì đã xong, hoặc có thể muộn hơn một chút, chúng thực hiện context switch. Trong Hình 13.14, vòng tròn (xanh lá) có dấu chéo (chữ X bên trong) biểu thị context switch mà mọi RCU reader pre-existing (và có thể cả reader mới) cuối cùng đều thực hiện.
 
-Thời điểm tất cả RCU reader cũ (có sẵn) (ở đây là 1 đến 3) hoàn tất và context-switch khỏi core được thể hiện bằng đường thẳng đứng đậm. (Trong ví dụ cụ thể này, ngay cả RCU reader mới 4 cũng đã hoàn tất và context-switch; điều này có thể xảy ra. Tuy nhiên, lưu ý nó đang đọc object mới.) Tại thời điểm này, khi một RCU GP đã trôi qua – thời điểm RCU reader có sẵn cuối cùng context-switch khỏi core – writer free data object cũ. Từ giờ, mọi RCU reader và writer sau đó sẽ làm việc trên data object “mới” (rồi sẽ sớm trở thành object “cũ” khi toàn bộ quá trình lặp lại). Công việc đã xong!
+Thời điểm tất cả RCU reader cũ (pre-existing) (ở đây là 1 đến 3) hoàn tất và context-switch khỏi core được thể hiện bằng đường thẳng đứng đậm. (Trong ví dụ cụ thể này, ngay cả RCU reader mới 4 cũng đã hoàn tất và context-switched; điều này có thể xảy ra. Tuy nhiên, lưu ý nó đang đọc object mới.) Tại thời điểm này, khi một RCU GP đã trôi qua – thời điểm RCU reader pre-existing cuối cùng context-switches khỏi core – writer free data object cũ. Từ giờ, mọi RCU reader và writer sau đó sẽ làm việc trên data object “mới” (rồi sẽ sớm trở thành object “cũ” khi toàn bộ quá trình lặp lại). Công việc đã xong!
 
 Vậy giờ có thể thấy: reader (R) chạy thực sự song song, hoàn toàn không bị can thiệp, kể cả từ writer (khiến RCU cực kỳ nhẹ và nhanh). Writer có thể – song song với reader – sửa đổi data bằng cách tạo bản sao (C) của data object, cập nhật (U) bản sao, rồi (khi an toàn) free object gốc và thay thế bằng bản sao. Vì thế có thuật ngữ RCU.
 
@@ -1363,19 +1363,19 @@ Hơn nữa, khi RCU phát triển, kernel cung cấp các API chuyên biệt đ�
 
 - `list_replace_rcu(old, new)`: Thay entry cũ bằng entry mới
 
-Tương tự, kernel cung cấp nhiều helper cho RCU-protected queue và tree. (Hãy nhớ lời đề nghị đọc các comment ở cấp code; chúng rất hay.)
+Tương tự, kernel cung cấp nhiều helper cho RCU-protected queue và tree. (Hãy nhớ lời đề nghị đọc các comment code-level; chúng rất hay.)
 
 Vì bước 3 và 4 giống hệt những gì đã trình bày ở phần trước (Giải thích RCU Cấp độ 2 (không có code, chỉ có khái niệm và nhiều chi tiết hơn)), chúng ta không lặp lại không cần thiết ở đây mà chuyển thẳng đến bước 5 và 6 còn lại.
 
-5\. Writer hoàn tất các cập nhật (xem Hình 13.14 và vòng tròn (đỏ) có số 2 bên trong); sau đó cập nhật data object pointer một cách atomic thành địa chỉ data object mới (xem Hình 13.14 và vòng tròn (đỏ) có số 3 bên trong), bảo đảm nó và mọi reader sau đó (như RCU reader 4 và 5 trong Hình 13.14) sẽ thấy phiên bản mới đã cập nhật. Lưu ý mọi reader có sẵn vẫn tiếp tục đọc song song từ data object cũ.
+5\. Writer hoàn tất các cập nhật (xem Hình 13.14 và vòng tròn (đỏ) có số 2 bên trong); sau đó cập nhật data object pointer một cách atomic thành địa chỉ data object mới (xem Hình 13.14 và vòng tròn (đỏ) có số 3 bên trong), bảo đảm nó và mọi reader sau đó (như RCU reader 4 và 5 trong Hình 13.14) sẽ thấy phiên bản mới đã cập nhật. Lưu ý mọi reader pre-existing vẫn tiếp tục đọc song song từ data object cũ.
 
-Để cập nhật data object pointer một cách atomic thành giá trị mới, writer thường dùng routine `rcu_assign_pointer(p, v)`. Bên trong, nó bảo đảm pointer được cập nhật chính xác. Bạn có thể thắc mắc, tại sao phức tạp như vậy? Tại sao không đơn giản gán giá trị mới cho pointer variable (`(p) = (v)`)? Đừng quên, sự phức tạp của cả hardware lẫn compiler (cộng thêm vấn đề memory ordering đặc thù architecture cho vui) có thể gây đủ loại rắc rối; vì vậy routine này chèn write memory barrier khi cần rồi thực hiện phép gán (cuối chương có trình bày một phần về memory barrier).
+Để cập nhật data object pointer một cách atomic thành giá trị mới, writer thường dùng routine `rcu_assign_pointer(p, v)`. Bên trong, nó bảo đảm pointer được cập nhật chính xác. Bạn có thể thắc mắc, tại sao phức tạp như vậy? Tại sao không đơn giản gán giá trị mới cho pointer variable (`(p) = (v)`)? Đừng quên, sự phức tạp của cả hardware lẫn compiler (cộng thêm vấn đề memory-ordering arch-specific cho vui) có thể gây đủ loại rắc rối; vì vậy routine này chèn write memory barrier khi cần rồi thực hiện phép gán (cuối chương có trình bày một phần về memory barrier).
 
-Ở đầu ý này, chúng ta nói: “Lưu ý mọi reader có sẵn vẫn tiếp tục đọc song song từ data object cũ.” Điều đó khiến bạn tự hỏi làm thế nào định nghĩa chính xác RCU reader có sẵn hay “cũ” so với reader “mới”? Điều này quan trọng vì reader có sẵn tiếp tục làm việc trên object cũ còn reader mới trên bản sao mới. Đây là câu trả lời: thời điểm quyết định là khi writer hoàn tất thực thi routine `rcu_assign_pointer(p,` `v)`. Mọi reader chạy trước thời điểm đó thấy pointer cũ, và mọi reader bắt đầu sau thời điểm đó thấy pointer mới, do đó thấy object mới.
+Ở đầu ý này, chúng ta nói: “Lưu ý mọi reader pre-existing vẫn tiếp tục đọc song song từ data object cũ.” Điều đó khiến bạn tự hỏi làm thế nào định nghĩa chính xác RCU reader pre-existing hay “cũ” so với reader “mới”? Điều này quan trọng vì reader pre-existing tiếp tục làm việc trên object cũ còn reader mới trên bản sao mới. Đây là câu trả lời: thời điểm quyết định là khi writer hoàn tất thực thi routine `rcu_assign_pointer(p,` `v)`. Mọi reader chạy trước thời điểm đó thấy pointer cũ, và mọi reader bắt đầu sau thời điểm đó thấy pointer mới, do đó thấy object mới.
 
-6\. Tất nhiên writer phải free object cũ (thực chất hủy nó và ngăn memory leak), nhưng không được làm vậy cho đến khi bảo đảm mọi reader có sẵn đã hoàn thành RCU read-side critical section. Vì thế, writer chờ một RCU GP rồi free object cũ (xem Hình 13.14 và các vòng tròn (đỏ) có số 4 và 5 tương ứng)!
+6\. Tất nhiên writer phải free object cũ (thực chất hủy nó và ngăn memory leak), nhưng không được làm vậy cho đến khi bảo đảm mọi reader pre-existing đã hoàn thành RCU read-side critical section. Vì thế, writer chờ một RCU GP rồi free object cũ (xem Hình 13.14 và các vòng tròn (đỏ) có số 4 và 5 tương ứng)!
 
-Làm sao biết một RCU GP – thực chất là mọi RCU reader (cũ) đã đọc xong – đã trôi qua? À, triển khai sử dụng một thủ thuật hay mà chúng ta đã gợi ý: vì biết mọi RCU read-side critical section được bảo đảm non-preemptible, ngay khi reader thread context-switch khỏi CPU core, chuyển sang user-land hoặc đi vào idle state, nó chắc chắn đã hoàn thành RCU read. Vì vậy kernel theo dõi chính điều này, và khi mọi RCU reader đã context-switch (ít nhất một lần), kernel biết chúng đã xong. Điều này được triển khai trong code qua API `synchronize_rcu()`. Do đó writer phải gọi routine này, và vì nó synchronous, ngay khi nó return, writer có thể tự tin free data object!
+Làm sao biết một RCU GP – thực chất là mọi RCU reader (cũ) đã đọc xong – đã trôi qua? À, triển khai sử dụng một thủ thuật hay mà chúng ta đã gợi ý: vì biết mọi RCU read-side critical section được bảo đảm non-preemptible, ngay khi reader thread context-switches khỏi CPU core, chuyển sang user-land hoặc đi vào idle state, nó chắc chắn đã hoàn thành RCU read. Vì vậy kernel theo dõi chính điều này, và khi mọi RCU reader đã context-switched (ít nhất một lần), kernel biết chúng đã xong. Điều này được triển khai trong code qua API `synchronize_rcu()`. Do đó writer phải gọi routine này, và vì nó synchronous, ngay khi nó return, writer có thể tự tin free data object!
 
 Hình 13.15 cố gắng tổng hợp tất cả (à, phần lớn) nội dung thảo luận cùng các core RCU API được sử dụng (tuy nhiên, để đỡ rối, tôi hiển thị tên API viết tắt (phần Chú giải có tên đầy đủ); thêm nữa, API `rcu_dereference()` chỉ xuất hiện một lần trong RCU reader 1 làm ví dụ. Bạn nên hình dung mọi RCU reader gọi nó ngay sau `rcu_read_lock()`. Ngoài ra, các API `spin_{un}lock()` mà writer có thể dùng hoàn toàn không được thể hiện ở đây):
 
@@ -1390,7 +1390,7 @@ Một triển khai “đồ chơi” (pseudocode) của function `synchronize_rc
         run_on(cpu);
 ```
 
-Chỉ cần chạy trên từng CPU core đã bảo đảm một RCU GP trên toàn hệ thống đã trôi qua và không còn RCU reader có sẵn nào (như đường thẳng đứng đậm trong Hình 13.15). Cách này hoạt động vì để context hiện tại chạy trên một core, mọi thread trước đó trên core ấy (hiển nhiên) phải context-switch khỏi nó; vì thế nếu chạy trên mọi online core, theo định nghĩa điều đó có nghĩa một RCU GP trên toàn hệ thống thực sự đã trôi qua!
+Chỉ cần chạy trên từng CPU core đã bảo đảm một RCU GP system-wide đã trôi qua và không còn RCU reader pre-existing nào (như đường thẳng đứng đậm trong Hình 13.15). Cách này hoạt động vì để context hiện tại chạy trên một core, mọi thread trước đó trên core ấy (hiển nhiên) phải context-switch khỏi nó; vì thế nếu chạy trên mọi online core, theo định nghĩa điều đó có nghĩa một RCU GP system-wide thực sự đã trôi qua!
 
 Được rồi, thử phản biện: nếu một trong các RCU reader mất nhiều thời gian hơn (so với Hình 13.15) thì sao? Nó có thất bại không? Không, RCU được triển khai đúng sẽ kéo dài RCU grace period để đáp ứng read dài đó! Điều này có nghĩa:
 
@@ -1398,11 +1398,11 @@ Chỉ cần chạy trên từng CPU core đã bảo đảm một RCU GP trên to
 
 - Quan trọng hơn, reader có thể tiếp tục chạy (trong thời gian dài), do đó ngầm kéo dài GP; cách này hoạt động miễn là mọi reader được bảo đảm hoàn tất trong thời gian hữu hạn.
 
-Điều này đặt ra câu hỏi: reader có thể kéo dài GP bao lâu? Không thể quá lâu, phải không? Đúng vậy… kernel phát cảnh báo khi xảy ra RCU CPU stall, khi nó giữ writer chờ một khoảng thời gian được xem là dài (hơi giống kernel warning do soft lockup hoặc hard lockup, mặc dù RCU cho phép khoảng thời gian thực sự dài). Dài ở đây là bao lâu? Kernel config `RCU_CPU_STALL_TIMEOUT` (định nghĩa tại đây: `https://elixir.bootlin.com/linux/v6.1.25/source/kernel/rcu/Kconfig.debug#L85`) quy định “RCU CPU stall timeout tính bằng giây”; khoảng giá trị là từ 3 đến 300 giây, mặc định 21 giây. (Về việc kéo dài hay gom GP thành batch, có cái gọi là “lazy RCU” thường dẫn đến một số đánh đổi; McKenney giải thích điều này tại đây: `https://youtu.be/obDzjElRj9c?list=PLIlI4QbmdBqH9-L1QOq6O5Yxt-YVjRsFZ&t=3722`). Tài liệu kernel chính thức ở đây: Sử dụng CPU Stall Detector của RCU: `https://www.kernel.org/doc/html/v6.1/RCU/stallwarn.html#using-rcu-s-cpu-stall-detector`.
+Điều này đặt ra câu hỏi: reader có thể kéo dài GP bao lâu? Không thể quá lâu, phải không? Đúng vậy… kernel phát cảnh báo khi xảy ra RCU CPU stall, khi nó giữ writer chờ một khoảng thời gian được xem là dài (hơi giống kernel warning do soft lockup hoặc hard lockup, mặc dù RCU cho phép khoảng thời gian thực sự dài). Dài ở đây là bao lâu? Kernel config `RCU_CPU_STALL_TIMEOUT` (định nghĩa tại đây: `https://elixir.bootlin.com/linux/v6.1.25/source/kernel/rcu/Kconfig.debug#L85`) quy định “RCU CPU stall timeout tính bằng giây”; khoảng giá trị là từ 3 đến 300 giây, mặc định 21 giây. (Về việc kéo dài hay gom GP thành batch, có so-called “lazy RCU” thường dẫn đến một số trade-offs; McKenney giải thích điều này tại đây: `https://youtu.be/obDzjElRj9c?list=PLIlI4QbmdBqH9-L1QOq6O5Yxt-YVjRsFZ&t=3722`). Tài liệu kernel chính thức ở đây: Sử dụng CPU Stall Detector của RCU: `https://www.kernel.org/doc/html/v6.1/RCU/stallwarn.html#using-rcu-s-cpu-stall-detector`.
 
 Để bạn biết, có thể xem ví dụ về “splat” do một (hoặc nhiều) RCU CPU stall gây ra trong sách Linux Kernel Debugging của tôi: Chương 10, Kernel Panic, Lockup và Hang, ở phần RCU và RCU CPU stall.
 
-Vậy là xong. Hiển nhiên RCU còn nhiều điều hơn những gì được giải thích ở đây; đây là kiến thức cơ bản, giúp bạn hình dung cách RCU hoạt động về khái niệm (và phần nào về code), đúng với mục đích đặt ra.
+Vậy là xong. Hiển nhiên RCU còn nhiều điều hơn những gì được giải thích ở đây; đây là kiến thức cơ bản, giúp bạn hình dung cách RCU hoạt động về khái niệm (và phần nào code-wise), đúng với mục đích đặt ra.
 
 #### Thử nghiệm RCU
 
@@ -1472,7 +1472,7 @@ Giả sử thêm rằng read xảy ra thường xuyên hơn write (rất nhiều
 
 ##### Trường hợp 2: Critical section được bảo vệ bằng reader-writer (spin)lock
 
-Vậy hãy dùng reader-writer spinlock quen thuộc để bảo vệ (không hiển thị toàn bộ code, chỉ các phần chính; code đầy đủ tại đây: `ch13/rdwr_concurrent/2_demo_rdwr_rwlock`).
+Vậy hãy dùng reader-writer spinlock well-known để bảo vệ (không hiển thị toàn bộ code, chỉ các phần chính; code đầy đủ tại đây: `ch13/rdwr_concurrent/2_demo_rdwr_rwlock`).
 
 Reader
 
@@ -1511,7 +1511,7 @@ z = 920;
 }
 ```
 
-Bảng 13.5: Trường hợp 2 được cố ý làm chưa tối ưu: reader/writer code được bảo vệ bằng reader-writer spinlock
+Bảng 13.5: Trường hợp 2 được cố ý làm sub-optimal: reader/writer code được bảo vệ bằng reader-writer spinlock
 
 (Chúng ta đã thêm một member vào global data structure – `rwlock_t` `rwlock`; reader-writer spinlock.) Nó hoạt động; tuy nhiên, một lần nữa, như đã học, reader-writer (spin)lock gặp một số vấn đề, đặc biệt là writer starvation và tác động bất lợi đến cache do giữ shared state song song trên các core khác nhau. Vì thế cộng đồng kernel đang tích cực chuyển từ reader-writer spinlock sang… đoán xem? Tất nhiên là RCU (vì trường hợp sử dụng tương tự nhau; cả hai đều dùng trong tình huống chủ yếu là read)!
 
@@ -1519,11 +1519,11 @@ Bảng 13.5: Trường hợp 2 được cố ý làm chưa tối ưu: reader/wri
 
 Được rồi, cuối cùng hãy làm đúng, bảo vệ các critical section trong những code snippet này bằng RCU!
 
-Code có thể trông như sau (chúng ta chú thích bằng các số đánh dấu để giúp liên hệ góc nhìn ở cấp code với các bảng tra cứu core RCU API – Bảng 13.6 và Bảng 13.7 – trình bày sau phần này. Hãy cẩn thận – các số trong Hình 13.16 không biểu thị thứ tự thực thi các code path). Được rồi, hãy xem code (liên quan) (như thường lệ, code đầy đủ tại đây: `ch13/rdwr_concurrent/3_demo_rdwr_rcu`):
+Code có thể trông như sau (chúng ta chú thích bằng các số đánh dấu để giúp liên hệ góc nhìn code-level với các bảng tra cứu core RCU API – Bảng 13.6 và Bảng 13.7 – trình bày sau phần này. Hãy cẩn thận – các số trong Hình 13.16 không biểu thị thứ tự thực thi các code path). Được rồi, hãy xem code (liên quan) (như thường lệ, code đầy đủ tại đây: `ch13/rdwr_concurrent/3_demo_rdwr_rcu`):
 
 ![Hình 13.16](images/ch13/fig13-16.jpg)
 
-Hình 13.16: Ví dụ có chú thích ở cấp code về sử dụng các core RCU API (các số chú thích tham chiếu số thứ tự core RCU API ở phần tiếp theo; chúng \_không\_ phải thứ tự chạy)
+Hình 13.16: Ví dụ có chú thích code-level về sử dụng các core RCU API (các số chú thích tham chiếu số thứ tự core RCU API ở phần tiếp theo; chúng \_không\_ phải thứ tự chạy)
 
 Lần này, vì RCU hoàn toàn không bảo vệ writer, chúng ta dùng spinlock đơn giản để writer chạy theo cách exclusive (serialized) (ngăn chúng giẫm chân nhau):
 
@@ -1566,8 +1566,8 @@ Bảng tóm tắt nhanh đầu tiên nêu tên core RCU API, prototype và giả
 |---|---|---|
 | 1 | `rcu_read_lock()` | `void rcu_read_lock(void);` Reader: Đánh dấu bắt đầu RCU read-side critical section. |
 | 2 | `rcu_read_unlock()` | `void rcu_read_unlock(void);` Reader: Đánh dấu kết thúc RCU read-side critical section. |
-| 3 | `synchronize_rcu()` `call_rcu()` | `void synchronize_rcu(void);` Writer/updater gọi API này để bắt đầu GP. GP là khoảng thời gian mà sau đó bảo đảm mọi RCU read-side critical section có sẵn bắt đầu trước khi gọi API này đều đã hoàn tất. Lời gọi này block writer cho đến khi điều đó xảy ra; sau đó writer có thể free data object cũ. `void call_rcu(struct rcu_head *head, rcu_callback_t func);` `call_rcu()` tương tự `synchronize_rcu()` về chức năng nhưng thực chất là phiên bản async (callback function được gọi asynchronously khi mọi reader hoàn tất); phù hợp khi không được phép block (ví dụ trong interrupt context hoặc code path có preempt/IRQ bị disable) hoặc khi write performance rất quan trọng. (Tuy nhiên trong trường hợp thông thường, nên ưu tiên API trước vì performance tổng thể của hệ thống.) |
-| 4 | `rcu_assign_pointer()` | `rcu_assign_pointer(p, v);` Writer: Dùng macro này để thiết lập giá trị mới `v` trên RCU-protected pointer `p` một cách an toàn và atomic, thực chất thông báo thay đổi giá trị cho reader (thực chất là cách an toàn để thực hiện `(p) = (v)`, có tính đến các đặc thù memory ordering của CPU/compiler). |
+| 3 | `synchronize_rcu()` `call_rcu()` | `void synchronize_rcu(void);` Writer/updater gọi API này để bắt đầu GP. GP là khoảng thời gian mà sau đó bảo đảm mọi RCU read-side critical section pre-existing bắt đầu trước khi gọi API này đều đã hoàn tất. Lời gọi này block writer cho đến khi điều đó xảy ra; sau đó writer có thể free data object cũ. `void call_rcu(struct rcu_head *head, rcu_callback_t func);` `call_rcu()` tương tự `synchronize_rcu()` về chức năng nhưng thực chất là phiên bản async (callback function được gọi asynchronously khi mọi reader hoàn tất); phù hợp khi không được phép block (ví dụ trong interrupt context hoặc code path có preempt/IRQ bị disable) hoặc khi write performance rất quan trọng. (Tuy nhiên trong trường hợp thông thường, nên ưu tiên API trước vì performance tổng thể của hệ thống.) |
+| 4 | `rcu_assign_pointer()` | `rcu_assign_pointer(p, v);` Writer: Dùng macro này để thiết lập giá trị mới `v` trên RCU-protected pointer `p` một cách an toàn và atomic, thực chất thông báo thay đổi giá trị cho reader (thực chất là cách an toàn để thực hiện `(p) = (v)`, có tính đến các đặc thù memory-ordering của CPU/compiler). |
 | 5 | `rcu_dereference()` | `typeof(p) rcu_dereference(p);` Reader: Lấy RCU-protected pointer một cách an toàn để sau đó dereference (và sử dụng). Hãy cẩn thận – chỉ được sử dụng bên trong RCU read-side critical section bao quanh nó. Đây là cách dùng điển hình: `p = rcu_dereference(foo); x = p->whatever;` Hãy xem cả tài liệu kernel chi tiết (được trình bày trong bảng tiếp theo; API thường được triển khai dưới dạng macro). |
 
 Bảng 13.6: Tóm tắt nhanh các core RCU API: tên và giải thích rất ngắn gọn
@@ -1727,13 +1727,13 @@ Tạo bản sao code của module `ch13/3_lockfree/list_demo_rcu/list_demo_rcu.c
 
 Một ví dụ khác, tốt hơn, về sử dụng RCU primitive cơ bản sẽ sớm được trình bày trong phần Sửa lỗi – lần 2: dùng RCU sắp tới. Ở đó chúng ta giải quyết vấn đề concurrency khi duyệt mọi thread trong kernel task list, sử dụng RCU cho lock-free synchronization. Hãy nhớ xem code và thử nghiệm!
 
-Một ví dụ còn tốt hơn về sử dụng RCU primitive cho module dựa trên list tại đây: `https://github.com/jinb-park/rcu_example/tree/master`. Hãy xem thử.
+Một ví dụ còn tốt hơn về sử dụng RCU primitive cho module list-based tại đây: `https://github.com/jinb-park/rcu_example/tree/master`. Hãy xem thử.
 
-Phần tiếp theo cho biết nơi bạn có thể truy cập (rất nhiều) tài liệu RCU bổ sung và qua đó tìm hiểu cách sử dụng RCU trong kernel.
+Phần tiếp theo cho biết nơi bạn có thể truy cập (rất nhiều) tài liệu RCU bổ sung và qua đó tìm hiểu cách sử dụng RCU in-kernel.
 
 #### RCU: tài liệu chi tiết
 
-Tất nhiên, có thể tìm hiểu sâu hơn rất nhiều về RCU cùng triển khai và sử dụng nó trong kernel qua tài liệu kernel chính thức:
+Tất nhiên, có thể tìm hiểu sâu hơn rất nhiều về RCU cùng triển khai và sử dụng nó in-kernel qua tài liệu kernel chính thức:
 
 - Tài liệu “root” (file `index.rst`) cho tài liệu RCU trên kernel series 6.1 ở đây: Các khái niệm RCU: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/index.rst`. Trong đó, bạn sẽ thấy danh sách có thư mục Design chứa một số tài liệu, cộng thêm nhiều tài liệu RCU khác (ở format `.rst` thông thường). Để hình dung nó trông thế nào, xem ảnh chụp sau:
 
@@ -1741,19 +1741,19 @@ Tất nhiên, có thể tìm hiểu sâu hơn rất nhiều về RCU cùng tri�
 
 Hình 13.18: Ảnh chụp “root” (index doc) của tài liệu kernel chính thức (v6.1) về RCU
 
-- Bắt đầu bằng tài liệu kinh điển RCU là gì? – “Read, Copy, Update” là ý tưởng tuyệt vời (đây là bộ sáu bài viết LWN nổi tiếng về RCU): `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/whatisRCU.rst` (mục được gắn nhãn whatisRCU trong Hình 13.18).
+- Bắt đầu bằng tài liệu kinh điển RCU là gì? – “Read, Copy, Update” là ý tưởng tuyệt vời (đây là bộ six-article viết LWN well-known về RCU): `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/whatisRCU.rst` (mục được gắn nhãn whatisRCU trong Hình 13.18).
 
 - Tiếp theo, để tìm hiểu sâu hơn các construct trong thiết kế RCU, xem Thiết kế (RCU): `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/Design`; trong đó phần Requirements đặc biệt hữu ích (ít nhất lúc đầu): Tham quan các requirement của RCU, Paul E. McKenney, IBM, 2015: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/Design/Requirements/Requirements.rst`.
 
 - Đây là chi tiết về sử dụng RCU (các API chuyên biệt), tập trung vào từng data structure:
 
-  - Sử dụng RCU để bảo vệ read-mostly linked list: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/listRCU.rst`. Ở đây bạn sẽ tìm thấy các ví dụ từng bước rất hay về chính xác cách tận dụng RCU trong kernel (xếp các trường hợp “phù hợp nhất” trước). Thực tế, ví dụ đầu tiên – duyệt process list – chính là điều đã học trong Chương 6, Các kiến thức thiết yếu về kernel internals – Process và thread, ở phần Duyệt các task list của kernel. Một trong các module chúng ta viết để demo – `ch6/prcs_showall/prcs_showall.c` – thực sự dùng primitive `rcu_read_{un}` `lock()` khi duyệt list, đúng như tài liệu ở đây trình bày.
+  - Sử dụng RCU để bảo vệ Read-Mostly linked list: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/listRCU.rst`. Ở đây bạn sẽ tìm thấy các ví dụ stepby-step rất hay về chính xác cách tận dụng RCU trong kernel (xếp các trường hợp “phù hợp nhất” trước). Thực tế, ví dụ đầu tiên – duyệt process list – chính là điều đã học trong Chương 6, Các kiến thức thiết yếu về kernel internals – Process và thread, ở phần Duyệt các task list của kernel. Một trong các module chúng ta viết để demo – `ch6/prcs_showall/prcs_showall.c` – thực sự dùng primitive `rcu_read_{un}` `lock()` khi duyệt list, đúng như tài liệu ở đây trình bày.
 
 Cách tiếp cận tương tự, sử dụng RCU để giải quyết vấn đề concurrency khi duyệt mọi thread trong kernel task list, là nội dung phần Sửa lỗi – lần 2: dùng RCU sắp tới.
 
-  - Tất nhiên còn (rất nhiều!) điều khác; RCU API được maintain thường xuyên và phát triển theo thời gian (một loạt cập nhật lớn vào năm 2010, một vào năm 2014 và gần đây nhất vào năm 2019). Đây là bản tổng hợp dạng bảng các RCU List API (trong tài liệu rộng hơn Các bảng RCU API, phiên bản 2019), Paul E. McKenney, Jake Edge: `https://lwn.net/Articles/777165/#RCU%20List%20APIs`.
+  - Tất nhiên còn (rất nhiều!) điều khác; RCU API được maintain thường xuyên và phát triển theo thời gian (một loạt cập nhật lớn vào năm 2010, một vào năm 2014 và gần đây nhất vào năm 2019). Đây là bản tổng hợp table-based các RCU List API (trong tài liệu rộng hơn Các bảng RCU API, phiên bản 2019), Paul E. McKenney, Jake Edge: `https://lwn.net/Articles/777165/#RCU%20List%20APIs`.
 
-  - Sử dụng RCU để bảo vệ read-mostly array: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/arrayRCU.rst`.
+  - Sử dụng RCU để bảo vệ Read-Mostly array: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/arrayRCU.rst`.
 
   - Tham quan các data structure của TREE\_RCU \[LWN.net\]: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/Design/Data-Structures/Data-Structures.rst`.
 
@@ -1761,11 +1761,11 @@ Cách tiếp cận tương tự, sử dụng RCU để giải quyết vấn đ�
 
 Với tất cả tài liệu này trong tay (một số khá nâng cao), nhiều người sẽ tự hỏi bắt đầu từ đâu, đúng không? Có câu trả lời dễ dàng – bạn đã bắt đầu rất tốt rồi, với cuốn sách này!
 
-Được rồi, ngoài chuyện đó, khi đã hiểu các khái niệm RCU cơ bản (hy vọng vài phần trước đã giúp bạn đạt điều đó), tìm hiểu các core RCU API (hay primitive) là ý tưởng tuyệt vời, và đây là nơi cần đến: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/whatisRCU.rst#L137` (một lần nữa, có thể xem tóm tắt nhanh ở Bảng 13.6). Sau đây là vài lời về các kernel debug option liên quan RCU.
+Được rồi, ngoài chuyện đó, khi đã hiểu các khái niệm RCU cơ bản (hy vọng vài phần trước đã giúp bạn đạt điều đó), tìm hiểu các core RCU API (hay primitive) là ý tưởng tuyệt vời, và đây là nơi cần đến: `https://elixir.bootlin.com/linux/v6.1.25/source/Documentation/RCU/whatisRCU.rst#L137` (một lần nữa, có thể xem tóm tắt nhanh ở Bảng 13.6). Sau đây là vài lời về các kernel debug option RCU-related.
 
 ##### Vài lời về debug việc sử dụng RCU
 
-Có hỗ trợ cho tình huống cần debug việc sử dụng RCU trong kernel (hoặc module). Để xem các menu item liên quan ở bước kernel configuration, thực hiện `make menuconfig` như thường lệ, đến sub-menu Kernel hacking \> RCU Debugging và xem các RCU debug config option ở đó. Kconfig file liên quan là `kernel/rcu/Kconfig.debug` (duyệt file giúp xem ngay mọi option cùng phần trợ giúp tương ứng! Link ở đây: `https://elixir.bootlin.com/linux/v6.1.25/source/kernel/rcu/Kconfig.debug`). Enable chúng trong kernel debug/development rất hữu ích và giúp phát hiện bug liên quan RCU.
+Có hỗ trợ cho tình huống cần debug việc sử dụng RCU trong kernel (hoặc module). Để xem các menu item liên quan ở bước kernel configuration, thực hiện `make menuconfig` như thường lệ, đến sub-menu Kernel hacking \> RCU Debugging và xem các RCU debug config option ở đó. Kconfig file liên quan là `kernel/rcu/Kconfig.debug` (duyệt file giúp xem ngay mọi option cùng phần trợ giúp tương ứng! Link ở đây: `https://elixir.bootlin.com/linux/v6.1.25/source/kernel/rcu/Kconfig.debug`). Enable chúng trong kernel debug/development rất hữu ích và giúp phát hiện bug RCU-related.
 
 Ngoài ra, đặt `CONFIG_RCU_EXPERT=y` sẽ enable thêm RCU debug option (như `CONFIG_PROVE_RCU_LIST`). Có thể tìm nó trong sub-menu General setup \> RCU Subsystem.
 
@@ -1790,7 +1790,7 @@ Thú vị và khá đúng đắn là các locking primitive thông thường (sp
 
 Vậy “những điều kiện phù hợp” để dùng RCU là gì? Dù đã đề cập, rõ ràng nó được dành cho tình huống read-mostly, khi ít cập nhật (write) và reader làm việc với data hơi stale hoặc không nhất quán vẫn ổn.
 
-Vì vậy, đây là tóm tắt nhanh những tình huống tốt nhất và không tốt lắm để sử dụng hoặc không sử dụng RCU; một lần nữa, cách tốt nhất là thể hiện bằng slide “Phạm vi áp dụng RCU” của Paul tại đây: `https://youtu.be/obDzjElRj9c?list=PLIlI4QbmdBqH9-L1QOq6O5Yxt-YVjRsFZ&t=4036`:
+Vì vậy, đây là tóm tắt nhanh những tình huống tốt nhất và not-so-good để sử dụng hoặc không sử dụng RCU; một lần nữa, cách tốt nhất là thể hiện bằng slide “Phạm vi áp dụng RCU” của Paul tại đây: `https://youtu.be/obDzjElRj9c?list=PLIlI4QbmdBqH9-L1QOq6O5Yxt-YVjRsFZ&t=4036`:
 
 ![Hình 13.19](images/ch13/fig13-19.jpg)
 
@@ -1806,7 +1806,7 @@ RT thường xung đột với lock-free programming; tại sao? Phần lớn k�
 
 ## Lock debugging trong kernel
 
-Như đã học, thiết kế và triển khai locking cùng synchronization có thể trở nên phức tạp, do đó làm tăng khả năng có bug ẩn náu. Kernel có nhiều phương tiện hỗ trợ debug các tình huống khó khăn về vấn đề locking ở cấp kernel, trong đó deadlock là vấn đề chính.
+Như đã học, thiết kế và triển khai locking cùng synchronization có thể trở nên phức tạp, do đó làm tăng khả năng có bug ẩn náu. Kernel có nhiều phương tiện hỗ trợ debug các tình huống khó khăn về vấn đề locking ở kernel-level, trong đó deadlock là vấn đề chính.
 
 Nếu chưa đọc, hãy bảo đảm trước tiên bạn đã đọc kiến thức cơ bản về synchronization, locking và hướng dẫn về deadlock ở chương trước (Chương 12, Kernel Synchronization – Phần 1, đặc biệt các phần Critical section, exclusive execution và atomicity và Các vấn đề concurrency trong Linux kernel).
 
@@ -1820,7 +1820,7 @@ Với mọi tình huống debug, có những thời điểm khác nhau diễn ra
 
 - Sau release, ngoài thực tế
 
-Một lời răn quen thuộc và tiếc là đúng: bug được phát hiện càng “xa” giai đoạn phát triển thì sửa càng tốn kém! Vì thế bạn thực sự nên cố tìm và sửa chúng sớm nhất có thể!
+Một lời răn well-known và tiếc là đúng: bug được phát hiện càng “xa” giai đoạn phát triển thì sửa càng tốn kém! Vì thế bạn thực sự nên cố tìm và sửa chúng sớm nhất có thể!
 
 Vì sách tập trung hoàn toàn vào kernel development, ở đây chúng ta tập trung vào một vài công cụ và kỹ thuật để debug vấn đề locking trong giai đoạn phát triển (kernel/module).
 
@@ -1842,13 +1842,13 @@ PREEMPT.
 [ ... ]
 ```
 
-Tôi không thể không nhắc đến dynamic memory error detector rất mạnh tên Kernel Address SANitizer (KASAN). Nói ngắn gọn, nó sử dụng dynamic analysis dựa trên compile-time instrumentation để phát hiện các bug liên quan memory phổ biến (hoạt động với cả GCC và Clang). ASan (Address Sanitizer), do kỹ sư Google đóng góp, được dùng để theo dõi và phát hiện vấn đề memory trong user-space app (được trình bày khá chi tiết và so sánh với Valgrind trong sách Hands-On System Programming for Linux). Phiên bản tương ứng trong kernel, KASAN, có từ kernel 4.0 cho x86\_64 và từ Linux 4.4 cho AArch64 (ARM64).
+Tôi không thể không nhắc đến dynamic memory error detector rất mạnh tên Kernel Address SANitizer (KASAN). Nói ngắn gọn, nó sử dụng compile-time instrumentation-based dynamic analysis để phát hiện các bug memory-related phổ biến (hoạt động với cả GCC và Clang). ASan (Address Sanitizer), do kỹ sư Google đóng góp, được dùng để theo dõi và phát hiện vấn đề memory trong user-space app (được trình bày khá chi tiết và so sánh với Valgrind trong sách Hands-On System Programming for Linux). Phiên bản tương ứng trong kernel, KASAN, có từ kernel 4.0 cho x86\_64 và từ Linux 4.4 cho AArch64 (ARM64).
 
 Trong kernel 5.8, một công cụ thực sự hữu ích khác, KCSAN – Kernel Concurrency Sanitizer – được đưa vào mainline. Đây là data race detector cho Linux kernel hoạt động qua compile-time instrumentation. Sách Linux Kernel Debugging trình bày cách sử dụng nó. Bạn cũng có thể tìm chi tiết trong các bài viết LWN: Tìm race condition bằng KCSAN, LWN, tháng 10 năm 2019 (`https://lwn.net/Articles/802128/`) và Concurrency bug nên sợ data-race detector đáng gờm (phần 1), LWN, tháng 4 năm 2020 (`https://lwn.net/Articles/816850/`).
 
 Tuy nhiên, lưu ý KASAN xung đột với KCSAN; do đó phải sử dụng riêng từng công cụ. Có thể tìm hướng dẫn chi tiết và ví dụ enable, sử dụng chúng trong sách Linux Kernel Debugging. Tôi rất khuyến khích bạn tận dụng chúng trong debug kernel.
 
-Ngoài ra, để bạn biết, có nhiều công cụ phát hiện locking bug và deadlock trong user-space app. Trong số đó có `helgrind` nổi tiếng (thuộc bộ Valgrind), TSan (Thread Sanitizer), cung cấp compile-time instrumentation để kiểm tra data race trong multithreaded application, và chính lockdep; lockdep cũng có thể hoạt động trong user space (dưới dạng library)! Hơn nữa, framework \[e\]BPF hiện đại cung cấp frontend `deadlock-bpfcc(8)`. Nó được thiết kế chuyên biệt để tìm deadlock tiềm ẩn (lock order inversion) trong một process (hoặc thread) đang chạy.
+Ngoài ra, để bạn biết, có nhiều công cụ phát hiện locking bug và deadlock trong user-space app. Trong số đó có `helgrind` well-known (thuộc bộ Valgrind), TSan (Thread Sanitizer), cung cấp compile-time instrumentation để kiểm tra data race trong multithreaded application, và chính lockdep; lockdep cũng có thể hoạt động trong user space (dưới dạng library)! Hơn nữa, framework \[e\]BPF hiện đại cung cấp frontend `deadlock-bpfcc(8)`. Nó được thiết kế chuyên biệt để tìm deadlock tiềm ẩn (lock order inversion) trong một process (hoặc thread) đang chạy.
 
 Như đã thấy ở Chương 2, Build Linux kernel 6.x từ source – Phần 1, chúng ta có thể configure Linux kernel đúng theo yêu cầu. Ở đây (trong root của kernel source tree 6.1.25), chúng ta thực hiện `make menuconfig` và (theo lời khuyên trong kernel patch submission checklist) đến menu Kernel hacking \> Lock Debugging `(`spinlocks, mutexes, etc...`)` (xem ảnh chụp ở Hình 13.20, chụp trên guest VM x86\_64 Ubuntu 23.04 LTS):
 
@@ -1858,13 +1858,13 @@ Hình 13.20: Ảnh chụp (đã cắt bớt) menu ‘Kernel hacking \> Lock Debu
 
 Hình 13.20 là ảnh chụp (đã cắt bớt) menu `< Kernel hacking > Lock Debugging (spinlocks,` `mutexes, etc...)` với các mục cần thiết được enable cho debug kernel.
 
-Thay vì phải tương tác qua từng menu item và chọn nút `<Help>` để xem nội dung, cách đơn giản hơn nhiều để có cùng thông tin trợ giúp là nhìn vào file `Kconfig*` liên quan (mô tả menu). Ở đây là `lib/Kconfig.debug`, vì tất cả (à, phần lớn) menu liên quan debug nằm ở đó. Trong trường hợp cụ thể này, tìm chuỗi menu `Lock Debugging (spinlocks, mutexes, etc...)`, nơi bắt đầu phần `Lock` `Debugging` (xem bảng sau). (Để bạn biết, link là `https://elixir.bootlin.com/linux/v6.1.25/source/lib/Kconfig.debug#L1229.)`
+Thay vì phải tương tác qua từng menu item và chọn nút `<Help>` để xem nội dung, cách đơn giản hơn nhiều để có cùng thông tin trợ giúp là nhìn vào file `Kconfig*` liên quan (mô tả menu). Ở đây là `lib/Kconfig.debug`, vì tất cả (à, phần lớn) menu debug-related nằm ở đó. Trong trường hợp cụ thể này, tìm chuỗi menu `Lock Debugging (spinlocks, mutexes, etc...)`, nơi bắt đầu phần `Lock` `Debugging` (xem bảng sau). (Để bạn biết, link là `https://elixir.bootlin.com/linux/v6.1.25/source/lib/Kconfig.debug#L1229.)`
 
 Bảng sau tổng hợp cách từng kernel lock debugging configuration option hỗ trợ debugging (không hiển thị tất cả và với một số option, chúng ta trích trực tiếp file `lib/Kconfig.debug`. Ngoài ra, hai mục cuối liên quan RCU debugging – định nghĩa trong `kernel/rcu/Kconfig.debug` – và thường yêu cầu `PROVE_RCU=y`, còn một số option cần `RCU_EXPERT=y`):
 
 | Tiêu đề menu lock debugging | Chức năng |
 |---|---|
-| Lock debugging: chứng minh locking correctness (`CONFIG_PROVE_LOCKING`), còn gọi là lockdep! | Đây là kernel option `lockdep` – bật để luôn có “chứng minh liên tục về lock correctness”. Mọi khả năng deadlock liên quan locking đều được báo cáo ngay trước khi thực sự xảy ra; rất hữu ích! (Sẽ được giải thích chi tiết hơn ngay sau đây). |
+| Lock debugging: chứng minh locking correctness (`CONFIG_PROVE_LOCKING`), còn gọi là lockdep! | Đây là kernel option `lockdep` – bật để luôn có “chứng minh liên tục về lock correctness”. Mọi khả năng deadlock locking-related đều được báo cáo ngay trước khi thực sự xảy ra; rất hữu ích! (Sẽ được giải thích chi tiết hơn ngay sau đây). |
 | Thống kê sử dụng lock (`CONFIG_LOCK_STAT`) | Theo dõi các lock contention point (được giải thích chi tiết hơn sau). |
 | RT mutex debugging, phát hiện deadlock (`CONFIG_DEBUG_RT_MUTEXES`) | “Cho phép tự động phát hiện và báo cáo vi phạm rt mutex semantics cùng deadlock (lockup) liên quan rt mutex.” |
 | Spinlock và `rw-lock` debugging: kiểm tra cơ bản (`CONFIG_DEBUG_SPINLOCK`) | Bật option này (cùng `CONFIG_SMP`) giúp phát hiện thiếu spinlock initialization và các lỗi spinlock phổ biến khác (đồng thời bật cả non-maskable interrupts (NMI) watchdog cũng hữu ích). |
@@ -1878,19 +1878,19 @@ Bảng sau tổng hợp cách từng kernel lock debugging configuration option 
 
 Bảng 13.9: Các kernel debug configuration option điển hình cho kernel lock (và RCU) cùng ý nghĩa
 
-Hai entry cuối trong bảng liên quan RCU debug config; chúng ta đã trình bày ngắn gọn việc thiết lập debug option liên quan RCU ở phần Vài lời về debug việc sử dụng RCU.
+Hai entry cuối trong bảng RCU-related debug config; chúng ta đã trình bày ngắn gọn việc thiết lập debug option liên quan RCU ở phần Vài lời về debug việc sử dụng RCU.
 
 Như đã đề xuất, bật tất cả hoặc phần lớn lock debug option này trong debug kernel dùng khi phát triển và testing là ý tưởng tuyệt vời.
 
 Chúng ta cung cấp helper script nhỏ (`ch13/4_lockdep/debugk_locking_configs_check`), hiển thị trạng thái một vài kernel config (chủ yếu) liên quan locking. Configure debug kernel rồi chạy nó để xác minh config.
 
-Tất nhiên, như dự kiến, enable kernel debug config có thể làm execution chậm đáng kể (và dùng nhiều memory hơn); cũng như trong cuộc sống, đây là đánh đổi bạn phải quyết định: đổi tốc độ lấy khả năng phát hiện vấn đề locking phổ biến, lỗi và cả khả năng deadlock. Bạn nên rất sẵn lòng chấp nhận đánh đổi này, đặc biệt khi phát triển (hoặc refactor) và testing code.
+Tất nhiên, như dự kiến, enable kernel debug config có thể làm execution chậm đáng kể (và dùng nhiều memory hơn); cũng như trong cuộc sống, đây là trade-off bạn phải quyết định: đổi tốc độ lấy khả năng phát hiện vấn đề locking phổ biến, lỗi và cả khả năng deadlock. Bạn nên rất sẵn lòng chấp nhận trade-off này, đặc biệt khi phát triển (hoặc refactor) và testing code.
 
 ### Lock validator lockdep – phát hiện vấn đề locking sớm
 
 Linux kernel có tính năng vô cùng hữu ích đang chờ kernel developer tận dụng: runtime locking correctness validator hay locking dependency validator – gọi ngắn gọn là lockdep. Ý tưởng cơ bản như sau: runtime `lockdep` tham gia bất cứ khi nào có hoạt động locking trong kernel – lấy hoặc release bất kỳ kernel-level lock nào, hoặc bất kỳ locking sequence nào liên quan nhiều lock.
 
-Hoạt động này được theo dõi hoặc lập bản đồ liên tục (xem vài đoạn bên dưới để biết tác động đến performance và cách giảm nhẹ). Bằng cách áp dụng các quy tắc locking đúng đắn đã biết, `lockdep` đưa ra kết luận về tính đúng đắn của những gì đã thực hiện (hãy nhớ chúng ta đã học khái niệm self-deadlock và circular deadlock ở Chương 12, Kernel Synchronization – Phần 1, trong phần Hướng dẫn locking và deadlock).
+Hoạt động này được theo dõi hoặc lập bản đồ liên tục (xem vài đoạn bên dưới để biết tác động đến performance và cách giảm nhẹ). Bằng cách áp dụng các quy tắc locking đúng đắn well-known, `lockdep` đưa ra kết luận về tính đúng đắn của những gì đã thực hiện (hãy nhớ chúng ta đã học khái niệm self-deadlock và circular deadlock ở Chương 12, Kernel Synchronization – Phần 1, trong phần Hướng dẫn locking và deadlock).
 
 Điểm hay là `lockdep` đạt được chứng minh toán học 100% (hay closure) rằng lock sequence có đúng hay không. Sau đây là trích dẫn trực tiếp từ tài liệu kernel về chủ đề này, `https://www.kernel.org/doc/html/v6.1/locking/lockdep-design.html#proof-of-100-correctness`:
 
@@ -1923,7 +1923,7 @@ $ grep PROVE_LOCKING /boot/config-6.1.25-lock-dbg
 CONFIG_PROVE_LOCKING=y
 ```
 
-Được rồi, tốt! Giờ hãy thực hành với một số deadlock, xem `lockdep` giúp phát hiện chúng như thế nào. Đọc tiếp nhé!
+Được rồi, tốt! Giờ hãy hands-on với một số deadlock, xem `lockdep` giúp phát hiện chúng như thế nào. Đọc tiếp nhé!
 
 #### Ví dụ 1 – phát hiện self deadlock bug bằng lockdep
 
@@ -1950,7 +1950,7 @@ ptr */
 
 Từ kernel 6.6 (rất mới tại thời điểm viết), các macro kiểu `do_each_thread()`/`while_each_thread()` đã được bỏ để thay bằng macro `for_each_process_thread()` đơn giản và dễ đọc hơn. Dù code có tính đến điều này, để giữ đơn giản, chúng ta không hiển thị trong code snippet trên.
 
-Nếu task là kernel thread, chúng ta đặt tên trong dấu ngoặc vuông. Giờ dù lấy tên thread theo cách này vẫn hoạt động, thay vì tra cứu trực tiếp bằng `t->comm` (như ở đây), có cách tốt hơn: kernel cung cấp helper routine `{get,set}_task_comm()` để lấy và đặt tên task. (Hãy nhớ đã trình bày nội dung tương tự trong Chương 6, Các kiến thức thiết yếu về kernel internals – Process và thread, ở phần Các kernel helper method tích hợp và tối ưu hóa.)
+Nếu task là kernel thread, chúng ta đặt tên trong dấu ngoặc vuông. Giờ dù lấy tên thread theo cách này vẫn hoạt động, thay vì tra cứu trực tiếp bằng `t->comm` (như ở đây), có cách tốt hơn: kernel cung cấp helper routine `{get,set}_task_comm()` để lấy và đặt tên task. (Hãy nhớ đã trình bày nội dung tương tự trong Chương 6, Các kiến thức thiết yếu về kernel internals – Process và thread, ở phần Các kernel helper method Built-in và tối ưu hóa.)
 
 Vậy giờ hãy làm theo cách đó! Chúng ta viết lại module (thành `ch13/4_lockdep/buggy_thrdshow_eg/thrd_showall_buggy.c`) để dùng helper macro `get_task_comm(buf, tsk)`; parameter đầu là buffer pointer để đặt tên thread vào (kỳ vọng bạn đã allocate memory cho nó), parameter thứ hai là pointer đến task structure của thread mà bạn đang truy vấn tên (xem code snippet sau):
 
@@ -2010,7 +2010,7 @@ EXPORT_SYMBOL_GPL(__get_task_comm);
 
 À, đây là vấn đề, nguyên nhân gốc của bug: function `__get_task_comm()` lập tức gọi API `task_lock()`, thực chất cố reacquire chính lock mà chúng ta đang giữ, gây (self) deadlock!
 
-Hãy nhớ một trong các “quy tắc” đã trình bày ở chương trước: “đừng cố reacquire lock đang giữ.”
+Hãy nhớ một trong các “quy tắc” đã trình bày ở chương trước: “đừng cố re-acquire lock đang giữ.”
 
 Chúng ta acquire nó ở đâu? Hãy nhớ một trong những dòng code đầu tiên của kernel module (có bug) sau khi vào loop là nơi gọi `task_lock(t)`; rồi chỉ vài dòng code sau gọi `get_task_comm()`, bên trong cố reacquire chính lock đó: kết quả là self deadlock:
 
@@ -2023,7 +2023,7 @@ do_each_thread(g, t) {   /* 'g' : process ptr; 't': thread ptr */
     [ … ]
 ```
 
-Hơn nữa, dễ dàng tìm lock cụ thể nào bị acquire hai lần; tra code của routine `task_lock()`:
+Hơn nữa, dễ dàng tìm lock cụ thể nào bị double-acquired; tra code của routine `task_lock()`:
 
 ```
 // include/linux/sched/task.h */
@@ -2066,13 +2066,13 @@ Giờ đã hiểu vấn đề ở đây, làm thế nào sửa nó? Hãy xem hai
 
 Nhìn báo cáo của `lockdep` (Hình 13.21) và diễn giải, việc này khá đơn giản (đây là một cách sửa; chúng ta sẽ sớm thảo luận cách khác): vì API `task_lock(t)` trong module code acquire task structure spinlock tên `alloc_lock` ở đầu loop `do-while`, hãy bảo đảm trước khi gọi routine `get_task_comm()` – giờ đã biết bên trong cố acquire (rồi release) chính lock đó – bạn unlock trước, rồi thực hiện `get_task_comm()`, sau đó lock lại.
 
-Ảnh chụp sau (Hình 13.22) cho thấy khác biệt ở cấp code (qua utility `diff(1)`) giữa phiên bản cũ có bug (`ch13/4_lockdep/buggy_thrdshow_eg/thrd_showall_buggy.c`) và phiên bản code mới đã sửa (`ch13/4_lockdep/fixed_thrdshow_eg/thrd_showall_fixed.c`):
+Ảnh chụp sau (Hình 13.22) cho thấy khác biệt code-level (qua utility `diff(1)`) giữa phiên bản cũ có bug (`ch13/4_lockdep/buggy_thrdshow_eg/thrd_showall_buggy.c`) và phiên bản code mới đã sửa (`ch13/4_lockdep/fixed_thrdshow_eg/thrd_showall_fixed.c`):
 
 ![Hình 13.22](images/ch13/fig13-22.jpg)
 
 Hình 13.22: Ảnh chụp (một phần) thể hiện khác biệt chính giữa phiên bản có bug và đã sửa của demo thrdshow LKM
 
-(Hãy bỏ qua số dòng do diff tạo; chúng có thể khác nhau.) Bốn vòng tròn đánh số trong Hình 13.22 giải thích cách sửa:
+(Hãy bỏ qua số dòng diff-generated; chúng có thể khác nhau.) Bốn vòng tròn đánh số trong Hình 13.22 giải thích cách sửa:
 
 1\. `task_lock(t)` acquire task lock (như đã biết là spinlock `alloc_lock` trong task structure). 2. Hiểu rằng `get_task_comm()` cũng cố acquire chính lock đó (qua việc gọi `task_lock()`), trước tiên chúng ta unlock bằng `task_unlock().` 3. Gọi `get_task_comm()` an toàn; bên trong nó gọi `task_lock()`, acquire spinlock `alloc_lock`, rồi release (qua `task_unlock()`). 4. Giờ gọi `task_lock()` để acquire lại spinlock cần thiết.
 
@@ -2092,15 +2092,15 @@ Một lần nữa, vì loại code này – duyệt từng task structure theo c
 
 Vì vậy chúng ta refactor code của module để dùng RCU read-side critical section; đây là phiên bản mới tốt hơn: `ch13/3_lockfree/thrdshowall_rcu/`. Hơn nữa, vì ở đây không bao giờ sửa nội dung task structure nào – nói cách khác không có in-place update (write) – chúng ta còn loại bỏ nhu cầu write protection bằng spinlock.
 
-Vậy code trong phiên bản RCU trông thế nào? Vì phần lớn giống nhau, thay vì hiển thị toàn bộ code, chúng ta chỉ hiển thị khác biệt giữa phiên bản duyệt task struct dùng routine `task_{un}lock()` (“bản sửa” trước đó, được giải thích ở phần trước) và phiên bản mới cải tiến dựa trên RCU:
+Vậy code trong phiên bản RCU trông thế nào? Vì phần lớn giống nhau, thay vì hiển thị toàn bộ code, chúng ta chỉ hiển thị khác biệt giữa phiên bản iterate-over-task-struct dùng routine `task_{un}lock()` (“bản sửa” trước đó, được giải thích ở phần trước) và phiên bản mới cải tiến RCU-based:
 
 ![Hình 13.23](images/ch13/fig13-23.jpg)
 
 Hình 13.23: Ảnh chụp (một phần) thể hiện trong patch các khác biệt chính giữa phiên bản đã sửa ban đầu dùng task\_{un}lock() và phiên bản “tốt hơn” dùng RCU của các demo LKM
 
-GitHub repo của sách cũng có patch (`https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/blob/main/ch13/3_lockfree/thrdshowall_rcu/using_rcu.patch`; hãy bỏ qua số dòng do diff tạo; chúng có thể khác nhau).
+GitHub repo của sách cũng có patch (`https://github.com/PacktPublishing/Linux-Kernel-Programming_2E/blob/main/ch13/3_lockfree/thrdshowall_rcu/using_rcu.patch`; hãy bỏ qua số dòng diff-generated; chúng có thể khác nhau).
 
-Nghiên cứu code (và patch); chú ý vì giờ dựa trên RCU, chúng ta dùng routine `rcu_dereference`() để “lấy RCU-protected pointer một cách an toàn, sau đó có thể dereference (và sử dụng)” (đúng như đã học trong Giải thích RCU Cấp độ 3 (Cấp độ 2 + nhiều chi tiết hơn).
+Nghiên cứu code (và patch); chú ý vì giờ RCU-based, chúng ta dùng routine `rcu_dereference`() để “lấy RCU-protected pointer một cách an toàn, sau đó có thể dereference (và sử dụng)” (đúng như đã học trong Giải thích RCU Cấp độ 3 (Cấp độ 2 + nhiều chi tiết hơn).
 
 Được rồi, giờ hãy chuyển sang một ví dụ nữa tận dụng sức mạnh của lockdep: phát hiện AB-BA (circular) deadlock!
 
@@ -2237,11 +2237,11 @@ Hình 13.24: Ảnh chụp (một phần) kernel log; lockdep phát hiện và b�
 
 Compiler attribute .cold
 
-Nhân tiện, tại sao một số function có hậu tố `.cold` (như function `thrd_work` ở đây)? Câu trả lời ngắn là đây là compiler attribute chỉ định function ít có khả năng được thực thi. Các function được gọi là cold này thường được đặt trong linker section riêng để cải thiện code locality của các non-cold section cần chạy nhanh! Tất cả nhằm tối ưu hóa. (Lưu ý trong một số trường hợp, phiên bản function bình thường có thể cùng tồn tại với phiên bản cold.)
+Nhân tiện, tại sao một số function có hậu tố `.cold` (như function `thrd_work` ở đây)? Câu trả lời ngắn là đây là compiler attribute chỉ định function ít có khả năng được thực thi. Các function so-called cold này thường được đặt trong linker section riêng để cải thiện code locality của các non-cold section required-to-be-fast! Tất cả nhằm tối ưu hóa. (Lưu ý trong một số trường hợp, phiên bản function bình thường có thể co-exist với phiên bản cold.)
 
 Báo cáo `lockdep` khá tuyệt vời. Phần đầu cho biết đã phát hiện “possible circular locking dependency…”. Sau đó nó cho thấy điều thực sự xảy ra lúc runtime: ở đây thread 0 (hiển thị là `thrd_0/0/3578`, tên (`thrd_0/0`), theo sau bởi dấu gạch chéo và PID) cố acquire lock (hash value 64-bit `ffffffffc06c80b8`; thậm chí hiển thị symbolic name `lockB`!) từ module, “`but task is already holding lock:`". Tiếp theo nó cho biết lock được giữ trong cùng function (`thrd_work`) của cùng module (`[deadlock_eg_AB_BA]`), chỉ rõ tình huống (circular/AB-BA) deadlock. Rồi hiển thị (kernel) call stack dẫn đến đây (với call stack chi tiết hơn theo ngay sau, không thấy trong Hình 13.24), tất nhiên làm rõ hoàn toàn code path nào gây deadlock.
 
-Vì là debug kernel, kernel symbol chắc chắn có sẵn; ngoài ra, ngay cả frame pointer config cũng có khả năng được enable. Chúng giúp có call stack chính xác, chi tiết, tất nhiên khiến debugging dễ hơn. Vậy trong production thì sao? Dù kernel symbol có thể được enable, frame pointer có thể không; điều đó cùng nhiều phức tạp khác khiến khó hơn… nhưng đừng nản, vì có rất nhiều kỹ thuật và công cụ kernel debug hữu ích (hãy xem sách Linux Kernel Debugging). Một lần nữa, ở đây là tình huống debug và kỳ vọng sử dụng debug kernel với nhiều config phát hiện bug được enable.
+Vì là debug kernel, kernel symbol chắc chắn có sẵn; ngoài ra, ngay cả frame pointer config cũng có khả năng được enable. Chúng giúp có call stack chính xác, chi tiết, tất nhiên khiến debugging dễ hơn. Vậy trong production thì sao? Dù kernel symbol có thể được enable, frame pointer có thể không; điều đó cùng nhiều phức tạp khác khiến khó hơn… nhưng đừng nản, vì có rất nhiều kỹ thuật và công cụ kernel debug hữu ích (hãy xem sách Linux Kernel Debugging). Một lần nữa, ở đây là tình huống debug và kỳ vọng sử dụng debug kernel với nhiều config bug-catching được enable.
 
 Sau đó (từ dòng `other info that might help us debug this:`), báo cáo tiếp tục chỉ ra nguyên nhân gốc tổng quát của deadlock bằng tình huống điển hình (thực sự là timeline diagram nhỏ!). Xem các dòng sau đó về phía dưới Hình 13.24; chúng cho thấy kiểu sự việc thực sự xảy ra lúc runtime – locking sequence có thể out-of-order (ooo). Chú ý cách lockdep báo cáo tình huống tổng quát ở đây; phần trên cho biết điều thực sự xảy ra lúc runtime. Ở đây rõ ràng chính xác là như vậy: kthread (#0) trên CPU core 0 lấy `lockA`; song song, đồng thời, kthread khác (#1) trên core 1 lấy `lockB` trước – bug! Sau đó kthread1 cố lấy `lockA`, trong khi song song kthread0 cố lấy `lockB`, và chúng ta có AB-BA circular deadlock đáng yêu.
 
@@ -2328,7 +2328,7 @@ Script trước tiên disable locking statistics rồi chạy test case. Test ca
 
 Giả sử đã chạy script `lock_stats_demo.sh`; giờ hãy diễn giải phần liên quan trong lock statistics thu được (lưu trong file `lockstats.txt`; để lọc output không cần thiết, chúng ta grep các dòng chứa tên lock `lockA` và `lockB`, giữ một dòng context).
 
-Dù vậy, output thu được rất dài theo chiều ngang và do đó xuống dòng; đây là cùng output đó, được chú thích bằng màu để dễ diễn giải các cột hơn (gợi ý: `con` viết tắt của contended):
+Dù vậy, output thu được rất dài theo chiều ngang và do đó xuống dòng; đây là cùng output đó, color-coded để dễ diễn giải các cột hơn (gợi ý: `con` viết tắt của contended):
 
 ![Hình 13.25](images/ch13/fig13-25.jpg)
 
@@ -2370,7 +2370,7 @@ Warning này có thể yêu cầu bạn reboot hệ thống.
 
 ## Giới thiệu memory barrier
 
-Cuối cùng, hãy đề cập vấn đề khác – memory barrier. Nó nghĩa là gì? Đôi khi flow của chương trình trở nên khó biết đối với lập trình viên vì microprocessor, memory controller và compiler có thể reorder memory read và write. Trong phần lớn trường hợp, các “thủ thuật” này vô hại và thường tối ưu performance. Nhưng có trường hợp không được reorder (memory I/O) instruction sequence như vậy; phải tôn trọng memory load và store sequence ban đầu theo ý định của lập trình viên. Những trường hợp nào? Thường là:
+Cuối cùng, hãy đề cập vấn đề khác – memory barrier. Nó nghĩa là gì? Đôi khi flow của chương trình trở nên khó biết đối với lập trình viên vì microprocessor, memory controller và compiler có thể reorder memory read và write. Trong phần lớn trường hợp, các “thủ thuật” này vô hại và thường tối ưu performance. Nhưng có trường hợp không được reorder (memory I/O) instruction sequence như vậy; phải tôn trọng memory load và store sequence ban đầu theo programmer-intended. Những trường hợp nào? Thường là:
 
 - Khi làm việc qua hardware boundary, chẳng hạn giữa các CPU core riêng lẻ trên multicore system
 
@@ -2390,7 +2390,7 @@ Có thể đặt memory barrier vào code path bằng các macro sau: bạn ph�
 
 Đó là điểm chính: memory barrier bảo đảm cho đến khi instruction hoặc data access trước đó thực thi thì instruction hoặc data access sau đó chưa thực thi, nhờ vậy duy trì ordering. Trong một số trường hợp (khá hiếm), nhiều khả năng là DMA, driver author sử dụng memory barrier. Khi dùng DMA, cần đọc tài liệu kernel (`https://www.kernel.org/doc/Documentation/DMA-API-HOWTO.txt`). Tài liệu nói rõ nơi phải dùng memory barrier và nguy cơ khi không dùng; xem ví dụ tiếp theo để biết thêm.
 
-Vì đặt memory barrier đúng vào code path thường khá khó hiểu với nhiều người, chúng tôi khuyến khích bạn tham khảo technical reference manual liên quan của processor hoặc peripheral mà bạn đang viết driver để biết thêm chi tiết. Ví dụ trên Raspberry Pi, system on-a-chip (SoC) điển hình là Broadcom BCM2835 series; tham khảo peripherals manual – BCM2835 ARM Peripherals manual (`https://www.raspberrypi.org/app/uploads/2012/02/BCM2835-ARM-Peripherals.pdf`), cụ thể phần 1.3, Các lưu ý khi truy cập peripheral để có memory ordering đúng – giúp xác định khi nào nên và không nên dùng memory barrier.
+Vì đặt memory barrier đúng vào code path thường khá khó hiểu với nhiều người, chúng tôi khuyến khích bạn tham khảo technical reference manual liên quan của processor hoặc peripheral mà bạn đang viết driver để biết thêm chi tiết. Ví dụ trên Raspberry Pi, system on-a chip (SoC) điển hình là Broadcom BCM2835 series; tham khảo peripherals manual – BCM2835 ARM Peripherals manual (`https://www.raspberrypi.org/app/uploads/2012/02/BCM2835-ARM-Peripherals.pdf`), cụ thể phần 1.3, Các lưu ý khi truy cập peripheral để có memory ordering đúng – giúp xác định khi nào nên và không nên dùng memory barrier.
 
 ### Ví dụ sử dụng memory barrier trong device driver
 
@@ -2447,11 +2447,11 @@ Tin tốt là trong phần lớn trường hợp, miễn sử dụng đúng các
 
 ### Lưu ý về marked access
 
-Sử dụng macro `READ_ONCE()` và `WRITE_ONCE()` – được gọi là marked access (khác với plain access thông thường của ngôn ngữ C) – trên từng variable bảo đảm tuyệt đối compiler và CPU sẽ làm đúng ý bạn. Nó ngăn compiler optimization và sử dụng memory barrier khi cần, bảo đảm cache coherency khi nhiều thread trên các core khác nhau truy cập đồng thời variable đang xét.
+Sử dụng macro `READ_ONCE()` và `WRITE_ONCE()` – so-called marked access (khác với plain access thông thường của ngôn ngữ C) – trên từng variable bảo đảm tuyệt đối compiler và CPU sẽ làm đúng ý bạn. Nó ngăn compiler optimization và sử dụng memory barrier khi cần, bảo đảm cache coherency khi nhiều thread trên các core khác nhau truy cập đồng thời variable đang xét.
 
 Driver/module author hãy lưu ý! Điều quan trọng là đừng quá lạm dụng macro `READ_ONCE()` và `WRITE_ONCE()`. Driver author thông thường không được khuyến nghị dùng chúng để “sửa” data race.
 
-Nhưng tại sao không? Tiền đề là read và write trên shared writable variable không được race với nhau. Giờ nếu đánh dấu mọi (hoặc gần như mọi) shared variable memory access bằng macro `READ_ONCE()` hoặc `WRITE_ONCE()`, thực chất sẽ ngăn công cụ như KCSAN phát hiện các race có bug mà chúng có thể gặp! Vì vậy điều quan trọng là không bảo vệ chúng qua các macro này và read/write mà chúng thực hiện phải ở dạng ngôn ngữ C thông thường. Thay vào đó, chúng tôi kỳ vọng memory access được bảo vệ đúng ngay từ thiết kế và triển khai ở cấp code (có lẽ bằng mutex, spinlock hoặc primitive `atomic_t`/`refcount_t`, kỹ thuật lock-free như RCU hoặc per-CPU variable, v.v.). Hơn nữa, KCSAN báo cáo data race thường là dấu hiệu báo trước, gợi ý rằng có logic bug (nghiêm trọng) trong code. Chỉ đơn giản tắt nó bằng macro `READ_ONCE()` hoặc `WRITE_ONCE()` sẽ là việc rất có hại cho mọi người.
+Nhưng tại sao không? Tiền đề là read và write trên shared writable variable không được race với nhau. Giờ nếu đánh dấu mọi (hoặc gần như mọi) shared variable memory access bằng macro `READ_ONCE()` hoặc `WRITE_ONCE()`, thực chất sẽ ngăn công cụ như KCSAN phát hiện các race có bug mà chúng có thể gặp! Vì vậy điều quan trọng là không bảo vệ chúng qua các macro này và read/write mà chúng thực hiện phải ở dạng ngôn ngữ C thông thường. Thay vào đó, chúng tôi kỳ vọng memory access được bảo vệ đúng ngay từ thiết kế và triển khai code-level (có lẽ bằng mutex, spinlock hoặc primitive `atomic_t`/`refcount_t`, kỹ thuật lock-free như RCU hoặc per-CPU variable, v.v.). Hơn nữa, KCSAN báo cáo data race thường là dấu hiệu báo trước, gợi ý rằng có logic bug (nghiêm trọng) trong code. Chỉ đơn giản tắt nó bằng macro `READ_ONCE()` hoặc `WRITE_ONCE()` sẽ là việc rất có hại cho mọi người.
 
 Một điều cuối – câu hỏi thường gặp (đáng tiếc): sử dụng keyword `volatile` của ngôn ngữ C có khiến vấn đề concurrency biến mất một cách kỳ diệu không? Tất nhiên không. Keyword `volatile` chỉ yêu cầu compiler disable các optimization phổ biến quanh variable đó (những thứ bên ngoài code path này cũng có thể sửa variable được đánh dấu `volatile`), chỉ vậy thôi. Điều này thường cần thiết và hữu ích khi làm việc với Memory Mapped I/O (MMIO) trong driver. Về memory barrier, thú vị là compiler không reorder read hoặc write trên variable được đánh dấu `volatile` so với các volatile variable khác. Tuy nhiên, atomicity là construct riêng, không được bảo đảm bằng keyword `volatile`.
 
@@ -2463,7 +2463,7 @@ Trong chương này, chúng ta tiếp nối chương trước trong hành trình
 
 Tiếp đó, một lợi ích lớn cho performance – các algorithm và kỹ thuật programming lock-free – được trình bày khá chi tiết, tập trung vào hiểu và học cách sử dụng per-CPU variable cùng công nghệ kernel synchronization RCU mạnh mẽ trong Linux kernel. Điều quan trọng là học cách dùng chúng cẩn thận (đặc biệt dạng nâng cao hơn như RCU). Cuối cùng, bạn học cách debug các vấn đề locking phổ biến bằng kernel lock debugging construct, thông qua configure, build và làm việc trên debug kernel (điều này rất quan trọng trong development, refactoring và test). Đặc biệt, lockdep là cách rất mạnh để phát hiện vấn đề locking, bao gồm cả deadlock chết người. Chúng ta kết thúc bằng vài lời về memory barrier là gì và thường được dùng ở đâu.
 
-Hành trình dài làm việc trong Linux kernel (và các lĩnh vực liên quan như device driver) của bạn giờ đã thực sự bắt đầu. Tuy nhiên, hãy hiểu rằng nếu không thực hành thường xuyên và thực sự làm việc với những nội dung này, thành quả sẽ nhanh chóng phai nhạt... Tôi khuyến khích bạn tiếp tục cập nhật kiến thức về những chủ đề này và hơn nữa. Khi kiến thức và kinh nghiệm tăng lên, đóng góp cho Linux kernel, hoặc bất kỳ open source project nào, là việc làm cao đẹp mà bạn rất nên thực hiện.
+Hành trình dài làm việc trong Linux kernel (và các lĩnh vực liên quan như device driver) của bạn giờ đã thực sự bắt đầu. Tuy nhiên, hãy hiểu rằng nếu không hands-on thường xuyên và thực sự làm việc với những nội dung này, thành quả sẽ nhanh chóng phai nhạt... Tôi khuyến khích bạn tiếp tục cập nhật kiến thức về những chủ đề này và hơn nữa. Khi kiến thức và kinh nghiệm tăng lên, đóng góp cho Linux kernel, hoặc bất kỳ open source project nào, là việc làm cao đẹp mà bạn rất nên thực hiện.
 
 ## Câu hỏi
 
