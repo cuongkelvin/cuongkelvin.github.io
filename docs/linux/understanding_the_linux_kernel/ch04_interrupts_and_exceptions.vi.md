@@ -461,7 +461,7 @@ Exception handler có cấu trúc chuẩn gồm ba bước:
 Để tận dụng exception, IDT phải được initialize đúng với exception handler function cho mỗi exception nhận biết. Function `trap_init()` có nhiệm vụ insert giá trị cuối — các function xử lý exception — vào mọi IDT entry tham chiếu nonmaskable interrupt và exception. Thực hiện qua function `set_trap_gate()`, `set_intr_gate()`, `set_system_gate()`, `set_system_intr_gate()` và `set_task_gate()`:
 
 ```c
-set_trap_gate(0,÷_error);
+set_trap_gate(0,&divide_error);
 set_trap_gate(1,&debug);
 set_intr_gate(2,&nmi);
 set_system_intr_gate(3,&int3);

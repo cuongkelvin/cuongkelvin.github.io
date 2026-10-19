@@ -687,7 +687,7 @@ Nếu parameter `oldset` là `NULL`, function khởi tạo nó bằng địa ch�
 
 ```c
 if (!oldset)
-    oldset = ¤t->blocked;
+    oldset = &current->blocked;
 ```
 
 Phần cốt lõi của function `do_signal()` gồm vòng lặp gọi lặp lại function `dequeue_signal()` cho đến khi không còn pending signal không bị block trong cả private lẫn shared pending signal queue. Return code của `dequeue_signal()` được lưu trong local variable `signr`. Nếu giá trị là 0, nghĩa là đã xử lý mọi pending signal và `do_signal()` có thể kết thúc. Chừng nào trả về giá trị khác không, vẫn có pending signal đợi xử lý. `dequeue_signal()` được gọi lại sau khi `do_signal()` xử lý signal hiện tại.
@@ -699,7 +699,7 @@ Hãy xem cách function `do_signal()` xử lý mỗi pending signal có number d
 Sau đó, `do_signal()` nạp vào local variable `ka` địa chỉ data structure `k_sigaction` của signal cần xử lý:
 
 ```c
-ka = ¤t->sig->action[signr-1];
+ka = &current->sig->action[signr-1];
 ```
 
 Tùy nội dung, có thể thực hiện ba loại action: ignore signal, thực hiện default action, hoặc thực thi signal handler.
@@ -856,11 +856,11 @@ Sau khi thiết lập User Mode stack, function `handle_signal()` kiểm tra gi�
 
 ```c
 if (!(ka->sa.sa_flags & SA_NODEFER)) {
-    spin_lock_irq(¤t->sighand->siglock);
-    sigorsets(¤t->blocked, ¤t->blocked, &ka->sa.sa_mask);
-    sigaddset(¤t->blocked, sig);
+    spin_lock_irq(&current->sighand->siglock);
+    sigorsets(&current->blocked, &current->blocked, &ka->sa.sa_mask);
+    sigaddset(&current->blocked, sig);
     recalc_sigpending(current);
-    spin_unlock_irq(¤t->sighand->siglock);
+    spin_unlock_irq(&current->sighand->siglock);
 }
 ```
 
@@ -1064,16 +1064,16 @@ siginitset(&new_ka.sa.sa_mask, mask);
 Function gọi `do_sigaction()` để sao chép table `new_ka` mới vào entry ở vị trí `sig-1` của `current->sig->action (`number của signal lớn hơn vị trí trong array một đơn vị vì không có signal không):
 
 ```c
-k = ¤t->sig->action[sig-1];
+k = &current->sig->action[sig-1];
 if (act) {
     *k = *act;
     sigdelsetmask(&k->sa.sa_mask, sigmask(SIGKILL) | sigmask(SIGSTOP));
     if (k->sa.sa_handler == SIG_IGN || (k->sa.sa_handler == SIG_DFL &&
      (sig==SIGCONT || sig==SIGCHLD || sig==SIGWINCH || sig==SIGURG))) {
-        rm_from_queue(sigmask(sig), ¤t->signal->shared_pending);
+        rm_from_queue(sigmask(sig), &current->signal->shared_pending);
         t = current;
         do {
-            rm_from_queue(sigmask(sig), ¤t->pending);
+            rm_from_queue(sigmask(sig), &current->pending);
             recalc_sigpending_tsk(t);
             t = next_thread(t);
         } while (t != current);
@@ -1099,9 +1099,9 @@ return ret ? ret : (unsigned long)old_sa.sa.sa_handler;
 System call `sigpending()` cho phép process kiểm tra tập pending blocked signal—tức signal phát sinh trong khi bị block. Service routine `sys_sigpending()` tương ứng nhận một parameter `set`, là địa chỉ user variable mà array bit phải được sao chép vào:
 
 ```c
-sigorsets(&pending, ¤t->pending.signal,
-                    ¤t->signal->shared_pending.signal);
-sigandsets(&pending, ¤t->blocked, &pending);
+sigorsets(&pending, &current->pending.signal,
+                    &current->signal->shared_pending.signal);
+sigandsets(&pending, &current->blocked, &pending);
 copy_to_user(set, &pending, 4);
 ```
 
@@ -1141,9 +1141,9 @@ if (copy_from_user(&new_set, set, sizeof(*set)))
 new_set &= ~(sigmask(SIGKILL)|sigmask(SIGSTOP));
 old_set = current->blocked.sig[0];
 if (how == SIG_BLOCK)
-    sigaddsetmask(¤t->blocked, new_set);
+    sigaddsetmask(&current->blocked, new_set);
 else if (how == SIG_UNBLOCK)
-    sigdelsetmask(¤t->blocked, new_set);
+    sigdelsetmask(&current->blocked, new_set);
 else if (how == SIG_SETMASK)
     current->blocked.sig[0] = new_set;
 else
@@ -1163,7 +1163,7 @@ Service routine `sys_sigsuspend()` tương ứng thực thi các statement sau:
 ```c
 mask &= ~(sigmask(SIGKILL) | sigmask(SIGSTOP));
 saveset = current->blocked;
-siginitset(¤t->blocked, mask);
+siginitset(&current->blocked, mask);
 recalc_sigpending(current);
 regs->eax = -EINTR;
 while (1) {

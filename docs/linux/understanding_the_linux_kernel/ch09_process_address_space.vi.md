@@ -1211,8 +1211,8 @@ Nếu process mới được tạo qua system call `clone()` và flag `CLONE_VM`
 
 ```c
 if (clone_flags & CLONE_VM) {
-    atomic_inc(¤t->mm->mm_users);
-    spin_unlock_wait(¤t->mm->page_table_lock);
+    atomic_inc(&current->mm->mm_users);
+    spin_unlock_wait(&current->mm->page_table_lock);
     tsk->mm = current->mm;
     tsk->active_mm = current->mm;
     return 0;

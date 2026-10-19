@@ -350,8 +350,8 @@ if (current->policy == SCHED_RR && !--current->time_slice) {
     current->time_slice = task_timeslice(current);
     current->first_time_slice = 0;
     set_tsk_need_resched(current);
-    list_del(¤t->run_list);
-    list_add_tail(¤t->run_list,
+    list_del(&current->run_list);
+    list_add_tail(&current->run_list,
                   this_rq()->active->queue+current->prio);
 }
 ```
@@ -418,8 +418,8 @@ if (TASK_INTERACTIVE(p) && !((task_timeslice(p) -
          p->time_slice) % TIMESLICE_GRANULARITY(p)) &&
         (p->time_slice >= TIMESLICE_GRANULARITY(p)) &&
         (p->array == rq->active)) {
-    list_del(¤t->run_list);
-    list_add_tail(¤t->run_list,
+    list_del(&current->run_list);
+    list_add_tail(&current->run_list,
                   this_rq()->active->queue+current->prio);
     set_tsk_need_resched(p);
 }
@@ -835,7 +835,7 @@ prev = current;
 if (prev->lock_depth >= 0)
     __reacquire_kernel_lock();
 preempt_enable_no_resched();
-if (test_bit(TIF_NEED_RESCHED, ¤t_thread_info()->flags)
+if (test_bit(TIF_NEED_RESCHED, &current_thread_info()->flags)
    goto need_resched;
 return;
 ```
