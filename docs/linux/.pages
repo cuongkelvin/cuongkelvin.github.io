@@ -6,4 +6,5 @@ nav:
   - understanding_the_linux_kernel
   - linux_device_driver_development
   - understanding_linux_network_internals_book
+  - linux_kernel_networking_book
   - ...

@@ -100,3 +100,25 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung vào
 - [**Chương 15 — Bridging: Spanning Tree Protocol**](understanding_linux_network_internals_book/ch15_bridging_the_spanning_tree_protocol.vi.md) — bridge ID và port ID, BPDU, topology hoạt động, timer, thay đổi topology
 - [**Chương 16 — Bridging: cài đặt trong Linux**](understanding_linux_network_internals_book/ch16_bridging_linux_implementation.vi.md) — bridge device, tạo và xóa bridge, thêm port, bật tắt bridge
 - [**Chương 17 — Bridging: chủ đề khác**](understanding_linux_network_internals_book/ch17_bridging_miscellaneous_topics.vi.md) — công cụ cấu hình user space, tinh chỉnh qua /proc và /sys, thống kê
+
+## Theo sách *Linux Kernel Networking*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Đi qua từng giao thức trong network stack của kernel, từ IPv4, IPv6 tới wireless và InfiniBand.
+
+- [**Chương 1 — Giới thiệu**](linux_kernel_networking_book/ch01_introduction.vi.md) — tổng quan network stack, network device, cộng đồng phát triển
+- [**Chương 2 — Netlink socket**](linux_kernel_networking_book/ch02_netlink_sockets.vi.md) — các họ netlink và generic netlink
+- [**Chương 3 — ICMP**](linux_kernel_networking_book/ch03_internet_control_message_protocol_icmp.vi.md) — ICMPv4, ICMPv6 và ping socket
+- [**Chương 4 — IPv4**](linux_kernel_networking_book/ch04_ipv4.vi.md) — header, nhận và gửi gói, multicast, IP option, phân mảnh và ghép mảnh
+- [**Chương 5 — IPv4 routing**](linux_kernel_networking_book/ch05_the_ipv4_routing_subsystem.vi.md) — forwarding và FIB, tra bảng định tuyến, ICMP redirect
+- [**Chương 6 — Định tuyến nâng cao**](linux_kernel_networking_book/ch06_advanced_routing.vi.md) — multicast routing, policy routing, multipath routing
+- [**Chương 7 — Neighbouring subsystem**](linux_kernel_networking_book/ch07_linux_neighbouring_subsystem.vi.md) — lõi neighbouring, ARP cho IPv4, NDISC cho IPv6
+- [**Chương 8 — IPv6**](linux_kernel_networking_book/ch08_ipv6.vi.md) — địa chỉ, header và extension header, autoconfiguration, nhận và gửi gói
+- [**Chương 9 — Netfilter**](linux_kernel_networking_book/ch09_netfilter.vi.md) — framework, các hook, connection tracking
+- [**Chương 10 — IPsec**](linux_kernel_networking_book/ch10_ipsec.vi.md) — IKE, mã hóa, XFRM framework, ESP, nhận và gửi gói IPsec
+- [**Chương 11 — Giao thức tầng 4**](linux_kernel_networking_book/ch11_layer_4_protocols.vi.md) — socket, UDP, TCP, SCTP, DCCP
+- [**Chương 12 — Wireless trong Linux**](linux_kernel_networking_book/ch12_wireless_in_linux.vi.md) — mac80211, MAC header 802.11, chế độ tiết kiệm năng lượng, MLME, 802.11n
+- [**Chương 13 — InfiniBand**](linux_kernel_networking_book/ch13_infiniband.vi.md) — tổng quan RDMA và InfiniBand, các tài nguyên RDMA
+- [**Chương 14 — Chủ đề nâng cao**](linux_kernel_networking_book/ch14_advanced_topics.vi.md) — network namespace, cgroup, busy poll, Bluetooth, 6LoWPAN, NFC, PCI
+- [**Phụ lục A — Linux API**](linux_kernel_networking_book/chA_linux_api.vi.md) — tra cứu `sk_buff`, `net_device` và các đối tượng RDMA
+- [**Phụ lục B — Quản trị mạng**](linux_kernel_networking_book/chB_network_administration.vi.md) — danh sách công cụ dòng lệnh để quản trị và debug mạng
+- [**Phụ lục C — Thuật ngữ**](linux_kernel_networking_book/chC_glossary.vi.md) — bảng thuật ngữ của sách
