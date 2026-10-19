@@ -1,0 +1,12 @@
+title: Mastering Embedded Linux Programming
+nav:
+  - 2. Learning About Toolchains: ch02_learning_about_toolchains.vi.md
+  - 3. All About Bootloaders: ch03_all_about_bootloaders.vi.md
+  - 4. Porting and Configuring the Kernel: ch04_porting_and_configuring_the_kernel.vi.md
+  - 6. Selecting a Build System: ch06_selecting_a_build_system.vi.md
+  - 7. Creating a Storage Strategy: ch07_creating_a_storage_strategy.vi.md
+  - 9. Starting Up the init Program: ch09_starting_up_the_init_program.vi.md
+  - 10. Processes and Threads: ch10_learning_about_processes_and_threads.vi.md
+  - 11. Managing Memory: ch11_managing_memory.vi.md
+  - 13. Profiling and Tracing: ch13_profiling_and_tracing.vi.md
+  - ...

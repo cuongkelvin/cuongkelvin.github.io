@@ -1,0 +1,27 @@
+title: Embedded Linux Primer
+nav:
+  - 1. Introduction: ch01_introduction.vi.md
+  - 2. The Big Picture: ch02_the_big_picture.vi.md
+  - 4. The Linux Kernel – A Different Perspective: ch04_the_linux_kernel_a_different_perspective.vi.md
+  - 5. Kernel Initialization: ch05_kernel_initialization.vi.md
+  - 6. User Space Initialization: ch06_user_space_initialization.vi.md
+  - 7. Bootloaders: ch07_bootloaders.vi.md
+  - 8. Device Driver Basics: ch08_device_driver_basics.vi.md
+  - 9. File Systems: ch09_file_systems.vi.md
+  - 10. MTD Subsystem: ch10_mtd_subsystem.vi.md
+  - 11. BusyBox: ch11_busybox.vi.md
+  - 12. Embedded Development Environment: ch12_embedded_development_environment.vi.md
+  - 13. Development Tools: ch13_development_tools.vi.md
+  - 14. Kernel Debugging Techniques: ch14_kernel_debugging_techniques.vi.md
+  - 15. Debugging Embedded Linux Applications: ch15_debugging_embedded_linux_applications.vi.md
+  - 16. Open Source Build Systems: ch16_open_source_build_systems.vi.md
+  - 17. Linux and Real Time: ch17_linux_and_real_time.vi.md
+  - 18. Universal Serial Bus: ch18_universal_serial_bus.vi.md
+  - 19. udev: ch19_udev.vi.md
+  - A. GNU Public License: chA_gnu_public_license.vi.md
+  - B. U-Boot Configurable Commands: chB_u_boot_configurable_commands.vi.md
+  - C. BusyBox Commands: chC_busybox_commands.vi.md
+  - D. SDRAM Interface Considerations: chD_sdram_interface_considerations.vi.md
+  - E. Open Source Resources: chE_open_source_resources.vi.md
+  - F. Sample BDI-2000 Configuration File: chF_sample_bdi_2000_configuration_file.vi.md
+  - ...

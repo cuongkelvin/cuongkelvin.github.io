@@ -1,0 +1,5 @@
+title: Network Device Drivers
+nav:
+  - "LDD3 · 17. Network Drivers": ldd3_ch17/ch17_network_drivers.vi.md
+  - "Essential Linux Device Drivers · 15. Network Interface Cards": eldd_ch15/ch15_network_interface_cards.vi.md
+  - "Linux Device Drivers Development · 22. NIC Drivers": madieu2017_ch22/ch22_network_interface_card_drivers.vi.md

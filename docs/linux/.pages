@@ -7,4 +7,7 @@ nav:
   - linux_device_driver_development
   - understanding_linux_network_internals_book
   - linux_kernel_networking_book
+  - embedded_linux_primer_book
+  - mastering_embedded_linux_programming_book
+  - network_device_drivers
   - ...

@@ -122,3 +122,49 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách. Đi qua từng g
 - [**Phụ lục A — Linux API**](linux_kernel_networking_book/chA_linux_api.vi.md) — tra cứu `sk_buff`, `net_device` và các đối tượng RDMA
 - [**Phụ lục B — Quản trị mạng**](linux_kernel_networking_book/chB_network_administration.vi.md) — danh sách công cụ dòng lệnh để quản trị và debug mạng
 - [**Phụ lục C — Thuật ngữ**](linux_kernel_networking_book/chC_glossary.vi.md) — bảng thuật ngữ của sách
+
+## Theo sách *Embedded Linux Primer*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Nhìn Linux từ góc độ hệ nhúng, từ bootloader, kernel tới công cụ debug.
+
+- [**Chương 1 — Giới thiệu**](embedded_linux_primer_book/ch01_introduction.vi.md) — vì sao chọn Linux cho hệ nhúng, mã nguồn mở và GPL, các tổ chức chuẩn hóa
+- [**Chương 2 — Bức tranh tổng thể**](embedded_linux_primer_book/ch02_the_big_picture.vi.md) — cấu tạo một hệ nhúng, lưu trữ, các bản phân phối embedded Linux
+- [**Chương 4 — Linux kernel từ góc nhìn khác**](embedded_linux_primer_book/ch04_the_linux_kernel_a_different_perspective.vi.md) — cấu trúc mã nguồn, hệ thống build và cấu hình kernel
+- [**Chương 5 — Khởi tạo kernel**](embedded_linux_primer_book/ch05_kernel_initialization.vi.md) — kernel image tổng hợp, luồng khởi động, tham số dòng lệnh, khởi tạo subsystem
+- [**Chương 6 — Khởi tạo user space**](embedded_linux_primer_book/ch06_user_space_initialization.vi.md) — root file system, tiến trình init, initrd và initramfs, tắt máy
+- [**Chương 7 — Bootloader**](embedded_linux_primer_book/ch07_bootloaders.vi.md) — vai trò bootloader, U-Boot và cách port, device tree blob
+- [**Chương 8 — Cơ bản về device driver**](embedded_linux_primer_book/ch08_device_driver_basics.vi.md) — khái niệm driver, công cụ quản lý module, build ngoài cây mã nguồn, driver và GPL
+- [**Chương 9 — File system**](embedded_linux_primer_book/ch09_file_systems.vi.md) — ext2, ext3, ext4, ReiserFS, JFFS2 và các file system khác
+- [**Chương 10 — MTD subsystem**](embedded_linux_primer_book/ch10_mtd_subsystem.vi.md) — tổng quan MTD, phân vùng, công cụ, UBI
+- [**Chương 11 — BusyBox**](embedded_linux_primer_book/ch11_busybox.vi.md) — giới thiệu, cấu hình và cách BusyBox hoạt động
+- [**Chương 12 — Môi trường phát triển**](embedded_linux_primer_book/ch12_embedded_development_environment.vi.md) — cross-development, yêu cầu máy host, kết nối board đích
+- [**Chương 13 — Công cụ phát triển**](embedded_linux_primer_book/ch13_development_tools.vi.md) — GDB, DDD, cscope, công cụ tracing và profiling, binary utility
+- [**Chương 14 — Kỹ thuật debug kernel**](embedded_linux_primer_book/ch14_kernel_debugging_techniques.vi.md) — KGDB, debug có phần cứng hỗ trợ, xử lý khi kernel không boot
+- [**Chương 15 — Debug ứng dụng embedded**](embedded_linux_primer_book/ch15_debugging_embedded_linux_applications.vi.md) — debug trên board, debug từ xa, thư viện chia sẻ, nhiều tác vụ
+- [**Chương 16 — Build system mã nguồn mở**](embedded_linux_primer_book/ch16_open_source_build_systems.vi.md) — Scratchbox, Buildroot, OpenEmbedded
+- [**Chương 17 — Linux và real time**](embedded_linux_primer_book/ch17_linux_and_real_time.vi.md) — khái niệm real time, kernel preemption, bản vá real-time, phân tích độ trễ
+- [**Chương 18 — USB**](embedded_linux_primer_book/ch18_universal_serial_bus.vi.md) — tổng quan và cấu hình USB, sysfs, công cụ, debug USB
+- [**Chương 19 — udev**](embedded_linux_primer_book/ch19_udev.vi.md) — phát hiện thiết bị, rule của udev, tùy biến hành vi
+- [**Phụ lục A–F**](embedded_linux_primer_book/chA_gnu_public_license.vi.md) — giấy phép GPL, lệnh U-Boot, lệnh BusyBox, giao tiếp SDRAM, nguồn tài liệu, file cấu hình BDI-2000
+
+## Theo sách *Mastering Embedded Linux Programming*
+
+Bản dịch tiếng Việt một số chương chọn lọc, kèm hình minh họa của sách.
+
+- [**Chương 2 — Toolchain**](mastering_embedded_linux_programming_book/ch02_learning_about_toolchains.vi.md) — các loại toolchain, chọn thư viện C, cấu tạo toolchain
+- [**Chương 3 — Bootloader**](mastering_embedded_linux_programming_book/ch03_all_about_bootloaders.vi.md) — trình tự boot, UEFI, chuyển giao sang kernel, device tree, U-Boot
+- [**Chương 4 — Port và cấu hình kernel**](mastering_embedded_linux_programming_book/ch04_porting_and_configuring_the_kernel.vi.md) — chọn và build kernel, boot kernel, port sang board mới
+- [**Chương 6 — Chọn build system**](mastering_embedded_linux_programming_book/ch06_selecting_a_build_system.vi.md) — định dạng package, Buildroot, Yocto Project
+- [**Chương 7 — Chiến lược lưu trữ**](mastering_embedded_linux_programming_book/ch07_creating_a_storage_strategy.vi.md) — truy cập flash, file system cho NOR, NAND và managed flash, file system nén chỉ đọc
+- [**Chương 9 — Chương trình init**](mastering_embedded_linux_programming_book/ch09_starting_up_the_init_program.vi.md) — BusyBox init, System V init, systemd
+- [**Chương 10 — Process và thread**](mastering_embedded_linux_programming_book/ch10_learning_about_processes_and_threads.vi.md) — process, thread, lập lịch
+- [**Chương 11 — Quản lý bộ nhớ**](mastering_embedded_linux_programming_book/ch11_managing_memory.vi.md) — virtual memory, bố cục bộ nhớ kernel và user, swap, `mmap`, đo mức dùng bộ nhớ
+- [**Chương 13 — Profiling và tracing**](mastering_embedded_linux_programming_book/ch13_profiling_and_tracing.vi.md) — top, perf, OProfile, tracing sự kiện, Ftrace
+
+## Chủ đề *Network device driver*
+
+Ba chương về driver card mạng, lấy từ ba quyển sách khác nhau để đọc đối chiếu.
+
+- [**LDD3 — Chương 17: Network driver**](network_device_drivers/ldd3_ch17/ch17_network_drivers.vi.md) — driver mẫu snull, kết nối với kernel, `net_device`, gửi và nhận gói, interrupt handler
+- [**Essential Linux Device Drivers — Chương 15: Network interface card**](network_device_drivers/eldd_ch15/ch15_network_interface_cards.vi.md) — cấu trúc dữ liệu driver, giao tiếp với tầng giao thức, quản lý buffer, ví dụ Ethernet NIC
+- [**Linux Device Drivers Development — Chương 22: NIC driver**](network_device_drivers/madieu2017_ch22/ch22_network_interface_card_drivers.vi.md) — cấu trúc dữ liệu driver, các method của device và driver
