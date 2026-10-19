@@ -24,7 +24,7 @@ Hãy bắt đầu!
 
 Tôi giả định bạn đã đọc Lời nói đầu, cụ thể là mục Khai thác tối đa cuốn sách này, đã chuẩn bị phù hợp một guest virtual machine (VM) chạy Ubuntu 18.04 LTS (hoặc một stable release mới hơn) và cài đặt tất cả package cần thiết. Nếu chưa, tôi khuyên bạn thực hiện việc này trước.
 
-Để khai thác tối đa cuốn sách này, tôi rất khuyến khích bạn trước tiên thiết lập workspace environment, bao gồm clone GitHub repository của sách (`https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`) để lấy code liên quan, và làm việc với nó theo cách thực hành trực tiếp.
+Để khai thác tối đa cuốn sách này, tôi rất khuyến khích bạn trước tiên thiết lập workspace environment, bao gồm clone GitHub repository của sách (`https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`) để lấy code liên quan, và làm việc với nó theo cách hands-on.
 
 ## Các cách tiếp cận để giao tiếp/kết nối một kernel driver với user space C app
 
@@ -46,9 +46,9 @@ Trong suốt chương này, chúng ta thảo luận chi tiết các kỹ thuật
 
 ## Kết nối qua proc filesystem (procfs)
 
-Trong mục này, chúng ta trình bày proc filesystem là gì và cách dùng nó làm interface giữa user address space và kernel address space. Proc filesystem là một interface mạnh mẽ và dễ lập trình, thường dùng để báo cáo trạng thái và debugging các hệ thống kernel cốt lõi.
+Trong mục này, chúng ta trình bày proc filesystem là gì và cách dùng nó làm interface giữa user address space và kernel address space. Proc filesystem là một interface mạnh mẽ và easy-to-program, thường dùng để báo cáo trạng thái và debugging các hệ thống kernel cốt lõi.
 
-Lưu ý rằng từ Linux phiên bản 2.6 trở đi và khi đóng góp upstream, người viết driver không được dùng interface này (nó chỉ dành riêng cho việc sử dụng bên trong kernel). Tuy nhiên, để đầy đủ, chúng ta vẫn trình bày ở đây.
+Lưu ý rằng từ Linux phiên bản 2.6 trở đi và khi đóng góp upstream, người viết driver không được dùng interface này (nó chỉ dành riêng cho việc sử dụng kernel-internal). Tuy nhiên, để đầy đủ, chúng ta vẫn trình bày ở đây.
 
 ### Tìm hiểu proc filesystem
 
@@ -95,7 +95,7 @@ Lưu ý rằng nội dung chính xác dưới `/proc` thay đổi theo cả kern
 
 #### Mục đích của proc filesystem
 
-Proc filesystem có hai mục đích:
+Mục đích của proc filesystem là two-fold:
 
 - Thứ nhất, đây là interface đơn giản để developer, system administrator và thực ra là bất kỳ ai nhìn sâu vào bên trong kernel nhằm thu thập thông tin về nội bộ các process, kernel và cả hardware. Sử dụng interface này chỉ đòi hỏi bạn biết những shell command cơ bản như `cd`, `cat`, `echo`, `ls`, v.v.
 
@@ -114,15 +114,15 @@ Thay đổi giá trị của một proc-based tunable rất dễ; ví dụ, hãy
 
 Như vậy là xong. Tuy nhiên, cần hiểu rõ rằng thao tác trên là volatile – thay đổi chỉ áp dụng cho session này; power cycle hoặc reboot tất nhiên sẽ khiến nó trở lại giá trị mặc định. Vậy làm thế nào để thay đổi trở thành vĩnh viễn? Câu trả lời ngắn gọn: dùng utility `sysctl(8)`; tham khảo man page của nó để biết thêm chi tiết.
 
-Bạn đã sẵn sàng viết code kết nối qua procfs chưa? Đừng vội – mục tiếp theo giải thích tại sao đây có thể không phải ý tưởng hay.
+Bạn đã sẵn sàng viết code procfs-interfacing chưa? Đừng vội – mục tiếp theo giải thích tại sao đây có thể không phải ý tưởng hay.
 
-#### procfs không dành cho người viết driver
+#### procfs off-bounds đối với người viết driver
 
 Mặc dù có thể dùng proc filesystem để kết nối với một user mode app, có một điểm quan trọng cần lưu ý! Bạn phải hiểu procfs, giống nhiều cơ chế tương tự trong kernel, là một Application Binary Interface (ABI). Cộng đồng kernel không hứa hẹn nó sẽ ổn định và giữ nguyên như hiện nay, cũng giống các kernel API và internal data structure. Thực tế, từ kernel 2.6, những người phát triển kernel đã nói rất rõ – người viết device driver (và tương tự) không được dùng procfs cho mục đích hoặc interface riêng, dù debug hay mục đích khác. Trước đây, với Linux 2.6, việc dùng proc cho các mục đích nói trên khá phổ biến (theo cộng đồng kernel là bị lạm dụng, vì proc chỉ dành cho việc sử dụng bên trong kernel!).
 
-Vậy nếu procfs bị coi là ngoài phạm vi sử dụng, hoặc deprecated, đối với người viết driver, ta dùng cơ chế nào để giao tiếp với user space process? Người viết driver cần dùng sysfs để export interface của mình. Thực ra không chỉ có sysfs; bạn có nhiều lựa chọn như sysfs, debugfs, netlink socket và ioctl system call. Chúng ta sẽ trình bày chi tiết chúng ở phần sau của chương này. Tuy nhiên, hãy chờ một chút; thực tế, “quy tắc” không dùng procfs đối với người viết driver là quy tắc dành cho cộng đồng. Nghĩa là nếu bạn định đưa driver hoặc kernel module của mình upstream vào mainline kernel, qua đó đóng góp code theo GPLv2 license, tất cả quy tắc cộng đồng chắc chắn áp dụng. Nếu không, quyền quyết định thực sự thuộc về bạn. Tất nhiên, tuân theo hướng dẫn và quy tắc của cộng đồng kernel chỉ có thể là điều tốt; chúng tôi chắc chắn khuyên bạn làm vậy. Về việc không khuyến khích các thành phần ngoài core như driver sử dụng proc, đáng tiếc là không có kernel documentation gần đây cho proc API/ABI.
+Vậy nếu procfs bị coi là off-bounds, hoặc deprecated, đối với người viết driver, ta dùng cơ chế nào để giao tiếp với user space process? Người viết driver cần dùng sysfs để export interface của mình. Thực ra không chỉ có sysfs; bạn có nhiều lựa chọn như sysfs, debugfs, netlink socket và ioctl system call. Chúng ta sẽ trình bày chi tiết chúng ở phần sau của chương này. Tuy nhiên, hãy chờ một chút; thực tế, “quy tắc” non-usage procfs đối với người viết driver là quy tắc dành cho cộng đồng. Nghĩa là nếu bạn định đưa driver hoặc kernel module của mình upstream vào mainline kernel, qua đó đóng góp code theo GPLv2 license, tất cả quy tắc cộng đồng chắc chắn áp dụng. Nếu không, quyền quyết định thực sự thuộc về bạn. Tất nhiên, tuân theo hướng dẫn và quy tắc của cộng đồng kernel chỉ có thể là điều tốt; chúng tôi chắc chắn khuyên bạn làm vậy. Về việc không khuyến khích các thành phần non-core như driver sử dụng proc, đáng tiếc là không có kernel documentation gần đây cho proc API/ABI.
 
-Trên kernel 5.4.0, có khoảng hơn 70 nơi gọi kernel API `proc_create()`, trong đó một số là driver (thường cũ hơn) và filesystem.
+Trên kernel 5.4.0, có 70-odd nơi gọi kernel API `proc_create()`, trong đó một số là driver (thường cũ hơn) và filesystem.
 
 Dù vậy (bạn đã được cảnh báo!), hãy học cách cho user space process tương tác với kernel code qua procfs.
 
@@ -216,7 +216,7 @@ static int debug_level;    /* 'off' (0) by default ... */
 
 Điểm hay của toàn bộ cơ chế – và thực sự là mục đích ở đây – là chúng ta có thể truy vấn và đặt variable `debug_level` này từ user space qua một procfs interface do mình tạo! Điều này cho phép end user (vì lý do bảo mật, cần root access) thay đổi debug level động tại runtime (một tính năng khá phổ biến trong nhiều sản phẩm).
 
-Trước khi đi sâu vào chi tiết ở mức code, hãy thử để biết điều gì sẽ xảy ra:
+Trước khi đi sâu vào chi tiết code-level, hãy thử để biết điều gì sẽ xảy ra:
 
 1\. Ở đây, dùng convenience wrapper script `lkm`, chúng ta phải build và `insmod(8)` kernel module (`ch2/proc_simple_intf` trong source tree của sách này):
 
@@ -486,7 +486,7 @@ Vậy, như đã nói, với procfs API thì kết quả có thể khác nhau �
 
 ## Kết nối qua sys filesystem (sysfs)
 
-Một tính năng quan trọng của Linux kernel release 2.6 là sự xuất hiện của modern device model. Về cơ bản, một chuỗi data structure phân cấp phức tạp dạng tree mô hình hóa tất cả device có trên hệ thống. Thực ra, nó còn vượt xa điều đó; sysfs tree bao quát các mục sau (cùng những thứ khác):
+Một tính năng quan trọng của Linux kernel release 2.6 là sự xuất hiện của modern device model. Về cơ bản, một chuỗi data structure phân cấp phức tạp tree-like mô hình hóa tất cả device có trên hệ thống. Thực ra, nó còn vượt xa điều đó; sysfs tree bao quát các mục sau (cùng những thứ khác):
 
 - Mọi bus có trên hệ thống (cũng có thể là virtual bus hoặc pseudo bus)
 
@@ -498,7 +498,7 @@ Vì vậy, không chỉ peripheral device mà cả các system bus bên dưới,
 
 Tuy nhiên, hãy nhớ từ mục Kết nối với proc filesystem rằng dùng procfs cho mục đích kết nối device driver không thực sự đúng, ít nhất với code muốn chuyển upstream. Vậy cách đúng là gì? À, tạo sysfs (pseudo) file được xem là “cách đúng” để device driver kết nối với user space.
 
-Giờ chúng ta đã thấy! sysfs là virtual filesystem thường được mount tại directory `/sys`. Thực chất, rất giống procfs, sysfs là tree thông tin (về device và những thứ khác) do kernel export về user space. Bạn có thể xem sysfs có những góc nhìn khác nhau vào modern device model. Qua sysfs, bạn có thể xem hệ thống theo nhiều cách hoặc qua các “góc nhìn”; chẳng hạn qua các bus mà nó hỗ trợ (bus view – PCI, USB, platform, I2C, SPI và nhiều loại khác), qua các “class” device (class view), qua chính các device, qua block device viewport, v.v. Ảnh chụp màn hình sau hiển thị nội dung `/sys` trên Ubuntu 18.04 LTS VM của tôi minh họa điều này:
+Giờ chúng ta đã thấy! sysfs là virtual filesystem thường được mount tại directory `/sys`. Thực chất, rất giống procfs, sysfs là tree thông tin (về device và những thứ khác) kernel-exported về user space. Bạn có thể xem sysfs có những góc nhìn khác nhau vào modern device model. Qua sysfs, bạn có thể xem hệ thống theo nhiều cách hoặc qua các “góc nhìn”; chẳng hạn qua các bus mà nó hỗ trợ (bus view – PCI, USB, platform, I2C, SPI và nhiều loại khác), qua các “class” device (class view), qua chính các device, qua block device viewport, v.v. Ảnh chụp màn hình sau hiển thị nội dung `/sys` trên Ubuntu 18.04 LTS VM của tôi minh họa điều này:
 
 ![Figure 2.2](images/ch02/fig02-02.png)
 
@@ -577,7 +577,7 @@ $
 
 Chúng ta có thể tạo `struct device` theo nhiều cách; cách tổng quát là thiết lập và thực hiện API `device_create()`. Một cách khác để tạo sysfs file, đồng thời bỏ qua nhu cầu có device structure, là tạo một “object” và gọi API `sysfs_create_file()`. (Link đến tutorial dùng cả hai cách này nằm trong mục Đọc thêm). Ở đây, chúng ta ưu tiên “platform device” vì nó gần với cách viết một (platform) driver hơn. Còn một cách hợp lệ khác. Như đã thấy trong `Chapter 1`, Viết một misc Character Device Driver đơn giản, chúng ta build một character driver đơn giản tuân theo framework `misc` của kernel. Ở đó, chúng ta instantiate một `struct miscdevice`; sau khi đăng ký (qua API `misc_register()`), structure này chứa một member tên `struct device` `*this_device;`, nhờ đó có thể dùng nó làm device pointer hợp lệ! Vì vậy, có thể đơn giản mở rộng device driver `misc` trước đó và dùng ở đây. Tuy nhiên, để học một chút về platform driver, chúng ta chọn cách đó. (Chúng tôi để bạn thực hành mở rộng device driver `misc` trước đó để dùng sysfs API và tạo/dùng sysfs file).
 
-Trở lại driver, so với init code, trong cleanup code, chúng ta phải hủy đăng ký platform device:
+Trở lại driver, so với init code, trong cleanup code, chúng ta phải un-register platform device:
 
 ```
 platform_device_unregister(sysfs_demo_platdev);
@@ -700,7 +700,7 @@ debug_level=%d\n",
 }
 ```
 
-Điều này hoạt động thế nào? Khi đọc sysfs file, callback function trên được gọi. Bên trong nó, chỉ cần ghi vào buffer pointer do user cung cấp, `buf` (tham số thứ ba; chúng ta dùng kernel API `snprintf()` để làm vậy), sẽ truyền giá trị được cung cấp (ở đây là `debug_level`) về user space!
+Điều này hoạt động thế nào? Khi đọc sysfs file, callback function trên được gọi. Bên trong nó, chỉ cần ghi vào buffer pointer user-supplied, `buf` (tham số thứ ba; chúng ta dùng kernel API `snprintf()` để làm vậy), sẽ truyền giá trị được cung cấp (ở đây là `debug_level`) về user space!
 
 3\. Hãy build và `insmod(8)` kernel module (để tiện, dùng wrapper script `lkm`):
 
@@ -792,7 +792,7 @@ $
 
 Thế đấy – nó hoạt động!
 
-7\. Giống khi kết nối qua procfs, chúng tôi cung cấp thêm code trong ví dụ sysfs. Ở đây, có thêm một sysfs interface (read-only) để hiển thị giá trị `PAGE_OFFSET`, cộng một interface mới. Hãy tưởng tượng nhiệm vụ của driver là lấy một giá trị “áp suất” (có thể qua một pressure sensor chip dùng I2C). Giả sử đã thực hiện và lưu giá trị áp suất này trong một integer global variable tên `gpressure`. Để “hiển thị” cho user space giá trị áp suất hiện tại, chúng ta phải dùng sysfs file. Đây là nó:
+7\. Giống khi kết nối qua procfs, chúng tôi cung cấp thêm code trong ví dụ sysfs. Ở đây, có thêm một sysfs interface (read-only) để hiển thị giá trị `PAGE_OFFSET`, cộng một interface mới. Hãy tưởng tượng nhiệm vụ của driver là lấy một giá trị “áp suất” (có thể qua một pressure sensor chip I2C-driven). Giả sử đã thực hiện và lưu giá trị áp suất này trong một integer global variable tên `gpressure`. Để “hiển thị” cho user space giá trị áp suất hiện tại, chúng ta phải dùng sysfs file. Đây là nó:
 
 Bên trong, phục vụ demo này, chúng ta tùy ý đặt global variable `gpressure` thành giá trị `25`.
 
@@ -803,7 +803,7 @@ ure
 25$
 ```
 
-Hãy nhìn kỹ output; tại sao prompt xuất hiện ngay sau `25`? Vì ta chỉ in nguyên giá trị – không newline, không gì khác; đó là điều được mong đợi. Code hiển thị giá trị “áp suất” quả thực đơn giản:
+Hãy nhìn kỹ output; tại sao prompt xuất hiện ngay sau `25`? Vì ta chỉ in as-is – không newline, không gì khác; đó là điều được mong đợi. Code hiển thị giá trị “áp suất” quả thực đơn giản:
 
 ```
 /* show 'pressure' value: sysfs entry point for the 'show' (read) callback
@@ -828,9 +828,9 @@ Như vậy, bạn đã học cách kết nối với user space qua sysfs! Như 
 
 ### Quy tắc “mỗi sysfs file một giá trị”
 
-Đến đây, bạn đã hiểu cách tạo và dùng sysfs cho mục đích kết nối user space với kernel, nhưng còn một điểm chính chúng ta đã bỏ qua. Có một “quy tắc” về dùng sysfs file, quy định chỉ được đọc hoặc ghi đúng một giá trị! Hãy xem đây là quy tắc mỗi file một giá trị.
+Đến đây, bạn đã hiểu cách tạo và dùng sysfs cho mục đích kết nối user space với kernel, nhưng còn một điểm chính chúng ta đã bỏ qua. Có một “quy tắc” về dùng sysfs file, quy định chỉ được đọc hoặc ghi đúng một giá trị! Hãy xem đây là quy tắc one-value-per-file.
 
-Vậy, như ví dụ dùng giá trị “áp suất”, chúng ta chỉ trả về giá trị áp suất hiện tại, không gì hơn. Vì thế, khác các công nghệ kết nối khác, sysfs không phù hợp lắm với trường hợp muốn trả về các gói thông tin dài tùy ý (chẳng hạn nội dung driver context structure) cho user space; nói cách khác, nó không phù hợp mục đích “debugging” thuần túy.
+Vậy, như ví dụ dùng giá trị “áp suất”, chúng ta chỉ trả về giá trị áp suất hiện tại, không gì hơn. Vì thế, khác các công nghệ kết nối khác, sysfs không phù hợp lắm với trường hợp muốn trả về các gói thông tin long-winded (chẳng hạn nội dung driver context structure) cho user space; nói cách khác, nó không phù hợp mục đích “debugging” thuần túy.
 
 Các tài liệu kernel và “quy tắc” dùng sysfs nằm tại đây: `https://www.kernel.org/doc/html/latest/admin-guide/sysfs-rules.html#rules-on-how-to-access-information-in-sysfs`. Ngoài ra, tài liệu sysfs API có tại đây: `https://www.kernel.org/doc/html/latest/filesystems/api-summary.html#the-filesystem-for-exporting-kernel-objects`.
 
@@ -842,17 +842,17 @@ Kernel thường cung cấp nhiều cách tạo sysfs object; ví dụ, với AP
 
 Hãy tưởng tượng một lúc về thế khó mà bạn, một driver developer trên Linux, gặp phải: bạn muốn triển khai một cách dễ mà thanh nhã để cung cấp debug “hook” từ driver đến user space. Ví dụ, user chỉ cần thực hiện `cat(1)` trên một (pseudo) file là “debug callback” function của driver được gọi. Sau đó nó dump một số thông tin trạng thái (có thể một “driver context” structure) về user mode process, và process sẽ dump đầy đủ ra stdout.
 
-Được thôi, không vấn đề: thời trước release 2.6, chúng ta có thể (như đã học trong mục Kết nối qua proc filesystem (procfs)) thoải mái dùng procfs layer để kết nối driver với user space. Sau đó, từ Linux 2.6 trở đi, cộng đồng kernel bác bỏ cách này. Chúng ta được yêu cầu ngừng hoàn toàn dùng procfs và thay bằng sysfs layer để kết nối driver với user space. Tuy nhiên, như thấy trong mục Kết nối qua sys filesystem (sysfs), nó có quy tắc nghiêm ngặt mỗi file một giá trị. Điều này thực sự rất tốt để báo cáo hoặc gửi các giá trị đơn lẻ từ và đến driver (thường là environment sensor value và tương tự), nhưng nhanh chóng loại bỏ mọi debug interface với user space trừ loại đơn giản nhất. Ta có thể dùng ioctl (như sẽ thấy) để thiết lập debug interface nhưng làm vậy khó hơn khá nhiều.
+Được thôi, không vấn đề: thời trước release 2.6, chúng ta có thể (như đã học trong mục Kết nối qua proc filesystem (procfs)) thoải mái dùng procfs layer để kết nối driver với user space. Sau đó, từ Linux 2.6 trở đi, cộng đồng kernel bác bỏ cách này. Chúng ta được yêu cầu ngừng hoàn toàn dùng procfs và thay bằng sysfs layer để kết nối driver với user space. Tuy nhiên, như thấy trong mục Kết nối qua sys filesystem (sysfs), nó có quy tắc nghiêm ngặt one-value-per-file. Điều này thực sự rất tốt để báo cáo hoặc gửi các giá trị đơn lẻ từ và đến driver (thường là environment sensor value và tương tự), nhưng nhanh chóng loại bỏ mọi debug interface với user space trừ loại đơn giản nhất. Ta có thể dùng ioctl (như sẽ thấy) để thiết lập debug interface nhưng làm vậy khó hơn khá nhiều.
 
-Vậy có thể làm gì? May mắn là có một giải pháp thanh nhã từ khoảng Linux 2.6.12 trở đi tên debugfs. “Debug filesystem” rất dễ dùng và khẳng định khá rõ người viết driver (thực ra bất kỳ ai) có thể dùng nó cho bất cứ mục đích nào! Không có quy tắc mỗi file một giá trị – hãy quên nó đi, không có quy tắc nào.
+Vậy có thể làm gì? May mắn là có một giải pháp thanh nhã từ khoảng Linux 2.6.12 trở đi tên debugfs. “Debug filesystem” rất dễ dùng và khẳng định khá rõ người viết driver (thực ra bất kỳ ai) có thể dùng nó cho bất cứ mục đích nào! Không có quy tắc one-value-per-file – hãy quên nó đi, không có quy tắc nào.
 
-Tất nhiên, giống các cách dựa trên filesystem đã xử lý – procfs, sysfs và giờ debugfs – cộng đồng kernel khẳng định rõ mọi interface này là ABI, và do đó tính ổn định cùng tuổi thọ của chúng không được bảo đảm. Dù đó là lập trường chính thức, thực tế các interface này đã trở thành chuẩn trên thực tế; một ngày đẹp trời loại bỏ chúng mà không báo trước sẽ chẳng có ích cho ai. Ảnh chụp màn hình sau trình bày nội dung debugfs trên guest x86-64 Ubuntu 18.04.3 LTS (chạy kernel “tùy chỉnh” 5.4.0 đã build trong sách đồng hành Linux Kernel Programming, Chương 3, Build Linux kernel 5.0 từ Source, Phần 2!):
+Tất nhiên, giống các cách filesystem-based đã xử lý – procfs, sysfs và giờ debugfs – cộng đồng kernel khẳng định rõ mọi interface này là ABI, và do đó tính ổn định cùng tuổi thọ của chúng không được bảo đảm. Dù đó là lập trường chính thức, thực tế các interface này đã trở thành chuẩn trên thực tế; một ngày đẹp trời loại bỏ chúng mà không báo trước sẽ chẳng có ích cho ai. Ảnh chụp màn hình sau trình bày nội dung debugfs trên guest x86-64 Ubuntu 18.04.3 LTS (chạy kernel “tùy chỉnh” 5.4.0 đã build trong sách đồng hành Linux Kernel Programming, Chương 3, Build Linux kernel 5.0 từ Source, Phần 2!):
 
 ![Figure 2.3](images/ch02/fig02-03.png)
 
 Hình 2.3 – Ảnh chụp màn hình nội dung debugfs filesystem trên Linux VM x86\_64
 
-Giống procfs và sysfs, do debugfs là kernel feature (xét cho cùng là virtual filesystem!), nội dung chính xác phụ thuộc nhiều vào kernel version và CPU architecture. Như đã nói, nhìn ảnh chụp này hẳn đã rõ có rất nhiều “người dùng” debugfs trong thực tế.
+Giống procfs và sysfs, do debugfs là kernel feature (xét cho cùng là virtual filesystem!), nội dung chính xác phụ thuộc nhiều vào kernel version và CPU architecture. Như đã nói, nhìn ảnh chụp này hẳn đã rõ có rất nhiều “người dùng” debugfs trong real-world.
 
 ### Kiểm tra debugfs có hiện diện hay không
 
@@ -941,7 +941,7 @@ static const struct file_operations dbgfs_drvctx_fops = {
 
 Từ Linux 5.8 trở đi (nhớ chúng ta đang làm với kernel 5.4 LTS), return value của một số debugfs creation API đã bị loại bỏ (chúng trả về `void`); patch của Greg Kroah-Hartman đề cập việc này được thực hiện vì không ai dùng chúng. Điều này rất điển hình với Linux – tính năng không cần thiết bị loại bỏ, và kernel tiếp tục tiến hóa...
 
-Rõ ràng, “read” callback là function `dbgfs_show_drvctx()`. Xin nhắc lại, function này được debugfs layer tự động gọi mỗi khi file `debugfs` (`llkd_dbgfs_show_drvctx`) được đọc; đây là code của debugfs read callback function:
+Rõ ràng, “read” callback là function `dbgfs_show_drvctx()`. Xin nhắc lại, function này được debugfs layer auto-invoked mỗi khi file `debugfs` (`llkd_dbgfs_show_drvctx`) được đọc; đây là code của debugfs read callback function:
 
 ```
 static ssize_t dbgfs_show_drvctx(struct file *filp, char __user * ubuf,
@@ -1059,11 +1059,11 @@ $ sudo cat /sys/kernel/debug/dbgfs_simple_intf/llkd_dbgfs_debug_level
 $
 ```
 
-Nó hoạt động, nhưng cách “lối tắt” có nhược điểm: vì mọi thứ được thực hiện bên trong, ta không có cách validate giá trị được ghi. Vì vậy, ở đây ta ghi giá trị `5` vào `debug_level`; nó hoạt động nhưng là giá trị không hợp lệ (ít nhất giả sử là vậy)! Vậy sửa thế nào? Đơn giản: đừng dùng helper method này; thay vào đó, dùng cách “thông thường” qua generic API `debugfs_create_file()` (như đã làm cho debugfs file đầu tiên). Ưu điểm là vì thiết lập callback routine rõ ràng cho read/write bằng cách chỉ định trong fops structure, ta kiểm soát được giá trị được ghi (tôi để bạn tự làm như bài tập). Giống cuộc sống, đây là đánh đổi; được cái này, mất cái kia.
+Nó hoạt động, nhưng cách “lối tắt” có nhược điểm: vì mọi thứ được thực hiện bên trong, ta không có cách validate giá trị được ghi. Vì vậy, ở đây ta ghi giá trị `5` vào `debug_level`; nó hoạt động nhưng là giá trị không hợp lệ (ít nhất giả sử là vậy)! Vậy sửa thế nào? Đơn giản: đừng dùng helper method này; thay vào đó, dùng cách “thông thường” qua generic API `debugfs_create_file()` (như đã làm cho debugfs file đầu tiên). Ưu điểm là vì thiết lập callback routine rõ ràng cho read/write bằng cách chỉ định trong fops structure, ta kiểm soát được giá trị được ghi (tôi để bạn tự làm như bài tập). Giống cuộc sống, đây là trade-off; được cái này, mất cái kia.
 
 ### Các helper debugfs API để làm việc với numeric global
 
-Bạn vừa học cách dùng helper API `debugfs_create_u32()` để thiết lập debugfs file đọc/ghi unsigned 32-bit integer global. Thực tế debugfs layer cung cấp một loạt “helper” API tương tự để ngầm đọc/ghi các numeric (integer) global variable trong module. Sau đây là các helper routine tạo debugfs entry có thể đọc/ghi unsigned integer global với các bit size khác nhau (8, 16, 32 và 64 bit). Tham số cuối là tham số chủ chốt – địa chỉ global integer trong kernel/module:
+Bạn vừa học cách dùng helper API `debugfs_create_u32()` để thiết lập debugfs file đọc/ghi unsigned 32-bit integer global. Thực tế debugfs layer cung cấp một loạt “helper” API tương tự để ngầm đọc/ghi các numeric (integer) global variable trong module. Sau đây là các helper routine tạo debugfs entry có thể đọc/ghi unsigned integer global với các bit size khác nhau (8, 16, 32 và 64-bit). Tham số cuối là tham số chủ chốt – địa chỉ global integer trong kernel/module:
 
 ```
 // include/linux/debugfs.h
@@ -1103,7 +1103,7 @@ struct dentry *debugfs_create_bool(const char *name, umode_t mode,
                   struct dentry *parent, bool *value);
 ```
 
-Đọc “file” sẽ chỉ trả về `Y` hoặc `N` (kèm newline); rõ ràng, `Y` nếu giá trị hiện tại của tham số thứ tư `value` khác zero, ngược lại là `N`. Khi ghi, có thể ghi `Y`, `N`, `1` hoặc `0`; các giá trị khác không được chấp nhận.
+Đọc “file” sẽ chỉ trả về `Y` hoặc `N` (kèm newline); rõ ràng, `Y` nếu giá trị hiện tại của tham số thứ tư `value` khác zero, ngược lại là `N`. Khi ghi, có thể ghi `Y`, `N`, `1` hoặc `0`; các giá trị non-zero được chấp nhận.
 
 Hãy nghĩ xem: bạn có thể điều khiển “robot” device qua robot device driver bằng cách ghi `1` vào boolean variable tên chẳng hạn `power` để bật nó và dùng `0` để tắt! Khả năng là vô tận.
 
@@ -1125,7 +1125,7 @@ Không xóa debugfs file lúc này, để chúng trên filesystem trong trạng 
 
 Hãy làm nó xảy ra – một kernel bug! Thú vị đúng không!?
 
-Được rồi, để tạo kernel bug, phải bảo đảm khi remove (unload) kernel module, API cleanup (xóa) tất cả debugfs file, `debugfs_remove_recursive()`, không được gọi. Vì vậy, sau mỗi lần module bị remove, debugfs directory và file có vẻ vẫn hiện diện! Tuy nhiên, nếu thử thao tác – read/write – trên bất kỳ file nào, chúng ở trạng thái orphaned và do đó, khi cố dereference metadata, các internal debugfs code path thực hiện invalid memory reference, dẫn đến bug (ở mức kernel).
+Được rồi, để tạo kernel bug, phải bảo đảm khi remove (unload) kernel module, API cleanup (xóa) tất cả debugfs file, `debugfs_remove_recursive()`, không được gọi. Vì vậy, sau mỗi lần module bị remove, debugfs directory và file có vẻ vẫn hiện diện! Tuy nhiên, nếu thử thao tác – read/write – trên bất kỳ file nào, chúng ở trạng thái orphaned và do đó, khi cố dereference metadata, các internal debugfs code path thực hiện invalid memory reference, dẫn đến bug (kernel-level).
 
 Trong kernel space, bug quả thực rất nghiêm trọng; về lý thuyết, nó không bao giờ được xảy ra! Điều này được gọi là Oops; trong quá trình xử lý, một internal kernel function được gọi, dump thông tin diagnostic hữu ích qua `printk` vào in-memory kernel log buffer cũng như console device (trên production system, nó cũng có thể được chuyển nơi khác để lấy và điều tra sau; ví dụ qua cơ chế kdump của kernel).
 
@@ -1143,7 +1143,7 @@ required cleanup! so, after removal, any op on the debugfs files will cause
 an Oops! (default is 0, no bug)");
 ```
 
-Trong cleanup code path của driver, kiểm tra variable `cause_an_oops` có khác zero không và cố ý không xóa (đệ quy) các debugfs file, qua đó tạo điều kiện cho bug:
+Trong cleanup code path của driver, kiểm tra variable `cause_an_oops` có non-zero không và cố ý không xóa (đệ quy) các debugfs file, qua đó tạo điều kiện cho bug:
 
 ```
 static void debugfs_simple_intf_cleanup(void)
@@ -1187,7 +1187,7 @@ Thông báo `Killed` trên console thật đáng ngại! Đây là dấu hiệu 
 
 ![Figure 2.4](images/ch02/fig02-04.png)
 
-Hình 2.4 – Một phần ảnh chụp kernel Oops, bug ở mức kernel
+Hình 2.4 – Một phần ảnh chụp kernel Oops, bug kernel-level
 
 Vì cung cấp chi tiết kernel debugging nằm ngoài phạm vi sách, chúng ta không đi sâu ở đây. Tuy nhiên, hiểu một chút khá trực quan. Nhìn kỹ ảnh trên: trong statement `BUG:`, bạn có thể thấy kernel virtual address (kva) mà việc tra cứu gây bug, gọi là Oops (chúng ta đã trình bày kva space trong sách đồng hành Linux Kernel Programming – Chương 7, Kiến thức thiết yếu về Memory Management Internals; đây thực sự là thông tin then chốt cho người viết driver):
 
@@ -1205,15 +1205,15 @@ Nó cho biết CPU instruction pointer (register tên RIP trên x86\_64) nằm t
 
 Kết hợp thông tin này với các tool mạnh như `objdump(1)` và `addr2line(1)` có thể giúp chỉ ra chính xác vị trí bug trong code!
 
-Các CPU register được dump; tốt hơn nữa, call trace hoặc call stack – nội dung kernel mode stack của process context (hãy tham khảo Linux Kernel Programming, Chương 6, Kiến thức thiết yếu về Kernel Internals, Process và Thread, để biết chi tiết kernel stack) – cho thấy code dẫn đến điểm này; tức crash (đọc stack trace từ dưới lên). Một mẹo nhanh khác: nếu kernel function trong output call trace có ký hiệu `?` phía trước, chỉ cần bỏ qua (có thể đó là một “dấu vết” cũ còn sót).
+Các CPU register được dump; tốt hơn nữa, call trace hoặc call stack – nội dung kernel mode stack của process context (hãy tham khảo Linux Kernel Programming, Chương 6, Kiến thức thiết yếu về Kernel Internals, Process và Thread, để biết chi tiết kernel stack) – cho thấy code dẫn đến điểm này; tức crash (đọc stack trace bottom-up). Một mẹo nhanh khác: nếu kernel function trong output call trace có ký hiệu `?` phía trước, chỉ cần bỏ qua (có thể đó là một “dấu vết” cũ còn sót).
 
-Thực tế, kernel bug trên production system phải khiến toàn bộ hệ thống panic (halt). Trên non-production system (như hệ thống đang chạy), kernel panic có thể xảy ra hoặc không; ở đây không xảy ra. Tuy nhiên, kernel bug phải được xử lý với mức độ nghiêm trọng cao nhất, thực sự là vấn đề ngăn cản công việc và phải sửa. Procfs file `/proc/sys/kernel/panic_on_oops` được đa số distro đặt thành `0`, nhưng trên production system thường được đặt thành `1`.
+Thực tế, kernel bug trên production system phải khiến toàn bộ hệ thống panic (halt). Trên non-production system (như hệ thống đang chạy), kernel panic có thể xảy ra hoặc không; ở đây không xảy ra. Tuy nhiên, kernel bug phải được xử lý với mức độ nghiêm trọng cao nhất, thực sự là show-stopper và phải sửa. Procfs file `/proc/sys/kernel/panic_on_oops` được đa số distro đặt thành `0`, nhưng trên production system thường được đặt thành `1`.
 
-Bài học ở đây rõ ràng: debugfs không thực hiện auto cleanup; chúng ta phải làm. Được rồi, hãy kết thúc thảo luận debugfs bằng cách tra một số cách dùng thực tế trong kernel.
+Bài học ở đây rõ ràng: debugfs không thực hiện auto cleanup; chúng ta phải làm. Được rồi, hãy kết thúc thảo luận debugfs bằng cách tra một số cách dùng real-world trong kernel.
 
 ### Debugfs – những nơi sử dụng thực tế
 
-Như đã nói, có nhiều nơi dùng debugfs API trong “thực tế”; có thể tìm một số không? Đây là một cách: chỉ cần tìm trong directory `drivers/` của kernel source tree các file tên `*debugfs*.c`; bạn có thể ngạc nhiên (tôi tìm được 114 file như vậy trong kernel tree 5.4.0!). Hãy xem vài file:
+Như đã nói, có nhiều nơi dùng debugfs API trong “real-world”; có thể tìm một số không? Đây là một cách: chỉ cần tìm trong directory `drivers/` của kernel source tree các file tên `*debugfs*.c`; bạn có thể ngạc nhiên (tôi tìm được 114 file như vậy trong kernel tree 5.4.0!). Hãy xem vài file:
 
 ```
 $ cd <kernel-source-tree> ; find drivers/ -iname "*debugfs*.c"
@@ -1270,7 +1270,7 @@ Trong số nhiều ưu điểm, công nghệ socket cung cấp các ưu điểm 
 
 - Lossless trên internet, ít nhất với một số transport layer protocol như TCP, và tất nhiên trên localhost, như trường hợp ở đây.
 
-- Truyền dữ liệu tốc độ cao, đặc biệt trên localhost!
+- Truyền dữ liệu High-speed, đặc biệt trên localhost!
 
 - Flow control semantics luôn có hiệu lực.
 
@@ -1534,7 +1534,7 @@ Hình 2.5 – Ảnh chụp màn hình giao tiếp user\<-\>kernel qua sample net
 
 Nó hoạt động; kernel netlink module nhận và hiển thị message được user space process (`PID 7813`) gửi đến. Sau đó kernel module trả lời user space peer bằng message riêng; user space peer nhận và hiển thị message đó thành công (qua `printf()`). Hãy tự thử. Khi xong, đừng quên remove kernel module bằng `sudo rmmod netlink_simple_intf`.
 
-Một ghi chú: có connector driver trong kernel. Mục đích là làm phát triển giao tiếp dựa trên netlink dễ hơn, giúp cả kernel developer và user space developer thiết lập và dùng netlink-based communication interface đơn giản hơn. Chúng ta không đi sâu ở đây; hãy tham khảo tài liệu trong kernel (`https://elixir.bootlin.com/linux/v5.4/source/Documentation/driver-api/connector.rst`). Một số sample code cũng được cung cấp trong kernel source tree (tại `samples/connector`).
+Một ghi chú: có connector driver trong kernel. Mục đích là làm phát triển giao tiếp netlink-based dễ hơn, giúp cả kernel developer và user space developer thiết lập và dùng netlink-based communication interface đơn giản hơn. Chúng ta không đi sâu ở đây; hãy tham khảo tài liệu trong kernel (`https://elixir.bootlin.com/linux/v5.4/source/Documentation/driver-api/connector.rst`). Một số sample code cũng được cung cấp trong kernel source tree (tại `samples/connector`).
 
 Như vậy, bạn đã học cách kết nối user mode app với kernel component qua cơ chế netlink socket mạnh mẽ. Như đã nói, nó có một số use case thực tế trong kernel tree. Giờ hãy tiếp tục thêm một phương thức kết nối user-kernel nữa, qua system call phổ biến `ioctl(2)`.
 
@@ -1542,9 +1542,9 @@ Như vậy, bạn đã học cách kết nối user mode app với kernel compon
 
 ioctl là system call; tại sao có tên lạ ioctl? Đó là viết tắt của input-output control. Trong khi read/write system call (cùng các call khác) dùng để truyền dữ liệu từ và đến device (hoặc file; nhớ mô hình UNIX nếu không phải process thì là file!), ioctl system call dùng để gửi command đến device (qua driver). Ví dụ, thay đổi terminal characteristic của console device, ghi một track xuống disk khi format, gửi control command đến stepper motor, điều khiển camera hoặc audio device, v.v. đều là các trường hợp gửi command đến device.
 
-Hãy xét ví dụ giả tưởng. Chúng ta có device và đang phát triển (character) device driver cho nó. Device có các register, những phần hardware memory nhỏ – thường 8, 16 hoặc 32 bit trên device – một số là control register. Bằng cách thực hiện I/O (read/write) thích hợp trên chúng, ta điều khiển device (đó thực sự là mục đích, đúng không; chi tiết thực sự về làm việc với hardware memory gồm device register sẽ được trình bày trong chương tiếp theo). Vậy bạn, người viết driver, giao tiếp hoặc kết nối thế nào với user space program muốn thực hiện các control operation trên device? Ta thường thiết kế user space C (hoặc C++) program mở device bằng `open(2)` trên device file, rồi thực hiện read/write system call.
+Hãy xét ví dụ giả tưởng. Chúng ta có device và đang phát triển (character) device driver cho nó. Device có các register, những phần hardware memory nhỏ – thường 8, 16 hoặc 32-bit trên device – một số là control register. Bằng cách thực hiện I/O (read/write) thích hợp trên chúng, ta điều khiển device (đó thực sự là mục đích, đúng không; chi tiết thực sự về làm việc với hardware memory gồm device register sẽ được trình bày trong chương tiếp theo). Vậy bạn, người viết driver, giao tiếp hoặc kết nối thế nào với user space program muốn thực hiện các control operation trên device? Ta thường thiết kế user space C (hoặc C++) program mở device bằng `open(2)` trên device file, rồi thực hiện read/write system call.
 
-Nhưng như vừa nói, các system call API `read(2)` và `write(2)` phù hợp khi truyền dữ liệu, còn ở đây ta muốn thực hiện control operation. Vì vậy, cần một system call khác... Vậy có cần tạo và viết code một (hoặc nhiều) system call mới? Không, đơn giản hơn nhiều: ta multiplex qua ioctl system call, dùng nó để thực hiện bất kỳ control operation cần thiết trên device! Bằng cách nào? Hãy nhớ data structure `file_operations` (fops) hết sức quan trọng từ chương trước; giờ ta khởi tạo một member khác, `.ioctl`, trỏ đến ioctl method function, cho phép device driver hook vào system call này:
+Nhưng như vừa nói, các system call API `read(2)` và `write(2)` phù hợp khi truyền dữ liệu, còn ở đây ta muốn thực hiện control operation. Vì vậy, cần một system call khác... Vậy có cần tạo và viết code một (hoặc nhiều) system call mới? Không, đơn giản hơn nhiều: ta multiplex qua ioctl system call, dùng nó để thực hiện bất kỳ control operation cần thiết trên device! Bằng cách nào? Hãy nhớ data structure `file_operations` (fops) all-important từ chương trước; giờ ta khởi tạo một member khác, `.ioctl`, trỏ đến ioctl method function, cho phép device driver hook vào system call này:
 
 ```
 static struct file_operations ioct_intf_fops = {
@@ -1556,7 +1556,7 @@ static struct file_operations ioct_intf_fops = {
 
 Thực tế, phải xác định nên dùng member `ioctl` hay `unlocked_ioctl` của structure `file_operations`, tùy module chạy trên Linux kernel phiên bản 2.6.36 trở lên hay không; chi tiết ở phần sau.
 
-Thực tế, thêm system call mới vào kernel không phải việc nên làm tùy tiện! Các nhà phát triển kernel không sẵn lòng thêm syscall tùy ý – xét cho cùng đây là interface nhạy cảm về bảo mật. Chi tiết được ghi ở đây: `https://www.kernel.org/doc/html/latest/kernel-hacking/hacking.html#ioctls-not-writing-a-new-system-call`.
+Thực tế, thêm system call mới vào kernel không phải việc nên làm tùy tiện! Các nhà phát triển kernel không sẵn lòng thêm syscall tùy ý – xét cho cùng đây là interface security-sensitive. Chi tiết được ghi ở đây: `https://www.kernel.org/doc/html/latest/kernel-hacking/hacking.html#ioctls-not-writing-a-new-system-call`.
 
 Phần sau trình bày thêm về dùng ioctl để kết nối.
 
@@ -1573,9 +1573,9 @@ Parameter list là varargs – variable arguments. Thực tế và thông thư�
 
 - Tham số đầu rõ ràng – file descriptor của device file (trong trường hợp này) đã mở.
 
-- Tham số thứ hai, tên `request`, là phần thú vị: đó là command truyền đến driver. Thực tế, nó là một encoding, đóng gói ioctl magic number: một number và một type (read/write).
+- Tham số thứ hai, tên `request`, là phần thú vị: đó là command truyền đến driver. Thực tế, nó là một encoding, đóng gói so-called ioctl magic number: một number và một type (read/write).
 
-- Tham số thứ ba (tùy chọn), thường tên `arg`, cũng là đại lượng `unsigned long`; dùng nó để truyền dữ liệu theo cách thông thường cho driver bên dưới hoặc, thường là trả dữ liệu về user space bằng cách truyền (virtual) address của nó và để kernel ghi vào, theo kiểu parameter value-result hoặc in-out của C.
+- Tham số thứ ba (tùy chọn), thường tên `arg`, cũng là đại lượng `unsigned long`; dùng nó để truyền dữ liệu theo cách thông thường cho driver bên dưới hoặc, thường là trả dữ liệu về user space bằng cách truyền (virtual) address của nó và để kernel ghi vào, theo kiểu parameter so-called value-result hoặc in-out của C.
 
 Dùng ioctl đúng không đơn giản như nhiều API khác. Hãy nghĩ một lúc: dễ có tình huống nhiều user space app đang thực hiện system call `ioctl(2)` (với nhiều command) đến device driver bên dưới. Một vấn đề xuất hiện: VFS layer của kernel sẽ hướng ioctl request đến đúng driver thế nào? ioctl thường thực hiện trên char device file có (major, minor) number duy nhất; vậy làm sao driver khác nhận ioctl command của bạn (trừ khi bạn cố ý, có thể với ác ý, thiết lập device file theo cách đó)? Tuy nhiên, có một protocol để dùng ioctl an toàn và đúng; mỗi application và driver định nghĩa magic number được encode vào tất cả ioctl request. Đầu tiên, driver xác minh mỗi ioctl request nhận được chứa magic number của mình; chỉ khi đó mới xử lý; nếu không đơn giản bỏ đi. Điều này tất nhiên dẫn đến nhu cầu có ABI – phải cấp magic number duy nhất (có thể là một khoảng) cho mỗi driver “đã đăng ký”. Vì tạo thành ABI, kernel document sẽ giống nhau; có thể tìm chi tiết ai dùng magic number (hoặc code) nào ở đây: `https://www.kernel.org/doc/Documentation/ioctl/ioctl-number.txt`.
 
@@ -1632,9 +1632,9 @@ int ioctl(int fd, unsigned long request, ...);
 
 - Tham số thứ hai: Request hoặc command được gửi đến device driver bên dưới (hoặc filesystem hay bất cứ thứ gì `fd` biểu diễn).
 
-- Tham số thứ ba (hoặc nhiều hơn) tùy chọn: Thường tham số thứ ba là integer (hoặc pointer đến integer hay data structure); dùng cách này để truyền thông tin bổ sung cho driver khi gửi command kiểu set, hoặc lấy thông tin từ driver qua mô hình pass-by-reference của C đã quen thuộc, trong đó truyền pointer và để driver “poke” nó, thực chất xem parameter như return value.
+- Tham số thứ ba (hoặc nhiều hơn) tùy chọn: Thường tham số thứ ba là integer (hoặc pointer đến integer hay data structure); dùng cách này để truyền thông tin bổ sung cho driver khi gửi command kiểu set, hoặc lấy thông tin từ driver qua mô hình pass-by-reference của C well-understood, trong đó truyền pointer và để driver “poke” nó, thực chất xem parameter như return value.
 
-Thực tế, ioctl thường được dùng như generic system call. Việc dùng ioctl để thực hiện command operation trên cả hardware và software phổ biến đến đáng kinh ngạc! Hãy tham khảo kernel documentation (`Documentation/ioctl/<...>`) để xem nhiều ví dụ thực tế. Chẳng hạn, tìm chi tiết ai dùng magic number (hoặc code) nào trong ioctl ở đây: `https://www.kernel.org/doc/Documentation/ioctl/ioctl-number.txt`. (Tương tự, man page `ioctl_list(2)` cho biết danh sách đầy đủ ioctl call trong x86 kernel; dù các documentation file này có vẻ khá cũ. Tài liệu hiện có vẻ nằm ở đây: `https://github.com/torvalds/linux/tree/master/Documentation/userspace-api/ioctl`.)
+real-world, ioctl thường được dùng như generic system call. Việc dùng ioctl để thực hiện command operation trên cả hardware và software phổ biến đến đáng kinh ngạc! Hãy tham khảo kernel documentation (`Documentation/ioctl/<...>`) để xem nhiều ví dụ thực tế. Chẳng hạn, tìm chi tiết ai dùng magic number (hoặc code) nào trong ioctl ở đây: `https://www.kernel.org/doc/Documentation/ioctl/ioctl-number.txt`. (Tương tự, man page `ioctl_list(2)` cho biết danh sách đầy đủ ioctl call trong x86 kernel; dù các documentation file này có vẻ khá cũ. Tài liệu hiện có vẻ nằm ở đây: `https://github.com/torvalds/linux/tree/master/Documentation/userspace-api/ioctl`.)
 
 Hãy xem vài đoạn user space C application, đặc biệt phần thực hiện system call `ioctl(2)` (để ngắn và dễ đọc, đã bỏ error checking code; code đầy đủ có trong GitHub repository của sách):
 
@@ -1659,7 +1659,7 @@ if (0 == power) {
 [...]
 ```
 
-Driver xử lý các ioctl do user space gửi thế nào? Hãy tìm hiểu.
+Driver xử lý các ioctl user space-issued thế nào? Hãy tìm hiểu.
 
 #### Kernel space – dùng ioctl system call
 
@@ -1756,7 +1756,7 @@ Tôi để bạn tự thử ví dụ project user space/driver này; để tiệ
 
 Như đã nói đầu chương, dùng ioctl interface cho debug thì sao? Có thể dùng cho mục đích này. Bạn luôn có thể chèn “debug” command vào switch-case block; nó có thể cung cấp thông tin hữu ích cho user space application về driver status, giá trị các variable chính (cả health monitoring), v.v. Không chỉ vậy, nếu không được ghi tài liệu rõ cho end user hoặc customer, các command chính xác dùng qua ioctl interface không được biết; do đó bạn cần ghi tài liệu interface đủ chi tiết để nhóm khác hoặc customer sử dụng tốt. Điều này dẫn đến một điểm thú vị: bạn có thể cố ý không ghi tài liệu cho một ioctl command; giờ nó là “hidden” command mà chẳng hạn field engineer có thể dùng để kiểm tra device. (Tôi để bạn làm như bài tập.)
 
-Kernel documentation về ioctl có file: `https://www.kernel.org/doc/Documentation/ioctl/botching-up-ioctls.txt`. Dù thiên về developer kernel graphics stack, nó mô tả lỗi thiết kế điển hình, trade-off, v.v.
+Kernel documentation về ioctl có file: `https://www.kernel.org/doc/Documentation/ioctl/botching-up-ioctls.txt`. Dù thiên về developer kernel graphics stack, nó mô tả lỗi thiết kế điển hình, trade-offs, v.v.
 
 Tuyệt – bạn gần xong rồi! Bạn đã học cách kết nối kernel module hoặc driver với user mode process hoặc thread (trong user space application) qua nhiều công nghệ. Ta bắt đầu procfs, rồi chuyển sang sysfs và debugfs. Netlink socket và ioctl system call hoàn tất việc tìm hiểu các phương thức kết nối này.
 
@@ -1778,7 +1778,7 @@ Trong mục này, chúng tôi tạo bảng so sánh nhanh các phương thức k
 
 ## Tổng kết
 
-Trong chương này, chúng ta trình bày một khía cạnh quan trọng với người viết device driver – chính xác cách kết nối giữa user space và kernel (driver) space. Ta lần lượt đi qua nhiều phương thức; bắt đầu cách cũ hơn, kết nối qua proc filesystem lâu đời (rồi nói tại sao nó không phải phương thức ưu tiên cho người viết driver). Sau đó chuyển sang kết nối qua sysfs mới hơn dựa trên 2.6. Đây là interface ưu tiên cho user space, ít nhất với device driver. Tuy vậy sysfs có hạn chế (nhớ quy tắc mỗi sysfs file một giá trị). Do đó, dùng kỹ thuật kết nối debugfs hoàn toàn tự do định dạng khiến viết debug interface (và interface khác) thực sự đơn giản và mạnh mẽ. Netlink socket là công nghệ kết nối mạnh mẽ, được network subsystem, udev và vài driver dùng; tuy nhiên đòi hỏi kiến thức về socket programming và kernel socket buffer. Để thực hiện generic command operation trên device driver, ioctl system call là một multiplexer tuyệt vời và thường được người viết device driver (cùng các thành phần khác) dùng để kết nối user space.
+Trong chương này, chúng ta trình bày một khía cạnh quan trọng với người viết device driver – chính xác cách kết nối giữa user space và kernel (driver) space. Ta lần lượt đi qua nhiều phương thức; bắt đầu cách cũ hơn, kết nối qua proc filesystem lâu đời (rồi nói tại sao nó không phải phương thức ưu tiên cho người viết driver). Sau đó chuyển sang kết nối qua sysfs 2.6-based mới hơn. Đây là interface ưu tiên cho user space, ít nhất với device driver. Tuy vậy sysfs có hạn chế (nhớ quy tắc one-value-per-sysfs-file). Do đó, dùng kỹ thuật kết nối debugfs hoàn toàn free-format khiến viết debug interface (và interface khác) thực sự đơn giản và mạnh mẽ. Netlink socket là công nghệ kết nối mạnh mẽ, được network subsystem, udev và vài driver dùng; tuy nhiên đòi hỏi kiến thức về socket programming và kernel socket buffer. Để thực hiện generic command operation trên device driver, ioctl system call là một multiplexer tuyệt vời và thường được người viết device driver (cùng các thành phần khác) dùng để kết nối user space.
 
 Với kiến thức này, giờ bạn có thể tích hợp thực tế driver-level code với user space application (hoặc script); thường user mode graphical user interface (GUI) muốn hiển thị một số giá trị nhận từ kernel hoặc device driver. Giờ bạn biết cách truyền các giá trị này từ kernel space device driver!
 

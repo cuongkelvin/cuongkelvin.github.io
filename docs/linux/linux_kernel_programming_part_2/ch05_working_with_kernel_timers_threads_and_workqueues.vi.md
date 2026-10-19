@@ -1,6 +1,6 @@
 # Chương 5. Làm việc với Kernel Timer, Thread và Workqueue
 
-Nếu đặc tả cấp thấp của device driver yêu cầu có delay 50 millisecond giữa việc thực thi `func_a()` và `func_b()` thì sao? Hơn nữa, tùy tình huống, delay phải hoạt động khi bạn chạy trong process context hoặc interrupt context. Nếu ở phần khác của driver, bạn cần một hàm giám sát nào đó được thực thi asynchronously và định kỳ (chẳng hạn mỗi giây) thì sao? Hay bạn cần một thread (hoặc nhiều thread) âm thầm thực hiện công việc ở background nhưng bên trong kernel?
+Nếu đặc tả low-level của device driver yêu cầu có delay 50-millisecond giữa việc thực thi `func_a()` và `func_b()` thì sao? Hơn nữa, tùy tình huống, delay phải hoạt động khi bạn chạy trong process context hoặc interrupt context. Nếu ở phần khác của driver, bạn cần một hàm giám sát nào đó được thực thi asynchronously và định kỳ (chẳng hạn mỗi giây) thì sao? Hay bạn cần một thread (hoặc nhiều thread) âm thầm thực hiện công việc ở background nhưng bên trong kernel?
 
 Đây là những yêu cầu rất phổ biến trong mọi loại phần mềm, bao gồm góc nhỏ của chúng ta trong vũ trụ – phát triển Linux kernel module (và driver)! Trong chương này, bạn sẽ học cách thiết lập, hiểu và sử dụng delay khi chạy trong kernel space, cũng như cách làm việc với kernel timer, kernel thread và workqueue.
 
@@ -18,7 +18,7 @@ Hãy bắt đầu!
 
 ## Yêu cầu kỹ thuật
 
-Tôi giả định bạn đã đọc phần Để tận dụng tối đa cuốn sách này trong Lời nói đầu, chuẩn bị phù hợp một guest VM chạy Ubuntu 18.04 LTS (hoặc bản phát hành ổn định mới hơn), và cài đặt mọi package cần thiết. Nếu chưa, tôi rất khuyến nghị làm việc này trước. Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyến nghị trước tiên thiết lập workspace environment, bao gồm clone GitHub repository chứa code của cuốn sách, và thực hành trên đó. Repository ở đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`.
+Tôi giả định bạn đã đọc phần Để tận dụng tối đa cuốn sách này trong Lời nói đầu, chuẩn bị phù hợp một guest VM chạy Ubuntu 18.04 LTS (hoặc bản phát hành ổn định mới hơn), và cài đặt mọi package cần thiết. Nếu chưa, tôi rất khuyến nghị làm việc này trước. Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyến nghị trước tiên thiết lập workspace environment, bao gồm clone GitHub repository chứa code của cuốn sách, và hands-on trên đó. Repository ở đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`.
 
 ## Delay một khoảng thời gian nhất định trong kernel
 
@@ -30,7 +30,7 @@ Thông thường, kernel code hoặc driver code cần chờ một khoảng th�
 
 (Như chúng ta đã trình bày chi tiết trong sách đồng hành Linux Kernel Programming, ở các chương về CPU scheduling là Chương 10, CPU Scheduler – Phần 1, và Chương 11, CPU Scheduler – Phần 2), đưa process context vào sleep ngụ ý rằng bên trong, hàm cốt lõi `schedule()` của kernel được gọi tại một thời điểm nào đó, cuối cùng gây ra context switch. Điều này dẫn đến điểm thực sự quan trọng (chúng ta đã đề cập trước đây!): bạn tuyệt đối không bao giờ được gọi `schedule()` khi chạy trong bất kỳ atomic context hoặc interrupt context nào. Thông thường, như trường hợp chèn delay ở đây, bạn phải xác định code tại vị trí dự định chèn delay đang chạy trong context nào. Chúng ta đã đề cập điều này trong sách đồng hành Linux Kernel Programming - Chương 6, Kiến thức cốt lõi về Kernel Internals – Process và Thread, trong phần Xác định context; hãy tham khảo lại nếu chưa rõ. (Chúng ta còn đi sâu hơn về điều này trong `Chapter 4`, Xử lý Hardware Interrupt.)
 
-Tiếp theo, hãy suy nghĩ kỹ: nếu bạn thực sự ở trong atomic context (hoặc interrupt context), có thật sự cần delay không? Toàn bộ mục đích của atomic context hoặc interrupt context là giới hạn việc thực thi trong đó ở thời lượng ngắn nhất có thể; bạn rất nên thiết kế theo cách này. Điều đó ngụ ý không chèn delay vào atomic code trừ khi không thể tránh.
+Tiếp theo, hãy suy nghĩ kỹ: nếu bạn thực sự ở trong atomic context (hoặc interrupt context), có thật sự cần delay không? Toàn bộ mục đích của atomic context hoặc interrupt context là giới hạn việc thực thi trong đó ở thời lượng as-brief-as-possible; bạn rất nên thiết kế theo cách này. Điều đó ngụ ý không chèn delay vào atomic code trừ khi không thể tránh.
 
 - Dùng loại thứ nhất: Đây là các API non-blocking hoặc atomic không bao giờ gây sleep. Bạn nên dùng chúng khi code ở trong atomic context (hoặc interrupt context) và thực sự cần non-blocking delay với thời lượng ngắn; nhưng ngắn đến mức nào? Theo nguyên tắc kinh nghiệm, dùng các API này cho non-blocking atomic delay không quá 1 millisecond. Ngay cả khi cần delay hơn một millisecond trong atomic context – chẳng hạn trong code của interrupt handler (nhưng tại sao lại delay trong interrupt!?) – hãy dùng các API `*delay()` này (ký tự `*` biểu thị wildcard; ở đây, như bạn sẽ thấy, nó biểu thị các routine `ndelay()`, `delay()` và `mdelay()`).
 
@@ -56,9 +56,9 @@ Có vài điểm cần lưu ý về các API này, cách triển khai bên trong
 
 - Bạn cần gọi routine phù hợp với thời lượng phải delay; ví dụ, nếu cần atomic non-blocking delay, chẳng hạn 30 millisecond, hãy gọi `mdelay(30)` thay vì `udelay(30*1000)`. Kernel code đề cập đúng điểm này: `linux/delay.h` – "Dùng udelay() cho các khoảng thời gian lớn hơn vài millisecond có thể có nguy cơ overflow trên máy có loops\_per\_jiffy cao (bogomips cao) ...".
 
-- Cách triển khai bên trong các API này, cũng như nhiều API trên Linux, có những chi tiết tinh tế: có cách triển khai trừu tượng hóa cấp cao cho các hàm (hoặc macro, tùy trường hợp) này trong header `<linux/delay.h>`; thường có cách triển khai cấp thấp đặc thù arch trong một header đặc thù arch (`<asm-<arch>/delay.h>` hoặc `<asm-generic/delay.h>`; tất nhiên `arch` nghĩa là CPU), tự động thay thế phiên bản cấp cao tại thời điểm gọi (linker sẽ bảo đảm điều này).
+- Cách triển khai bên trong các API này, cũng như nhiều API trên Linux, có những chi tiết tinh tế: có cách triển khai trừu tượng hóa higher-level cho các hàm (hoặc macro, tùy trường hợp) này trong header `<linux/delay.h>`; thường có cách triển khai low-level arch-specific trong một header arch-specific (`<asm-<arch>/delay.h>` hoặc `<asm-generic/delay.h>`; tất nhiên `arch` nghĩa là CPU), tự động thay thế phiên bản high-level tại thời điểm gọi (linker sẽ bảo đảm điều này).
 
-- Trong cách triển khai hiện tại, cuối cùng các API này đều quy về wrapper trên `udelay()`; bản thân hàm này lại quy về một assembly loop chặt chẽ thực hiện điều được gọi là "busy looping"! (Với x86, code ở `arch/x86/lib/delay.c:__const_udelay()`.) Không đi vào chi tiết phức tạp, ở giai đoạn đầu của boot process, kernel hiệu chỉnh một vài giá trị: giá trị gọi là bogomips – bogus MIPS – và loops per jiffy (lpj). Về cơ bản, kernel xác định trên hệ thống cụ thể đó phải lặp loop bao nhiêu lần để 1 timer tick hay một jiffy trôi qua. Giá trị này được gọi là bogomips của hệ thống và có thể xem trong kernel log. Ví dụ, trên laptop Core-i7 của tôi, nó như sau:
+- Trong cách triển khai hiện tại, cuối cùng các API này đều quy về wrapper trên `udelay()`; bản thân hàm này lại quy về một assembly loop chặt chẽ thực hiện điều được gọi là "busy looping"! (Với x86, code ở `arch/x86/lib/delay.c:__const_udelay()`.) Không đi vào chi tiết phức tạp, ở giai đoạn đầu của boot process, kernel hiệu chỉnh một vài giá trị: giá trị so-called bogomips – bogus MIPS – và loops per jiffy (lpj). Về cơ bản, kernel xác định trên hệ thống cụ thể đó phải lặp loop bao nhiêu lần để 1 timer tick hay một jiffy trôi qua. Giá trị này được gọi là bogomips của hệ thống và có thể xem trong kernel log. Ví dụ, trên laptop Core-i7 của tôi, nó như sau:
 
 ```
 Calibrating delay loop (skipped), value calculated using timer
@@ -101,7 +101,7 @@ __set_current_state(TASK_UNINTERRUPTIBLE);
 return schedule_timeout(timeout);
 ```
 
-Routine `schedule_timeout()` hoạt động bằng cách thiết lập một kernel timer (chủ đề tiếp theo!) sẽ expire sau thời gian mong muốn, rồi lập tức đưa process vào sleep bằng cách gọi `schedule()`! (Nếu tò mò, hãy xem code ở đây: `kernel/time/timer.c:schedule_timeout()`.) Cách triển khai `msleep_interruptible()` rất tương tự, ngoại trừ nó gọi `__set_current_state(TASK_INTERRUPTIBLE);`. Theo nguyên tắc thiết kế, hãy theo mô hình UNIX cung cấp mechanism, không cung cấp policy; theo đó, gọi `msleep_interruptible()` có thể là ý hay khi nếu userspace app hủy công việc (có lẽ do người dùng nhấn `^C`), kernel hoặc driver ngoan ngoãn giải phóng task: process context của nó được đánh thức, chạy signal handler thích hợp rồi mọi thứ tiếp tục. Trong tình huống quan trọng là kernel space không bị signal do người dùng tạo ra làm phiền, dùng biến thể `msleep()`.
+Routine `schedule_timeout()` hoạt động bằng cách thiết lập một kernel timer (chủ đề tiếp theo!) sẽ expire sau thời gian mong muốn, rồi lập tức đưa process vào sleep bằng cách gọi `schedule()`! (Nếu tò mò, hãy xem code ở đây: `kernel/time/timer.c:schedule_timeout()`.) Cách triển khai `msleep_interruptible()` rất tương tự, ngoại trừ nó gọi `__set_current_state(TASK_INTERRUPTIBLE);`. Theo nguyên tắc thiết kế, hãy theo mô hình UNIX cung cấp mechanism, không cung cấp policy; theo đó, gọi `msleep_interruptible()` có thể là ý hay khi nếu userspace app hủy công việc (có lẽ do người dùng nhấn `^C`), kernel hoặc driver ngoan ngoãn giải phóng task: process context của nó được đánh thức, chạy signal handler thích hợp rồi mọi thứ tiếp tục. Trong tình huống quan trọng là kernel space không bị signal user-generated ra làm phiền, dùng biến thể `msleep()`.
 
 Một lần nữa, theo nguyên tắc kinh nghiệm, dùng các API sau tùy thời lượng delay:
 
@@ -235,7 +235,7 @@ msleep_interruptible(10));
 
 Hình 5.1 – Screenshot một phần cho thấy đầu ra của kernel module delays\_sleeps.ko
 
-Hãy nghiên cứu kỹ đầu ra trên; lạ là cả routine `udelay(10)` lẫn `mdelay(10)` dường như hoàn tất thực thi trước khi khoảng delay mong muốn kết thúc (trong đầu ra mẫu, lần lượt trong `9 us` và `9 ms`)! Tại sao? Thực tế là các routine `*delay()` có xu hướng kết thúc sớm hơn. Điều này được ghi lại trong kernel source. Hãy xem phần code liên quan ở đây (tự nó đã rõ ràng):
+Hãy nghiên cứu kỹ đầu ra trên; lạ là cả routine `udelay(10)` lẫn `mdelay(10)` dường như hoàn tất thực thi trước khi khoảng delay mong muốn kết thúc (trong đầu ra mẫu, lần lượt trong `9 us` và `9 ms`)! Tại sao? Thực tế là các routine `*delay()` có xu hướng kết thúc sớm hơn. Điều này được ghi lại trong kernel source. Hãy xem phần code liên quan ở đây (self-explanatory):
 
 ```
 // include/linux/delay.h
@@ -255,7 +255,7 @@ Hãy nghiên cứu kỹ đầu ra trên; lạ là cả routine `udelay(10)` lẫ
  * http://lists.openwall.net/linux-kernel/2011/01/09/56
 ```
 
-Các routine `*sleep()` có đặc điểm ngược lại; chúng gần như luôn có xu hướng sleep lâu hơn yêu cầu. Một lần nữa, đây là vấn đề được dự đoán trong OS không phải real-time như Linux chuẩn. Có thể giảm nhẹ các vấn đề này theo vài cách:
+Các routine `*sleep()` có đặc điểm ngược lại; chúng gần như luôn có xu hướng sleep lâu hơn yêu cầu. Một lần nữa, đây là vấn đề được dự đoán trong OS non-real-time như Linux chuẩn. Có thể giảm nhẹ các vấn đề này theo vài cách:
 
 - Trên Linux chuẩn, ở user mode, làm như sau:
 
@@ -298,7 +298,7 @@ Như vậy, chúng ta đã xem xong kernel delay và sleep trong kernel. Với n
 
 ### Các driver "sed" – minh họa kernel timer, kthread và workqueue
 
-Để chương này thú vị và mang tính thực hành hơn, chúng ta bắt đầu phát triển một miscellaneous class character "driver" gọi là driver simple encrypt decrypt – viết tắt là sed (đừng nhầm với tiện ích `sed(1)` nổi tiếng). Không, bạn sẽ không nhận giải lớn vì đoán được nó cung cấp một dạng hỗ trợ mã hóa/giải mã text – rất đơn giản. Điểm chính là chúng ta tưởng tượng trong đặc tả driver này có điều khoản yêu cầu công việc (thực tế là chức năng mã hóa/giải mã) được thực hiện trong khoảng thời gian nhất định – thực chất trong một deadline nhất định. Để kiểm tra, chúng ta thiết kế driver có kernel timer sẽ expire trong khoảng thời gian đó; driver kiểm tra chức năng có thực sự hoàn tất trong ràng buộc thời gian này không!
+Để chương này thú vị và mang tính hands-on hơn, chúng ta bắt đầu phát triển một miscellaneous class character "driver" gọi là driver simple encrypt decrypt – viết tắt là sed (đừng nhầm với tiện ích `sed(1)` well-known). Không, bạn sẽ không nhận giải lớn vì đoán được nó cung cấp một dạng hỗ trợ mã hóa/giải mã text – rất đơn giản. Điểm chính là chúng ta tưởng tượng trong đặc tả driver này có điều khoản yêu cầu công việc (thực tế là chức năng mã hóa/giải mã) được thực hiện trong khoảng thời gian nhất định – thực chất trong một deadline nhất định. Để kiểm tra, chúng ta thiết kế driver có kernel timer sẽ expire trong khoảng thời gian đó; driver kiểm tra chức năng có thực sự hoàn tất trong ràng buộc thời gian này không!
 
 Chúng ta sẽ phát triển một loạt driver `sed` và các đối tác user space (app) của chúng:
 
@@ -332,7 +332,7 @@ Trong phần tiếp theo, bạn sẽ học cách thiết lập và dùng kernel 
 
 4\. Khi timer timeout (expire), OS tự động gọi callback function của timer (hàm thiết lập ở bước 2); nhớ rằng nó chạy trong timer softirq hay atomic context hoặc interrupt context.
 
-5\. (Tùy chọn) Timer không có tính cyclic, mặc định chỉ chạy một lần. Để timer chạy lại, bạn phải gọi API `mod_timer()`; đây là cách thiết lập interval timer – timer timeout sau một khoảng thời gian cố định nhất định. Nếu không làm bước này, timer là one-shot timer - đếm ngược và expire đúng một lần.
+5\. (Tùy chọn) Timer không có tính cyclic, mặc định chỉ chạy one-time. Để timer chạy lại, bạn phải gọi API `mod_timer()`; đây là cách thiết lập interval timer – timer timeout sau một khoảng thời gian cố định nhất định. Nếu không làm bước này, timer là one-shot timer - đếm ngược và expire đúng một lần.
 
 6\. Khi xong, xóa timer bằng `del_timer[_sync]()`; cũng có thể dùng để hủy timeout. Nó trả về giá trị cho biết pending timer đã được deactivate hay chưa; tức là trả về `1` khi hủy active timer hoặc `0` khi hủy inactive timer.
 
@@ -377,7 +377,7 @@ CPU
  * on which the timer was enqueued.
 ```
 
-Dùng flag `TIMER_DEFERRABLE` hữu ích khi cần chú ý mức tiêu thụ điện (chẳng hạn trên thiết bị dùng pin). Flag thứ ba, `TIMER_IRQSAFE`, chỉ dành cho mục đích đặc biệt; tránh dùng nó.
+Dùng flag `TIMER_DEFERRABLE` hữu ích khi cần chú ý mức tiêu thụ điện (chẳng hạn trên thiết bị battery-backed). Flag thứ ba, `TIMER_IRQSAFE`, chỉ dành cho special-purpose; tránh dùng nó.
 
 Tiếp theo, dùng API `add_timer()` để arm, hay khởi động timer. Sau khi gọi, timer "sống" và bắt đầu đếm ngược:
 
@@ -491,7 +491,7 @@ Giờ hãy kiểm tra kernel timer module. Trên Ubuntu VM x86\_64, chúng ta d�
 
 Hình 5.2 – Screenshot một phần khi chạy kernel module timer\_simple.ko
 
-Hãy nghiên cứu đầu ra `dmesg` (kernel log) ở đây. Vì đặt giá trị ban đầu của member `data` trong private structure bằng `3`, kernel timer expire ba lần (đúng như logic yêu cầu). Hãy xem timestamp ở cột ngoài cùng bên trái; lần timer expire thứ hai ở `4234.289334` (sec.us) và lần thứ ba ở `4234.737346`; phép trừ nhanh cho thấy chênh lệch thời gian là 448.012 microsecond; tức khoảng 448 millisecond. Điều này hợp lý vì yêu cầu timeout 420 ms (hơi vượt một chút; overhead của printk cũng có ảnh hưởng).
+Hãy nghiên cứu đầu ra `dmesg` (kernel log) ở đây. Vì đặt giá trị ban đầu của member `data` trong private structure bằng `3`, kernel timer expire ba lần (đúng như logic yêu cầu). Hãy xem timestamp ở cột left-most; lần timer expire thứ hai ở `4234.289334` (sec.us) và lần thứ ba ở `4234.737346`; phép trừ nhanh cho thấy chênh lệch thời gian là 448.012 microsecond; tức khoảng 448 millisecond. Điều này hợp lý vì yêu cầu timeout 420 ms (hơi vượt một chút; overhead của printk cũng có ảnh hưởng).
 
 Đầu ra macro `PRINT_CTX()` cũng cho thấy nhiều điều; hãy xem lần thứ hai trong screenshot trên:
 
@@ -518,9 +518,9 @@ Do giới hạn dung lượng, chúng ta không định trình bày code thật 
 
 Hãy xem thiết kế tổng thể:
 
-- Driver `sed1` (`ch5/sed1/sed1_driver/sed1_drv.c`) thực sự là pseudo driver, theo nghĩa nó không thao tác trên peripheral hardware controller hoặc chip mà trên memory; tuy vậy, đây là `misc` class character device driver đầy đủ.
+- Driver `sed1` (`ch5/sed1/sed1_driver/sed1_drv.c`) thực sự là pseudo driver, theo nghĩa nó không thao tác trên peripheral hardware controller hoặc chip mà trên memory; tuy vậy, đây là `misc` class character device driver full-fledged.
 
-- Nó đăng ký dưới dạng thiết bị `misc`; trong quá trình đó, kernel tự tạo device node (ở đây gọi là `/dev/sed1_drv`).
+- Nó đăng ký dưới dạng thiết bị `misc`; trong quá trình đó, kernel auto-created device node (ở đây gọi là `/dev/sed1_drv`).
 
 - Chúng ta bố trí driver có cấu trúc "context" (`struct stMyCtx`) chứa các member chính được dùng xuyên suốt; một trong số đó là cấu trúc `struct` `timer_list` dành cho kernel timer, được khởi tạo trong init code path (với API `timer_setup()`).
 
@@ -611,7 +611,7 @@ Screenshot sau cho thấy một lần chạy mẫu mã hóa và giải mã (ở 
 
 ![Figure 5.3](images/ch05/fig05-03.png)
 
-Hình 5.3 – Mini-project sed1 mã hóa và giải mã message trong deadline quy định
+Hình 5.3 – mini-project sed1 mã hóa và giải mã message trong deadline quy định
 
 Mọi thứ diễn ra tốt ở đây. Hãy xem code callback function của kernel timer. Ở đây, trong driver `sed1` đơn giản, chúng ta chỉ cho nó làm như sau:
 
@@ -655,7 +655,7 @@ sed_ds *kdret)
 
 ![Figure 5.4](images/ch05/fig05-04.png)
 
-Hình 5.4 – Mini-project sed1 chạy với module parameter make\_it\_fail bằng 1, khiến lỡ deadline
+Hình 5.4 – mini-project sed1 chạy với module parameter make\_it\_fail bằng 1, khiến lỡ deadline
 
 Lần này, deadline bị vượt trước khi timer bị hủy, nên timer expire và kích hoạt. Callback function `timesup()` sau đó chạy (được tô nổi trong screenshot trên). Tôi rất khuyến nghị bạn dành thời gian đọc chi tiết code driver và user mode app rồi tự thử.
 
@@ -763,7 +763,7 @@ in use
     [ ... ]
 ```
 
-Tham số thứ nhất của `kthread_run()` là nguồn sống của kthread mới – hàm của nó! Ở đây không định truyền dữ liệu cho kthread mới sinh, nên tham số thứ hai là `NULL`. Các tham số còn lại là format string kiểu printf chỉ định tên. Khi thành công, nó trả về pointer đến task structure của kthread mới (chúng ta đã trình bày khá chi tiết task structure trong sách đồng hành Linux Kernel Programming - Chương 6, Kiến thức cốt lõi về Kernel Internals – Process và Thread, phần Hiểu và truy cập kernel task structure). Inline function `get_task_struct()` quan trọng – nó tăng reference count của task structure được truyền vào. Điều này đánh dấu task đang được dùng (sau đó, trong cleanup code, chúng ta gọi helper routine `kthread_stop()`; nó làm thao tác ngược, giảm reference count của task structure (và cuối cùng giải phóng nó)).
+Tham số thứ nhất của `kthread_run()` là nguồn sống của kthread mới – hàm của nó! Ở đây không định truyền dữ liệu cho kthread mới sinh, nên tham số thứ hai là `NULL`. Các tham số còn lại là format string printf-style chỉ định tên. Khi thành công, nó trả về pointer đến task structure của kthread mới (chúng ta đã trình bày khá chi tiết task structure trong sách đồng hành Linux Kernel Programming - Chương 6, Kiến thức cốt lõi về Kernel Internals – Process và Thread, phần Hiểu và truy cập kernel task structure). Inline function `get_task_struct()` quan trọng – nó tăng reference count của task structure được truyền vào. Điều này đánh dấu task đang được dùng (sau đó, trong cleanup code, chúng ta gọi helper routine `kthread_stop()`; nó làm thao tác ngược, giảm reference count của task structure (và cuối cùng giải phóng nó)).
 
 Giờ hãy xem chính kernel thread (chỉ trình bày các code snippet liên quan):
 
@@ -859,7 +859,7 @@ Trong phần này (như đề cập ở phần Các driver "sed" – minh họa 
 
 #### sed2 – thiết kế
 
-Mini-project `sed` v2 (`sed2`; code: `ch5/sed2/`) rất giống project `sed1`. Khác biệt chính là lần này thực hiện "công việc" qua kernel thread do driver tạo riêng cho mục đích này. Các khác biệt chính so với phiên bản trước như sau:
+mini-project `sed` v2 (`sed2`; code: `ch5/sed2/`) rất giống project `sed1`. Khác biệt chính là lần này thực hiện "công việc" qua kernel thread do driver tạo riêng cho mục đích này. Các khác biệt chính so với phiên bản trước như sau:
 
 - Chỉ có một shared memory buffer toàn cục giữ metadata cùng payload; tức message cần mã hóa/giải mã. Đây là member `struct` `sed_ds->shmem` trong driver context structure, `struct stMyCtx`.
 
@@ -873,7 +873,7 @@ Vậy, tóm lại, ý tưởng ở đây chủ yếu minh họa dùng kernel thr
 
 - Không thể đơn giản truyền dữ liệu từ process context của kernel thread sang user space process – chúng hoàn toàn khác nhau (chạy trong virtual address space khác nhau: user mode process có VAS đầy đủ và PID riêng, v.v.; kernel thread thực sự sống trong kernel VAS với PID và kernel mode stack riêng). Do đó, dùng routine `copy_{from|to}_user()` (và tương tự) để giao tiếp từ kthread đến user mode app là không thể.
 
-- Nguy cơ race nguy hiểm rất lớn; kernel thread chạy asynchronously so với user process context; vì vậy có thể tạo bug liên quan concurrency nếu không cẩn thận. Đây là toàn bộ lý do có hai chương cuối cuốn sách, nơi chúng ta trình bày khái niệm và công nghệ kernel synchronization, locking (cùng những nội dung liên quan). Hiện tại hãy kiên nhẫn – chúng ta giữ mọi thứ đơn giản nhất có thể bằng vài thủ thuật polling đơn giản thay cho synchronization đúng cách.
+- Nguy cơ race nguy hiểm rất lớn; kernel thread chạy asynchronously so với user process context; vì vậy có thể tạo bug concurrency-related nếu không cẩn thận. Đây là toàn bộ lý do có hai chương cuối cuốn sách, nơi chúng ta trình bày khái niệm và công nghệ kernel synchronization, locking (cùng những nội dung liên quan). Hiện tại hãy kiên nhẫn – chúng ta giữ mọi thứ đơn giản nhất có thể bằng vài thủ thuật polling đơn giản thay cho synchronization đúng cách.
 
 Chúng ta có bốn thao tác trong project `sed2`:
 
@@ -895,7 +895,7 @@ Có thể tóm tắt thiết kế bằng sơ đồ ASCII-art đơn giản:
 
 ![Figure 5.7](images/ch05/fig05-07.png)
 
-Hình 5.7 – Thiết kế cấp cao của mini-project sed2
+Hình 5.7 – Thiết kế high-level của mini-project sed2
 
 Được rồi, giờ hãy xem cách triển khai code liên quan cho `sed2`.
 
@@ -940,7 +940,7 @@ sed_ds))) {
 
 Driver, sau khi thực hiện vài kiểm tra tính hợp lệ trong method `ioctl()`, bắt đầu làm việc: với thao tác mã hóa, kiểm tra payload hiện tại đã được mã hóa chưa (hiển nhiên có state member trong context structure được cập nhật để giữ thông tin này; tức `priv->msg_state`). Nếu mọi thứ ổn, nó sao chép message (cùng metadata cần thiết trong `struct sed_ds`) từ user space app vào. Sau đó, đánh thức kernel thread (qua API `wake_up_process()`; tham số là pointer đến task structure của nó, cũng là return value từ API `kthread_create()`). Điều này khiến kernel thread tiếp tục thực thi!
 
-Trong code `init`, chúng ta tạo kthread bằng API `kthread_create()` (không phải macro `kthread_run()`) vì không muốn kthread chạy ngay! Thay vào đó, muốn giữ nó sleep, chỉ đánh thức khi cần nó làm việc. Đây là cách tiếp cận điển hình nên theo khi dùng worker thread (gọi là mô hình manager-worker).
+Trong code `init`, chúng ta tạo kthread bằng API `kthread_create()` (không phải macro `kthread_run()`) vì không muốn kthread chạy ngay! Thay vào đó, muốn giữ nó sleep, chỉ đánh thức khi cần nó làm việc. Đây là cách tiếp cận điển hình nên theo khi dùng worker thread (so-called mô hình manager-worker).
 
 Code sau trong method `init` tạo kernel thread:
 
@@ -1076,15 +1076,15 @@ Hãy xem một lần chạy mẫu mini-project `sed2` qua vài screenshot; bảo
 
 ![Figure 5.8](images/ch05/fig05-08.png)
 
-Hình 5.8 – Mini-project sed2 thể hiện hệ thống menu tương tác. Ở đây message đã được mã hóa thành công
+Hình 5.8 – mini-project sed2 thể hiện hệ thống menu tương tác. Ở đây message đã được mã hóa thành công
 
 Vậy chúng ta đã mã hóa message, nhưng xem nó thế nào? Đơn giản: dùng menu! Chọn option `2` để lấy message (đã mã hóa) (nó sẽ được hiển thị để bạn thong thả xem), option `3` để giải mã, option `2` lần nữa để xem, và option `5` để xem kernel log – khá hữu ích! Một số option được thể hiện trong screenshot sau:
 
 ![Figure 5.9](images/ch05/fig05-09.png)
 
-Hình 5.9 – Mini-project sed2 thể hiện hệ thống menu tương tác. Ở đây message đã được mã hóa thành công
+Hình 5.9 – mini-project sed2 thể hiện hệ thống menu tương tác. Ở đây message đã được mã hóa thành công
 
-Như thể hiện trong kernel log, user mode app (`userapp_sed2_dbg_asan`) đã mở device và thực hiện thao tác lấy, rồi thao tác mã hóa vài giây sau (timestamp ở góc dưới bên trái screenshot trên giúp xác định điều này). Sau đó driver đánh thức kernel thread; có thể thấy đầu ra printk cũng như đầu ra `PRINT_CTX()` ở đây:
+Như thể hiện trong kernel log, user mode app (`userapp_sed2_dbg_asan`) đã mở device và thực hiện thao tác lấy, rồi thao tác mã hóa vài giây sau (timestamp ở góc bottom-left screenshot trên giúp xác định điều này). Sau đó driver đánh thức kernel thread; có thể thấy đầu ra printk cũng như đầu ra `PRINT_CTX()` ở đây:
 
 ```
 [41178.885577] sed2_drv:worker_kthread(): 001) [sed2_drv/worker]:24117   |
@@ -1140,7 +1140,7 @@ Như đề cập ở phần Tạo và làm việc với kernel thread, một cá
 
 Về cách dùng workqueue (và bottom-half mechanism khác), tham khảo lại `Chapter 4`, Xử lý Hardware Interrupt, phần Hardirq, tasklet và threaded handler – dùng gì khi nào, đặc biệt bảng ở đó.
 
-Điều quan trọng là hiểu kernel có default workqueue luôn sẵn sàng; gọi là kernel-global workqueue hoặc system workqueue. Để tránh tạo áp lực hệ thống, rất nên dùng nó. Chúng ta dùng kernel-global workqueue, enqueue các work task vào đó và để nó xử lý công việc.
+Điều quan trọng là hiểu kernel có default workqueue always-ready; gọi là kernel-global workqueue hoặc system workqueue. Để tránh tạo áp lực hệ thống, rất nên dùng nó. Chúng ta dùng kernel-global workqueue, enqueue các work task vào đó và để nó xử lý công việc.
 
 Thậm chí có thể dùng và tạo các loại workqueue khác! Kernel cung cấp framework cmwq phức tạp cùng tập API giúp tạo các loại workqueue cụ thể. Chúng ta sẽ xem chi tiết hơn ở phần tiếp theo.
 
@@ -1214,7 +1214,7 @@ Sơ đồ sau tóm tắt (đơn giản, về khái niệm) kernel workqueue subs
 
 Hình 5.11 – Góc nhìn khái niệm đơn giản về workqueue subsystem trong kernel
 
-Workqueue framework của kernel duy trì động các worker pool (gồm kernel thread) này; một số, như workqueue `events` (tương ứng kernel-global workqueue), là general-purpose, còn những pool khác được tạo và duy trì cho mục đích cụ thể (thể hiện ở tên kernel thread, như block I/O, `kworker*blockd`, memory control, `kworker*mm_percpu_wq`, loại đặc thù device như tpm, `tpm_dev_wq`, CPU frequency governor driver, `devfreq_wq`, v.v.). Lưu ý kernel workqueue subsystem duy trì tự động, tinh tế và hiệu quả mọi workqueue này (cùng worker pool kernel thread liên quan).
+Workqueue framework của kernel duy trì động các worker pool (gồm kernel thread) này; một số, như workqueue `events` (tương ứng kernel-global workqueue), là general-purpose, còn những pool khác được tạo và duy trì cho mục đích cụ thể (thể hiện ở tên kernel thread, như block I/O, `kworker*blockd`, memory control, `kworker*mm_percpu_wq`, loại device-specific như tpm, `tpm_dev_wq`, CPU frequency governor driver, `devfreq_wq`, v.v.). Lưu ý kernel workqueue subsystem duy trì tự động, tinh tế và hiệu quả mọi workqueue này (cùng worker pool kernel thread liên quan).
 
 Vậy thực sự dùng workqueue thế nào? Phần tiếp theo cho thấy cách dùng kernel-global workqueue. Tiếp đó là demo kernel module minh họa rõ cách sử dụng.
 
@@ -1235,7 +1235,7 @@ Cấu trúc `work_struct` là cấu trúc chủ lực của workqueue (ít nhấ
 
 #### Cho work task thực thi – schedule\_work()
 
-Gọi `INIT_WORK()` đăng ký work structure và function chỉ định với default kernel-global workqueue nội bộ. Nhưng chưa thực thi nó! Bạn phải cho biết khi nào thực thi "công việc" bằng cách gọi API `schedule_work()` đúng lúc:
+Gọi `INIT_WORK()` đăng ký work structure và function chỉ định với default kernel-global workqueue in-house. Nhưng chưa thực thi nó! Bạn phải cho biết khi nào thực thi "công việc" bằng cách gọi API `schedule_work()` đúng lúc:
 
 ```
 bool schedule_work(struct work_struct *work);
@@ -1258,7 +1258,7 @@ delay);
 
 Dùng routine này khi muốn delay việc thực thi workqueue handler function một khoảng thời gian chỉ định; tham số thứ hai, `delay`, là số `jiffies` muốn chờ. Chúng ta biết biến `jiffies` tăng `HZ` jiffy mỗi giây; vì vậy, để work task delay `n` giây, chỉ định `n * jiffies`. Tương tự, luôn có thể truyền giá trị `msecs_to_jiffies(n)` làm tham số thứ hai để nó thực thi sau `n` millisecond kể từ bây giờ.
 
-Tiếp theo, lưu ý tham số thứ nhất của `schedule_delayed_work()` khác; đó là cấu trúc `delayed_work`, bản thân chứa cấu trúc `work_struct` giờ đã quen thuộc làm member, cùng các housekeeping member khác (kernel timer, pointer đến workqueue structure và CPU number). Để khởi tạo, chỉ cần cấp phát memory rồi dùng macro `INIT_DELAYED_WORK()` (cú pháp vẫn giống `INIT_WORK()`); nó xử lý mọi khởi tạo.
+Tiếp theo, lưu ý tham số thứ nhất của `schedule_delayed_work()` khác; đó là cấu trúc `delayed_work`, bản thân chứa cấu trúc `work_struct` now-familiar làm member, cùng các housekeeping member khác (kernel timer, pointer đến workqueue structure và CPU number). Để khởi tạo, chỉ cần cấp phát memory rồi dùng macro `INIT_DELAYED_WORK()` (cú pháp vẫn giống `INIT_WORK()`); nó xử lý mọi khởi tạo.
 
 Một biến thể hơi khác nữa là routine `schedule[_delayed]_work_on()`; `on` trong tên cho phép chỉ định CPU core nào sẽ schedule work task khi thực thi. Đây là signature của inline function `schedule_delayed_work_on()`:
 
@@ -1281,7 +1281,7 @@ bool cancel_delayed_work_sync(struct delayed_work *dwork);
 
 Thực sự khá đơn giản: dùng `cancel_work_sync()` sau khi dùng các routine `INIT_WORK()` và `schedule_work()`; dùng hai routine sau khi đã delay work task. Lưu ý hai routine có hậu tố `_sync`; ngụ ý cancellation là synchronous – kernel chờ các work task hoàn tất thực thi trước khi các hàm này return! Đây thường là điều mong muốn. Chúng trả về boolean: `True` nếu có công việc pending, còn không là `False`.
 
-Trong kernel module, không cancel (hoặc flush) work task trong cleanup code path (`rmmod`) là cách chắc chắn gây vấn đề nghiêm trọng; bảo đảm thực hiện!
+Trong kernel module, không cancel (hoặc flush) work task trong cleanup code path (`rmmod`) là cách sure-fire gây vấn đề nghiêm trọng; bảo đảm thực hiện!
 
 Kernel workqueue subsystem cũng cung cấp vài routine `flush_*()` (bao gồm `flush_scheduled_work()`, `flush_workqueue()` và `flush_[delayed_]work()`). Kernel documentation (`https://www.kernel.org/doc/html/latest/core-api/workqueue.html`) cảnh báo rõ rằng các routine này không dễ dùng nhất vì dễ gây deadlock. Bạn được khuyến nghị dùng các API `cancel_[delayed_]work[_sync]()` nói trên thay thế.
 
@@ -1309,7 +1309,7 @@ Trong các phần tiếp theo, chúng ta viết kernel module đơn giản dùng
 
 ### Work queue kernel module đơn giản của chúng ta – xem code
 
-Hãy thực hành với work queue! Trong các mục sau, chúng ta viết demo kernel module đơn giản (`ch5/workq_simple`) minh họa cách dùng kernel-default workqueue để thực thi một work task. Nó thực ra được xây dựng trên LKM trước, dùng để minh họa kernel timer (`ch5/timer_simple`). Hãy xem ở mức code (như thường lệ, không trình bày toàn bộ code, chỉ những phần liên quan nhất). Chúng ta bắt đầu với private context data structure và init method:
+Hãy hands-on với work queue! Trong các mục sau, chúng ta viết demo kernel module đơn giản (`ch5/workq_simple`) minh họa cách dùng kernel-default workqueue để thực thi một work task. Nó thực ra được xây dựng trên LKM trước, dùng để minh họa kernel timer (`ch5/timer_simple`). Hãy xem code-wise (như thường lệ, không trình bày toàn bộ code, chỉ những phần liên quan nhất). Chúng ta bắt đầu với private context data structure và init method:
 
 ```
 static struct st_ctx {
@@ -1351,7 +1351,7 @@ static void ding(struct timer_list *timer)
 }
 ```
 
-Sau khi giảm biến `data`, nó thiết lập timer kích hoạt lại (sau 420 ms, qua `mod_timer()`), rồi qua API `schedule_work()`, schedule work queue callback để chạy! Kernel nhận biết work queue function lúc này phải được thực thi (tiêu thụ) sớm nhất khi khả thi. Nhưng khoan — work queue callback phải và sẽ chỉ chạy trong process context, qua một global kernel worker thread — các thread gọi là events. Vì thế, chỉ khi đã ra khỏi softirq context này và (một trong) các “events” kernel worker thread nằm trên CPU runqueue và thực sự chạy, work queue callback function mới được gọi. Đừng lo — sẽ sớm thôi... Toàn bộ ý nghĩa của việc dùng workqueue là kernel không chỉ đảm nhiệm hoàn toàn thread management, mà hàm còn chạy trong process context, nơi có thể thực hiện blocking operation hoặc I/O operation kéo dài.
+Sau khi giảm biến `data`, nó thiết lập timer kích hoạt lại (sau 420 ms, qua `mod_timer()`), rồi qua API `schedule_work()`, schedule work queue callback để chạy! Kernel nhận biết work queue function lúc này phải được thực thi (tiêu thụ) sớm nhất khi khả thi. Nhưng khoan — work queue callback phải và sẽ chỉ chạy trong process context, qua một global kernel worker thread — các thread so-called events. Vì thế, chỉ khi đã ra khỏi softirq context này và (một trong) các “events” kernel worker thread nằm trên CPU runqueue và thực sự chạy, work queue callback function mới được gọi. Đừng lo — sẽ sớm thôi... Toàn bộ ý nghĩa của việc dùng workqueue là kernel không chỉ đảm nhiệm hoàn toàn thread management, mà hàm còn chạy trong process context, nơi có thể thực hiện blocking operation hoặc I/O operation kéo dài.
 
 Một lần nữa, sớm là bao lâu? Hãy thử đo: chúng ta lấy timestamp (qua inline function `ktime_get_real_ns()` thông thường) ngay sau `schedule_work()` và ở dòng code đầu tiên trong work queue function. Macro `SHOW_DELTA()` đáng tin cậy hiển thị chênh lệch thời gian. Như dự kiến, nó nhỏ, thường trong khoảng vài phần trăm microsecond (tất nhiên phụ thuộc nhiều yếu tố, gồm hardware platform, kernel version, v.v.). Hệ thống tải cao khiến context switch sang các events kernel thread mất lâu hơn, có thể gây chậm thực thi chức năng work queue. Bạn sẽ thấy trong lần chạy mẫu ở ảnh chụp (Hình 5.12) trong mục tiếp theo.
 
@@ -1400,7 +1400,7 @@ Hãy xem code này chi tiết hơn:
 
 Lưu ý chúng ta dùng macro `PRINT_CTX()` trong LKM này (nằm trong header `convenient.h`) để cho thấy điều thú vị:
 
-- Khi chạy trong context của timer callback function, các status bit chứa ký tự `s` (ký tự thứ ba trong field bốn ký tự — `.Ns1` hoặc tương tự), cho thấy đang chạy trong softirq (interrupt, atomic) context.
+- Khi chạy trong context của timer callback function, các status bit chứa ký tự `s` (ký tự thứ ba trong field four-character — `.Ns1` hoặc tương tự), cho thấy đang chạy trong softirq (interrupt, atomic) context.
 
 - Khi chạy trong context của work queue callback function, ký tự thứ ba của status bit không bao giờ chứa `s`; luôn là `.`, chứng minh workqueue luôn thực thi trong process context!
 
@@ -1419,7 +1419,7 @@ Tất nhiên, kernel code base có rất nhiều nơi dùng workqueue (đặc bi
 
 ### Mini project sed3 – xem rất ngắn gọn
 
-Hãy kết thúc chương bằng cách xem rất ngắn gọn sự phát triển từ project `sed2` thành `sed3`. Mini-project này giống hệt `sed2`, ngoại trừ đơn giản hơn! Công việc (en/de)crypt giờ được thực hiện bởi work task (hàm) qua chức năng workqueue hay bottom-half mechanism của kernel. Chúng ta dùng workqueue — kernel-global workqueue mặc định — để làm việc thay vì tạo và quản lý kthread thủ công (như trong `sed2`)!
+Hãy kết thúc chương bằng cách xem rất ngắn gọn sự phát triển từ project `sed2` thành `sed3`. mini-project này giống hệt `sed2`, ngoại trừ đơn giản hơn! Công việc (en/de)crypt giờ được thực hiện bởi work task (hàm) qua chức năng workqueue hay bottom-half mechanism của kernel. Chúng ta dùng workqueue — kernel-global workqueue mặc định — để làm việc thay vì tạo và quản lý kthread thủ công (như trong `sed2`)!
 
 Ảnh sau cho thấy truy cập kernel log của một lần chạy mẫu; trong lần chạy, ứng dụng user mode encrypt, rồi decrypt, rồi lấy message để xem. Chúng ta tô nổi bật phần thú vị — việc thực thi work task qua worker thread của kernel-global workqueue — trong hai hình chữ nhật đỏ:
 
@@ -1429,7 +1429,7 @@ Hình 5.13 – Kernel log khi chạy driver sed3; work task chạy qua kernel-gl
 
 Nhân tiện, ứng dụng user mode giống hệt ứng dụng dùng trong `sed2`. Ảnh trên cho thấy (qua macro `PRINT_CTX()` đáng tin cậy) các kernel worker thread thực tế mà kernel-global workqueue dùng để chạy công việc encrypt và decrypt; trong trường hợp này là `[kworker/1:0]` PID 9812 cho encrypt và `[kworker/0:2]` PID 9791 cho decrypt. Chú ý cả hai chạy trong process context. Chúng tôi để bạn tự duyệt code `sed3` (`ch5/sed3`).
 
-Đến đây kết thúc mục này. Bạn đã học kernel workqueue infrastructure thực sự hữu ích cho người viết module/driver vì giúp thêm abstraction layer mạnh mẽ trên các chi tiết bên dưới về kernel thread, việc tạo cùng quản lý và thao tác phức tạp. Nó giúp rất dễ thực hiện công việc trong kernel — đặc biệt dùng kernel-global workqueue (mặc định) có sẵn — mà không cần lo những chi tiết rắc rối.
+Đến đây kết thúc mục này. Bạn đã học kernel workqueue infrastructure thực sự hữu ích cho người viết module/driver vì giúp thêm abstraction layer mạnh mẽ trên các chi tiết bên dưới về kernel thread, việc tạo cùng quản lý và thao tác phức tạp. Nó giúp rất dễ thực hiện công việc trong kernel — đặc biệt dùng kernel-global workqueue (mặc định) pre-existing — mà không cần lo những chi tiết rắc rối.
 
 ## Tổng kết
 
@@ -1437,7 +1437,7 @@ Làm tốt lắm! Chúng ta đã trình bày nhiều nội dung trong chương n
 
 Chuỗi ba demo driver `sed` (simple encrypt decrypt) mà chúng ta thiết kế và triển khai thể hiện một use case phức tạp hơn đôi chút cho những công nghệ thú vị này: `sed1` với triển khai timeout, `sed2` thêm kernel thread để thực hiện công việc, và `sed3` dùng kernel-global workqueue để tiêu thụ công việc khi cần.
 
-Hãy dành thời gian làm các Câu hỏi/bài tập sau cho chương này và xem tài nguyên Đọc thêm. Khi xong, tôi đề nghị nghỉ ngơi xứng đáng rồi quay lại. Chúng ta gần đến đích: hai chương cuối trình bày chủ đề thực sự quan trọng — kernel synchronization!
+Hãy dành thời gian làm các Câu hỏi/bài tập sau cho chương này và xem tài nguyên Đọc thêm. Khi xong, tôi đề nghị nghỉ ngơi well-deserved rồi quay lại. Chúng ta gần đến đích: hai chương cuối trình bày chủ đề thực sự quan trọng — kernel synchronization!
 
 ## Câu hỏi
 
@@ -1478,7 +1478,7 @@ my_chip_probe(...)
 
 4\. `mutlitime`: Phát triển kernel module nhận tham số là số giây trước khi gọi timer callback. Mặc định bằng zero (ngụ ý không có timer và do đó là validity error). Hoạt động như sau: nếu số truyền vào là 3, phải tạo ba kernel timer; timer đầu hết hạn sau 3 giây, timer thứ hai sau 2 giây, timer cuối sau 1 giây. Nói cách khác, nếu số truyền vào là “n”, phải tạo “n” kernel timer; timer đầu hết hạn sau “n” giây, timer thứ hai sau “n-1” giây, timer thứ ba sau “n-2” giây, v.v. cho đến khi số đếm về zero.
 
-5\. Build và chạy các mini-project `sed[123]` được cung cấp trong chương, xác minh (bằng cách xem kernel log) chúng hoạt động đúng như phải vậy.
+5\. Build và chạy các mini-projects `sed[123]` được cung cấp trong chương, xác minh (bằng cách xem kernel log) chúng hoạt động đúng như phải vậy.
 
 6\. `workq_simple2`: LKM `ch5/workq_simple` được cung cấp thiết lập và “tiêu thụ” một work item (hàm) qua kernel-global workqueue; nâng cấp để thiết lập và thực thi hai “work” task. Xác minh hoạt động đúng.
 

@@ -2,7 +2,7 @@
 
 Trong chương này, chúng ta tập trung vào một khía cạnh thực sự then chốt khi viết device driver: hardware interrupt là gì và, quan trọng hơn, chính xác bạn xử lý chúng như thế nào với tư cách tác giả driver. Thực tế, một tỷ lệ lớn peripheral (mà bạn muốn viết device driver cho chúng) báo cho OS hoặc driver biết nhu cầu cần được xử lý ngay bằng cách assert hardware interrupt. Về bản chất, đây là một tín hiệu điện cuối cùng cảnh báo control unit của processor (thông thường, cảnh báo này phải chuyển hướng điều khiển đến interrupt handler routine của peripheral liên quan vì nó cần được chú ý ngay).
 
-Để xử lý những interrupt này, bạn cần hiểu một số nền tảng về cách chúng hoạt động; tức là OS xử lý chúng như thế nào và, quan trọng nhất, với tư cách tác giả driver, bạn được kỳ vọng làm việc với chúng ra sao. Một tầng phức tạp bổ sung xuất hiện do Linux là một rich OS dựa trên VM, đòi hỏi và sử dụng một mức abstraction trong cách làm việc với interrupt. Vì thế, bạn sẽ bắt đầu bằng việc học workflow (rất) cơ bản về xử lý hardware interrupt. Sau đó, chúng ta xem xét những chủ đề mà tác giả driver như bạn chủ yếu quan tâm: chính xác cách cấp phát IRQ và viết code cho chính handler routine—có những điều nên làm và không được làm rất cụ thể! Tiếp theo chúng ta trình bày động lực và cách sử dụng mô hình threaded interrupt mới hơn, enable/disable các IRQ cụ thể, xem thông tin IRQ line qua proc, và top half cùng bottom half dùng để làm gì, sử dụng chúng như thế nào. Chúng ta kết thúc chương bằng cách trả lời một số FAQ về interrupt handling.
+Để xử lý những interrupt này, bạn cần hiểu một số nền tảng về cách chúng hoạt động; tức là OS xử lý chúng như thế nào và, quan trọng nhất, với tư cách tác giả driver, bạn được kỳ vọng làm việc với chúng ra sao. Một tầng phức tạp bổ sung xuất hiện do Linux là một rich OS VM-based, đòi hỏi và sử dụng một mức abstraction trong cách làm việc với interrupt. Vì thế, bạn sẽ bắt đầu bằng việc học workflow (rất) cơ bản về xử lý hardware interrupt. Sau đó, chúng ta xem xét những chủ đề mà tác giả driver như bạn chủ yếu quan tâm: chính xác cách cấp phát IRQ và viết code cho chính handler routine—có những điều nên làm và không được làm rất cụ thể! Tiếp theo chúng ta trình bày động lực và cách sử dụng mô hình threaded interrupt mới hơn, enable/disable các IRQ cụ thể, xem thông tin IRQ line qua proc, và top half cùng bottom half dùng để làm gì, sử dụng chúng như thế nào. Chúng ta kết thúc chương bằng cách trả lời một số FAQ về interrupt handling.
 
 Trong chương này, chúng ta trình bày các chủ đề sau:
 
@@ -26,13 +26,13 @@ Bắt đầu thôi!
 
 ## Yêu cầu kỹ thuật
 
-Chương này giả định bạn đã đọc mục Để tận dụng tối đa cuốn sách này trong Lời nói đầu, đã chuẩn bị phù hợp một guest VM chạy Ubuntu 18.04 LTS (hoặc bản phát hành ổn định mới hơn) và cài đặt tất cả package cần thiết. Nếu chưa, tôi rất khuyến nghị bạn làm việc này trước. Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyến nghị bạn thiết lập workspace environment trước, bao gồm clone GitHub repository của sách để lấy code, rồi thực hành trực tiếp trên đó. Repository ở đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`.
+Chương này giả định bạn đã đọc mục Để tận dụng tối đa cuốn sách này trong Lời nói đầu, đã chuẩn bị phù hợp một guest VM chạy Ubuntu 18.04 LTS (hoặc bản phát hành ổn định mới hơn) và cài đặt tất cả package cần thiết. Nếu chưa, tôi rất khuyến nghị bạn làm việc này trước. Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyến nghị bạn thiết lập workspace environment trước, bao gồm clone GitHub repository của sách để lấy code, rồi hands-on trên đó. Repository ở đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`.
 
 ## Hardware interrupt và cách kernel xử lý chúng
 
-Nhiều, nếu không muốn nói là hầu hết, peripheral controller dùng hardware interrupt để báo cho OS hoặc device driver rằng cần thực hiện một hành động nào đó (thường là khẩn cấp). Ví dụ điển hình gồm network adapter (NIC), block device (disk), USB device, AV device, human interface device (HID) như keyboard, mouse, touchscreen và video screen, clock/timer chip, DMA controller, v.v. Ý tưởng chính đằng sau hardware interrupt là hiệu quả. Thay vì liên tục poll chip (trên thiết bị chạy bằng pin, điều này có thể nhanh chóng làm cạn pin!), interrupt là cách để low-level software chỉ chạy đúng khi cần.
+Nhiều, nếu không muốn nói là hầu hết, peripheral controller dùng hardware interrupt để báo cho OS hoặc device driver rằng cần thực hiện một hành động nào đó (thường là khẩn cấp). Ví dụ điển hình gồm network adapter (NIC), block device (disk), USB device, AV device, human interface device (HID) như keyboard, mouse, touchscreen và video screen, clock/timer chip, DMA controller, v.v. Ý tưởng chính đằng sau hardware interrupt là hiệu quả. Thay vì liên tục poll chip (trên thiết bị battery-backed, điều này có thể nhanh chóng làm cạn pin!), interrupt là cách để low-level software chỉ chạy đúng khi cần.
 
-Sau đây là cái nhìn nhanh ở mức hardware (không đi quá sâu vào chi tiết): motherboard của hệ thống hiện đại có một loại interrupt controller chip nào đó, thường được gọi là \[IO\]\[A\]PIC, viết tắt của IO-\[Advanced\] Programmable Interrupt Controller, trên x86 (tài liệu kernel cho x86 IO-APIC ở `https://www.kernel.org/doc/html/latest/x86/i386/IO-APIC.html#io-apic`) hoặc generic interrupt controller (GIC) trên ARM. PIC (để đơn giản, chúng ta chỉ dùng thuật ngữ chung PIC) có một line đến interrupt pin của CPU. Các onboard peripheral có khả năng assert interrupt sẽ có một IRQ line đến PIC.
+Sau đây là cái nhìn nhanh ở hardware-level (không đi quá sâu vào chi tiết): motherboard của hệ thống hiện đại có một loại interrupt controller chip nào đó, thường được gọi là \[IO\]\[A\]PIC, viết tắt của IO-\[Advanced\] Programmable Interrupt Controller, trên x86 (tài liệu kernel cho x86 IO-APIC ở `https://www.kernel.org/doc/html/latest/x86/i386/IO-APIC.html#io-apic`) hoặc generic interrupt controller (GIC) trên ARM. PIC (để đơn giản, chúng ta chỉ dùng thuật ngữ chung PIC) có một line đến interrupt pin của CPU. Các onboard peripheral có khả năng assert interrupt sẽ có một IRQ line đến PIC.
 
 IRQ là dạng viết tắt thường dùng của Interrupt ReQuest; nó biểu thị interrupt line (hoặc các line) được cấp phát cho một peripheral device.
 
@@ -46,17 +46,17 @@ Giả sử peripheral device đang xét là network adapter (NIC) và một netw
 
 4\. Control unit trên processor kiểm tra sự hiện diện của hardware interrupt trên mỗi CPU sau khi từng machine instruction chạy xong. Do đó, nếu hardware interrupt xảy ra, chắc chắn nó sẽ biết gần như ngay lập tức. CPU sau đó phát hardware interrupt (tất nhiên interrupt có thể được mask; chúng ta thảo luận chi tiết hơn ở mục Enable và disable IRQ phía sau).
 
-5\. Low-level code (BSP/platform) trên OS được hook vào đây và phản ứng (đây thường là code ở mức assembly); ví dụ, trên ARM-32, low-level C entry point cho hardware interrupt là `arch/arm/kernel/irq.c:asm_do_IRQ()`.
+5\. low-level code (BSP/platform) trên OS được hook vào đây và phản ứng (đây thường là code ở mức assembly); ví dụ, trên ARM-32, low-level C entry point cho hardware interrupt là `arch/arm/kernel/irq.c:asm_do_IRQ()`.
 
-6\. Từ đây, OS thực thi các code path cuối cùng gọi interrupt handler routine đã đăng ký của những driver phục vụ interrupt này. (Một lần nữa, mục đích của chương không phải tập trung vào hardware layer hay thậm chí các chi tiết hardware interrupt ở mức platform riêng của từng kiến trúc. Tôi muốn tập trung vào những gì liên quan đến bạn với tư cách tác giả driver—cách xử lý chúng!).
+6\. Từ đây, OS thực thi các code path cuối cùng gọi interrupt handler routine đã đăng ký của những driver phục vụ interrupt này. (Một lần nữa, mục đích của chương không phải tập trung vào hardware layer hay thậm chí các chi tiết hardware interrupt ở platform-level arch-specific. Tôi muốn tập trung vào những gì liên quan đến bạn với tư cách tác giả driver—cách xử lý chúng!).
 
-Hardware interrupt thực sự có priority cao nhất trong Linux OS: nó preempt bất kỳ thứ gì đang chạy—dù là user code path hay kernel-space code path—để chạy. Tuy vậy, về sau chúng ta sẽ thấy trên Linux kernel hiện đại có thể dùng mô hình threaded interrupt làm thay đổi tình hình; xin kiên nhẫn một chút—chúng ta sẽ đến đó! Bây giờ, hãy tạm chuyển hướng. Chúng ta đã nhắc một ví dụ peripheral device điển hình là network controller (hay NIC), và về cơ bản nói rằng nó phục vụ truyền và nhận packet (Tx/Rx) qua hardware interrupt. Trước đây điều này đúng, nhưng không phải lúc nào cũng đúng với NIC tốc độ cao hiện đại (thường 10 Gbps trở lên). Vì sao? Câu trả lời khá thú vị: tốc độ cực cao mà interrupt liên tục ngắt processor có thể khiến hệ thống rơi vào tình huống có vấn đề gọi là livelock; tình huống mà hệ thống không thể đáp ứng nhu cầu interrupt cực lớn! Cũng như deadlock (trình bày trong `Chapter 6`, Kernel synchronization – Phần 1), hệ thống thực tế có xu hướng freeze hoặc hang. Vậy phải làm gì với livelock? Phần lớn NIC hiện đại cao cấp hỗ trợ chế độ hoạt động polled; OS hiện đại như Linux có network receive path infrastructure gọi là NAPI (xin nhớ, chẳng liên quan gì đến em bé—đây là viết tắt của New API), cho phép driver chuyển giữa interrupt mode và polled mode theo nhu cầu và nhờ đó xử lý network packet (trên receive path) hiệu quả hơn.
+Hardware interrupt thực sự có priority cao nhất trong Linux OS: nó preempt bất kỳ thứ gì đang chạy—dù là user code path hay kernel-space code path—để chạy. Tuy vậy, về sau chúng ta sẽ thấy trên Linux kernel hiện đại có thể dùng mô hình threaded interrupt làm thay đổi tình hình; xin kiên nhẫn một chút—chúng ta sẽ đến đó! Bây giờ, hãy tạm chuyển hướng. Chúng ta đã nhắc một ví dụ peripheral device điển hình là network controller (hay NIC), và về cơ bản nói rằng nó phục vụ truyền và nhận packet (Tx/Rx) qua hardware interrupt. Trước đây điều này đúng, nhưng không phải lúc nào cũng đúng với NIC high-speed hiện đại (thường 10 Gbps trở lên). Vì sao? Câu trả lời khá thú vị: tốc độ cực cao mà interrupt liên tục ngắt processor có thể khiến hệ thống rơi vào tình huống có vấn đề gọi là livelock; tình huống mà hệ thống không thể đáp ứng nhu cầu interrupt cực lớn! Cũng như deadlock (trình bày trong `Chapter 6`, Kernel synchronization – Phần 1), hệ thống thực tế có xu hướng freeze hoặc hang. Vậy phải làm gì với livelock? Phần lớn NIC hiện đại high-end hỗ trợ chế độ hoạt động polled; OS hiện đại như Linux có network receive path infrastructure gọi là NAPI (xin nhớ, chẳng liên quan gì đến em bé—đây là viết tắt của New API), cho phép driver chuyển giữa interrupt mode và polled-mode theo nhu cầu và nhờ đó xử lý network packet (trên receive path) hiệu quả hơn.
 
 Sau khi giới thiệu hardware interrupt, hãy học cách bạn làm việc với chúng với tư cách tác giả driver. Phần lớn các mục còn lại của chương sẽ nói về điều này. Bắt đầu bằng cách học cấp phát hoặc đăng ký IRQ line.
 
 ## Cấp phát hardware IRQ
 
-Thông thường, phần then chốt của việc viết device driver thực sự là bắt và xử lý hardware interrupt mà chip bạn đang viết driver phát ra. Bạn làm việc này như thế nào? Vấn đề là cách hardware interrupt được định tuyến từ interrupt controller chip đến CPU thay đổi rất nhiều; nó phụ thuộc mạnh vào platform. Tin tốt là Linux kernel cung cấp abstraction layer để che giấu mọi khác biệt ở mức hardware; nó được gọi là generic interrupt (hay IRQ) handling layer. Về cơ bản, nó thực hiện công việc cần thiết bên dưới và cung cấp các API cùng cấu trúc dữ liệu hoàn toàn tổng quát. Vì vậy, ít nhất về lý thuyết, code của bạn sẽ chạy trên mọi platform. Tất nhiên, generic IRQ layer là thứ chúng ta chủ yếu sử dụng với tư cách tác giả driver; mọi API và helper routine chúng ta dùng đều thuộc loại này. Nhớ rằng chính core kernel, ít nhất lúc ban đầu, xử lý interrupt (như đã học ở mục trước). Sau đó nó tham chiếu một array các linked list (cấu trúc dữ liệu rất phổ biến trong Linux; ở đây index của array là IRQ number) để xác định những hàm ở mức driver cần gọi. (Không đi quá sâu vào chi tiết, node trên các list là cấu trúc IRQ descriptor; tức `include/linux/interrupt.h:struct` `irqaction`.) Nhưng làm sao đưa interrupt handler function của driver vào list này để kernel có thể gọi nó khi interrupt từ device xảy ra? À, đó là điểm then chốt: bạn đăng ký nó với kernel. Linux hiện đại cung cấp ít nhất bốn cách (API) để đăng ký quan tâm đến một interrupt line, như sau:
+Thông thường, phần then chốt của việc viết device driver thực sự là bắt và xử lý hardware interrupt mà chip bạn đang viết driver phát ra. Bạn làm việc này như thế nào? Vấn đề là cách hardware interrupt được định tuyến từ interrupt controller chip đến CPU thay đổi rất nhiều; nó phụ thuộc mạnh vào platform. Tin tốt là Linux kernel cung cấp abstraction layer để che giấu mọi khác biệt ở hardware-level; nó được gọi là generic interrupt (hay IRQ) handling layer. Về cơ bản, nó thực hiện công việc cần thiết bên dưới và cung cấp các API cùng cấu trúc dữ liệu hoàn toàn tổng quát. Vì vậy, ít nhất về lý thuyết, code của bạn sẽ chạy trên mọi platform. Tất nhiên, generic IRQ layer là thứ chúng ta chủ yếu sử dụng với tư cách tác giả driver; mọi API và helper routine chúng ta dùng đều thuộc loại này. Nhớ rằng chính core kernel, ít nhất lúc ban đầu, xử lý interrupt (như đã học ở mục trước). Sau đó nó tham chiếu một array các linked list (cấu trúc dữ liệu rất phổ biến trong Linux; ở đây index của array là IRQ number) để xác định những hàm ở driver-level cần gọi. (Không đi quá sâu vào chi tiết, node trên các list là cấu trúc IRQ descriptor; tức `include/linux/interrupt.h:struct` `irqaction`.) Nhưng làm sao đưa interrupt handler function của driver vào list này để kernel có thể gọi nó khi interrupt từ device xảy ra? À, đó là điểm then chốt: bạn đăng ký nó với kernel. Linux hiện đại cung cấp ít nhất bốn cách (API) để đăng ký quan tâm đến một interrupt line, như sau:
 
 - `request_irq()`
 
@@ -72,7 +72,7 @@ Hãy xử lý từng cách một (còn những routine bổ sung là biến th�
 
 Giống như đã thấy với I/O memory và I/O port, IRQ line được xem là resource do kernel quản lý. Có thể xem kernel API `request_irq()` là cách truyền thống để tác giả driver đăng ký quan tâm đến IRQ và cấp phát resource này cho mình, nhờ đó kernel có thể gọi handler khi interrupt đến một cách asynchronous.
 
-Bạn có thể thấy thảo luận này rất giống signal handling trong user space. Ở đó, chúng ta gọi system call `sigaction(2)` để đăng ký quan tâm đến một signal. Khi signal đến (asynchronous), kernel gọi signal handler routine (user mode) đã đăng ký! Có một số khác biệt then chốt. Thứ nhất, user space signal handler không phải interrupt; thứ hai, user space signal handler chỉ chạy trong user mode không có đặc quyền; trái lại, kernel space interrupt handler của driver chạy (asynchronous) với kernel privilege và trong interrupted context!
+Bạn có thể thấy thảo luận này rất giống signal handling trong user space. Ở đó, chúng ta gọi system call `sigaction(2)` để đăng ký quan tâm đến một signal. Khi signal đến (asynchronous), kernel gọi signal handler routine (user mode) đã đăng ký! Có một số khác biệt then chốt. Thứ nhất, user space signal handler không phải interrupt; thứ hai, user space signal handler chỉ chạy trong user mode non-privileged; trái lại, kernel space interrupt handler của driver chạy (asynchronous) với kernel privilege và trong interrupted context!
 
 Hơn nữa, một số signal thực sự là software side effect của việc phát processor exception; nói rộng ra, processor phát fault, trap hoặc abort khi có điều trái phép xảy ra và nó phải “trap” (chuyển) vào kernel space để xử lý. Process hoặc thread cố truy cập page không hợp lệ (hoặc không đủ permission) khiến MMU phát fault hoặc abort; điều này khiến OS fault handling code phát signal `SIGSEGV` lên process context (tức lên `current`)! Tuy nhiên, phát một loại exception nào đó không phải lúc nào cũng có nghĩa có vấn đề—system call chẳng qua là trap vào OS; tức programmed exception (qua `syscall / SWI` trên x86/ARM).
 
@@ -98,17 +98,17 @@ unsigned long flags, const char *name, void *dev);
 
 Luôn include header file `linux/interrupt.h`. Hãy xem xét từng tham số của `request_irq()`:
 
-- `int irq`: Đây là IRQ line bạn đang cố đăng ký hoặc trap/hook vào. Nghĩa là khi interrupt cụ thể này được kích hoạt, interrupt handler function của bạn (tham số thứ hai, `handler_func`) được gọi. Câu hỏi về `irq` là: làm sao tìm được IRQ number? Chúng ta đã đề cập vấn đề tổng quát này trong `Chapter 3`, Làm việc với hardware I/O memory, ở mục (thực sự then chốt) Lấy device resource. Nhắc lại nhanh, IRQ line là resource, nghĩa là nó được lấy theo cách thông thường—trên hệ thống embedded hiện đại, bằng cách parse Device Tree (DT); cách cũ là hard code giá trị trong source file riêng cho board (yên tâm, bạn sẽ thấy ví dụ truy vấn IRQ line qua DT trong mục Cấp phát IRQ—cách hiện đại—managed interrupt facility). Trên hệ thống kiểu PC, bạn có thể phải truy vấn bus chứa device (với cold device). Ở đây PCI bus (và các bus tương tự) rất phổ biến. Kernel thậm chí cung cấp PCI helper routine để bạn truy vấn resource từ đó, qua đó tìm ra IRQ line đã gán.
+- `int irq`: Đây là IRQ line bạn đang cố đăng ký hoặc trap/hook vào. Nghĩa là khi interrupt cụ thể này được kích hoạt, interrupt handler function của bạn (tham số thứ hai, `handler_func`) được gọi. Câu hỏi về `irq` là: làm sao tìm được IRQ number? Chúng ta đã đề cập vấn đề tổng quát này trong `Chapter 3`, Làm việc với hardware I/O memory, ở mục (thực sự then chốt) Lấy device resource. Nhắc lại nhanh, IRQ line là resource, nghĩa là nó được lấy theo cách thông thường—trên hệ thống embedded hiện đại, bằng cách parse Device Tree (DT); cách cũ là hard code giá trị trong source file board-specific (yên tâm, bạn sẽ thấy ví dụ truy vấn IRQ line qua DT trong mục Cấp phát IRQ—cách hiện đại—managed interrupt facility). Trên hệ thống PC-type, bạn có thể phải truy vấn bus chứa device (với cold device). Ở đây PCI bus (và các bus tương tự) rất phổ biến. Kernel thậm chí cung cấp PCI helper routine để bạn truy vấn resource từ đó, qua đó tìm ra IRQ line đã gán.
 
 - `irq_handler_t (*handler_func)(int, void *)`: Tham số này là pointer đến interrupt handler function (trong C, chỉ cung cấp tên hàm là đủ). Tất nhiên, đây là code sẽ được gọi asynchronous khi hardware interrupt kích hoạt. Nhiệm vụ của nó là phục vụ interrupt (sẽ nói thêm sau). Làm sao kernel biết nó ở đâu? Nhớ `struct irqaction`, cấu trúc được routine `request_irq()` điền dữ liệu. Một member của nó là `handler`, được đặt bằng tham số thứ hai này.
 
 - `unsigned long flags`: Đây là tham số thứ ba của `request_irq()`, một flag bitmask. Khi được đặt bằng zero, nó triển khai hành vi mặc định (chúng ta thảo luận một số interrupt flag then chốt trong mục Đặt interrupt flag).
 
-- `const char *name`: Đây là tên code/driver sở hữu interrupt. Thông thường nó được đặt thành tên device driver (nhờ vậy, `/proc/interrupts` có thể hiển thị tên driver đang dùng interrupt; đây là cột ngoài cùng bên phải; chi tiết ở mục Xem tất cả interrupt (IRQ) line đã được cấp phát).
+- `const char *name`: Đây là tên code/driver sở hữu interrupt. Thông thường nó được đặt thành tên device driver (nhờ vậy, `/proc/interrupts` có thể hiển thị tên driver đang dùng interrupt; đây là cột right-most; chi tiết ở mục Xem tất cả interrupt (IRQ) line đã được cấp phát).
 
-- `void *dev`: Đây là tham số thứ năm và cuối của `request_irq()`, cho phép bạn truyền bất kỳ dữ liệu nào mong muốn (thường gọi là cookie) đến interrupt handler routine, một kỹ thuật software phổ biến. Trong tham số thứ hai, bạn có thể thấy interrupt handler routine thuộc kiểu `void *`. Đây là nơi tham số này được truyền đến. Phần lớn driver thực tế có một loại context structure hoặc private data structure nào đó để lưu mọi thông tin cần thiết. Hơn nữa, context structure này thường được nhúng vào device structure của driver (thường được subsystem hoặc driver framework chuyên biệt hóa). Thực tế, kernel thường giúp bạn làm việc này; ví dụ, network driver dùng `alloc_etherdev()` để nhúng dữ liệu vào `struct net_device`, platform driver nhúng dữ liệu vào member `platform_device.device.platform_data` của `struct` `platform_device`, I2C client driver dùng helper `i2c_set_clientdata()` để “đặt” private/context data vào cấu trúc `i2c_client`, v.v.
+- `void *dev`: Đây là tham số thứ năm và cuối của `request_irq()`, cho phép bạn truyền bất kỳ dữ liệu nào mong muốn (thường gọi là cookie) đến interrupt handler routine, một kỹ thuật software phổ biến. Trong tham số thứ hai, bạn có thể thấy interrupt handler routine thuộc kiểu `void *`. Đây là nơi tham số này được truyền đến. Phần lớn driver real-world có một loại context structure hoặc private data structure nào đó để lưu mọi thông tin cần thiết. Hơn nữa, context structure này thường được nhúng vào device structure của driver (thường được subsystem hoặc driver framework chuyên biệt hóa). Thực tế, kernel thường giúp bạn làm việc này; ví dụ, network driver dùng `alloc_etherdev()` để nhúng dữ liệu vào `struct net_device`, platform driver nhúng dữ liệu vào member `platform_device.device.platform_data` của `struct` `platform_device`, I2C client driver dùng helper `i2c_set_clientdata()` để “đặt” private/context data vào cấu trúc `i2c_client`, v.v.
 
-Lưu ý khi dùng shared interrupt (chúng ta giải thích ngay sau đây), bạn phải khởi tạo tham số này bằng giá trị khác NULL (nếu không, làm sao `free_irq()` biết cần free handler nào?). Nếu bạn không có context structure hoặc dữ liệu cụ thể để truyền, truyền macro `THIS_MODULE` ở đây sẽ đáp ứng được (giả sử bạn đang viết driver bằng loadable kernel module framework; đó là pointer đến metadata structure của kernel module; tức `struct module`).
+Lưu ý khi dùng shared interrupt (chúng ta giải thích ngay sau đây), bạn phải khởi tạo tham số này bằng giá trị non-NULL (nếu không, làm sao `free_irq()` biết cần free handler nào?). Nếu bạn không có context structure hoặc dữ liệu cụ thể để truyền, truyền macro `THIS_MODULE` ở đây sẽ đáp ứng được (giả sử bạn đang viết driver bằng loadable kernel module framework; đó là pointer đến metadata structure của kernel module; tức `struct module`).
 
 Return value của `request_irq()` là số nguyên, theo convention kernel `0/-E` thông thường (xem tài liệu đồng hành Linux Kernel Programming - Chương 4, Viết kernel module đầu tiên – LKM Phần 1, mục Return convention 0/-E), bằng `0` khi thành công và giá trị `errno` âm khi thất bại. Như compiler attribute `__must_check` chỉ rõ, chắc chắn bạn được kỳ vọng kiểm tra trường hợp thất bại (dù thế nào đây cũng là thực hành lập trình tốt).
 
@@ -146,7 +146,7 @@ Khi cấp phát interrupt (IRQ line) bằng các API `{devm_}request{_threaded}_
 
 - `IRQF_ONESHOT`: IRQ không được enable sau khi hardirq handler thực thi xong. Flag này thường được threaded interrupt sử dụng (trình bày trong mục Làm việc với mô hình threaded interrupt) để đảm bảo IRQ vẫn bị disable cho đến khi threaded handler hoàn tất.
 
-Flag `__IRQF_TIMER` là trường hợp đặc biệt. Nó dùng để đánh dấu interrupt là timer interrupt. Như đã thấy trong tài liệu đồng hành Linux Kernel Programming, Chương 10, CPU scheduler - Phần 1, và Chương 11, CPU scheduler - Phần 2, khi xem xét CPU scheduling, timer interrupt kích hoạt theo chu kỳ và chịu trách nhiệm triển khai cơ chế timer/timeout của kernel, các công việc housekeeping liên quan scheduler, v.v.
+Flag `__IRQF_TIMER` là trường hợp đặc biệt. Nó dùng để đánh dấu interrupt là timer interrupt. Như đã thấy trong tài liệu đồng hành Linux Kernel Programming, Chương 10, CPU scheduler - Phần 1, và Chương 11, CPU scheduler - Phần 2, khi xem xét CPU scheduling, timer interrupt kích hoạt theo chu kỳ và chịu trách nhiệm triển khai cơ chế timer/timeout của kernel, các công việc housekeeping scheduler-related, v.v.
 
 Các timer interrupt flag được chỉ định bằng macro này:
 
@@ -168,7 +168,7 @@ Khi peripheral assert interrupt, interrupt controller được kích hoạt đ�
 
 - Edge-triggered: Interrupt chỉ kích hoạt một lần khi level thay đổi từ inactive sang active.
 
-Ngoài ra, interrupt có thể được kích hoạt ở mức cao hoặc thấp, trên cạnh lên hoặc xuống của clock. Kernel cho phép cấu hình và chỉ định điều này qua các flag bổ sung như `IRQF_TRIGGER_NONE`, `IRQF_TRIGGER_RISING`, `IRQF_TRIGGER_FALLING`, `IRQF_TRIGGER_HIGH`, `IRQF_TRIGGER_LOW`, v.v. Những đặc tính điện mức thấp này của peripheral chip thường được cấu hình sẵn trong BSP-level code hoặc được chỉ định trong DT.
+Ngoài ra, interrupt có thể được kích hoạt ở mức cao hoặc thấp, trên cạnh lên hoặc xuống của clock. Kernel cho phép cấu hình và chỉ định điều này qua các flag bổ sung như `IRQF_TRIGGER_NONE`, `IRQF_TRIGGER_RISING`, `IRQF_TRIGGER_FALLING`, `IRQF_TRIGGER_HIGH`, `IRQF_TRIGGER_LOW`, v.v. Những đặc tính điện low-level này của peripheral chip thường được pre-configured trong BSP-level code hoặc được chỉ định trong DT.
 
 Level-triggered interrupt buộc bạn hiểu interrupt source để có thể deassert (hoặc ack) nó đúng cách (với shared IRQ, sau khi kiểm tra nó dành cho bạn). Thông thường đây là việc đầu tiên phải làm khi phục vụ nó; nếu không, nó sẽ tiếp tục kích hoạt. Ví dụ, nếu interrupt được kích hoạt khi một device register nào đó đạt giá trị `0xff`, driver phải đặt register về, chẳng hạn, `0x0` trước khi deassert! Điều này dễ hiểu nhưng có thể khó xử lý đúng.
 
@@ -182,7 +182,7 @@ Bây giờ, tiếp tục với một điều thú vị. Để giúp tiếp thu n
 
 #### Xem code 1—IXGB network driver
 
-Đã đến lúc xem code. Hãy xem vài phần code nhỏ của Intel IXGB network adapter driver (điều khiển một số Intel network adapter thuộc dòng 82597EX). Trong nhiều sản phẩm trên thị trường, Intel có dòng sản phẩm tên IXGB network adapter. Controller là Intel 82597EX; đây thường là ethernet adapter 10 gigabit dành cho server (product brief của Intel cho controller này ở `https://www.intel.com/Assets/PDF/prodbrief/pro10GbE_LR_SA-DS.pdf`):
+Đã đến lúc xem code. Hãy xem vài phần code nhỏ của Intel IXGB network adapter driver (điều khiển một số Intel network adapter thuộc dòng 82597EX). Trong nhiều sản phẩm trên thị trường, Intel có dòng sản phẩm tên IXGB network adapter. Controller là Intel 82597EX; đây thường là ethernet adapter 10-gigabit dành cho server (product brief của Intel cho controller này ở `https://www.intel.com/Assets/PDF/prodbrief/pro10GbE_LR_SA-DS.pdf`):
 
 ![Figure 4.1](images/ch04/fig04-01.png)
 
@@ -210,7 +210,7 @@ Trong code snippet trên, bạn có thể thấy driver gọi API `request_irq()
 
 - Tham số thứ hai là pointer đến interrupt handler routine (thường gọi là hardirq handler; chúng ta xem tất cả chi tiết hơn về sau); ở đây là hàm tên `ixgb_intr()`.
 
-- Tham số thứ ba là bitmask `flags`. Bạn có thể thấy ở đây driver chỉ định interrupt này được chia sẻ (qua flag `IRQF_SHARED`). Việc các device trên bus chia sẻ interrupt line là một phần của đặc tả PCI. Điều này ngụ ý driver cần xác minh interrupt thực sự dành cho nó. Nó thực hiện trong interrupt handler (thường là code rất đặc thù hardware, thường kiểm tra một register cho trước có giá trị kỳ vọng hay không).
+- Tham số thứ ba là bitmask `flags`. Bạn có thể thấy ở đây driver chỉ định interrupt này được chia sẻ (qua flag `IRQF_SHARED`). Việc các device trên bus chia sẻ interrupt line là một phần của đặc tả PCI. Điều này ngụ ý driver cần xác minh interrupt thực sự dành cho nó. Nó thực hiện trong interrupt handler (thường là code rất hardware-specific, thường kiểm tra một register cho trước có giá trị kỳ vọng hay không).
 
 - Tham số thứ tư là tên driver xử lý interrupt. Nó được lấy qua member `name` của cấu trúc chuyên biệt `net_device` (đã được driver đăng ký với net framework của kernel bằng cách gọi `register_netdev()` trong probe method `ixgb_probe()`).
 
@@ -330,9 +330,9 @@ Trong khi IRQn thực thi trên, chẳng hạn, CPU core 1, các interrupt khác
 
 Interrupt đúng như tên gọi: nó ngắt công việc bình thường trên máy; đó là chút phiền toái phải chấp nhận. Context phải được lưu, handler phải được thực thi (cùng bottom half, sẽ trình bày trong mục Hiểu và sử dụng top half cùng bottom half), rồi context phải được khôi phục cho phần bị ngắt. Vì vậy, bạn hiểu ý rồi: đây là critical code path, đừng chậm chạp—hãy nhanh và non-blocking!
 
-Điều này cũng đặt ra câu hỏi, nhanh là nhanh đến đâu? Tuy câu trả lời tất nhiên phụ thuộc platform, một heuristic là: giữ interrupt processing nhanh nhất có thể, trong khoảng vài chục microsecond. Nếu liên tục vượt 100 microsecond, cần tính đến chiến lược thay thế. Chúng ta trình bày những việc có thể làm khi điều này xảy ra ở phần sau chương.
+Điều này cũng đặt ra câu hỏi, nhanh là nhanh đến đâu? Tuy câu trả lời tất nhiên platform-dependent, một heuristic là: giữ interrupt processing nhanh nhất có thể, trong khoảng vài chục microsecond. Nếu liên tục vượt 100 microsecond, cần tính đến chiến lược thay thế. Chúng ta trình bày những việc có thể làm khi điều này xảy ra ở phần sau chương.
 
-Với snippet pseudocode `my_interrupt()` đơn giản (trình bày trong mục Đừng block—nhận biết code path có thể blocking), trước tiên hãy tự hỏi, tôi có thực sự phải cấp phát memory trong critical code path non-blocking cần thực thi nhanh như interrupt handler không? Bạn có thể thiết kế module/driver để cấp phát memory trước đó (và chỉ dùng pointer) không?
+Với snippet pseudocode `my_interrupt()` đơn giản (trình bày trong mục Đừng block—nhận biết code path có thể blocking), trước tiên hãy tự hỏi, tôi có thực sự phải cấp phát memory trong critical code path non-blocking needs-to-execute-fast như interrupt handler không? Bạn có thể thiết kế module/driver để cấp phát memory trước đó (và chỉ dùng pointer) không?
 
 Một lần nữa, thực tế đôi khi cần làm khá nhiều việc để phục vụ interrupt đúng cách (network/block driver là ví dụ tốt). Chúng ta sẽ trình bày một số chiến lược điển hình để xử lý việc này ngay sau đây.
 
@@ -350,7 +350,7 @@ Interrupt handler routine được generic IRQ layer của kernel gọi khi hard
 
 - Tham số thứ hai là giá trị đã truyền qua tham số cuối của `request_irq()`. Như đã nhắc, nó thường là device structure chuyên biệt của driver, nhúng driver context hoặc private data. Vì vậy kiểu dữ liệu của nó là kiểu tổng quát `void *`, cho phép `request_irq()` truyền bất kỳ kiểu nào, typecast thích hợp trong handler routine rồi sử dụng.
 
-Handler là code C thông thường, nhưng đi kèm mọi lưu ý ở mục trước! Hãy cẩn thận tuân theo các hướng dẫn đó. Dù chi tiết phụ thuộc hardware, thông thường trách nhiệm đầu tiên của interrupt handler là clear interrupt trên board, thực chất acknowledge nó và báo cho PIC. Điều này thường đạt được bằng cách ghi một số bit cụ thể vào hardware register chỉ định trên board hoặc controller; đọc datasheet của chip, chipset hoặc hardware device cụ thể để xác định. Ở đây, macro `in_irq()` trả về `true`, cho biết code hiện đang ở hardirq context.
+Handler là code C thông thường, nhưng đi kèm mọi lưu ý ở mục trước! Hãy cẩn thận tuân theo các hướng dẫn đó. Dù chi tiết hardware-specific, thông thường trách nhiệm đầu tiên của interrupt handler là clear interrupt trên board, thực chất acknowledge nó và báo cho PIC. Điều này thường đạt được bằng cách ghi một số bit cụ thể vào hardware register chỉ định trên board hoặc controller; đọc datasheet của chip, chipset hoặc hardware device cụ thể để xác định. Ở đây, macro `in_irq()` trả về `true`, cho biết code hiện đang ở hardirq context.
 
 Phần việc còn lại của handler hiển nhiên rất đặc thù device. Ví dụ, input driver muốn scan key code (hoặc tọa độ touchscreen, hay phím/chuyển động mouse, hoặc thứ gì khác) vừa được nhấn hoặc thả từ register hay peripheral memory location nào đó, rồi có thể lưu vào memory buffer. Hoặc nó có thể ngay lập tức truyền lên stack đến generic input layer bên trên. Chúng ta không đi sâu những chi tiết đó ở đây. Một lần nữa, driver framework là điều cần hiểu cho loại driver của bạn; điều này ngoài phạm vi sách.
 
@@ -430,7 +430,7 @@ ixgb_intr(int irq, void *data)
 }
 ```
 
-Trong code snippet trên, chú ý cách driver truy cập private (hoặc context) metadata structure (`struct ixgb_adapter`) từ cấu trúc `net_device` (cấu trúc chuyên biệt cho network device) nhận làm tham số thứ hai; điều này rất điển hình. (Ở đây, helper `netdev_priv()` dùng để trích private structure của driver từ cấu trúc tổng quát `net_device` phần nào tương tự helper macro nổi tiếng `container_of()`. Thực tế, helper này cũng thường được dùng trong các tình huống tương tự.) Tiếp theo, nó thực hiện peripheral I/O memory read qua macro `IXGB_READ_REG()` (dùng cách tiếp cận MMIO—xem chương trước để biết chi tiết MMIO; `IXGB_READ_REG()` là macro gọi API `readl()` đã trình bày ở chương trước—routine kiểu cũ để thực hiện MMIO read 32 bit). Đừng bỏ lỡ điểm then chốt: đây là cách driver xác định interrupt dành cho nó hay không, vì hãy nhớ đó là shared interrupt! Nếu dành cho nó (trường hợp có khả năng cao), nó tiếp tục công việc; vì adapter hỗ trợ NAPI, driver lúc này lên lịch polled NAPI read để thu network packet khi chúng đến và gửi lên network protocol stack để xử lý tiếp (thực ra không đơn giản đến vậy; việc truyền memory thực tế sẽ được thực hiện qua DMA).
+Trong code snippet trên, chú ý cách driver truy cập private (hoặc context) metadata structure (`struct ixgb_adapter`) từ cấu trúc `net_device` (cấu trúc chuyên biệt cho network device) nhận làm tham số thứ hai; điều này rất điển hình. (Ở đây, helper `netdev_priv()` dùng để trích private structure của driver từ cấu trúc tổng quát `net_device` phần nào tương tự helper macro well-known `container_of()`. Thực tế, helper này cũng thường được dùng trong các tình huống tương tự.) Tiếp theo, nó thực hiện peripheral I/O memory read qua macro `IXGB_READ_REG()` (dùng cách tiếp cận MMIO—xem chương trước để biết chi tiết MMIO; `IXGB_READ_REG()` là macro gọi API `readl()` đã trình bày ở chương trước—routine kiểu cũ để thực hiện MMIO read 32-bit). Đừng bỏ lỡ điểm then chốt: đây là cách driver xác định interrupt dành cho nó hay không, vì hãy nhớ đó là shared interrupt! Nếu dành cho nó (trường hợp có khả năng cao), nó tiếp tục công việc; vì adapter hỗ trợ NAPI, driver lúc này lên lịch polled NAPI read để thu network packet khi chúng đến và gửi lên network protocol stack để xử lý tiếp (thực ra không đơn giản đến vậy; việc truyền memory thực tế sẽ được thực hiện qua DMA).
 
 Bây giờ, tạm chuyển hướng nhưng rất quan trọng: bạn cần học cách cấp phát IRQ line theo cách hiện đại—qua các API `devm_*`. Đây được gọi là managed approach.
 
@@ -481,7 +481,7 @@ Tiếp theo, chúng ta học threaded interrupt là gì, cách làm việc với
 
 Như đã thấy trong tài liệu đồng hành Linux Kernel Programming - Chương 11, CPU scheduler – Phần 2, ở mục Chuyển mainline Linux thành RTOS, chúng ta trình bày real-time patch cho Linux (RTL), cho phép patch, cấu hình, build và chạy Linux như RTOS! Nếu chưa rõ, hãy xem lại. Chúng ta không lặp lại cùng thông tin ở đây.
 
-Công việc của dự án Real-Time Linux (RTL) đã dần được back-port vào mainline Linux kernel. Một thay đổi then chốt do RTL mang lại là merge tính năng threaded interrupt vào mainline kernel. Điều này xảy ra trong kernel phiên bản 2.6.30 (tháng 6 năm 2009). Công nghệ này làm điều thoạt nhìn rất lạ: nó “chuyển đổi” hardware interrupt handler thành, về cơ bản, một kernel thread.
+Công việc của dự án Real-Time Linux (RTL) đã dần được back-ported vào mainline Linux kernel. Một thay đổi then chốt do RTL mang lại là merge tính năng threaded interrupt vào mainline kernel. Điều này xảy ra trong kernel phiên bản 2.6.30 (tháng 6 năm 2009). Công nghệ này làm điều thoạt nhìn rất lạ: nó “chuyển đổi” hardware interrupt handler thành, về cơ bản, một kernel thread.
 
 Như sẽ học ở chương tiếp theo, kernel thread thực sự rất giống user mode thread—nó chạy độc lập, trong process context, có task structure riêng (do đó PID, TGID, v.v. riêng), nghĩa là có thể được schedule; tức khi ở trạng thái runnable, nó cạnh tranh với các thread khác để chạy trên CPU core. Khác biệt then chốt là user mode thread luôn có hai address space—process VAS mà nó thuộc về (user space) và kernel VAS mà nó chuyển sang khi thực hiện system call. Ngược lại, kernel thread chỉ chạy trong kernel space và không nhìn thấy user space; nó chỉ thấy kernel VAS nơi nó luôn thực thi (về kỹ thuật, giá trị `current-mm` của nó luôn là `NULL`!).
 
@@ -514,15 +514,15 @@ request_threaded_irq(unsigned int irq, irq_handler_t handler,
 
 Các tham số, trừ tham số thứ ba, giống hệt `request_irq()`. Sau đây là vài điểm then chốt cần lưu ý:
 
-- `irq_handler_t handler`: Tham số thứ hai là pointer đến interrupt handler function thông thường. Bây giờ chúng ta gọi nó là primary handler. Nếu null và `thread_fn` (tham số thứ ba) khác null, một primary handler mặc định (của kernel) được tự động cài đặt (nếu bạn thắc mắc về primary handler mặc định này, chúng ta trình bày chi tiết hơn trong mục Triển khai threaded interrupt bên trong).
+- `irq_handler_t handler`: Tham số thứ hai là pointer đến interrupt handler function thông thường. Bây giờ chúng ta gọi nó là primary handler. Nếu null và `thread_fn` (tham số thứ ba) non-null, một primary handler mặc định (của kernel) được auto-installed (nếu bạn thắc mắc về primary handler mặc định này, chúng ta trình bày chi tiết hơn trong mục Triển khai threaded interrupt bên trong).
 
 - `irq_handler_t thread_fn`: Tham số thứ ba là pointer đến threaded interrupt function; hành vi API phụ thuộc việc bạn truyền tham số này là null hay không:
 
-- Nếu khác null, việc phục vụ interrupt thực tế do hàm này thực hiện. Nó chạy trong context (process) của một kernel thread riêng—đó là threaded interrupt!
+- Nếu non-null, việc phục vụ interrupt thực tế do hàm này thực hiện. Nó chạy trong context (process) của một kernel thread riêng—đó là threaded interrupt!
 
 - Nếu null, là mặc định khi gọi `request_irq()`, chỉ primary handler chạy và không tạo kernel thread.
 
-Primary handler, nếu được chỉ định (tham số thứ hai), chạy trong cái gọi là hardirq hay hard interrupt context (giống trường hợp `request_irq()`). Nếu primary handler khác null, bạn phải viết code của nó và (tối thiểu) thực hiện:
+Primary handler, nếu được chỉ định (tham số thứ hai), chạy trong cái gọi là hardirq hay hard interrupt context (giống trường hợp `request_irq()`). Nếu primary handler non-null, bạn phải viết code của nó và (tối thiểu) thực hiện:
 
 - Xác minh interrupt dành cho bạn; nếu không, trả về `IRQ_NONE`.
 
@@ -548,7 +548,7 @@ int __must_check
                void *dev_id);
 ```
 
-Mọi tham số ngoài tham số đầu, là pointer đến device structure, đều giống `request_threaded_irq()`. Lợi ích then chốt là không phải lo giải phóng IRQ line. Kernel tự động free nó khi detach device hoặc remove driver, như đã học với `devm_request_irq()`. Như với `request_threaded_irq()`, return value của `devm_request_threaded_irq()` là số nguyên, theo convention kernel `0/-E` thông thường: `0` khi thành công và giá trị errno âm khi thất bại; bạn phải kiểm tra.
+Mọi tham số ngoài tham số đầu, là pointer đến device structure, đều giống `request_threaded_irq()`. Lợi ích then chốt là không phải lo giải phóng IRQ line. Kernel auto-free nó khi detach device hoặc remove driver, như đã học với `devm_request_irq()`. Như với `request_threaded_irq()`, return value của `devm_request_threaded_irq()` là số nguyên, theo convention kernel `0/-E` thông thường: `0` khi thành công và giá trị errno âm khi thất bại; bạn phải kiểm tra.
 
 Đừng quên! Dùng managed API `devm_request_threaded_irq()` là cách hiện đại được khuyến nghị để cấp phát threaded interrupt. Tuy nhiên, lưu ý không phải lúc nào đó cũng là cách phù hợp; xem mục Các ràng buộc khi dùng threaded handler để biết thêm.
 
@@ -617,7 +617,7 @@ static int stm32f7_i2c_probe(struct platform_device *pdev)
                    pdev->name, i2c_dev);
 ```
 
-Hãy tập trung vào lời gọi `devm_request_threaded_irq()`. Tham số đầu là pointer đến device structure. Vì đây là platform driver (được đăng ký qua wrapper macro `module_platform_driver`), probe method nhận tham số `struct` `platform_device *pdev`; cấu trúc `device` được trích từ đó. Tham số thứ hai là IRQ line cần cấp phát. Một lần nữa, như đã thấy, nó được lấy qua helper routine. Ở đây là API `platform_get_irq()`. Tham số thứ ba chỉ định primary handler; tức hardirq. Vì khác null, routine này được gọi khi IRQ kích hoạt. Nó thực hiện xác minh đặc thù hardware trên device và I2C transfer; nếu mọi thứ ổn, trả về giá trị `IRQ_WAKE_THREAD`. Điều này đánh thức threaded interrupt routine, tham số thứ tư, và hàm `stm32f7_i2c_isr_event_thread()` chạy như kernel thread trong process context! Tham số `irqflags`, đặt bằng `IRQF_ONESHOT`, là điển hình với threaded handler; nó chỉ định IRQ line vẫn bị disable cho đến khi threaded handler hoàn tất (không chỉ hardirq). Threaded handler routine làm công việc của nó và trả về `IRQ_HANDLED` khi xong.
+Hãy tập trung vào lời gọi `devm_request_threaded_irq()`. Tham số đầu là pointer đến device structure. Vì đây là platform driver (được đăng ký qua wrapper macro `module_platform_driver`), probe method nhận tham số `struct` `platform_device *pdev`; cấu trúc `device` được trích từ đó. Tham số thứ hai là IRQ line cần cấp phát. Một lần nữa, như đã thấy, nó được lấy qua helper routine. Ở đây là API `platform_get_irq()`. Tham số thứ ba chỉ định primary handler; tức hardirq. Vì non-null, routine này được gọi khi IRQ kích hoạt. Nó thực hiện xác minh hardware-specific trên device và I2C transfer; nếu mọi thứ ổn, trả về giá trị `IRQ_WAKE_THREAD`. Điều này đánh thức threaded interrupt routine, tham số thứ tư, và hàm `stm32f7_i2c_isr_event_thread()` chạy như kernel thread trong process context! Tham số `irqflags`, đặt bằng `IRQF_ONESHOT`, là điển hình với threaded handler; nó chỉ định IRQ line vẫn bị disable cho đến khi threaded handler hoàn tất (không chỉ hardirq). Threaded handler routine làm công việc của nó và trả về `IRQ_HANDLED` khi xong.
 
 Vì error IRQ line được cấp phát qua API `devm_request_irq()`, và vì đã trình bày cách dùng API này (xem mục Cấp phát IRQ—cách hiện đại—managed interrupt facility), chúng ta không lặp lại thông tin về nó ở đây.
 
@@ -625,7 +625,7 @@ Bây giờ, hãy xem kernel triển khai mô hình threaded interrupt bên trong
 
 ### Triển khai threaded interrupt bên trong
 
-Như đã nhắc, nếu primary handler null và thread function khác null, kernel dùng primary handler mặc định. Hàm tên `irq_default_primary_handler()` và chỉ trả về giá trị `IRQ_WAKE_THREAD`, qua đó đánh thức (và làm cho có thể schedule) kernel thread.
+Như đã nhắc, nếu primary handler null và thread function non-null, kernel dùng primary handler mặc định. Hàm tên `irq_default_primary_handler()` và chỉ trả về giá trị `IRQ_WAKE_THREAD`, qua đó đánh thức (và làm cho có thể schedule) kernel thread.
 
 Hơn nữa, kernel thread thực tế chạy routine `thread_fn` được tạo trong code của API `request_threaded_irq()`. Call graph (ở Linux kernel phiên bản 5.4.0) như sau:
 
@@ -646,7 +646,7 @@ t = kthread_create(irq_thread, new, "irq/%d-%s", irq, new->name);
 
 ### Vì sao dùng threaded interrupt?
 
-Một câu hỏi then chốt thường gặp là vì sao phải dùng threaded interrupt khi đã có interrupt kiểu hardirq thông thường? Câu trả lời đầy đủ hơi dài; sau đây là các lý do chính:
+Một câu hỏi then chốt thường gặp là vì sao phải dùng threaded interrupt khi đã có interrupt hardirq-type thông thường? Câu trả lời đầy đủ hơi dài; sau đây là các lý do chính:
 
 - Để thực sự đạt real time.
 
@@ -682,7 +682,7 @@ Hình 4.4—Mức ưu tiên tương đối trên Linux OS tiêu chuẩn
 
 Giả sử bạn đang làm việc với real-time multithreaded application. Trong hàng chục thread đang tồn tại trong process, ba thread (để đơn giản gọi là A, B và C) được xem là thread “real-time” critical. Theo đó, bạn cho app cấp scheduling policy `SCHED_FIFO` và real-time priority lần lượt 30, 45 và 60 cho thread A, B và C (nếu chưa rõ những điểm này, xem tài liệu đồng hành Linux Kernel Programming - Chương 10, CPU scheduler - Phần 1, và Chương 11, CPU scheduler - Phần 2, về CPU scheduling). Vì là real-time app, thời gian tối đa những thread này được dùng để hoàn tất công việc bị giới hạn. Nói cách khác, có deadline; trong ví dụ, giả sử worst-case deadline để thread B hoàn tất công việc là 12 millisecond.
 
-Bây giờ, xét priority tương đối thì điều này hoạt động thế nào? Để đơn giản, giả sử hệ thống có một CPU core. Một thread khác, X (chạy với scheduling policy `SCHED_OTHER` và real-time priority `0`, là giá trị scheduling policy/priority mặc định), hiện đang thực thi code trên CPU. Tuy nhiên, nếu “sự kiện” mà bất kỳ real-time thread nào đang chờ xảy ra, nó sẽ preempt thread đang thực thi và chạy. Đây là điều được kỳ vọng; nhớ quy tắc cơ bản của real-time scheduling rất đơn giản: runnable thread có priority cao nhất phải là thread đang chạy. Tốt, điều đó ổn. Bây giờ cần xét hardware interrupt. Hardware interrupt, như đã thấy, có priority cao nhất. Nghĩa là nó preempt mọi thứ, kể cả thread real-time (được gọi là vậy) của bạn (xem sơ đồ trên)! Giả sử interrupt processing mất 200 microsecond; trên rich OS như Linux, điều này không được xem là quá tệ. Tuy nhiên, trong tình huống này, năm hardware interrupt tiêu thụ 1 millisecond; nếu device bận (ví dụ nhiều data packet đến) và phát, chẳng hạn, 20 hardware interrupt liên tục thì sao? Chắc chắn chúng được ưu tiên và tiêu thụ (ít nhất) 4 millisecond! Real-time thread của bạn chắc chắn bị preempt khi interrupt processing chạy và không thể lấy CPU cần thiết cho đến khi đã quá muộn! Deadline (12 ms) đã hết từ lâu và hệ thống thất bại (nếu thật sự là real-time app, điều này có thể thảm khốc).
+Bây giờ, xét priority tương đối thì điều này hoạt động thế nào? Để đơn giản, giả sử hệ thống có một CPU core. Một thread khác, X (chạy với scheduling policy `SCHED_OTHER` và real-time priority `0`, là giá trị scheduling policy/priority mặc định), hiện đang thực thi code trên CPU. Tuy nhiên, nếu “sự kiện” mà bất kỳ real-time thread nào đang chờ xảy ra, nó sẽ preempt thread đang thực thi và chạy. Đây là điều được kỳ vọng; nhớ quy tắc cơ bản của real-time scheduling rất đơn giản: runnable thread có priority cao nhất phải là thread đang chạy. Tốt, điều đó ổn. Bây giờ cần xét hardware interrupt. Hardware interrupt, như đã thấy, có priority cao nhất. Nghĩa là nó preempt mọi thứ, kể cả thread real-time (so-called vậy) của bạn (xem sơ đồ trên)! Giả sử interrupt processing mất 200 microsecond; trên rich OS như Linux, điều này không được xem là quá tệ. Tuy nhiên, trong tình huống này, năm hardware interrupt tiêu thụ 1 millisecond; nếu device bận (ví dụ nhiều data packet đến) và phát, chẳng hạn, 20 hardware interrupt liên tục thì sao? Chắc chắn chúng được ưu tiên và tiêu thụ (ít nhất) 4 millisecond! real-time thread của bạn chắc chắn bị preempt khi interrupt processing chạy và không thể lấy CPU cần thiết cho đến khi đã quá muộn! Deadline (12 ms) đã hết từ lâu và hệ thống thất bại (nếu thật sự là real-time app, điều này có thể thảm khốc).
 
 Sơ đồ sau biểu diễn tình huống về mặt khái niệm (để ngắn gọn và rõ ràng, chỉ hiển thị một user space `SCHED_FIFO` real-time thread; tức thread B ở `rtprio` 45):
 
@@ -690,7 +690,7 @@ Sơ đồ sau biểu diễn tình huống về mặt khái niệm (để ngắn 
 
 Hình 4.5: Mô hình hardirq—user mode RT SCHED\_FIFO thread bị ngắt bởi hardware interrupt flood; trễ deadline
 
-Real-time thread B được biểu diễn chạy từ thời điểm `t0` (trên trục x; trục y biểu diễn real-time priority; `rtprio` của thread B là 45); nó có 12 ms (hard deadline) để hoàn tất công việc. Tuy nhiên, giả sử sau 6 ms (tại `t1`), hardware interrupt kích hoạt. Trong Hình 4.5, chúng ta không hiển thị low-level interrupt setup code được thực thi. Lúc này hardware interrupt kích hoạt tại `t1` khiến interrupt handler được gọi; tức hardirq (biểu diễn bằng mũi tên đôi dọc lớn màu đen trong sơ đồ trên). Hiển nhiên hardware interrupt preempt thread B. Giả sử nó mất 200 microsecond để thực thi; không nhiều, nhưng nếu một đợt interrupt flood (chẳng hạn 20 interrupt, tiêu thụ 4 ms) đến thì sao! Điều này được biểu diễn trong sơ đồ trên: interrupt tiếp tục ở tốc độ cao cho đến `t2`; chỉ sau khi tất cả hoàn tất, context mới được khôi phục. Vì vậy scheduling code chạy và (giả sử) context switch trở lại thread B, cấp processor cho nó (trên Intel CPU hiện đại, chúng ta lấy thời gian context switching bảo thủ 50 microsecond: `https://blog.tsunanet.net/2010/11/how-long-does-it-take-to-make-context.html`). Tuy nhiên, ngay sau đó, tại `t3`, hardware interrupt lại kích hoạt, tiếp tục preempt B. Điều này có thể kéo dài vô hạn; RT thread cuối cùng sẽ chạy (khi interrupt storm kết thúc) nhưng có thể đạt hoặc không đạt deadline! Đây là vấn đề chính.
+Real-time thread B được biểu diễn chạy từ thời điểm `t0` (trên x-axis; y-axis biểu diễn real-time priority; `rtprio` của thread B là 45); nó có 12 ms (hard deadline) để hoàn tất công việc. Tuy nhiên, giả sử sau 6 ms (tại `t1`), hardware interrupt kích hoạt. Trong Hình 4.5, chúng ta không hiển thị low-level interrupt setup code được thực thi. Lúc này hardware interrupt kích hoạt tại `t1` khiến interrupt handler được gọi; tức hardirq (biểu diễn bằng double-arrow dọc lớn màu đen trong sơ đồ trên). Hiển nhiên hardware interrupt preempt thread B. Giả sử nó mất 200 microsecond để thực thi; không nhiều, nhưng nếu một đợt interrupt flood (chẳng hạn 20 interrupt, tiêu thụ 4 ms) đến thì sao! Điều này được biểu diễn trong sơ đồ trên: interrupt tiếp tục ở tốc độ cao cho đến `t2`; chỉ sau khi tất cả hoàn tất, context mới được khôi phục. Vì vậy scheduling code chạy và (giả sử) context switch trở lại thread B, cấp processor cho nó (trên Intel CPU hiện đại, chúng ta lấy thời gian context switching bảo thủ 50 microsecond: `https://blog.tsunanet.net/2010/11/how-long-does-it-take-to-make-context.html`). Tuy nhiên, ngay sau đó, tại `t3`, hardware interrupt lại kích hoạt, tiếp tục preempt B. Điều này có thể kéo dài vô hạn; RT thread cuối cùng sẽ chạy (khi interrupt storm kết thúc) nhưng có thể đạt hoặc không đạt deadline! Đây là vấn đề chính.
 
 Vấn đề mô tả ở đoạn trước không biến mất chỉ bằng cách tăng real-time priority của user mode thread; hardirq hardware interrupt vẫn luôn preempt chúng, bất kể priority.
 
@@ -710,7 +710,7 @@ Trong sơ đồ trên, RT thread B lúc này có scheduling policy `SCHED_FIFO` 
 
 - Tại `t1`, thanh xám mảnh biểu diễn hardirq low-level setup/BSP code.
 
-- Đường dọc mũi tên đôi màu đen mảnh biểu diễn primary hardirq handler (cả hai phần trên chỉ mất vài microsecond để hoàn tất).
+- Đường dọc double-arrow màu đen mảnh biểu diễn primary hardirq handler (cả hai phần trên chỉ mất vài microsecond để hoàn tất).
 
 - Thanh màu xanh dương là scheduling code.
 
@@ -718,7 +718,7 @@ Trong sơ đồ trên, RT thread B lúc này có scheduling policy `SCHED_FIFO` 
 
 Kết quả của tất cả điều này là thread B hoàn tất công việc dư sức trong deadline (ở đây, làm ví dụ, nó đạt deadline chỉ sau hơn 10 ms).
 
-Trừ khi ràng buộc thời gian cực kỳ khắt khe, dùng mô hình threaded interrupt để xử lý interrupt của device hoạt động rất tốt với phần lớn device và driver. Tại thời điểm viết, những device có xu hướng tiếp tục dùng cách top/bottom half truyền thống (trình bày chi tiết trong mục Hiểu và sử dụng top half cùng bottom half) thường là network, block và (một số) multimedia device hiệu năng cao.
+Trừ khi ràng buộc thời gian cực kỳ khắt khe, dùng mô hình threaded interrupt để xử lý interrupt của device hoạt động rất tốt với phần lớn device và driver. Tại thời điểm viết, những device có xu hướng tiếp tục dùng cách top/bottom half truyền thống (trình bày chi tiết trong mục Hiểu và sử dụng top half cùng bottom half) thường là network, block và (một số) multimedia device high-performance.
 
 ### Các ràng buộc khi dùng threaded handler
 
@@ -742,7 +742,7 @@ request_any_context_irq(unsigned int irq, irq_handler_t handler,
             unsigned long flags, const char *name, void *dev_id);
 ```
 
-Các tham số giống hệt `request_irq()`. Khi được gọi, routine quyết định interrupt handler function—tham số `handler`—chạy trong atomic hardirq context hay process context có thể sleep của kernel thread—nói cách khác là threaded handler. Làm sao biết `handler()` sẽ chạy trong context nào? Return value cho biết dựa trên context mà `handler()` sẽ chạy:
+Các tham số giống hệt `request_irq()`. Khi được gọi, routine quyết định interrupt handler function—tham số `handler`—chạy trong atomic hardirq context hay process context sleep-capable của kernel thread—nói cách khác là threaded handler. Làm sao biết `handler()` sẽ chạy trong context nào? Return value cho biết dựa trên context mà `handler()` sẽ chạy:
 
 - Nếu sẽ chạy trong hardirq context, trả về giá trị `IRQC_IS_HARDIRQ`.
 
@@ -750,13 +750,13 @@ Các tham số giống hệt `request_irq()`. Khi được gọi, routine quyế
 
 - `errno` âm được trả về khi thất bại (bạn phải kiểm tra).
 
-Tuy nhiên, điều này thực sự có nghĩa gì? Về cơ bản, có các controller trên slow bus (I2C là ví dụ rất rõ); chúng sinh ra handler dùng cái gọi là “nested” interrupt, thực sự có nghĩa handler vốn không atomic. Nó có thể gọi hàm sleep (một lần nữa, hàm I2C là ví dụ tốt), do đó bắt buộc phải preemptible. Dùng API `request_any_context_irq()` đảm bảo nếu đúng trường hợp này, generic IRQ code bên dưới phát hiện và cung cấp handling interface phù hợp. GPIO-driven matrix keypad driver là ví dụ khác dùng API này (`drivers/input/keyboard/matrix_keypad.c`).
+Tuy nhiên, điều này thực sự có nghĩa gì? Về cơ bản, có các controller trên slow bus (I2C là ví dụ rất rõ); chúng sinh ra handler dùng so-called “nested” interrupt, thực sự có nghĩa handler vốn không atomic. Nó có thể gọi hàm sleep (một lần nữa, hàm I2C là ví dụ tốt), do đó bắt buộc phải preemptible. Dùng API `request_any_context_irq()` đảm bảo nếu đúng trường hợp này, generic IRQ code bên dưới phát hiện và cung cấp handling interface phù hợp. GPIO-driven matrix keypad driver là ví dụ khác dùng API này (`drivers/input/keyboard/matrix_keypad.c`).
 
 Qua phần trình bày này, bạn đã hiểu threaded interrupt là gì và vì sao rất hữu ích. Bây giờ, xem chủ đề ngắn hơn: bạn, với tư cách tác giả driver, có thể enable/disable có chọn lọc IRQ line như thế nào.
 
 ## Enable và disable IRQ
 
-Thông thường core kernel code (và/hoặc code riêng theo kiến trúc) xử lý low-level interrupt management. Việc này gồm mask interrupt khi cần. Tuy nhiên, một số driver cũng như OS đòi hỏi khả năng điều khiển chi tiết khi enable/disable hardware interrupt. Vì driver hoặc module code chạy với kernel privilege, kernel cung cấp helper routine (được export) cho phép làm chính điều này:
+Thông thường core kernel code (và/hoặc code arch-specific) xử lý low-level interrupt management. Việc này gồm mask interrupt khi cần. Tuy nhiên, một số driver cũng như OS đòi hỏi khả năng điều khiển fine-grained khi enable/disable hardware interrupt. Vì driver hoặc module code chạy với kernel privilege, kernel cung cấp helper routine (được export) cho phép làm chính điều này:
 
 | Comment ngắn | API hoặc helper routine |
 |---|---|
@@ -773,7 +773,7 @@ Thông thường core kernel code (và/hoặc code riêng theo kiến trúc) x�
 
 Các helper `local_irq_disable() / local_irq_enable()` được thiết kế để disable/enable mọi interrupt (trừ NMI) trên local hoặc current processor core.
 
-Cách triển khai `local_irq_disable()`/`local_irq_enable()` trên x86\[\_64\] dùng cặp machine instruction nổi tiếng/tai tiếng `cli`/`sti`; ngày xưa chúng disable/enable interrupt trên toàn hệ thống, mọi CPU. Giờ chúng hoạt động theo từng CPU.
+Cách triển khai `local_irq_disable()`/`local_irq_enable()` trên x86\[\_64\] dùng cặp machine instruction nổi tiếng/tai tiếng `cli`/`sti`; ngày xưa chúng disable/enable interrupt trên toàn hệ thống, mọi CPU. Giờ chúng hoạt động theo per-CPU.
 
 Các helper `disable_{hard}irq*()`/`enable_irq()` được thiết kế để disable/enable có chọn lọc một IRQ line cụ thể và được gọi theo cặp. Một số routine trên có thể gọi từ interrupt context, dù phải cẩn thận! An toàn hơn là đảm bảo gọi từ process context. Lời nhắc “cẩn thận” có vì một số helper hoạt động bằng cách gọi nội bộ các non-blocking routine như `cpu_relax()`, chờ bằng cách lặp lại một số machine instruction trên processor. (`cpu_relax()` là ví dụ tốt của trường hợp “cần dùng cẩn thận”, vì nó gọi machine instruction `nop` trong vòng lặp vô hạn; vòng lặp thoát khi bất kỳ hardware interrupt nào kích hoạt, chính là điều đang chờ! Tuy nhiên, chờ một lúc khi ở interrupt context bị xem là sai; vì vậy mới có lời nhắc “cẩn thận”.) Kernel commit cho `disable_hardirq()` (liên kết: `https://github.com/torvalds/linux/commit/02cea3958664723a5d2236f0f0058de97c7e4693`) giải thích nó dành cho các tình huống như netpoll cần disable interrupt từ atomic context.
 
@@ -781,11 +781,11 @@ Khi disable interrupt, cẩn thận đảm bảo bạn không giữ (đã lock) 
 
 ### NMI
 
-Mọi API và helper trên hoạt động với mọi hardware interrupt trừ non-maskable interrupt (NMI). NMI là interrupt riêng theo kiến trúc, dùng để triển khai các thứ như hardware watchdog và tính năng debug (ví dụ, kernel stack dump vô điều kiện cho mọi core; chúng ta sắp xem ví dụ). Ngoài ra, NMI interrupt line không thể được chia sẻ. Có thể minh họa nhanh việc khai thác NMI bằng cái gọi là magic SysRq facility của kernel. Để xem keyboard hotkey được gán cho magic SysRq, phải gọi hoặc kích hoạt bằng tổ hợp phím `[Alt][SysRq][letter]`.
+Mọi API và helper trên hoạt động với mọi hardware interrupt trừ non-maskable interrupt (NMI). NMI là interrupt arch-specific, dùng để triển khai các thứ như hardware watchdog và tính năng debug (ví dụ, kernel stack dump vô điều kiện cho mọi core; chúng ta sắp xem ví dụ). Ngoài ra, NMI interrupt line không thể được chia sẻ. Có thể minh họa nhanh việc khai thác NMI bằng so-called magic SysRq facility của kernel. Để xem keyboard hotkey được gán cho magic SysRq, phải gọi hoặc kích hoạt bằng tổ hợp phím `[Alt][SysRq][letter]`.
 
 Kích hoạt magic SysRq: Thay vì xoắn cả ngón tay gõ `[Alt][SysRq][letter]`, có cách dễ hơn—và quan trọng hơn là non-interactive: chỉ cần echo ký tự liên quan vào proc pseudofile (tất nhiên dưới quyền root): `echo letter/proc/sysrq-trigger`.
 
-Nhưng cần gõ ký tự nào? Output sau cho thấy cách nhanh để tìm hiểu. Đây là một dạng trợ giúp nhanh cho magic SysRq (tôi thực hiện trên Raspberry Pi 3B+):
+Nhưng cần gõ ký tự nào? Output sau cho thấy cách nhanh để tìm hiểu. Đây là một dạng quick-help cho magic SysRq (tôi thực hiện trên Raspberry Pi 3B+):
 
 ```
 rpi # dmesg -C
@@ -807,7 +807,7 @@ rpi #
 
 Hình 4.7—Output khi NMI được gửi đến mọi CPU, hiển thị kernel stack backtrace trên từng CPU
 
-Trong screenshot trên, bạn thấy `bash` PID 633 đang chạy trên CPU `0` và kernel thread `swapper/1` chạy trên CPU `1` (có thể thấy kernel stack của từng bên; hãy đọc từ dưới lên).
+Trong screenshot trên, bạn thấy `bash` PID 633 đang chạy trên CPU `0` và kernel thread `swapper/1` chạy trên CPU `1` (có thể thấy kernel stack của từng bên; hãy đọc bottom-up).
 
 Code của magic SysRq facility ở `drivers/tty/sysrq.c`; xem qua khá thú vị. Sau đây là call graph gần đúng của những gì xảy ra trên x86 khi kích hoạt magic SysRq `l`:
 
@@ -818,7 +818,7 @@ arch_trigger_cpumask_backtrace()
     nmi_trigger_cpumask_backtrace()
 ```
 
-Hàm cuối thực sự trở thành code tổng quát (không riêng kiến trúc) tại `lib/nmi_backtrace.c:nmi_trigger_cpumask_backtrace()`. Code ở đây kích hoạt CPU backtrace bằng cách gửi NMI đến từng CPU. Việc này đạt được qua hàm `nmi_cpu_backtrace()`. Hàm này tiếp đến hiển thị thông tin đã thấy trong screenshot trên bằng cách gọi routine `show_regs()` hoặc `dump_stack()`, cuối cùng trở thành code riêng theo kiến trúc để dump CPU register cũng như kernel-mode stack. Code cũng đủ thông minh để không cố hiển thị backtrace trên CPU core đang ở low power (idle) state.
+Hàm cuối thực sự trở thành code tổng quát (không arch-specific) tại `lib/nmi_backtrace.c:nmi_trigger_cpumask_backtrace()`. Code ở đây kích hoạt CPU backtrace bằng cách gửi NMI đến từng CPU. Việc này đạt được qua hàm `nmi_cpu_backtrace()`. Hàm này tiếp đến hiển thị thông tin đã thấy trong screenshot trên bằng cách gọi routine `show_regs()` hoặc `dump_stack()`, cuối cùng trở thành code arch-specific để dump CPU register cũng như kernel-mode stack. Code cũng đủ thông minh để không cố hiển thị backtrace trên CPU core đang ở low power (idle) state.
 
 Một lần nữa, thực tế không phải lúc nào cũng đơn giản; xem bài của Steven Rostedt về những vấn đề phức tạp người ta gặp với x86 NMI và cách xử lý: The x86 NMI iret problem, tháng 3 năm 2012: `https://lwn.net/Articles/484932/`.
 
@@ -838,7 +838,7 @@ Trong output `/proc/interrupts` trên, mỗi IRQ line của hệ thống có m�
 
 - Cột thứ hai (trở đi) hiển thị số hardirq được từng CPU core phục vụ (từ khi hệ thống khởi động đến hiện tại). Số này biểu diễn số lần interrupt handler chạy trên CPU core đó (số cột thay đổi tùy số active core đang xử lý IRQ trên hệ thống). Trong screenshot trên, Raspberry Pi Zero chỉ có một CPU core, trong khi x86\_64 VM có hai CPU core (virtualized) để phân phối và xử lý interrupt (sẽ nói thêm trong mục Load balancing interrupt và IRQ affinity).
 
-- Cột thứ ba (hoặc sau đó) hiển thị interrupt controller chip. Trên x86 (cột thứ tư trong Hình 4.9), tên IO-APIC nghĩa là interrupt controller cải tiến được dùng trên multicore system để phân phối interrupt đến nhiều core hoặc CPU group (trên hệ thống cao cấp, có thể có nhiều IO-APIC).
+- Cột thứ ba (hoặc sau đó) hiển thị interrupt controller chip. Trên x86 (cột thứ tư trong Hình 4.9), tên IO-APICs nghĩa là interrupt controller cải tiến được dùng trên multicore system để phân phối interrupt đến nhiều core hoặc CPU group (trên hệ thống high-end, có thể có nhiều IO-APIC).
 
 - Cột kế tiếp hiển thị loại interrupt triggering đang dùng; tức level hoặc edge triggering (đã thảo luận trong mục Hiểu level-triggered và edge-triggered interrupt). Ở đây, `Edge` cho biết IRQ là edge-triggered. Số đứng trước (ví dụ `35 Edge` trong screenshot trên) phụ thuộc hệ thống rất nhiều. Nó thường biểu diễn interrupt source (mà kernel map thành IRQ line; nhiều embedded device driver thường dùng GPIO pin làm interrupt source). Tốt nhất đừng cố diễn giải (trừ khi thực sự biết cách) và chỉ dựa vào IRQ number (cột đầu).
 
@@ -850,9 +850,9 @@ Hình 4.9—IRQ status trên x86\_64 Ubuntu 18.04 VM (screenshot được cắt 
 
 Từ kernel 2.6.24, với hệ thống x86 và AMD64 (hay x86\_64), ngay cả non-device (I/O) interrupt (system interrupt) cũng được hiển thị ở đây, như NMI, local timer interrupt (LOC), PMI, IWI, v.v. Bạn thấy trong Hình 4.9, dòng cuối hiển thị `IWI`, tức Inter-Work Interrupt.
 
-Kernel procfs code hiển thị output `/proc/interrupts` trên—tức method `show`—ở `kernel/irq/proc.c:show_interrupts()` (liên kết: `https://elixir.bootlin.com/linux/v5.4/source/kernel/irq/proc.c#L438`). Đầu tiên in header line, sau đó tạo “record” một dòng cho mỗi IRQ line. Thống kê chủ yếu lấy từ metadata structure cho mỗi IRQ line—`struct irq_desc`; trong mỗi IRQ, nó lặp qua từng processor core (qua helper routine `for_each_online_cpu()`), in số hardirq đã phục vụ cho từng core. Cuối cùng (cột cuối), nó in “owner” của IRQ line qua member `name` của `struct` `irqaction`. Interrupt riêng theo kiến trúc cho x86 (như IRQ `NMI`, `LOC`, `PMI` và `IWI`) được hiển thị qua code tại `arch/x86/kernel/irq.c:arch_show_interrupts()`.
+Kernel procfs code hiển thị output `/proc/interrupts` trên—tức method `show`—ở `kernel/irq/proc.c:show_interrupts()` (liên kết: `https://elixir.bootlin.com/linux/v5.4/source/kernel/irq/proc.c#L438`). Đầu tiên in header line, sau đó tạo “record” one-line cho mỗi IRQ line. Thống kê chủ yếu lấy từ metadata structure cho mỗi IRQ line—`struct irq_desc`; trong mỗi IRQ, nó lặp qua từng processor core (qua helper routine `for_each_online_cpu()`), in số hardirq đã phục vụ cho từng core. Cuối cùng (cột cuối), nó in “owner” của IRQ line qua member `name` của `struct` `irqaction`. Interrupt arch-specific cho x86 (như IRQ `NMI`, `LOC`, `PMI` và `IWI`) được hiển thị qua code tại `arch/x86/kernel/irq.c:arch_show_interrupts()`.
 
-Trên x86, IRQ `0` luôn là timer interrupt. Trong tài liệu đồng hành Linux Kernel Programming - Chương 10, CPU scheduler - Phần 1, chúng ta học rằng về lý thuyết timer interrupt kích hoạt `HZ` lần mỗi giây. Trên thực tế, để hiệu quả, giờ nó được thay bằng periodic high-resolution timer (HRT) theo từng CPU; nó xuất hiện là IRQ tên LOC (viết tắt LOCal) cho timer interrupt trong `/proc/interrupts`. Điều này thực sự giải thích vì sao số hardware timer interrupt dưới hàng `timer` rất thấp; hãy xem (trên x86\_64 guest có bốn CPU (virtual)):
+Trên x86, IRQ `0` luôn là timer interrupt. Trong tài liệu đồng hành Linux Kernel Programming - Chương 10, CPU scheduler - Phần 1, chúng ta học rằng về lý thuyết timer interrupt kích hoạt `HZ` lần mỗi giây. Trên thực tế, để hiệu quả, giờ nó được thay bằng periodic high-resolution timer (HRT) theo per-CPU; nó xuất hiện là IRQ tên LOC (viết tắt LOCal) cho timer interrupt trong `/proc/interrupts`. Điều này thực sự giải thích vì sao số hardware timer interrupt dưới hàng `timer` rất thấp; hãy xem (trên x86\_64 guest có bốn CPU (virtual)):
 
 ```
 $ egrep "timer|LOC" /proc/interrupts ; sleep 1 ; egrep
@@ -870,11 +870,11 @@ $
 
 Chú ý IRQ `0` không tăng, nhưng IRQ `LOC` thực sự tăng (theo từng CPU core).
 
-Pseudofile `/proc/stat` cũng cung cấp một số thông tin về việc sử dụng để phục vụ interrupt theo từng CPU và số interrupt có thể được phục vụ (xem man page `proc(5)` để biết thêm).
+Pseudofile `/proc/stat` cũng cung cấp một số thông tin về việc sử dụng để phục vụ interrupt theo per-CPU và số interrupt có thể được phục vụ (xem man page `proc(5)` để biết thêm).
 
 Softirq, được giải thích chi tiết trong mục Hiểu và sử dụng top half cùng bottom half, có thể xem qua `/proc/softirqs`; sẽ nói thêm sau.
 
-Đến đây, bạn đã học cách xem IRQ line được cấp phát. Tuy nhiên, còn một khía cạnh lớn của interrupt handling: hiểu sự phân đôi được gọi là top-half/bottom-half, vì sao tồn tại và cách làm việc với chúng. Chúng ta xem ở mục tiếp theo.
+Đến đây, bạn đã học cách xem IRQ line được cấp phát. Tuy nhiên, còn một khía cạnh lớn của interrupt handling: hiểu sự phân đôi so-called top-half/bottom-half, vì sao tồn tại và cách làm việc với chúng. Chúng ta xem ở mục tiếp theo.
 
 ## Hiểu và sử dụng top half cùng bottom half
 
@@ -890,13 +890,13 @@ Như đã gợi ý, có hai chiến lược lớn được dùng trong các trư
 
 Chúng ta đã trình bày chi tiết khái niệm, cách dùng thực tế và lý do của threaded interrupt trong mục Làm việc với mô hình threaded interrupt. Trong mô hình top-bottom-half, cách tiếp cận là:
 
-- Cái gọi là top half là hàm được gọi ban đầu khi hardware interrupt kích hoạt. Vì thế bạn đã quen—nó chính là hardirq, ISR hoặc primary handler routine đăng ký qua một trong các API `*request_*irq()` (để rõ: qua một trong các API `request_irq()` / `devm_request_irq()` / `request_threaded_irq()` / `devm_request_threaded_irq()`).
+- so-called top half là hàm được gọi ban đầu khi hardware interrupt kích hoạt. Vì thế bạn đã quen—nó chính là hardirq, ISR hoặc primary handler routine đăng ký qua một trong các API `*request_*irq()` (để rõ: qua một trong các API `request_irq()` / `devm_request_irq()` / `request_threaded_irq()` / `devm_request_threaded_irq()`).
 
-- Chúng ta còn đăng ký cái gọi là bottom half routine để thực hiện phần lớn interrupt handling.
+- Chúng ta còn đăng ký so-called bottom half routine để thực hiện phần lớn interrupt handling.
 
 Nói cách khác, interrupt handling chia thành hai half—top và bottom. Tuy nhiên, đây không hẳn là cách mô tả thỏa đáng (vì từ tiếng Anh half khiến bạn trực giác nghĩ các routine có kích thước xấp xỉ nhau); thực tế giống thế này hơn:
 
-- Top half thực hiện tối thiểu công việc bắt buộc (thường acknowledge interrupt, có thể tắt trên board trong thời gian top half chạy, rồi thực hiện bất kỳ công việc đặc thù hardware (tối thiểu) nào, gồm nhận/gửi dữ liệu cần thiết từ/đến device).
+- Top half thực hiện tối thiểu công việc bắt buộc (thường acknowledge interrupt, có thể tắt trên board trong thời gian top half chạy, rồi thực hiện bất kỳ công việc hardware-specific (tối thiểu) nào, gồm nhận/gửi dữ liệu cần thiết từ/đến device).
 
 - Bottom half routine đảm nhiệm phần lớn interrupt handling.
 
@@ -920,7 +920,7 @@ Lưu ý bottom half vẫn hoàn toàn chạy trong atomic context hoặc interru
 
 - Không bao giờ được trực tiếp hay gián tiếp gọi `schedule()`.
 
-Bottom-half handling này là một tập con của khả năng được gọi là deferred functionality của kernel; kernel có một số cơ chế deferred functionality:
+bottom-half handling này là một tập con của khả năng được gọi là deferred functionality của kernel; kernel có một số cơ chế deferred functionality:
 
 - Workqueue (dựa trên kernel thread); `context:process`
 
@@ -1051,7 +1051,7 @@ Trong code trên, hãy tưởng tượng chúng ta làm mọi công việc tối
 
 Thay vì API `tasklet_schedule()`, có thể dùng routine thay thế qua API `tasklet_hi_schedule()`. Bên trong, nó khiến tasklet trở thành softirq có priority cao nhất (softirq priority `0`)! (Thông tin thêm ở mục Hiểu cơ chế kernel softirq.) Lưu ý gần như không bao giờ làm vậy; priority (softirq) mặc định của tasklet thường dư sức đáp ứng. Đặt lên mức `hi` thực sự chỉ dành cho trường hợp cực đoan; tránh nhiều nhất có thể.
 
-Trong Linux phiên bản 5.4.0, có khoảng hơn 70 chỗ driver dùng hàm `tasklet_hi_schedule()`. Các driver thường là network driver hiệu năng cao—một số GPU, crypto, USB và mmc driver, cùng vài driver khác.
+Trong Linux phiên bản 5.4.0, có 70-odd chỗ driver dùng hàm `tasklet_hi_schedule()`. Các driver thường là network driver high-performance—một số GPU, crypto, USB và mmc driver, cùng vài driver khác.
 
 Về tasklet, kernel tiếp tục tiến hóa. Các patch gần đây (tại thời điểm viết, tháng 7 năm 2020) của Kees Cook và những người khác đang tìm cách hiện đại hóa tasklet routine (callback). Để biết thêm, xem `https://www.openwall.com/lists/kernel-hardening/2020/07/16/1`.
 
@@ -1061,7 +1061,7 @@ Tại đây, bạn hiểu bottom half, tức tasklet, là cơ chế deferred fun
 
 Bạn đã học cách dùng tasklet—ví dụ rất tốt của cơ chế deferred functionality. Nhưng chúng được triển khai bên trong thế nào? Kernel triển khai tasklet qua facility bên dưới gọi là cơ chế softirq (hay software-interrupt). Dù bề ngoài tương tự threaded interrupt đã thấy, nó thực sự rất khác ở nhiều điểm quan trọng. Những đặc điểm softirq sau giúp bạn hiểu:
 
-- Softirq là cơ chế deferred functionality thuần nội bộ kernel, theo nghĩa được gán tĩnh khi compile kernel (tất cả đều hard-code trong kernel); bạn không thể tạo động softirq mới.
+- Softirq là cơ chế deferred functionality thuần nội bộ kernel, theo nghĩa được gán tĩnh khi compile kernel (tất cả đều hard-coded trong kernel); bạn không thể tạo động softirq mới.
 
 - Kernel (ở phiên bản 5.4) cung cấp tổng cộng 10 softirq riêng biệt:
 
@@ -1081,7 +1081,7 @@ Sơ đồ sau mở rộng mô tả priority trên Linux tiêu chuẩn ở phần
 
 Hình 4.10—Priority tương đối trên Linux tiêu chuẩn, gồm cả softirq
 
-Đúng, như có thể thấy, softirq là cơ chế priority rất cao trên Linux; có 10 loại riêng ở priority khác nhau. Chúng là gì và dùng làm gì được trình bày ở mục nhỏ tiếp theo.
+Đúng, như có thể thấy, softirq là cơ chế high-priority trên Linux; có 10 loại riêng ở priority khác nhau. Chúng là gì và dùng làm gì được trình bày ở mục nhỏ tiếp theo.
 
 #### Các softirq sẵn có và mục đích
 
@@ -1106,7 +1106,7 @@ Bảng sau tổng hợp từng softirq của kernel theo thứ tự priority (`0
 | Softirq# | Softirq | Comment (dùng để làm gì/thực hiện gì) | Hàm "action" hoặc "vector" |
 |---|---|---|---|
 | `0` | `HI_SOFTIRQ` | Hi-tasklet: Softirq priority cao nhất; dùng khi gọi `tasklet_hi_schedule()`. Không được khuyến nghị cho phần lớn use case. Thay vào đó dùng tasklet thông thường (softirq #`6`). | `tasklet_hi_action()` |
-| `1` | `TIMER_SOFTIRQ` | Timer: Bottom half của timer interrupt chạy expired timer cùng các tác vụ "housekeeping" khác (gồm cập nhật scheduler CPU `runqueue` + `vruntime`, tăng biến nổi tiếng `jiffies_64`, v.v.). | `run_timer_softirq()` |
+| `1` | `TIMER_SOFTIRQ` | Timer: Bottom half của timer interrupt chạy expired timer cùng các tác vụ "housekeeping" khác (gồm cập nhật scheduler CPU `runqueue` + `vruntime`, tăng biến well-known `jiffies_64`, v.v.). | `run_timer_softirq()` |
 | `2` | `NET_TX_SOFTIRQ` | Net: Bottom half của network stack transmit path (qdisc). | `net_tx_action()` |
 | `3` | `NET_RX_SOFTIRQ` | Net: Bottom half của network stack receive path (NAPI polling). | `net_rx_action()` |
 | `4` | `BLOCK_SOFTIRQ` | Block: Block processing (hoàn tất I/O op; gọi complete function của block MQ, `blk_mq_ops`). | `blk_done_softirq()` |
@@ -1118,7 +1118,7 @@ Bảng sau tổng hợp từng softirq của kernel theo thứ tự priority (`0
 
 Thật thú vị; network stack và block stack là các code path có priority rất cao (timer interrupt cũng vậy), nên code của chúng phải chạy sớm nhất có thể. Vì thế, chúng có các softirq riêng để phục vụ những code path quan trọng này.
 
-Có thể xem các softirq đã được kích hoạt đến nay không? Tất nhiên, rất giống cách xem hardirq (qua pseudofile `proc/interrupts`). Chúng ta có pseudofile `/proc/softirqs` để theo dõi softirq. Đây là ảnh chụp ví dụ từ hệ thống Ubuntu x86\_64 native (bốn core) của tôi:
+Có thể xem các softirq đã được kích hoạt đến nay không? Tất nhiên, rất giống cách xem hardirq (qua pseudofile `proc/interrupts`). Chúng ta có pseudofile `/proc/softirqs` để theo dõi softirq. Đây là ảnh chụp ví dụ từ hệ thống Ubuntu x86\_64 native (four-core) của tôi:
 
 ![Figure 4.12](images/ch04/fig04-12.png)
 
@@ -1148,7 +1148,7 @@ Bây giờ, hãy tập trung ngắn gọn vào một số chi tiết nội bộ 
 
 ##### Chạy tasklet
 
-Một vài điều về nội bộ việc gọi tasklet: chúng ta hiểu tasklet softirq chạy qua `tasklet_schedule()`. API này cuối cùng gọi hàm nội bộ `__tasklet_schedule_common()` của kernel (`https://elixir.bootlin.com/linux/v5.4/source/kernel/softirq.c#L471`), hàm này gọi nội bộ `raise_softirq_irqoff(softirq_nr)` (`https://elixir.bootlin.com/linux/v5.4/source/kernel/softirq.c#L423`). Việc này raise softirq `softirq_nr`; với regular tasklet, giá trị là `TASKLET_SOFTIRQ`, còn khi tasklet được schedule qua API `tasklet_hi_schedule()`, giá trị là `HI_SOFTIRQ`, softirq có priority cao nhất! Hãy hiếm khi dùng nó, nếu thực sự phải dùng. Giờ ta biết chức năng “schedule” đã thiết lập softirq; ở đây, việc thực thi thực tế diễn ra khi softirq ở mức priority đó (`0` hoặc `6` trong trường hợp này) thực sự chạy. Hàm chạy softirq có tên `do_softirq()`; với regular tasklet, cuối cùng nó gọi softirq vector `tasklet_action()` (như bảng trên); vector này gọi `tasklet_action_common()` (`https://elixir.bootlin.com/linux/v5.4/source/kernel/softirq.c#L501`), rồi (sau một số thiết lập list) enable hardware interrupt (qua `local_irq_enable()`), sau đó lặp qua per-CPU tasklet list, tiêu thụ (chạy) các tasklet function trên đó. Bạn có nhận thấy gần như mọi hàm được đề cập ở đây đều độc lập kiến trúc không? Đó là điều tốt.
+Một vài điều về nội bộ việc gọi tasklet: chúng ta hiểu tasklet softirq chạy qua `tasklet_schedule()`. API này cuối cùng gọi hàm nội bộ `__tasklet_schedule_common()` của kernel (`https://elixir.bootlin.com/linux/v5.4/source/kernel/softirq.c#L471`), hàm này gọi nội bộ `raise_softirq_irqoff(softirq_nr)` (`https://elixir.bootlin.com/linux/v5.4/source/kernel/softirq.c#L423`). Việc này raise softirq `softirq_nr`; với regular tasklet, giá trị là `TASKLET_SOFTIRQ`, còn khi tasklet được schedule qua API `tasklet_hi_schedule()`, giá trị là `HI_SOFTIRQ`, softirq có priority cao nhất! Hãy hiếm khi dùng nó, nếu thực sự phải dùng. Giờ ta biết chức năng “schedule” đã thiết lập softirq; ở đây, việc thực thi thực tế diễn ra khi softirq ở mức priority đó (`0` hoặc `6` trong trường hợp này) thực sự chạy. Hàm chạy softirq có tên `do_softirq()`; với regular tasklet, cuối cùng nó gọi softirq vector `tasklet_action()` (như bảng trên); vector này gọi `tasklet_action_common()` (`https://elixir.bootlin.com/linux/v5.4/source/kernel/softirq.c#L501`), rồi (sau một số thiết lập list) enable hardware interrupt (qua `local_irq_enable()`), sau đó lặp qua per-CPU tasklet list, tiêu thụ (chạy) các tasklet function trên đó. Bạn có nhận thấy gần như mọi hàm được đề cập ở đây đều arch-independent không? Đó là điều tốt.
 
 ##### Sử dụng kernel thread ksoftirqd
 
@@ -1193,11 +1193,11 @@ Nhưng nếu không phải vậy? Hãy xem bảng sau; cột đầu chỉ tổng
 |---|---|---|
 | \<= 10 microsecond | Chỉ dùng hardirq (top half); không cần gì khác. | Trường hợp tốt nhất; không điển hình. |
 | Từ 10 đến 100 microsecond | Chỉ hardirq hoặc cả hardirq lẫn tasklet (softirq). | Chạy stress test/workload để xem thực sự cần tasklet không. Việc dùng nó phần nào không được khuyến khích, thay vào đó ưu tiên threaded handler hoặc workqueue. |
-| 100 microsecond, device không quá quan trọng | Dùng primary handler (hardirq); tức handler function riêng (nếu cần công việc đặc thù phần cứng) hoặc chỉ dùng mặc định của kernel cùng một threaded handler. Hoặc, nếu chấp nhận được, chỉ dùng workqueue (trình bày trong chương tiếp theo). | Tránh xử lý softirq, giúp giảm system latency nhưng có thể xử lý chậm hơn một chút. Đó là vì threaded handler cạnh tranh CPU time với các thread khác. Workqueue cũng dựa trên kernel thread và có đặc điểm tương tự. |
+| 100 microsecond, device non-critical | Dùng primary handler (hardirq); tức handler function riêng (nếu cần công việc hardware-specific) hoặc chỉ dùng mặc định của kernel cùng một threaded handler. Hoặc, nếu chấp nhận được, chỉ dùng workqueue (trình bày trong chương tiếp theo). | Tránh xử lý softirq, giúp giảm system latency nhưng có thể xử lý chậm hơn một chút. Đó là vì threaded handler cạnh tranh CPU time với các thread khác. Workqueue cũng dựa trên kernel thread và có đặc điểm tương tự. |
 | 100 microsecond, device quan trọng (thường là network, block và một số multimedia device) | Dùng primary handler (hardirq/top half) và tasklet (bottom half). | Ưu tiên device hơn mọi thứ khi một lượng lớn interrupt đến. Đây cũng là nhược điểm vì có thể gây vấn đề “livelock” và latency dài khi softirq tràn ngập! Hãy kiểm thử và xác định. |
-| 100 microsecond, công việc/device cực kỳ quan trọng | Dùng primary handler (hardirq/top half) và hi-tasklet hoặc (có thể) softirq riêng (mới!). | Trường hợp khá cực đoan, ít khả năng xảy ra; để thêm softirq riêng, bạn cần thay đổi kernel code nội bộ (theo GPL). Điều này khiến chi phí bảo trì cao (trừ khi các thay đổi core kernel cùng driver được đóng góp upstream!). |
+| 100 microsecond, công việc/device cực kỳ quan trọng | Dùng primary handler (hardirq/top half) và hi-tasklet hoặc (có thể) softirq riêng (mới!). | Trường hợp khá cực đoan, ít khả năng xảy ra; để thêm softirq riêng, bạn cần thay đổi kernel code nội bộ (GPL-ed). Điều này khiến chi phí bảo trì cao (trừ khi các thay đổi core kernel cùng driver được đóng góp upstream!). |
 
-Thời gian tính bằng microsecond trong cột đầu tất nhiên có thể tranh luận, phụ thuộc kiến trúc và board, và có thể (sẽ) thay đổi theo thời gian. Giá trị gợi ý 100 microsecond làm mốc chỉ là heuristic. Như đã nói, bản thân xử lý softirq nên hoàn tất trong vài trăm microsecond; một lượng lớn softirq chưa được xử lý có thể lại dẫn đến livelock. Kernel giảm thiểu (hoặc giảm rủi ro) theo hai cách tổng quát:
+Thời gian tính bằng microsecond trong cột đầu tất nhiên có thể tranh luận, arch-and-board-dependent, và có thể (sẽ) thay đổi theo thời gian. Giá trị gợi ý 100 microsecond làm mốc chỉ là heuristic. Như đã nói, bản thân xử lý softirq nên hoàn tất trong vài trăm microsecond; một lượng lớn softirq chưa được xử lý có thể lại dẫn đến livelock. Kernel giảm thiểu (hoặc de-risks) theo hai cách tổng quát:
 
 - Threaded interrupt hoặc workqueue (cả hai dựa trên kernel thread)
 
@@ -1207,9 +1207,9 @@ Các trường hợp trên chạy trong process context, qua đó giảm vấn �
 
 Với hàng cuối bảng trên, cách duy nhất để tạo softirq mới là thực sự đi vào kernel code và sửa nó. Ý là sửa kernel code base (theo GPL license). Trong embedded project, sửa kernel source không hiếm. Tuy nhiên, thêm softirq được xem là (rất) hiếm và hoàn toàn không phải ý hay vì latency có thể đã cao ngay cả khi chưa phải xử lý thêm softirq! Việc này đã không xảy ra trong nhiều năm.
 
-Về real time và determinism, trong tài liệu đồng hành Linux Kernel Programming, Chương 11, CPU Scheduler – Phần 2, mục Xem kết quả, chúng ta đề cập jitter (độ biến thiên thời gian) trong interrupt processing trên bộ vi xử lý chạy Linux chuẩn ở mức +/- 10 microsecond. Với RTL kernel, tốt hơn nhiều, nhưng vẫn chưa deterministic một trăm phần trăm. Vậy có thể hoàn toàn deterministic với interrupt handling trên Linux không? Một cách thú vị là dùng — nếu được enable và khả thi — FIQ, cơ chế gọi là fast interrupt mà một số bộ xử lý, đặc biệt ARM, cung cấp. Chúng hoạt động ngoài phạm vi Linux kernel, chính vì vậy viết FIQ interrupt handler sẽ loại bỏ mọi jitter do kernel gây ra. Xem bài này để biết thêm: `https://bootlin.com/blog/fiq-handlers-in-the-arm-linux-kernel/`.
+Về real time và determinism, trong tài liệu đồng hành Linux Kernel Programming, Chương 11, CPU Scheduler – Phần 2, mục Xem kết quả, chúng ta đề cập jitter (độ biến thiên thời gian) trong interrupt processing trên bộ vi xử lý chạy Linux chuẩn ở mức +/- 10 microsecond. Với RTL kernel, tốt hơn nhiều, nhưng vẫn chưa deterministic một trăm phần trăm. Vậy có thể hoàn toàn deterministic với interrupt handling trên Linux không? Một cách thú vị là dùng — nếu được enable và khả thi — FIQ, cơ chế so-called fast interrupt mà một số bộ xử lý, đặc biệt ARM, cung cấp. Chúng hoạt động ngoài phạm vi Linux kernel, chính vì vậy viết FIQ interrupt handler sẽ loại bỏ mọi jitter kernel-induced. Xem bài này để biết thêm: `https://bootlin.com/blog/fiq-handlers-in-the-arm-linux-kernel/`.
 
-Cuối cùng, có lẽ nên đề cập rằng (tại thời điểm viết) đang có khá nhiều suy nghĩ lại ở đây: một số nhà phát triển kernel cho rằng toàn bộ cơ chế top-half bottom-half không còn cần thiết. Tuy nhiên, thực tế cơ chế này đã ăn sâu vào kernel, khiến việc loại bỏ không đơn giản.
+Cuối cùng, có lẽ nên đề cập rằng (tại thời điểm viết) đang có khá nhiều suy nghĩ lại ở đây: một số nhà phát triển kernel cho rằng toàn bộ cơ chế top-half bottom-half không còn cần thiết. Tuy nhiên, thực tế cơ chế này đã ăn sâu vào kernel, khiến việc loại bỏ non-trivial.
 
 ### Hiểu đầy đủ context
 
@@ -1347,7 +1347,7 @@ Hãy diễn giải output trên chi tiết hơn; từ trái sang phải:
 
 - Task bị interrupt bởi việc này là process `gnome-terminal-` có PID `3075`. Thực tế, có lẽ nó đã bị hardirq kích hoạt trước khi tasklet này chạy interrupt, và chỉ tiếp tục thực thi — trong trường hợp tốt nhất — khi tasklet hoàn tất.
 
-- Có thể suy ra những điều sau từ output bốn cột trên (phần `.Ns1`):
+- Có thể suy ra những điều sau từ output four-column trên (phần `.Ns1`):
 
 - `.`: Mọi interrupt (trên local core, core `#0`) được enable.
 
@@ -1369,7 +1369,7 @@ Giờ đã học nhiều lĩnh vực, chúng ta có thể nhìn tổng thể cá
 
 Hình 4.13 – Priority tương đối trên toàn stack - user, kernel process context và các kernel interrupt context
 
-Sơ đồ này khá rõ ràng, hãy nghiên cứu kỹ.
+Sơ đồ này self-explanatory, hãy nghiên cứu kỹ.
 
 Trong mục dài này, bạn đã học interrupt handling qua cả cơ chế top-half và bottom-half, lý do tồn tại của chúng, cách tổ chức và cách driver sử dụng. Giờ bạn hiểu mọi bottom-half mechanism đều được triển khai nội bộ qua softirq; tasklet là bottom-half mechanism chính mà bạn, người viết driver, có thể dễ dàng dùng. Tất nhiên, điều này không có nghĩa phải dùng — nếu chỉ top-half là đủ, hoặc tốt hơn nữa, chỉ threaded handler, thì rất tốt. Mục Hardirq, tasklet và threaded handler – dùng gì khi nào đã trình bày chi tiết các cân nhắc này.
 
@@ -1391,7 +1391,7 @@ Mục đích ở đây là đưa ra câu trả lời ngắn; chúng tôi khuyế
 
 Trước hết, trên multicore (SMP) system, cách hardware interrupt được route đến CPU core thường rất đặc thù theo board và interrupt controller. Dù vậy, generic IRQ layer trên Linux cung cấp abstraction rất hữu ích: cho phép (và triển khai) interrupt load balancing để không CPU nào (hay nhóm CPU nào) bị quá tải. Thậm chí có frontend utility `irqbalance(1)` và `irqbalance-ui(1)` cho phép admin (hoặc root user) thực hiện IRQ balancing (`irqbalance-ui` là frontend `ncurses` cho `irqbalance`).
 
-Có thể thay đổi interrupt được gửi đến các processor core không? Có, qua pseudofile `/proc/irq/IRQ/smp_affinity`! Đó là bitmask chỉ định CPU mà IRQ này được phép route đến. Vấn đề là thiết lập mặc định luôn cho phép mọi CPU core xử lý interrupt. Ví dụ, trên hệ thống tám core, giá trị `smp_affinity` cho IRQ line là `0xff` (nhị phân `1111 1111`). Vì sao là vấn đề? CPU caching. Nói ngắn gọn, nếu nhiều core xử lý cùng interrupt, cache bị xáo trộn và do đó có thể xảy ra nhiều cache invalidation (để giữ memory coherent với CPU cache), dẫn đến đủ loại vấn đề hiệu năng; đặc biệt trên hệ thống cao cấp có hàng chục core và nhiều NIC.
+Có thể thay đổi interrupt được gửi đến các processor core không? Có, qua pseudofile `/proc/irq/IRQ/smp_affinity`! Đó là bitmask chỉ định CPU mà IRQ này được phép route đến. Vấn đề là thiết lập mặc định luôn cho phép mọi CPU core xử lý interrupt. Ví dụ, trên hệ thống tám core, giá trị `smp_affinity` cho IRQ line là `0xff` (nhị phân `1111 1111`). Vì sao là vấn đề? CPU caching. Nói ngắn gọn, nếu nhiều core xử lý cùng interrupt, cache bị xáo trộn và do đó có thể xảy ra nhiều cache invalidation (để giữ memory coherent với CPU cache), dẫn đến đủ loại vấn đề hiệu năng; đặc biệt trên hệ thống high-end có hàng chục core và nhiều NIC.
 
 Chúng ta trình bày thêm các vấn đề CPU caching trong `Chapter 7`, Kernel Synchronization - Phần 2, mục Ảnh hưởng của cache và false sharing.
 
@@ -1405,7 +1405,7 @@ Hãy xem thêm vài điểm:
 
 ### Kernel có duy trì IRQ stack riêng không?
 
-Trong tài liệu đồng hành Linux Kernel Programming, Chương 6, Kiến thức thiết yếu và Kernel Internals – Process và Thread, mục Tổ chức process, thread và stack của chúng – user space và kernel space, chúng ta đã trình bày vài điểm chính: mỗi user space thread có hai stack: user space stack và kernel space stack. Khi thread chạy trong user space không đặc quyền, nó dùng user mode stack; khi chuyển sang kernel space có đặc quyền (qua system call hoặc exception), nó dùng kernel-mode stack (xem lại Hình 6.3 trong tài liệu đồng hành Linux Kernel Programming). Tiếp theo, kernel-mode stack có kích thước rất hạn chế và cố định — chỉ dài 2 hoặc 4 page (lần lượt tùy kiến trúc 32-bit hay 64-bit)! Vì vậy, tưởng tượng driver code (chẳng hạn method `ioctl()`) đang chạy trong code path lồng sâu. Điều này có nghĩa kernel-mode stack của process context đó đã chứa khá nhiều metadata — stack frame của từng hàm đã gọi. Bây giờ hardware interrupt đến! Cuối cùng, đây cũng là code phải chạy nên cần stack. Có thể đơn giản dùng kernel-mode stack hiện tại, nhưng như vậy tăng đáng kể khả năng stack overflow (vì đang lồng sâu và stack nhỏ). Stack overflow trong kernel là thảm họa vì hệ thống đơn giản sẽ treo/chết mà không có manh mối thực sự về nguyên nhân gốc (kernel config `CONFIG_VMAP_STACK` được đưa vào để giảm chính loại vấn đề này và được đặt mặc định trên x86\_64).
+Trong tài liệu đồng hành Linux Kernel Programming, Chương 6, Kiến thức thiết yếu và Kernel Internals – Process và Thread, mục Tổ chức process, thread và stack của chúng – user space và kernel space, chúng ta đã trình bày vài điểm chính: mỗi user space thread có hai stack: user space stack và kernel space stack. Khi thread chạy trong user space non-privileged, nó dùng user mode stack; khi chuyển sang kernel space có đặc quyền (qua system call hoặc exception), nó dùng kernel-mode stack (xem lại Hình 6.3 trong tài liệu đồng hành Linux Kernel Programming). Tiếp theo, kernel-mode stack có kích thước rất hạn chế và cố định — chỉ dài 2 hoặc 4 page (lần lượt tùy kiến trúc 32-bit hay 64-bit)! Vì vậy, tưởng tượng driver code (chẳng hạn method `ioctl()`) đang chạy trong code path lồng sâu. Điều này có nghĩa kernel-mode stack của process context đó đã chứa khá nhiều metadata — stack frame của từng hàm đã gọi. Bây giờ hardware interrupt đến! Cuối cùng, đây cũng là code phải chạy nên cần stack. Có thể đơn giản dùng kernel-mode stack hiện tại, nhưng như vậy tăng đáng kể khả năng stack overflow (vì đang lồng sâu và stack nhỏ). Stack overflow trong kernel là thảm họa vì hệ thống đơn giản sẽ treo/chết mà không có manh mối thực sự về nguyên nhân gốc (kernel config `CONFIG_VMAP_STACK` được đưa vào để giảm chính loại vấn đề này và được đặt mặc định trên x86\_64).
 
 Vì vậy, nói ngắn gọn, trên gần như mọi kiến trúc hiện đại, kernel cấp phát một kernel space stack riêng cho mỗi CPU để xử lý hardware interrupt. Nó gọi là IRQ stack. Khi hardware interrupt đến, vị trí stack (qua CPU stack pointer register thích hợp) được chuyển sang IRQ stack của CPU đang xử lý interrupt (và khôi phục khi IRQ exit). Một số kiến trúc (PPC) có kernel config `CONFIG_IRQSTACKS` để enable IRQ stack. Kích thước IRQ stack cố định, giá trị phụ thuộc kiến trúc. Trên x86\_64, dài 4 page (16 KB, với page size 4K điển hình).
 
@@ -1419,7 +1419,7 @@ Như đã biết, `procfs` là nguồn thông tin phong phú; chúng ta đã th�
 
 Trong tài liệu đồng hành Linux Kernel Programming - Chương 1, Thiết lập Kernel Workspace, mục Tracing và phân tích hiệu năng hiện đại với \[e\]BPF, chúng ta chỉ ra cách hiện đại để tracing, đo và phân tích hiệu năng trên Linux (4.x gần đây) là \[e\]BPF, enhanced Berkeley Packet Filter (cũng chỉ gọi là BPF). Trong vô số công cụ có sẵn (`https://github.com/iovisor/bcc#tools`), hai công cụ phù hợp mục đích trước mắt là trace, đo và phân tích interrupt (cả hardirq và softirq). (Trên Ubuntu, tên công cụ là `toolname-bpfcc`, trong đó `toolname` là tên công cụ đang xét, như `hardirqs-bpfcc` và `softirqs-bpfcc`). Chúng trace interrupt động (tại thời điểm viết, chưa dựa trên kernel tracepoint). Bạn cần quyền root để chạy những công cụ \[e\]BPF này.
 
-Quan trọng: Có thể cài BCC tool cho Linux distro host thông thường bằng cách đọc hướng dẫn tại đây: `https://github.com/iovisor/bcc/blob/master/INSTALL.md`. Vì sao không làm trên guest Linux VM? Bạn có thể làm khi chạy distro kernel (như kernel do Ubuntu hoặc Fedora cung cấp). Lý do có thể làm là việc cài BCC toolset bao gồm (và phụ thuộc vào) cài package `linux-headers-$(uname -r)`; package `linux-headers` này chỉ tồn tại cho distro kernel (không có cho custom kernel 5.4 mà bạn có thể đang chạy trên guest).
+Quan trọng: Có thể cài BCC tool cho Linux distro host thông thường bằng cách đọc hướng dẫn tại đây: `https://github.com/iovisor/bcc/blob/master/INSTALL.md`. Vì sao không làm trên guest Linux VM? Bạn có thể làm khi chạy distro kernel (như kernel do Ubuntu cung cấp hoặc Fedora-supplied). Lý do có thể làm là việc cài BCC toolset bao gồm (và phụ thuộc vào) cài package `linux-headers-$(uname -r)`; package `linux-headers` này chỉ tồn tại cho distro kernel (không có cho custom kernel 5.4 mà bạn có thể đang chạy trên guest).
 
 ##### Đo thời gian phục vụ từng hardirq
 
@@ -1461,7 +1461,7 @@ Linux có tracing engine rất mạnh tích hợp ngay trong kernel tên Ftrace.
 
 Steven Rostedt là tác giả ban đầu của Ftrace. Bài viết Finding Origins of Latencies Using Ftrace của ông rất đáng đọc. Có thể tìm tại đây: `https://static.lwn.net/images/conf/rtlws11/papers/proc/p02.pdf`.
 
-Trong mục này, chúng ta không định trình bày sâu cách dùng Ftrace vì thực sự không thuộc nội dung đang xét. Học dùng Ftrace không khó, và là vũ khí quý trong bộ công cụ kernel debug! Nếu chưa quen, hãy xem các liên kết Ftrace đã cung cấp trong mục Đọc thêm ở cuối chương.
+Trong mục này, chúng ta không định trình bày in-depth cách dùng Ftrace vì thực sự không thuộc nội dung đang xét. Học dùng Ftrace không khó, và là vũ khí quý trong bộ công cụ kernel debug! Nếu chưa quen, hãy xem các liên kết Ftrace đã cung cấp trong mục Đọc thêm ở cuối chương.
 
 Latency là độ trễ giữa thời điểm điều gì đó lẽ ra xảy ra và thời điểm thực sự xảy ra (sự khác nhau nói vui giữa lý thuyết và thực hành). System latency trong OS có thể là nguyên nhân bên dưới của vấn đề hiệu năng. Trong đó có interrupt latency và scheduling latency. Nhưng nguyên nhân thực sự là gì? Theo bài viết của Steve Rostedt (đề cập ở trên), bốn sự kiện gây các latency này:
 
@@ -1473,9 +1473,9 @@ Latency là độ trễ giữa thời điểm điều gì đó lẽ ra xảy ra 
 
 - Interrupt inversion: Khi interrupt chạy trước một task có priority cao hơn (tương tự priority inversion, có thể xảy ra trong hard real-time; tất nhiên, như đã học, chính vì vậy threaded handler rất quan trọng).
 
-Ftrace có thể ghi lại tất cả trừ điều cuối. Ở đây tập trung học cách dùng Ftrace để tìm (hay thực sự là lấy mẫu) thời gian trường hợp xấu nhất mà hardware interrupt bị disable. Đây được gọi là `irqsoff` latency tracing. Bắt đầu thôi!
+Ftrace có thể ghi lại tất cả trừ điều cuối. Ở đây tập trung học cách dùng Ftrace để tìm (hay thực sự là lấy mẫu) thời gian trường hợp worst-case mà hardware interrupt bị disable. Đây được gọi là `irqsoff` latency tracing. Bắt đầu thôi!
 
-##### Tìm latency thời gian interrupt bị disable trong trường hợp xấu nhất bằng Ftrace
+##### Tìm latency thời gian interrupt bị disable trong trường hợp worst-case bằng Ftrace
 
 Ftrace có một số plugin (hay tracer) để làm việc. Trước hết, cần bảo đảm latency tracer `irqsoff` (hay plugin của Ftrace) thực sự được enable trong kernel. Có thể kiểm tra theo hai cách:
 
@@ -1495,7 +1495,7 @@ Trong output trên, tracer `irqsoff` — thứ chúng ta cần — bị thiếu!
 
 Lockdep có thể gây vấn đề ở đây: nếu được enable, thực sự tốt nhất nên disable tính năng lockdep của kernel khi latency tracing (có thể thêm quá nhiều overhead). Chúng ta sẽ thảo luận khá chi tiết lockdep trong `Chapter` `7`, Kernel Synchronization - Phần 2.
 
-Khi đã enable `CONFIG_IRQSOFF_TRACER` (và cài `trace-cmd`), làm theo các bước để latency tracer của Ftrace xác định interrupts-off latency trong trường hợp xấu nhất. Tất nhiên, phải thực hiện với quyền root:
+Khi đã enable `CONFIG_IRQSOFF_TRACER` (và cài `trace-cmd`), làm theo các bước để latency tracer của Ftrace xác định interrupts-off latency trong trường hợp worst-case. Tất nhiên, phải thực hiện với quyền root:
 
 1\. Lấy một root shell (bạn cần đặc quyền root để làm):
 
@@ -1532,7 +1532,7 @@ echo 1 tracing_on
  ... it runs! ...
 ```
 
-7\. Output sau thể hiện `irqsoff latency` trong trường hợp xấu nhất (thường hiển thị bằng microsecond; đừng lo, chúng ta sẽ sớm trình bày lần chạy mẫu):
+7\. Output sau thể hiện `irqsoff latency` trong trường hợp worst-case (thường hiển thị bằng microsecond; đừng lo, chúng ta sẽ sớm trình bày lần chạy mẫu):
 
 ```
 cat tracing_max_latency
@@ -1571,7 +1571,7 @@ Output nhận được sẽ như sau:
 [...]
 ```
 
-Ở đây, `irqsoff` latency trong trường hợp xấu nhất là 234 microsecond (xảy ra khi task `sshd` có PID 25311 đang thực thi), ngụ ý hardware interrupt đã tắt trong khoảng thời gian đó. Để thuận tiện, tôi cung cấp wrapper Bash script đơn giản (`ch4/irqsoff_latency_ftrc.sh`) thực hiện cùng công việc.
+Ở đây, `irqsoff` latency trong trường hợp worst-case là 234 microsecond (xảy ra khi task `sshd` có PID 25311 đang thực thi), ngụ ý hardware interrupt đã tắt trong khoảng thời gian đó. Để thuận tiện, tôi cung cấp wrapper Bash script đơn giản (`ch4/irqsoff_latency_ftrc.sh`) thực hiện cùng công việc.
 
 Bây giờ, chúng ta đề cập vài công cụ hữu ích khác để đo system latency.
 
@@ -1591,13 +1591,13 @@ Sau đây là vài công cụ đáng đề cập về ghi nhận và phân tích
 
 Chúc mừng! Chương này dài nhưng đáng công. Bạn đã học được nhiều về làm việc với hardware interrupt. Chúng ta bắt đầu bằng xem ngắn gọn cách OS xử lý interrupt rồi học cách bạn, người viết driver, phải làm việc với chúng. Để làm vậy, bạn học cách cấp phát IRQ line (và giải phóng) qua một số phương thức, cùng triển khai hardware interrupt routine. Ở đây, nhiều hạn chế và lưu ý, về cơ bản quy về việc đây là hoạt động atomic, đã được thảo luận. Sau đó trình bày cách thức và lý do của mô hình “threaded interrupt”; thường được xem là cách hiện đại được khuyến nghị để xử lý interrupt. Tiếp đó, chúng ta hiểu và học làm việc với hardirq/softirq cùng top/bottom half. Cuối cùng, theo kiểu FAQ quen thuộc, chúng ta trình bày thông tin về interrupt load balancing, IRQ stack, và cách dùng một số framework cùng công cụ hữu ích để đo interrupt metric và latency.
 
-Tất cả đều là kiến thức thiết yếu để xây dựng một driver được viết tốt, phải làm việc với hardware interrupt!
+Tất cả đều là kiến thức thiết yếu để xây dựng một driver well-written, phải làm việc với hardware interrupt!
 
 Chương tiếp theo trình bày các lĩnh vực làm việc với thời gian: delay và timeout trong kernel space, tạo và quản lý kernel thread, dùng kernel workqueue. Tôi đề nghị bạn chăm chỉ làm bài tập của chương này, xem nhiều tài nguyên trong mục Đọc thêm, rồi nghỉ ngơi (chỉ làm mà không chơi khiến Jack buồn tẻ, đúng không!?) trước khi quay lại! Hẹn gặp bạn ở đó!
 
 ## Câu hỏi
 
-1\. Trên hệ thống x86 (VM cũng được), chứng minh rằng trong khi số timer interrupt (IRQ `0`) giữ nguyên, một periodic system interrupt khác thực sự liên tục tăng (do đó theo dõi thời gian theo từng CPU). Gợi ý: dùng một `proc` pseudo-file liên quan đến interrupt.
+1\. Trên hệ thống x86 (VM cũng được), chứng minh rằng trong khi số timer interrupt (IRQ `0`) giữ nguyên, một periodic system interrupt khác thực sự liên tục tăng (do đó theo dõi thời gian theo per-CPU). Gợi ý: dùng một `proc` pseudo-file liên quan đến interrupt.
 
 2\. keylogger\_simple ; chỉ x86 native \[chỉ dùng cho ethical hacking; có thể không hoạt động trên VM\] (Nâng cao hơn một chút) Viết keyboard logger driver đơn giản dùng kernel framework “misc”. Bắt vào IRQ 1 của i8042 để “bắt” sự kiện nhấn/thả phím và đọc key scancode. Dùng cấu trúc dữ liệu `kfifo` để giữ keyboard scancode trong kernel space memory. Cho user mode process (hoặc thread) định kỳ đọc các mục dữ liệu từ `kfifo` của driver vào user space buffer rồi ghi chúng vào log file. Viết ứng dụng (hoặc dùng thread khác) để diễn giải các phím. Gợi ý:
 

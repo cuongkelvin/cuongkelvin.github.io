@@ -36,19 +36,19 @@ Exclusively ngụ ý tại bất kỳ thời điểm nào chỉ một thread ch�
 
 - Thực thi một machine language instruction đơn lẻ.
 
-- Đọc hoặc ghi một primitive data type được align, nằm trong word size của bộ xử lý (thường 32 hoặc 64 bit); ví dụ, đọc hay ghi số nguyên 64-bit trên hệ thống 64-bit được bảo đảm atomic. Thread đọc biến đó không bao giờ thấy kết quả ở giữa chừng, torn hoặc dirty; chỉ thấy giá trị cũ hoặc mới.
+- Đọc hoặc ghi một primitive data type được align, nằm trong word size của bộ xử lý (thường 32 hoặc 64 bit); ví dụ, đọc hay ghi số nguyên 64-bit trên hệ thống 64-bit được bảo đảm atomic. Thread đọc biến đó không bao giờ thấy kết quả in-between chừng, torn hoặc dirty; chỉ thấy giá trị cũ hoặc mới.
 
 Vì vậy, nếu có vài dòng code làm việc trên shared writeable data (global hoặc static), không thể bảo đảm chạy exclusively khi thiếu cơ chế synchronization tường minh. Lưu ý đôi khi cần code của critical section chạy cả atomically lẫn exclusively, nhưng không phải mọi lúc.
 
-Khi code critical section chạy trong process context an toàn để sleep (như file operation điển hình trên driver qua user app (open, read, write, ioctl, mmap, v.v.), hoặc execution path của kernel thread hay workqueue), có thể chấp nhận critical section không thực sự atomic. Tuy nhiên, khi code chạy trong non-blocking atomic context (như hardirq, tasklet hoặc softirq), nó phải chạy cả atomically lẫn exclusively (chúng ta trình bày chi tiết hơn trong mục Mutex hay spinlock? Dùng loại nào khi nào).
+Khi code critical section chạy trong process context safe-to-sleep (như file operation điển hình trên driver qua user app (open, read, write, ioctl, mmap, v.v.), hoặc execution path của kernel thread hay workqueue), có thể chấp nhận critical section không thực sự atomic. Tuy nhiên, khi code chạy trong non-blocking atomic context (như hardirq, tasklet hoặc softirq), nó phải chạy cả atomically lẫn exclusively (chúng ta trình bày chi tiết hơn trong mục Mutex hay spinlock? Dùng loại nào khi nào).
 
-Một ví dụ khái niệm giúp làm rõ. Giả sử ba thread (từ các user space app) cố mở và đọc từ driver gần như đồng thời trên multicore system. Không can thiệp, chúng có thể chạy code critical section song song, qua đó làm việc trên shared writable data song song, rất có thể làm hỏng dữ liệu! Hiện tại, hãy xem sơ đồ khái niệm để thấy vì sao thực thi không exclusive trong code path của critical section là sai (ở đây chưa nói đến atomicity):
+Một ví dụ khái niệm giúp làm rõ. Giả sử ba thread (từ các user space app) cố mở và đọc từ driver gần như đồng thời trên multicore system. Không can thiệp, chúng có thể chạy code critical section song song, qua đó làm việc trên shared writable data song song, rất có thể làm hỏng dữ liệu! Hiện tại, hãy xem sơ đồ khái niệm để thấy vì sao thực thi non-exclusive trong code path của critical section là sai (ở đây chưa nói đến atomicity):
 
 ![Figure 6.1](images/ch06/fig06-01.png)
 
 Hình 6.1 – Sơ đồ khái niệm thể hiện code path của critical section bị vi phạm khi có \>1 thread chạy đồng thời bên trong
 
-Như sơ đồ trên, trong device driver, ở method (chẳng hạn) read, bạn cho chạy code để làm nhiệm vụ (đọc dữ liệu từ phần cứng). Hãy xem sơ đồ sâu hơn theo các truy cập dữ liệu tại những thời điểm khác nhau:
+Như sơ đồ trên, trong device driver, ở method (chẳng hạn) read, bạn cho chạy code để làm nhiệm vụ (đọc dữ liệu từ phần cứng). Hãy xem sơ đồ in-depth hơn theo các truy cập dữ liệu tại những thời điểm khác nhau:
 
 - Từ `t0` đến `t1`: Không truy cập dữ liệu hoặc chỉ truy cập local variable. Điều này concurrent-safe, không cần bảo vệ và có thể chạy song song (vì mỗi thread có private stack riêng).
 
@@ -68,11 +68,11 @@ Trong mục tiếp theo, chúng ta xem tình huống kinh điển — tăng mộ
 
 ### Trường hợp kinh điển – global i ++
 
-Hãy nghĩ ví dụ kinh điển: số nguyên global `i` được tăng trong concurrent code path, nơi nhiều thread thực thi có thể chạy đồng thời. Hiểu đơn giản về hardware và software có thể khiến bạn tin thao tác này hiển nhiên atomic. Tuy nhiên, thực tế hardware và software hiện đại (compiler và OS) tinh vi hơn nhiều bạn tưởng, gây đủ loại tối ưu hướng hiệu năng vô hình (với app developer).
+Hãy nghĩ ví dụ kinh điển: số nguyên global `i` được tăng trong concurrent code path, nơi nhiều thread thực thi có thể chạy đồng thời. Hiểu đơn giản về hardware và software có thể khiến bạn tin thao tác này hiển nhiên atomic. Tuy nhiên, thực tế hardware và software hiện đại (compiler và OS) tinh vi hơn nhiều bạn tưởng, gây đủ loại tối ưu performance-driven vô hình (với app developer).
 
-Ở đây không cố đi quá chi tiết, nhưng thực tế bộ xử lý hiện đại cực kỳ phức tạp: trong nhiều công nghệ nhằm tăng hiệu năng, có superscalar và super-pipelined execution để lần lượt thực thi nhiều instruction độc lập và nhiều phần của các instruction khác nhau song song, thực hiện instruction reordering và/hoặc memory reordering tức thời, cache memory trong on-CPU cache phân cấp phức tạp, false sharing, v.v.! Chúng ta đi sâu một số chi tiết trong `Chapter 7`, Kernel Synchronization – Phần 2, các mục Ảnh hưởng của cache – false sharing và Memory barrier.
+Ở đây không cố đi quá chi tiết, nhưng thực tế bộ xử lý hiện đại cực kỳ phức tạp: trong nhiều công nghệ nhằm tăng hiệu năng, có superscalar và super-pipelined execution để lần lượt thực thi nhiều instruction độc lập và nhiều phần của các instruction khác nhau song song, thực hiện instruction reordering và/hoặc memory reordering on-the-fly, cache memory trong on-CPU cache phân cấp phức tạp, false sharing, v.v.! Chúng ta đi sâu một số chi tiết trong `Chapter 7`, Kernel Synchronization – Phần 2, các mục Ảnh hưởng của cache – false sharing và Memory barrier.
 
-Bài What every systems programmer should know about concurrency của Matt Kline, tháng 4 năm 2020, (`https://assets.bitbashing.io/papers/concurrency-primer.pdf`) rất xuất sắc và nhất định nên đọc về chủ đề; hãy đọc!
+Bài What every systems programmer should know about concurrency của Matt Kline, tháng 4 năm 2020, (`https://assets.bitbashing.io/papers/concurrency-primer.pdf`) rất xuất sắc và là tài liệu must-read về chủ đề; hãy đọc!
 
 Tất cả tạo tình huống phức tạp hơn vẻ ngoài ban đầu. Hãy tiếp tục với `i ++` kinh điển:
 
@@ -95,17 +95,17 @@ Phép tăng này tự nó an toàn không? Câu trả lời ngắn là không, b
 
 Nếu ISA có khả năng dùng một machine instruction để tăng integer, và compiler đủ thông minh để dùng, thì thực sự atomic — an toàn và không cần locking. Nếu không, không an toàn và cần locking!
 
-Hãy thử: mở trình duyệt đến website compiler explorer tuyệt vời này: `https://godbolt.org/`. Chọn C làm ngôn ngữ lập trình rồi trong khung trái khai báo global integer `i` và tăng trong một hàm. Compile ở khung phải với compiler và compiler option thích hợp. Bạn sẽ thấy machine code thực tế sinh ra cho câu lệnh C bậc cao `i ++;`. Nếu thực sự chỉ một machine instruction, sẽ an toàn; nếu không, cần locking. Nhìn chung, bạn sẽ thấy không thực sự biết chắc: thực chất không thể giả định — phải mặc định không an toàn và bảo vệ! Có thể thấy trong ảnh sau:
+Hãy thử: mở trình duyệt đến website compiler explorer tuyệt vời này: `https://godbolt.org/`. Chọn C làm ngôn ngữ lập trình rồi trong khung trái khai báo global integer `i` và tăng trong một hàm. Compile ở khung phải với compiler và compiler option thích hợp. Bạn sẽ thấy machine code thực tế sinh ra cho câu lệnh C high-level `i ++;`. Nếu thực sự chỉ một machine instruction, sẽ an toàn; nếu không, cần locking. Nhìn chung, bạn sẽ thấy không thực sự biết chắc: thực chất không thể giả định — phải mặc định không an toàn và bảo vệ! Có thể thấy trong ảnh sau:
 
 ![Figure 6.2](images/ch06/fig06-02.png)
 
 Hình 6.2 – Ngay cả với phiên bản gcc stable mới nhất nhưng không tối ưu, gcc x86\_64 sinh nhiều instruction cho i ++
 
-Ảnh trên cho thấy rõ: vùng nền vàng trong khung trái và phải lần lượt là C source và assembly tương ứng do compiler sinh (dựa trên ISA x86\_64 và mức tối ưu compiler). Mặc định, không tối ưu, `i ++` thành ba machine instruction. Đúng như dự kiến: tương ứng fetch (memory đến register), increment và store (register đến memory)! Điều này không atomic; hoàn toàn có thể sau một machine instruction thực thi, control unit can thiệp và chuyển instruction stream sang điểm khác. Thậm chí có thể dẫn đến process hay thread khác được context switch vào!
+Ảnh trên cho thấy rõ: vùng nền vàng trong khung trái và right-hand lần lượt là C source và assembly tương ứng do compiler sinh (dựa trên ISA x86\_64 và mức tối ưu compiler). Mặc định, không tối ưu, `i ++` thành ba machine instruction. Đúng như dự kiến: tương ứng fetch (memory đến register), increment và store (register đến memory)! Điều này không atomic; hoàn toàn có thể sau một machine instruction thực thi, control unit can thiệp và chuyển instruction stream sang điểm khác. Thậm chí có thể dẫn đến process hay thread khác được context switch vào!
 
-Tin tốt là chỉ cần thêm `-O2` trong cửa sổ `Compiler options...`, `i` `++` thành một machine instruction — thực sự atomic! Tuy nhiên, không dự đoán được trước; một ngày code có thể chạy trên hệ thống ARM (RISC) khá thấp cấp, tăng khả năng cần nhiều machine instruction cho `i ++`. (Đừng lo — chúng ta trình bày công nghệ locking tối ưu riêng cho integer trong mục Dùng atomic integer operator).
+Tin tốt là chỉ cần thêm `-O2` trong cửa sổ `Compiler options...`, `i` `++` thành một machine instruction — thực sự atomic! Tuy nhiên, không dự đoán được trước; một ngày code có thể chạy trên hệ thống ARM (RISC) khá low-end, tăng khả năng cần nhiều machine instruction cho `i ++`. (Đừng lo — chúng ta trình bày công nghệ locking tối ưu riêng cho integer trong mục Dùng atomic integer operator).
 
-Ngôn ngữ hiện đại cung cấp native atomic operator; với C/C++, khá gần đây (từ 2011); chuẩn ISO C++11 và ISO C11 cung cấp atomic variable tích hợp sẵn. Tìm nhanh trên Google sẽ thấy. Glibc hiện đại cũng dùng chúng. Ví dụ, nếu làm việc với signaling trong user space, bạn biết dùng kiểu dữ liệu `volatile sig_atomic_t` để truy cập và/hoặc cập nhật atomic integer an toàn trong signal handler. Còn kernel? Chương tiếp theo, bạn học giải pháp Linux kernel cho vấn đề chính này. Chúng ta trình bày trong các mục Dùng atomic integer operator và Dùng atomic bit operator.
+Ngôn ngữ hiện đại cung cấp native atomic operator; với C/C++, khá gần đây (từ 2011); chuẩn ISO C++11 và ISO C11 cung cấp atomic variable ready-made và built-in. Tìm nhanh trên Google sẽ thấy. Glibc hiện đại cũng dùng chúng. Ví dụ, nếu làm việc với signaling trong user space, bạn biết dùng kiểu dữ liệu `volatile sig_atomic_t` để truy cập và/hoặc cập nhật atomic integer an toàn trong signal handler. Còn kernel? Chương tiếp theo, bạn học giải pháp Linux kernel cho vấn đề chính này. Chúng ta trình bày trong các mục Dùng atomic integer operator và Dùng atomic bit operator.
 
 Linux kernel tất nhiên là concurrent environment: nhiều thread thực thi chạy song song trên nhiều CPU core. Không chỉ vậy, ngay trên uni-processor system (UP/một CPU), sự hiện diện của hardware interrupt, trap, fault, exception và software signal có thể gây vấn đề data integrity. Tất nhiên bảo vệ khỏi concurrency tại các điểm cần thiết trong code path nói dễ hơn làm; xác định và bảo vệ critical section bằng công nghệ như locking — cùng synchronization primitive và công nghệ khác — là tuyệt đối thiết yếu, vì vậy là nội dung cốt lõi chương này và chương sau.
 
@@ -127,9 +127,9 @@ Locking tất nhiên hoạt động, nhưng — điều này khá trực quan �
 
 Hình 6.4 – Lock tạo bottleneck, tương tự phễu vật lý
 
-Ví dụ vật lý khác thường được nhắc là đường cao tốc nhiều làn nhập thành một làn rất đông và nghẽn (có thể trạm thu phí thiết kế kém). Một lần nữa, parallelism — xe (thread) chạy song song với xe khác ở làn (CPU) khác — bị mất, cần hành vi serialized — xe buộc xếp hàng nối đuôi.
+Ví dụ vật lý khác oft-mentioned là đường cao tốc nhiều làn nhập thành một làn rất đông và nghẽn (có thể trạm thu phí thiết kế kém). Một lần nữa, parallelism — xe (thread) chạy song song với xe khác ở làn (CPU) khác — bị mất, cần hành vi serialized — xe buộc xếp hàng nối đuôi.
 
-Vì vậy, chúng ta, kiến trúc sư software, phải cố thiết kế sản phẩm/project để cần locking tối thiểu. Mặc dù loại bỏ hoàn toàn global variable không khả thi trong phần lớn project thực tế, cần tối ưu và giảm thiểu sử dụng. Chúng ta trình bày thêm, gồm vài kỹ thuật lockless programming rất thú vị, ở phần sau.
+Vì vậy, chúng ta, kiến trúc sư software, phải cố thiết kế sản phẩm/project để cần locking tối thiểu. Mặc dù loại bỏ hoàn toàn global variable không khả thi trong phần lớn project real-world, cần tối ưu và giảm thiểu sử dụng. Chúng ta trình bày thêm, gồm vài kỹ thuật lockless programming rất thú vị, ở phần sau.
 
 Một điểm then chốt khác là lập trình viên mới có thể ngây thơ giả định đọc shared writeable data object hoàn toàn an toàn nên không cần bảo vệ tường minh (ngoại trừ primitive data type được align nằm trong kích thước bus của bộ xử lý); điều này không đúng. Có thể dẫn đến dirty read hoặc torn read, tình huống có thể đọc stale data khi writer thread khác đồng thời ghi trong lúc bạn — sai vì không locking — đọc chính dữ liệu đó.
 
@@ -201,7 +201,7 @@ Hình dung hệ thống có bốn CPU core (SMP system); hai user space process,
 
 Châm ngôn này tiếc thay quá đúng: Kiểm thử có thể phát hiện sự hiện diện của lỗi, không phải sự vắng mặt. Hơn nữa, còn tệ hơn nếu kiểm thử không bắt được race (và bug), để chúng tự do ngoài thực địa.
 
-Bạn có thể nghĩ vì sản phẩm là embedded system nhỏ chạy một CPU core (UP), thảo luận kiểm soát concurrency (thường qua locking) không áp dụng. Chúng tôi không đồng ý: gần như mọi sản phẩm hiện đại, nếu chưa, sẽ chuyển sang multicore (có thể ở thế hệ tiếp theo). Quan trọng hơn, ngay UP system cũng có vấn đề concurrency, như sẽ tìm hiểu.
+Bạn có thể nghĩ vì sản phẩm là embedded system nhỏ chạy một CPU core (UP), thảo luận kiểm soát concurrency (thường qua locking) không áp dụng. Chúng tôi không đồng ý: gần như mọi sản phẩm hiện đại, nếu chưa, sẽ chuyển sang multicore (có thể ở next-generation). Quan trọng hơn, ngay UP system cũng có vấn đề concurrency, như sẽ tìm hiểu.
 
 ### Preemptible kernel, blocking I/O và data race
 
@@ -215,7 +215,7 @@ Blocking call là hàm khiến process context gọi nó được đưa vào sle
 
 Cuối cùng, hình dung: P1 lại vô tư chạy read method code của driver; đi vào critical section (giữa `t2` và `t3`; xem lại Hình 6.5). Tiến được một chút nhưng rồi hardware interrupt kích hoạt (trên cùng CPU)! Trên Linux OS, hardware (peripheral) interrupt có priority cao nhất; mặc định preempt mọi code (kể cả kernel code). Vì vậy process (hay thread) P1 ít nhất tạm bị gác lại, mất bộ xử lý; interrupt handling code preempt nó và chạy.
 
-Bạn có thể thắc mắc, thì sao? Đúng vậy, hoàn toàn phổ biến! Hardware interrupt phát rất thường xuyên trên hệ thống hiện đại, thực chất (và đúng nghĩa) interrupt đủ loại task context (chạy nhanh `vmstat 3` trên shell; cột `in` dưới `system` thể hiện số hardware interrupt phát trên hệ thống trong 1 giây vừa qua!). Câu hỏi chính: interrupt handling code (hardirq top half hoặc cái gọi tasklet hay softirq bottom half, tùy thứ xảy ra) có chia sẻ và làm việc trên cùng shared writable data của process context vừa bị interrupt không?
+Bạn có thể thắc mắc, thì sao? Đúng vậy, hoàn toàn phổ biến! Hardware interrupt phát rất thường xuyên trên hệ thống hiện đại, thực chất (và đúng nghĩa) interrupt đủ loại task context (chạy nhanh `vmstat 3` trên shell; cột `in` dưới `system` thể hiện số hardware interrupt phát trên hệ thống trong 1 giây vừa qua!). Câu hỏi chính: interrupt handling code (hardirq top half hoặc so-called tasklet hay softirq bottom half, tùy thứ xảy ra) có chia sẻ và làm việc trên cùng shared writable data của process context vừa bị interrupt không?
 
 Nếu đúng, Houston, có vấn đề — data race! Nếu không, code bị interrupt không phải critical section đối với interrupt code path, và ổn. Thực tế phần lớn device driver có xử lý interrupt; vì vậy trách nhiệm của người viết driver (bạn!) là bảo đảm không global/static data — thực chất không critical section — được chia sẻ giữa process context và interrupt code path. Nếu có (điều thực sự xảy ra), phải bằng cách nào đó bảo vệ dữ liệu khỏi data race và corruption có thể xảy ra.
 
@@ -269,7 +269,7 @@ Về locking, xuất hiện vấn đề (nguy hiểm) deadlock. Deadlock là kh�
 
 - Trường hợp phức tạp hơn, nhiều lock, process context và interrupt context (hardirq và softirq)
 
-Trong trường hợp đơn giản, luôn theo hướng dẫn lock ordering là đủ: luôn lấy và release lock theo thứ tự được ghi tài liệu rõ (sẽ cung cấp ví dụ trong kernel code ở mục Dùng mutex lock). Tuy nhiên có thể rất phức tạp; tình huống deadlock phức tạp có thể đánh lừa cả nhà phát triển kinh nghiệm. May mắn là lockdep — runtime lock dependency validator của Linux kernel — có thể bắt mọi trường hợp deadlock! (Đừng lo — sẽ đến: trình bày lockdep chi tiết chương tiếp). Khi trình bày spinlock (mục Dùng spinlock), sẽ gặp các tình huống process và/hoặc interrupt context tương tự; ở đó làm rõ loại spinlock nên dùng.
+Trong trường hợp đơn giản, luôn theo hướng dẫn lock ordering là đủ: luôn lấy và release lock theo thứ tự được well-documented (sẽ cung cấp ví dụ trong kernel code ở mục Dùng mutex lock). Tuy nhiên có thể rất phức tạp; tình huống deadlock phức tạp có thể đánh lừa cả nhà phát triển kinh nghiệm. May mắn là lockdep — runtime lock dependency validator của Linux kernel — có thể bắt mọi trường hợp deadlock! (Đừng lo — sẽ đến: trình bày lockdep chi tiết chương tiếp). Khi trình bày spinlock (mục Dùng spinlock), sẽ gặp các tình huống process và/hoặc interrupt context tương tự; ở đó làm rõ loại spinlock nên dùng.
 
 Về deadlock, Steve Rostedt có bài trình bày khá chi tiết về lockdep tại Linux Plumber's Conference (năm 2011); slide hữu ích, khám phá tình huống deadlock đơn giản lẫn phức tạp và cách lockdep phát hiện (`https://blog.linuxplumbersconf.org/2011/ocw/sessions/153`).
 
@@ -293,11 +293,11 @@ Với spinlock, không có chuyện sleep; loser chờ bằng spinning trên loc
 while (locked) ;
 ```
 
-Lưu ý chỉ là khái niệm. Nghĩ một chút — thực chất là polling. Tuy nhiên, là lập trình viên tốt, bạn hiểu polling thường được xem là ý tồi. Vậy vì sao spinlock hoạt động vậy? Thực ra không; chỉ trình bày như vậy để hiểu khái niệm. Như sắp hiểu, spinlock chỉ thực sự có nghĩa trên multicore (SMP) system. Trên đó, khi winner thread chạy code critical section, loser chờ bằng spinning trên CPU core khác! Thực tế ở mức triển khai, code spinlock hiện đại tối ưu cao (và phụ thuộc kiến trúc), không hoạt động bằng “spinning” đơn giản (ví dụ nhiều triển khai spinlock cho ARM dùng machine language instruction wait for event (WFE), cho CPU chờ tối ưu trong low power state; xem mục Đọc thêm để có tài nguyên về triển khai nội bộ spinlock).
+Lưu ý chỉ là khái niệm. Nghĩ một chút — thực chất là polling. Tuy nhiên, là lập trình viên tốt, bạn hiểu polling thường được xem là ý tồi. Vậy vì sao spinlock hoạt động vậy? Thực ra không; chỉ trình bày như vậy để hiểu khái niệm. Như sắp hiểu, spinlock chỉ thực sự có nghĩa trên multicore (SMP) system. Trên đó, khi winner thread chạy code critical section, loser chờ bằng spinning trên CPU core khác! Thực tế ở mức triển khai, code spinlock hiện đại tối ưu cao (và arch-specific), không hoạt động bằng “spinning” đơn giản (ví dụ nhiều triển khai spinlock cho ARM dùng machine language instruction wait for event (WFE), cho CPU chờ tối ưu trong low power state; xem mục Đọc thêm để có tài nguyên về triển khai nội bộ spinlock).
 
 ### Xác định lock nên dùng – lý thuyết
 
-Cách triển khai spinlock không thực sự là mối quan tâm ở đây; điều đáng quan tâm là overhead thấp hơn mutex lock. Vì sao? Đơn giản: để mutex lock hoạt động, loser thread phải sleep. Bên trong gọi hàm `schedule()`, nghĩa là loser thấy mutex lock API là blocking call! Gọi scheduler cuối cùng dẫn đến context switch khỏi bộ xử lý. Ngược lại, khi owner thread unlock, phải wake up loser thread; lại context switch trở vào bộ xử lý. Vì vậy “chi phí” tối thiểu của mutex lock/unlock là thời gian hai context switch trên máy đó. (Xem ô thông tin mục tiếp.) Xem lại ảnh trên, có thể xác định vài thứ, gồm thời gian trong critical section (code path “locked”), tức `t_locked = t3 - t2`. Giả sử `t_ctxsw` là thời gian context switch. Như đã học, chi phí tối thiểu của mutex lock/unlock là `2 * t_ctxsw`. Giờ giả sử biểu thức sau đúng:
+Cách triển khai spinlock không thực sự là mối quan tâm ở đây; điều đáng quan tâm là overhead thấp hơn mutex lock. Vì sao? Đơn giản: để mutex lock hoạt động, loser thread phải sleep. Bên trong gọi hàm `schedule()`, nghĩa là loser thấy mutex lock API là blocking call! Gọi scheduler cuối cùng dẫn đến context-switched khỏi bộ xử lý. Ngược lại, khi owner thread unlock, phải wake up loser thread; lại context-switched trở vào bộ xử lý. Vì vậy “chi phí” tối thiểu của mutex lock/unlock là thời gian hai context switch trên máy đó. (Xem ô thông tin mục tiếp.) Xem lại ảnh trên, có thể xác định vài thứ, gồm thời gian trong critical section (code path “locked”), tức `t_locked = t3 - t2`. Giả sử `t_ctxsw` là thời gian context switch. Như đã học, chi phí tối thiểu của mutex lock/unlock là `2 * t_ctxsw`. Giờ giả sử biểu thức sau đúng:
 
 ```
 t_locked < 2 * t_ctxsw
@@ -317,9 +317,9 @@ Thực tế, nghĩ như sau: mutex lock làm loser thread sleep chờ unlock; sp
 
 Tất nhiên spinlock có overhead thấp hơn mutex; vì vậy có thể dùng spinlock ngay trong process context (như read method driver giả tưởng), miễn critical section không block (sleep).
 
-\[1\] Thời gian context switch khác nhau; phần lớn phụ thuộc hardware và chất lượng OS. Đo gần đây (tháng 9 năm 2018) cho thấy context switching khoảng 1,2 đến 1,5 us (microsecond) trên CPU được pin, khoảng 2,2 us không pin (`https://eli.thegreenplace.net/2018/measuring-context-switching-and-memory-overheads-for-linux-threads/`).
+\[1\] Thời gian context switch khác nhau; phần lớn phụ thuộc hardware và chất lượng OS. Đo gần đây (tháng 9 năm 2018) cho thấy context switching khoảng 1,2 đến 1,5 us (microsecond) trên CPU pinned-down, khoảng 2,2 us không pin (`https://eli.thegreenplace.net/2018/measuring-context-switching-and-memory-overheads-for-linux-threads/`).
 
-Cả hardware lẫn Linux OS cải thiện rất nhiều, do đó thời gian context switching trung bình cũng vậy. Bài Linux Journal cũ (tháng 12 năm 1998) xác định trên hệ thống x86, context switch trung bình 19 us (microsecond), trường hợp xấu nhất 30 us.
+Cả hardware lẫn Linux OS cải thiện rất nhiều, do đó thời gian context switching trung bình cũng vậy. Bài Linux Journal cũ (tháng 12 năm 1998) xác định trên hệ thống x86, context switch trung bình 19 us (microsecond), trường hợp worst-case 30 us.
 
 Câu hỏi là làm sao biết code đang chạy trong process hay interrupt context? Dễ: macro `PRINT_CTX()` (trong header `convenient.h`) cho thấy:
 
@@ -469,15 +469,15 @@ EXPORT_SYMBOL(mutex_lock);
 
 `might_sleep()` là macro có tính năng debug thú vị; bắt code lẽ ra thực thi trong atomic context nhưng không! Nghĩ xem: `might_sleep()`, dòng code đầu trong `mutex_lock()`, ngụ ý code path này không nên được bất cứ thứ gì trong atomic context thực thi vì có thể sleep. Nghĩa là chỉ nên dùng mutex trong process context an toàn để sleep!
 
-Nhắc nhanh và quan trọng: Linux kernel có thể configure rất nhiều debug option; ở đây config option `CONFIG_DEBUG_MUTEXES` giúp bắt bug mutex có thể có, gồm deadlock. Tương tự dưới menu Kernel Hacking, có nhiều kernel config option liên quan debug. Đã thảo luận trong tài liệu đồng hành Linux Kernel Programming - Chương 5, Viết kernel module đầu tiên – LKM Phần 2. Có nhiều kernel config rất hữu ích về lock debugging; trình bày chương tiếp, mục Lock debugging trong kernel.
+Nhắc nhanh và quan trọng: Linux kernel có thể configure rất nhiều debug option; ở đây config option `CONFIG_DEBUG_MUTEXES` giúp bắt bug mutex-related có thể có, gồm deadlock. Tương tự dưới menu Kernel Hacking, có nhiều kernel config option debug-related. Đã thảo luận trong tài liệu đồng hành Linux Kernel Programming - Chương 5, Viết kernel module đầu tiên – LKM Phần 2. Có nhiều kernel config rất hữu ích về lock debugging; trình bày chương tiếp, mục Lock debugging trong kernel.
 
 #### Mutex lock – qua \[un\]interruptible sleep?
 
 Như thường lệ, mutex còn hơn những gì đã thấy. Bạn biết Linux process (hay thread) đi qua các state của state machine. Trên Linux, sleep có hai state riêng — interruptible sleep và uninterruptible sleep. Process (hay thread) ở interruptible sleep nhạy, nghĩa là đáp ứng user space signal, còn task ở uninterruptible sleep không nhạy với user signal.
 
-Trong ứng dụng tương tác người dùng có driver bên dưới, theo quy tắc chung nên đưa process vào interruptible sleep (khi block chờ lock), để end user quyết định abort ứng dụng bằng Ctrl + C (hay cơ chế liên quan signal). Quy tắc thiết kế thường theo trên Unix-like system: cung cấp mechanism, không phải policy. Dù vậy, trên non-interactive code path, thường phải chờ lock vô hạn, với ngữ nghĩa signal được chuyển đến task không nên abort blocking wait. Trên Linux, trường hợp uninterruptible phổ biến nhất.
+Trong ứng dụng human-interactive có driver bên dưới, theo quy tắc chung nên đưa process vào interruptible sleep (khi block chờ lock), để end user quyết định abort ứng dụng bằng Ctrl + C (hay cơ chế liên quan signal). Quy tắc thiết kế thường theo trên Unix-like system: cung cấp mechanism, không phải policy. Dù vậy, trên non-interactive code path, thường phải chờ lock vô hạn, với ngữ nghĩa signal được chuyển đến task không nên abort blocking wait. Trên Linux, trường hợp uninterruptible phổ biến nhất.
 
-Vậy: API `mutex_lock()` luôn đưa calling task vào uninterruptible sleep. Nếu không muốn vậy, dùng API `mutex_lock_interruptible()` để đưa task vào interruptible sleep. Có một khác biệt cú pháp: API sau trả integer `0` khi thành công và `-EINTR` (nhớ return convention `0`/`-E`) khi thất bại (do signal interruption).
+Vậy: API `mutex_lock()` luôn đưa calling task vào uninterruptible sleep. Nếu không muốn vậy, dùng API `mutex_lock_interruptible()` để đưa task vào interruptible sleep. Có một khác biệt syntax-wise: API sau trả integer `0` khi thành công và `-EINTR` (nhớ return convention `0`/`-E`) khi thất bại (do signal interruption).
 
 Nói chung, `mutex_lock()` nhanh hơn `mutex_lock_interruptible()`; dùng khi critical section ngắn (gần như bảo đảm lock được giữ ngắn, đặc điểm rất đáng mong muốn).
 
@@ -500,7 +500,7 @@ Giờ đã học mutex lock API, hãy áp dụng. Mục tiếp xây trên một 
 
 ### Mutex locking – driver ví dụ
 
-Chúng ta tạo ví dụ device driver code đơn giản trong Chương 1 - Viết một misc character device driver đơn giản, tức `ch1/miscdrv_rdwr`. Ở đó viết character device driver đơn giản thuộc class `misc`, dùng user space utility program (`ch12/miscdrv_rdwr/rdwr_drv_secret.c`) để đọc/ghi một bí mật (gọi là vậy) từ/vào memory của device driver.
+Chúng ta tạo ví dụ device driver code đơn giản trong Chương 1 - Viết một misc character device driver đơn giản, tức `ch1/miscdrv_rdwr`. Ở đó viết character device driver đơn giản thuộc class `misc`, dùng user space utility program (`ch12/miscdrv_rdwr/rdwr_drv_secret.c`) để đọc/ghi một bí mật (so-called vậy) từ/vào memory của device driver.
 
 Tuy nhiên, điều chúng ta rõ ràng (trắng trợn mới đúng!) không làm là bảo vệ shared (global) writeable data! Điều này trả giá đắt ngoài thực tế. Hãy dành thời gian nghĩ: không thể chấp nhận hai (ba hay nhiều) user mode process mở device file của driver rồi đồng thời gọi nhiều I/O read/write. Global shared writable data ở đây (cụ thể hai global integer và driver context data structure) dễ hỏng.
 
@@ -582,11 +582,11 @@ Nhưng (luôn có nhưng, phải không?), chưa hoàn toàn ổn! Xem hàm `pri
 
 Có ổn không? Không, nhìn kỹ: đang đọc giá trị global integer `ga` và `gb`. Nhớ nền tảng: khi có concurrency (chắc chắn có khả năng trong open method driver này), ngay đọc shared writeable data không lock cũng có thể không an toàn. Nếu chưa hiểu, nghĩ: nếu một thread đọc integer, thread khác đồng thời cập nhật (ghi), thì sao? Gọi là dirty read (hay torn read); có thể đọc stale data, phải bảo vệ. (Thực tế không phải ví dụ dirty read thật tốt vì trên phần lớn bộ xử lý, đọc/ghi từng integer thường atomic. Tuy nhiên không được giả định — đơn giản phải làm việc và bảo vệ.)
 
-Thực tế có bug tiềm ẩn tương tự: đọc dữ liệu từ open file structure (pointer `filp`) mà không bảo vệ (đúng, open file structure có lock; phải dùng! Sẽ làm sau).
+Thực tế có bug-in-waiting tương tự: đọc dữ liệu từ open file structure (pointer `filp`) mà không bảo vệ (đúng, open file structure có lock; phải dùng! Sẽ làm sau).
 
 Ngữ nghĩa chính xác cách/khi dirty read xảy ra thường rất phụ thuộc kiến trúc (máy); dù vậy nhiệm vụ người viết module/driver rõ: bảo vệ mọi critical section, gồm đọc shared writable data.
 
-Hiện chỉ đánh dấu lỗi tiềm ẩn (bug). Chúng ta xử lý trong mục Dùng atomic integer operator theo cách thân thiện hiệu năng hơn. Xem diff read method driver cho điều thú vị (bỏ qua số dòng ở đây; có thể thay đổi):
+Hiện chỉ đánh dấu lỗi tiềm ẩn (bug). Chúng ta xử lý trong mục Dùng atomic integer operator theo cách performance-friendly hơn. Xem diff read method driver cho điều thú vị (bỏ qua số dòng ở đây; có thể thay đổi):
 
 ![Figure 6.7](images/ch06/fig06-07.png)
 
@@ -693,7 +693,7 @@ Ngoài deadlock, còn tình huống rủi ro khi dùng mutex: priority inversion
 
 Như trình bày khá chi tiết trong sách trước Hands-on System Programming with Linux, chính priority inversion đã xảy ra với robot Mars Pathfinder của NASA, ngay trên bề mặt sao Hỏa, tháng 7 năm 1997! Xem mục Đọc thêm để có tài nguyên thú vị, điều mọi nhà phát triển software nên biết!
 
-Triển khai userspace Pthreads mutex chắc chắn có priority inheritance (PI) semantics. Nhưng trong Linux kernel? Ingo Molnar cung cấp RT-mutex dựa trên PI-futex (real-time mutex; thực chất mutex mở rộng có PI. `futex(2)` là system call tinh vi cung cấp fast userspace mutex). Có sẵn khi bật config option `CONFIG_RT_MUTEXES`. Khá giống mutex “thông thường”, RT-mutex API dùng khởi tạo, (un)lock và destroy RT-mutex object. (Code đã merge vào mainline kernel từ tree `-rt` của Ingo Molnar). Về sử dụng thực, RT-mutex dùng triển khai nội bộ PI futex (bản thân system call `futex(2)` triển khai nội bộ userspace Pthreads mutex). Ngoài ra kernel locking self-test code và I2C subsystem dùng trực tiếp RT-mutex.
+Triển khai userspace Pthreads mutex chắc chắn có priority inheritance (PI) semantics. Nhưng trong Linux kernel? Ingo Molnar cung cấp RT-mutex PI-futex-based (real-time mutex; thực chất mutex mở rộng có PI. `futex(2)` là system call tinh vi cung cấp fast userspace mutex). Có sẵn khi bật config option `CONFIG_RT_MUTEXES`. Khá giống mutex “thông thường”, RT-mutex API dùng khởi tạo, (un)lock và destroy RT-mutex object. (Code đã merge vào mainline kernel từ tree `-rt` của Ingo Molnar). Về sử dụng thực, RT-mutex dùng triển khai nội bộ PI futex (bản thân system call `futex(2)` triển khai nội bộ userspace Pthreads mutex). Ngoài ra kernel locking self-test code và I2C subsystem dùng trực tiếp RT-mutex.
 
 Vì vậy với người viết module (hay driver) điển hình, API này không dùng thường xuyên. Kernel có tài liệu về thiết kế nội bộ RT-mutex tại `https://www.kernel.org/doc/Documentation/locking/rt-mutex-design.rst` (bao quát priority inversion, priority inheritance, v.v.).
 
@@ -701,13 +701,13 @@ Vì vậy với người viết module (hay driver) điển hình, API này khô
 
 Vài điều về thực tế triển khai nội bộ mutex lock sâu trong kernel: Linux cố dùng fast path khi có thể.
 
-Fast path là loại code path hiệu năng cao tối ưu nhất; ví dụ không lock, không blocking. Mục tiêu cho code theo fast path nhiều nhất có thể. Chỉ khi thực sự không thể, kernel mới chuyển sang “mid path” (có thể có), rồi “slow path”; vẫn hoạt động nhưng chậm(hơn).
+Fast path là loại code path high-performance tối ưu nhất; ví dụ không lock, không blocking. Mục tiêu cho code theo fast path nhiều nhất có thể. Chỉ khi thực sự không thể, kernel mới chuyển sang “mid path” (có thể có), rồi “slow path”; vẫn hoạt động nhưng chậm(hơn).
 
 Fast path được dùng khi không có lock contention (ban đầu lock unlocked). Vì vậy lock được lấy không rắc rối, gần như ngay lập tức. Tuy nhiên nếu mutex đã locked, kernel thường dùng mid path optimistic spinning, thành dạng lock lai (mutex/spinlock). Nếu ngay cả điều này không thể, theo “slow path” — process context cố lấy lock có thể vào sleep state. Nếu quan tâm triển khai nội bộ, thêm chi tiết trong kernel documentation chính thức: `https://www.kernel.org/doc/Documentation/locking/mutex-design.rst`.
 
 Dự án LDV (Linux Driver Verification): Trong tài liệu đồng hành Linux Kernel Programming - Chương 1, Thiết lập Kernel Workspace, mục Dự án LDV – Linux Driver Verification, đã đề cập các “quy tắc” hữu ích về nhiều khía cạnh lập trình Linux module (chủ yếu driver) và core kernel.
 
-Với chủ đề hiện tại, một quy tắc là: Lock mutex hai lần hoặc unlock khi chưa lock (`http://linuxtesting.org/ldv/online?action=show_rulerule_id=0032`). Nói những thứ không được làm với mutex lock (đã trình bày mục Dùng mutex lock đúng cách). Điều thú vị: thấy ví dụ bug thực tế — cố acquire mutex lock hai lần, dẫn đến (self) deadlock — trong kernel driver (cùng bản sửa sau đó).
+Với chủ đề hiện tại, một quy tắc là: Lock mutex hai lần hoặc unlock khi chưa lock (`http://linuxtesting.org/ldv/online?action=show_rulerule_id=0032`). Nói những thứ không được làm với mutex lock (đã trình bày mục Dùng mutex lock đúng cách). Điều thú vị: thấy ví dụ bug thực tế — cố double-acquire mutex lock, dẫn đến (self) deadlock — trong kernel driver (cùng bản sửa sau đó).
 
 Giờ hiểu dùng mutex lock, hãy sang lock rất phổ biến khác trong kernel — spinlock.
 
@@ -986,9 +986,9 @@ BUG: scheduling while atomic: rdwr_test_secre/23578/0x00000002
 
 Call stack hay stack backtrace (hoặc “call trace”) của kernel mode stack của process — ở đây là user space app `rdwr_drv_secret` đang chạy code driver (có bug) trong process context — thấy rõ trong Hình 6.9. Mỗi dòng sau header `Call` `Trace:` thực chất là call frame trên kernel stack.
 
-Mẹo: bỏ qua stack frame bắt đầu bằng ký hiệu `?`; thực sự là call frame đáng ngờ, rất có thể là “phần sót” từ lần dùng stack trước trong cùng memory region. Nên tạm nói về memory: stack allocation thực sự hoạt động vậy; stack memory không được cấp phát/giải phóng theo từng call frame vì quá tốn. Chỉ khi hết một stack memory page, page mới tự động được fault vào! (Nhớ thảo luận trong tài liệu đồng hành Linux Kernel Programming - Chương 9, Cấp phát Kernel Memory cho người viết Module – Phần 2, mục Ghi chú ngắn về memory allocation và demand paging.) Thực tế khi code gọi và trở về từ hàm, cùng stack memory page thường được tái sử dụng. Không chỉ vậy, vì hiệu năng memory không bị xóa mỗi lần, nên phần sót của frame trước thường xuất hiện. (Có thể thực sự “làm hỏng” bức tranh. Tuy nhiên may mắn, thuật toán tracing stack call frame hiện đại thường rất giỏi xác định stack trace đúng.)
+Mẹo: bỏ qua stack frame bắt đầu bằng ký hiệu `?`; thực sự là call frame đáng ngờ, rất có thể là “phần sót” từ lần dùng stack trước trong cùng memory region. Nên tạm nói memory-related: stack allocation thực sự hoạt động vậy; stack memory không được cấp phát/giải phóng per-call frame vì quá tốn. Chỉ khi hết một stack memory page, page mới tự động được fault vào! (Nhớ thảo luận trong tài liệu đồng hành Linux Kernel Programming - Chương 9, Cấp phát Kernel Memory cho người viết Module – Phần 2, mục Ghi chú ngắn về memory allocation và demand paging.) Thực tế khi code gọi và trở về từ hàm, cùng stack memory page thường được tái sử dụng. Không chỉ vậy, vì hiệu năng memory không bị xóa mỗi lần, nên phần sót của frame trước thường xuất hiện. (Có thể thực sự “làm hỏng” bức tranh. Tuy nhiên may mắn, thuật toán tracing stack call frame hiện đại thường rất giỏi xác định stack trace đúng.)
 
-Theo stack trace từ dưới lên (luôn đọc từ dưới lên), thấy như dự kiến system call user space `write(2)` (thường hiển thị như `SyS_write` hoặc trên x86 là `__x64_sys_write`, dù không thấy trong Hình 6.9) gọi kernel VFS layer code (thấy `vfs_write()` gọi `__vfs_write()`), rồi gọi write method driver, tức `write_miscdrv_rdwr()`! Code như đã biết gọi code path có bug, nơi gọi `schedule_timeout()`, rồi gọi `schedule()` (và `__schedule()`), khiến toàn bộ bug `BUG: scheduling` `while atomic` kích hoạt.
+Theo stack trace bottom-up (luôn đọc bottom-up), thấy như dự kiến system call user space `write(2)` (thường hiển thị như `SyS_write` hoặc trên x86 là `__x64_sys_write`, dù không thấy trong Hình 6.9) gọi kernel VFS layer code (thấy `vfs_write()` gọi `__vfs_write()`), rồi gọi write method driver, tức `write_miscdrv_rdwr()`! Code như đã biết gọi code path có bug, nơi gọi `schedule_timeout()`, rồi gọi `schedule()` (và `__schedule()`), khiến toàn bộ bug `BUG: scheduling` `while atomic` kích hoạt.
 
 Format của code path `scheduling while atomic` được lấy từ dòng code sau trong `kernel/sched/core.c`:
 
@@ -1123,7 +1123,7 @@ Với chủ đề hiện tại, một quy tắc là: Sử dụng spin lock và u
 
 Tập trung trường hợp thứ ba. Rõ ràng nên dùng spinlock bảo vệ critical section trong interrupt handling code (nhớ mutex không được phép trong mọi interrupt context). Ngoài ra, trừ khi dùng chính cùng spinlock trong method `read` và code path interrupt handler, hoàn toàn không được bảo vệ! (Cẩn thận với lock; dành thời gian suy nghĩ thiết kế và code chi tiết.)
 
-Hãy thực hành hơn (hiện bằng pseudocode): giả sử có global (shared) data structure tên `gCtx`; thao tác trên nó trong cả method `read` và interrupt handler (hardirq handler) của driver. Vì shared, là critical section cần bảo vệ; vì chạy atomic (interrupt) context, không dùng mutex, phải dùng spinlock (biến tên `slock`). Pseudocode sau có timestamp (`t1,` `t2, ...`) cho tình huống:
+Hãy hands-on hơn (hiện bằng pseudocode): giả sử có global (shared) data structure tên `gCtx`; thao tác trên nó trong cả method `read` và interrupt handler (hardirq handler) của driver. Vì shared, là critical section cần bảo vệ; vì chạy atomic (interrupt) context, không dùng mutex, phải dùng spinlock (biến tên `slock`). Pseudocode sau có timestamp (`t1,` `t2, ...`) cho tình huống:
 
 ```
 // Driver read method ; WRONG !
@@ -1193,7 +1193,7 @@ driver_read(...)                  << time t0 >>
 }                                << time t3 >>
 ```
 
-Trước khi tự vỗ vai và nghỉ hết ngày, xét tình huống khác. Lần này sản phẩm (hay project) phức tạp hơn, rất có thể trong nhiều nhà phát triển code base, một người cố tình đặt interrupt mask thành giá trị nhất định, block một số interrupt, cho phép số khác. Ví dụ giả sử đã xảy ra trước tại `t0`. Giờ như nói, nhà phát triển khác (bạn!) đến, bảo vệ critical section trong read method bằng API `spin_lock_irq()`. Nghe đúng? Có, nhưng API có quyền tắt (mask) mọi hardware interrupt (và kernel preemption, tạm bỏ qua) trên local CPU core. Thực hiện bằng thao tác mức thấp lên hardware interrupt mask register (rất phụ thuộc kiến trúc). Giả sử đặt bit tương ứng interrupt thành `1` enable nó, xóa bit (thành `0`) disable/mask. Do đó có thể có:
+Trước khi tự vỗ vai và nghỉ hết ngày, xét tình huống khác. Lần này sản phẩm (hay project) phức tạp hơn, rất có thể trong nhiều nhà phát triển code base, một người cố tình đặt interrupt mask thành giá trị nhất định, block một số interrupt, cho phép số khác. Ví dụ giả sử đã xảy ra trước tại `t0`. Giờ như nói, nhà phát triển khác (bạn!) đến, bảo vệ critical section trong read method bằng API `spin_lock_irq()`. Nghe đúng? Có, nhưng API có quyền tắt (mask) mọi hardware interrupt (và kernel preemption, tạm bỏ qua) trên local CPU core. Thực hiện bằng thao tác mức thấp lên hardware interrupt mask register (rất arch-specific). Giả sử đặt bit tương ứng interrupt thành `1` enable nó, xóa bit (thành `0`) disable/mask. Do đó có thể có:
 
 - Thời điểm `t0`: Interrupt mask đặt thành giá trị nào đó, giả sử `0x8e (10001110b)`, enable một số, disable số khác. Quan trọng cho project (để đơn giản, giả định mask register 8-bit) \[... thời gian trôi qua ... \].
 
@@ -1235,9 +1235,9 @@ Nếu tasklet hay softirq (bottom-half interrupt mechanism) có critical section
 void spin_lock_bh(spinlock_t *lock);
 ```
 
-Tất nhiên overhead quan trọng trong code path nhạy hiệu năng (network stack là ví dụ tốt). Vì vậy dùng dạng spinlock đơn giản nhất sẽ có lợi so với biến thể phức tạp. Dù vậy chắc chắn có lúc cần dạng spinlock API mạnh hơn. Ví dụ trên Linux kernel 5.4.0, số lần dùng xấp xỉ các dạng đã thấy: `spin_lock()`: hơn 9.400; `spin_lock_irq()`: hơn 3.600; `spin_lock_irqsave()`: hơn 15.000; `spin_lock_bh()`: hơn 3.700. (Không suy luận lớn gì; chỉ muốn chỉ ra dùng dạng spinlock API mạnh hơn khá phổ biến trong Linux kernel).
+Tất nhiên overhead quan trọng trong code path performance-sensitive (network stack là ví dụ tốt). Vì vậy dùng dạng spinlock đơn giản nhất sẽ có lợi so với biến thể phức tạp. Dù vậy chắc chắn có lúc cần dạng spinlock API mạnh hơn. Ví dụ trên Linux kernel 5.4.0, số lần dùng xấp xỉ các dạng đã thấy: `spin_lock()`: hơn 9.400; `spin_lock_irq()`: hơn 3.600; `spin_lock_irqsave()`: hơn 15.000; `spin_lock_bh()`: hơn 3.700. (Không suy luận lớn gì; chỉ muốn chỉ ra dùng dạng spinlock API mạnh hơn khá phổ biến trong Linux kernel).
 
-Cuối cùng ghi chú rất ngắn về triển khai nội bộ spinlock: thường là code rất đặc thù kiến trúc, gồm atomic machine language instruction thực thi rất nhanh trên bộ vi xử lý. Ví dụ trên kiến trúc x86\[\_64\] phổ biến, spinlock cuối cùng quy về atomic test-and-set machine instruction trên member của spinlock structure (thường triển khai qua machine language instruction `cmpxchg`). Trên ARM, như đã nói, thường machine instruction `wfe` (Wait For Event, cùng SetEvent (SEV)) là trung tâm triển khai. (Có tài nguyên triển khai nội bộ trong mục Đọc thêm). Dù sao, với tư cách người viết kernel/driver, chỉ dùng API (và macro) được cung cấp khi dùng spinlock.
+Cuối cùng ghi chú rất ngắn về triển khai under-the-hood spinlock: thường là code rất arch-specific, gồm atomic machine language instruction thực thi rất nhanh trên bộ vi xử lý. Ví dụ trên kiến trúc x86\[\_64\] phổ biến, spinlock cuối cùng quy về atomic test-and-set machine instruction trên member của spinlock structure (thường triển khai qua machine language instruction `cmpxchg`). Trên ARM, như đã nói, thường machine instruction `wfe` (Wait For Event, cùng SetEvent (SEV)) là trung tâm triển khai. (Có tài nguyên triển khai nội bộ trong mục Đọc thêm). Dù sao, với tư cách người viết kernel/driver, chỉ dùng API (và macro) được cung cấp khi dùng spinlock.
 
 ### Dùng spinlock – tóm tắt nhanh
 
@@ -1245,7 +1245,7 @@ Tóm tắt nhanh spinlock:
 
 - Đơn giản nhất, overhead thấp nhất: Dùng non-irq spinlock primitive `spin_lock()`/`spin_unlock()` khi bảo vệ critical section process context (không có interrupt cần xử lý hoặc có nhưng hoàn toàn không race; thực chất dùng khi interrupt không tham gia hay không liên quan).
 
-- Overhead trung bình: Dùng phiên bản disable IRQ (và disable kernel preemption) `spin_lock_irq() / spin_unlock_irq()` khi interrupt tham gia và có liên quan (process context và interrupt context có thể “race”, tức chia sẻ global data).
+- Overhead trung bình: Dùng phiên bản irq-disabling (và disable kernel preemption) `spin_lock_irq() / spin_unlock_irq()` khi interrupt tham gia và có liên quan (process context và interrupt context có thể “race”, tức chia sẻ global data).
 
 - Mạnh nhất (tương đối), overhead cao: Cách an toàn nhất dùng spinlock. Giống overhead trung bình nhưng save-and-restore interrupt mask qua cặp `spin_lock_irqsave()` / `spin_unlock_irqrestore()`, bảo đảm thiết lập interrupt mask trước không vô ý bị ghi đè như trường hợp trên.
 

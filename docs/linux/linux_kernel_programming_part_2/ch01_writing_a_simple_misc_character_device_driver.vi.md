@@ -2,9 +2,9 @@
 
 Không còn nghi ngờ gì nữa, device driver là một chủ đề rộng lớn và thú vị. Không chỉ vậy, có lẽ chúng còn là cách sử dụng phổ biến nhất của Loadable Kernel Module (LKM) framework mà chúng ta đã dùng. Ở đây, chúng ta sẽ làm quen với việc viết một vài Linux character device driver đơn giản nhưng hoàn chỉnh, thuộc một class gọi là `misc`; đúng vậy, đó là viết tắt của miscellaneous. Chúng tôi muốn nhấn mạnh rằng chương này có phạm vi và mức độ bao quát giới hạn — ở đây, chúng tôi không cố đi sâu vào chi tiết của Linux driver model cùng nhiều framework của nó; thay vào đó, chúng tôi giới thiệu một số sách và hướng dẫn xuất sắc về chủ đề này qua mục Đọc thêm của chương. Mục tiêu ở đây là nhanh chóng giúp bạn làm quen với những khái niệm tổng thể đằng sau việc viết một character device driver đơn giản.
 
-Dù vậy, cuốn sách này thực sự có một số chương dành riêng cho những gì người viết driver cần biết. Ngoài chương mở đầu này, chúng tôi trình bày chi tiết cách người viết driver làm việc với hardware I/O memory, hardware interrupt handling (và nhiều chủ đề nhỏ của nó), cùng các cơ chế kernel như delay, timer, kernel thread và work queue. Việc sử dụng các user-kernel communication pathway hay interface khác nhau cũng được trình bày chi tiết. Hai chương cuối của cuốn sách sau đó tập trung vào điều rất quan trọng đối với mọi hoạt động phát triển kernel, bao gồm driver — kernel synchronization. Những lý do khác khiến chúng tôi muốn viết một Linux character device driver đơn giản thay vì chỉ kernel module “thông thường” là:
+Dù vậy, cuốn sách này thực sự có một số chương dành riêng cho những gì người viết driver cần biết. Ngoài chương mở đầu này, chúng tôi trình bày chi tiết cách người viết driver làm việc với hardware I/O memory, hardware interrupt handling (và nhiều sub-topics của nó), cùng các cơ chế kernel như delay, timer, kernel thread và work queue. Việc sử dụng các user-kernel communication pathway hay interface khác nhau cũng được trình bày chi tiết. Hai chương cuối của cuốn sách sau đó tập trung vào điều rất quan trọng đối với mọi hoạt động phát triển kernel, bao gồm driver — kernel synchronization. Những lý do khác khiến chúng tôi muốn viết một Linux character device driver đơn giản thay vì chỉ kernel module “thông thường” là:
 
-- Cho đến nay, các kernel module của chúng ta khá đơn giản, chỉ có các hàm `init` và `cleanup`, không có gì hơn. Một device driver cung cấp một số entry point vào kernel; đây là các system call liên quan đến file, được gọi là method của driver. Vì vậy, chúng ta có thể có method `open()`, method `read()`, method `write()`, method `llseek()`, method `[unlocked|compat]_ioctl()`, method `release()`, v.v.
+- Cho đến nay, các kernel module của chúng ta khá đơn giản, chỉ có các hàm `init` và `cleanup`, không có gì hơn. Một device driver cung cấp một số entry point vào kernel; đây là các system call file-related, được gọi là method của driver. Vì vậy, chúng ta có thể có method `open()`, method `read()`, method `write()`, method `llseek()`, method `[unlocked|compat]_ioctl()`, method `release()`, v.v.
 
 Để bạn biết thêm, mọi “method” (hàm) mà người viết driver có thể hook vào đều nằm trong cấu trúc dữ liệu kernel quan trọng này: `include/linux/fs.h:file_operations` (sẽ nói thêm trong mục Tìm hiểu mối liên hệ giữa process, driver và kernel).
 
@@ -22,7 +22,7 @@ Trong chương này, chúng ta sẽ đề cập các chủ đề sau:
 
 ## Yêu cầu kỹ thuật
 
-Tôi giả định rằng bạn đã đọc mục Để tận dụng tối đa cuốn sách này trong Lời nói đầu, đã chuẩn bị thích hợp một guest VM chạy Ubuntu 18.04 LTS (hoặc bản phát hành ổn định mới hơn), và cài đặt mọi package cần thiết. Nếu chưa, tôi rất khuyến nghị bạn làm việc này trước. Để tận dụng tối đa cuốn sách này, tôi đặc biệt khuyến nghị bạn trước hết thiết lập môi trường workspace, bao gồm clone GitHub repository chứa code của sách, rồi thực hành trực tiếp trên đó. Bạn có thể tìm repository ở đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`.
+Tôi giả định rằng bạn đã đọc mục Để tận dụng tối đa cuốn sách này trong Lời nói đầu, đã chuẩn bị thích hợp một guest VM chạy Ubuntu 18.04 LTS (hoặc bản phát hành ổn định mới hơn), và cài đặt mọi package cần thiết. Nếu chưa, tôi rất khuyến nghị bạn làm việc này trước. Để tận dụng tối đa cuốn sách này, tôi đặc biệt khuyến nghị bạn trước hết thiết lập môi trường workspace, bao gồm clone GitHub repository chứa code của sách, rồi hands-on trên đó. Bạn có thể tìm repository ở đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`.
 
 ## Bắt đầu viết một misc character device driver đơn giản
 
@@ -42,9 +42,9 @@ Một device driver là interface giữa OS và một thiết bị phần cứng
 
 - Major number và minor number
 
-Bạn sẽ thấy namespace — loại device và cặp `{major#, minor#}` — tạo thành một hệ thống phân cấp. Device (và do đó cả driver của chúng) được tổ chức theo một hệ thống phân cấp dạng cây trong kernel (driver core code trong kernel đảm nhiệm việc này). Hệ thống phân cấp trước hết được chia theo loại device — block hoặc char. Trong mỗi loại, chúng ta có n major number, và mỗi major number lại được phân loại thông qua m minor number; Hình 1.1 thể hiện hệ thống phân cấp này.
+Bạn sẽ thấy namespace — loại device và cặp `{major#, minor#}` — tạo thành một hệ thống phân cấp. Device (và do đó cả driver của chúng) được tổ chức theo một hệ thống phân cấp tree-like trong kernel (driver core code trong kernel đảm nhiệm việc này). Hệ thống phân cấp trước hết được chia theo loại device — block hoặc char. Trong mỗi loại, chúng ta có n major number, và mỗi major number lại được phân loại thông qua m minor number; Hình 1.1 thể hiện hệ thống phân cấp này.
 
-Khác biệt chính giữa block device và character device là block device có khả năng (ở mức kernel) được mount và do đó trở thành một phần của filesystem mà người dùng truy cập được. Character device không thể được mount; vì vậy, thiết bị lưu trữ thường dựa trên block. Hãy nghĩ như sau (hơi đơn giản hóa nhưng hữu ích): nếu thiết bị (phần cứng) không phải thiết bị lưu trữ, cũng không phải thiết bị mạng, thì đó là character device. Rất nhiều thiết bị thuộc class “character”, bao gồm các sensor chip I2C/SPI (Inter Integrated Circuit / Serial Peripheral Interface) thông thường (nhiệt độ, áp suất, độ ẩm, v.v.), màn hình cảm ứng, Real-Time Clock (RTC), media (video, camera, audio), bàn phím, chuột, v.v. USB tạo thành một class trong kernel để hỗ trợ hạ tầng. USB device có thể là block device (pen drive, USB disk), character device (chuột, bàn phím, camera) hoặc network device (USB dongle).
+Khác biệt chính giữa block device và character device là block device có khả năng (kernel-level) được mount và do đó trở thành một phần của filesystem user-accessible. Character device không thể được mount; vì vậy, thiết bị lưu trữ thường dựa trên block. Hãy nghĩ như sau (hơi đơn giản hóa nhưng hữu ích): nếu thiết bị (phần cứng) không phải thiết bị lưu trữ, cũng không phải thiết bị mạng, thì đó là character device. Rất nhiều thiết bị thuộc class “character”, bao gồm các sensor chip I2C/SPI (Inter Integrated Circuit / Serial Peripheral Interface) thông thường (nhiệt độ, áp suất, độ ẩm, v.v.), màn hình cảm ứng, Real-Time Clock (RTC), media (video, camera, audio), bàn phím, chuột, v.v. USB tạo thành một class trong kernel để hỗ trợ hạ tầng. USB device có thể là block device (pen drive, USB disk), character device (chuột, bàn phím, camera) hoặc network device (USB dongle).
 
 Từ Linux 2.6 trở đi, cặp `{major:minor}` là một đại lượng unsigned 32-bit duy nhất trong inode, một bitmask (đó là member `dev_t i_rdev`). Trong 32 bit này, 12 bit MSB biểu diễn major number và 20 bit LSB còn lại biểu diễn minor number. Tính nhanh cho thấy do đó có thể có tới 2<sup>12</sup> = 4.096 major number và 2<sup>20</sup>, tức một triệu, minor number cho mỗi major number. Vì vậy, hãy nhìn Hình 1.1; trong hệ thống phân cấp block, có thể có 4.096 major, mỗi major có thể có tới 1 triệu minor. Tương tự, trong hệ thống phân cấp character, có thể có 4.096 major, mỗi major có thể có tới 1 triệu minor:
 
@@ -54,7 +54,7 @@ Hình 1.1 – Device namespace hay hệ thống phân cấp device
 
 Bạn có thể thắc mắc: chính xác cặp số major:minor này có ý nghĩa gì? Hãy xem major number là đại diện cho class của device (nó là SCSI disk, bàn phím, thiết bị teletype terminal (tty) hay pseudo-terminal (pty), loopback device (đúng vậy, đây là pseudo-hardware device), joystick, tape device, framebuffer, sensor chip, màn hình cảm ứng, v.v.?). Thật sự có rất nhiều loại device; để hình dung số lượng đó lớn đến mức nào, chúng tôi khuyến khích bạn xem kernel documentation tại đây: `https://www.kernel.org/doc/Documentation/admin-guide/devices.txt` (đây chính là sổ đăng ký chính thức của mọi device hiện có cho Linux OS. Tên chính thức là LANANA — Linux Assigned Names And Numbers Authority! Chỉ những người này mới có thể chính thức gán device node — loại và các số major:minor — cho device).
 
-Ý nghĩa (cách diễn giải) của minor number hoàn toàn do người viết driver quyết định; kernel không can thiệp. Thông thường, driver diễn giải minor number của device là đại diện cho một instance vật lý hoặc logic của device, hoặc đại diện cho một chức năng nhất định. (Ví dụ, driver Small Computer System Interface (SCSI) — loại block, major `#8` — dùng minor number để biểu diễn các disk partition logic cho tối đa 16 disk. Mặt khác, character major `#119` được virtual network control driver của VMware sử dụng. Ở đây, minor được diễn giải là virtual network thứ nhất, virtual network thứ hai, v.v.) Tương tự, mọi driver tự gán ý nghĩa cho minor number của mình. Nhưng quy tắc tốt nào cũng có ngoại lệ. Ở đây, ngoại lệ của quy tắc kernel không diễn giải minor number là class `misc` (loại character, major `#10`). Nó dùng minor number như major cấp hai. Điều này sẽ được trình bày trong mục tiếp theo.
+Ý nghĩa (cách diễn giải) của minor number hoàn toàn do người viết driver quyết định; kernel không can thiệp. Thông thường, driver diễn giải minor number của device là đại diện cho một instance vật lý hoặc logic của device, hoặc đại diện cho một chức năng nhất định. (Ví dụ, driver Small Computer System Interface (SCSI) — loại block, major `#8` — dùng minor number để biểu diễn các disk partition logic cho tối đa 16 disk. Mặt khác, character major `#119` được virtual network control driver của VMware sử dụng. Ở đây, minor được diễn giải là virtual network thứ nhất, virtual network thứ hai, v.v.) Tương tự, mọi driver tự gán ý nghĩa cho minor number của mình. Nhưng quy tắc tốt nào cũng có ngoại lệ. Ở đây, ngoại lệ của quy tắc kernel không diễn giải minor number là class `misc` (loại character, major `#10`). Nó dùng minor number như major second-level. Điều này sẽ được trình bày trong mục tiếp theo.
 
 Một vấn đề phổ biến là namespace bị dùng hết. Một quyết định được đưa ra nhiều năm trước đã “gom” nhiều character device linh tinh — nhiều loại chuột (không phải loài thuộc thế giới động vật), cảm biến, màn hình cảm ứng, v.v. — vào một class gọi là `misc` hay “miscellaneous”, được gán character major number `10`. Trong class `misc` có rất nhiều device cùng driver tương ứng. Trên thực tế, chúng dùng chung major number và dựa vào minor number duy nhất để nhận diện bản thân. Chúng ta sẽ viết một vài driver sử dụng chính class này và kernel framework “misc”. Nhiều device đã được LANANA (Linux Assigned Names And Numbers Authority) gán vào class character device `misc`. Hình 1.2 thể hiện một phần ảnh chụp từ `https://www.kernel.org/doc/Documentation/admin-guide/devices.txt`, hiển thị vài device `misc` đầu tiên, minor number được gán và mô tả ngắn. Hãy xem liên kết tham khảo để có danh sách đầy đủ:
 
@@ -62,7 +62,7 @@ Một vấn đề phổ biến là namespace bị dùng hết. Một quyết đ�
 
 Hình 1.2 – Một phần ảnh chụp các misc device: loại char, major # 10
 
-Trong Hình 1.2, cột ngoài cùng bên trái có `10 char`, chỉ định major `# 10` được gán dưới loại character trong hệ thống phân cấp device (Hình 1.1). Các cột bên phải có dạng `minor# = /dev/<foo> <description>`; khá rõ ràng, đó là minor number được gán, theo sau (sau dấu `=`) là device node và mô tả một dòng.
+Trong Hình 1.2, cột ngoài cùng bên trái có `10 char`, chỉ định major `# 10` được gán dưới loại character trong hệ thống phân cấp device (Hình 1.1). Các cột bên phải có dạng `minor# = /dev/<foo> <description>`; khá rõ ràng, đó là minor number được gán, theo sau (sau dấu `=`) là device node và mô tả one-line.
 
 ### Ghi chú nhanh về Linux Device Model
 
@@ -81,7 +81,7 @@ block/ bus/ class/ dev/ devices/ firmware/ fs/ hypervisor/ kernel/ module/
 power/
 ```
 
-Hãy xem các thư mục này là khung nhìn vào LDM — những cách khác nhau để xem các device trên hệ thống. Tất nhiên, khi mọi thứ phát triển, thường có nhiều thứ được thêm vào hơn là bỏ ra (khía cạnh phình to!). Hiện một số thư mục không hiển nhiên đã xuất hiện ở đây. Mặc dù (cũng như procfs) sysfs được tài liệu chính thức mô tả là một interface Application Binary Interface (ABI), có thể thay đổi/bị ngừng khuyến nghị bất cứ lúc nào, thực tế là hệ thống này sẽ tồn tại — và tất nhiên tiếp tục phát triển — theo thời gian.
+Hãy xem các thư mục này là khung nhìn vào LDM — những cách khác nhau để xem các device trên hệ thống. Tất nhiên, khi mọi thứ phát triển, thường có nhiều thứ được thêm vào hơn là bỏ ra (khía cạnh phình to!). Hiện một số thư mục non-obvious đã xuất hiện ở đây. Mặc dù (cũng như procfs) sysfs được tài liệu chính thức mô tả là một interface Application Binary Interface (ABI), có thể thay đổi/bị ngừng khuyến nghị bất cứ lúc nào, thực tế là hệ thống này sẽ tồn tại — và tất nhiên tiếp tục phát triển — theo thời gian.
 
 Nói hơi đơn giản, có thể xem LDM là có — và gắn kết — các thành phần chính sau:
 
@@ -97,9 +97,9 @@ Một nguyên tắc nền tảng của LDM là mỗi device đều phải nằm 
 
 Hình 1.3 – Các bus hay hạ tầng bus driver khác nhau trên Linux hiện đại (trên x86\_64)
 
-Driver core của kernel cung cấp bus driver (thường là một phần của chính kernel image hoặc được tự động nạp lúc boot khi cần), tất nhiên giúp các bus làm công việc của chúng. Công việc đó là gì? Điều quan trọng là chúng tổ chức và nhận diện các device trên bus. Nếu một device mới xuất hiện (có thể bạn vừa cắm pen drive), USB bus driver sẽ nhận ra và bind nó với device driver (USB mass storage) tương ứng! Sau khi bind thành công (có nhiều thuật ngữ được dùng để mô tả: bound, enumerated, discovered), kernel driver framework gọi method (hàm) `probe()` đã đăng ký của driver. Probe method này lúc đó thiết lập device, cấp phát tài nguyên, IRQ, thiết lập memory, đăng ký theo yêu cầu, v.v.
+Driver core của kernel cung cấp bus driver (thường là một phần của chính kernel image hoặc được auto-loaded lúc boot khi cần), tất nhiên giúp các bus làm công việc của chúng. Công việc đó là gì? Điều quan trọng là chúng tổ chức và nhận diện các device trên bus. Nếu một device mới xuất hiện (có thể bạn vừa cắm pen drive), USB bus driver sẽ nhận ra và bind nó với device driver (USB mass storage) tương ứng! Sau khi bind thành công (có nhiều thuật ngữ được dùng để mô tả: bound, enumerated, discovered), kernel driver framework gọi method (hàm) `probe()` đã đăng ký của driver. Probe method này lúc đó thiết lập device, cấp phát tài nguyên, IRQ, thiết lập memory, đăng ký theo yêu cầu, v.v.
 
-Một khía cạnh quan trọng khác cần hiểu về LDM là driver hiện đại dựa trên LDM thường phải làm những việc sau:
+Một khía cạnh quan trọng khác cần hiểu về LDM là driver hiện đại LDM-based thường phải làm những việc sau:
 
 - Đăng ký bản thân với một kernel framework (chuyên biệt).
 
@@ -168,7 +168,7 @@ Trong instance của cấu trúc `miscdevice`, chúng ta làm như sau:
 
 2\. Khởi tạo field `name`. Khi đăng ký thành công, điều này khiến kernel framework tự động tạo device node (dạng `/dev/<name>`) thay cho chúng ta! Như dự kiến, loại sẽ là character, major number là `10`, còn minor number là giá trị được gán động. Đây là (một phần) lợi ích của việc dùng kernel framework; nếu không, có lẽ chúng ta phải nghĩ cách tự tạo device node; nhân tiện, tiện ích `mknod(1)` có thể tạo device file khi được gọi với đặc quyền root (hoặc bạn có capability `CAP_MKNOD`); nó hoạt động bằng cách gọi system call `mknod(2)`!
 
-3\. Quyền của device node sẽ được đặt thành giá trị mà bạn dùng để khởi tạo field `mode` (ở đây, chúng ta cố ý cho phép rộng rãi, mọi người đều có thể đọc-ghi thông qua giá trị bát phân `0666`).
+3\. Quyền của device node sẽ được đặt thành giá trị mà bạn dùng để khởi tạo field `mode` (ở đây, chúng ta cố ý cho phép rộng rãi, mọi người đều có thể readable-writeable thông qua giá trị bát phân `0666`).
 
 4\. Chúng ta sẽ hoãn thảo luận về structure member file operations (`fops`) đến mục sau mục này.
 
@@ -178,7 +178,7 @@ Mọi driver `misc` đều thuộc loại character và dùng cùng major number
 
 Ở đây, chúng ta sẽ tìm hiểu một chút kernel internals liên quan đến việc đăng ký thành công một character device driver trên Linux. Trên thực tế, bạn sẽ hiểu hoạt động của raw character driver framework bên dưới.
 
-Cấu trúc `file_operations`, hay fops (phát âm eff-opps) như thường được gọi, có vai trò tối quan trọng với người viết driver; phần lớn member của cấu trúc fops là function pointer — hãy xem chúng như virtual method. Chúng biểu diễn mọi system call liên quan đến file có thể được gọi trên một (device) file. Vì vậy, nó có các member `open`, `read`, `write`, `poll`, `mmap`, `release` và nhiều member khác (phần lớn là function pointer). Một vài member của cấu trúc dữ liệu quan trọng này được trình bày ở đây:
+Cấu trúc `file_operations`, hay fops (phát âm eff-opps) như thường được gọi, có vai trò tối quan trọng với người viết driver; phần lớn member của cấu trúc fops là function pointer — hãy xem chúng như virtual method. Chúng biểu diễn mọi system call file-related có thể được gọi trên một (device) file. Vì vậy, nó có các member `open`, `read`, `write`, `poll`, `mmap`, `release` và nhiều member khác (phần lớn là function pointer). Một vài member của cấu trúc dữ liệu quan trọng này được trình bày ở đây:
 
 ```
 // include/linux/fs.h
@@ -210,7 +210,7 @@ Bây giờ, giả sử bạn đã viết driver để thiết lập các hàm ch
    .fops = &llkd_misc_fops, /* connect to this driver's 'functionality' */
 ```
 
-Dòng code này có tác dụng quan trọng: nó gắn file operations pointer của process (nằm trong cấu trúc open file của process) với cấu trúc file operations của device driver. Chức năng — những gì driver sẽ làm — giờ đã được thiết lập cho device file này! Hãy làm rõ hơn. Bây giờ (sau khi driver đã tự khởi tạo), một user-mode process mở device file của driver bằng cách gọi system call `open(2)` trên file đó. Giả sử mọi thứ diễn ra tốt đẹp (và phải như vậy), process lúc này được kết nối với driver qua các structure pointer `file_operations` nằm sâu trong kernel. Đây là điểm quan trọng: sau khi system call `open(2)` trả về thành công, và process gọi bất kỳ system call liên quan đến file `foo()` nào trên (device) file đó, kernel VFS layer, hoạt động theo kiểu hướng đối tượng (chúng ta đã nêu điều này trước đây trong sách!), sẽ tin tưởng tuyệt đối mà gọi method `fops->foo()` đã đăng ký! File do user space process mở, thường là device file trong `/dev`, được biểu diễn nội bộ bằng cấu trúc metadata `struct file` (một pointer đến cấu trúc này, `struct file *filp`, được truyền cho driver). Vì vậy, xét theo pseudo-code, khi user space gọi system call liên quan đến file `foo()`, đây là điều kernel VFS layer thực sự làm:
+Dòng code này có tác dụng quan trọng: nó gắn file operations pointer của process (nằm trong cấu trúc open file của process) với cấu trúc file operations của device driver. Chức năng — những gì driver sẽ làm — giờ đã được thiết lập cho device file này! Hãy làm rõ hơn. Bây giờ (sau khi driver đã tự khởi tạo), một user-mode process mở device file của driver bằng cách gọi system call `open(2)` trên file đó. Giả sử mọi thứ diễn ra tốt đẹp (và phải như vậy), process lúc này được kết nối với driver qua các structure pointer `file_operations` nằm sâu trong kernel. Đây là điểm quan trọng: sau khi system call `open(2)` trả về thành công, và process gọi bất kỳ system call file-related `foo()` nào trên (device) file đó, kernel VFS layer, hoạt động theo kiểu object-oriented (chúng ta đã nêu điều này trước đây trong sách!), sẽ tin tưởng tuyệt đối mà gọi method `fops->foo()` đã đăng ký! File do user space process mở, thường là device file trong `/dev`, được biểu diễn nội bộ bằng cấu trúc metadata `struct file` (một pointer đến cấu trúc này, `struct file *filp`, được truyền cho driver). Vì vậy, xét theo pseudo-code, khi user space gọi system call file-related `foo()`, đây là điều kernel VFS layer thực sự làm:
 
 ```
 /* pseudocode: kernel VFS layer (not the driver) */
@@ -219,7 +219,7 @@ if (filp->f_op->foo)
 corresponding to 'foo()' */
 ```
 
-Do đó, nếu user space process đã mở device file gọi system call `read(2)` trên file đó, kernel VFS sẽ gọi `filp->f_op->read(...)`, thực chất chuyển quyền điều khiển đến device driver. Công việc của bạn với tư cách người viết device driver là cung cấp chức năng của `read(2)`! Điều tương tự áp dụng cho mọi system call liên quan đến file khác. Về cơ bản, đây là cách Unix và Linux triển khai nguyên tắc thiết kế nổi tiếng nếu không phải process thì là file.
+Do đó, nếu user space process đã mở device file gọi system call `read(2)` trên file đó, kernel VFS sẽ gọi `filp->f_op->read(...)`, thực chất chuyển quyền điều khiển đến device driver. Công việc của bạn với tư cách người viết device driver là cung cấp chức năng của `read(2)`! Điều tương tự áp dụng cho mọi system call file-related khác. Về cơ bản, đây là cách Unix và Linux triển khai nguyên tắc thiết kế well-known nếu không phải process thì là file.
 
 ##### Xử lý các method không được hỗ trợ
 
@@ -231,9 +231,9 @@ Bạn không cần điền mọi member của cấu trúc `f_ops`, chỉ những
 
 1\. Đặt tường minh `llseek` thành giá trị đặc biệt `no_llseek`, khiến một giá trị thất bại (`-ESPIPE`; `illegal seek`) được trả về.
 
-2\. Trong những trường hợp này, bạn cũng phải gọi hàm `nonseekable_open()` trong method `open()` của driver, chỉ định rằng file không thể seek (hàm thường được gọi như thế này trong method `open()`: `return nonseekable_open(struct inode *inode,` `struct file *filp);`. Chi tiết cùng những thông tin khác được trình bày trong các bài viết LWN ở đây: `https://lwn.net/Articles/97154/`. Bạn có thể xem các thay đổi mà việc này mang lại cho nhiều driver ở đây: `https://lwn.net/Articles/97180/`).
+2\. Trong những trường hợp này, bạn cũng phải gọi hàm `nonseekable_open()` trong method `open()` của driver, chỉ định rằng file non-seekable (hàm thường được gọi như thế này trong method `open()`: `return nonseekable_open(struct inode *inode,` `struct file *filp);`. Chi tiết cùng những thông tin khác được trình bày trong các bài viết LWN ở đây: `https://lwn.net/Articles/97154/`. Bạn có thể xem các thay đổi mà việc này mang lại cho nhiều driver ở đây: `https://lwn.net/Articles/97180/`).
 
-Một giá trị thích hợp để trả về nếu không hỗ trợ một hàm là `-ENOSYS`, khiến user-mode process thấy lỗi `Function not implemented` (khi gọi library API `perror(3)` hoặc `strerror(3)`). Điều này rõ ràng, không mơ hồ; nhà phát triển user space lúc đó sẽ hiểu rằng driver không hỗ trợ hàm này. Vì vậy, một cách triển khai driver là thiết lập pointer đến mọi file operation method và viết routine cho mọi system call liên quan đến file (các method `f_op`) trong driver. Với những method bạn hỗ trợ, hãy viết code; với những method không triển khai, chỉ cần trả về giá trị `-ENOSYS`. Mặc dù hơi mất công, cách này tạo ra các giá trị trả về rõ ràng cho user space.
+Một giá trị thích hợp để trả về nếu không hỗ trợ một hàm là `-ENOSYS`, khiến user-mode process thấy lỗi `Function not implemented` (khi gọi library API `perror(3)` hoặc `strerror(3)`). Điều này rõ ràng, không mơ hồ; nhà phát triển user space lúc đó sẽ hiểu rằng driver không hỗ trợ hàm này. Vì vậy, một cách triển khai driver là thiết lập pointer đến mọi file operation method và viết routine cho mọi system call file-related (các method `f_op`) trong driver. Với những method bạn hỗ trợ, hãy viết code; với những method không triển khai, chỉ cần trả về giá trị `-ENOSYS`. Mặc dù hơi mất công, cách này tạo ra các giá trị trả về rõ ràng cho user space.
 
 ### Viết code misc driver – phần 2
 
@@ -284,7 +284,7 @@ Hình 1.4 – Ảnh chụp quá trình build và nạp skeleton misc driver misc
 
 Bây giờ, code `init` đã xong, chức năng driver đã được thiết lập qua cấu trúc file operations, và driver đã được đăng ký với framework kernel `misc`. Vậy tiếp theo xảy ra gì? Thực ra không có gì, cho đến khi một process mở device file (gắn với driver) và thực hiện một dạng I/O nào đó (Input/Output, tức đọc/ghi).
 
-Vì vậy, hãy giả sử user-mode process (hoặc thread) gọi system call `open(2)` trên device node của driver (nhớ rằng device node đã được tự động tạo khi driver đăng ký với framework `misc` của kernel). Quan trọng nhất, như bạn đã học trong mục Tìm hiểu mối liên hệ giữa process, driver và kernel, với mọi system call liên quan đến file được gọi trên device node, VFS về cơ bản sẽ gọi method (`f_op`) đã đăng ký của driver. Vì vậy, ở đây VFS làm như sau: `filp->f-op->open()`, qua đó gọi method `open` của driver trong cấu trúc `file_operations`, tức hàm `open_miscdrv()`!
+Vì vậy, hãy giả sử user-mode process (hoặc thread) gọi system call `open(2)` trên device node của driver (nhớ rằng device node đã được auto-created khi driver đăng ký với framework `misc` của kernel). Quan trọng nhất, như bạn đã học trong mục Tìm hiểu mối liên hệ giữa process, driver và kernel, với mọi system call file-related được gọi trên device node, VFS về cơ bản sẽ gọi method (`f_op`) đã đăng ký của driver. Vì vậy, ở đây VFS làm như sau: `filp->f-op->open()`, qua đó gọi method `open` của driver trong cấu trúc `file_operations`, tức hàm `open_miscdrv()`!
 
 Nhưng bạn, người viết driver, nên triển khai code method `open` của driver thế nào? Điểm chính là: signature của hàm `open` phải giống hệt signature của `open` trong cấu trúc `file_operation`; thực tế, điều này đúng với mọi hàm. Do đó, chúng ta triển khai hàm `open_miscdrv()` như sau:
 
@@ -320,7 +320,7 @@ static int open_miscdrv(struct inode *inode, struct file *filp)
 
 Hãy chú ý signature của routine `open`, hàm `open_miscdrv()`, khớp chính xác với signature của function pointer `open` trong cấu trúc `f_op` (bạn luôn có thể tra cấu trúc `file_operations` cho Linux 5.4 tại đây: `https://elixir.bootlin.com/linux/v5.4/source/include/linux/fs.h#L1814`).
 
-Trong driver đơn giản này, method `open` thực sự không có nhiều việc phải làm. Chúng ta cấp phát memory cho một buffer (để chứa pathname của device) qua `kzalloc()`, gọi macro `PRINT_CTX()` (nằm trong header `convenient.h`) để hiển thị context hiện tại — process đang mở device. Sau đó phát một `printk` (qua `pr_info()`) hiển thị vài chi tiết VFS layer (pathname và giá trị open flag); bạn có thể lấy pathname của file bằng convenience API `file_path()`, như chúng ta làm ở đây (để làm vậy, cần cấp phát và, sau khi dùng, giải phóng một kernel memory buffer). Tiếp theo, vì không hỗ trợ seeking trong driver này, chúng ta gọi API `nonseekable_open()` (như đã thảo luận trong mục Xử lý các method không được hỗ trợ). System call `open(2)` trên device file phải thành công. User-mode process lúc này có file descriptor hợp lệ — một handle đến file đang mở (ở đây thực chất là device node). Bây giờ, giả sử user-mode process muốn đọc dữ liệu từ phần cứng; do đó nó gọi system call `read(2)`. Như đã giải thích, kernel VFS lúc này tự động gọi read method `read_miscdrv()` của driver. Một lần nữa, signature của nó mô phỏng chính xác signature hàm read trong cấu trúc dữ liệu `file_operations`. Đây là code đơn giản của read method của driver:
+Trong driver đơn giản này, method `open` thực sự không có nhiều việc phải làm. Chúng ta cấp phát memory cho một buffer (để chứa pathname của device) qua `kzalloc()`, gọi macro `PRINT_CTX()` (nằm trong header `convenient.h`) để hiển thị context hiện tại — process đang mở device. Sau đó phát một `printk` (qua `pr_info()`) hiển thị vài chi tiết VFS layer (pathname và giá trị open flag); bạn có thể lấy pathname của file bằng convenience API `file_path()`, như chúng ta làm ở đây (để làm vậy, cần cấp phát và, sau khi dùng, giải phóng một kernel memory buffer). Tiếp theo, vì không hỗ trợ seeking trong driver này, chúng ta gọi API `nonseekable_open()` (như đã thảo luận trong mục Xử lý các method không được hỗ trợ). System call `open(2)` trên device file phải thành công. user-mode process lúc này có file descriptor hợp lệ — một handle đến file đang mở (ở đây thực chất là device node). Bây giờ, giả sử user-mode process muốn đọc dữ liệu từ phần cứng; do đó nó gọi system call `read(2)`. Như đã giải thích, kernel VFS lúc này auto-invoke read method `read_miscdrv()` của driver. Một lần nữa, signature của nó mô phỏng chính xác signature hàm read trong cấu trúc dữ liệu `file_operations`. Đây là code đơn giản của read method của driver:
 
 ```
 /*
@@ -363,7 +363,7 @@ Sau khi xác minh driver (LKM) đã được chèn, chúng ta gọi lệnh `dd(1
 
 Macro `PRINT_CTX()` được dùng trong code nằm trong header `convenient.h`. Hãy xem qua; nó khá bổ ích (chúng ta cố mô phỏng format latency output của hạ tầng `Ftrace` trong kernel, thể hiện nhiều chi tiết trong một không gian nhỏ, một dòng output duy nhất). Điều này được giải thích chi tiết trong `Chapter 4`, Xử lý hardware interrupt, ở mục Hiểu đầy đủ context. Hiện tại đừng lo về mọi chi tiết...
 
-Hình 1.6 thể hiện cách kiểm thử ghi vào driver (ở mức tối thiểu), một lần nữa qua `dd(1)`. Lần này, chúng ta đọc `4k` dữ liệu ngẫu nhiên (bằng cách dùng tính năng `/dev/urandom` của driver `mem` tích hợp trong kernel), rồi ghi dữ liệu ngẫu nhiên vào device node; thực chất là vào “device” của chúng ta:
+Hình 1.6 thể hiện cách kiểm thử ghi vào driver (ở mức tối thiểu), một lần nữa qua `dd(1)`. Lần này, chúng ta đọc `4k` dữ liệu ngẫu nhiên (bằng cách dùng tính năng `/dev/urandom` của driver `mem` built-in trong kernel), rồi ghi dữ liệu ngẫu nhiên vào device node; thực chất là vào “device” của chúng ta:
 
 ![Figure 1.6](images/ch01/fig01-06.png)
 
@@ -381,7 +381,7 @@ Bây giờ chúng ta có dữ liệu của device phần cứng trong kernel spa
 
 ### Sử dụng kernel API để truyền dữ liệu
 
-Như đã đề cập, giả sử driver đã đọc dữ liệu phần cứng và dữ liệu hiện nằm trong kernel memory buffer. Làm sao truyền nó sang user space? Một cách ngây thơ là thử thực hiện đơn giản qua `memcpy()`, nhưng không, cách đó không hoạt động (vì sao? Thứ nhất, không an toàn; thứ hai, phụ thuộc rất nhiều vào kiến trúc; hoạt động trên một số kiến trúc nhưng không trên kiến trúc khác). Vì vậy, điểm quan trọng là: kernel cung cấp một cặp inline function để truyền dữ liệu từ kernel sang user space và ngược lại. Chúng lần lượt là `copy_to_user()` và `copy_from_user()`, và thực sự được dùng rất phổ biến. Cách dùng đơn giản. Cả hai nhận ba tham số: pointer `to` (destination buffer), pointer `from` (source buffer) và `n`, số byte cần sao chép (hãy nghĩ tương tự thao tác `memcpy`):
+Như đã đề cập, giả sử driver đã đọc dữ liệu phần cứng và dữ liệu hiện nằm trong kernel memory buffer. Làm sao truyền nó sang user space? Một cách ngây thơ là thử thực hiện đơn giản qua `memcpy()`, nhưng không, cách đó không hoạt động (vì sao? Thứ nhất, không an toàn; thứ hai, rất arch-dependent; hoạt động trên một số kiến trúc nhưng không trên kiến trúc khác). Vì vậy, điểm quan trọng là: kernel cung cấp một cặp inline function để truyền dữ liệu từ kernel sang user space và ngược lại. Chúng lần lượt là `copy_to_user()` và `copy_from_user()`, và thực sự được dùng rất phổ biến. Cách dùng đơn giản. Cả hai nhận ba tham số: pointer `to` (destination buffer), pointer `from` (source buffer) và `n`, số byte cần sao chép (hãy nghĩ tương tự thao tác `memcpy`):
 
 ```
 include <linux/uaccess.h>   /* Note! used to be <asm/uaccess.h> upto 4.11
@@ -393,7 +393,7 @@ unsigned long copy_from_user(void *to, const void __user *from, unsigned
 long n);
 ```
 
-Giá trị trả về là số byte chưa được sao chép; nói cách khác, giá trị trả về `0` cho biết thành công, còn giá trị khác không cho biết số byte được chỉ ra chưa được sao chép. Nếu nhận giá trị khác không, bạn nên (theo quy ước trả về `0/-E` thông thường) trả lỗi biểu thị I/O fault bằng cách trả `-EIO` hoặc `-EFAULT` (qua đó đặt `errno` trong user space thành giá trị dương tương ứng). (Pseudo) code sau minh họa cách device driver dùng hàm `copy_to_user()` để sao chép dữ liệu từ kernel sang user space:
+Giá trị trả về là số byte chưa được sao chép; nói cách khác, giá trị trả về `0` cho biết thành công, còn giá trị non-zero cho biết số byte được chỉ ra chưa được sao chép. Nếu nhận giá trị non-zero, bạn nên (theo quy ước trả về `0/-E` thông thường) trả lỗi biểu thị I/O fault bằng cách trả `-EIO` hoặc `-EFAULT` (qua đó đặt `errno` trong user space thành giá trị dương tương ứng). (Pseudo) code sau minh họa cách device driver dùng hàm `copy_to_user()` để sao chép dữ liệu từ kernel sang user space:
 
 ```
 static ssize_t read_method(struct file *filp, char __user *ubuf, size_t
@@ -435,7 +435,7 @@ Trong mục tiếp theo, chúng ta sẽ viết một character device driver dù
 
 Bây giờ bạn đã hiểu cách sao chép dữ liệu giữa user space và kernel space (và chiều ngược lại), hãy viết một device driver khác (`ch1/miscdrv_rdwr`) dựa trên skeleton miscellaneous driver trước (`ch1/miscdrv/`). Khác biệt chính là chúng ta dùng một vài mục dữ liệu toàn cục (trong một cấu trúc) xuyên suốt và thực sự thực hiện I/O dưới dạng đọc và ghi. Ở đây, hãy giới thiệu khái niệm driver context hay private driver data structure; ý tưởng là có một cấu trúc dữ liệu dễ truy cập, chứa mọi thông tin liên quan ở cùng một nơi. Ở đây, chúng ta đặt tên cấu trúc này là `struct` `drv_ctx` (xem trong code listing sau). Khi khởi tạo driver, chúng ta cấp phát memory cho nó và khởi tạo nó.
 
-Được rồi, thực ra không có bí mật nào ở đây, chỉ để nghe có vẻ thú vị thôi. Một trong các member trong cấu trúc dữ liệu driver context là một thông điệp gọi là bí mật (đó là member `drv_ctx.oursecret`, cùng một số thống kê (giả) và config word). Đây là “driver context” hay private data structure đơn giản mà chúng ta đề xuất dùng:
+Được rồi, thực ra không có bí mật nào ở đây, chỉ để nghe có vẻ thú vị thôi. Một trong các member trong cấu trúc dữ liệu driver context là một thông điệp so-called bí mật (đó là member `drv_ctx.oursecret`, cùng một số thống kê (giả) và config word). Đây là “driver context” hay private data structure đơn giản mà chúng ta đề xuất dùng:
 
 ```
 // ch1/miscdrv_rdwr/miscdrv_rdwr.c
@@ -680,7 +680,7 @@ Tiếp tục, hãy xem khối code để ứng dụng gọi read hoặc write (t
 }
 ```
 
-(Trước khi thử driver này, hãy bảo đảm kernel module của driver `miscdrv` trước đã được gỡ.) Bây giờ, tất nhiên hãy bảo đảm driver này đã được build và chèn, nếu không system call `open(2)` sẽ thất bại. Chúng ta trình bày một vài lần chạy thử. Trước hết, hãy build ứng dụng user-mode, chèn driver (không được thể hiện trong Hình 1.8), rồi đọc từ device node vừa tạo:
+(Trước khi thử driver này, hãy bảo đảm kernel module của driver `miscdrv` trước đã được gỡ.) Bây giờ, tất nhiên hãy bảo đảm driver này đã được build và chèn, nếu không system call `open(2)` sẽ thất bại. Chúng ta trình bày một vài lần chạy thử. Trước hết, hãy build ứng dụng user-mode, chèn driver (không được thể hiện trong Hình 1.8), rồi đọc từ device node just-created:
 
 ![Figure 1.8](images/ch01/fig01-08.png)
 
@@ -706,7 +706,7 @@ Hãy nghĩ về điều này: chúng ta có helper routine `copy_to_user()`; tha
 
 Để minh họa rõ tác hại của việc không thiết kế và triển khai driver cẩn thận, chúng ta cố tình đưa lỗi (thực sự là bug!) vào cả read method lẫn write method của một phiên bản “tệ” của driver trước (mặc dù ở đây chỉ xét tình huống liên quan đến các routine rất phổ biến `copy_[from|to]_user()` và không có gì khác).
 
-Để có cảm nhận thực hành rõ hơn, chúng ta sẽ viết một phiên bản “tệ” của driver `ch1/miscdrv_rdwr`. Chúng ta sẽ đặt tên nó (thật là khéo) là `ch1/bad_miscdrv`. Trong phiên bản này, chúng ta cố tình tích hợp hai code path có bug:
+Để có cảm nhận hands-on rõ hơn, chúng ta sẽ viết một phiên bản “tệ” của driver `ch1/miscdrv_rdwr`. Chúng ta sẽ đặt tên nó (thật là khéo) là `ch1/bad_miscdrv`. Trong phiên bản này, chúng ta cố tình tích hợp hai code path có bug:
 
 - Một trong read method của driver
 
@@ -751,7 +751,7 @@ Hãy thử: trước hết bảo đảm bạn đã build và nạp kernel module
 
 Hình 1.10 – Ảnh chụp misc driver bad\_miscdrv thực hiện một read “tệ”
 
-À, điều này thú vị; system call `read(2)` của ứng dụng kiểm thử (`rdwr_test_hackit`) thực sự thất bại, với routine `perror(3)` chỉ ra nguyên nhân thất bại là `Bad` `address`. Nhưng vì sao? Vì sao driver, chạy với đặc quyền kernel, không thực sự ghi vào địa chỉ đích (ở đây là `0x5597245d46b0`, địa chỉ sai; như đã biết, nó đang cố ghi xa hơn 512 KB so với địa chỉ đích đúng. Chúng ta cố tình viết code read method của driver để làm như vậy). Đó là vì kernel bảo đảm các routine `copy_[from|to]_user()` (lý tưởng là) sẽ thất bại khi cố đọc hoặc ghi địa chỉ không hợp lệ! Bên trong có một số kiểm tra: `access_ok()` là kiểm tra đơn giản chỉ bảo đảm I/O được thực hiện trong segment dự kiến (user hoặc kernel). Linux kernel hiện đại có kiểm tra tốt hơn; ngoài kiểm tra `access_ok()` đơn giản, kernel sau đó đi qua — nếu được bật — KASAN (Kernel Address Sanitizer, một tính năng compiler instrumentation; KASAN thực sự rất hữu ích, nhất định phải làm trong phát triển và kiểm thử!), các kiểm tra object size (bao gồm kiểm tra overflow), rồi mới gọi worker routine thực hiện sao chép thực tế, `raw_copy_[from|to]_user()`.
+À, điều này thú vị; system call `read(2)` của ứng dụng kiểm thử (`rdwr_test_hackit`) thực sự thất bại, với routine `perror(3)` chỉ ra nguyên nhân thất bại là `Bad` `address`. Nhưng vì sao? Vì sao driver, chạy với đặc quyền kernel, không thực sự ghi vào địa chỉ đích (ở đây là `0x5597245d46b0`, địa chỉ sai; như đã biết, nó đang cố ghi xa hơn 512 KB so với địa chỉ đích đúng. Chúng ta cố tình viết code read method của driver để làm như vậy). Đó là vì kernel bảo đảm các routine `copy_[from|to]_user()` (lý tưởng là) sẽ thất bại khi cố đọc hoặc ghi địa chỉ không hợp lệ! Bên trong có một số kiểm tra: `access_ok()` là kiểm tra đơn giản chỉ bảo đảm I/O được thực hiện trong segment dự kiến (user hoặc kernel). Linux kernel hiện đại có kiểm tra tốt hơn; ngoài kiểm tra `access_ok()` đơn giản, kernel sau đó đi qua — nếu được bật — KASAN (Kernel Address Sanitizer, một tính năng compiler instrumentation; KASAN thực sự rất hữu ích, must-do trong phát triển và kiểm thử!), các kiểm tra object size (bao gồm kiểm tra overflow), rồi mới gọi worker routine thực hiện sao chép thực tế, `raw_copy_[from|to]_user()`.
 
 Tốt; bây giờ hãy chuyển sang trường hợp thú vị hơn, write có bug mà chúng ta sẽ sắp xếp (dù theo cách dàn dựng) thành một cuộc tấn công! Hãy đọc tiếp...
 
@@ -763,7 +763,7 @@ Hacker ác ý thực sự muốn gì, mục tiêu tối thượng của họ là
 
 Chúng ta sửa nhẹ ứng dụng user space — thực chất là process context của mình. Phiên bản cụ thể này của ứng dụng kiểm thử user-mode khác phiên bản trước ở một điểm: giờ có macro tên `HACKIT`. Nếu được định nghĩa (mặc định là có), process này sẽ cố tình chỉ ghi các số không vào user space buffer rồi gửi đến write method của driver tệ. Nếu driver có macro `DANGER_GETROOT_BUG` được định nghĩa (mặc định là có), nó sẽ ghi các số không vào member UID của process, qua đó khiến user-mode process nhận đặc quyền root!
 
-Trong mô hình Unix/Linux truyền thống, nếu Real User ID (RUID) và/hoặc Effective User ID (EUID) (nằm trong task structure, trong `struct cred`) được đặt thành giá trị đặc biệt bằng không (`0`), điều đó có nghĩa process có quyền superuser (root). Ngày nay, mô hình POSIX Capabilities được xem là cách tốt hơn để làm việc với đặc quyền, vì cho phép gán quyền chi tiết — capability — cho một thread, thay vì cho process hoặc thread toàn quyền kiểm soát hệ thống như root.
+Trong mô hình Unix/Linux truyền thống, nếu Real User ID (RUID) và/hoặc Effective User ID (EUID) (nằm trong task structure, trong `struct cred`) được đặt thành giá trị đặc biệt bằng không (`0`), điều đó có nghĩa process có quyền superuser (root). Ngày nay, mô hình POSIX Capabilities được xem là cách tốt hơn để làm việc với đặc quyền, vì cho phép gán quyền fine-grained — capability — cho một thread, thay vì cho process hoặc thread toàn quyền kiểm soát hệ thống như root.
 
 Đây là `diff` nhanh của ứng dụng kiểm thử user space so với phiên bản trước, cho phép bạn thấy các thay đổi code (một lần nữa, chúng ta giới hạn output chỉ còn những gì liên quan nhất):
 
@@ -798,7 +798,7 @@ $ diff -u ../miscdrv/rdwr_test.c rdwr_test_hackit.c
 [ ... ]
 ```
 
-Điều này có nghĩa bí mật (gọi là vậy) không bao giờ được ghi; không sao. Bây giờ hãy xem các sửa đổi trong driver.
+Điều này có nghĩa bí mật (so-called vậy) không bao giờ được ghi; không sao. Bây giờ hãy xem các sửa đổi trong driver.
 
 ##### Sửa device driver
 
@@ -860,7 +860,7 @@ Wdiscarded-qualifiers]
 [...]
 ```
 
-Rõ ràng, routine `copy_to_user()` phía trên sẽ ghi buffer do người dùng cung cấp, `ubuf`, vào destination buffer `new_dest` — quan trọng là chúng ta đã khiến nó trỏ đến `current->cred->uid` — với số byte là `count`.
+Rõ ràng, routine `copy_to_user()` phía trên sẽ ghi buffer user-supplied, `ubuf`, vào destination buffer `new_dest` — quan trọng là chúng ta đã khiến nó trỏ đến `current->cred->uid` — với số byte là `count`.
 
 ##### Bây giờ hãy lấy root
 
@@ -924,7 +924,7 @@ Trong chương tiếp theo, bạn sẽ học một nhiệm vụ quan trọng c�
 
 3\. Viết driver “task display”; ở đây, chúng ta muốn user space process ghi PID của thread (hoặc process) vào nó. Khi đọc từ device node của driver (giả sử pathname là `/dev/task_display`), bạn phải nhận chi tiết về task (tất nhiên lấy từ task structure). Ví dụ, thực hiện `echo 1 > /dev/task_display` rồi `cat` `/dev/task_display` phải khiến driver phát chi tiết task của PID 1 vào kernel log. Đừng quên thêm kiểm tra tính hợp lệ (kiểm tra PID hợp lệ, v.v.).
 
-4\. (Nâng cao hơn một chút:) Viết một driver dựa trên LDM “đúng nghĩa”; các driver `misc` được trình bày ở đây có đăng ký với framework `misc` của kernel, nhưng chỉ dùng ngầm raw character interface làm bus. LDM ưu tiên driver phải đăng ký với một kernel framework và một bus driver. Vì vậy, hãy viết driver “demo” đăng ký với framework `misc` của kernel và platform bus. Việc này cũng cần tạo một platform device giả. (Lưu ý các gợi ý: a) Hãy tham khảo `Chapter 2`, User-Kernel Communication Pathways, đặc biệt các mục Tạo một platform device đơn giản và Platform device. b) Có thể tìm một lời giải cho driver này tại đây: `solutions_to_assgn/ch12/misc_plat/`.)
+4\. (Nâng cao hơn một chút:) Viết một driver LDM-based “đúng nghĩa”; các driver `misc` được trình bày ở đây có đăng ký với framework `misc` của kernel, nhưng chỉ dùng ngầm raw character interface làm bus. LDM ưu tiên driver phải đăng ký với một kernel framework và một bus driver. Vì vậy, hãy viết driver “demo” đăng ký với framework `misc` của kernel và platform bus. Việc này cũng cần tạo một platform device giả. (Lưu ý các gợi ý: a) Hãy tham khảo `Chapter 2`, User-Kernel Communication Pathways, đặc biệt các mục Tạo một platform device đơn giản và Platform device. b) Có thể tìm một lời giải cho driver này tại đây: `solutions_to_assgn/ch12/misc_plat/`.)
 
 Bạn sẽ tìm thấy lời giải cho một số câu hỏi trong GitHub repo của sách: `https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2/tree/main/solutions_to_assgn`.
 

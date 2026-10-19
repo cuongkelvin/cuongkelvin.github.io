@@ -1,8 +1,8 @@
 # Chương 3. Làm việc với hardware I/O memory
 
-Trong chương này, chúng ta tập trung vào một khía cạnh quan trọng liên quan đến phần cứng khi viết device driver: chính xác cách truy cập và thực hiện I/O (input/output, đọc và ghi) trên hardware (hay peripheral) I/O memory — chip phần cứng ngoại vi mà bạn đang viết driver cho nó.
+Trong chương này, chúng ta tập trung vào một khía cạnh quan trọng hardware-related khi viết device driver: chính xác cách truy cập và thực hiện I/O (input/output, đọc và ghi) trên hardware (hay peripheral) I/O memory — chip phần cứng ngoại vi mà bạn đang viết driver cho nó.
 
-Động lực đằng sau kiến thức bạn sẽ thu được trong chương này rất rõ ràng: nếu không có nó, bạn sẽ thực sự điều khiển device bằng cách nào? Phần lớn device được điều khiển bằng các thao tác ghi và đọc được tính toán cẩn thận trên hardware register và/hoặc peripheral memory, còn gọi là hardware I/O memory. Linux, là OS dựa trên virtual memory, đòi hỏi một mức trừu tượng hóa trong cách làm việc với peripheral I/O memory.
+Động lực đằng sau kiến thức bạn sẽ thu được trong chương này rất rõ ràng: nếu không có nó, bạn sẽ thực sự điều khiển device bằng cách nào? Phần lớn device được điều khiển bằng các thao tác ghi và đọc được tính toán cẩn thận trên hardware register và/hoặc peripheral memory, còn gọi là hardware I/O memory. Linux, là OS virtual memory-based, đòi hỏi một mức trừu tượng hóa trong cách làm việc với peripheral I/O memory.
 
 Trong chương này, chúng ta sẽ đề cập các chủ đề sau:
 
@@ -16,7 +16,7 @@ Hãy bắt đầu!
 
 ## Yêu cầu kỹ thuật
 
-Tôi giả định bạn đã đọc mục Để tận dụng tối đa cuốn sách này trong Lời nói đầu, đã chuẩn bị thích hợp một guest VM chạy Ubuntu 18.04 LTS (hoặc một bản phát hành ổn định mới hơn) và cài mọi package cần thiết. Nếu chưa, tôi rất khuyến nghị bạn làm việc này trước. Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyến nghị bạn trước hết thiết lập môi trường workspace, bao gồm clone GitHub repository chứa code của sách, rồi thực hành trực tiếp trên đó. Có thể tìm repository ở đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`.
+Tôi giả định bạn đã đọc mục Để tận dụng tối đa cuốn sách này trong Lời nói đầu, đã chuẩn bị thích hợp một guest VM chạy Ubuntu 18.04 LTS (hoặc một bản phát hành ổn định mới hơn) và cài mọi package cần thiết. Nếu chưa, tôi rất khuyến nghị bạn làm việc này trước. Để tận dụng tối đa cuốn sách, tôi đặc biệt khuyến nghị bạn trước hết thiết lập môi trường workspace, bao gồm clone GitHub repository chứa code của sách, rồi hands-on trên đó. Có thể tìm repository ở đây: `https://github.com/PacktPublishing/Linux-Kernel-Programming-Part-2`.
 
 ## Truy cập hardware I/O memory từ kernel
 
@@ -24,7 +24,7 @@ Một vấn đề thú vị mà bạn, với tư cách người viết device dr
 
 ### Tìm hiểu vấn đề với truy cập trực tiếp
 
-Tất nhiên, hardware memory trên chip này, cái gọi là I/O memory, không phải RAM. Linux kernel không cho phép người viết module hoặc driver truy cập trực tiếp các vị trí hardware I/O memory như vậy. Chúng ta đã biết lý do: trên OS hiện đại dựa trên VM, mọi truy cập memory đều phải đi qua Memory Management Unit (MMU) và paging table.
+Tất nhiên, hardware memory trên chip này, so-called I/O memory, không phải RAM. Linux kernel không cho phép người viết module hoặc driver truy cập trực tiếp các vị trí hardware I/O memory như vậy. Chúng ta đã biết lý do: trên OS hiện đại VM-based, mọi truy cập memory đều phải đi qua Memory Management Unit (MMU) và paging table.
 
 Hãy nhanh chóng nhắc lại khía cạnh chính đã thấy trong tài liệu đồng hành Linux Kernel Programming, Chương 7, Kiến thức thiết yếu về Memory Management Internals: mặc định, memory được ảo hóa, có nghĩa mọi địa chỉ là virtual, không phải physical (bao gồm cả địa chỉ trong kernel segment hay VAS). Hãy nghĩ như sau: khi một virtual address được process (hoặc kernel) truy cập để đọc, ghi hoặc thực thi, hệ thống phải lấy nội dung memory tại physical address tương ứng. Việc này đòi hỏi chuyển đổi virtual address thành physical address lúc runtime; các tối ưu phần cứng (CPU cache, Translation Lookaside Buffer (TLB), v.v.) có thể tăng tốc. Quá trình được thực hiện như sau:
 
@@ -114,11 +114,11 @@ Như đã thấy trong mục Tìm hiểu vấn đề với truy cập trực ti�
 void __iomem *ioremap(phys_addr_t offset, size_t size)
 ```
 
-Header `asm/io.h` trở thành header file phụ thuộc kiến trúc theo yêu cầu. Chú ý tham số đầu tiên của `ioremap()` là physical (hoặc bus) address (kiểu dữ liệu là `phys_addr_t`). Đây là một trong những trường hợp hiếm trên Linux mà bạn, người viết driver, phải cung cấp physical address thay vì virtual address (trường hợp điển hình khác là khi thực hiện thao tác Direct Memory Access (DMA)). Tham số thứ hai rõ ràng; đó là kích thước hay chiều dài memory I/O region cần map. Khi được gọi, routine `ioremap()` sẽ map I/O chip hoặc peripheral memory bắt đầu từ `offset`, dài `size` byte, vào VAS của kernel! Điều này cần thiết — chạy với đặc quyền kernel, driver giờ có thể truy cập I/O memory region này qua pointer trả về và do đó thực hiện I/O trên memory region.
+Header `asm/io.h` trở thành header file arch-specific theo yêu cầu. Chú ý tham số đầu tiên của `ioremap()` là physical (hoặc bus) address (kiểu dữ liệu là `phys_addr_t`). Đây là một trong những trường hợp hiếm trên Linux mà bạn, người viết driver, phải cung cấp physical address thay vì virtual address (trường hợp điển hình khác là khi thực hiện thao tác Direct Memory Access (DMA)). Tham số thứ hai rõ ràng; đó là kích thước hay chiều dài memory I/O region cần map. Khi được gọi, routine `ioremap()` sẽ map I/O chip hoặc peripheral memory bắt đầu từ `offset`, dài `size` byte, vào VAS của kernel! Điều này cần thiết — chạy với đặc quyền kernel, driver giờ có thể truy cập I/O memory region này qua pointer trả về và do đó thực hiện I/O trên memory region.
 
 Hãy nghĩ xem! Giống system call `mmap()` cho phép memory map một region trong KVA space vào user space process, các API `[devm_]ioremap*()` (và những API tương tự) cho phép map một region của peripheral I/O memory vào KVA space.
 
-API `ioremap()` trả về một KVA kiểu `void *` (vì đó là vị trí địa chỉ). Vậy directive `__iomem` trông khác thường ở đây (`void __iomem *`) là gì? Nó đơn giản là compiler attribute bị loại bỏ lúc build; chỉ để nhắc con người chúng ta (cũng như thực hiện sanity checking hoặc xem static analysis code) rằng đây là I/O address chứ không phải RAM address thông thường! Vì vậy, với ví dụ trên, trên device Raspberry Pi, bạn có thể map GPIO register bank thành KVA bằng cách làm như sau (đây không phải code thực tế, mà là ví dụ cho thấy cách gọi API `ioremap()`):
+API `ioremap()` trả về một KVA kiểu `void *` (vì đó là vị trí địa chỉ). Vậy directive `__iomem` peculiar-looking ở đây (`void __iomem *`) là gì? Nó đơn giản là compiler attribute bị loại bỏ lúc build; chỉ để nhắc con người chúng ta (cũng như thực hiện sanity checking hoặc xem static analysis code) rằng đây là I/O address chứ không phải RAM address thông thường! Vì vậy, với ví dụ trên, trên device Raspberry Pi, bạn có thể map GPIO register bank thành KVA bằng cách làm như sau (đây không phải code thực tế, mà là ví dụ cho thấy cách gọi API `ioremap()`):
 
 ```
 #define GPIO_REG_BASE    0x7e200000
@@ -136,7 +136,7 @@ iounmap(iobase);
 release_mem_region(GPIO_REG_BASE, GPIO_REG_LEN);
 ```
 
-Biến `iobase` lúc này giữ giá trị trả về từ `ioremap()`; đó là KVA, kernel virtual address. Bạn có thể dùng nó, miễn khác NULL (bạn phải xác minh điều này!). Vì vậy, trong ví dụ này, giá trị trả về từ `ioremap()` là vị trí trong kernel VAS nơi GPIO register (peripheral I/O memory) của Raspberry Pi giờ được map và sẵn có.
+Biến `iobase` lúc này giữ giá trị trả về từ `ioremap()`; đó là KVA, kernel virtual address. Bạn có thể dùng nó, miễn non-NULL (bạn phải xác minh điều này!). Vì vậy, trong ví dụ này, giá trị trả về từ `ioremap()` là vị trí trong kernel VAS nơi GPIO register (peripheral I/O memory) của Raspberry Pi giờ được map và sẵn có.
 
 Khi xong, bạn phải unmap mapping (như thấy trong đoạn code trên) bằng API `iounmap()`; tham số của API `iounmap()` rất rõ — điểm bắt đầu I/O mapping (giá trị do `ioremap()` trả về):
 
@@ -150,7 +150,7 @@ Sau đây là sơ đồ khái niệm thể hiện điều này:
 
 ![Figure 3.2](images/ch03/fig03-02.png)
 
-Hình 3.2 – Physical-to-virtual mapping của I/O peripheral memory
+Hình 3.2 – physical-to-virtual mapping của I/O peripheral memory
 
 Một việc thú vị là so sánh sơ đồ trên (Hình 3.2) với sơ đồ chi tiết về kernel VAS trên Raspberry Pi đã trình bày trong tài liệu đồng hành Linux Kernel Programming, Chương 7, Kiến thức thiết yếu về Memory Management Internals (Hình 7.12).
 
@@ -158,7 +158,7 @@ Một việc thú vị là so sánh sơ đồ trên (Hình 3.2) với sơ đồ 
 
 ### Thế hệ mới hơn – các managed API devm\_\*
 
-Giờ đã hiểu cách dùng `request_mem_region()` và các API `ioremap*()` vừa thấy, bạn biết không? Thực tế cả hai API này hiện được xem là deprecated; với tư cách người viết driver hiện đại, bạn được kỳ vọng dùng các resource-managed API `devm_*` tốt hơn. (Chúng ta trình bày API cũ vì một vài lý do, gồm việc nhiều driver cũ vẫn dùng rất nhiều, để hiểu kiến thức cơ bản về dùng resource management API `ioremap()`, và để đầy đủ.)
+Giờ đã hiểu cách dùng `request_mem_region()` và các API `ioremap*()` just-seen, bạn biết không? Thực tế cả hai API này hiện được xem là deprecated; với tư cách người viết driver hiện đại, bạn được kỳ vọng dùng các resource-managed API `devm_*` tốt hơn. (Chúng ta trình bày API cũ vì một vài lý do, gồm việc nhiều driver cũ vẫn dùng rất nhiều, để hiểu kiến thức cơ bản về dùng resource management API `ioremap()`, và để đầy đủ.)
 
 Trước hết, hãy xem resource-managed ioremap mới, tên `devm_ioremap()`, trong `lib/devres.c`:
 
@@ -191,13 +191,13 @@ Nhưng lấy tham số đầu này của API `devm_ioremap()` — bus hay physic
 
 Có một số loại resource sẵn có, gồm device MMIO range, I/O port range, interrupt request (IRQ) line, register offset, DMA và bus value.
 
-Để tất cả hoạt động, I/O resource phải được chỉ định theo từng device. Có hai cách tổng quát để làm điều này:
+Để tất cả hoạt động, I/O resource phải được chỉ định theo per-device. Có hai cách tổng quát để làm điều này:
 
-- Cách truyền thống: Hard-code chúng (I/O resource) vào kernel source tree trong những file thường gọi là board-specific file. (Ví dụ, với ARM CPU phổ biến, thường tìm thấy chúng ở `arch/arm/mach->foo/...`, trong đó `foo` là tên machine (`mach`) hay platform/board. Thêm một ví dụ: số platform device được định nghĩa trong các board-specific file này là 1.670 với Linux 3.10.6; chuyển sang cách DT hiện đại đã giảm con số xuống 885 trong kernel source tree 5.4.0.)
+- Cách truyền thống: hard-coding chúng (I/O resource) vào kernel source tree trong những file thường gọi là board-specific file. (Ví dụ, với ARM CPU phổ biến, thường tìm thấy chúng ở `arch/arm/mach->foo/...`, trong đó `foo` là tên machine (`mach`) hay platform/board. Thêm một ví dụ: số platform device được định nghĩa trong các board-specific file này là 1.670 với Linux 3.10.6; chuyển sang cách DT hiện đại đã giảm con số xuống 885 trong kernel source tree 5.4.0.)
 
-- Cách hiện đại: Đặt chúng (I/O resource) sao cho OS có thể phát hiện lúc boot; với embedded system như ARM-32, AArch64 và PPC, điều này thường được thực hiện bằng cách mô tả hardware topology của board hoặc platform (mọi phần cứng trên đó, như SoC, CPU, ngoại vi, disk, flash chip, sensor chip, v.v.) qua một ngôn ngữ đặc thù phần cứng gọi là DT (tương tự VHDL). Các file Device Tree Source (DTS) nằm dưới kernel source tree (với ARM, trong `arch/arm/boot/dts/`) và được biên dịch lúc kernel build (qua DT compiler, tức `dtc`) thành binary format gọi là Device Tree Blob (DTB). DTB thường được bootloader truyền cho kernel lúc boot. Trong early boot, kernel đọc, flatten và diễn giải DTB, tạo platform device (và các device khác) khi cần, rồi bind chúng với driver thích hợp.
+- Cách hiện đại: Đặt chúng (I/O resource) sao cho OS có thể phát hiện lúc boot; với embedded system như ARM-32, AArch64 và PPC, điều này thường được thực hiện bằng cách mô tả hardware topology của board hoặc platform (mọi phần cứng trên đó, như SoC, CPU, ngoại vi, disk, flash chip, sensor chip, v.v.) qua một ngôn ngữ hardware-specific gọi là DT (tương tự VHDL). Các file Device Tree Source (DTS) nằm dưới kernel source tree (với ARM, trong `arch/arm/boot/dts/`) và được biên dịch lúc kernel build (qua DT compiler, tức `dtc`) thành binary format gọi là Device Tree Blob (DTB). DTB thường được bootloader truyền cho kernel lúc boot. Trong early boot, kernel đọc, flatten và diễn giải DTB, tạo platform device (và các device khác) khi cần, rồi bind chúng với driver thích hợp.
 
-DT không hiện diện trên hệ thống x86\[\_64\]. Tương đương gần nhất có lẽ là ACPI table. Ngoài ra, lưu ý DT không phải công nghệ đặc thù Linux; nó được thiết kế độc lập OS, và tổ chức chung được gọi là Open Firmware (OF).
+DT không hiện diện trên hệ thống x86\[\_64\]. Tương đương gần nhất có lẽ là ACPI table. Ngoài ra, lưu ý DT không phải công nghệ Linux-specific; nó được thiết kế OS-agnostic, và tổ chức chung được gọi là Open Firmware (OF).
 
 Như đã đề cập, với mô hình hiện đại này, kernel và/hoặc device driver phải lấy thông tin resource (được điền bên trong một `include/linux/ioport.h:struct resource`) từ DTB. Bằng cách nào? Một cách phổ biến mà platform driver thường dùng là qua các API `platform_get_*()`.
 
@@ -256,13 +256,13 @@ Bạn có thể đã gặp API `devm_request_and_ioremap()` từng thường đ�
 
 Cuối cùng, có một số biến thể của `ioremap()`. Các API `[devm_]ioremap_nocache()` và `ioremap_cache()` là ví dụ, và ảnh hưởng đến caching mode của CPU.
 
-Người viết driver nên đọc kỹ các comment (phụ thuộc kiến trúc) trong kernel source tại nơi có các routine này; ví dụ, trên x86 tại `arch/x86/mm/ioremap.c:ioremap_nocache()`.
+Người viết driver nên đọc kỹ các comment (arch-specific) trong kernel source tại nơi có các routine này; ví dụ, trên x86 tại `arch/x86/mm/ioremap.c:ioremap_nocache()`.
 
 Giờ đã trình bày mục quan trọng về cách lấy thông tin resource và dùng các managed API `devm_*()` hiện đại, hãy học cách diễn giải output từ `/proc` liên quan đến MMIO.
 
 ### Tra mapping mới qua /proc/iomem
 
-Sau khi thực hiện mapping (qua một trong các API `[devm_]ioremap*()` vừa trình bày), thực sự có thể nhìn thấy nó qua pseudo-file chỉ đọc, tức `/proc/iomem`. Thực tế, entry mới dưới `/proc/iomem` được tạo khi gọi thành công `request_mem_region()`. Muốn xem cần quyền root (chính xác hơn, non-root cũng xem được nhưng chỉ thấy mọi địa chỉ là `0`; vì lý do bảo mật). Vậy hãy xem trên guest VM Ubuntu x86\_64 đáng tin cậy của chúng ta. Trong output sau, do giới hạn chỗ và để rõ ràng, chúng ta trình bày có cắt bớt một phần:
+Sau khi thực hiện mapping (qua một trong các API `[devm_]ioremap*()` just-covered), thực sự có thể nhìn thấy nó qua pseudo-file read-only, tức `/proc/iomem`. Thực tế, entry mới dưới `/proc/iomem` được tạo khi gọi thành công `request_mem_region()`. Muốn xem cần quyền root (chính xác hơn, non-root cũng xem được nhưng chỉ thấy mọi địa chỉ là `0`; vì lý do bảo mật). Vậy hãy xem trên guest VM Ubuntu x86\_64 đáng tin cậy của chúng ta. Trong output sau, do giới hạn chỗ và để rõ ràng, chúng ta trình bày có cắt bớt một phần:
 
 ```
 $ sudo cat /proc/iomem
@@ -288,9 +288,9 @@ fffc0000-ffffffff : Reserved
 $
 ```
 
-Điều thật sự quan trọng cần hiểu là các address range trong cột bên trái không phải virtual — chúng là physical (hoặc bus) address. Bạn có thể thấy RAM hệ thống (hay platform) được map ở đâu. Ngoài ra, bên trong đó, có thể thấy chính xác các section kernel code, data và bss nằm ở đâu (theo physical address). Thực tế, tiện ích `procmap` của tôi (`https://github.com/kaiwan/procmap`) dùng chính thông tin này (chuyển đổi physical address thành virtual).
+Điều thật sự quan trọng cần hiểu là các address range trong cột left hand-side không phải virtual — chúng là physical (hoặc bus) address. Bạn có thể thấy RAM hệ thống (hay platform) được map ở đâu. Ngoài ra, bên trong đó, có thể thấy chính xác các section kernel code, data và bss nằm ở đâu (theo physical address). Thực tế, tiện ích `procmap` của tôi (`https://github.com/kaiwan/procmap`) dùng chính thông tin này (chuyển đổi physical address thành virtual).
 
-Để đối chiếu, hãy chạy cùng lệnh trên device Raspberry Pi 3 (mẫu B+ có SoC Broadcom BCM2837 với ARM Cortex A53 bốn core). Một lần nữa, do giới hạn chỗ và để rõ ràng, chúng ta trình bày một phần output được cắt bớt:
+Để đối chiếu, hãy chạy cùng lệnh trên device Raspberry Pi 3 (mẫu B+ có SoC Broadcom BCM2837 với ARM Cortex A53 quad-core). Một lần nữa, do giới hạn chỗ và để rõ ràng, chúng ta trình bày một phần output được cắt bớt:
 
 ```
 pi@raspberrypi:~ $ sudo cat /proc/iomem
@@ -324,11 +324,11 @@ Vậy, giờ I/O memory region đã được map thành công vào kernel VAS, b
 
 ### MMIO – thực hiện I/O thực tế
 
-Khi làm việc với MMIO, peripheral I/O memory được map vào kernel VAS, nên đối với bạn — người viết driver — nó trông như memory thông thường, giống RAM. Cần cẩn thận ở đây: có những lưu ý và cảnh báo phải tuân thủ. Bạn không được xem region này như RAM thông thường và truy cập trực tiếp qua các routine C quen thuộc! Trong những mục sắp tới, chúng ta sẽ chỉ cách thực hiện I/O (đọc và ghi) cho bất kỳ peripheral I/O region nào đã được remap bằng MMIO. Chúng ta bắt đầu với trường hợp rất phổ biến là I/O nhỏ (1 đến 8 byte), rồi chuyển sang repeating I/O, trước khi xem cách `memset` và `memcpy` một MMIO region.
+Khi làm việc với MMIO, peripheral I/O memory được map vào kernel VAS, nên đối với bạn — người viết driver — nó trông như memory thông thường, giống RAM. Cần cẩn thận ở đây: có những lưu ý và cảnh báo phải tuân thủ. Bạn không được xem region này như RAM thông thường và truy cập trực tiếp qua các routine C quen thuộc! Trong những mục sắp tới, chúng ta sẽ chỉ cách thực hiện I/O (đọc và ghi) cho bất kỳ peripheral I/O region nào đã được remap bằng MMIO. Chúng ta bắt đầu với trường hợp rất phổ biến là I/O nhỏ (1 đến 8-byte), rồi chuyển sang repeating I/O, trước khi xem cách `memset` và `memcpy` một MMIO region.
 
-#### Đọc và ghi 1 đến 8 byte trên MMIO memory region
+#### Đọc và ghi 1 đến 8-byte trên MMIO memory region
 
-Vậy chính xác làm sao truy cập và thực hiện I/O (đọc và ghi) trên peripheral I/O memory qua MMIO? Kernel cung cấp API cho phép cả đọc lẫn ghi chip memory. Dùng các API này (hoặc macro/inline function), bạn có thể thực hiện I/O, như đọc và ghi, với bốn bit-width có thể có: 8-bit, 16-bit, 32-bit và, trên hệ thống 64-bit, 64-bit:
+Vậy chính xác làm sao truy cập và thực hiện I/O (đọc và ghi) trên peripheral I/O memory qua MMIO? Kernel cung cấp API cho phép cả đọc lẫn ghi chip memory. Dùng các API này (hoặc macro/inline function), bạn có thể thực hiện I/O, như đọc và ghi, với bốn bit-widths có thể có: 8-bit, 16-bit, 32-bit và, trên hệ thống 64-bit, 64-bit:
 
 - MMIO read: `ioread8()`, `ioread16()`, `ioread32()` và `ioread64()`
 
@@ -366,7 +366,7 @@ Một phép kiểm tra phổ biến mà người viết driver dùng để kiể
 
 #### Thực hiện repeating I/O trên MMIO memory region
 
-Các API `ioread[8|16|32|64]()` và `iowrite[8|16|32|64]()` chỉ làm việc trên lượng dữ liệu nhỏ từ 1 đến 8 byte. Nhưng nếu muốn đọc hay ghi vài chục hoặc vài trăm byte thì sao? Bạn luôn có thể đặt các API này trong loop. Tuy nhiên, dự liệu chính điều này, kernel cung cấp helper routine hiệu quả hơn, nội bộ dùng một assembly loop gọn. Đây là các phiên bản gọi là repeating của MMIO API:
+Các API `ioread[8|16|32|64]()` và `iowrite[8|16|32|64]()` chỉ làm việc trên lượng dữ liệu nhỏ từ 1 đến 8 byte. Nhưng nếu muốn đọc hay ghi vài chục hoặc vài trăm byte thì sao? Bạn luôn có thể đặt các API này trong loop. Tuy nhiên, dự liệu chính điều này, kernel cung cấp helper routine hiệu quả hơn, nội bộ dùng một assembly loop gọn. Đây là các phiên bản so-called repeating của MMIO API:
 
 - Để đọc, có tập API `ioread[8|16|32|64]_rep()`.
 
@@ -419,13 +419,13 @@ Ban đầu, header `asm/io.h` thường được include. Tuy nhiên, giờ head
 
 Cần biết rằng kernel có các helper routine cũ để thực hiện MMIO; đó là API helper `read[b|w|l|q]()` và `write[b|w|l|q]()`. Ở đây, chữ được thêm làm hậu tố vào read/write chỉ định bit width; thực sự rất đơn giản:
 
-- `b`: Độ rộng byte (8 bit)
+- `b`: Byte-wide (8 bit)
 
-- `w`: Độ rộng word (16 bit)
+- `w`: Word-wide (16 bit)
 
-- `l`: Độ rộng long (32 bit)
+- `l`: Long-wide (32 bit)
 
-- `q`: Độ rộng quad-word (64 bit); chỉ có trên máy 64-bit
+- `q`: Quad-word-wide (64 bit); chỉ có trên máy 64-bit
 
 Lưu ý với kernel hiện đại, bạn không được kỳ vọng dùng các routine này mà nên dùng các API helper `ioread/iowrite[8|16|32|64]()` nói trên. Lý do duy nhất chúng ta đề cập ở đây là vẫn có một số driver dùng các helper routine cũ này. Cú pháp và ngữ nghĩa hoàn toàn tương tự helper mới, nên tôi để bạn tự tra nếu cần.
 
@@ -449,7 +449,7 @@ Hãy kết thúc mục này bằng cách tóm tắt (không quá chú trọng m�
 
 5\. Trả MMIO region về kernel qua `release_mem_region()` (xóa entry trong `/proc/iomem`).
 
-Vì MMIO là phương tiện mạnh mẽ để giao tiếp với peripheral chip, bạn có thể nghĩ mọi driver (bao gồm cả cái gọi là bus driver) đều được thiết kế và viết để dùng nó (và/hoặc port I/O), nhưng không phải vậy. Đó là vì vấn đề hiệu năng. Xét cho cùng, thực hiện MMIO (hoặc PMIO) trên ngoại vi đòi hỏi tương tác và chú ý liên tục của bộ xử lý. Với nhiều lớp device (hãy nghĩ đến streaming nội dung media độ phân giải cao trên smartphone hay tablet!), điều này đơn giản là quá chậm. Vậy cách hiệu năng cao để giao tiếp với peripheral device là gì? Câu trả lời là DMA, chủ đề tiếc rằng nằm ngoài phạm vi sách (hãy xem mục Đọc thêm để tìm gợi ý sách driver hữu ích và tài nguyên về DMA). Vậy MMIO được dùng ở đâu? Thực tế, nó được dùng cho rất nhiều ngoại vi tốc độ thấp hơn, bao gồm các thao tác status và control.
+Vì MMIO là phương tiện mạnh mẽ để giao tiếp với peripheral chip, bạn có thể nghĩ mọi driver (bao gồm cả so-called bus driver) đều được thiết kế và viết để dùng nó (và/hoặc port I/O), nhưng không phải vậy. Đó là vì vấn đề hiệu năng. Xét cho cùng, thực hiện MMIO (hoặc PMIO) trên ngoại vi đòi hỏi tương tác và chú ý liên tục của bộ xử lý. Với nhiều lớp device (hãy nghĩ đến streaming nội dung media high-definition trên smartphone hay tablet!), điều này đơn giản là quá chậm. Vậy cách high-performance để giao tiếp với peripheral device là gì? Câu trả lời là DMA, chủ đề tiếc rằng nằm ngoài phạm vi sách (hãy xem mục Đọc thêm để tìm gợi ý sách driver hữu ích và tài nguyên về DMA). Vậy MMIO được dùng ở đâu? Thực tế, nó được dùng cho rất nhiều ngoại vi tốc độ thấp hơn, bao gồm các thao tác status và control.
 
 Mặc dù MMIO là cách phổ biến nhất để thực hiện I/O trên ngoại vi, port I/O là một cách khác. Vì vậy, hãy học cách làm việc với nó.
 
@@ -463,13 +463,13 @@ Thực tế, phần lớn bộ xử lý hiện đại, ngay cả khi hỗ trợ 
 
 Port I/O khá đơn giản so với mọi sự phức tạp đã thấy ở MMIO. Đó là vì bộ xử lý cung cấp machine instruction để trực tiếp làm việc. Tất nhiên, giống MMIO, bạn phải lịch sự xin kernel cho phép truy cập PIO region (đã trình bày trong mục Xin phép kernel). API để làm việc này là `request_region()` và `release_region()` (tham số giống hệt API MMIO tương ứng).
 
-Vậy truy cập và thực hiện I/O (đọc và ghi) trên I/O port thế nào? Một lần nữa, kernel cung cấp API wrapper trên assembly/machine instruction bên dưới để đọc lẫn ghi. Dùng chúng, bạn có thể thực hiện I/O read và write với ba bit-width: 8-bit, 16-bit và 32-bit:
+Vậy truy cập và thực hiện I/O (đọc và ghi) trên I/O port thế nào? Một lần nữa, kernel cung cấp API wrapper trên assembly/machine instruction bên dưới để đọc lẫn ghi. Dùng chúng, bạn có thể thực hiện I/O read và write với ba bit-widths: 8-bit, 16-bit và 32-bit:
 
 - PMIO read: `inb()`, `inw()` và `inl()`
 
 - PMIO write: `outb()`, `outw()` và `outl()`
 
-Rất trực quan, `b` có nghĩa độ rộng byte (8 bit), `w` nghĩa độ rộng word (16 bit), và `l` nghĩa độ rộng long (32 bit).
+Rất trực quan, `b` có nghĩa byte-wide (8 bit), `w` nghĩa word-wide (16 bit), và `l` nghĩa long-wide (32 bit).
 
 Signature của các port I/O read routine như sau:
 
@@ -480,7 +480,7 @@ u16 inw(unsigned long addr);
 u32 inl(unsigned long addr);
 ```
 
-Tham số duy nhất của các wrapper `in[b|w|l]()` là port address của vị trí port I/O memory sẽ được đọc. Chúng ta đã trình bày trong mục Lấy device resource (mục thực sự quan trọng với nhà phát triển driver như bạn!). Port cũng là resource, có nghĩa có thể lấy theo cách thông thường: trên embedded system hiện đại, thực hiện bằng cách parse device tree (hoặc ACPI table); cách cũ là hard-code giá trị trong board-specific source file. Thực tế, với nhiều ngoại vi phổ biến, port number hay port address range là giá trị đã biết rõ, nên có thể hard-code vào driver (thường trong header file của driver). Một lần nữa, tốt nhất đừng chỉ giả định điều gì; hãy bảo đảm tham khảo datasheet cho ngoại vi đang xét.
+Tham số duy nhất của các wrapper `in[b|w|l]()` là port address của vị trí port I/O memory sẽ được đọc. Chúng ta đã trình bày trong mục Lấy device resource (mục thực sự quan trọng với nhà phát triển driver như bạn!). Port cũng là resource, có nghĩa có thể lấy theo cách thông thường: trên embedded system hiện đại, thực hiện bằng cách parse device tree (hoặc ACPI table); cách cũ là hard-code giá trị trong board-specific source file. Thực tế, với nhiều ngoại vi phổ biến, port number hay port address range là giá trị well-known, nên có thể hard-coded vào driver (thường trong header file của driver). Một lần nữa, tốt nhất đừng chỉ giả định điều gì; hãy bảo đảm tham khảo datasheet cho ngoại vi đang xét.
 
 Bây giờ, quay lại API. Giá trị trả về là unsigned integer (bit-width thay đổi tùy helper routine được dùng). Đó là giá trị hiện tại trên port (register) tại thời điểm read được thực hiện. Signature của các port I/O write routine như sau:
 
@@ -565,7 +565,7 @@ Bây giờ, hãy đề cập nhanh vài điều liên quan đến port I/O.
 
 Còn một vài điểm ít nhiều khác nhau về PIO mà bạn, người viết driver, nên lưu ý:
 
-- Giống MMIO cung cấp repeating I/O routine (nhớ các helper `ioread|iowrite[8|16|32|64]_rep()`), PMIO (hay PIO) cung cấp chức năng lặp phần nào tương tự cho trường hợp muốn đọc hoặc ghi cùng I/O port nhiều lần. Đây là các phiên bản gọi là string của port helper routine thông thường; chúng có chữ `s` trong tên để nhắc điều đó. Kernel source có comment tóm tắt gọn gàng như sau:
+- Giống MMIO cung cấp repeating I/O routine (nhớ các helper `ioread|iowrite[8|16|32|64]_rep()`), PMIO (hay PIO) cung cấp chức năng lặp phần nào tương tự cho trường hợp muốn đọc hoặc ghi cùng I/O port nhiều lần. Đây là các phiên bản so-called string của port helper routine thông thường; chúng có chữ `s` trong tên để nhắc điều đó. Kernel source có comment tóm tắt gọn gàng như sau:
 
 ```
 // include/asm-generic/io.h
@@ -587,11 +587,11 @@ void outsl(unsigned long addr, const void *buffer, unsigned int
 count);
 ```
 
-Vì vậy, ví dụ, helper routine `insw()` sẽ đọc tổng cộng `count` lần (tức count\*2 byte vì mỗi read là 2 byte hay 16 bit) từ starting `addr`, một I/O port address, vào những vị trí liên tiếp của destination buffer tại `buffer` (inline function `readsw()` là triển khai nội bộ).
+Vì vậy, ví dụ, helper routine `insw()` sẽ đọc tổng cộng `count` lần (tức count\*2-byte vì mỗi read là 2 byte hay 16-bit) từ starting `addr`, một I/O port address, vào những vị trí liên tiếp của destination buffer tại `buffer` (inline function `readsw()` là triển khai nội bộ).
 
-Tương tự, helper routine `outsw()` ghi tổng cộng `count` lần (tức count\*2 byte vì mỗi read là 2 byte hay 16 bit), dữ liệu từ source buffer tại `buffer` đến I/O port tại `address` (inline function `writesw()` là triển khai nội bộ).
+Tương tự, helper routine `outsw()` ghi tổng cộng `count` lần (tức count\*2-byte vì mỗi read là 2 byte hay 16-bit), dữ liệu từ source buffer tại `buffer` đến I/O port tại `address` (inline function `writesw()` là triển khai nội bộ).
 
-- Tiếp theo, kernel dường như cung cấp các helper API tương đương `in|out[b|w|l]()`, tức `in|out[b|w|l]_p()`. Ở đây, hậu tố `_p` có nghĩa đưa pause hay delay vào I/O. Ban đầu dành cho ngoại vi chậm; tuy nhiên, hiện nay điều này dường như trở thành chi tiết tương thích ngược không còn ý nghĩa: các routine “delayed I/O” chỉ là wrapper đơn giản trên routine thông thường (thực tế không có delay).
+- Tiếp theo, kernel dường như cung cấp các helper API tương đương `in|out[b|w|l]()`, tức `in|out[b|w|l]_p()`. Ở đây, hậu tố `_p` có nghĩa đưa pause hay delay vào I/O. Ban đầu dành cho ngoại vi chậm; tuy nhiên, hiện nay điều này dường như trở thành chi tiết backward-compatible không còn ý nghĩa: các routine “delayed I/O” chỉ là wrapper đơn giản trên routine thông thường (thực tế không có delay).
 
 - Cũng có phiên bản user space tương đương của các PIO API (ví dụ, có thể dùng chúng để viết user space driver). Tất nhiên, gọi thành công các API `in|out[b|w|l]()` trong user mode đòi hỏi process gọi thực hiện thành công các system call `iopl(2)`/`ioperm(2)`, đến lượt chúng lại đòi quyền root (hoặc bạn cần có capability bit `CAP_SYS_RAWIO` được đặt; điều này cũng có thể làm vì mục đích bảo mật.)
 
@@ -603,7 +603,7 @@ Trong chương này, bạn đã học vì sao không thể chỉ làm việc tr�
 
 Chúng ta học rằng các hệ thống như x86 thường dùng cả hai cách vì ngoại vi được thiết kế như vậy. Truy cập MMIO và/hoặc PMIO là nhiệm vụ chính của mọi driver — xét cho cùng, đây là cách nói chuyện và điều khiển phần cứng! Không chỉ vậy, nhiều bus driver bên dưới (cho các bus trên Linux, như I2C, USB, SPI, PCI, v.v.) nội bộ dùng MMIO/PMIO để thực hiện peripheral I/O. Vì vậy, bạn đã làm tốt khi hoàn tất chương này!
 
-Trong chương tiếp theo, chúng ta xem một lĩnh vực quan trọng khác liên quan đến phần cứng: tìm hiểu, xử lý và làm việc với hardware interrupt.
+Trong chương tiếp theo, chúng ta xem một lĩnh vực quan trọng khác hardware-related: tìm hiểu, xử lý và làm việc với hardware interrupt.
 
 ## Câu hỏi
 
