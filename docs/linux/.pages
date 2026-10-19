@@ -4,4 +4,5 @@ nav:
   - linux_kernel_programming
   - linux_kernel_programming_part_2
   - understanding_the_linux_kernel
+  - linux_device_driver_development
   - ...

@@ -56,3 +56,25 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách.
 - [**Chương 18 — Filesystem Ext2 và Ext3**](understanding_the_linux_kernel/ch18_the_ext2_and_ext3_filesystems.vi.md) — cấu trúc dữ liệu trên đĩa và trong bộ nhớ, quản lý không gian đĩa, journaling của Ext3
 - [**Chương 19 — Giao tiếp giữa tiến trình**](understanding_the_linux_kernel/ch19_process_communication.vi.md) — pipe, FIFO, System V IPC, POSIX message queue
 - [**Chương 20 — Thực thi chương trình**](understanding_the_linux_kernel/ch20_program_execution.vi.md) — định dạng file thực thi, execution domain, họ hàm `exec`
+
+## Theo sách *Linux Device Driver Development*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung vào viết driver cho thiết bị thật trên hệ nhúng.
+
+- [**Chương 1 — Nhập môn phát triển kernel**](linux_device_driver_development/ch01_introduction_to_kernel_development.vi.md) — dựng môi trường, lấy mã nguồn, cấu hình và build kernel, build và cài module
+- [**Chương 2 — Khái niệm cơ bản về kernel module**](linux_device_driver_development/ch02_understanding_linux_kernel_module_basic_concepts.vi.md) — khung module, build in-tree và out-of-tree, tham số module, export symbol, xử lý lỗi, in log
+- [**Chương 3 — Các helper cốt lõi của kernel**](linux_device_driver_development/ch03_dealing_with_kernel_core_helpers.vi.md) — spinlock, mutex, wait queue, delay, timer và hrtimer, softirq, tasklet, workqueue, interrupt handler
+- [**Chương 4 — Character device driver**](linux_device_driver_development/ch04_writing_character_device_drivers.vi.md) — major và minor, device node, đăng ký char device, các file operation, `poll` và `ioctl`
+- [**Chương 5 — Device tree**](linux_device_driver_development/ch05_understanding_and_leveraging_the_device_tree.vi.md) — quy ước đặt tên, alias và label, biểu diễn địa chỉ thiết bị, resource
+- [**Chương 6 — Device, driver và platform abstraction**](linux_device_driver_development/ch06_introduction_to_devices_drivers_and_platform_abstraction.vi.md) — cấu trúc device, driver và bus, cơ chế ghép device với driver, OF matching
+- [**Chương 7 — Platform device và platform driver**](linux_device_driver_development/ch07_understanding_the_concept_of_platform_devices_and_drivers.vi.md) — cấp phát platform device, platform resource, probe, viết platform driver từ đầu
+- [**Chương 8 — I2C device driver**](linux_device_driver_development/ch08_writing_i2c_device_drivers.vi.md) — adapter và client, API giao tiếp I2C, probe và remove, khai báo thiết bị
+- [**Chương 9 — SPI device driver**](linux_device_driver_development/ch09_writing_spi_device_drivers.vi.md) — controller và device, truyền message, probe và remove, khai báo thiết bị
+- [**Chương 10 — Cấp phát bộ nhớ trong kernel**](linux_device_driver_development/ch10_understanding_the_linux_kernel_memory_allocation.vi.md) — address space, VMA, MMU và TLB, page và slab allocator, `kmalloc` và `vmalloc`, PIO và MMIO, map bộ nhớ sang user space
+- [**Chương 11 — DMA**](linux_device_driver_development/ch11_implementing_direct_memory_access_dma_support.vi.md) — DMA mapping, cache coherency, completion, DMA engine API, cyclic DMA, DT binding
+- [**Chương 12 — Regmap API**](linux_device_driver_development/ch12_abstracting_memory_access_introduction_to_the_regmap_api_a_register_map_abstraction.vi.md) — cấu hình và khởi tạo Regmap, đọc ghi thanh ghi, cache, ví dụ SPI driver
+- [**Chương 13 — Kernel IRQ framework**](linux_device_driver_development/ch13_demystifying_the_kernel_irq_framework.vi.md) — interrupt controller, lan truyền IRQ, chaining IRQ, per-CPU interrupt, SGI và IPI
+- [**Chương 14 — Linux device model**](linux_device_driver_development/ch14_introduction_to_the_linux_device_model.vi.md) — cấu trúc bus, driver và device, kobject, kobj_type, kset, attribute trong sysfs
+- [**Chương 15 — IIO framework**](linux_device_driver_development/ch15_digging_into_the_iio_framework.vi.md) — `iio_dev`, channel, triggered buffer, consumer trong kernel, ứng dụng IIO ở user space
+- [**Chương 16 — Pin controller và GPIO**](linux_device_driver_development/ch16_getting_the_most_out_of_the_pin_controller_and_gpio_subsystems.vi.md) — pin control, GPIO controller driver, GPIO consumer theo descriptor, libgpiod, GPIO aggregator
+- [**Chương 17 — Input subsystem**](linux_device_driver_development/ch17_leveraging_the_linux_kernel_input_subsystem.vi.md) — đăng ký input device, polled device, báo cáo input event, đọc event từ user space

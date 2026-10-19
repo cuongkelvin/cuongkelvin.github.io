@@ -1,0 +1,20 @@
+title: Linux Device Driver Development
+nav:
+  - 1. Introduction to Kernel Development: ch01_introduction_to_kernel_development.vi.md
+  - 2. Kernel Module Basic Concepts: ch02_understanding_linux_kernel_module_basic_concepts.vi.md
+  - 3. Kernel Core Helpers: ch03_dealing_with_kernel_core_helpers.vi.md
+  - 4. Character Device Drivers: ch04_writing_character_device_drivers.vi.md
+  - 5. The Device Tree: ch05_understanding_and_leveraging_the_device_tree.vi.md
+  - 6. Devices, Drivers and Platform Abstraction: ch06_introduction_to_devices_drivers_and_platform_abstraction.vi.md
+  - 7. Platform Devices and Drivers: ch07_understanding_the_concept_of_platform_devices_and_drivers.vi.md
+  - 8. I2C Device Drivers: ch08_writing_i2c_device_drivers.vi.md
+  - 9. SPI Device Drivers: ch09_writing_spi_device_drivers.vi.md
+  - 10. Kernel Memory Allocation: ch10_understanding_the_linux_kernel_memory_allocation.vi.md
+  - 11. Direct Memory Access (DMA): ch11_implementing_direct_memory_access_dma_support.vi.md
+  - 12. The Regmap API: ch12_abstracting_memory_access_introduction_to_the_regmap_api_a_register_map_abstraction.vi.md
+  - 13. The Kernel IRQ Framework: ch13_demystifying_the_kernel_irq_framework.vi.md
+  - 14. The Linux Device Model: ch14_introduction_to_the_linux_device_model.vi.md
+  - 15. The IIO Framework: ch15_digging_into_the_iio_framework.vi.md
+  - 16. Pin Controller and GPIO Subsystems: ch16_getting_the_most_out_of_the_pin_controller_and_gpio_subsystems.vi.md
+  - 17. The Input Subsystem: ch17_leveraging_the_linux_kernel_input_subsystem.vi.md
+  - ...
