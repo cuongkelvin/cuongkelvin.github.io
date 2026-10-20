@@ -1,0 +1,16 @@
+title: Expert C Programming
+nav:
+  - 0. Introduction: ch00_introduction.vi.md
+  - 1. C Through the Mists of Time: ch01_c_through_the_mists_of_time.vi.md
+  - "2. It's Not a Bug, It's a Language Feature": ch02_it_s_not_a_bug_it_s_a_language_feature.vi.md
+  - 3. Unscrambling Declarations in C: ch03_unscrambling_declarations_in_c.vi.md
+  - "4. The Shocking Truth: C Arrays and Pointers": ch04_the_shocking_truth_c_arrays_and_pointers.vi.md
+  - 5. Thinking of Linking: ch05_thinking_of_linking.vi.md
+  - 6. Runtime Data Structures: ch06_poetry_in_motion_runtime_data_structures.vi.md
+  - 7. Thanks for the Memory: ch07_thanks_for_the_memory.vi.md
+  - 8. Halloween vs Christmas Day: ch08_why_programmers_can_t_tell_halloween_from_christmas_day.vi.md
+  - 9. More About Arrays: ch09_more_about_arrays.vi.md
+  - 10. More About Pointers: ch10_more_about_pointers.vi.md
+  - "11. You Know C, So C++ is Easy": ch11_you_know_c_so_c_is_easy.vi.md
+  - A. Programmer Job Interviews: chA_secrets_of_programmer_job_interviews.vi.md
+  - ...
