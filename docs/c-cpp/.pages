@@ -2,4 +2,5 @@ title: C/C++
 nav:
   - index.md
   - expert_c_programming
+  - understanding_and_using_c_pointers
   - ...

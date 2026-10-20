@@ -19,3 +19,16 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách. Đi vào những
 - [**Chương 10 — Thêm về con trỏ**](expert_c_programming/ch10_more_about_pointers.vi.md) — bố cục mảng nhiều chiều, Iliffe vector, ragged array, truyền và trả mảng qua con trỏ, mảng động
 - [**Chương 11 — Từ C sang C++**](expert_c_programming/ch11_you_know_c_so_c_is_easy.vi.md) — lập trình hướng đối tượng, abstraction, encapsulation, class và method
 - [**Phụ lục A — Phỏng vấn lập trình viên**](expert_c_programming/chA_secrets_of_programmer_job_interviews.vi.md) — các câu hỏi phỏng vấn kinh điển về C và hệ thống
+
+## Theo sách *Understanding and Using C Pointers*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung hoàn toàn vào con trỏ và quản lý bộ nhớ trong C.
+
+- [**Chương 1 — Giới thiệu**](understanding_and_using_c_pointers/ch01_introduction.vi.md) — con trỏ và bộ nhớ, kích thước và kiểu của con trỏ, các toán tử, cách dùng phổ biến
+- [**Chương 2 — Quản lý bộ nhớ động**](understanding_and_using_c_pointers/ch02_dynamic_memory_management_in_c.vi.md) — cấp phát và giải phóng bộ nhớ, dangling pointer, các kỹ thuật quản lý bộ nhớ
+- [**Chương 3 — Con trỏ và hàm**](understanding_and_using_c_pointers/ch03_pointers_and_functions.vi.md) — stack và heap, truyền và trả về qua con trỏ, con trỏ hàm
+- [**Chương 4 — Con trỏ và mảng**](understanding_and_using_c_pointers/ch04_pointers_and_arrays.vi.md) — ký pháp con trỏ với mảng, mảng động bằng `malloc` và `realloc`, truyền mảng, mảng nhiều chiều
+- [**Chương 5 — Con trỏ và chuỗi**](understanding_and_using_c_pointers/ch05_pointers_and_strings.vi.md) — cơ bản về chuỗi, các thao tác chuẩn, truyền và trả chuỗi, con trỏ hàm với chuỗi
+- [**Chương 6 — Con trỏ và struct**](understanding_and_using_c_pointers/ch06_pointers_and_structures.vi.md) — giải phóng struct, giảm chi phí cấp phát, dùng con trỏ cho cấu trúc dữ liệu
+- [**Chương 7 — Bảo mật và lỗi dùng con trỏ**](understanding_and_using_c_pointers/ch07_security_issues_and_the_improper_use_of_pointers.vi.md) — khai báo và khởi tạo, các lỗi khi dùng và giải phóng, công cụ phân tích tĩnh
+- [**Chương 8 — Chủ đề khác**](understanding_and_using_c_pointers/ch08_odds_and_ends.vi.md) — ép kiểu con trỏ, aliasing và strict aliasing, thread, kỹ thuật hướng đối tượng

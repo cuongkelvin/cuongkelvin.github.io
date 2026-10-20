@@ -1,0 +1,11 @@
+title: Understanding and Using C Pointers
+nav:
+  - 1. Introduction: ch01_introduction.vi.md
+  - 2. Dynamic Memory Management in C: ch02_dynamic_memory_management_in_c.vi.md
+  - 3. Pointers and Functions: ch03_pointers_and_functions.vi.md
+  - 4. Pointers and Arrays: ch04_pointers_and_arrays.vi.md
+  - 5. Pointers and Strings: ch05_pointers_and_strings.vi.md
+  - 6. Pointers and Structures: ch06_pointers_and_structures.vi.md
+  - 7. Security Issues and Improper Use of Pointers: ch07_security_issues_and_the_improper_use_of_pointers.vi.md
+  - 8. Odds and Ends: ch08_odds_and_ends.vi.md
+  - ...
