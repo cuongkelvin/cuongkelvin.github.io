@@ -1,0 +1,15 @@
+title: Digital Design and Computer Architecture
+nav:
+  - 1. From Zero to One: ch01_from_zero_to_one.vi.md
+  - 2. Combinational Logic Design: ch02_combinational_logic_design.vi.md
+  - 3. Sequential Logic Design: ch03_sequential_logic_design.vi.md
+  - 4. Hardware Description Languages: ch04_hardware_description_languages.vi.md
+  - 5. Digital Building Blocks: ch05_digital_building_blocks.vi.md
+  - 6. Architecture: ch06_architecture.vi.md
+  - 7. Microarchitecture: ch07_microarchitecture.vi.md
+  - 8. Memory Systems: ch08_memory_systems.vi.md
+  - 9. Embedded I/O Systems: ch09_embedded_i_o_systems.vi.md
+  - A. Digital System Implementation: chA_digital_system_implementation.vi.md
+  - B. RISC-V Instruction Set Summary: chB_risc_v_instruction_set_summary.vi.md
+  - C. C Programming: chC_c_programming.vi.md
+  - ...
