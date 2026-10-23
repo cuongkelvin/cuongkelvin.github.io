@@ -88,7 +88,7 @@ BẢNG 6-1 Các directory Top-Level
 | `usr` | File system hierarchy thứ cấp cho chương trình ứng dụng, thường là read-only |
 | `var` | Chứa các file thay đổi, như system log và configuration file tạm thời |
 
-Đỉnh của Linux file system hierarchy được tham chiếu chỉ bằng ký tự slash (`/`). Ví dụ, để liệt kê nội dung root directory, bạn gõ:
+Đỉnh của Linux file system hierarchy được tham chiếu chỉ bằng ký tự slash (`/`). Ví dụ, để liệt kê nội dung root directory, bạn nhập lệnh sau:
 
 ```
 $ ls /
@@ -603,7 +603,7 @@ $ tree ./usr/myinitramfs_root/
 4 directories, 5 files
 ```
 
-Khi trỏ kernel configuration parameter `INITRAMFS_SOURCE` đến directory chứa file structure này, nó tự động tạo compressed cpio archive `initramfs` và link vào kernel image.
+Khi trỏ kernel configuration parameter `INITRAMFS_SOURCE` đến thư mục chứa cấu trúc file này, hệ thống tự động tạo compressed cpio archive `initramfs` và link archive đó vào kernel image.
 
 Cần lưu ý lý do có symlink `init`. Khi kernel được cấu hình cho `initramfs`, nó tìm executable file tên `/init` tại gốc image `initramfs`. Nếu tìm thấy, nó thực thi file đó làm process `init` với PID (process ID) bằng 1. Nếu không tìm thấy, nó bỏ qua `initramfs` và tiếp tục xử lý root file system bình thường. Logic này nằm trong `.../init/main.c`. Character pointer tên `ramdisk_execute_command` chứa pointer đến initialization command này. Theo mặc định, nó được đặt thành string `“/init”`.
 
@@ -621,7 +621,7 @@ Shutdown script nên kết thúc mọi user space process, dẫn đến đóng m
 
 Chương này trình bày tổng quan in-depth về khởi tạo user space trên hệ thống Linux kernel. Với kiến thức này, bạn có thể tùy chỉnh hành vi khởi động embedded system riêng.
 
-- Mọi hệ thống Linux đều cần root file system. Tạo từ đầu có thể khó vì dependency phức tạp của từng ứng dụng.
+- Mọi Linux system đều cần root file system. Việc tạo root file system từ đầu có thể khó khăn vì các dependency phức tạp của từng ứng dụng.
 
 - File System Hierarchy standard hướng dẫn lập trình viên bố trí file system để đạt tính tương thích và linh hoạt tối đa.
 

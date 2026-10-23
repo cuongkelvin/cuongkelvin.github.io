@@ -12,75 +12,75 @@
 
 - 17\.5 Tổng kết 485
 
-Khi Linux bắt đầu trên Intel i386 processor, không ai ngờ
+Khi Linux bắt đầu tồn tại trên Intel i386 processor, không ai ngờ đến
 
-thành công của Linux trong server application. Thành công ấy
+thành công mà Linux sẽ đạt được trong các server application. Thành công đó đã
 
-dẫn đến port Linux sang nhiều architecture và được dùng bởi
+dẫn đến việc Linux được port sang nhiều architecture khác nhau và được sử dụng bởi
 
-lập trình viên embedded system từ cellular handset tới telecommunications
+các lập trình viên cho embedded system, từ thiết bị cầm tay di động đến các telecommunications
 
 switch. Cách đây không lâu, nếu ứng dụng có yêu cầu real-time, bạn
 
-có lẽ không đưa Linux vào lựa chọn operating system.
+có thể đã không đưa Linux vào danh sách lựa chọn operating system.
 
-Điều đó đã đổi nhờ phát triển Linux real-time, được thúc đẩy phần
+Mọi chuyện đã thay đổi nhờ những bước phát triển của Linux real-time, được thúc đẩy phần
 
-lớn bởi ứng dụng audio, multimedia.
+lớn bởi các ứng dụng âm thanh và multimedia.
 
-Chương bắt đầu bằng lịch sử ngắn phát triển tính năng Linux real-time.
+Chương này bắt đầu bằng phần xem xét ngắn gọn lịch sử phát triển các tính năng real-time
 
-Sau đó xem tiện ích cho lập trình viên real-time
+của Linux. Sau đó, chúng ta xem xét các tiện ích dành cho lập trình viên real-time
 
-và cách dùng.
+và cách sử dụng những tiện ích đó.
 
 ## 17.1 Real time là gì?
 
-Hỏi năm người “real time” nghĩa gì, có lẽ nhận năm đáp án. Có người còn nêu con số. Trong thảo luận này sẽ xét nhiều tình huống rồi đề xuất định nghĩa. Nhiều yêu cầu được gọi soft real time, số khác hard real time.
+Nếu hỏi năm người “real time” nghĩa là gì, rất có thể bạn sẽ nhận được năm câu trả lời khác nhau. Một số người thậm chí có thể đưa ra những con số cụ thể. Để phục vụ phần thảo luận này, chúng ta sẽ xem xét nhiều tình huống rồi đề xuất một định nghĩa. Nhiều yêu cầu có thể được gọi là soft real time, trong khi những yêu cầu khác được gọi là hard real time.
 
 ### 17.1.1 Soft real time
 
-Phần lớn đồng ý soft real time nghĩa operation có deadline. Nếu trễ, chất lượng trải nghiệm giảm nhưng không chí mạng. Desktop workstation là ví dụ hoàn hảo yêu cầu soft real-time. Khi sửa tài liệu, mong thấy kết quả gõ trên màn hình ngay. Khi phát mp3 ưa thích, mong audio high-quality không tiếng click, pop hoặc ngắt quãng.
+Phần lớn mọi người đồng ý rằng soft real time nghĩa là một thao tác có deadline. Nếu không đáp ứng deadline, chất lượng trải nghiệm có thể giảm nhưng không gây hậu quả nghiêm trọng đến mức hệ thống thất bại. Desktop workstation của bạn là một ví dụ hoàn hảo về yêu cầu soft real-time. Khi chỉnh sửa tài liệu, bạn mong thấy ngay kết quả của các phím vừa gõ trên màn hình. Khi phát file mp3 yêu thích, bạn mong có âm thanh high-quality, không có tiếng lách tách, tiếng nổ lụp bụp hay những khoảng gián đoạn trong bản nhạc.
 
-Nhìn chung con người không thấy, nghe delay dưới vài chục millisecond. Tất nhiên nhạc sĩ nói delay nhỏ hơn vẫn ảnh hưởng nhạc. Nếu sự kiện soft real-time so-called này lỡ deadline, kết quả có thể không mong muốn, giảm “chất lượng” trải nghiệm nhưng không thảm họa.
+Nhìn chung, con người không thể nhìn hoặc nghe thấy độ trễ nhỏ hơn vài chục millisecond. Tất nhiên, các nhạc sĩ sẽ cho bạn biết rằng âm nhạc có thể bị ảnh hưởng bởi độ trễ còn nhỏ hơn thế. Nếu những sự kiện được gọi là soft real-time, hay so-called, này bỏ lỡ deadline, kết quả có thể không mong muốn và làm giảm “chất lượng” trải nghiệm, nhưng không gây hậu quả thảm khốc.
 
 ### 17.1.2 Hard real time
 
-Hard real time đặc trưng bởi hậu quả lỡ deadline. Trong hệ hard real-time, hậu quả thường thảm họa. Tất nhiên thảm họa là tương đối. Nếu embedded device điều khiển fuel flow của jet aircraft engine, lỡ deadline phản hồi pilot input hoặc thay đổi đặc tính vận hành có thể dẫn hậu quả tai hại.
+Hard real time được đặc trưng bởi hậu quả của việc bỏ lỡ deadline. Trong hệ thống hard real-time, nếu một deadline bị bỏ lỡ, hậu quả thường rất nghiêm trọng. Tất nhiên, mức độ nghiêm trọng là tương đối. Nếu thiết bị embedded của bạn đang điều khiển dòng nhiên liệu đến động cơ máy bay phản lực, việc không đáp ứng deadline để phản hồi thao tác của phi công hoặc thay đổi đặc tính vận hành có thể dẫn đến hậu quả tai hại.
 
-Chú ý thời lượng deadline không quyết định đặc tính real-time. Phục vụ tick atomic clock là ví dụ. Miễn xử lý tick trong cửa sổ 1-second trước tick tiếp, dữ liệu hợp lệ. Bỏ xử lý tick có thể làm GPS lệch nhiều foot, thậm chí mile!
+Lưu ý rằng khoảng thời gian của deadline không quyết định đặc tính real-time. Việc phục vụ tick của atomic clock là một ví dụ như vậy. Miễn là tick được xử lý trong khoảng thời gian 1-second trước tick tiếp theo, dữ liệu vẫn còn hợp lệ. Bỏ lỡ việc xử lý một tick có thể khiến hệ thống định vị toàn cầu của chúng ta sai lệch vài foot, thậm chí vài mile!
 
-Với điều này, dùng định nghĩa phổ biến soft/hard real time. Với soft real-time, giá trị computation/result giảm nếu trễ. Với hard real-time, theo định nghĩa chỉ lỡ một deadline cũng coi hệ thống thất bại, có thể hậu quả thảm họa.
+Từ những điều trên, chúng ta sử dụng một tập hợp định nghĩa phổ biến cho soft real time và hard real time. Với hệ thống soft real-time, giá trị của một phép tính hoặc kết quả giảm đi nếu không đáp ứng deadline. Với hệ thống hard real-time, theo định nghĩa, chỉ cần bỏ lỡ một deadline thì hệ thống đã bị xem là thất bại, và điều này có thể gây hậu quả thảm khốc.
 
 ### 17.1.3 Linux scheduling
 
-UNIX/Linux thiết kế công bằng process scheduling. Scheduler cố phân phối resource giữa mọi process cần CPU, bảo đảm tiến triển. Mục tiêu này trái yêu cầu real-time process. Process real-time phải được ưu tiên tuyệt đối khi ready. Real time nghĩa latency dự đoán, lặp lại được.
+UNIX và Linux đều được thiết kế để bảo đảm tính công bằng trong process scheduling. Nghĩa là scheduler cố gắng hết sức phân phối tài nguyên sẵn có cho tất cả process cần CPU và bảo đảm mỗi process đều có thể tiếp tục thực hiện công việc. Chính mục tiêu thiết kế này lại trái với yêu cầu của một real-time process. Một real-time process phải được ưu tiên tuyệt đối để chạy ngay khi sẵn sàng. Real time nghĩa là có latency dự đoán được và lặp lại được.
 
 ### 17.1.4 Latency
 
-Process Real-time thường gắn physical event như interrupt từ peripheral. Hình 17-1 minh họa latency component Linux. Bắt đầu đo khi nhận interrupt muốn xử lý, thời điểm t0. Sau đó interrupt diễn ra, quyền sang interrupt service routine (ISR), t1. Interrupt latency gần hoàn toàn do maximum interrupt off time[^1]—thời gian trong execution thread tắt hardware interrupt.
+Các Real-time process thường gắn với một sự kiện vật lý, chẳng hạn interrupt đến từ peripheral device. Hình 17-1 minh họa các thành phần latency trong một Linux system. Phép đo latency bắt đầu khi nhận được interrupt mà chúng ta muốn xử lý. Thời điểm này được biểu diễn bằng t0 trong Hình 17-1. Một khoảng thời gian sau, interrupt được thực hiện và quyền điều khiển được chuyển cho interrupt service routine (ISR), như thời điểm t1 biểu diễn. Interrupt latency này gần như hoàn toàn do maximum interrupt off time[^1] quyết định, tức thời gian dành cho một thread thực thi khi hardware interrupt bị vô hiệu hóa.
 
 ![Figure 17-1](images/ch17/fig17-01.png)
 
 HÌNH 17-1 Các latency component
 
-Giảm xử lý trong ISR thực là thực hành thiết kế tốt. Execution context này hạn chế (ISR không gọi blocking function có thể sleep). Vì vậy nên chỉ phục vụ hardware device, để xử lý dữ liệu cho Linux bottom half, còn gọi softirq. Có nhiều kiểu xử lý bottom-half, mô tả tốt nhất trong Linux Kernel Development của Robert Love; tham chiếu cuối chương.
+Giảm thiểu công việc xử lý trong ISR thực sự được xem là một thực hành thiết kế tốt. Thực tế, execution context này có khả năng hạn chế; chẳng hạn, ISR không thể gọi một blocking function, tức function có thể sleep. Vì vậy, nên chỉ phục vụ hardware device tại đây và dành việc xử lý dữ liệu cho Linux bottom half, còn được gọi là softirq. Có một số loại xử lý bottom-half; chúng được mô tả rõ nhất trong cuốn Linux Kernel Development của Robert Love. Hãy xem phần cuối chương này để tìm tài liệu tham khảo.
 
-Khi ISR/bottom half xong, thường wake user space process chờ data, t2 Hình 17-1. Sau đó scheduler chọn real-time process và giao CPU, t3. Scheduling latency chủ yếu ảnh hưởng bởi số process chờ CPU và priority. Đặt attribute Real Time (`SCHED_FIFO` hoặc `SCHED_RR`) ưu tiên hơn normal Linux process, cho được chọn tiếp, giả định là process real-time highest-priority chờ CPU. Process real-time highest-priority ready (không block I/O) luôn chạy. Sẽ thấy cách đặt attribute ngay sau.
+Khi ISR/bottom half hoàn tất xử lý, thông thường nó đánh thức một user space process đang chờ dữ liệu. Thời điểm này được biểu diễn bằng t2 trong Hình 17-1. Một khoảng thời gian sau, scheduler chọn real-time process để chạy và cấp CPU cho process đó. Thời điểm này được biểu diễn bằng t3 trong Hình 17-1. Scheduling latency chủ yếu chịu ảnh hưởng của số process đang chờ CPU và priority giữa chúng. Đặt thuộc tính Real Time cho một process (`SCHED_FIFO` hoặc `SCHED_RR`) cho nó priority cao hơn các Linux process thông thường và cho phép nó trở thành process tiếp theo được chọn để chạy, giả sử nó là real-time process có priority highest-priority đang chờ CPU. Process real-time highest-priority đang sẵn sàng chạy, không bị block vì I/O, sẽ luôn được chạy. Bạn sẽ sớm thấy cách đặt thuộc tính này.
 
 ## 17.2 Kernel preemption
 
-Thời Linux 1.x chưa có kernel preemption. Khi user space process request kernel service, không task khác được schedule tới khi process block (sleep) chờ gì đó (thường I/O) hoặc kernel request xong. Làm kernel preemptable[^2] nghĩa khi process chạy trong kernel, process khác preempt và chạy dù process đầu chưa xong xử lý in-kernel. Hình 17-2 minh họa.
+Trong thời kỳ đầu Linux 1.x, kernel preemption chưa tồn tại. Điều này có nghĩa là khi một user space process yêu cầu kernel service, không task nào khác có thể được schedule để chạy cho đến khi process đó block, tức sleep để chờ một điều gì đó, thường là I/O, hoặc cho đến khi yêu cầu đối với kernel hoàn tất. Làm cho kernel trở thành preemptable[^2] nghĩa là trong khi một process đang chạy trong kernel, process khác có thể preempt process thứ nhất và được phép chạy dù process thứ nhất chưa hoàn tất xử lý in-kernel. Hình 17-2 minh họa chuỗi sự kiện này.
 
 ![Figure 17-2](images/ch17/fig17-02.png)
 
 HÌNH 17-2 Kernel preemption
 
-Trong hình, Process A vào kernel qua system call, có thể `write()` tới console hoặc file. Khi kernel thực thi thay A, Process B priority cao hơn được interrupt wake. Kernel preempt A, giao CPU B, dù A chưa block, chưa xong kernel processing.
+Trong hình này, Process A đã đi vào kernel thông qua một system call. Đó có thể là lời gọi `write()` đến một device như console hoặc đến một file. Trong khi kernel đang thực thi thay cho Process A, một interrupt đánh thức Process B có priority cao hơn. Kernel preempt Process A và giao CPU cho Process B, dù Process A chưa block cũng chưa hoàn tất công việc xử lý trong kernel.
 
 ### 17.2.1 Trở ngại preemption
 
-Thách thức kernel fully preemptable là xác định mọi nơi phải bảo vệ khỏi preemption. Đây là critical section không được preempt. Ví dụ A Hình 17-2 đang file system operation trong kernel. Đến lúc code cần ghi in-kernel data structure biểu diễn file. Để tránh hỏng structure, phải khóa mọi process khác truy cập shared data structure. Listing 17-1 minh họa bằng cú pháp C.
+Thách thức khi làm kernel hoàn toàn preemptable là xác định tất cả vị trí trong kernel cần được bảo vệ khỏi preemption. Đó là những critical section trong kernel mà preemption không được phép xảy ra. Chẳng hạn, giả sử Process A trong Hình 17-2 đang thực thi một file system operation trong kernel. Tại một thời điểm nào đó, code có thể cần ghi vào một in-kernel data structure biểu diễn một file trên file system. Để bảo vệ data structure đó khỏi hỏng dữ liệu, process phải ngăn mọi process khác truy cập shared data structure này. Listing 17-1 minh họa khái niệm đó bằng cú pháp C.
 
 LISTING 17-1 Khóa critical section
 
@@ -95,17 +95,17 @@ LISTING 17-1 Khóa critical section
 ...
 ```
 
-Nếu không bảo vệ shared data như vậy, process cập nhật có thể bị preempt giữa chừng. Process khác thử cập nhật cùng shared data gần chắc chắn hỏng. Ví dụ kinh điển hai process thao tác trực tiếp common variable, quyết định dựa value. Hình 17-3 minh họa.
+Nếu không bảo vệ shared data theo cách này, process đang cập nhật shared data structure có thể bị preempt ngay giữa quá trình cập nhật. Nếu một process khác cố cập nhật cùng shared data, gần như chắc chắn dữ liệu sẽ bị hỏng. Ví dụ kinh điển là khi hai process thao tác trực tiếp trên các variable chung và đưa ra quyết định dựa trên giá trị của chúng. Hình 17-3 minh họa một trường hợp như vậy.
 
 ![Figure 17-3](images/ch17/fig17-03.png)
 
 HÌNH 17-3 Shared data concurrency error
 
-Hình 17-3, A bị interrupt sau update shared data nhưng trước quyết định dựa nó. Theo thiết kế A không phát hiện bị preempt. B đổi value trước A chạy lại. Thấy A quyết định theo value B xác định. Nếu không muốn hành vi này, phải tắt preemption ở A quanh shared data—ở đây operation, quyết định trên variable count.
+Trong Hình 17-3, Process A bị ngắt sau khi cập nhật shared data nhưng trước khi đưa ra quyết định dựa trên dữ liệu đó. Theo thiết kế, Process A không thể phát hiện mình đã bị preempt. Process B thay đổi giá trị shared data trước khi Process A được chạy lại. Như bạn có thể thấy, Process A sẽ đưa ra quyết định dựa trên giá trị do Process B xác định. Nếu đây không phải hành vi bạn muốn, bạn phải tắt preemption trong Process A ở phần thao tác với shared data; trong trường hợp này là thao tác và quyết định dựa trên variable count.
 
 ### 17.2.2 Preemption model
 
-Giải pháp đầu kernel preemption đặt check tại vị trí chiến lược biết an toàn preempt current execution thread: entry/exit system call, release một số kernel lock, return từ interrupt processing. Ở mỗi điểm dùng code tương tự Listing 17-2 để preempt.
+Giải pháp đầu tiên cho kernel preemption là đặt các phép kiểm tra tại những vị trí chiến lược trong kernel code, nơi biết chắc có thể preempt thread thực thi hiện tại một cách an toàn. Những vị trí này bao gồm lúc vào và ra khỏi system call, lúc giải phóng một số kernel lock và lúc trở về từ interrupt processing. Tại mỗi điểm này, code tương tự Listing 17-2 được dùng để thực hiện preemption.
 
 LISTING 17-2 Kiểm tra preemption theo Linux 2.4+ preempt patch
 
@@ -139,57 +139,57 @@ LISTING 17-2 Kiểm tra preemption theo Linux 2.4+ preempt patch
 ...
 ```
 
-Code snippet đầu Listing 17-2 (đơn giản hóa code thực) gọi tại vị trí chiến lược vừa nói, biết kernel an toàn preempt. Snippet thứ hai trong Listing 17-2 là code thực kernel Linux 2.4 đầu áp preempt patch. Loop `while` thú vị gây context switch qua `schedule()` tới khi đáp ứng mọi preemption request.
+Code snippet đầu tiên trong Listing 17-2, được đơn giản hóa từ code thực, được gọi tại những vị trí chiến lược đã mô tả ở trên, nơi biết chắc có thể preempt kernel an toàn. Code snippet thứ hai trong Listing 17-2 là code thực từ một Linux 2.4 kernel đời đầu đã áp dụng preempt patch. Vòng lặp `while` thú vị này tạo context switch thông qua lời gọi `schedule()` cho đến khi mọi yêu cầu preemption đều được đáp ứng.
 
-Dù giảm latency, cách này chưa lý tưởng. Người làm low latency sớm thấy cần “đảo logic”. Với model trước:
+Mặc dù cách tiếp cận này giúp giảm latency trong Linux system, nó chưa phải là lý tưởng. Các lập trình viên làm việc về latency thấp sớm nhận ra cần phải “đảo ngược logic”. Với các preemption model trước đây, chúng ta có cách tiếp cận sau:
 
-- Linux kernel cơ bản nonpreemptable.
+- Về cơ bản, Linux kernel là nonpreemptable.
 
-- Preemption check rải tại vị trí chiến lược biết an toàn.
+- Các phép kiểm tra preemption được bố trí rải rác trong kernel tại những vị trí chiến lược đã biết là an toàn cho preemption.
 
-- Chỉ bật preemption tại điểm known-safe.
+- Preemption chỉ được bật tại những điểm known-safe này.
 
-Muốn giảm latency thêm đáng kể, cần preemptable kernel:
+Để tiếp tục giảm latency một cách đáng kể, chúng ta muốn có những đặc điểm sau trong một preemptable kernel:
 
-- Linux kernel fully preemptable mọi nơi.
+- Linux kernel hoàn toàn preemptable ở mọi nơi.
 
 - Chỉ tắt preemption quanh critical section.
 
-Đây là hướng kernel developer từ original preemptable kernel patch series. Nhưng không dễ: xem toàn source code base, phân tích chính xác data cần bảo vệ concurrency, chỉ tắt preemption ở đó. Phương pháp là instrument kernel đo latency, tìm code path lâu nhất, sửa. Kernel Linux 2.6 mới hơn có thể cấu hình cho ứng dụng low-latency nhờ nỗ lực phương pháp “lock-breaking”.
+Đây là hướng các kernel developer đã theo đuổi kể từ loạt patch preemptable kernel ban đầu. Tuy nhiên, đây không phải công việc dễ dàng. Nó đòi hỏi xem xét kỹ toàn bộ kernel source code base, phân tích chính xác dữ liệu nào cần được bảo vệ trước truy cập đồng thời và chỉ tắt preemption tại những vị trí đó. Phương pháp được sử dụng là bổ sung công cụ đo latency vào kernel, tìm các code path có latency dài nhất rồi sửa chúng. Các Linux 2.6 kernel mới hơn có thể được cấu hình cho những ứng dụng low-latency nhờ nỗ lực dành cho phương pháp “lock-breaking” này.
 
 ### 17.2.3 SMP kernel
 
-Thú vị là nhiều việc tạo multiprocessor architecture hiệu quả cũng lợi real time. Symmetric multiprocessing (SMP) có nhiều CPU thường trên một board dùng chung memory, resource. Thách thức phức tạp hơn uniprocessor vì thêm concurrency cần bảo vệ. Uniprocessor chỉ một task thực thi trong kernel mỗi lúc, chỉ cần chống interrupt/exception processing. SMP có nhiều execution thread trong kernel ngoài nguy cơ interrupt/exception.
+Điều thú vị là phần lớn công việc để tạo một multiprocessor architecture hiệu quả cũng đem lại lợi ích cho real time. Symmetric multiprocessing (SMP) là một multiprocessing architecture trong đó nhiều CPU, thường nằm trên một board, dùng chung memory và các tài nguyên khác. Thách thức với SMP phức tạp hơn uniprocessor vì có thêm một yếu tố truy cập đồng thời cần bảo vệ. Trong uniprocessor model, mỗi thời điểm chỉ một task có thể thực thi trong kernel. Bảo vệ trước truy cập đồng thời chỉ đòi hỏi bảo vệ trước interrupt processing hoặc exception processing. Trong SMP model, ngoài nguy cơ từ interrupt processing và exception processing, còn có thể có nhiều thread thực thi đồng thời trong kernel.
 
-SMP hỗ trợ từ kernel Linux 2.x đầu. Big kernel lock (BKL) bảo vệ concurrency khi chuyển uniprocessor sang SMP. BKL là global spinlock ngăn task khác thực thi kernel. Trong Linux Kernel Development, Robert Love gọi BKL là “đứa con ghẻ tóc đỏ của kernel”. Khi mô tả, Robert đùa thêm “xấu xa” vào attribute!
+SMP đã được hỗ trợ từ những Linux 2.x kernel đời đầu. Một big kernel lock (BKL) được dùng để bảo vệ trước truy cập đồng thời trong quá trình chuyển từ uniprocessor sang hoạt động SMP. BKL là một global spinlock ngăn mọi task khác thực thi trong kernel. Trong cuốn Linux Kernel Development xuất sắc của mình, Robert Love mô tả BKL là “đứa con ghẻ tóc đỏ của kernel”. Khi mô tả các đặc điểm của BKL, Robert còn đùa bằng cách thêm “xấu xa” vào danh sách thuộc tính của nó!
 
-SMP kernel ban đầu dựa BKL gây scheduling kém hiệu quả đáng kể, một CPU có thể idle lâu. Nhiều việc tạo SMP hiệu quả cũng trực tiếp lợi ứng dụng real-time—chủ yếu hạ latency. Thay BKL bằng locking smaller-grained chỉ quanh shared data cần bảo vệ giảm đáng kể preemption latency.
+Các cách triển khai SMP kernel ban đầu dựa trên BKL gây ra sự kém hiệu quả đáng kể trong scheduling. Người ta nhận thấy một CPU có thể bị để idle trong thời gian dài. Phần lớn công việc tạo ra SMP kernel hiệu quả cũng trực tiếp đem lại lợi ích cho các ứng dụng real-time, chủ yếu là giảm latency. Thay BKL bằng locking smaller-grained chỉ bao quanh shared data thực sự cần bảo vệ đã giúp giảm đáng kể preemption latency.
 
 ### 17.2.4 Nguồn preemption latency
 
-Hệ real-time phải phục vụ task real-time trong upper time boundary chỉ định. Đạt preemption latency thấp nhất quán thiết yếu với hệ real-time. Hai đóng góp lớn nhất là xử lý interrupt-context, critical section tắt interrupt. Đã biết nỗ lực giảm kích thước (thời lượng) critical section. Còn interrupt-context là thách thức tiếp, được giải bằng Linux 2.6 real-time patch.
+Một hệ thống real-time phải có khả năng phục vụ các task real-time trong giới hạn thời gian tối đa đã chỉ định. Đạt được preemption latency thấp một cách nhất quán là điều thiết yếu đối với hệ thống real-time. Hai yếu tố đóng góp lớn nhất vào preemption latency là interrupt-context processing và việc xử lý critical section khi interrupt bị tắt. Bạn đã biết rằng rất nhiều nỗ lực được dành để giảm kích thước, từ đó giảm thời lượng, của các critical section. Vì vậy, interrupt-context processing trở thành thách thức tiếp theo. Linux 2.6 real-time patch đã giải quyết thách thức này.
 
 ## 17.3 Kernel patch Real-Time
 
-Hard real time vẫn chưa trong mainline kernel.org source tree. Muốn bật phải áp patch. Patch real-time kernel là kết quả tích lũy nhiều sáng kiến giảm latency, nhiều người đóng góp, hiện Ingo Molnar duy trì tại www.kernel.org/pub/linux/kernel/projects/rt/. Hiệu năng soft real-time kernel 2.6 tăng mạnh từ release đầu. Khi 2.6 mới ra, 2.4 tốt hơn đáng kể về soft real-time. Từ khoảng 2.6.12 dễ đạt soft real-time single-digit millisecond trên x86 khá nhanh. Latency lặp lại được cỡ microsecond cần real-time patch.
+Hỗ trợ hard real time vẫn chưa có trong mainline source tree của kernel.org. Muốn bật hard real time, bạn phải áp dụng một patch. Kernel patch real-time là kết quả tích lũy của một số sáng kiến giảm Linux kernel latency. Nhiều người đã đóng góp cho patch này; hiện tại Ingo Molnar duy trì nó và bạn có thể tìm tại www.kernel.org/pub/linux/kernel/projects/rt/. Hiệu năng soft real-time của Linux 2.6 kernel đã cải thiện đáng kể so với các bản phát hành 2.6 đầu tiên. Khi 2.6 vừa ra mắt, Linux 2.4 kernel có hiệu năng soft real-time tốt hơn đáng kể. Kể từ khoảng Linux 2.6.12, có thể dễ dàng đạt hiệu năng soft real-time trong khoảng single-digit millisecond trên một x86 processor đủ nhanh. Để có latency lặp lại được ở mức microsecond, cần sử dụng real-time patch.
 
-Patch real-time thêm nhiều tính năng quan trọng. Hình 17-4 cho configuration option Preemption mode sau patch real-time.
+Patch real-time bổ sung một số tính năng quan trọng cho Linux kernel. Hình 17-4 cho thấy các configuration option của Preemption mode sau khi áp dụng real-time patch.
 
 ![Figure 17-4](images/ch17/fig17-04.png)
 
 HÌNH 17-4 Preemption mode với real-time patch
 
-Patch real-time thêm mode thứ tư `PREEMPT_RT`, Preempt Real Time. Bốn mode:
+Patch real-time bổ sung một preemption mode thứ tư có tên `PREEMPT_RT`, hay Preempt Real Time. Bốn preemption mode như sau:
 
-- `PREEMPT_NONE`—Không forced preemption. Latency tổng tốt trung bình nhưng đôi khi delay dài. Hợp nhất khi overall throughput là tiêu chí hàng đầu.
+- `PREEMPT_NONE`—Không có forced preemption. Overall latency trung bình là tốt, nhưng đôi khi có thể xuất hiện độ trễ dài. Phù hợp nhất với ứng dụng lấy overall throughput làm tiêu chí thiết kế hàng đầu.
 
-- `PREEMPT_VOLUNTARY`—Bước giảm latency đầu. Thêm explicit preemption point tại vị trí chiến lược kernel. Đổi chút throughput lấy latency thấp.
+- `PREEMPT_VOLUNTARY`—Giai đoạn đầu tiên trong việc giảm latency. Các explicit preemption point bổ sung được đặt tại những vị trí chiến lược trong kernel để giảm latency. Một phần overall throughput được đánh đổi để có latency thấp hơn.
 
-- `PREEMPT_DESKTOP`—Bật preemption mọi nơi trừ critical section. Hữu ích ứng dụng soft real-time như audio, multimedia. Đổi throughput lấy latency thấp hơn.
+- `PREEMPT_DESKTOP`—Chế độ này bật preemption ở mọi nơi trong kernel, ngoại trừ khi đang xử lý bên trong critical section. Chế độ này hữu ích cho các ứng dụng soft real-time như âm thanh và multimedia. Overall throughput được đánh đổi để giảm latency hơn nữa.
 
-- `PREEMPT_RT`—Thêm tính năng patch real-time, gồm thay spinlock bằng preemptable mutex. Cho involuntary preemption mọi nơi trừ vùng `preempt_disable()` bảo vệ. Làm mượt mạnh biến thiên latency (jitter), cho latency thấp, dự đoán được với ứng dụng real-time time-critical.
+- `PREEMPT_RT`—Bổ sung các tính năng từ real-time patch, bao gồm thay spinlock bằng preemptable mutex. Điều này cho phép involuntary preemption ở mọi nơi trong kernel, ngoại trừ những vùng được bảo vệ bằng `preempt_disable()`. Chế độ này giảm đáng kể biến thiên latency (jitter), cho phép latency thấp và dự đoán được đối với các ứng dụng real-time time-critical.
 
-Nếu bật kernel preemption trong configuration, tắt lúc boot bằng parameter sau trên command line:
+Nếu kernel preemption được bật trong kernel configuration, bạn có thể tắt nó lúc boot bằng cách thêm kernel parameter sau vào kernel command line:
 
 ```
 preempt=0
@@ -197,15 +197,15 @@ preempt=0
 
 ### 17.3.1 Tính năng Real-Time
 
-Một số tính năng kernel mới bật với `CONFIG_PREEMPT_RT`. Hình 17-4 có setting mới. Những tính năng này và khác của real-time patch được mô tả đây.
+Một số tính năng Linux kernel mới được bật bằng `CONFIG_PREEMPT_RT`. Hình 17-4 cho thấy một số configuration setting mới. Các tính năng này cùng những tính năng khác của real-time Linux kernel patch được mô tả dưới đây.
 
-Patch real-time chuyển phần lớn spinlock thành mutex priority-inheritance. Giảm overall latency đổi thêm overhead xử lý spinlock (mutex), giảm throughput. Lợi ích chuyển là có thể preempt. Nếu A giữ lock, B priority cao hơn cần cùng lock, A có thể preempt B khi giữ mutex.
+Patch real-time chuyển phần lớn spinlock trong hệ thống thành mutex priority-inheritance. Điều này giảm overall latency nhưng làm tăng overhead xử lý spinlock (mutex), dẫn đến giảm overall system throughput. Lợi ích của việc chuyển spinlock thành mutex là chúng có thể bị preempt. Nếu Process A đang giữ một lock và Process B có priority cao hơn cần cùng lock đó, Process A có thể preempt Process B trong trường hợp nó đang giữ mutex.
 
-Chọn `CONFIG_PREEMPT_HARDIRQS`, ISR buộc chạy process context. Cho developer điều khiển priority ISR vì thành schedulable entity. Như vậy cũng preemptable cho interrupt hardware higher-priority xử lý trước. Vì schedule được, có thể gán priority như task khác theo yêu cầu.
+Khi chọn `CONFIG_PREEMPT_HARDIRQS`, các interrupt service routine (ISR) buộc phải chạy trong process context. Điều này cho lập trình viên quyền kiểm soát priority của ISR vì chúng trở thành những thực thể có thể được schedule. Vì thế, chúng cũng trở thành preemptable, cho phép hardware interrupt higher-priority được xử lý trước. Vì có thể được schedule, bạn có thể gán priority cho chúng tương tự các task khác dựa trên yêu cầu hệ thống.
 
-Tính năng mạnh. Một số hardware architecture không enforce interrupt priority. Loại có cũng có thể không khớp mục tiêu real-time. Dùng `CONFIG_PREEMPT_HARDIRQS` tự định nghĩa priority mỗi IRQ chạy.
+Đây là một tính năng mạnh mẽ. Một số hardware architecture không thực thi interrupt priority. Những kiến trúc có thực thi cũng có thể không áp dụng priority phù hợp với mục tiêu thiết kế real-time mà bạn chỉ định. Khi sử dụng `CONFIG_PREEMPT_HARDIRQS`, bạn có thể tự do xác định priority mà mỗi IRQ sẽ chạy.
 
-`CONFIG_PREEMPT_SOFTIRQS` giảm latency bằng chạy softirq trong context kernel softirq daemon (ksoftirqd). Ksoftirqd là Linux task (process) đúng nghĩa, có priority, schedule cùng task khác. Nếu kernel real time và bật `CONFIG_PREEMPT_SOFTIRQS`, task ksoftirqd nâng real-time priority xử lý softirq.[^3] Listing 17-3 cho code kernel gần đây trong `.../kernel/softirq.c`.
+`CONFIG_PREEMPT_SOFTIRQS` giảm latency bằng cách chạy softirq trong context của softirq daemon thuộc kernel, ksoftirqd. Ksoftirqd là một Linux task (process) đúng nghĩa, nên có thể được gán priority và schedule cùng các task khác. Nếu kernel được cấu hình cho real time và bật `CONFIG_PREEMPT_SOFTIRQS`, kernel task ksoftirqd được nâng lên real-time priority để xử lý softirq.[^3] Listing 17-3 cho thấy code đảm nhiệm việc này trong một Linux kernel gần đây, nằm tại `.../kernel/softirq.c`.
 
 LISTING 17-3 Nâng ksoftirqd lên trạng thái Real-Time
 
@@ -224,17 +224,17 @@ static int ksoftirqd(void * __data)
 ...
 ```
 
-Thấy kernel task `ksoftirqd` nâng thành real-time task (`SCHED_FIFO`) bằng kernel function `sys_sched_setscheduler()`.
+Ở đây, chúng ta thấy kernel task `ksoftirqd` được nâng thành real-time task (`SCHED_FIFO`) bằng kernel function `sys_sched_setscheduler()`.
 
 ### 17.3.2 O(1) scheduler
 
-O(1) scheduler có từ Linux 2.5. Nêu vì thiết yếu giải pháp real-time, cải tiến đáng kể scheduler cũ. Mở rộng tốt hơn với nhiều process, giúp overall latency thấp hơn.
+O(1) scheduler đã có từ thời Linux 2.5. Nó được đề cập ở đây vì là một thành phần thiết yếu của giải pháp real-time. O(1) scheduler là một cải tiến đáng kể so với Linux scheduler trước đó. Nó mở rộng tốt hơn cho hệ thống có nhiều process và giúp giảm overall latency.
 
-Nếu thắc mắc O(1) là ký hiệu toán cho hệ bậc một. Ở context này nghĩa thời gian scheduling decision không phụ thuộc số process trên runqueue. Scheduler cũ không có, hiệu năng giảm theo số process.[^4]
+Nếu bạn đang thắc mắc, O(1) là một ký hiệu toán học cho hệ bậc một. Trong ngữ cảnh này, nó có nghĩa là thời gian để đưa ra một scheduling decision không phụ thuộc vào số process trên một runqueue nhất định. Linux scheduler cũ không có đặc tính này và hiệu năng của nó suy giảm khi số process tăng lên.[^4]
 
 ### 17.3.3 Tạo process Real-Time
 
-Có thể đánh dấu process real time bằng process attribute scheduler dùng trong thuật toán. Listing 17-4 cho phương pháp chung.
+Bạn có thể chỉ định một process là real time bằng cách đặt một process attribute mà scheduler sử dụng trong scheduling algorithm. Listing 17-4 cho thấy phương pháp tổng quát.
 
 LISTING 17-4 Tạo process Real-Time
 
@@ -262,51 +262,51 @@ int main(int argc, char **argv)
 }
 ```
 
-Snippet làm hai việc trong `sched_setscheduler()`: đổi policy `SCHED_RR`, nâng priority tối đa hệ thống. Linux hỗ trợ ba policy:
+Code snippet này thực hiện hai việc trong lời gọi `sched_setscheduler()`: đổi scheduling policy thành `SCHED_RR` và nâng priority lên mức tối đa có thể trên hệ thống. Linux hỗ trợ ba scheduling policy:
 
 - `SCHED_OTHER`—Normal Linux process, fairness scheduling.
 
-- `SCHED_RR`—Process Real-time có time slice. Tức nếu không block, được chạy khoảng thời gian scheduler xác định.
+- `SCHED_RR`—Process Real-time có một time slice. Nói cách khác, nếu không block, nó được phép chạy trong một khoảng thời gian nhất định do scheduler xác định.
 
-- `SCHED_FIFO`—Process Real-time chạy đến block hoặc chủ động yield processor, hoặc process `SCHED_FIFO` higher-priority khác runnable.
+- `SCHED_FIFO`—Process Real-time chạy cho đến khi block, chủ động nhường processor hoặc cho đến khi một process `SCHED_FIFO` higher-priority khác trở thành runnable.
 
-Man page `sched_setscheduler()` có thêm chi tiết ba policy.
+Man page của `sched_setscheduler()` cung cấp thêm chi tiết về ba scheduling policy khác nhau.
 
 ## 17.4 Phân tích hiệu năng kernel Real-Time
 
-Instrumentation xem hiệu năng kernel real-time từng hơi tùy biến. Thời đó qua rồi. Ftrace thay cơ chế cũ khi bản đầu sách xuất bản. Bộ tracing tool mạnh cho xem chi tiết trong kernel. Documentation đầy đủ tại `.../Documentation/trace/ftrace.txt` trong source tree.
+Các công cụ để khảo sát hiệu năng real-time kernel từng mang tính tự phát phần nào. Thời kỳ đó đã qua. Ftrace đã thay thế những tracing mechanism cũ còn tồn tại khi ấn bản đầu của cuốn sách này được xuất bản. Ftrace là một tập hợp tracing tool mạnh mẽ, cho phép lập trình viên quan sát chi tiết những gì đang diễn ra bên trong kernel. Có thể tìm tài liệu đầy đủ về hệ thống Ftrace trong kernel source tree tại `.../Documentation/trace/ftrace.txt`.
 
 ### 17.4.1 Dùng Ftrace để tracing
 
-Phải bật Ftrace trong kernel configuration trước dùng. Hình 17-5 cho parameter liên quan từ release gần đây.
+Ftrace phải được bật trong kernel configuration trước khi có thể sử dụng. Hình 17-5 cho thấy các kernel configuration parameter liên quan từ một bản phát hành kernel gần đây.
 
 ![Figure 17-5](images/ch17/fig17-05.png)
 
 HÌNH 17-5 Kernel configuration cho Ftrace
 
-Ftrace có nhiều module. Nên chỉ chọn thứ cần cho test session vì mỗi loại thêm overhead kernel.
+Ftrace có nhiều module để lựa chọn. Bạn nên chỉ chọn những module có thể cần cho một phiên kiểm thử cụ thể, vì mỗi module đều tạo thêm một mức overhead cho kernel.
 
-Framework bật tracing qua interface export ra debugfs. Giả sử bật Ftrace đúng, phải mount debugfs như sau:
+Framework chung để bật tracing sử dụng interface được export ra debugfs file system. Giả sử bạn đã bật Ftrace đúng cách trong kernel configuration, bước tiếp theo là mount debugfs. Thực hiện việc này như sau:
 
 ```
 # mount -t debugfs debug /sys/kernel/debug
 ```
 
-Xong thấy directory dưới `/sys/kernel/debug` tên `tracing`. Directory `tracing` chứa mọi control, output source của Ftrace. Sẽ rõ khi tương tác các phần sau. Theo gợi ý kernel documentation, dùng symlink `/tracing` đơn giản hóa báo cáo, tương tác subsystem:
+Khi hoàn tất, bạn sẽ thấy một directory dưới `/sys/kernel/debug` có tên `tracing`. Directory `tracing` này chứa mọi control và output source cho dữ liệu Ftrace. Điều này sẽ rõ hơn khi chúng ta tương tác với hệ thống trong những phần sau. Theo gợi ý trong tài liệu kernel, chúng ta sẽ dùng một symlink có tên `/tracing` để đơn giản hóa việc báo cáo và tương tác với các Ftrace subsystem:
 
 ```
 # ln -s /sys/kernel/debug/tracing /tracing
 ```
 
-Từ đây tham chiếu `/tracing` thay path dài `/sys/kernel/debug/tracing`.
+Từ đây trở đi, chúng ta sẽ tham chiếu `/tracing` thay cho path dài hơn `/sys/kernel/debug/tracing`.
 
 ### 17.4.2 Đo preemption off latency
 
-Kernel dùng lời gọi tắt preemption khi xử lý critical shared data structure. Khi tắt, interrupt vẫn xảy ra nhưng process higher-priority không chạy được. Có thể profile preempt off time bằng preemptoff Ftrace.
+Kernel sử dụng các lời gọi để tắt preemption trong khi xử lý các shared data structure thiết yếu. Khi preemption bị tắt, interrupt vẫn có thể xảy ra, nhưng process higher-priority không thể chạy. Bạn có thể khảo sát thời gian preemption bị tắt bằng chức năng preemptoff của Ftrace.
 
-Bật đo bằng `PREEMPT_TRACER`, `PREEMPT_OFF_HIST` trong submenu Kernel hacking. Trace mode phát hiện latency path dài nhất khi tắt preemption.
+Để bật phép đo latency khi preemption bị tắt, hãy bật `PREEMPT_TRACER` và `PREEMPT_OFF_HIST` trong submenu Kernel hacking của kernel configuration. Trace mode này cho phép phát hiện những path có latency dài nhất khi preemption bị vô hiệu hóa.
 
-Phương pháp chung chuẩn bị Ftrace đo preemptoff:
+Phương pháp tổng quát để chuẩn bị Ftrace cho một phép đo preemptoff như sau:
 
 ```
 # echo preemptoff >/tracing/current_tracer
@@ -317,7 +317,7 @@ Phương pháp chung chuẩn bị Ftrace đo preemptoff:
 # echo 0 > /tracing/tracing_enable
 ```
 
-Listing 17-5 cho trace output từ chuỗi lệnh. Chú ý maximum latency 221 microsecond trong header.
+Listing 17-5 cho thấy trace output thu được từ chuỗi lệnh này. Hãy chú ý maximum latency 221 microsecond được hiển thị trong header.
 
 LISTING 17-5 Preemptoff trace
 
@@ -365,15 +365,15 @@ LISTING 17-5 Preemptoff trace
 221
 ```
 
-Chú ý hai dòng cuối Listing 17-5. Hiện maximum latency Ftrace ghi bằng nội dung `tracing_max_latency`. Giá trị luôn cập nhật maximum latency ghi được và output trace file (toàn Listing 17-5) tương ứng path qua hệ thống gắn latency dài nhất.
+Hãy chú ý hai dòng cuối Listing 17-5. Tại đây, chúng ta hiển thị giá trị maximum latency mà Ftrace ghi nhận bằng cách hiển thị nội dung `tracing_max_latency`. Giá trị này luôn được cập nhật theo maximum latency đã ghi nhận, còn output của trace file, tức toàn bộ nội dung Listing 17-5, tương ứng với path qua hệ thống gắn với latency dài nhất này.
 
 ### 17.4.3 Đo wakeup latency
 
-Phép đo quan trọng nhất với developer real-time là bao lâu task high-priority chạy sau được báo. Khi process real-time (attribute `SCHED_FIFO` hoặc `SCHED_RR`) chạy, theo định nghĩa chia sẻ processor với task khác. Khi event cần phục vụ, task real-time được wake, tức báo scheduler cần chạy. Wakeup timing từ wakeup event tới lúc task thực có CPU, bắt đầu chạy.
+Một trong những phép đo quan trọng nhất mà lập trình viên real-time quan tâm là mất bao lâu để task high-priority bắt đầu chạy sau khi được báo cần chạy. Khi một real-time process, tức process có scheduling attribute `SCHED_FIFO` hoặc `SCHED_RR`, chạy trong hệ thống, theo định nghĩa nó chia sẻ processor với các task khác. Khi có sự kiện cần phục vụ, real-time task được đánh thức. Nói cách khác, scheduler được thông báo rằng task đó cần chạy. Wakeup timing là khoảng thời gian từ wakeup event đến khi task thực sự được cấp CPU và bắt đầu chạy.
 
-Ftrace có trace facility wakeup, wakeup\_rt, ghi, trace latency dài nhất từ wake tới run khi tracer bật.
+Ftrace có các trace facility wakeup và wakeup\_rt. Khi tracer được bật, facility này ghi nhận và trace latency dài nhất từ lúc đánh thức đến lúc chạy.
 
-Listing 17-6 sinh từ C test program tạo, ghi file. Trước I/O, nâng thành `SCHED_RR` priority 99, setup tracing bằng write stdio tương tự lệnh shell:
+Listing 17-6 được tạo từ một chương trình kiểm thử C đơn giản có chức năng tạo và ghi một file. Trước khi thực hiện file I/O, chương trình kiểm thử tự nâng mình lên `SCHED_RR` với priority 99 và thiết lập tracing system bằng các thao tác ghi vào stdio, tương tự việc thực hiện các lệnh sau từ shell:
 
 ```
 # echo 0 > /tracing/tracing_enabled
@@ -382,7 +382,7 @@ Listing 17-6 sinh từ C test program tạo, ghi file. Trước I/O, nâng thàn
 # echo 1 > /tracing/tracing_enabled
 ```
 
-Sau test program gọi, tracing hoàn tất. Listing 17-6 cho kết quả, maximum wakeup latency 7 microsecond.
+Sau khi chương trình kiểm thử thực hiện các lệnh này, tracing đã hoàn tất. Listing 17-6 cho thấy kết quả. Chú ý rằng trong trường hợp này, maximum wakeup latency được báo cáo là 7 microsecond.
 
 LISTING 17-6 Wakeup timing trace
 
@@ -444,13 +444,13 @@ root@speedy:~# cat /tracing/trace
     sshd-1789    4d..3.    8us :   1789:120:R ==> [004]  6006:  0:R rt
 ```
 
-Khi chạy, test program làm file I/O rồi sleep, bảo đảm yield processor dù không block I/O. Trace Listing 17-6 thú vị: header cho PID 6006 priority 99, maximum latency 7 microsecond—rất chấp nhận được.
+Khi chạy, chương trình kiểm thử thực hiện file I/O rồi sleep. Điều này bảo đảm nó nhường processor ngay cả khi không block vì I/O. Trace trong Listing 17-6 khá thú vị. Từ header, bạn thấy chương trình kiểm thử chạy với PID 6006 và priority 99. Bạn cũng thấy maximum latency được báo cáo là 7 microsecond, chắc chắn là một giá trị rất chấp nhận được.
 
-Dòng đầu trace là wakeup event. Process PID 1789 (ssh daemon) đang chạy lúc đó. Trace cuối là context switch thực từ `sshd` sang test program PID 6006 RT priority. Dòng giữa là kernel path và relative time.
+Dòng đầu tiên của trace output là wakeup event. Một process có PID 1789, ssh daemon, đang chạy tại thời điểm đó. Trace cuối cùng là context switch thực sự từ `sshd` sang chương trình kiểm thử chạy với PID 6006 và RT priority. Các dòng giữa wakeup và context switch thể hiện kernel path đã đi qua cùng các thời điểm tương đối.
 
-Tham khảo subdirectory a`.../Documentation` của kernel source tree cho `trace/ftrace.txt` để thêm chi tiết.
+Tham khảo subdirectory a`.../Documentation` của Linux kernel source tree để tìm `trace/ftrace.txt` và biết thêm chi tiết.
 
-Maximum latency cung cấp riêng trong trace file khác. Để hiện maximum wakeup latency trong tracing run cụ thể, gọi:
+Maximum latency được cung cấp riêng trong một trace file khác. Để hiển thị maximum wakeup latency trong một lần tracing cụ thể, chỉ cần thực hiện lệnh sau:
 
 ```
 root@speedy:~# cat /tracing/tracing_max_latency
@@ -459,7 +459,7 @@ root@speedy:~# cat /tracing/tracing_max_latency
 
 ### 17.4.4 Interrupt off timing
 
-Muốn đo maximum interrupt off timing, bảo đảm bật `IRQSOFF_TRACER`. Option đo thời gian critical section tắt IRQ. Hoạt động như wakeup latency timing. Bật phép đo với root:
+Để bật phép đo thời gian tối đa interrupt bị tắt, hãy bảo đảm đã bật `IRQSOFF_TRACER` trong kernel configuration. Option này đo thời gian dành cho các critical section khi IRQ bị tắt. Tính năng này hoạt động giống phép đo wakeup latency. Để bật phép đo, thực hiện các bước sau với quyền root:
 
 ```
 # echo irqsoff >/tracing/current_tracer
@@ -470,47 +470,47 @@ Muốn đo maximum interrupt off timing, bảo đảm bật `IRQSOFF_TRACER`. Op
 # echo 0 > /tracing/tracing_enabled
 ```
 
-Đọc current maximum bằng hiện nội dung `/tracing/tracing_max_latency`:
+Để đọc giá trị maximum hiện tại, chỉ cần hiển thị nội dung của `/tracing/tracing_max_latency`:
 
 ```
 # cat /tracing/tracing_max_latency
 97
 ```
 
-Thấy wakeup, interrupt off latency cùng bật, hiển thị qua một file. Tức chỉ cấu hình một phép đo mỗi lần hoặc kết quả có thể sai. Vì thêm runtime overhead đáng kể, bật hết cùng lúc cũng không khôn ngoan.
+Bạn sẽ nhận thấy các phép đo wakeup latency và interrupt off latency đều được bật và hiển thị thông qua cùng một file. Tất nhiên, điều này có nghĩa là mỗi lần chỉ có thể cấu hình một phép đo, nếu không kết quả có thể không hợp lệ. Vì các phép đo này tạo thêm runtime overhead đáng kể, dù sao việc bật tất cả cùng lúc cũng không phải lựa chọn hợp lý.
 
 ### 17.4.5 Phát hiện soft lockup
 
-Bật `DETECT_SOFTLOCKUP` trong configuration để phát hiện thời gian dài kernel mode không context switch. Có trong kernel non-real-time nhưng hữu ích phát hiện path very-high-latency hoặc soft deadlock. Chỉ bật, theo dõi report console/system log. Report dạng:
+Để bật tính năng phát hiện soft lockup, hãy bật `DETECT_SOFTLOCKUP` trong kernel configuration. Tính năng này cho phép phát hiện những khoảng thời gian dài chạy trong kernel mode mà không có context switch. Nó tồn tại trong các kernel non-real-time nhưng hữu ích để phát hiện path very-high-latency hoặc tình trạng soft deadlock. Để sử dụng tính năng phát hiện soft lockup, chỉ cần bật tính năng và theo dõi các báo cáo trên console hoặc system log. Những báo cáo tương tự sau sẽ được phát ra:
 
 ```
 BUG: soft lockup detected on CPU0
 ```
 
-Khi kernel phát message thường kèm backtrace, thông tin như process name/PID. Giống kernel oops đầy đủ register. Xem `.../kernel/softlockup.c`. Dùng thông tin tìm nguồn lockup.
+Khi kernel phát thông báo này, thường sẽ kèm theo backtrace và các thông tin khác như process name và PID. Nó trông tương tự một kernel oops message, có đầy đủ processor register. Hãy xem `.../kernel/softlockup.c` để biết chi tiết. Thông tin này có thể được dùng để hỗ trợ tìm ra nguồn gốc tình trạng lockup.
 
 ## 17.5 Tổng kết
 
-Linux ngày càng dùng nơi cần real-time performance: multimedia, robot controller, industrial controller, automotive controller. Chương trình bày khái niệm nền, kỹ thuật phân tích giúp phát triển, debug ứng dụng real-time.
+Linux ngày càng được sử dụng trong những hệ thống đòi hỏi hiệu năng real-time. Ví dụ bao gồm các ứng dụng multimedia và bộ điều khiển robot, công nghiệp, ô tô. Chương này trình bày các khái niệm nền tảng và kỹ thuật phân tích để giúp bạn phát triển và debug ứng dụng real-time.
 
-- Hệ Real-time đặc trưng deadline. Lỡ deadline gây bất tiện, giảm trải nghiệm là soft real time. Ngược lại hard real-time coi thất bại khi lỡ deadline.
+- Hệ thống Real-time được đặc trưng bởi deadline. Khi bỏ lỡ deadline chỉ gây bất tiện hoặc làm giảm trải nghiệm khách hàng, đó được gọi là soft real time. Ngược lại, hệ thống hard real-time được xem là thất bại khi bỏ lỡ deadline.
 
-- Kernel preemption là tính năng lớn đầu trong Linux kernel xử lý latency system-wide.
+- Kernel preemption là tính năng quan trọng đầu tiên trong Linux kernel giải quyết latency system-wide.
 
-- Kernel gần đây hỗ trợ nhiều preemption mode từ không tới full real-time.
+- Các Linux kernel gần đây hỗ trợ một số preemption mode, từ không có preemption đến preemption real-time đầy đủ.
 
-- Patch real-time thêm tính năng then chốt cho latency thấp đáng tin.
+- Patch real-time bổ sung một số tính năng then chốt cho Linux kernel, mang lại latency thấp và đáng tin cậy.
 
-- Patch real-time có công cụ đo quan trọng giúp debug, mô tả implementation Linux real-time.
+- Patch real-time bao gồm một số công cụ đo quan trọng để hỗ trợ debug và xác định đặc tính của một cách triển khai Linux real-time.
 
 ### 17.5.1 Gợi ý đọc thêm
 
 Linux Kernel Development, 3rd Edition Robert Love Addison-Wesley, 2010 Trang này được cố ý để trống
 
-[^1]: Bỏ qua context switching time interrupt vì thường không đáng kể so interrupt off time.
+[^1]: Chúng ta bỏ qua context switching time cho interrupt processing vì nó thường không đáng kể so với interrupt off time.
 
-[^2]: Thú vị là có nhiều tranh luận viết preemptable thế nào đúng! Tôi theo khảo sát Rick Lehrbaum tại www.linuxdevices.com/articles/AT5136316996.html.
+[^2]: Điều thú vị là có nhiều tranh luận về cách viết đúng của preemptable! Tôi chọn theo khảo sát do Rick Lehrbaum thực hiện tại www.linuxdevices.com/articles/AT5136316996.html.
 
-[^3]: Xem Linux Kernel Development cuối chương để học thêm softirq.
+[^3]: Hãy xem Linux Kernel Development, được dẫn ở cuối chương này, để tìm hiểu thêm về softirq.
 
-[^4]: Lại giới thiệu sách Robert Love cho thảo luận tuyệt vời O(1) scheduler và phê phán thú vị algorithmic complexity, nguồn ký hiệu O(1).
+[^4]: Một lần nữa, chúng tôi giới thiệu cuốn sách của Robert Love với phần thảo luận xuất sắc về O(1) scheduler và bài phê bình thú vị về algorithmic complexity, nguồn gốc của ký hiệu O(1).

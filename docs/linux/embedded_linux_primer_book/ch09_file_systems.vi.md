@@ -140,7 +140,7 @@ Listing 9-2 chứa nhiều chi tiết liên quan ext2 file system. Đây là cá
 
 Nhìn output `mkfs.ext2` trong Listing 9-2, có thể xác định một số đặc tính tổ chức storage device. Chúng ta đã biết block size 1024 byte. Nếu ứng dụng cụ thể cần, có thể yêu cầu `mkfs.ext2` format ext2 file system với block size khác. Implementation hiện tại cho phép block size 1.024, 2.048 và 4.096 block.
 
-Block size luôn là sự cân đối để đạt hiệu năng tốt nhất. Một mặt, block size lớn lãng phí dung lượng hơn trên disk chứa nhiều file nhỏ, vì mỗi file phải vừa số nguyên block. Mọi phần dư trên `block_size *` `n` phải chiếm thêm một block đầy đủ, dù chỉ 1 byte. Mặt khác, block size rất nhỏ tăng overhead quản lý metadata mô tả mapping block-to-file. Benchmark trên hardware implementation và data format cụ thể là cách duy nhất chắc chắn chọn block size tối ưu.
+Việc chọn block size luôn là sự cân đối để đạt hiệu năng tốt nhất. Một mặt, block size lớn gây lãng phí nhiều dung lượng hơn trên disk có nhiều file nhỏ vì mỗi file phải chiếm một số nguyên block. Bất kỳ phần dư nào vượt quá `block_size *` `n` đều phải chiếm thêm một block đầy đủ, dù phần dư chỉ có 1 byte. Mặt khác, block size rất nhỏ làm tăng overhead của file system trong việc quản lý metadata mô tả mapping block-to-file. Chạy benchmark trên hardware implementation và các data format cụ thể của bạn là cách duy nhất để chắc chắn đã chọn block size tối ưu.
 
 ### 9.2.1 Mount file system
 
@@ -181,7 +181,7 @@ Listing 9-3 là ví dụ hình dạng root file system của embedded system t�
 
 ### 9.2.2 Kiểm tra tính toàn vẹn file system
 
-Lệnh `e2fsck` dùng kiểm tra tính toàn vẹn ext2 file system. File system có thể hỏng vì nhiều lý do. Phổ biến nhất là mất nguồn bất ngờ. Linux distribution đóng mọi file đang mở và unmount file system trong shutdown sequence (giả định shutdown có trình tự). Tuy nhiên với embedded system, power-downs bất ngờ thường xảy ra, nên cần biện pháp phòng vệ. `e2fsck` là tuyến phòng vệ đầu.
+Lệnh `e2fsck` được dùng để kiểm tra tính toàn vẹn của ext2 file system. File system có thể bị hỏng vì nhiều lý do, trong đó phổ biến nhất là mất nguồn bất ngờ. Các Linux distribution đóng tất cả file đang mở và unmount các file system trong shutdown sequence (giả sử hệ thống được shutdown có trình tự). Tuy nhiên, với embedded system, các lần power-downs bất ngờ thường xảy ra nên chúng ta cần có biện pháp phòng vệ cho những trường hợp này. `e2fsck` là tuyến phòng vệ đầu tiên.
 
 Listing 9-4 cho output `e2fsck` chạy trên CompactFlash của các ví dụ trước. Nó đã được format và unmount đúng, nên không nên có lỗi.
 
@@ -217,11 +217,11 @@ Pass 5: Checking group summary information
 #
 ```
 
-Từ Listing 9-5, bạn thấy `e2fsck` phát hiện CompactFlash không được unmount sạch. Hơn nữa thấy xử lý trên file system trong quá trình `e2fsck` kiểm tra. Tiện ích `e2fsck` đi qua file system năm lượt, kiểm tra các phần khác nhau của data structure nội bộ. Lỗi gắn với file có inode[^4] 13 được sửa tự động vì có flag `-y` trên command line `e2fsck`.
+Từ Listing 9-5, bạn có thể thấy `e2fsck` phát hiện CompactFlash không được unmount sạch. Bạn cũng có thể thấy quá trình xử lý file system trong khi `e2fsck` kiểm tra. Tiện ích `e2fsck` thực hiện năm lượt duyệt file system để kiểm tra các thành phần khác nhau của những data structure bên trong file system. Một lỗi liên quan đến file được xác định bởi inode[^4] 13 đã được sửa tự động vì flag `-y` có mặt trên command line của `e2fsck`.
 
 Tất nhiên trong hệ thống thực có thể không may như vậy. Một số lỗi file system không thể sửa bằng `e2fsck`. Người thiết kế embedded system cần hiểu nếu mất nguồn không shutdown đúng, boot cycle có thể bị chậm bởi thời gian scan boot device và sửa lỗi. Thực tế, nếu lỗi không sửa được, system boot dừng và cần can thiệp thủ công. Hơn nữa, nếu file system lớn, file system check (`fsck`) có thể mất nhiều phút, thậm chí nhiều giờ với file system nhiều gigabyte.
 
-Biện pháp khác chống hỏng file system là bảo đảm write được commit xuống disk ngay khi ghi. Tiện ích `sync` có thể ép mọi I/O request trong queue được commit vào device tương ứng. Một chiến lược giảm khoảng dễ hỏng dữ liệu vì mất nguồn hoặc drive failure bất ngờ là gọi lệnh `sync` sau mỗi lần ghi file, hoặc ở thời điểm chiến lược theo yêu cầu ứng dụng. trade-off tất nhiên là mất hiệu năng. Hoãn disk write là tối ưu hiệu năng trong mọi operating system hiện đại. Dùng `sync` thực chất vô hiệu hóa tối ưu này.
+Một biện pháp khác để phòng tránh hỏng file system là bảo đảm các thao tác ghi được commit xuống disk ngay khi thực hiện. Tiện ích `sync` có thể được dùng để buộc tất cả I/O request đang nằm trong queue được commit xuống các device tương ứng. Một chiến lược giảm thiểu khoảng thời gian dữ liệu dễ bị hỏng do mất nguồn hoặc drive failure bất ngờ là gọi lệnh `sync` sau mỗi lần ghi file, hoặc tại các thời điểm được lựa chọn theo yêu cầu ứng dụng. Sự trade-off ở đây tất nhiên là suy giảm hiệu năng. Trì hoãn ghi disk là biện pháp tối ưu hiệu năng được dùng trong mọi operating system hiện đại. Sử dụng `sync` về thực chất vô hiệu hóa biện pháp tối ưu này.
 
 Ext2 file system đã trưởng thành thành file system nhanh, hiệu quả, vững chắc cho Linux system. Tuy nhiên nếu cần độ tin cậy bổ sung của journaling file system, hoặc boot time sau shutdown không sạch là vấn đề thiết kế, nên cân nhắc ext3 file system.
 
@@ -229,9 +229,9 @@ Ext2 file system đã trưởng thành thành file system nhanh, hiệu quả, v
 
 Ext3 file system đã trở thành journaling file system mạnh, high-performance và vững chắc. Hiện nó là file system mặc định của nhiều desktop Linux distribution phổ biến.
 
-Về cơ bản ext3 là phần mở rộng ext2 với journaling bổ sung. Journaling là kỹ thuật ghi log từng thay đổi file system vào file đặc biệt để khôi phục được từ journaling point đã biết. Ưu điểm chính của ext3 là mount được ngay sau shutdown không sạch. Như phần trước, khi hệ thống tắt bất ngờ, chẳng hạn mất điện, hệ thống ép kiểm tra tính nhất quán file system, có thể lâu. Với ext3 không cần consistency check vì chỉ cần phát lại journal để bảo đảm tính nhất quán.
+Về cơ bản, ext3 file system là phần mở rộng của ext2 file system với khả năng journaling bổ sung. Journaling là kỹ thuật ghi lại mỗi thay đổi của file system vào một file đặc biệt để có thể khôi phục từ các journaling point đã biết. Một ưu điểm chính của ext3 file system là khả năng được mount ngay sau một lần shutdown không sạch. Như đã nêu trong mục trước, khi hệ thống tắt bất ngờ, chẳng hạn do mất điện, hệ thống buộc phải kiểm tra tính nhất quán của file system; đây có thể là một thao tác kéo dài. Với ext3 file system, không cần kiểm tra tính nhất quán vì chỉ cần phát lại journal để bảo đảm file system nhất quán.
 
-Không đi sâu thiết kế ngoài phạm vi sách, chúng ta giải thích nhanh journaling file system hoạt động thế nào. Nó chứa file đặc biệt, thường ẩn với user, lưu file system metadata[^5] và chính file data. File đặc biệt gọi là journal. Khi file system thay đổi (như write operation), thay đổi được ghi trước vào journal. File system driver bảo đảm write này được commit vào journal trước khi thay đổi thực được đưa và commit vào storage medium (disk hoặc Flash). Sau khi ghi log vào journal, driver áp dụng thay đổi lên file thực và metadata trên medium. Nếu mất nguồn khi ghi media và reboot, chỉ cần phát lại thay đổi trong journal để khôi phục tính nhất quán file system.
+Không đi sâu vào các chi tiết thiết kế nằm ngoài phạm vi cuốn sách, chúng ta sẽ giải thích ngắn gọn cách journaling file system hoạt động. Journaling file system chứa một file đặc biệt, thường được ẩn khỏi user, dùng để lưu file system metadata[^5] và chính dữ liệu của file. File đặc biệt này được gọi là journal. Mỗi khi file system có thay đổi (chẳng hạn một thao tác ghi), các thay đổi được ghi vào journal trước. File system driver bảo đảm thao tác ghi này được commit vào journal trước khi các thay đổi thực được đưa đến và commit vào môi trường lưu trữ, chẳng hạn disk hoặc Flash. Sau khi các thay đổi được ghi nhận trong journal, driver áp dụng chúng lên file thực và metadata trên môi trường lưu trữ. Nếu mất nguồn trong lúc ghi vào môi trường lưu trữ rồi hệ thống reboot, chỉ cần phát lại các thay đổi trong journal để khôi phục tính nhất quán của file system.
 
 Một mục tiêu thiết kế quan trọng nhất của ext3 là tương thích backward- và forward-compatible với ext2. Có thể chuyển ext2 sang ext3 rồi ngược lại mà không format hoặc ghi lại toàn bộ dữ liệu disk. Hãy xem cách thực hiện.[^6] Listing 9-6 trình bày chi tiết quy trình.
 
@@ -272,7 +272,7 @@ drwxr-xr-x   2 root root    1024 Aug 14 11:27 usr
 drwxr-xr-x   2 root root    1024 Aug 14 11:27 var
 ```
 
-Giờ đã tạo journal file trên Flash module, nó thực chất được format thành ext3 file system. Lần reboot tiếp hoặc chạy `e2fsck` trên partition chứa ext3 mới, journal file tự động trở nên vô hình. Metadata lưu trong inode dành riêng cho mục đích đó. Chừng nào file `.journal` còn thấy trong directory listing, sửa hoặc xóa nó là nguy hiểm.
+Sau khi tạo journal file trên Flash module, về thực chất chúng ta đã format module thành một ext3 file system. Ở lần reboot tiếp theo, hoặc khi tiện ích `e2fsck` được chạy trên partition chứa ext3 file system vừa tạo, journal file sẽ tự động được ẩn đi. Metadata của nó được lưu trong một inode dành riêng cho mục đích này. Chừng nào file `.journal` còn xuất hiện trong directory listing, việc sửa đổi hoặc xóa file này vẫn nguy hiểm.
 
 Có thể và đôi khi có lợi khi tạo journal file trên device khác. Ví dụ nếu hệ thống có hơn một physical device, đặt ext3 journaling file system trên drive đầu và journal file trên drive thứ hai. Phương pháp hoạt động dù physical storage dựa trên Flash hay rotational media. Để tạo journaling file system từ ext2 hiện có với journal file ở partition riêng, gọi `tune2fs` như sau:
 
@@ -304,13 +304,13 @@ Reiser4 triển khai file system operation “atomic” high-performance nhằm 
 
 Flash memory được dùng rộng trong sản phẩm embedded. Do bản chất công nghệ, nó vốn kém hiệu quả hơn và dễ hỏng dữ liệu do mất nguồn hơn. Nguyên nhân là write time lớn hơn nhiều. Sự kém hiệu quả đến từ block size. Block size của Flash memory device thường tính bằng hàng chục hoặc hàng trăm kilobyte. Flash memory chỉ xóa được từng block, dù write thường thực thi từng byte hoặc word. Để cập nhật một file, phải xóa và ghi lại cả block.
 
-Ai cũng biết phân bố kích thước file trên Linux machine (hay OS khác) có nhiều file nhỏ hơn file lớn. Histogram trong Hình 9-2, tạo bằng `gnuplot`, minh họa phân bố kích thước file trên Linux development system điển hình.
+Một điều được biết rõ là phân bố kích thước file trên một máy Linux bất kỳ (hoặc OS khác) có số lượng file nhỏ nhiều hơn rất nhiều so với file lớn. Histogram trong Hình 9-2, được tạo bằng `gnuplot`, minh họa phân bố kích thước file trên một Linux development system điển hình.
 
 ![Figure 9-2](images/ch09/fig09-02.png)
 
 HÌNH 9-2 Kích thước file theo byte
 
-Hình 9-2 cho thấy phần lớn kích thước file thấp hơn nhiều so với khoảng 5KB. Đỉnh tại 4096 biểu diễn directory. Directory entry (bản thân cũng là file) dài đúng 4096 byte và có rất nhiều. Đỉnh trên 40.000 byte là hệ quả phép đo: đếm số file lớn hơn khoảng 40KB, điểm cuối khoảng đo. Điều thú vị là đại đa số file rất nhỏ.
+Hình 9-2 cho thấy phần lớn file có kích thước nhỏ hơn nhiều so với khoảng 5KB. Đỉnh tại 4096 biểu diễn các directory. Các directory entry (bản thân chúng cũng là file) có chiều dài đúng 4096 byte, và có rất nhiều entry như vậy. Đỉnh phía trên 40.000 byte là hệ quả của phương pháp đo: nó đếm số file lớn hơn khoảng 40KB, tức điểm cuối của khoảng đo. Điều đáng chú ý là đại đa số file đều rất nhỏ.
 
 File nhỏ tạo thách thức riêng cho người thiết kế Flash file system. Vì Flash memory phải xóa cả block mỗi lần, và Flash block thường lớn gấp nhiều lần file nhỏ, Flash chịu các operation ghi lại block time-consuming. Ví dụ giả sử Flash block 128KB chứa vài chục file 4096 byte hoặc nhỏ hơn. Giờ giả sử một file cần sửa. Điều này khiến Flash file system invalidate cả block 128KB rồi ghi lại mọi file sang block mới xóa. Quá trình có thể time-consuming.
 
@@ -318,7 +318,7 @@ Vì Flash write có thể time-consuming (chậm hơn hard disk write nhiều), 
 
 Đây là lúc Journaling Flash File System second-generation (JFFS2) xuất hiện. Những vấn đề vừa thảo luận và vấn đề khác phần lớn được giảm hoặc loại bỏ bởi thiết kế JFFS2. JFFS ban đầu do Axis Communications AB của Thụy Điển thiết kế, nhắm riêng Flash memory device phổ biến lúc đó. JFFS hiểu Flash architecture và quan trọng hơn, giới hạn architecture do device áp đặt.
 
-Vấn đề khác của Flash file system là Flash memory có tuổi thọ giới hạn. Flash memory device điển hình được đặc tả tối thiểu 100.000 write cycle, gần đây device 1,000,000-cycle trở nên phổ biến. Đặc tả áp dụng cho từng block Flash device. Giới hạn khác thường đặt yêu cầu trải đều write trên các block Flash memory device. JFFS2 dùng kỹ thuật wear leveling để thực hiện.
+Một vấn đề khác của Flash file system là Flash memory có tuổi thọ hữu hạn. Flash memory device điển hình được quy định chịu được tối thiểu 100.000 write cycle; gần đây, các device 1,000,000-cycle đã trở nên phổ biến. Thông số này áp dụng cho từng block của Flash device. Giới hạn đặc biệt đó đặt ra yêu cầu phải phân bổ các thao tác ghi đồng đều giữa các block của Flash memory device. JFFS2 sử dụng kỹ thuật gọi là wear leveling để thực hiện chức năng này.
 
 ### 9.6.1 Build JFFS2 image
 
@@ -351,7 +351,7 @@ drwxr-xr-x  2 root root 4096 Aug 14 11:27 var
 $
 ```
 
-Khi có runtime file phù hợp, directory layout này dùng làm mẫu cho lệnh `mkfs.jffs2`. Lệnh `mkfs.jffs2` tạo JFFS2 file system image format đúng từ directory tree như Listing 9-8. Các parameter Command-line truyền cho `mkfs.jffs2` vị trí directory và tên output file nhận JFFS2 image. Mặc định tạo image từ current directory. Listing 9-9 cho lệnh build JFFS2 image.
+Khi được bổ sung đầy đủ các runtime file thích hợp, directory layout này có thể được dùng làm mẫu cho lệnh `mkfs.jffs2`. Lệnh `mkfs.jffs2` tạo ra một JFFS2 file system image được format đúng từ một directory tree như trong Listing 9-8. Các parameter Command-line được dùng để truyền cho `mkfs.jffs2` vị trí directory cũng như tên output file sẽ chứa JFFS2 image. Mặc định, JFFS2 image được tạo từ current directory. Listing 9-9 trình bày lệnh build JFFS2 image.
 
 LISTING 9-9 Ví dụ lệnh `mkfs.jffs2`
 
@@ -366,7 +366,7 @@ drwxr-xr-x  13 root  root      4096 Sep 17 22:02 jffs2-image-dir
 
 Directory structure và file của Listing 9-8 nằm trong directory `jffs2-image-dir` ở ví dụ. Chúng ta tùy chọn thực thi lệnh `mkfs.jffs2` từ directory bên trên file system image. Dùng flag `-d` báo lệnh `mkfs.jffs2` vị trí file system template. Dùng flag `-o` đặt tên output file nhận JFFS2 image kết quả. Image `jffs2.bin` được dùng trong Chương 10, “MTD subsystem”, khi khảo sát JFFS2 file cùng MTD subsystem.
 
-Cần chỉ ra mọi file system Flash-based hỗ trợ write operation đều chịu điều kiện có thể làm Flash device bên dưới hỏng sớm. Ví dụ bật system logger (`syslogd` và `klogd`) cấu hình ghi dữ liệu vào file system Flash-based dễ làm Flash device quá tải bởi write liên tục. Một số loại lỗi chương trình cũng dẫn đến write liên tục. Cần cẩn thận giới hạn Flash write trong tuổi thọ Flash device.
+Cần lưu ý rằng bất kỳ file system Flash-based nào hỗ trợ thao tác ghi cũng có thể gặp những điều kiện khiến Flash device bên dưới hỏng sớm. Ví dụ, bật các system logger (`syslogd` và `klogd`) được cấu hình ghi dữ liệu vào file system Flash-based có thể dễ dàng khiến Flash device phải chịu các thao tác ghi liên tục quá mức. Một số loại lỗi chương trình cũng có thể dẫn đến ghi liên tục. Cần cẩn thận giới hạn lượng ghi Flash ở mức phù hợp với tuổi thọ của Flash device.
 
 ## 9.7 cramfs
 
@@ -399,7 +399,7 @@ warning: gids truncated to 8 bits (this may be a security concern)
 -rw-rw-r--  1 chris chris 1019904 Sep 19 18:06 ../cramfs.image
 ```
 
-Lệnh `mkcramfs` ban đầu gọi không có command-line parameter để tái hiện usage message. Vì không có man page, đây là cách tốt nhất hiểu cách dùng. Sau đó gọi lệnh với current directory (`.)` làm nguồn file cho file system `cramfs`, và file tên `cramfs.image` làm đích. Cuối cùng liệt kê file vừa tạo và thấy file mới `cramfs.image`.
+Ban đầu, lệnh `mkcramfs` được gọi mà không có parameter command-line nào để hiển thị lại usage message. Vì tiện ích này không có man page, đây là cách tốt nhất để hiểu cách sử dụng nó. Sau đó, chúng ta gọi lệnh với current directory (`.)` làm nguồn các file cho file system `cramfs`, và file có tên `cramfs.image` làm đích. Cuối cùng, chúng ta liệt kê file vừa tạo và thấy file mới có tên `cramfs.image`.
 
 Chú ý nếu kernel cấu hình hỗ trợ `cramfs`, có thể mount file system image trên Linux development workstation rồi khảo sát nội dung. Tất nhiên vì là file system read-only nên không thể sửa. Listing 9-11 minh họa mount file system `cramfs` tại mount point `/mnt/flash`.
 
@@ -433,7 +433,7 @@ Nếu từng phát triển trong môi trường UNIX, chắc chắn bạn quen N
 
 Như file system khác, kernel phải cấu hình hỗ trợ NFS cho cả chức năng server-side và client side. Chức năng NFS server và client cấu hình độc lập trong kernel configuration.
 
-Hướng dẫn chi tiết cấu hình, tinh chỉnh NFS ngoài phạm vi sách, nhưng giới thiệu ngắn giúp minh họa NFS hữu ích thế nào khi phát triển embedded. Xem phần cuối chương để có thông tin NFS chi tiết, gồm NFS Howto đầy đủ.
+Hướng dẫn chi tiết về cấu hình và tinh chỉnh NFS nằm ngoài phạm vi cuốn sách, nhưng phần giới thiệu ngắn sẽ giúp minh họa NFS hữu ích như thế nào trong quá trình phát triển ở môi trường embedded. Xem mục ở cuối chương này để tìm thông tin chi tiết về NFS, bao gồm tài liệu NFS Howto đầy đủ.
 
 Trên development workstation bật NFS, configuration file chứa danh sách chỉ định từng directory muốn export qua Network File System. Trên Red Hat, Ubuntu và phần lớn distribution khác, file nằm trong directory `/etc`, tên `exports`. Listing 9-12 là `/etc/exports` mẫu như trên workstation phát triển embedded.
 
@@ -461,11 +461,11 @@ Chú ý một số điểm quan trọng của lệnh. Chúng ta yêu cầu lện
 192.168.11.9        pluto
 ```
 
-Yêu cầu thứ hai là embedded target có directory trong root directory tên `/workspace`. (Có thể chọn pathname bất kỳ, ví dụ mount tại `/mnt/mywork`.) Đây gọi là mount point. Yêu cầu là target có directory được tạo với tên giống trong lệnh `mount`.
+Yêu cầu thứ hai là embedded target phải có một directory mang tên `/workspace` trong root directory. (Bạn có thể chọn pathname bất kỳ. Ví dụ, bạn có thể mount nó tại `/mnt/mywork`.) Directory này được gọi là mount point. Yêu cầu ở đây là target phải có một directory đã được tạo với tên giống tên được chỉ định trong lệnh `mount`.
 
 Lệnh `mount` trong ví dụ khiến nội dung directory `/home/chris/workspace` của NFS server có sẵn trên path `/workspace` của embedded system.
 
-Điều này rất hữu ích, đặc biệt trong môi trường cross-development. Giả sử làm dự án lớn cho embedded device. Mỗi khi sửa dự án, cần chuyển ứng dụng đến target để test và debug. Dùng NFS như vừa mô tả, giả sử làm trong directory NFS export trên host, thay đổi sẵn có ngay trên target embedded system mà không upload file dự án mới compile. Điều này tăng tốc phát triển đáng kể.
+Điều này rất hữu ích, đặc biệt trong môi trường cross-development. Giả sử bạn đang làm việc trên một dự án lớn cho embedded device. Mỗi khi thay đổi dự án, bạn cần chuyển ứng dụng sang target để kiểm thử và debug. Khi dùng NFS theo cách vừa mô tả, giả sử bạn đang làm việc trong directory được NFS export trên host, các thay đổi lập tức có sẵn trên target embedded system mà không cần upload các file dự án vừa compile. Cách này có thể tăng tốc đáng kể quá trình phát triển.
 
 ### 9.8.1 Root file system trên NFS
 
@@ -501,9 +501,9 @@ $ find -type f | wc -l
 
 Target file system này chứa gần một gigabyte binary file cho ARM architecture. Như listing cho thấy, đây là hơn 29.000 binary file, configuration file và documentation file. Khó có thể vừa Flash device trung bình trong embedded system!
 
-Đó là sức mạnh NFS root mount. Cho mục đích phát triển, embedded system chứa mọi tool, utility quen trên Linux workstation chỉ có thể tăng năng suất. Thực vậy, có lẽ hàng chục command-line tool và development utility bạn chưa thấy có thể rút ngắn lịch phát triển. Bạn sẽ tìm hiểu thêm trong Chương 13, “Công cụ phát triển”.
+Đó là sức mạnh của NFS root mount. Trong quá trình phát triển, việc embedded system được trang bị đầy đủ những công cụ và tiện ích mà bạn quen dùng trên Linux workstation sẽ giúp tăng năng suất. Thực tế, có lẽ có hàng chục command-line tool và development utility mà bạn chưa từng biết đến có thể giúp rút ngắn lịch trình phát triển. Bạn sẽ tìm hiểu thêm về một số công cụ hữu ích này trong Chương 13, “Công cụ phát triển”.
 
-Cấu hình embedded system mount root file system qua NFS lúc boot tương đối đơn giản. Đầu tiên cấu hình kernel target hỗ trợ NFS. Cũng có configuration option bật root mount remote NFS directory. Điều này minh họa ở Hình 9-3.
+Cấu hình embedded system để mount root file system qua NFS khi boot tương đối đơn giản. Trước tiên, bạn phải cấu hình kernel của target để hỗ trợ NFS. Ngoài ra còn có một configuration option cho phép mount một remote NFS directory làm root file system. Hình 9-3 minh họa điều này.
 
 ![Figure 9-3](images/ch09/fig09-03.png)
 
@@ -541,7 +541,7 @@ Một số file system nằm trong nhóm Pseudo File Systems của menu kernel-c
 
 File system `/proc` lấy tên từ mục đích ban đầu: interface cho kernel truyền thông tin từng process đang chạy trên Linux system. Theo thời gian, nó phát triển để cung cấp nhiều hơn process information. Chúng ta giới thiệu điểm chính ở đây; việc khám phá toàn bộ file system `/proc` để bạn tự thực hiện.
 
-File system `/proc` gần như thiết yếu với mọi Linux system trừ loại đơn giản nhất, kể cả embedded. Nhiều function user-level dựa trên nội dung file system `/proc` để làm việc. Ví dụ lệnh `mount` không có parameter liệt kê mọi mount point đang hoạt động trên hệ thống, từ thông tin `/proc/mounts`. Nếu file system `/proc` không có, lệnh `mount` âm thầm return. Listing 9-14 minh họa trên board ADI Engineering Coyote.
+File system `/proc` gần như đã trở thành thành phần thiết yếu của mọi Linux system, kể cả embedded system, ngoại trừ những hệ thống đơn giản nhất. Nhiều function user-level dựa vào nội dung file system `/proc` để thực hiện công việc. Chẳng hạn, lệnh `mount` khi được gọi không có parameter sẽ liệt kê mọi mount point đang hoạt động trên hệ thống, dựa trên thông tin do `/proc/mounts` cung cấp. Nếu file system `/proc` không có sẵn, lệnh `mount` trả về mà không hiển thị gì. Listing 9-14 minh họa điều này trên ADI Engineering Coyote board.
 
 LISTING 9-14 Sự phụ thuộc của mount vào `/proc`
 
@@ -582,7 +582,7 @@ $ mount -t proc none /proc
 
 Tất nhiên đến đây có thể rõ rằng muốn chức năng file system `/proc`, phải bật trong kernel configuration. Option kernel-configuration này nằm trong submenu File Systems dưới nhóm Pseudo File Systems.
 
-Mỗi user process chạy trong kernel được biểu diễn bằng entry trong file system `/proc`. Ví dụ process `init` giới thiệu trong Chương 6 luôn được gán process ID (PID) 1. Process trong file system `/proc` được biểu diễn bằng directory có tên là PID. Ví dụ process `init` PID 1 biểu diễn bằng directory `/proc/1`. Listing 9-15 cho nội dung directory trên embedded Coyote board.
+Mỗi user process chạy trong kernel được biểu diễn bằng một entry trong file system `/proc`. Ví dụ, process `init` được giới thiệu trong Chương 6 luôn được gán process ID (PID) bằng 1. Các process trong file system `/proc` được biểu diễn bằng directory có tên là số PID. Chẳng hạn, process `init` với PID bằng 1 được biểu diễn bằng directory `/proc/1`. Listing 9-15 cho thấy nội dung directory này trên embedded Coyote board của chúng ta.
 
 LISTING 9-15 Các entry của process `init` trong `/proc`
 
@@ -608,9 +608,9 @@ dr-xr-xr-x    3 root  root   0 Jan  1 00:25 task
 -r--r--r--    1 root  root   0 Jan  1 00:25 wchan
 ```
 
-Các entry này có trong file system `/proc` cho từng process đang chạy, chứa nhiều thông tin hữu ích, đặc biệt để phân tích, debug process. Ví dụ entry `cmdline` chứa command line đầy đủ gọi process, gồm mọi argument. Directory `cwd` và `root` chứa cách process nhìn current working directory và current root directory.
+Những entry này hiện diện trong file system `/proc` cho từng process đang chạy và chứa nhiều thông tin hữu ích, đặc biệt cho việc phân tích và debug process. Chẳng hạn, entry `cmdline` chứa toàn bộ command line được dùng để gọi process, bao gồm mọi argument. Các directory `cwd` và `root` chứa góc nhìn của process về current working directory và current root directory.
 
-Một entry hữu ích hơn để debug hệ thống là `maps`. Nó chứa danh sách từng virtual memory segment gán cho chương trình, cùng attribute. Listing 9-16 là output `/proc/1/maps` trong ví dụ process `init`.
+Một trong những entry hữu ích hơn cho việc debug hệ thống là entry `maps`. Nó chứa danh sách từng virtual memory segment được gán cho chương trình, cùng các attribute của từng segment. Listing 9-16 là output từ `/proc/1/maps` trong ví dụ process `init` của chúng ta.
 
 LISTING 9-16 Memory segment của process `init` từ `/proc`
 
@@ -630,7 +630,7 @@ befeb000-bf000000 rwxp befeb000 00:00 0
 #
 ```
 
-Tính hữu ích của thông tin này rất rõ. Bạn thấy program segment của chính process `init` trong hai entry đầu. Cũng thấy memory segment của shared library object mà process `init` dùng. Định dạng như sau:
+Tính hữu ích của thông tin này rất dễ thấy. Bạn có thể thấy các program segment của chính process `init` trong hai entry đầu tiên. Bạn cũng có thể thấy các memory segment được những shared library object mà process `init` sử dụng chiếm giữ. Định dạng như sau:
 
 ```
 vmstart-vmend  attr  pgoffset  devname inode filename
@@ -638,7 +638,7 @@ vmstart-vmend  attr  pgoffset  devname inode filename
 
 Ở đây `vmstart` và `vmend` lần lượt là virtual memory address đầu, cuối. `attr` chỉ memory region attribute như read, write, execute và cho biết region có shareable không. `pgoffset` là page offset của region (kernel virtual memory parameter). `devname`, hiển thị `xx:xx`, là biểu diễn kernel của device ID gắn với memory region. Region không gắn file cũng không gắn device—do đó `00:00`. Hai entry cuối là inode và file gắn với memory region. Tất nhiên nếu memory segment không gắn file, inode field là 0. Đây thường là data segment.
 
-Các entry hữu ích khác được liệt kê cho từng process. Status entry chứa thông tin process đang chạy, gồm parent PID, user ID, group ID, virtual memory usage, signal và capability. Có thể lấy thêm chi tiết từ tham chiếu cuối chương.
+Các entry hữu ích khác cũng được liệt kê cho từng process. Entry status chứa thông tin về process đang chạy, bao gồm parent PID, user ID và group ID, mức sử dụng virtual memory, signal và capability. Bạn có thể tìm thêm chi tiết trong các tài liệu tham khảo ở cuối chương này.
 
 Một số entry `/proc` thường dùng là `cpuinfo`, `meminfo` và `version`. Entry `cpuinfo` liệt kê attribute mà kernel phát hiện về processor chạy trên hệ thống. Entry `meminfo` cung cấp thống kê tổng system memory. Entry `version` phản ánh Linux kernel version string, cùng thông tin compiler và machine dùng build kernel.
 
@@ -668,7 +668,7 @@ drwxr-xr-x 20 root root 0 Jan  1 00:00 module
 
 sysfs cung cấp subdirectory top-level cho một số thành phần hệ thống, gồm system bus. Ví dụ dưới subdirectory `block`, mỗi block device được biểu diễn bằng subdirectory entry. Điều tương tự đúng với các directory khác ở cấp cao nhất.
 
-Phần lớn thông tin sysfs lưu ở định dạng hợp máy đọc hơn người đọc. Ví dụ để tìm device trên PCI bus, có thể xem trực tiếp subdirectory `/sys/bus/pci`. Trên Coyote board chỉ có một PCI device (Ethernet card), directory như sau:
+Phần lớn thông tin do sysfs lưu trữ có định dạng phù hợp để máy đọc hơn là để con người đọc. Ví dụ, để tìm các device trên PCI bus, bạn có thể xem trực tiếp subdirectory `/sys/bus/pci`. Trên Coyote board của chúng ta, chỉ có một PCI device được kết nối (một Ethernet card), directory này có nội dung như sau:
 
 ```
 # ls -l /sys/bus/pci/devices/
@@ -748,7 +748,7 @@ Supported sysfs modules:
         usbhid
 ```
 
-Từ listing thấy sự đa dạng thông tin hệ thống có sẵn trong sysfs. Nhiều tiện ích dùng để xác định đặc tính system device hoặc áp chính sách hệ thống như power management và khả năng hot-plug.
+Từ listing này, bạn có thể thấy sự đa dạng của thông tin hệ thống có sẵn từ sysfs. Nhiều tiện ích sử dụng thông tin này để xác định đặc điểm của các system device hoặc thực thi các system policy, chẳng hạn power management và khả năng hot-plug.
 
 Bạn có thể học thêm sysfs từ http://en.wikipedia.org/wiki/Sysfs và các tham chiếu ở đó.
 
@@ -780,9 +780,9 @@ LISTING 9-19 Source module comment của Linux ramfs
  * filesystem.
 ```
 
-Module chủ yếu được viết làm ví dụ cách viết virtual file system. Khác biệt chính giữa file system này và ramdisk facility trong Linux kernel hiện đại là khả năng co, giãn theo sử dụng. Ramdisk không có tính chất này. Source module nhỏ gọn và viết tốt, được trình bày vì giá trị giáo dục. Bạn nên nghiên cứu ví dụ nếu muốn học thêm Linux file system.
+Module này được viết chủ yếu để minh họa cách viết virtual file system. Một khác biệt chính giữa file system này và ramdisk có trong Linux kernel hiện đại là khả năng thu nhỏ và mở rộng theo mức sử dụng. Ramdisk không có đặc tính này. Source module này nhỏ gọn và được viết tốt. Nó được giới thiệu ở đây vì giá trị học tập. Bạn nên nghiên cứu ví dụ này nếu muốn tìm hiểu thêm về Linux file system.
 
-Tmpfs file system tương tự và liên quan ramfs. Như ramfs, mọi thứ trong tmpfs lưu ở kernel virtual memory, và nội dung mất khi power-down hoặc reboot. Tmpfs hữu ích để lưu file tạm nhanh. Ví dụ tốt là mount directory `/tmp` trên tmpfs. Nó tăng hiệu năng ứng dụng dùng nhiều file tạm nhỏ. Đây cũng là cách tốt giữ directory `/tmp` sạch vì nội dung mất mỗi reboot. Mount tmpfs tương tự virtual file system khác:
+Tmpfs file system tương tự và có liên hệ với ramfs. Giống ramfs, mọi thứ trong tmpfs được lưu trong kernel virtual memory, và nội dung tmpfs mất đi khi power-down hoặc reboot. Tmpfs file system hữu ích để lưu trữ file tạm với tốc độ cao. Một ví dụ điển hình là mount directory `/tmp` của bạn trên tmpfs. Điều này cải thiện hiệu năng cho các ứng dụng dùng nhiều file tạm nhỏ. Đây cũng là một cách rất tốt để giữ directory `/tmp` sạch, vì nội dung của nó mất đi sau mỗi lần reboot. Mount tmpfs tương tự mount mọi virtual file system khác:
 
 ```
 # mount -t tmpfs /tmpfs /tmp
@@ -792,7 +792,7 @@ Như virtual file system khác, chẳng hạn `/proc`, parameter tmpfs đầu tr
 
 ## 9.11 Tạo file system đơn giản
 
-Tạo file system image đơn giản khá dễ. Ở đây minh họa Linux kernel loopback device, cho phép dùng regular file như block device. Tóm lại, chúng ta tạo file system image trong regular file rồi dùng Linux loopback device mount file như block device khác.
+Việc tạo một file system image đơn giản khá dễ thực hiện. Ở đây, chúng ta minh họa cách sử dụng loopback device của Linux kernel. Loopback device cho phép sử dụng một regular file như một block device. Nói ngắn gọn, chúng ta tạo file system image trong một regular file rồi dùng Linux loopback device để mount file đó theo cùng cách mount mọi block device khác.
 
 Để tạo root file system đơn giản, bắt đầu bằng file fixed-sized chứa toàn số 0:
 
@@ -836,9 +836,9 @@ Như `dd`, lệnh `mkfs.ext2` có thể phá hủy hệ thống nên cẩn thậ
 # mount -o loop ./my-new-fs-image /mnt/flash
 ```
 
-Lệnh mount file `my-new-fs-image` như file system tại mount point `/mnt/flash`. Tên mount point không quan trọng; có thể mount bất cứ đâu miễn tồn tại. Dùng `mkdir` tạo mount point.
+Lệnh này mount file `my-new-fs-image` làm một file system tại mount point có tên `/mnt/flash`. Tên mount point không quan trọng; bạn có thể mount ở bất cứ đâu mình muốn, miễn là mount point đó tồn tại. Hãy dùng `mkdir` để tạo mount point.
 
-Sau khi image file mới tạo được mount như file system, có thể sửa tùy ý. Thêm xóa directory, tạo device node, v.v. Có thể dùng tar copy file vào ra. Khi sửa xong, thay đổi lưu trong file, giả sử không vượt kích thước device. Nhớ với phương pháp này kích thước cố định lúc tạo và không đổi được.
+Sau khi image file vừa tạo được mount làm file system, chúng ta có thể tự do sửa đổi nó. Chúng ta có thể thêm và xóa directory, tạo device node, v.v. Chúng ta có thể dùng tar để copy file vào hoặc ra khỏi file system. Khi hoàn tất, các thay đổi được lưu trong file, với giả định bạn không vượt quá kích thước device. Hãy nhớ rằng với phương pháp này, kích thước được cố định khi tạo và không thể thay đổi.
 
 ## 9.12 Tổng kết
 
@@ -862,7 +862,7 @@ Chương giới thiệu nhiều file system dùng trên desktop/server Linux sys
 
 - Linux có nhiều pseudo file system. Một số loại quan trọng hơn được trình bày, gồm file system `/proc` và sysfs.
 
-- Tmpfs file system RAM-based có nhiều công dụng cho embedded system. Cải tiến quan trọng nhất so ramdisk truyền thống là tự resize động đáp ứng yêu cầu hoạt động.
+- File system tmpfs RAM-based có nhiều ứng dụng trong embedded system. Cải tiến quan trọng nhất của nó so với ramdisk truyền thống là khả năng tự thay đổi kích thước một cách động để đáp ứng các yêu cầu vận hành.
 
 ### 9.12.1 Gợi ý đọc thêm
 
@@ -886,14 +886,14 @@ Tài liệu file system `/proc` www.tldp.org/LDP/lkmpg/2.6/html/c712.htm
 
 [^1]: Bạn sẽ học cách thực hiện trong Chương 19, “udev”.
 
-[^2]: Thuật ngữ cylinder mượn từ đơn vị lưu trữ trên rotational medium. Nó gồm dữ liệu dưới nhóm head trên sector nhất định của disk device. Ở đây dùng để tương thích file system utility hiện có.
+[^2]: Thuật ngữ cylinder được mượn từ đơn vị lưu trữ trên môi trường lưu trữ quay. Nó bao gồm dữ liệu nằm dưới một nhóm head trên một sector nhất định của disk device. Ở đây, thuật ngữ này được dùng nhằm bảo đảm tính tương thích với các tiện ích file system hiện có.
 
 [^3]: Có thể cho nonroot user mount file system, như cdrom, bằng entry thích hợp trong `/etc/fstab`.
 
-[^4]: File trên file system được biểu diễn bởi ext2 internal data structure tên inode.
+[^4]: Một file trên file system được biểu diễn bằng một data structure nội bộ của ext2 có tên là inode.
 
-[^5]: Metadata là dữ liệu về file, trái với chính dữ liệu file. Ví dụ ngày giờ, kích thước, block đã dùng của file, v.v.
+[^5]: Metadata là dữ liệu mô tả file, khác với chính dữ liệu bên trong file. Ví dụ bao gồm ngày, giờ, kích thước của file, các block được sử dụng, v.v.
 
-[^6]: Chuyển file system theo cách này chỉ nên coi là hoạt động phát triển.
+[^6]: Việc chuyển đổi file system theo cách này chỉ nên được xem là một hoạt động trong quá trình phát triển.
 
-[^7]: Hoàn toàn có thể mount `/proc` bất cứ đâu trong file system, nhưng mọi tiện ích (gồm mount) cần proc đều kỳ vọng nó mount tại `/proc`.
+[^7]: Bạn hoàn toàn có thể mount `/proc` ở bất kỳ đâu trong file system của mình, nhưng mọi tiện ích cần proc (bao gồm mount) đều mong đợi nó được mount tại `/proc`.

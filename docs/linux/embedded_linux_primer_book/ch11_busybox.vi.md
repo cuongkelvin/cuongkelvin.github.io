@@ -48,9 +48,9 @@ giới hạn của chúng.
 
 BusyBox cực kỳ phổ biến trong cộng đồng embedded Linux. Nó rất dễ cấu hình, compile và dùng. Ngoài ra có tiềm năng giảm đáng kể tài nguyên hệ thống tổng thể cần hỗ trợ tập hợp lớn tiện ích Linux thông dụng. BusyBox cung cấp phần thay thế gọn cho nhiều tiện ích full-blown truyền thống trên phần lớn desktop và embedded Linux distribution. Ví dụ file utility `ls`, `cat`, `cp`, `dir`, `head`, `tail`; general utility `dmesg`, `kill`, `halt`, `fdisk`, `mount`, `umount`; và nhiều loại khác. BusyBox cũng hỗ trợ operation more-complex như `ifconfig`, `netstat`, `route` cùng network utility khác.
 
-BusyBox có tính module, cấu hình cao và tùy chỉnh phù hợp yêu cầu cụ thể. Package có configuration utility tương tự dùng cấu hình Linux kernel nên sẽ khá quen thuộc.
+BusyBox có cấu trúc module, cho phép cấu hình rất linh hoạt và có thể được tùy chỉnh để đáp ứng các yêu cầu cụ thể của bạn. Package này bao gồm một configuration utility tương tự tiện ích dùng để cấu hình Linux kernel, nên bạn sẽ thấy khá quen thuộc.
 
-Lệnh BusyBox thường là implementation đơn giản hơn bản full-blown tương ứng. Một số chỉ hỗ trợ tập con command-line option thông thường. Tuy nhiên thực tế bạn sẽ thấy tập con chức năng lệnh BusyBox quá đủ cho phần lớn yêu cầu embedded chung.
+Các lệnh trong BusyBox nhìn chung là những implementation đơn giản hơn so với các phiên bản full-blown tương ứng. Trong một số trường hợp, chỉ một tập con của các command-line option thông thường được hỗ trợ. Tuy nhiên, trên thực tế, bạn sẽ thấy tập con chức năng lệnh của BusyBox là quá đủ cho phần lớn yêu cầu embedded thông thường.
 
 ### 11.1.1 BusyBox dễ dùng
 
@@ -66,7 +66,7 @@ Có thể build, cài BusyBox trên development workstation hoặc target embedd
 
 ## 11.2 Cấu hình BusyBox
 
-Để bắt đầu cấu hình BusyBox, lệnh giống Linux kernel cho configuration utility library-based `ncurses`. Chú ý tương tự Linux kernel, `make help` cung cấp nhiều thông tin hữu ích về make target sẵn có. Lệnh cấu hình là:
+Để bắt đầu cấu hình BusyBox, bạn dùng cùng lệnh như với Linux kernel cho configuration utility library-based dựa trên `ncurses`. Lưu ý rằng, tương tự Linux kernel, `make help` cung cấp nhiều thông tin hữu ích về các make target có sẵn. Lệnh cấu hình là:
 
 ```
 $ make menuconfig
@@ -91,7 +91,7 @@ LISTING 11-1 BusyBox build option
 ()  Cross Compiler prefix
 ```
 
-Option đầu hữu ích khi tạo embedded system rất tối thiểu. Nó cho compile, link BusyBox tĩnh để không cần dynamically loaded library (như `libc-*`) lúc runtime trên target system. Không có option, BusyBox cần nhiều library để chạy. Có thể dễ xác định library BusyBox (hoặc binary khác) cần trên target system bằng lệnh `ldd`. Listing 11-2 là output `ldd` được cross-compiled cho ARM xscale.
+Option đầu tiên hữu ích khi xây dựng embedded system tối giản. Nó cho phép BusyBox được compile và static link để không cần dynamically loaded library (chẳng hạn `libc-*`) lúc runtime trên target system. Nếu không dùng option này, BusyBox cần nhiều library khác nhau để chạy. Chúng ta có thể dễ dàng xác định những library mà BusyBox (hoặc bất kỳ binary nào khác) cần trên target system bằng lệnh `ldd`. Listing 11-2 là output của `ldd` được cross-compiled cho ARM xscale.
 
 LISTING 11-2 Library dependency của BusyBox
 
@@ -103,15 +103,15 @@ $ xscale_be-ldd busybox
     /lib/ld-linux.so.2 (0xb8088000)
 ```
 
-Chú ý BusyBox compile với cấu hình mặc định cần bốn shared library trong Listing 11-2. Nếu chọn build BusyBox static binary, `ldd` chỉ báo BusyBox binary không phải dynamic executable. Nói cách khác, không cần shared library giải quyết unresolved dependency nào trong executable. Static linking tạo footprint tổng nhỏ hơn trên root file system vì không cần shared library. Tuy nhiên build embedded application không có shared library nghĩa là các C library function quen thuộc không có sẵn cho ứng dụng. Để hình dung chênh lệch kích thước tương đối giữa BusyBox link tĩnh và cùng cấu hình compile với shared library, ở phiên bản gần đây busybox link tĩnh khoảng 1,5MB so với 778KB của dynamically linked image.
+Hãy chú ý rằng tiện ích BusyBox được compile theo cấu hình mặc định cần bốn shared library trong Listing 11-2. Nếu chọn build BusyBox dưới dạng static binary, `ldd` sẽ chỉ thông báo rằng BusyBox binary không phải dynamic executable. Nói cách khác, nó không cần shared library nào để giải quyết các dependency còn chưa được giải quyết trong executable. Static linking tạo ra tổng footprint nhỏ hơn trên root file system vì không cần shared library. Tuy nhiên, xây dựng embedded application mà không có shared library có nghĩa là các C library function quen thuộc không có sẵn cho ứng dụng của bạn. Để hình dung chênh lệch kích thước giữa BusyBox được static link và cùng cấu hình được compile với shared library, ở một phiên bản BusyBox gần đây, busybox được static link có kích thước khoảng 1,5MB, so với 778KB của image được dynamic link.
 
 ### 11.2.1 Cross-Compiling BusyBox
 
-Như đầu chương, tác giả BusyBox định dùng package trong môi trường cross-development nên build ở đó khá dễ. Phiên bản trước chỉ cần chỉ định prefix cho cross-compiler bằng option build BusyBox với cross-compiler. Điều này đã được thay bằng phương pháp chuẩn hơn chỉ định environment variable tương tự build package khác như Linux kernel. Để cross-compile với cross-compiler cụ thể trên development workstation, chỉ định nghĩa `CROSS_COMPILE` trong environment. Ví dụ giá trị `CROSS_COMPILE` là `arm5vt_le-`, `xscale_be-`, `ppc_linux-`. Chú ý cũng có thể chỉ định cross-compiler prefix trong configuration utility vừa mô tả. Chúng ta trình bày compiler prefix liên quan cross-compiling chi tiết hơn ở chương sau khi khảo sát embedded development environment.
+Như đã đề cập ở đầu chương, các tác giả BusyBox dự định sử dụng package này trong môi trường cross-development, nên build BusyBox trong môi trường đó khá dễ. Ở các phiên bản trước, yêu cầu duy nhất là chỉ định prefix cho cross-compiler bằng cách chọn option build BusyBox với cross-compiler. Cách này đã được thay bằng phương pháp chuẩn hơn: chỉ định một environment variable, tương tự khi build các package khác như Linux kernel. Để cross-compile bằng một cross-compiler cụ thể trên development workstation, chỉ cần định nghĩa `CROSS_COMPILE` trong environment. Một số giá trị ví dụ của `CROSS_COMPILE` là `arm5vt_le-`, `xscale_be-` và `ppc_linux-`. Lưu ý rằng bạn cũng có thể chỉ định cross-compiler prefix trong configuration utility vừa mô tả. Chúng ta sẽ trình bày chi tiết hơn các compiler prefix liên quan đến cross-compiling trong chương tiếp theo, khi khảo sát môi trường phát triển embedded.
 
 ## 11.3 Hoạt động BusyBox
 
-Khi build BusyBox, thu được binary tên—đúng như đoán—`BusyBox`. Có thể gọi BusyBox từ chính binary name nhưng thường chạy qua symlink. Khi gọi không có command-line parameter, nó tạo danh sách function bật qua configuration. Listing 11-3 cho output như vậy (được format vừa trang).
+Khi build BusyBox, bạn nhận được một binary có tên, đúng như bạn đoán, là `BusyBox`. Bạn có thể gọi BusyBox bằng chính binary name, nhưng thông thường nó được khởi chạy qua symlink. Khi được gọi không có command-line parameter, BusyBox tạo một danh sách các function đã được bật qua configuration. Listing 11-3 cho thấy output như vậy (đã được định dạng để vừa chiều rộng trang).
 
 LISTING 11-3 Cách dùng BusyBox
 
@@ -155,7 +155,7 @@ Currently defined functions:
     xargs, yes, zcat
 ```
 
-Từ Listing 11-3 thấy danh sách function bật trong BusyBox build này. Chúng theo thứ tự chữ cái (bỏ qua shell scripting operator `[` và `[[`) từ `addgroup` đến `zcat`, tiện ích giải nén nội dung compressed file. Danh sách biểu diễn tập tiện ích bật trong bản build cụ thể.
+Từ Listing 11-3, bạn có thể thấy danh sách các function được bật trong bản build BusyBox này. Chúng được liệt kê theo thứ tự chữ cái (bỏ qua các shell scripting operator `[` và `[[`), từ `addgroup` đến `zcat`, một tiện ích dùng để giải nén nội dung compressed file. Danh sách này biểu thị tập hợp các tiện ích được bật trong bản build BusyBox cụ thể này.
 
 Để gọi function cụ thể, thực thi `busybox` với function đã định nghĩa trên command line. Ví dụ hiển thị danh sách file trong root directory bằng lệnh:
 
@@ -163,7 +163,7 @@ Từ Listing 11-3 thấy danh sách function bật trong BusyBox build này. Ch�
 [root@coyote]# busybox ls /
 ```
 
-Thông điệp quan trọng khác từ usage message BusyBox trong Listing 11-3 là mô tả ngắn chương trình. Nó mô tả BusyBox như multicall binary kết hợp nhiều utility thông dụng trong một executable. Đây là mục đích các symlink nói trước. BusyBox được thiết kế gọi bằng symlink đặt tên theo function thực hiện. Điều này bỏ gánh nặng gõ lệnh two-word để gọi function và cho user tập lệnh quen thuộc của utility cùng tên. Listing 11-4 và 11-5 làm rõ điều này.
+Một thông tin quan trọng khác từ BusyBox usage message trong Listing 11-3 là phần mô tả ngắn về chương trình. Nó mô tả BusyBox như một multicall binary, kết hợp nhiều tiện ích thông dụng thành một executable duy nhất. Đó chính là mục đích của các symlink đã đề cập trước đó. BusyBox được thiết kế để gọi thông qua symlink mang tên chức năng mà nó sẽ thực hiện. Cách này loại bỏ việc phải gõ lệnh two-word để gọi một chức năng cụ thể, đồng thời cung cấp cho người dùng một tập lệnh quen thuộc tương ứng với các tiện ích cùng tên. Listing 11-4 và 11-5 sẽ làm rõ điều này.
 
 Listing 11-4 cho target directory structure do BusyBox package tạo qua lệnh `make install` trong source tree `busybox`.
 
@@ -178,7 +178,7 @@ drwxrwxr-x  2 root   root 4096 Dec  3 13:38 sbin
 drwxrwxr-x  4 root   root 4096 Dec  3 13:38 usr
 ```
 
-Executable file `busybox` nằm trong directory `/bin`, symlink được tạo khắp phần cấu trúc còn lại trỏ về `/bin/busybox`. Listing 11-5 mở rộng directory structure của Listing 11-4.
+Executable file `busybox` nằm trong directory `/bin`, và các symlink được tạo khắp phần còn lại của cấu trúc để trỏ về `/bin/busybox`. Listing 11-5 mở rộng directory structure trong Listing 11-4.
 
 LISTING 11-5 BusyBox symlink structure: Chi tiết tree
 
@@ -211,9 +211,9 @@ LISTING 11-5 BusyBox symlink structure: Chi tiết tree
         ‘-- chroot -> ../../bin/busybox
 ```
 
-Output Listing 11-5 được cắt đáng kể để dễ đọc và tránh listing three-page. Mỗi dòng có dấu ba chấm (`...`) chỉ nơi listing cắt để chỉ hiện vài entry đầu, cuối của directory đó. Thực tế có thể tạo hơn 100 symlink trong các directory, tùy chức năng bật bằng BusyBox configuration utility.
+Output trong Listing 11-5 đã được rút ngắn đáng kể để dễ đọc và tránh một listing dài three-page. Mỗi dòng chứa dấu ba chấm (`...`) cho biết vị trí listing được lược bớt để chỉ hiển thị vài entry đầu và vài entry cuối của directory tương ứng. Trên thực tế, có thể có hơn 100 symlink được tạo trong các directory này, tùy những chức năng bạn đã bật bằng BusyBox configuration utility.
 
-Chú ý BusyBox executable, entry thứ hai của directory `/bin`. Cũng trong `/bin` có symlink trỏ lại busybox cho `addgroup`, `cat`, `cp`, v.v. đến `zcat`. Một lần nữa entry giữa `cp` và `zcat` bỏ để dễ đọc. Với symlink structure này, user chỉ nhập tên utility thực để gọi chức năng. Ví dụ cấu hình network interface bằng tiện ích BusyBox `ifconfig`, user có thể nhập:
+Hãy chú ý chính BusyBox executable, entry thứ hai trong directory `/bin`. Trong directory `/bin` còn có các symlink trỏ về busybox cho `addgroup`, `cat`, `cp`, v.v., cho đến `zcat`. Một lần nữa, các entry giữa `cp` và `zcat` đã được lược khỏi listing để dễ đọc. Với cấu trúc symlink này, người dùng chỉ cần nhập tên thực của tiện ích để gọi chức năng tương ứng. Ví dụ, để cấu hình một network interface bằng tiện ích BusyBox `ifconfig`, người dùng có thể nhập một lệnh tương tự như sau:
 
 ```
 $ ifconfig eth1 192.168.1.14
@@ -223,11 +223,11 @@ $ ifconfig eth1 192.168.1.14
 
 ### 11.3.1 BusyBox init
 
-Chú ý symlink trong Listing 11-5 tên `init`. Chương 6, “Khởi tạo user space”, giới thiệu chương trình `init` và vai trò khởi tạo hệ thống. Nhớ kernel cố thực thi chương trình `/sbin/init` làm bước cuối khởi tạo kernel. Không có lý do BusyBox không thể mô phỏng chức năng `init`, và đó chính là cách cấu hình hệ thống Listing 11-5. BusyBox xử lý chức năng `init`.
+Hãy chú ý symlink có tên `init` trong Listing 11-5. Trong Chương 6, “Khởi tạo user space”, bạn đã tìm hiểu chương trình `init` và vai trò của nó trong quá trình khởi tạo hệ thống. Hãy nhớ rằng kernel cố thực thi một chương trình có tên `/sbin/init` như bước cuối của quá trình khởi tạo kernel. Không có lý do gì BusyBox không thể mô phỏng chức năng `init`, và đó chính là cách hệ thống trong Listing 11-5 được cấu hình. BusyBox đảm nhiệm chức năng `init`.
 
-BusyBox xử lý khởi tạo hệ thống khác System V `init` chuẩn. Linux system dùng System V (SysV) initialization như Chương 6 cần file `inittab` truy cập được trong directory `/etc`. BusyBox cũng đọc file `inittab` nhưng cú pháp file `inittab` khác. Nhìn chung không cần dùng `inittab` nếu dùng BusyBox. Cân nhắc lời khuyên man page: nếu cần runlevel, dùng System V initialization.[^2]
+BusyBox xử lý việc khởi tạo hệ thống khác với System V `init` chuẩn. Một Linux system dùng cơ chế khởi tạo System V (SysV) như mô tả trong Chương 6 cần một file `inittab` có thể truy cập trong directory `/etc`. BusyBox cũng đọc file `inittab`, nhưng cú pháp file `inittab` của nó khác. Nhìn chung, bạn không cần dùng `inittab` nếu sử dụng BusyBox. Hãy cân nhắc lời khuyên trong BusyBox man page: nếu cần runlevel, hãy dùng cơ chế khởi tạo System V.[^2]
 
-Hãy xem trên embedded system. Chúng ta tạo root file system nhỏ dựa BusyBox, cấu hình static linking để không cần shared library. Listing 11-6 là listing `tree` của root file system. Chúng ta tạo file system nhỏ theo các bước Chương 9, “File system”, Phần 9.11, “Tạo file system đơn giản”. Không lặp lại quy trình ở đây. File trong file system đơn giản thể hiện ở Listing 11-6.
+Hãy xem điều này trông như thế nào trên một embedded system. Chúng ta đã tạo một root file system nhỏ dựa trên BusyBox. Chúng ta cấu hình BusyBox để static linking, loại bỏ nhu cầu sử dụng bất kỳ shared library nào. Listing 11-6 là một listing `tree` của root file system này. Chúng ta tạo file system nhỏ này theo các bước được phác thảo trong Chương 9, “File system”, Mục 9.11, “Tạo một file system đơn giản”. Chúng ta không trình bày lại chi tiết quy trình ở đây. Các file trong file system đơn giản của chúng ta được thể hiện trong Listing 11-6.
 
 LISTING 11-6 Root file system BusyBox tối thiểu
 
@@ -251,7 +251,7 @@ $ tree
 4 directories, 10 files
 ```
 
-Root file system BusyBox-based này chiếm hơn chút so với kích thước chính `busybox`. Trong cấu hình dùng static linking và gần 100 utility, BusyBox executable dưới 2MB:
+Root file system BusyBox-based này chỉ chiếm dung lượng lớn hơn một chút so với dung lượng cần cho chính `busybox`. Trong cấu hình này, với static linking và hỗ trợ gần 100 tiện ích, BusyBox executable có kích thước dưới 2MB:
 
 ```
 # ls -l /bin/busybox
@@ -280,13 +280,13 @@ Enter ‘help’ for a list of built-in commands.
 / #
 ```
 
-Listing 11-7 chạy trên embedded board cấu hình NFS root mount. Export directory trên workstation chứa file system image đơn giản của Listing 11-6. Là bước gần cuối boot process, Linux kernel trên target board mount root file system qua NFS. Khi kernel cố thực thi `/sbin/init`, nó thất bại (có chủ ý) vì không có `/sbin/init` trong file system. Tuy nhiên như đã thấy kernel cũng thử `/bin/sh`. Trên target BusyBox-configured, điều này thành công và `busybox` chạy qua symlink `/bin/sh` trên root file system.
+Listing 11-7 được chạy trên một embedded board cấu hình NFS root mount. Chúng ta export một directory trên workstation chứa file system image đơn giản được mô tả chi tiết trong Listing 11-6. Trong một trong những bước cuối của boot process, Linux kernel trên target board mount root file system thông qua NFS. Khi kernel cố thực thi `/sbin/init`, thao tác này thất bại (đúng theo thiết kế) vì file system không có `/sbin/init`. Tuy nhiên, như đã thấy, kernel còn thử thực thi `/bin/sh`. Trên target BusyBox-configured của chúng ta, thao tác này thành công và `busybox` được khởi chạy thông qua symlink `/bin/sh` trên root file system.
 
-Điều đầu BusyBox làm là phàn nàn không tìm thấy `/etc/init.d/rcS`. Đây là initialization script mặc định nó tìm. Thay vì `inittab`, đây là phương pháp ưu tiên khởi tạo embedded system dựa BusyBox.
+Điều đầu tiên BusyBox làm là báo rằng nó không tìm thấy `/etc/init.d/rcS`. Đây là initialization script mặc định mà BusyBox tìm kiếm. Thay vì sử dụng `inittab`, đây là phương pháp được ưu tiên để khởi tạo một embedded system dựa trên BusyBox.
 
-Khởi tạo xong, BusyBox hiển thị prompt yêu cầu user nhấn Enter kích hoạt console. Khi phát hiện Enter, nó thực thi shell session `ash` đợi input. Thông báo cuối về job control xuất phát từ việc trong ví dụ này (và phần lớn embedded system điển hình), tạo system console trên serial terminal. Linux kernel có code tắt job control nếu phát hiện console trên serial terminal.
+Khi hoàn tất khởi tạo, BusyBox hiển thị prompt yêu cầu người dùng nhấn Enter để kích hoạt console. Khi phát hiện phím Enter, BusyBox thực thi một shell session `ash` chờ input từ người dùng. Thông báo cuối về job control xuất phát từ việc trong ví dụ cụ thể này (và trên phần lớn embedded system điển hình), chúng ta tạo system console trên một serial terminal. Linux kernel có code để vô hiệu hóa job control nếu phát hiện console nằm trên serial terminal.
 
-Ví dụ tạo hệ thống hoạt động với gần 100 Linux utility gồm core utility, file utility, network support và shell khá có khả năng. Bạn thấy package đơn giản cung cấp platform mạnh để xây dựng system application riêng. Tất nhiên nếu không hỗ trợ libc và system library khác, bạn đối mặt tác vụ triển khai ứng dụng rất khó. Phải hỗ trợ mọi standard C library call và library function khác mà chương trình C điển hình dựa vào. Hoặc link tĩnh ứng dụng với library phụ thuộc, nhưng nếu có hơn vài ứng dụng như vậy, kích thước có thể vượt tổng kích thước link động và giữ shared library trên target.
+Ví dụ này tạo ra một hệ thống hoạt động được với gần 100 tiện ích Linux, bao gồm các core utility, file utility, hỗ trợ network và một shell có khả năng tương đối tốt. Bạn có thể thấy package đơn giản này cung cấp một nền tảng mạnh để xây dựng các system application của riêng mình. Tất nhiên, cần lưu ý rằng nếu không có hỗ trợ cho libc và các system library khác, bạn sẽ gặp một công việc rất khó khăn khi triển khai ứng dụng. Bạn sẽ phải cung cấp hỗ trợ cho tất cả các standard C library call thông thường và những library function khác mà một chương trình C điển hình dựa vào. Một lựa chọn khác là static link ứng dụng với các library mà chúng phụ thuộc. Tuy nhiên, nếu dùng cách này cho nhiều hơn một vài ứng dụng, tổng kích thước ứng dụng có thể vượt tổng kích thước khi dynamic link và đặt các shared library trên target.
 
 ### 11.3.2 Initialization script rcS mẫu
 
@@ -314,13 +314,13 @@ xinetd
 busybox sh
 ```
 
-Script đơn giản này phần lớn self-explanatory. Đầu tiên quan trọng là mount file system `/proc` tại mount point dành riêng `/proc`, vì nhiều utility lấy thông tin từ file system `/proc`. Điều này giải thích kỹ hơn trong Chương 9. Tiếp theo chạy system logger sớm nhất có thể để ghi lại vấn đề startup. Sau system log daemon, cấu hình local loopback interface cho hệ thống. Một lần nữa, nhiều Linux facility truyền thống giả định có loopback interface, và nếu hệ thống có cấu hình hỗ trợ socket thì nên bật interface này. Việc cuối trước khi mở shell là chạy Internet superserver `xinetd`. Chương trình chạy nền, lắng nghe network request trên mọi network interface cấu hình. Ví dụ để bắt đầu telnet session tới board, `xinetd` tiếp nhận request telnet connection và sinh telnet server xử lý session.
+Script đơn giản này phần lớn là self-explanatory. Trước hết, cần mount file system `/proc` tại mount point dành riêng cho nó là `/proc`, vì nhiều tiện ích lấy thông tin từ file system `/proc`. Điều này được giải thích đầy đủ hơn trong Chương 9. Tiếp theo, chúng ta khởi chạy các system logger sớm nhất có thể để ghi nhận mọi vấn đề lúc startup. Sau các system log daemon, chúng ta cấu hình local loopback interface cho hệ thống. Một lần nữa, nhiều chức năng Linux truyền thống giả định có loopback interface; nếu hệ thống đã được cấu hình hỗ trợ socket, bạn nên bật interface này. Việc cuối cùng trước khi mở shell là khởi chạy Internet superserver `xinetd`. Chương trình này chạy nền, lắng nghe network request trên mọi network interface đã cấu hình. Ví dụ, để bắt đầu một telnet session tới board, `xinetd` tiếp nhận request kết nối telnet và tạo một telnet server để xử lý session đó.
 
 Thay vì mở shell, có thể chạy ứng dụng riêng từ initialization script `rcS`. Listing 11-8 là ví dụ đơn giản target board telnet-enabled chạy dịch vụ cơ bản như system logger và kernel logger.
 
 ### 11.3.3 Cài BusyBox lên target
 
-Chỉ có thể thảo luận cài BusyBox khi hiểu cách dùng và mục đích symlink. BusyBox makefile chứa target install. Thực thi `make install` tạo directory structure chứa BusyBox executable và symlink tree. Môi trường này cần chuyển tới root directory target embedded system, đầy đủ symlink tree. Như giải thích, symlink tree bỏ yêu cầu gõ `busybox` `command` cho mỗi lệnh. Thay vào đó, để liệt kê file trong directory, user chỉ gõ `ls`. Symlink thực thi BusyBox như mô tả và gọi chức năng `ls`. Xem lại Listing 11-4 và 11-5. Chú ý BusyBox build system chỉ tạo link cho chức năng bật qua configuration utility.
+Chỉ có thể tiếp tục thảo luận việc cài đặt BusyBox khi bạn hiểu cách sử dụng và mục đích của symlink. BusyBox makefile chứa một target có tên install. Thực thi `make install` tạo ra directory structure chứa BusyBox executable và một symlink tree. Toàn bộ môi trường này, bao gồm symlink tree, cần được chuyển sang root directory của target embedded system. Như đã giải thích, symlink tree loại bỏ việc phải gõ `busybox` `command` cho mỗi lệnh. Thay vào đó, để xem danh sách file trong một directory, người dùng chỉ cần gõ `ls`. Symlink thực thi BusyBox theo cách đã mô tả và gọi chức năng `ls`. Hãy xem lại Listing 11-4 và 11-5 để thấy symlink tree. Lưu ý rằng BusyBox build system chỉ tạo link cho các chức năng bạn đã bật thông qua configuration utility.
 
 Cách dễ nhất tạo symlink farm cần trong root file system là để BusyBox build system thực hiện. Chỉ mount root file system trên development workstation và truyền `CONFIG_PREFIX` cho BusyBox makefile. Listing 11-9 cho quy trình.
 
@@ -351,21 +351,21 @@ $ ls -l /mnt/remote/bin/busybox
 -rwsr-sr-x  1 root root 552132  ... /mnt/remote/bin/busybox
 ```
 
-Đầu tiên mount root file system binary image vào mount point mong muốn—ở đây `/mnt/remote`, vị trí tôi thích. Sau đó gọi lệnh BusyBox `make install`, truyền `CONFIG_PREFIX` chỉ nơi đặt symlink tree và BusyBox executable file. Dù không rõ từ listing, makefile gọi script `applets/install.sh` làm phần lớn việc. Script duyệt file chứa mọi BusyBox applet bật và tạo symlink cho từng applet trên path đã chỉ bằng `CONFIG_PREFIX`. Script rất nhiều lời, xuất một dòng cho từng symlink tạo. Để ngắn gọn Listing 11-9 chỉ hiện vài thông báo đầu, cuối. Dấu ba chấm biểu diễn phần bỏ.
+Trước hết, chúng ta mount root file system binary image tại mount point mong muốn, ở đây là `/mnt/remote`, một vị trí tôi thường dùng. Sau đó, chúng ta gọi lệnh BusyBox `make install`, truyền `CONFIG_PREFIX` để chỉ định nơi đặt symlink tree và BusyBox executable file. Dù không thể hiện rõ trong listing, makefile gọi script `applets/install.sh` để thực hiện phần lớn công việc. Script duyệt một file chứa tất cả BusyBox applet đã được bật và tạo symlink cho từng applet tại path đã chỉ định bằng `CONFIG_PREFIX`. Script xuất rất nhiều thông báo: một dòng cho mỗi symlink được tạo. Để ngắn gọn, Listing 11-9 chỉ hiển thị vài thông báo tạo symlink đầu tiên và cuối cùng. Dấu ba chấm trong listing biểu diễn các thông báo đã bị lược bỏ.
 
-Thông báo setuid cũng do install script hiển thị để nhắc có thể cần đặt BusyBox executable thành setuid root. Điều này cho function cần root access hoạt động đúng ngay cả khi nonroot user gọi. Không bắt buộc tuyệt đối, đặc biệt trong embedded Linux nơi thường chỉ có root account. Nếu cần cho cài đặt, lệnh (`chmod +s`) được thể hiện trong Listing 11-9.
+Thông báo về setuid cũng được install script hiển thị để nhắc bạn rằng có thể cần đặt BusyBox executable thành setuid root. Điều này cho phép các chức năng BusyBox cần root access hoạt động đúng ngay cả khi được một nonroot user gọi. Đây không phải yêu cầu tuyệt đối, đặc biệt trong môi trường embedded Linux, nơi hệ thống thường chỉ có một root account. Nếu điều này cần thiết cho bản cài đặt của bạn, lệnh tương ứng (`chmod +s`) được trình bày trong Listing 11-9.
 
 Kết quả bước cài là BusyBox binary và symlink tree được cài trên target root file system. Kết quả cuối rất giống Listing 11-4.
 
-Hữu ích khi biết BusyBox còn có option bật tạo symlink tree trên target system lúc runtime. Option bật trong configuration và gọi lúc runtime bằng BusyBox với option `-install`. Phải mount file system `/proc` trên target để hỗ trợ này hoạt động.
+Cũng cần biết rằng BusyBox có một option cho phép tạo symlink tree này trên target system lúc runtime. Option đó được bật trong BusyBox configuration và được gọi lúc runtime bằng cách thực thi BusyBox với option `-install`. Bạn phải mount file system `/proc` trên target system để chức năng hỗ trợ này hoạt động.
 
 ### 11.3.4 BusyBox applet
 
-Trong BusyBox snapshot gần đây, man page ghi 282 lệnh (còn gọi applet). Có đủ hỗ trợ cho shell script tương đối phức tạp, gồm Bash shell scripting. BusyBox hỗ trợ `awk`, `sed`, thường gặp trong Bash script. Hỗ trợ network utility như `ping`, `ifconfig`, `traceroute`, `netstat`. Một số lệnh đưa vào riêng để hỗ trợ scripting, gồm `true`, `false`, `yes`.
+Trong một BusyBox snapshot gần đây, 282 lệnh (còn gọi là applet) được ghi trong man page. BusyBox có đủ hỗ trợ cho các shell script tương đối phức tạp, bao gồm hỗ trợ Bash shell scripting. BusyBox hỗ trợ `awk` và `sed`, thường xuất hiện trong Bash script. BusyBox hỗ trợ các network utility như `ping`, `ifconfig`, `traceroute` và `netstat`. Một số lệnh được đưa vào riêng để hỗ trợ scripting, bao gồm `true`, `false` và `yes`.
 
-Dành ít phút xem Phụ lục C, “Các lệnh BusyBox”, nơi có tổng quan từng lệnh. Sau đó bạn hiểu rõ hơn khả năng BusyBox và tính phù hợp cho embedded Linux project riêng.
+Hãy dành ít phút đọc Phụ lục C, “Các lệnh BusyBox”, nơi bạn có thể tìm thấy phần mô tả khái quát của từng lệnh BusyBox. Sau đó, bạn sẽ hiểu rõ hơn khả năng của BusyBox và cách áp dụng nó cho dự án embedded Linux của riêng mình.
 
-Như đầu chương, nhiều lệnh BusyBox có tập con tính năng, option giới hạn so với bản full-featured tương ứng. Nhìn chung có thể nhận help cho lệnh lúc runtime bằng option `--help`. Nó sinh usage message mô tả ngắn từng command option hỗ trợ. Applet BusyBox `gzip` là ví dụ hữu ích về lệnh hỗ trợ option hạn chế. Listing 11-10 hiển thị output `gzip -help` trên BusyBox target.
+Như đã đề cập ở đầu chương, nhiều lệnh BusyBox chỉ có một tập con giới hạn các tính năng và option so với các phiên bản full-featured tương ứng. Nhìn chung, bạn có thể xem trợ giúp của bất kỳ lệnh BusyBox nào lúc runtime bằng cách gọi lệnh với option `--help`. Thao tác này tạo ra usage message với mô tả ngắn về từng command option được hỗ trợ. Applet BusyBox `gzip` là một ví dụ hữu ích về lệnh BusyBox chỉ hỗ trợ một tập option giới hạn. Listing 11-10 hiển thị output của `gzip -help` trên một BusyBox target.
 
 LISTING 11-10 Cách dùng applet BusyBox `gzip`
 
@@ -383,11 +383,11 @@ Options:
         -f      Force
 ```
 
-Phiên bản BusyBox của `gzip` chỉ hỗ trợ ba command-line option. Bản full-featured hỗ trợ hơn 15 command-line option khác nhau. Ví dụ tiện ích full-featured `gzip` hỗ trợ option `--list` tạo compression statistic cho từng file trên command line. Không có hỗ trợ đó cho BusyBox `gzip`. Thường đây không là giới hạn đáng kể cho embedded system. Trình bày để bạn lựa chọn sáng suốt khi quyết định BusyBox. Khi cần đầy đủ khả năng utility, giải pháp đơn giản: bỏ hỗ trợ utility đó trong BusyBox configuration và thêm Linux utility chuẩn vào target system. Nhờ vậy có thể kết hợp BusyBox utility và Linux utility chuẩn trên cùng embedded system.
+Phiên bản BusyBox của `gzip` chỉ hỗ trợ ba option command-line. Phiên bản full-featured tương ứng hỗ trợ hơn 15 option command-line khác nhau. Ví dụ, tiện ích full-featured `gzip` hỗ trợ option `--list` để tạo thống kê nén cho từng file trên command line. BusyBox `gzip` không có hỗ trợ như vậy. Thông thường, đây không phải giới hạn đáng kể đối với embedded system. Chúng tôi trình bày thông tin này để bạn có cơ sở lựa chọn khi quyết định sử dụng BusyBox. Khi cần đầy đủ khả năng của một tiện ích, giải pháp rất đơn giản: bỏ hỗ trợ tiện ích cụ thể đó trong BusyBox configuration và thêm tiện ích Linux chuẩn vào target system. Nhờ vậy, bạn có thể kết hợp các tiện ích BusyBox và tiện ích Linux chuẩn trên cùng embedded system.
 
 ## 11.4 Tổng kết
 
-Chương mô tả BusyBox, một tiện ích phổ biến nhất trong embedded Linux. BusyBox còn có chỗ trong desktop, server distribution như phần rescue image và initial ramdisk thường gặp. Chương trình bày cách cấu hình, build, cài tiện ích quan trọng. Cũng khảo sát khác biệt khởi tạo hệ thống khi dùng hệ thống BusyBox-based.
+Chương này mô tả BusyBox, một trong những tiện ích phổ biến nhất trong lĩnh vực embedded Linux. BusyBox cũng được dùng trong các desktop distribution và server distribution, như một phần của rescue image cũng như initial ramdisk thường có trong những distribution này. Chương đã trình bày cách cấu hình, build và cài đặt tiện ích quan trọng đó. Chúng ta cũng đã khảo sát những khác biệt trong quá trình khởi tạo hệ thống khi dùng hệ thống BusyBox-based.
 
 - BusyBox là công cụ mạnh cho embedded system thay nhiều Linux utility thông dụng trong một multicall binary.
 

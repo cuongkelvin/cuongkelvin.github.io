@@ -404,7 +404,7 @@ ERIC_config:      unconfig
 
 Configuration rule mới được chèn như thể hiện trong ba dòng bắt đầu bằng ký tự `+` (unified diff format). Sửa makefile top-level bằng editor ưa thích.
 
-Hoàn thành các bước vừa mô tả, chúng ta có U-Boot source tree làm điểm khởi đầu. Có thể nó chưa compile sạch, nên đó là bước đầu cần làm. Ít nhất compiler có thể hướng dẫn nơi bắt đầu.
+Sau khi hoàn tất các bước vừa mô tả, chúng ta có một U-Boot source tree làm điểm khởi đầu. Tree này có thể chưa compile thành công mà không gặp lỗi, vì vậy đây cần là bước đầu tiên. Ít nhất, compiler có thể cung cấp chỉ dẫn về nơi cần bắt đầu.
 
 ### 7.4.3 Build EP405 lần đầu
 
@@ -610,7 +610,7 @@ Nhiều DDR memory module off-the-shelf có SPD (Serial Presence Detect) PROM ch
 
 Đến đây, bạn có thể hiểu một số khó khăn khi port bootloader sang hardware platform. Không gì thay thế được hiểu biết chi tiết về phần cứng bên dưới. Tất nhiên, chúng ta muốn giảm thời gian đầu tư cho tác vụ này. Xét cho cùng, chúng ta thường không được trả công theo mức hiểu từng chi tiết phần cứng của processor, mà theo khả năng cung cấp giải pháp hoạt động kịp thời. Thực vậy, đây là một lý do chính khiến open source phát triển mạnh. Bạn vừa thấy port U-Boot sang hardware platform mới dễ thế nào—không phải vì bạn là chuyên gia processor, mà vì nhiều người đi trước đã làm phần lớn công việc khó.
 
-Listing 7-10 là danh sách đầy đủ file mới hoặc được sửa để hoàn tất port EP405 cơ bản cho U-Boot. Tất nhiên, nếu có hardware device mới chưa được U-Boot hỗ trợ, hoặc nếu port sang CPU mới chưa được hỗ trợ, công sức sẽ lớn hơn nhiều. Điểm cần nhấn mạnh, dù có nguy cơ lặp lại, là không gì thay thế hiểu biết chi tiết cả phần cứng (CPU và subsystem) lẫn phần mềm bên dưới (U-Boot) để hoàn tất port thành công trong thời gian hợp lý. Nếu bắt đầu dự án với cách nghĩ đó, bạn sẽ có kết quả thành công.
+Listing 7-10 là danh sách đầy đủ các file mới hoặc được sửa đổi để hoàn tất bản port EP405 cơ bản cho U-Boot. Dĩ nhiên, nếu có hardware device mới chưa được U-Boot hỗ trợ hoặc nếu chúng ta port sang một CPU mới chưa được U-Boot hỗ trợ, công sức sẽ lớn hơn rất nhiều. Điểm cần nhấn mạnh, dù có nguy cơ lặp lại, là không gì thay thế được hiểu biết chi tiết về cả hardware (CPU và subsystem) lẫn software bên dưới (U-Boot) để hoàn tất một bản port thành công trong khoảng thời gian hợp lý. Nếu bắt đầu dự án với cách nghĩ đó, bạn sẽ có kết quả thành công.
 
 LISTING 7-10 File mới hoặc thay đổi cho U-Boot port EP405
 
@@ -882,7 +882,7 @@ $ dtc -O dtb -o myboard.dtb -b 0 myboard.dts
 
 Trong lệnh này, `myboard.dts` là device tree source human-readable, còn `myboard.dtb` là binary do lời gọi lệnh tạo ra. Flag `-O` chỉ định output format—ở đây là device tree blob binary. Flag `-o` đặt tên output file, còn parameter `-b 0` chỉ định physical boot CPU trong trường hợp multicore.
 
-Chú ý compiler `dtc` cho phép chuyển cả hai chiều. Ví dụ lệnh vừa nêu compile từ source sang device tree binary, trong khi lệnh như sau tạo source từ binary:
+Lưu ý rằng compiler `dtc` cho phép chuyển đổi theo cả hai chiều. Ví dụ lệnh vừa trình bày compile từ source sang device tree binary, trong khi một lệnh như sau tạo source từ binary:
 
 ```
 $ dtc -I dtb -O dts mpc8548.dtb >mpc8548.dts
@@ -988,7 +988,7 @@ title That Other OS
         chainloader +1
 ```
 
-Đầu tiên GRUB trình bày cho user danh sách image có thể boot. Các title entry trong Listing 7-18 là image name được trình bày. Default tag chỉ định image để boot nếu không nhấn phím nào trong timeout, ở đây là 3 giây. Image được đếm từ 0.
+Trước tiên, GRUB trình bày cho người dùng danh sách các image có thể boot. Các title entry trong Listing 7-18 là tên image được hiển thị cho người dùng. Default tag chỉ định image sẽ được boot nếu không có phím nào được nhấn trong khoảng timeout, là 3 giây ở ví dụ này. Các image được đánh số bắt đầu từ 0.
 
 Khác Lilo, GRUB thực sự có thể đọc file system trên partition nhất định để load image. Tag `root` chỉ root partition làm gốc cho mọi tên file trong configuration file `grub.conf`. Trong cấu hình mẫu, root là partition số 1 trên hard disk drive đầu tiên, được chỉ định là `root(hd0,1)`. Partition được đánh số từ 0; đây là partition thứ hai trên hard disk đầu.
 

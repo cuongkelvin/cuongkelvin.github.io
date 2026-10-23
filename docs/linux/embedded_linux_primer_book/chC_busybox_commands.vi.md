@@ -7,7 +7,7 @@ BẢNG C-1 Các lệnh BusyBox có tài liệu
 | Lệnh | Mô tả |
 |---|---|
 | `adduser` | Thêm user |
-| `adjtimex` | Đọc, tùy chọn đặt system timebase parameter |
+| `adjtimex` | Đọc và tùy chọn đặt các system timebase parameter |
 | `ar` | Trích xuất hoặc liệt kê FILES từ archive `ar` |
 | `arp` | Thao tác ARP cache |
 | `arping` | Gửi ARP request/reply |
@@ -37,8 +37,8 @@ BẢNG C-1 Các lệnh BusyBox có tài liệu
 | `chvt` | Đổi foreground virtual terminal sang /dev/ttyN |
 | `cksum` | Tính CRC32 checksum FILES |
 | `clear` | Xóa màn hình |
-| `cmp` | So FILE1 với stdin nếu không chỉ FILE2 |
-| `comm` | So FILE1 với FILE2 hoặc stdin nếu chỉ - |
+| `cmp` | So sánh FILE1 với stdin nếu không chỉ định FILE2 |
+| `comm` | So sánh FILE1 với FILE2 hoặc với stdin nếu chỉ định - |
 | `cp` | Copy SOURCE tới DEST hoặc nhiều SOURCE(s) tới DIRECTORY |
 | `cpio` | Trích xuất/liệt kê file từ cpio archive hoặc tạo cpio archive |
 | `crond` | Daemon thực thi lệnh theo lịch |
@@ -55,7 +55,7 @@ BẢNG C-1 Các lệnh BusyBox có tài liệu
 | `devmem` | Read/write physical address |
 | `df` | In thống kê sử dụng file system |
 | `dhcprelay` | Chuyển DHCP request từ client device tới server device |
-| `diff` | So file từng dòng, xuất khác biệt |
+| `diff` | So sánh các file theo từng dòng và xuất những khác biệt |
 | `dirname` | Bỏ hậu tố không phải directory khỏi FILENAME |
 | `dmesg` | In hoặc điều khiển kernel ring buffer |
 | `dnsd` | DNS server daemon tĩnh nhỏ |
@@ -266,7 +266,7 @@ BẢNG C-1 Các lệnh BusyBox có tài liệu
 | `tee` | Copy standard input tới mỗi FILE, cả standard output |
 | `telnet` | Nối telnet server |
 | `telnetd` | Xử lý incoming telnet connection |
-| `test` | Kiểm tra file type, so value, v.v.; trả exit code 0/1 |
+| `test` | Kiểm tra file type, so sánh các giá trị, v.v.; trả về exit code 0 hoặc 1 |
 | `tftp` | Truyền file từ/tới TFTP server |
 | `tftpd` | Truyền file theo TFTP client request |
 | `time` | Chạy chương trình, tổng hợp system resource usage |

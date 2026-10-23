@@ -1,6 +1,6 @@
 # Phụ lục B. Các lệnh U-Boot có thể cấu hình
 
-U-Boot có hơn 70 lệnh cấu hình được. Bảng B-1 tổng hợp từ U-Boot snapshot gần đây. Ngoài ra nhiều lệnh không chuẩn, một số phụ thuộc hardware cụ thể hoặc thử nghiệm. Để có danh sách đầy đủ up-to-date, xem source code. Lệnh ở đây định nghĩa trong header file `.../include/config_cmd_all.h` từ U-Boot source directory top-level.
+U-Boot có hơn 70 lệnh có thể cấu hình. Bảng B-1 được tổng hợp từ một U-Boot snapshot gần đây. Ngoài ra còn có nhiều lệnh không chuẩn, một số dành riêng cho hardware cụ thể hoặc mang tính thử nghiệm. Để có danh sách đầy đủ và up-to-date, hãy xem source code. Các lệnh trình bày ở đây được định nghĩa trong header file `.../include/config_cmd_all.h` thuộc U-Boot source directory top-level.
 
 BẢNG B-1 Các lệnh U-Boot có thể cấu hình
 

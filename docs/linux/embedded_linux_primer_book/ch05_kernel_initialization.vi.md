@@ -253,7 +253,7 @@ Dòng 3 của Listing 5-3 là kernel version string. Đây là dòng output đ�
 printk(KERN_NOTICE “%s”, linux_banner);
 ```
 
-Dòng này tạo output vừa mô tả—kernel version string, dòng 3 của Listing 5-3. Version string này chứa một số thông tin liên quan đến kernel image:
+Dòng này tạo output vừa được mô tả, tức kernel version string ở dòng 3 của Listing 5-3. Version string này chứa một số thông tin đáng chú ý liên quan đến kernel image:
 
 - Kernel version: Linux version 2.6.32-07500-g8bea867[^4]
 
@@ -265,7 +265,7 @@ Dòng này tạo output vừa mô tả—kernel version string, dòng 3 của Li
 
 - Ngày và giờ kernel image được compile
 
-Thông tin này hữu ích cả trong quá trình phát triển lẫn khi vận hành thực tế sau đó. Ngoại trừ một mục, ý nghĩa của các mục đều hiển nhiên. Build number đơn giản là công cụ được các lập trình viên thêm vào version string để cho biết có thứ quan trọng hơn ngày giờ đã thay đổi giữa hai lần build. Đây là cách để lập trình viên theo dõi lần build một cách chung và tự động. Trong ví dụ này, bạn sẽ nhận thấy đây là lần build thứ mười hai trong chuỗi, được thể hiện bởi #12 ở dòng 3 của Listing 5-3. Build number được lưu trong hidden file có tên `.version` ở Linux directory top-level. Nó được tự động tăng bởi build script trong `.../scripts/mkversion`. Tóm lại, đây là một nhãn numeric string được tự động tăng mỗi khi bất kỳ phần đáng kể nào trong kernel được build lại. Chú ý rằng nó được đặt lại thành #1 khi thực thi `make mrproper`.
+Thông tin này hữu ích cả trong quá trình phát triển lẫn khi vận hành thực tế sau đó. Ngoại trừ một mục, các entry đều self-explanatory. Build number đơn giản là công cụ được các lập trình viên thêm vào version string để cho biết có thứ quan trọng hơn ngày giờ đã thay đổi giữa hai lần build. Đây là cách để lập trình viên theo dõi lần build một cách chung và tự động. Trong ví dụ này, bạn sẽ nhận thấy đây là lần build thứ mười hai trong chuỗi, được thể hiện bởi #12 ở dòng 3 của Listing 5-3. Build number được lưu trong hidden file có tên `.version` ở Linux directory top-level. Nó được tự động tăng bởi build script trong `.../scripts/mkversion`. Tóm lại, đây là một nhãn numeric string được tự động tăng mỗi khi bất kỳ phần đáng kể nào trong kernel được build lại. Chú ý rằng nó được đặt lại thành #1 khi thực thi `make mrproper`.
 
 ## 5.2 Luồng điều khiển khi khởi tạo
 
@@ -724,7 +724,7 @@ Kernel command line này yêu cầu kernel hiển thị mọi initialization rou
 
 - Nhiều architecture nối một bootstrap loader architecture-specific vào kernel binary image để thiết lập execution environment thích hợp mà Linux kernel yêu cầu. Chúng ta đã trình bày các bước build bootstrap loader để phân biệt chức năng này với kernel chính.
 
-- Hiểu luồng điều khiển khi khởi tạo sẽ giúp bạn hiểu sâu hơn Linux kernel và thấy cách tùy chỉnh nó cho những yêu cầu cụ thể của mình.
+- Hiểu luồng điều khiển trong quá trình khởi tạo sẽ giúp bạn hiểu sâu hơn Linux kernel và biết cách tùy chỉnh nó cho các yêu cầu cụ thể của mình.
 
 - Chúng ta đã tìm kernel entry point trong `head.o` và lần theo luồng điều khiển vào logic khởi tạo kernel chính, `main.c`. Chúng ta đã xem xét một hệ thống đang boot và các thông báo nó tạo ra, cùng phần tổng quan về nhiều khái niệm khởi tạo quan trọng.
 

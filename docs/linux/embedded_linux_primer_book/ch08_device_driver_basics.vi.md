@@ -161,7 +161,7 @@ Sau khi gọi configuration utility bằng lệnh tương tự, configuration op
 
 `(M)` Module. Compile `examples` thành dynamically loadable module.
 
-Hình 8-1 cho thấy màn hình gconfig kết quả với configuration option mới. Dấu gạch (-) trong ô chọn chọn module, như cột M bên phải. Dấu kiểm chọn yes, nghĩa là driver module cần được compile thành phần của kernel chính. Ô trống nghĩa là option không được chọn.
+Hình 8-1 cho thấy màn hình gconfig sau khi bổ sung configuration option mới. Dấu gạch ngang (-) trong ô chọn tương ứng với lựa chọn module, như được thể hiện ở cột M bên phải. Dấu đánh dấu trong ô chọn tương ứng với yes, nghĩa là driver module cần được compile thành một phần của chính kernel. Ô chọn trống cho biết option không được chọn.
 
 ![Figure 8-1](images/ch08/fig08-01.png)
 
@@ -230,7 +230,7 @@ $ make ARCH=arm CROSS_COMPILE=xscale_be-                  \
 
 ### 8.1.6 Load module
 
-Hoàn thành mọi bước cần thiết, giờ có thể load và kiểm tra device driver module. Listing 8-5 cho thấy output khi load rồi unload device driver trên embedded system.
+Sau khi hoàn tất mọi bước cần thiết, bây giờ chúng ta có thể load và kiểm thử device driver module. Listing 8-5 cho thấy output khi load rồi unload device driver trên embedded system.
 
 LISTING 8-5 Load và unload module
 
@@ -288,7 +288,7 @@ MODULE_DESCRIPTION(“Hello World Example”);
 MODULE_LICENSE(“GPL”);
 ```
 
-Ba dòng được thêm vào device driver module mẫu. Dòng đầu khai báo static integer giữ debug flag. Dòng thứ hai là macro trong `.../include/linux/moduleparam.h` (được `modules.h` include) đăng ký module parameter với kernel module subsystem. Dòng mới thứ ba là macro đăng ký description string gắn với parameter vào kernel module subsystem. Mục đích sẽ rõ khi xem lệnh `modinfo` ở phần sau chương.
+Ba dòng đã được thêm vào device driver module mẫu của chúng ta. Dòng đầu khai báo một static integer để lưu debug flag. Dòng thứ hai là một macro được định nghĩa trong `.../include/linux/moduleparam.h` (được `modules.h` include), dùng để đăng ký module parameter với kernel module subsystem. Dòng mới thứ ba là một macro đăng ký một string mô tả gắn với parameter đó với kernel module subsystem. Mục đích của việc này sẽ rõ hơn khi chúng ta xem xét lệnh `modinfo` ở phần sau của chương.
 
 Nếu giờ dùng `insmod` để insert module mẫu và thêm option `debug_enable`, sẽ thấy output kết quả dựa trên module `hello1.c` đã sửa của Listing 8-6.
 
@@ -338,13 +338,13 @@ Chú ý cột ngoài cùng bên phải, “Used by”. Nó chỉ device driver m
 
 ### 8.2.3 modprobe
 
-Đây là nơi sự khéo léo của `modprobe` phát huy. Listing 8-7 cho thấy quan hệ giữa module `ext3` và `jbd`. Module `ext3` phụ thuộc module `jbd`. Tiện ích `modprobe` khám phá quan hệ này và load các module phụ thuộc đúng thứ tự. Lệnh sau load cả driver module `jbd.ko` và `ext3.ko`:
+Đây là lúc khả năng thông minh của `modprobe` phát huy tác dụng. Listing 8-7 cho thấy mối quan hệ giữa các module `ext3` và `jbd`. Module `ext3` phụ thuộc vào module `jbd`. Tiện ích `modprobe` có thể xác định mối quan hệ này và load các module phụ thuộc theo đúng thứ tự. Lệnh sau load cả hai driver module `jbd.ko` và `ext3.ko`:
 
 ```
 $ modprobe ext3
 ```
 
-Tiện ích `modprobe` có một số command-line option điều khiển hành vi. Như đã thấy, `modprobe` có thể remove module, gồm các module mà module nhất định phụ thuộc vào. Đây là ví dụ remove cả `jbd.ko` và `ext3.ko`:
+Tiện ích `modprobe` có một số command-line option để điều khiển hành vi của nó. Như đã thấy trước đó, `modprobe` có thể được dùng để remove module, bao gồm cả những module mà một module cụ thể phụ thuộc vào. Sau đây là ví dụ remove cả `jbd.ko` và `ext3.ko`:
 
 ```
 $ modprobe -r ext3
@@ -372,9 +372,9 @@ Chú ý chức năng `modprobe.conf` phần lớn đã được thay bằng ch�
 
 ### 8.2.4 depmod
 
-Làm sao `modprobe` biết dependency của module? Tiện ích `depmod` đóng vai trò then chốt. Khi `modprobe` thực thi, nó tìm file tên `modules.dep` trong cùng directory cài module. Tiện ích `depmod` tạo file module-dependency này.
+Làm sao `modprobe` biết các dependency của một module cụ thể? Tiện ích `depmod` đóng vai trò then chốt trong quá trình này. Khi `modprobe` được thực thi, nó tìm một file có tên `modules.dep` trong cùng directory nơi các module được cài đặt. Tiện ích `depmod` tạo ra file module-dependency này.
 
-File chứa danh sách mọi module mà kernel build system được cấu hình, cùng dependency information của từng module. Định dạng đơn giản, mỗi device driver module chiếm một dòng. Nếu module có dependency, chúng được liệt kê theo thứ tự sau module name. Ví dụ, Listing 8-7 cho thấy module `ext3` phụ thuộc module `jbd`. Dòng dependency trong `modules.dep` như sau:
+File này chứa danh sách tất cả module mà kernel build system được cấu hình để build, cùng thông tin dependency của từng module. File có định dạng đơn giản, trong đó mỗi device driver module chiếm một dòng. Nếu module có dependency, chúng được liệt kê theo thứ tự sau tên module. Chẳng hạn, trong Listing 8-7, chúng ta đã thấy module `ext3` phụ thuộc vào module `jbd`. Dòng dependency trong `modules.dep` sẽ có dạng như sau:
 
 ```
 ext3.ko: jbd.ko
@@ -406,7 +406,7 @@ Cần lưu ý khác `modprobe`, `rmmod` không remove dependent module. Dùng `m
 
 ### 8.2.6 modinfo
 
-Có thể bạn chú ý ba dòng cuối của khung driver trong Listing 8-1 rồi Listing 8-6. Các macro đặt tag trong binary module để hỗ trợ quản trị và quản lý. Listing 8-9 là kết quả thực thi `modinfo` trên module `hello1.ko`.
+Bạn có thể đã chú ý đến ba dòng cuối của khung driver trong Listing 8-1, và sau đó trong Listing 8-6. Các macro này đặt những tag vào binary module để hỗ trợ việc quản trị và quản lý chúng. Listing 8-9 là kết quả chạy `modinfo` trên module `hello1.ko` của chúng ta.
 
 LISTING 8-9 Output `modinfo`
 
@@ -421,7 +421,7 @@ vermagic:     2.6.32-07500-g8bea867 mod_unload modversions ARMv5
 parm:         debug_enable:Enable module debug mode. (int)
 ```
 
-Field đầu hiển nhiên: tên file đầy đủ của device driver module. Để dễ đọc, chúng ta lại rút ngắn path. Các dòng tiếp là kết quả trực tiếp của descriptive macro cuối Listing 8-6—gồm filename, author và license information. Chúng chỉ là tag cho module utility dùng, không ảnh hưởng hành vi device driver. Có thể học thêm `modinfo` từ man page và source `modinfo`.
+Field đầu tiên rất rõ ràng: đó là tên file đầy đủ của device driver module. Để dễ đọc, chúng ta lại rút ngắn path. Những dòng tiếp theo là kết quả trực tiếp của các macro mô tả ở cuối Listing 8-6, cụ thể là thông tin filename, author và license. Đây chỉ là các tag để module utility sử dụng; chúng không ảnh hưởng đến hành vi của chính device driver. Bạn có thể tìm hiểu thêm về `modinfo` trong man page và source code của `modinfo`.
 
 Một tính năng rất hữu ích của `modinfo` là biết module hỗ trợ parameter nào. Từ Listing 8-9 thấy module chỉ hỗ trợ một parameter, chính là `debug_enable` thêm trong Listing 8-6. Listing cho name, type (ở đây int) và descriptive text field đã nhập bằng macro `MODULE_PARM_DESC()`. Điều này rất tiện, đặc biệt với module khó truy cập source code.
 
@@ -533,11 +533,11 @@ Chú ý cũng thêm function call mới vào routine `hello_init()`. Dòng này 
 
 Cần lưu ý các ví dụ trong sách nhằm cho bạn ý niệm tổng thể về device driver architecture và vị trí trong bức tranh chung. Đây không phải hướng dẫn phát triển device driver. Chủ đề được trình bày trong hai tài liệu xuất sắc liệt kê cuối chương.
 
-Với lưu ý đó, phương pháp cấp phát major device number trong Listing 8-10 đã được thay bằng phương pháp mạnh hơn nhiều. Thường bạn không chỉ định device number trong driver mà dùng method cho phép kernel chỉ định giúp. Điều này tránh xung đột device number và mở rộng tốt hơn nhiều so với gán số thủ công. Quá trình được mô tả đầy đủ trong Chương 3 của Linux Device Drivers, 3rd Edition, tham chiếu cuối chương.
+Với lưu ý đó, cần nhấn mạnh rằng phương pháp cấp phát major device number trong Listing 8-10 đã được thay bằng một phương pháp vững chắc hơn nhiều. Thông thường, bạn sẽ không chỉ định device number trong driver của mình. Bạn sẽ dùng các phương pháp cho phép kernel chỉ định device number giúp bạn. Điều này tránh xung đột device number và có khả năng mở rộng tốt hơn nhiều so với tự gán device number thủ công. Quy trình này được mô tả đầy đủ trong Chương 3 của Linux Device Drivers, 3rd Edition, được dẫn ở cuối chương này.
 
 ### 8.3.3 Device node và mknod
 
-Để hiểu ứng dụng bind request đến device cụ thể do device driver biểu diễn thế nào, cần hiểu khái niệm device node. Đây là special file type trong Linux biểu diễn device. Gần như mọi Linux distribution giữ device node ở vị trí chung (theo Filesystem Hierarchy Standard[^7]), trong directory tên `/dev`. Tiện ích chuyên dụng tạo device node trên file system có tên `mknod`.
+Để hiểu cách một ứng dụng gắn các request của nó với device cụ thể được device driver của chúng ta biểu diễn, cần hiểu khái niệm device node. Device node là một loại file đặc biệt trong Linux, biểu diễn một device. Gần như mọi Linux distribution đều đặt device node ở một vị trí chung (do Filesystem Hierarchy Standard[^7] quy định), trong directory có tên `/dev`. Một tiện ích chuyên dụng được dùng để tạo device node trên file system. Tiện ích đó có tên `mknod`.
 
 Ví dụ tạo node là cách tốt nhất minh họa chức năng và thông tin nó truyền đạt. Tiếp nối ví dụ device driver đơn giản, hãy tạo device node thích hợp để thử nó:
 
@@ -554,17 +554,17 @@ crw-r--r--   1 root  root  234, 0 Jul 14 2005 /dev/hello1
 
 Các parameter truyền cho `mknod` gồm name, type, major number và minor number cho device driver. Tên đã chọn là `hello1`. Vì minh họa character driver, dùng `c` để chỉ điều đó. Major number là 234, số chọn cho ví dụ, còn minor number là 0.
 
-Riêng nó, device node chỉ là file khác trong file system. Tuy nhiên vì trạng thái đặc biệt là device node, chúng ta dùng nó bind với device driver đã cài. Nếu application process gọi system call `open()` với device node làm path parameter, kernel tìm device driver hợp lệ đã đăng ký major number khớp device node—ở đây 234. Đó là cơ chế kernel liên kết device cụ thể với device node.
+Bản thân device node cũng chỉ là một file khác trên file system. Tuy nhiên, vì có vai trò đặc biệt là device node, nó được dùng để liên kết với một device driver đã cài đặt. Nếu một application process gọi system call `open()` với device node của chúng ta làm path parameter, kernel sẽ tìm một device driver hợp lệ đã đăng ký với major number khớp device node, trong trường hợp này là 234. Đây là cơ chế kernel dùng để liên kết device cụ thể của chúng ta với device node.
 
 Như phần lớn lập trình viên C biết, system call `open()` hoặc biến thể trả về reference (file descriptor) để ứng dụng gọi file system operation tiếp theo như read, write và close. Reference này sau đó được truyền cho các file system operation như read, write hoặc biến thể.
 
-Nếu tò mò về minor number, đây là cơ chế xử lý nhiều device hoặc subdevice bằng một device driver. Operating system không dùng nó mà chỉ truyền cho device driver. Driver có thể dùng tùy ý. Ví dụ với multiport serial card, major number chỉ định driver, minor number có thể chỉ định một trong nhiều port do cùng driver xử lý trên card. Tham khảo tài liệu device driver xuất sắc để biết thêm chi tiết.
+Nếu bạn tò mò về mục đích của minor number, đây là cơ chế xử lý nhiều device hoặc subdevice bằng một device driver duy nhất. Operating system không sử dụng minor number mà chỉ truyền nó cho device driver. Device driver có thể sử dụng minor number theo bất kỳ cách nào phù hợp. Ví dụ, với multiport serial card, major number xác định driver. Minor number có thể xác định một trong các port do cùng driver xử lý trên multiport card. Hãy tham khảo một trong những tài liệu hay về device driver để biết thêm chi tiết.
 
 Một lưu ý cuối đáng đề cập. Thảo luận device node phía trước nhằm mục đích hướng dẫn. Trên phần lớn Linux system hiện đại, bạn không bao giờ thực sự tạo device node. Việc tạo được `udev` xử lý tự động. Chức năng này được giải thích đầy đủ trong Chương 19.
 
 ## 8.4 Kết hợp mọi thành phần
 
-Giờ có khung device driver, có thể load và thử. Listing 8-11 là user space application đơn giản thử device driver. Chúng ta đã thấy cách load driver. Chỉ compile rồi gọi lệnh `make modules_install` đặt vào file system như mô tả trước đó.
+Giờ đã có khung device driver, chúng ta có thể load và chạy thử nó. Listing 8-11 là một user space application đơn giản để chạy thử device driver của chúng ta. Chúng ta đã biết cách load driver. Chỉ cần compile nó rồi chạy lệnh `make modules_install` để đặt nó vào file system, như đã mô tả trước đó.
 
 LISTING 8-11 Thử device driver
 
@@ -644,7 +644,7 @@ $ make ARCH=arm CROSS_COMPILE=xscale_be- -C \
 
 Tất nhiên thay `<path/to/your/linux-2.6>` bằng path đến Linux source tree riêng. Lệnh `make` này khi được gọi chuyển vào kernel source tree qua parameter `-C` và yêu cầu build các target định nghĩa trong `SUBDIRS`. Đơn giản vậy thôi.
 
-Khi hiểu khái niệm, có thể tạo makefile thông minh hơn chút. Ví dụ nó định nghĩa `SUBDIRS` và path đến kernel nếu muốn. Quan trọng là kernel configuration phải định nghĩa `CONFIG_EXAMPLES` bằng `=m` hoặc `=y`. Có thể kiểm tra trong file `.config`. Như mong đợi, nếu `CONFIG_EXAMPLES` chưa định nghĩa, module `hello1.c` không được compile.
+Khi đã hiểu các khái niệm, bạn có thể làm cho makefile thông minh hơn một chút. Chẳng hạn, makefile có thể định nghĩa `SUBDIRS` và path đến kernel nếu bạn muốn. Cần hiểu rằng kernel configuration của bạn phải định nghĩa `CONFIG_EXAMPLES` là `=m` hoặc `=y`. Bạn có thể kiểm tra điều này trong file `.config`. Đúng như dự kiến, nếu `CONFIG_EXAMPLES` chưa được định nghĩa, module `hello1.c` sẽ không được compile.
 
 ## 8.6 Device driver và GPL
 
@@ -660,7 +660,7 @@ Có nhiều thảo luận và tranh luận về device driver và cách các đi
 
 Đây là nơi nảy sinh tranh luận. Một số khái niệm chưa được kiểm chứng tại tòa. Quan điểm phổ biến của cộng đồng pháp lý và open source là nếu chứng minh được tác phẩm được phát triển độc lập,[^9] và device driver không giả định “hiểu biết sâu” về Linux kernel, người phát triển tự do cấp phép theo cách thấy phù hợp. Nếu sửa kernel để đáp ứng nhu cầu đặc biệt của driver, nó được coi là tác phẩm phái sinh và do đó chịu GPL.
 
-Trong cộng đồng open source có lượng thông tin lớn, ngày càng tăng về các vấn đề này. Có vẻ trong tương lai những khái niệm sẽ được kiểm chứng tại tòa và tạo tiền lệ. Mất bao lâu là điều không ai biết. Nếu muốn hiểu rõ hơn vấn đề pháp lý quanh Linux và open source, bạn có thể thích www.open-bar.org.
+Trong cộng đồng open source có một lượng thông tin lớn và ngày càng tăng về các vấn đề này. Có vẻ đến một thời điểm nào đó trong tương lai, những khái niệm này sẽ được xem xét tại tòa án và một tiền lệ sẽ được thiết lập. Điều đó mất bao lâu thì không ai có thể đoán chắc. Nếu muốn hiểu rõ hơn các vấn đề pháp lý liên quan đến Linux và open source, bạn có thể quan tâm đến www.open-bar.org.
 
 ## 8.7 Tổng kết
 
@@ -692,11 +692,11 @@ Rusty’s Linux Kernel Page Module Utilities for 2.6 Rusty Russell http://kernel
 
 [^2]: Cơ chế được mô tả rất chi tiết trong Chương 19, “udev”.
 
-[^3]: Path này dùng bởi Red Hat, Fedora và cũng được File System Hierarchy Standard yêu cầu. được tham chiếu cuối chương. Distribution khác có thể dùng vị trí khác trong file system cho kernel module.
+[^3]: Path này được Red Hat và Fedora distribution sử dụng, đồng thời cũng được File System Hierarchy Standard yêu cầu. Tiêu chuẩn này được dẫn ở cuối chương. Các distribution khác có thể sử dụng những vị trí khác trong file system để lưu kernel module.
 
 [^4]: Hosting target board và NFS root mount được trình bày chi tiết trong Chương 12, “Môi trường phát triển embedded”.
 
-[^5]: Nếu không thấy thông báo console, hãy tắt syslogd logger hoặc giảm console loglevel. Chúng ta mô tả cách làm trong Chương 14, “Kỹ thuật debug kernel”.
+[^5]: Nếu không thấy các thông báo trên console, hãy vô hiệu hóa syslogd logger hoặc giảm console loglevel. Chúng ta sẽ mô tả cách thực hiện trong Chương 14, “Các kỹ thuật debug kernel”.
 
 [^6]: `/proc/modules` thuộc file system `/proc`, được giới thiệu trong Chương 9, “File system”.
 

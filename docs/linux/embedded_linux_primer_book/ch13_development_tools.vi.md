@@ -60,34 +60,34 @@ binary utility hữu ích hơn cả.
 
 ## 13.1 GNU Debugger (GDB)
 
-Nếu dành nhiều thời gian phát triển Linux application, chắc chắn bạn dành nhiều giờ làm quen GNU Debugger. GDB có thể là công cụ quan trọng nhất trong bộ công cụ lập trình viên. Nó có lịch sử lâu dài và khả năng phát triển tới hỗ trợ debugging low-level hardware-specific cho nhiều architecture, microprocessor. Cần lưu ý GDB user manual gần lớn bằng sách này. Ở đây chỉ giới thiệu để bắt đầu. Bạn nên nghiên cứu user manual tham chiếu cuối chương.
+Nếu dành nhiều thời gian phát triển ứng dụng Linux, chắc chắn bạn sẽ dành nhiều giờ làm quen với GNU Debugger. Có thể nói GDB là công cụ quan trọng nhất trong bộ công cụ của lập trình viên. Nó có lịch sử lâu đời và đã phát triển để hỗ trợ debugging low-level hardware-specific cho rất nhiều architecture và microprocessor. Cần lưu ý rằng GDB user manual gần dày bằng cuốn sách này. Mục đích ở đây là giới thiệu GDB để giúp bạn bắt đầu. Bạn nên nghiên cứu user manual được dẫn ở phần cuối.
 
-Vì sách về embedded Linux development, chúng ta dùng GDB compile thành cross-debugger. Tức debugger chạy trên development host nhưng chỉ hiểu binary executable theo architecture được cấu hình lúc compile. Vài ví dụ sau dùng GDB compile cho Linux development host và target processor XScale (ARM). Dù dùng tên ngắn `gdb`, ví dụ dựa cross-gdb XScale-enabled từ Monta Vista embedded Linux distribution cho ARM XScale. Binary tên `xscale_be-gdb`. Vẫn là GDB nhưng cấu hình cho môi trường cross-development.
+Vì đây là cuốn sách về phát triển embedded Linux, chúng ta sử dụng một phiên bản GDB được biên dịch thành cross-debugger. Nghĩa là bản thân debugger chạy trên development host, nhưng chỉ hiểu binary executable thuộc architecture mà nó được cấu hình tại thời điểm biên dịch. Một vài ví dụ tiếp theo dùng GDB được biên dịch cho Linux development host và target processor XScale (ARM). Mặc dù dùng tên ngắn `gdb`, chúng ta trình bày các ví dụ dựa trên cross-gdb XScale-enabled từ Monta Vista embedded Linux distribution dành cho ARM XScale. Binary này tên `xscale_be-gdb`. Nó vẫn là GDB, nhưng được cấu hình cho môi trường cross-development.
 
-GDB debugger là chương trình phức tạp có nhiều configuration option khi build. Chúng ta không hướng dẫn build `gdb`, đã có tài liệu khác trình bày. Trong chương giả định bạn đã có GDB hoạt động, cấu hình đúng architecture và host development environment sẽ dùng.
+GDB debugger là một chương trình phức tạp, cung cấp nhiều configuration option trong quá trình build. Chúng tôi không có ý định hướng dẫn build `gdb`; chủ đề đó đã được trình bày trong các tài liệu khác. Trong chương này, chúng ta giả định bạn đã có một GDB hoạt động và được cấu hình cho architecture cùng host development environment sẽ sử dụng.
 
 ### 13.1.1 Debug core dump
 
-Lý do phổ biến nhất lấy GDB ra dùng là đánh giá core dump. Quá trình nhanh, dễ, thường xác định ngay code gây lỗi. Core dump là file kernel sinh khi application program gây fault, như truy cập memory location không sở hữu. Nhiều điều kiện kích hoạt core dump,[^1] nhưng SIGSEGV (segmentation fault) phổ biến nhất. SIGSEGV là Linux kernel signal sinh khi user process truy cập memory trái phép. Khi signal sinh, kernel kết thúc process rồi dump core image nếu được bật.
+Một trong những lý do phổ biến nhất để lấy GDB ra sử dụng là phân tích core dump. Quá trình này nhanh, dễ và thường giúp xác định ngay code gây lỗi. Core dump là file được kernel tạo khi chương trình ứng dụng gây fault, chẳng hạn truy cập một memory location mà nó không sở hữu. Nhiều tình huống có thể kích hoạt core dump,[^1] nhưng SIGSEGV (segmentation fault) phổ biến hơn cả. SIGSEGV là một Linux kernel signal được tạo khi user process truy cập memory trái phép. Khi signal này xuất hiện, kernel kết thúc process rồi dump core image nếu tính năng đó được bật.
 
-Để bật sinh core dump, process phải có quyền. Đạt bằng đặt resource limit qua C function call `setrlimit()` hoặc từ BASH/BusyBox shell command prompt bằng `ulimit`. Không hiếm gặp dòng sau trong initialization script embedded system để bật core dump khi process lỗi:
+Để bật khả năng tạo core dump, process của bạn phải có quyền thực hiện việc đó. Bạn có thể cấp quyền bằng cách đặt resource limit của process qua lời gọi function C `setrlimit()`, hoặc dùng `ulimit` tại command prompt của BASH hoặc BusyBox shell. Không hiếm khi bạn gặp dòng sau trong initialization script của embedded system để bật việc tạo core dump khi process gặp lỗi:
 
 ```
 ulimit -c unlimited
 ```
 
-Lệnh BASH built-in này đặt size limit core dump. Ở trên đặt `unlimited`. Có thể gọi lệnh sau từ shell để xem setting hiện tại:
+Lệnh BASH built-in này được dùng để đặt giới hạn kích thước core dump. Trong trường hợp trên, kích thước được đặt thành `unlimited`. Bạn có thể chạy lệnh sau từ shell để xem thiết lập hiện tại:
 
 ```
 $ ulimit
 unlimited
 ```
 
-Khi application program gây segmentation fault (ví dụ ghi memory address ngoài phạm vi cho phép), Linux kết thúc process và sinh core dump nếu bật. Core dump là snapshot process đang chạy tại thời điểm segmentation fault.
+Khi chương trình ứng dụng gây segmentation fault, chẳng hạn ghi vào memory address ngoài phạm vi được phép, Linux kết thúc process và tạo core dump nếu tính năng này được bật. Core dump là snapshot của process đang chạy tại thời điểm segmentation fault xảy ra.
 
-Bật debugging symbol trong binary sẽ hữu ích. GDB cho output hữu ích hơn nhiều nếu bật debugging symbol (`gcc -g`) khi build. Tuy nhiên vẫn có thể xác định chuỗi sự kiện dẫn tới segmentation fault ngay cả khi compile không debugging symbol. Có thể cần điều tra nhiều hơn nếu thiếu symbol. Khi đó phải tự liên hệ virtual address với vị trí trong chương trình.
+Bật debugging symbol trong binary sẽ rất hữu ích. GDB tạo output hữu ích hơn nhiều khi debugging symbol được bật trong quá trình build bằng `gcc -g`. Tuy nhiên, bạn vẫn có thể xác định trình tự sự kiện dẫn đến segmentation fault ngay cả khi binary được biên dịch mà không có debugging symbol. Khi thiếu sự trợ giúp của symbol, bạn có thể cần điều tra thêm. Trong trường hợp đó, bạn phải tự đối chiếu virtual address với vị trí trong chương trình.
 
-Listing 13-1 cho kết quả phiên phân tích core dump bằng GDB. Output được format lại chút cho vừa trang. Dùng demonstration software cố ý gây segmentation fault. Đây là output process (tên webs) gây segmentation fault:
+Listing 13-1 trình bày kết quả một session phân tích core dump bằng GDB. Output đã được định dạng lại đôi chút để vừa trang. Chúng ta sử dụng một software minh họa để cố ý tạo segmentation fault. Sau đây là output của process tên webs đã gây segmentation fault:
 
 ```
 root@coyote:# ./webs
@@ -135,17 +135,17 @@ $1 = 0x0
 
 ### 13.1.2 Gọi GDB
 
-Dòng đầu Listing 13-1 cho cách gọi GDB từ command line. Vì cross-debugging, cần cross-version GDB compile cho host, target system. Gọi cross-gdb như thể hiện, truyền cho `xscale_be-gdb` tên binary rồi tên core dump file—ở đây chỉ `core`. Sau vài banner line mô tả cấu hình và thông tin khác, GDB hiển thị lý do kết thúc: signal 11, chỉ segmentation fault.[^2]
+Dòng đầu tiên của Listing 13-1 cho thấy cách gọi GDB từ command line. Vì đang thực hiện cross-debugging, chúng ta cần cross-version của GDB đã được biên dịch cho host và target system của mình. Chúng ta gọi cross-gdb như trong listing, truyền cho `xscale_be-gdb` tên binary, tiếp theo là tên core dump file; trong trường hợp này, tên file chỉ là `core`. Sau khi in một số banner line mô tả cấu hình và các thông tin khác, GDB hiển thị nguyên nhân chương trình kết thúc: signal 11, biểu thị segmentation fault.[^2]
 
-Một số dòng tiếp khi GDB load binary, library phụ thuộc và core file. Dòng cuối khi startup là vị trí chương trình lúc fault. Dòng bắt đầu string `#0` chỉ stack frame (stack frame zero trong function `ClearBlock()` tại virtual address `0x00012ac4`). Dòng tiếp bắt đầu `43` là số dòng source gây lỗi trong file `led.c`. Từ đó GDB hiện command prompt chờ input.
+Tiếp theo là một số dòng thông báo khi GDB load binary, các library mà binary phụ thuộc và core file. Dòng cuối cùng được in khi GDB khởi động là vị trí của chương trình tại thời điểm xảy ra fault. Dòng bắt đầu bằng string `#0` cho biết stack frame: stack frame zero trong function `ClearBlock()` tại virtual address `0x00012ac4`. Dòng tiếp theo bắt đầu bằng `43`, là số dòng của dòng source code gây lỗi trong file `led.c`. Sau đó, GDB hiển thị command prompt và chờ input.
 
-Để có context, nhập lệnh `gdb list` bằng dạng viết tắt `l`. GDB nhận dạng viết tắt không mơ hồ. Ở đây lỗi chương trình bắt đầu lộ ra. Đây là dòng gây lỗi theo phân tích core dump của GDB:
+Để xem ngữ cảnh xung quanh lỗi, chúng ta nhập lệnh `gdb list` bằng dạng viết tắt `l`. GDB nhận dạng các lệnh viết tắt nếu chúng không gây nhầm lẫn. Đến đây, lỗi chương trình bắt đầu lộ rõ. Theo kết quả GDB phân tích core dump, dòng gây lỗi là:
 
 ```
 43            *ptr = 0;
 ```
 
-Tiếp theo gọi `gdb print` cho variable `ptr`, viết tắt `p`. Như Listing 13-1, pointer `ptr` có giá trị `0`. Vì vậy kết luận segmentation fault do null pointer dereference điển hình, lỗi lập trình phổ biến nhiều ngôn ngữ. Từ đây có thể dùng backtrace xem call chain dẫn đến lỗi, có thể về nguồn lỗi. Listing 13-2 hiển thị kết quả.
+Tiếp theo, chúng ta chạy lệnh `gdb print` cho variable `ptr`, sử dụng dạng viết tắt `p`. Như bạn thấy trong Listing 13-1, pointer `ptr` có giá trị `0`. Vì vậy, chúng ta kết luận nguyên nhân segmentation fault là null pointer dereference điển hình, một lỗi lập trình phổ biến trong nhiều ngôn ngữ. Từ đây, chúng ta có thể chọn lệnh backtrace để xem call chain dẫn đến lỗi này, qua đó có thể lần ngược về nguồn gốc lỗi. Listing 13-2 hiển thị kết quả.
 
 LISTING 13-2 Lệnh backtrace
 
@@ -167,7 +167,7 @@ LISTING 13-2 Lệnh backtrace
 (gdb)
 ```
 
-Backtrace hiển thị call chain ngược tới `main()`, đầu user program. Mỗi dòng bắt đầu stack frame number. Có thể chuyển stack frame bằng lệnh `gdb frame`. Listing 13-3 là ví dụ chuyển frame 2, hiển thị source code. Như ví dụ trước, dòng bắt đầu command prompt `(gdb)` là lệnh nhập, các dòng khác là output GDB.
+Backtrace hiển thị call chain ngược đến tận `main()`, điểm bắt đầu chương trình của người dùng. Mỗi dòng trong backtrace được đặt trước một stack frame number. Bạn có thể chuyển đến bất kỳ stack frame nào bằng lệnh `gdb frame`. Listing 13-3 minh họa thao tác này: chúng ta chuyển đến stack frame 2 và hiển thị source code trong frame đó. Như trong các ví dụ trước, những dòng bắt đầu bằng command prompt `(gdb)` là lệnh chúng ta gửi đến GDB; những dòng còn lại là output của GDB.
 
 LISTING 13-3 Di chuyển giữa stack frame trong GDB
 
@@ -191,11 +191,11 @@ LISTING 13-3 Di chuyển giữa stack frame trong GDB
 (gdb)
 ```
 
-Như thấy, với chút trợ giúp source code từ lệnh list, dễ trace ngược tới nguồn null pointer sai. Thực tế chú ý nguồn segmentation fault tạo trong ví dụ. Listing 13-3 thấy kiểm tra return value của `malloc()` đã comment bỏ. Trong ví dụ `malloc()` thất bại dẫn đến operation trên null pointer hai frame sau trong call chain. Dù ví dụ cố tình tạo, đơn giản, nhiều crash kiểu này dễ tìm bằng phương pháp tương tự với GDB, core dump. Cũng thấy null pointer qua parameter value trong function call. Điều này thường dẫn trực tiếp stack frame nơi null pointer xuất phát.
+Như bạn thấy, với một chút hỗ trợ từ source code được hiển thị bằng lệnh list, việc lần ngược theo code để tìm nguồn gốc null pointer gây lỗi trở nên đơn giản. Hãy chú ý nguyên nhân segmentation fault mà chúng ta đã tạo cho ví dụ này. Trong Listing 13-3, phần kiểm tra return value của lời gọi `malloc()` đã bị vô hiệu hóa bằng comment. Trong ví dụ này, lời gọi `malloc()` thất bại, dẫn đến thao tác trên null pointer ở hai frame sau trong call chain. Mặc dù ví dụ này được cố ý dựng lên và rất đơn giản, nhiều crash thuộc loại này lại dễ xác định đáng ngạc nhiên khi sử dụng phương pháp tương tự với GDB và core dump. Bạn cũng có thể nhận ra null pointer bằng cách xem các parameter value trong lời gọi function. Cách này thường dẫn bạn thẳng đến stack frame nơi null pointer xuất hiện.
 
 ### 13.1.3 Debug session trong GDB
 
-Kết thúc giới thiệu GDB bằng debug session điển hình. Với program crash trước, có thể chọn step qua code để khoanh vùng lỗi. Tất nhiên nếu có core dump, luôn bắt đầu ở đó. Nhưng tình huống khác có thể muốn breakpoint và step running code. Listing 13-4 chi tiết cách khởi động GDB chuẩn bị debug. Chú ý phải compile chương trình bật debug flag trên command line `gcc` để GDB hữu ích ở context này. Xem Hình 12-1 Chương 12, “Môi trường phát triển embedded”; đây là phiên cross-debug với GDB trên development host, debug chương trình trên target. Chi tiết đầy đủ remote application debugging ở Chương 15, “Debug ứng dụng embedded Linux”.
+Chúng ta kết thúc phần giới thiệu GDB bằng một debug session điển hình. Trong ví dụ chương trình crash trước đó, chúng ta cũng có thể chọn đi qua từng bước code để khoanh vùng nguyên nhân thất bại. Tất nhiên, nếu có core dump, bạn luôn nên bắt đầu từ đó. Tuy nhiên, trong những tình huống khác, bạn có thể muốn đặt breakpoint và đi qua từng bước code đang chạy. Listing 13-4 trình bày chi tiết cách khởi động GDB để chuẩn bị debug session. Chú ý rằng chương trình phải được biên dịch với debug flag được bật trên command line của `gcc` thì GDB mới hữu ích trong ngữ cảnh này. Xem Hình 12-1 trong Chương 12, “Môi trường phát triển embedded”; đây là một session cross-debug với GDB chạy trên development host để debug chương trình chạy trên target. Chúng ta trình bày đầy đủ chi tiết remote application debugging trong Chương 15, “Debug ứng dụng embedded Linux”.
 
 LISTING 13-4 Bắt đầu GDB debug session
 
@@ -231,26 +231,26 @@ $2 =  100000000
 (gdb)
 ```
 
-Khảo sát session đơn giản, đầu tiên kết nối target board bằng lệnh `gdb target`. (Remote debugging chi tiết ở Chương 15.) Khi kết nối target hardware, đặt breakpoint tại `main()` bằng gdb break (viết tắt `b`). Sau đó gọi `gdb continue` (viết tắt `c`) để tiếp tục thực thi. Nếu có program argument, có thể đưa trên command line lúc gọi GDB.
+Khảo sát debug session đơn giản này, trước hết chúng ta kết nối đến target board bằng lệnh `gdb target`. (Chúng ta trình bày chi tiết hơn về remote debugging trong Chương 15.) Khi đã kết nối đến target hardware, chúng ta đặt breakpoint tại `main()` bằng lệnh gdb break, viết tắt là `b`. Sau đó, chúng ta chạy lệnh `gdb continue`, viết tắt là `c`, để tiếp tục thực thi chương trình. Nếu có program argument, chúng ta có thể truyền chúng trên command line khi gọi GDB.
 
-Chạm breakpoint tại `main()`, rồi đặt breakpoint tại `ErrorInHandler()`, theo sau continue viết tắt. Khi chạm breakpoint mới, step code bằng lệnh `next`. Ở đó gặp `malloc()`. Sau lời gọi `malloc()`, kiểm tra return value thấy thất bại qua null return value. Cuối cùng in parameter của `malloc()` thấy request memory region rất lớn (100 triệu byte), khiến thất bại.
+Chương trình dừng ở breakpoint đã đặt tại `main()`. Sau đó, chúng ta đặt thêm một breakpoint tại `ErrorInHandler()` rồi chạy lệnh continue, cũng ở dạng viết tắt. Khi chương trình chạm breakpoint mới, chúng ta bắt đầu đi qua từng bước code bằng lệnh `next`. Tại đó, chúng ta gặp lời gọi `malloc()`. Sau lời gọi `malloc()`, chúng ta kiểm tra return value và phát hiện lời gọi thất bại, thể hiện qua return value là null. Cuối cùng, chúng ta in giá trị parameter của lời gọi `malloc()` và thấy chương trình đang yêu cầu một memory region rất lớn (100 triệu byte), khiến yêu cầu thất bại.
 
-Dù đơn giản, ví dụ GDB phần này giúp người mới làm việc hiệu quả ngay. Ít người thực sự làm chủ GDB—nó phức tạp và nhiều khả năng. Phần 13.2, “Data Display Debugger”, giới thiệu graphical front end giúp chuyển tiếp dễ hơn nếu chưa quen GDB.
+Mặc dù đơn giản, các ví dụ GDB trong phần này sẽ giúp người mới sử dụng GDB hiệu quả ngay. Rất ít người thật sự làm chủ GDB vì công cụ này phức tạp và có nhiều khả năng. Phần 13.2, “Data Display Debugger”, giới thiệu một graphical front end cho GDB có thể giúp việc làm quen dễ dàng hơn nếu bạn chưa quen dùng GDB.
 
-Một lưu ý cuối về GDB: chắc chắn bạn thấy nhiều banner line trên console lúc mới gọi, như Listing 13-1. Như nói trước, ví dụ dùng cross-gdb từ Monta Vista embedded Linux distribution. Banner chứa thông tin thiết yếu lập trình viên embedded phải biết: host specification và target specification của GDB. Listing 13-1 thấy output sau khi gọi GDB:
+Một lưu ý cuối về GDB: chắc hẳn bạn đã nhận thấy nhiều banner line mà GDB hiển thị trên console khi được gọi lần đầu, như trong Listing 13-1. Như đã nói, trong các ví dụ này chúng ta sử dụng cross-gdb từ Monta Vista embedded Linux distribution. Các banner line chứa một thông tin thiết yếu mà lập trình viên embedded phải chú ý: đặc tả host và target của GDB. Trong Listing 13-1, chúng ta thấy output sau khi gọi GDB:
 
 ```
 This GDB was configured as “--host=i686-pc-linux-gnu -
 target=armv5teb-montavista-linuxeabi”
 ```
 
-Ở đây gọi GDB compile chạy từ Linux PC—cụ thể i686 chạy GNU/Linux operating system. Quan trọng không kém, GDB này compile để debug ARM binary code sinh từ armv5teb big endian toolchain.
+Trong trường hợp này, chúng ta gọi một phiên bản GDB được biên dịch để chạy trên Linux PC, cụ thể là máy i686 chạy GNU/Linux operating system. Một điểm cũng quan trọng không kém là phiên bản GDB này được biên dịch để debug ARM binary code do armv5teb big endian toolchain tạo ra.
 
-Lỗi phổ biến nhất của người mới embedded là dùng sai GDB khi debug target executable. Nếu có gì không đúng, kiểm tra ngay GDB configuration bảo đảm hợp môi trường. Không thể dùng native GDB để debug target code!
+Một trong những lỗi phổ biến nhất của người mới phát triển embedded là dùng sai GDB khi cố debug target executable. Nếu có điều gì hoạt động không đúng, bạn nên kiểm tra ngay cấu hình GDB để bảo đảm cấu hình đó phù hợp với môi trường của mình. Bạn không thể dùng native GDB để debug target code!
 
 ## 13.2 Data Display Debugger
 
-Data Display Debugger (DDD), Hình 13-1, là graphical front end cho GDB và command-line debugger khác. DDD có nhiều tính năng nâng cao ngoài xem source code và step debug session.
+Data Display Debugger (DDD), được trình bày trong Hình 13-1, là graphical front end cho GDB và các debugger command-line khác. DDD có nhiều tính năng nâng cao ngoài việc chỉ xem source code và đi qua từng bước trong debug session.
 
 ![Figure 13-1](images/ch13/fig13-01.png)
 
@@ -262,25 +262,25 @@ Gọi DDD như sau:
 $ ddd --debugger xscale_be-gdb webs
 ```
 
-Không có flag `--debugger`, DDD thử gọi native GDB trên development host. Đây không phải điều muốn nếu định debug ứng dụng target. Argument thứ hai trên DDD command line là chương trình debug. Xem man page DDD để thêm chi tiết.
+Nếu thiếu flag `--debugger`, DDD sẽ thử gọi native GDB trên development host. Đây không phải điều bạn muốn nếu dự định debug ứng dụng trên target system. Argument thứ hai trên command line của DDD là chương trình bạn sẽ debug. Xem man page DDD để biết thêm chi tiết.
 
-Dùng command tool như Hình 13-1 để step chương trình. Có thể đặt breakpoint bằng đồ họa hoặc GDB console window dưới màn hình DDD. Để target debugging, đầu tiên phải nối debugger đến target system như Listing 13-4 bằng lệnh `target`. Lệnh gọi trong GDB window của DDD main screen.
+Sử dụng command tool như trong Hình 13-1, bạn có thể đi qua từng bước chương trình. Bạn có thể đặt breakpoint bằng giao diện đồ họa hoặc qua GDB console window ở phía dưới màn hình DDD. Để debug target, trước hết bạn phải kết nối debugger đến target system như trong Listing 13-4, bằng lệnh `target`. Lệnh này được chạy trong GDB window trên màn hình chính của DDD.
 
-Khi kết nối target, có thể thực thi lệnh tương tự chuỗi vừa thấy để cô lập program failure. Hình 13-2 cho DDD display giai đoạn sau của debug session này.
+Khi đã kết nối đến target, bạn có thể thực thi các lệnh tương tự trình tự vừa trình bày để cô lập nguyên nhân chương trình thất bại. Hình 13-2 trình bày màn hình DDD ở giai đoạn sau của debugging session này.
 
 ![Figure 13-2](images/ch13/fig13-02.png)
 
 HÌNH 13-2 Debug session trong DDD
 
-Chú ý Hình 13-2 đã bắt đầu hiển thị một số program variable quan trọng giúp khoanh vùng nguyên nhân segmentation fault. Có thể theo dõi variable khi step chương trình bằng command tool trong hình.
+Chú ý rằng trong Hình 13-2, chúng ta đã bắt đầu hiển thị một số program variable quan trọng có thể giúp khoanh vùng nguyên nhân segmentation fault. Chúng ta có thể theo dõi những variable này trong khi đi qua từng bước chương trình bằng command tool trong hình.
 
-DDD là graphical front end mạnh cho GDB, tương đối dễ dùng, được hỗ trợ rộng trên nhiều development host. Tham khảo phần cuối để có link GNU DDD documentation.
+DDD là một graphical front end mạnh mẽ cho GDB. Công cụ này tương đối dễ sử dụng và được hỗ trợ rộng rãi trên nhiều development host. Xem phần cuối chương để tìm link đến tài liệu GNU DDD.
 
-Cần lưu ý theo thời gian Eclipse đã làm lu mờ (cố ý chơi chữ!) DDD để trở thành debugger được chọn. Không đủ chỗ trình bày Eclipse chi tiết. Tham chiếu cuối chương nếu muốn thêm thông tin.
+Cần lưu ý rằng theo thời gian, Eclipse đã làm lu mờ DDD (tác giả cố ý chơi chữ với tên Eclipse!) và trở thành debugger được ưu tiên lựa chọn. Khuôn khổ cuốn sách không cho phép trình bày chi tiết Eclipse. Các tài liệu tham khảo về Eclipse được liệt kê ở cuối chương nếu bạn muốn tìm hiểu thêm.
 
 ## 13.3 cbrowser/cscope
 
-Giới thiệu `cbrowser` vì hỗ trợ công cụ tiện này đã vào Linux kernel source tree. `cbrowser` là công cụ duyệt source-code đơn giản, giúp điều hướng source tree lớn theo symbol dễ dàng. Một số distribution như Ubuntu có `cbrowser` trong repository, nhưng số khác như Fedora gần đây thì không. Trên Ubuntu chỉ gõ:
+Chúng ta giới thiệu `cbrowser` vì hỗ trợ cho công cụ tiện dụng này đã được đưa vào Linux kernel source tree. `cbrowser` là một công cụ duyệt source-code đơn giản, giúp dễ dàng điều hướng trong source tree lớn bằng cách lần theo symbol. Một số distribution, chẳng hạn Ubuntu, có `cbrowser` trong repository, nhưng những distribution khác như các bản Fedora gần đây thì không. Trên Ubuntu, chỉ cần nhập:
 
 ```
 $ sudo apt-get install cbrowser
@@ -292,9 +292,9 @@ Linux kernel makefile hỗ trợ build database mà `cbrowser` dùng. Đây là 
 $ make ARCH=powerpc CROSS_COMPILE=ppc_82xx- cscope
 ```
 
-Điều này tạo symbol database `cscope` mà `cbrowser` dùng. `cscope` là engine; `cbrowser` là graphical user interface. Có thể dùng riêng `cscope`. Nó command-line-driven và mạnh nhưng không nhanh, dễ bằng để điều hướng source tree lớn trong thời point-and-click. Nếu `vi` vẫn là editor ưa thích, `cscope` có thể dành cho bạn!
+Thao tác này tạo symbol database `cscope` mà `cbrowser` sử dụng. `cscope` là engine; `cbrowser` là graphical user interface. Bạn có thể dùng riêng `cscope` nếu muốn. Công cụ này hoạt động theo kiểu command-line-driven và rất mạnh, nhưng không thật sự nhanh hoặc dễ dàng bằng khi điều hướng source tree lớn trong thời đại point-and-click. Nếu `vi` vẫn là editor yêu thích, có lẽ `cscope` rất phù hợp với bạn!
 
-Để gọi `cbrowser`, vào directory chứa database `cscope` rồi gõ lệnh `cbrowser` không argument. Hình 13-3 cho session mẫu. Đọc thêm hai công cụ trong tham chiếu cuối chương.
+Để gọi `cbrowser`, hãy chuyển vào directory chứa database `cscope`, rồi nhập lệnh `cbrowser` không có argument. Hình 13-3 minh họa một session mẫu. Bạn có thể đọc thêm về cả hai công cụ hữu ích này trong các tài liệu tham khảo được liệt kê ở phần cuối.
 
 ![Figure 13-3](images/ch13/fig13-03.png)
 
@@ -302,15 +302,15 @@ HÌNH 13-3 `cbrowser` hoạt động
 
 ## 13.4 Công cụ tracing và profiling
 
-Nhiều công cụ hữu ích cho các góc nhìn hệ thống. Một số cho góc nhìn high-level, giúp biết process nào chạy, process nào dùng nhiều CPU bandwidth nhất. Số khác phân tích chi tiết như nơi cấp phát memory hoặc hữu ích hơn, nơi leak. Vài phần sau giới thiệu tool, utility quan trọng nhất nhóm này. Chỉ đủ chỗ giới thiệu sơ bộ, có tham chiếu khi thích hợp để biết thêm.
+Nhiều công cụ hữu ích có thể cung cấp các góc nhìn khác nhau về hệ thống. Một số công cụ cung cấp góc nhìn high-level: bạn có thể biết những process nào đang chạy trên hệ thống và process nào đang sử dụng nhiều CPU bandwidth nhất. Những công cụ khác cung cấp phân tích chi tiết, chẳng hạn memory đang được cấp phát ở đâu hoặc, hữu ích hơn nữa, đang bị leak ở đâu. Một vài phần tiếp theo giới thiệu những tool và utility quan trọng nhất trong nhóm này. Khuôn khổ sách chỉ cho phép giới thiệu sơ lược các công cụ; tài liệu tham khảo được cung cấp ở những chỗ thích hợp để bạn tìm hiểu chi tiết hơn.
 
 ### 13.4.1 strace
 
-`strace` là trace utility hữu ích trong gần như mọi Linux distribution. `strace` thu, hiển thị thông tin từng kernel system call mà Linux application program thực thi. `strace` đặc biệt tiện vì chạy trên chương trình không có source code. Không cần compile debug symbol như GDB. Hơn nữa `strace` là công cụ học rất sâu sắc. Như man page nói, “Sinh viên, hacker và người overly-curious sẽ học được nhiều về hệ thống và system call bằng trace ngay cả chương trình thông thường”.
+`strace` là một trace utility hữu ích có mặt trong gần như mọi Linux distribution. `strace` thu thập và hiển thị thông tin cho từng kernel system call mà một chương trình ứng dụng Linux thực thi. `strace` đặc biệt tiện dụng vì có thể chạy trên những chương trình không có sẵn source code. Bạn không cần biên dịch chương trình với debug symbol như khi dùng GDB. Hơn nữa, `strace` có thể là một công cụ học tập giúp hiểu rất sâu. Như man page viết, “Sinh viên, hacker và những người overly-curious sẽ thấy rằng có thể học được rất nhiều về một hệ thống và các system call của nó chỉ bằng cách trace ngay cả những chương trình thông thường.”
 
-Khi chuẩn bị sample software cho phần GDB trước, tôi chọn dự án lạ—bản GoAhead embedded web server cũ. Lần compile, link đầu dẫn tới ví dụ thú vị cho `strace`. Khởi chạy ứng dụng từ command line chỉ âm thầm trả quyền điều khiển console. Không error message, xem system log cũng không manh mối. Nó đơn giản không chạy.
+Trong khi chuẩn bị sample software cho phần GDB trước đó trong chương, tôi quyết định sử dụng một software project mà mình chưa quen: một phiên bản đầu tiên của GoAhead embedded web server. Lần đầu thử biên dịch và link project này đã mang lại một ví dụ thú vị cho `strace`. Khởi chạy ứng dụng từ command line chỉ âm thầm trả quyền điều khiển về console. Không có error message nào xuất hiện, và xem system log cũng không tìm được manh mối. Ứng dụng đơn giản là không chịu chạy.
 
-`strace` nhanh chóng xác định vấn đề. Listing 13-5 cho output gọi `strace` trên ứng dụng. Nhiều dòng bị xóa vì dung lượng; output chưa sửa dài hơn trăm dòng.
+`strace` nhanh chóng xác định được vấn đề. Listing 13-5 hiển thị output khi gọi `strace` trên ứng dụng này. Nhiều dòng trong output đã bị lược bỏ do giới hạn dung lượng trình bày. Output chưa biên tập dài hơn một trăm dòng.
 
 LISTING 13-5 Output `strace`: GoAhead Web Demo
 
@@ -376,43 +376,43 @@ ECONNREFUSED (Connection refused)
 99 root@coyote:/home/websdemo#
 ```
 
-Số dòng được thêm vào output `strace` cho dễ đọc. Ứng dụng sinh dưới strace tại dòng 01. Dạng đơn giản nhất chỉ đặt lệnh `strace` ngay trước tên chương trình muốn khảo sát. Đó là cách tạo output Listing 13-5.
+Số dòng đã được thêm vào output của `strace` để listing dễ đọc hơn. Ứng dụng được khởi chạy dưới strace ở dòng 01. Với cách sử dụng đơn giản nhất, chỉ cần đặt lệnh `strace` ngay trước tên chương trình mà bạn muốn khảo sát. Đó là cách tạo ra output trong Listing 13-5.
 
-Mỗi dòng trace là kernel system call riêng mà ứng dụng `websdemo` gọi vào kernel. Không cần phân tích, hiểu từng dòng dù làm vậy rất bổ ích. Chúng ta tìm bất thường giúp xác định vì sao không chạy. Vài dòng đầu chuẩn bị environment. Thấy một số system call `open()` tới `/etc/ld.so.*`, chính Linux dynamic linker-loader (`ld.so`) làm việc. Thực tế dòng 06 gợi ý embedded board chưa cấu hình đúng. Nên tạo linker cache file bằng `ldconfig`. (Linker cache tăng mạnh tốc tìm shared library reference.) Sau đó giải quyết bằng chạy `ldconfig` trên target.[^3]
+Mỗi dòng trong trace này biểu thị một kernel system call riêng biệt mà ứng dụng `websdemo` gọi vào kernel. Chúng ta không cần phân tích và hiểu từng dòng trace, mặc dù làm vậy sẽ rất bổ ích. Chúng ta đang tìm những bất thường có thể giúp xác định chính xác vì sao chương trình không chạy. Trong một số dòng đầu, môi trường thực thi của chương trình được chuẩn bị. Chúng ta thấy một số system call `open()` đến `/etc/ld.so.*`; đây là Linux dynamic linker-loader (`ld.so`) đang thực hiện công việc của nó. Thực tế, dòng 06 là một manh mối cho thấy embedded board trong ví dụ chưa được cấu hình đúng. Cần tạo linker cache file bằng cách chạy `ldconfig`. (Linker cache tăng đáng kể tốc độ tìm kiếm shared library reference.) Sau đó, vấn đề này được giải quyết bằng cách chạy `ldconfig` trên target.[^3]
 
-Đến dòng 19 là housekeeping cơ bản khác, chủ yếu loader và `libc` khởi tạo. Chú ý dòng 20 tìm configuration file nhưng không thấy. Có thể quan trọng khi phần mềm chạy. Từ dòng 24 chương trình thiết lập, cấu hình network resource cần. Dòng 24 tới 29 mở, đọc Linux system file chứa chỉ dẫn DNS service resolve hostname. Local network configuration tiếp tới dòng 81. Phần lớn là network setup, configuration cần tạo hạ tầng networking cho chương trình. Phần này bỏ cho ngắn, rõ.
+Các dòng tiếp theo đến dòng 19 thực hiện thêm các công việc chuẩn bị cơ bản, chủ yếu do loader và quá trình khởi tạo `libc` thực hiện. Chú ý ở dòng 20, chương trình tìm configuration file nhưng không thấy. Đây có thể là một vấn đề quan trọng khi chúng ta đã chạy được software. Bắt đầu từ dòng 24, chương trình thiết lập và cấu hình những networking resource phù hợp mà nó cần. Các dòng 24 đến 29 mở và đọc một Linux system file chứa chỉ dẫn để DNS service resolve hostname. Hoạt động cấu hình local network tiếp tục đến dòng 81. Phần lớn hoạt động này là các bước thiết lập và cấu hình network cần thiết để xây dựng networking infrastructure cho chính chương trình. Phần listing này đã được lược bỏ để nội dung ngắn gọn và rõ ràng hơn.
 
-Đặc biệt chú ý network activity từ dòng 82. Chương trình cố lập TCP/IP connection tới IP address toàn số 0. Dòng 82 tái hiện cho tiện:
+Đặc biệt chú ý hoạt động network bắt đầu ở dòng 82. Tại đây, chương trình cố thiết lập TCP/IP connection đến một IP address gồm toàn số 0. Dòng 82 được trình bày lại dưới đây để tiện theo dõi:
 
 ```
 socket(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 3
 ```
 
-Một số điểm Listing 13-5 đáng chú ý. Có thể không biết chi tiết mọi system call nhưng hình dung được tổng thể. System call `socket()` tương tự file system call `open()`. Return value sau dấu `=` ở đây biểu diễn Linux file descriptor. Nhờ đó liên kết hoạt động dòng 82 tới system call `close()` ở dòng 89 với file descriptor 3.
+Có một vài điểm đáng chú ý về Listing 13-5. Chúng ta có thể không biết mọi chi tiết của từng system call, nhưng vẫn hình dung được những gì đang xảy ra. System call `socket()` tương tự lời gọi `open()` của file system. Return value, được biểu thị bằng dấu `=` trong trường hợp này, là một Linux file descriptor. Nhờ biết điều đó, chúng ta có thể liên hệ hoạt động từ dòng 82 đến system call `close()` ở dòng 89 với file descriptor 3.
 
-Quan tâm nhóm system call này vì thấy error message dòng 88: `Connection refused`. Lúc này chưa biết vì sao không chạy nhưng có vẻ bất thường. Hãy điều tra. Dòng 82 gọi `socket()` thiết lập endpoint cho IP communication. Dòng 83 lạ vì cố nối remote endpoint (socket) có IP address toàn 0. Không cần chuyên gia network để nghi gây vấn đề.[^4] Dòng 83 còn gợi ý quan trọng: port parameter 53. Tìm nhanh TCP/IP port number trên Internet cho biết port 53 là Domain Name Service (DNS).
+Chúng ta quan tâm đến nhóm system call liên quan này vì thấy error message ở dòng 88: `Connection refused`. Lúc này, chúng ta vẫn chưa biết vì sao chương trình không chạy, nhưng điều này có vẻ bất thường. Hãy tìm hiểu. Dòng 82, lời gọi system call `socket()`, thiết lập một endpoint cho IP communication. Dòng 83 khá lạ vì cố thiết lập connection đến một remote endpoint (socket) có IP address gồm toàn số 0. Không cần là chuyên gia network, chúng ta cũng có thể nghi ngờ đây là nguyên nhân gây rắc rối.[^4] Dòng 83 còn cung cấp một manh mối quan trọng khác: port parameter được đặt thành 53. Tìm nhanh các TCP/IP port number trên Internet cho biết port 53 dành cho Domain Name Service (DNS).
 
-Dòng 84 thêm manh mối. Board có hostname coyote, thấy trong command prompt dòng 01 Listing 13-5. Có vẻ đây là DNS lookup hostname board đang thất bại. Thử nghiệm thêm entry vào file `/etc/hosts`[^5] của target để liên kết hostname định nghĩa cục bộ với IP address gán cục bộ như sau:
+Dòng 84 cung cấp thêm một manh mối. Board của chúng ta có hostname là coyote. Bạn có thể thấy tên này trong command prompt ở dòng 01 của Listing 13-5. Có vẻ hoạt động này là một DNS lookup đang thất bại đối với hostname của board. Để thử nghiệm, chúng ta thêm một entry vào file `/etc/hosts`[^5] trên target system, nhằm liên kết hostname được định nghĩa cục bộ với IP address được gán cục bộ cho board, như sau:
 
 ```
 coyote  192.168.1.21        #The IP address we assigned
 ```
 
-Thế là chương trình hoạt động bình thường. Dù có thể không biết chính xác vì sao gây thất bại (chuyên gia TCP/IP networking có thể biết), output `strace` dẫn tới DNS lookup board name thất bại. Sửa xong chương trình khởi động vui vẻ, phục vụ web page. Nhắc lại đây là chương trình không có source code tham khảo, không symbol compile vào binary image. Dùng `strace` xác định được nguyên nhân và triển khai giải pháp.
+Thế là chương trình bắt đầu hoạt động bình thường. Mặc dù chúng ta có thể không biết chính xác vì sao điều này làm chương trình thất bại, trong khi chuyên gia TCP/IP networking có thể biết, output của `strace` đã dẫn chúng ta đến việc DNS lookup cho tên board đang thất bại. Sau khi sửa vấn đề đó, chương trình khởi động suôn sẻ và bắt đầu phục vụ web page. Nhắc lại, đây là chương trình mà chúng ta không có source code để tham khảo và binary image không được biên dịch kèm symbol. Sử dụng `strace`, chúng ta đã xác định được nguyên nhân chương trình thất bại và triển khai giải pháp.
 
 ### 13.4.2 Các biến thể strace
 
-Tiện ích `strace` có nhiều command-line option. Hữu ích hơn cả là chọn tập con system call để trace. Ví dụ chỉ muốn network-related activity của process, gọi:
+Tiện ích `strace` có nhiều command-line option. Một trong những khả năng hữu ích hơn cả là chọn một tập con system call để trace. Ví dụ, nếu chỉ muốn xem hoạt động network-related của một process cụ thể, hãy chạy lệnh sau:
 
 ```
 $ strace -e trace=network process_name
 ```
 
-Điều này trace mọi system call network-related như `socket()`, `connect()`, `recvfrom()`, `send()`. Cách mạnh để xem network activity chương trình. Có nhiều tập con khác: chỉ file-related activity với `open()`, `close()`, `read()`, `write()`, v.v. Thêm các tập con system call process-related, signal-related, IPC-related.
+Lệnh này tạo trace của tất cả system call network-related, chẳng hạn `socket()`, `connect()`, `recvfrom()` và `send()`. Đây là một cách hiệu quả để xem hoạt động network của một chương trình cụ thể. Một số tập con khác cũng có sẵn. Ví dụ, bạn có thể chỉ xem các hoạt động file-related của chương trình, với `open()`, `close()`, `read()`, `write()`, v.v. Các tập con khác bao gồm system call process-related, system call signal-related và system call IPC-related.
 
-Đáng lưu ý `strace` trace được chương trình sinh process khác. Gọi `strace` với option `-f` yêu cầu `strace` theo child process tạo bằng system call `fork()`. Lệnh `strace` có nhiều khả năng. Cách tốt nhất thành thạo là dùng. Hãy tìm, đọc open source documentation mới nhất cho công cụ này và các công cụ khác trình bày. Ở đây `man strace` trên phần lớn Linux host đủ tài liệu để thử cả buổi chiều!
+Cần lưu ý rằng `strace` có thể trace các chương trình sinh thêm process. Gọi `strace` với option `-f` yêu cầu `strace` theo dõi các child process được tạo bằng system call `fork()`. Lệnh `strace` có rất nhiều khả năng. Cách tốt nhất để thành thạo tiện ích mạnh mẽ này là sử dụng nó. Hãy chủ động tìm và đọc open source documentation mới nhất cho công cụ này cũng như các công cụ khác mà chúng tôi trình bày. Trong trường hợp này, `man strace` trên phần lớn Linux host sẽ cung cấp đủ tài liệu để bạn thử nghiệm suốt một buổi chiều!
 
-Cách dùng `strace` rất hữu ích là option `-c`, tạo profiling high-level của ứng dụng. Dùng option `-c`, `strace` tích lũy statistic từng system call, số lần gặp, số lần trả lỗi, thời gian từng call. Listing 13-6 là ví dụ chạy `strace -c` trên webs demo trước.
+Một cách sử dụng `strace` rất hữu ích là dùng option `-c`. Option này tạo bản profiling high-level của ứng dụng. Với option `-c`, `strace` tích lũy số liệu thống kê cho từng system call: số lần được gọi, số lần trả về lỗi và thời gian dành cho mỗi system call. Listing 13-6 là một ví dụ chạy `strace -c` trên webs demo trong ví dụ trước.
 
 LISTING 13-6 Profiling bằng `strace`
 
@@ -452,13 +452,13 @@ root@coyote$ strace -c ./webs
 100.00    0.114985                   624        22 total
 ```
 
-Đây là cách rất hữu ích có góc nhìn high-level nơi ứng dụng tiêu thời gian, nơi lỗi xảy ra. Một số lỗi có thể bình thường nhưng số khác tốn thời gian ngoài dự kiến. Từ Listing 13-6 thấy syscall lâu nhất là `execve()`, shell dùng sinh ứng dụng. Nó chỉ gọi một lần. Quan sát thú vị khác là system call `send()` được dùng thường xuyên nhất, hợp lý vì ứng dụng là web server nhỏ.
+Đây là một cách rất hữu ích để có góc nhìn high-level về những nơi ứng dụng tiêu tốn thời gian và những nơi xảy ra lỗi. Một số lỗi có thể là một phần bình thường trong hoạt động của ứng dụng, nhưng những lỗi khác có thể làm mất thời gian theo cách bạn không dự kiến. Từ Listing 13-6, chúng ta thấy syscall có thời lượng dài nhất là `execve()`, lời gọi mà shell dùng để khởi chạy ứng dụng. Như bạn thấy, nó chỉ được gọi một lần. Một quan sát thú vị khác là system call `send()` được sử dụng thường xuyên nhất. Điều này hợp lý vì ứng dụng là một web server nhỏ.
 
-Nhớ như công cụ khác thảo luận, `strace` phải compile cho target architecture. `strace` thực thi trên target board, không phải development host. Phải dùng phiên bản tương thích architecture. Nếu mua commercial embedded Linux distribution, bảo đảm có tiện ích này cho architecture chọn.
+Hãy nhớ rằng, cũng như các công cụ khác đang thảo luận, `strace` phải được biên dịch cho target architecture. `strace` được thực thi trên target board, thay vì development host. Bạn phải sử dụng phiên bản tương thích với architecture của mình. Nếu mua commercial embedded Linux distribution, bạn nên bảo đảm tiện ích này được cung cấp cho architecture đã chọn.
 
 ### 13.4.3 ltrace
 
-Tiện ích `ltrace`, `strace` liên quan chặt. `ltrace` làm cho library call điều `strace` làm cho system call. Gọi tương tự, đặt tracer utility trước chương trình cần trace:
+Hai tiện ích `ltrace` và `strace` có quan hệ chặt chẽ với nhau. `ltrace` theo dõi library call theo cách mà `strace` theo dõi system call. Cách gọi cũng tương tự: bạn đặt tiện ích tracer trước chương trình cần trace, như sau:
 
 ```
 $ ltrace ./example
@@ -485,9 +485,9 @@ free(0x804a008)                                  = <void>
 $
 ```
 
-Với mỗi library call, hiển thị tên cùng những phần khác nhau của parameter. Tương tự `strace`, sau đó hiển thị return value. Như `strace`, có thể dùng khi không có source code.
+Đối với mỗi library call, công cụ hiển thị tên lời gọi cùng các phần khác nhau của parameter được truyền vào. Tương tự `strace`, sau đó công cụ hiển thị return value của library call. Cũng như `strace`, công cụ này có thể được dùng cho những chương trình không có sẵn source code.
 
-Tương tự `strace`, nhiều switch ảnh hưởng hành vi `ltrace`. Có thể hiện program counter value mỗi library call, giúp hiểu program flow. Như `strace`, dùng `-c` tích lũy, báo count/error/time statistic, làm profiling tool đơn giản hữu ích. Listing 13-8 hiển thị kết quả chương trình mẫu với option `-c`.
+Tương tự `strace`, nhiều switch có thể thay đổi hành vi của `ltrace`. Bạn có thể hiển thị giá trị program counter ở mỗi library call, điều này giúp hiểu luồng thực thi của ứng dụng. Cũng như `strace`, bạn có thể dùng `-c` để tích lũy và báo cáo số liệu thống kê về số lần gọi, lỗi và thời gian, tạo thành một profiling tool đơn giản nhưng hữu ích. Listing 13-8 hiển thị kết quả chạy chương trình mẫu đơn giản của chúng ta với option `-c`.
 
 LISTING 13-8 Profiling bằng `ltrace`
 
@@ -509,21 +509,21 @@ $HOME = /home/chris
  100.00    0.000956                     9 total
 ```
 
-Công cụ `ltrace` chỉ dùng cho chương trình compile dùng dynamically linked shared library object. Đây thường mặc định nên trừ khi chỉ định `-static` lúc compile, có thể dùng `ltrace` trên binary kết quả. Tương tự `strace`, phải dùng binary `ltrace` compile cho target architecture. Các utility chạy trên target, không host development system.
+Công cụ `ltrace` chỉ sử dụng được với những chương trình đã được biên dịch để dùng dynamically linked shared library object. Đây thường là mặc định, nên trừ khi bạn chủ động chỉ định `-static` khi biên dịch, bạn có thể sử dụng `ltrace` trên binary kết quả. Cũng tương tự `strace`, bạn phải dùng một binary `ltrace` được biên dịch cho target architecture. Các tiện ích này chạy trên target, thay vì host development system.
 
 ### 13.4.4 ps
 
-Có lẽ trừ `strace`, `ltrace`, không công cụ nào bị lập trình viên embedded bỏ quên thường hơn `top`, `ps`. Với vô số option từng loại, có thể dành nguyên chương cho công cụ system-profiling hữu ích này. Chúng gần như luôn có trên target ưa thích trong embedded Linux distribution.
+Có lẽ ngoại trừ `strace` và `ltrace`, không công cụ nào bị lập trình viên embedded system bỏ quên thường xuyên hơn `top` và `ps`. Với vô số option của mỗi tiện ích, chúng ta có thể dễ dàng dành cả một chương cho những công cụ system-profiling hữu ích này. Chúng có mặt trên gần như mọi target mà bạn yêu thích trong các embedded Linux distribution.
 
-Cả hai dùng file system `/proc` như Chương 9, “File system”. Nhiều thông tin chúng truyền có thể lấy từ file system `/proc` nếu biết tìm gì, parse kết quả thế nào. Công cụ trình bày theo dạng human-readable tiện lợi.
+Cả hai tiện ích đều sử dụng file system `/proc`, như mô tả trong Chương 9, “File system”. Bạn có thể tự lấy phần lớn thông tin mà chúng cung cấp từ file system `/proc` nếu biết cần tìm gì và cách phân tích thông tin thu được. Các công cụ này trình bày thông tin dưới dạng human-readable thuận tiện.
 
-Tiện ích `ps` liệt kê mọi process đang chạy trên machine. Tuy nhiên rất linh hoạt, có thể điều chỉnh cung cấp nhiều dữ liệu hữu ích về trạng thái machine, process. Ví dụ `ps` hiển thị scheduling policy từng process, đặc biệt hữu ích hệ thống dùng real-time process.
+Tiện ích `ps` liệt kê mọi process đang chạy trên một máy. Tuy nhiên, công cụ này rất linh hoạt và có thể được điều chỉnh để cung cấp nhiều dữ liệu hữu ích về trạng thái máy cùng các process đang chạy trên đó. Ví dụ, `ps` có thể hiển thị scheduling policy của mỗi process. Điều này đặc biệt hữu ích cho những hệ thống sử dụng real-time process.
 
-Không option, `ps` hiển thị mọi process cùng user ID với user gọi lệnh và chỉ process gắn terminal gọi lệnh. Hữu ích khi user, terminal sinh nhiều job.
+Khi không có option, `ps` hiển thị tất cả process có cùng user ID với người dùng gọi lệnh, đồng thời chỉ hiển thị những process gắn với terminal nơi lệnh được chạy. Điều này hữu ích khi người dùng đó đã khởi chạy nhiều job từ terminal đó.
 
-Truyền option cho `ps` có thể khó hiểu vì `ps` hỗ trợ nhiều chuẩn (POSIX so UNIX) và ba kiểu option: BSD, UNIX, GNU. Nhìn chung BSD dùng một hoặc nhiều chữ không dash, UNIX dùng tổ hợp dash-letter quen thuộc, GNU dùng long argument format có double dash trước. Tham khảo man page của implementation `ps`.
+Việc truyền option cho `ps` có thể gây nhầm lẫn, vì `ps` hỗ trợ nhiều chuẩn khác nhau, chẳng hạn POSIX và UNIX, cùng ba kiểu option riêng biệt: BSD, UNIX và GNU. Nhìn chung, BSD option gồm một hoặc nhiều chữ cái, không có dấu gạch ngang. UNIX option dùng tổ hợp dash-letter quen thuộc, còn GNU dùng long argument format đứng sau hai dấu gạch ngang. Tham khảo man page để biết chi tiết về bản triển khai `ps` của bạn.
 
-Ai dùng `ps` có lẽ có cách gọi ưa thích. Một cách general-purpose đặc biệt hữu ích là `ps aux`, hiển thị mọi process hệ thống. Listing 13-9 là ví dụ từ embedded target board đang chạy.
+Mỗi người dùng `ps` có lẽ đều có một cách gọi yêu thích. Một cách gọi general-purpose đặc biệt hữu ích là `ps aux`, hiển thị mọi process trên hệ thống. Listing 13-9 là ví dụ từ một embedded target board đang chạy.
 
 LISTING 13-9 Danh sách process
 
@@ -560,7 +560,7 @@ root      960  0.0  1.2   2312   772 pts/0 R+   05:59   0:00 ps aux
 
 - Field USER và process ID (PID) là self-explanatory.
 
-- Field %CPU biểu diễn phần trăm CPU utilization từ đầu vòng đời process; vì vậy tổng CPU usage gần như không bao giờ 100 phần trăm.
+- Field %CPU biểu thị phần trăm sử dụng CPU tính từ khi process bắt đầu tồn tại; vì vậy, tổng CPU usage gần như không bao giờ bằng 100 phần trăm.
 
 - Field %MEM chỉ tỷ lệ resident memory footprint của process so với tổng physical memory sẵn có.
 
@@ -570,17 +570,17 @@ root      960  0.0  1.2   2312   772 pts/0 R+   05:59   0:00 ps aux
 
 - TTY là controlling terminal của process.
 
-Phần lớn process ví dụ không gắn controlling terminal. Lệnh `ps` tạo Listing 13-9 gọi từ telnet session, như terminal device `pts/0` chỉ ra.
+Phần lớn process trong ví dụ này không gắn với một controlling terminal. Lệnh `ps` tạo Listing 13-9 được chạy từ một telnet session, như terminal device `pts/0` cho thấy.
 
-Field STAT mô tả trạng thái process lúc tạo snapshot. S nghĩa sleeping, đợi sự kiện thường là I/O. R nghĩa runnable (scheduler có thể giao CPU nếu không có thứ ưu tiên cao hơn đợi). Dấu ngoặc nhọn cạnh state letter chỉ process ưu tiên cao hơn.
+Field STAT mô tả trạng thái của process tại thời điểm tạo snapshot này. S biểu thị process đang sleeping, chờ một loại sự kiện nào đó, thường là I/O. R biểu thị process ở trạng thái runnable, nghĩa là scheduler có thể giao quyền sử dụng CPU cho nó nếu không có công việc ưu tiên cao hơn đang chờ. Dấu ngoặc nhọn cạnh chữ biểu thị trạng thái cho biết process này có mức ưu tiên cao hơn.
 
-Cột cuối là command name. Những tên trong ngoặc vuông là kernel thread. Có nhiều symbol, option hơn; tham khảo man page `ps` để đủ chi tiết.
+Cột cuối cùng là command name. Những tên nằm trong ngoặc vuông là kernel thread. Còn nhiều symbol và option khác; tham khảo man page của `ps` để biết đầy đủ chi tiết.
 
 ### 13.4.5 top
 
-Trong khi `ps` là snapshot one-time của hệ thống hiện tại, `top` chụp định kỳ trạng thái hệ thống, process. Tương tự `ps`, `top` có nhiều command-line option và configuration option. Nó tương tác, có thể cấu hình lại khi chạy để tùy chỉnh display theo nhu cầu.
+Trong khi `ps` tạo snapshot one-time của hệ thống hiện tại, `top` lấy snapshot định kỳ về trạng thái hệ thống và các process. Tương tự `ps`, `top` có nhiều command-line option và configuration option. Công cụ này có tính tương tác và có thể được cấu hình lại trong khi chạy để tùy chỉnh nội dung hiển thị theo nhu cầu cụ thể của bạn.
 
-Không option, `top` hiển thị mọi process tương tự lệnh `ps aux` ở Listing 13-9, cập nhật mỗi 3 giây. Tất nhiên điều này và nhiều khía cạnh khác của `top` đều user-configurable. Vài dòng đầu màn hình `top` hiển thị system information cũng cập nhật mỗi 3 giây, gồm uptime, số user, số process và trạng thái, nhiều hơn nữa.
+Khi được gọi không có option, `top` hiển thị mọi process đang chạy theo cách rất giống lệnh `ps aux` trong Listing 13-9, cập nhật mỗi 3 giây. Tất nhiên, điều này và nhiều khía cạnh khác của `top` đều là user-configurable. Một vài dòng đầu màn hình `top` hiển thị thông tin hệ thống, cũng cập nhật mỗi 3 giây. Thông tin này gồm system uptime, số người dùng, số lượng và trạng thái process, cùng nhiều nội dung khác.
 
 Listing 13-10 cho `top` cấu hình mặc định, từ thực thi `top` trên command line không parameter.
 
@@ -620,15 +620,15 @@ Swap:        0k total,        0k used,        0k free,    11840k cached
   954 root      15   0  2384 1348 1096 S  0.0  2.2   0:00.16 bash
 ```
 
-Cột mặc định Listing 13-10 là PID, user, process priority, process nice value, virtual memory process dùng, resident memory footprint, shared memory task dùng và field khác giống mô tả trong ví dụ `ps` trước.
+Các cột mặc định trong Listing 13-10 lần lượt là PID, user, process priority, process nice value, lượng virtual memory mà process sử dụng, resident memory footprint, lượng shared memory mà task sử dụng và những field khác giống các field đã mô tả trong ví dụ `ps` trước đó.
 
-Chỉ đủ chỗ giới thiệu sơ các utility. Bạn nên dành buổi chiều với man page `top`, `ps` để khám phá khả năng phong phú.
+Khuôn khổ sách chỉ cho phép giới thiệu sơ lược những tiện ích hữu ích này. Bạn nên dành một buổi chiều đọc man page của `top` và `ps` để khám phá những khả năng phong phú của chúng.
 
 ### 13.4.6 mtrace
 
-`mtrace` là utility đơn giản phân tích, báo lời gọi `malloc()`, `realloc()`, `free()` trong ứng dụng. Dễ dùng, có thể giúp phát hiện vấn đề. Như userland tool khác trong chương, `mtrace` phải cấu hình, compile cho target architecture. `mtrace` là library thay thế `malloc` cài trên target. Ứng dụng bật bằng function call đặc biệt. Embedded Linux distribution nên có package `mtrace`.
+`mtrace` là một tiện ích đơn giản phân tích và báo cáo các lời gọi `malloc()`, `realloc()` và `free()` trong ứng dụng. Công cụ này dễ dùng và có thể giúp phát hiện vấn đề trong ứng dụng. Cũng như các userland tool khác đã mô tả trong chương, `mtrace` phải được cấu hình và biên dịch cho target architecture. `mtrace` là một library thay thế `malloc` được cài trên target. Ứng dụng bật library này bằng một function call đặc biệt. Embedded Linux distribution của bạn nên có package `mtrace`.
 
-Để minh họa, tạo chương trình đơn giản sinh dynamic data trên linked list đơn giản. Mỗi list item được sinh động, cũng như từng data item trên list. Listing 13-11 cho list structure đơn giản.
+Để minh họa tiện ích này, chúng ta tạo một chương trình đơn giản tạo dữ liệu động trên một linked list đơn giản. Mỗi list item được tạo động, và mỗi data item đặt trên list cũng vậy. Listing 13-11 trình bày list structure đơn giản này.
 
 LISTING 13-11 Linear linked list đơn giản
 
@@ -647,7 +647,7 @@ Mỗi list item được tạo động bằng `malloc()` như sau rồi đặt c
 struct blist_s *p = malloc( sizeof(struct blist_s) );
 ```
 
-Mỗi data item variable-sized trong list cũng được sinh động, thêm vào list item trước khi đặt cuối list. Như vậy mỗi list item tạo bằng hai lời gọi `malloc()`—một cho chính item biểu diễn bằng `struct` `blist_s` vừa nêu, một cho variable data item. Sau đó sinh 10.000 record trên list chứa variable string data, dẫn đến 20.000 lời gọi `malloc()`.
+Mỗi data item variable-sized trong list cũng được tạo động và thêm vào list item trước khi item được đặt ở cuối list. Như vậy, mỗi list item được tạo bằng hai lời gọi `malloc()`: một cho chính list item, được biểu diễn bằng `struct` `blist_s` vừa trình bày, và một cho data item có kích thước thay đổi. Sau đó, chúng ta tạo 10.000 record trong list chứa string data có kích thước thay đổi, dẫn đến 20.000 lời gọi `malloc()`.
 
 Để dùng `mtrace`, phải đáp ứng ba điều kiện:
 
@@ -657,15 +657,15 @@ Mỗi data item variable-sized trong list cũng được sinh động, thêm và
 
 - Environment variable `MALLOC_TRACE` phải chỉ tên file ghi được để nhận trace data.
 
-Đáp ứng xong, mỗi lời gọi function được trace sinh một dòng trong raw trace file do `MALLOC_TRACE` định nghĩa. Trace data như sau:
+Khi các điều kiện này được đáp ứng, mỗi lời gọi đến một trong những function được trace sẽ tạo một dòng trong raw trace file do `MALLOC_TRACE` định nghĩa. Trace data có dạng như sau:
 
 ```
 @ ./mt_ex:[0x80486ec] + 0x804a5f8 0x10
 ```
 
-Dấu `@` báo trace line chứa address hoặc function name. Chương trình thực thi tại address trong ngoặc vuông `0x80486ec`. Dùng binary utility hoặc debugger dễ liên kết address với function. Dấu cộng (`+`) chỉ lời gọi cấp phát memory. Lời gọi `free()` dùng dấu trừ. Field tiếp chỉ virtual address memory location được cấp phát hoặc giải phóng. Field cuối là size, có trong mọi allocation call.
+Dấu `@` báo rằng trace line chứa một địa chỉ hoặc function name. Chương trình đang thực thi tại địa chỉ trong ngoặc vuông, `0x80486ec`. Sử dụng binary utility hoặc debugger, chúng ta có thể dễ dàng liên hệ địa chỉ này với một function. Dấu cộng (`+`) biểu thị đây là lời gọi cấp phát memory. Lời gọi `free()` sẽ được biểu thị bằng dấu trừ. Field tiếp theo cho biết virtual address của memory location đang được cấp phát hoặc giải phóng. Field cuối cùng là kích thước, được đưa vào trong mọi lời gọi cấp phát memory.
 
-Data format này không user-friendly. Vì vậy tiện ích `mtrace` gồm utility phân tích raw trace data và báo bất nhất. Analysis utility là Perl script trong package `mtrace`. Đơn giản nhất Perl script in dòng `No memory leaks`. Listing 13-12 cho output khi phát hiện memory leak.
+Data format này không thật sự user-friendly. Vì vậy, tiện ích `mtrace` có kèm một công cụ phân tích raw trace data và báo cáo mọi điểm không nhất quán. Công cụ phân tích là một Perl script được cung cấp trong package `mtrace`. Trong trường hợp đơn giản nhất, Perl script in một dòng duy nhất với message `No memory leaks`. Listing 13-12 hiển thị output khi phát hiện memory leak.
 
 LISTING 13-12 Báo lỗi `mtrace`
 
@@ -681,13 +681,13 @@ Memory not freed:
 0x0804acc8     0x0a  at /home/chris/temp/mt_ex.c:64
 ```
 
-Như thấy công cụ đơn giản giúp phát hiện vấn đề trước khi xảy ra và tìm khi xảy ra. Chú ý Perl script hiện filename, line number mỗi `malloc()` không có `free()` tương ứng cho memory location. Cần debugging information trong executable sinh bằng flag `-g` cho compiler. Nếu không thấy debug information, script chỉ báo address function gọi `malloc()`.
+Như bạn thấy, công cụ đơn giản này có thể giúp phát hiện nguy cơ trước khi sự cố xảy ra, cũng như tìm ra vấn đề khi sự cố đã xuất hiện. Chú ý rằng Perl script hiển thị filename và line number của mỗi lời gọi `malloc()` không có lời gọi `free()` tương ứng cho memory location đó. Để làm được điều này, executable file phải chứa debugging information, được tạo bằng cách truyền flag `-g` cho compiler. Nếu không tìm thấy debugging information, script chỉ báo cáo địa chỉ của function gọi `malloc()`.
 
 ### 13.4.7 dmalloc
 
-`dmalloc` tiếp tục nơi `mtrace` dừng. Package `mtrace` đơn giản, tương đối ít can thiệp, hữu ích nhất phát hiện mất cân bằng `malloc`/free. Package `dmalloc` cho phát hiện nhiều lỗi dynamic memory-management hơn. So `mtrace`, `dmalloc` can thiệp mạnh. Tùy configuration, `dmalloc` có thể khiến ứng dụng cực chậm. Chắc chắn không phù hợp nếu nghi memory error do race condition hay timing issue. `dmalloc` (và `mtrace` ở mức thấp hơn) chắc chắn đổi timing ứng dụng.
+`dmalloc` tiếp tục ở nơi `mtrace` dừng lại. Package `mtrace` đơn giản, tương đối ít can thiệp và hữu ích nhất để phát hiện những tình huống mất cân bằng giữa `malloc` và free. Package `dmalloc` cho phép bạn phát hiện phạm vi lỗi dynamic memory-management rộng hơn nhiều. So với `mtrace`, `dmalloc` can thiệp rất mạnh. Tùy cấu hình, `dmalloc` có thể khiến ứng dụng chạy cực kỳ chậm. Đây chắc chắn không phải công cụ phù hợp nếu bạn nghi ngờ memory error do race condition hoặc những vấn đề timing khác. `dmalloc`, và `mtrace` ở mức thấp hơn, chắc chắn sẽ thay đổi timing của ứng dụng.
 
-`dmalloc` là công cụ memory-analysis động rất mạnh, cấu hình cao nên hơi phức tạp. Cần thời gian học, làm chủ. Tuy nhiên từ QA testing tới sửa bug, có thể thành công cụ ưa thích.
+`dmalloc` là một công cụ memory-analysis động rất mạnh. Công cụ này cho phép cấu hình linh hoạt nên cũng tương đối phức tạp. Bạn cần dành thời gian học và làm chủ nó. Tuy nhiên, từ QA testing đến sửa bug, nó có thể trở thành một trong những development tool yêu thích của bạn.
 
 `dmalloc` là debug library thay thế `malloc`. Để dùng `dmalloc`, phải đáp ứng:
 
@@ -697,29 +697,29 @@ Như thấy công cụ đơn giản giúp phát hiện vấn đề trước khi 
 
 - Library, utility `dmalloc` phải cài trên embedded target.
 
-- Một số environment variable mà library `dmalloc` tham chiếu phải định nghĩa trước khi chạy ứng dụng trên target.
+- Những environment variable nhất định mà library `dmalloc` tham chiếu phải được định nghĩa trước khi bạn chạy ứng dụng trên target.
 
-Dù không bắt buộc, nên include `dmalloc.h` trong application program để `dmalloc` đưa file, line number vào output.
+Mặc dù không hoàn toàn bắt buộc, bạn nên include `dmalloc.h` trong chương trình ứng dụng. Việc này cho phép `dmalloc` đưa thông tin file và line number vào output.
 
-Link ứng dụng với library `dmalloc` chọn. Package `dmalloc` có thể cấu hình sinh nhiều library tùy lựa chọn lúc configuration. Các ví dụ dùng shared library object `libdmalloc.` `so`. Đặt library (hoặc symlink) ở path compiler tìm được. Lệnh compile có thể như sau:
+Hãy link ứng dụng với library `dmalloc` mà bạn lựa chọn. Package `dmalloc` có thể được cấu hình để tạo ra một số library khác nhau, tùy các lựa chọn của bạn khi cấu hình package. Những ví dụ sau sử dụng shared library object `libdmalloc.` `so`. Đặt library này, hoặc một symlink trỏ đến nó, trong path mà compiler có thể tìm thấy. Lệnh biên dịch ứng dụng có thể tương tự như sau:
 
 ```
 $ ppc_82xx-gcc -g -Wall -o mtest_ex -L../dmalloc-5.4.2/ -ldmalloc mtest_ex.c
 ```
 
-Command line giả định đặt library `dmalloc` (`libdmalloc.` `so`) tại vị trí switch `-L` tìm—cụ thể `../dmalloc-5.4.2` ngay trên current directory.
+Command line này giả định rằng bạn đã đặt library `dmalloc` (`libdmalloc.` `so`) tại một vị trí được tìm kiếm bằng switch `-L` trên command line, cụ thể là `../dmalloc-5.4.2`, ngay phía trên current directory.
 
-Để cài library `dmalloc` lên target, đặt vị trí ưa thích (có thể `/usr/local/lib`). Có thể cần cấu hình hệ thống tìm. Trên Power Architecture system mẫu, thêm path `/usr/local/lib` vào file `/etc/ld.so.conf` và gọi utility `ldconfig` cập nhật library search cache.
+Để cài library `dmalloc` trên target, đặt nó tại vị trí bạn muốn, có thể là `/usr/local/lib`. Bạn có thể cần cấu hình hệ thống để tìm được library này. Trên Power Architecture system mẫu, chúng ta thêm path `/usr/local/lib` vào file `/etc/ld.so.conf`, rồi gọi tiện ích `ldconfig` để cập nhật library search cache.
 
-Bước chuẩn bị cuối là đặt environment variable library `dmalloc` dùng xác định mức debugging bật. Variable chứa debug bit mask kết hợp nhiều tính năng vào một variable tiện. Có thể như sau:
+Bước chuẩn bị cuối cùng là đặt một environment variable mà library `dmalloc` sử dụng để xác định mức debugging sẽ được bật. Environment variable này chứa một debug bit mask kết hợp nhiều tính năng vào một variable duy nhất, thuận tiện cho việc sử dụng. Thiết lập của bạn có thể tương tự như sau:
 
 ```
 DMALLOC_OPTIONS=debug=0x4f4ed03,inter=100,log=dmalloc.log
 ```
 
-Ở đây `debug` là bit mask debug-level, `inter` đặt interval count để library `dmalloc` kiểm tra sâu chính nó, heap. Library `dmalloc` ghi log output vào file variable `log` chỉ.
+Ở đây, `debug` là bit mask debug-level, còn `inter` đặt số đếm khoảng cách giữa các lần library `dmalloc` thực hiện kiểm tra toàn diện chính nó và heap. Library `dmalloc` ghi output log vào file được variable `log` chỉ định.
 
-Package `dmalloc` có utility sinh environment variable `DMALLOC_OPTIONS` dựa trên flag truyền. Documentation package `dmalloc` trình bày kỹ nên không lặp ở đây. Ví dụ trên sinh bằng lời gọi `dmalloc` sau:
+Package `dmalloc` đi kèm một tiện ích tạo environment variable `DMALLOC_OPTIONS` dựa trên các flag được truyền vào. Tài liệu trong package `dmalloc` trình bày nội dung này rất đầy đủ nên chúng ta không lặp lại ở đây. Ví dụ vừa rồi được tạo bằng lời gọi `dmalloc` sau:
 
 ```
 $ dmalloc -p check-fence -l dmalloc.log -i 100 high
@@ -727,7 +727,7 @@ $ dmalloc -p check-fence -l dmalloc.log -i 100 high
 
 Xong các bước, có thể chạy ứng dụng với debug library `dmalloc`.
 
-`dmalloc` tạo output log khá chi tiết. Listing 13-13 cho log output `dmalloc` mẫu của chương trình cố ý gây memory leak.
+`dmalloc` tạo output log khá chi tiết. Listing 13-13 trình bày log output mẫu của `dmalloc` cho một chương trình mẫu cố ý tạo một số memory leak.
 
 LISTING 13-13 Log output `dmalloc`
 
@@ -770,17 +770,17 @@ LISTING 13-13 Log output `dmalloc`
 2592: 4002: ending time = 2592, elapsed since start = 0:00:00
 ```
 
-Quan trọng log này sinh khi chương trình exit. (`dmalloc` có nhiều option, mode; có thể cấu hình `dmalloc` in output line khi phát hiện lỗi.)
+Cần lưu ý rằng log này được tạo khi chương trình kết thúc. (`dmalloc` có nhiều option và mode hoạt động; bạn có thể cấu hình `dmalloc` in các dòng output ngay khi phát hiện lỗi.)
 
-Nửa đầu log báo statistic high-level về heap, overall memory usage ứng dụng. Có tổng cho từng library call `malloc` như `malloc()`, `free()`, `realloc()`. Thú vị log mặc định báo mười allocation lớn nhất và source location xảy ra. Rất hữu ích cho profiling system-level tổng thể.
+Nửa đầu output log báo cáo số liệu thống kê high-level về heap và tổng mức sử dụng memory của ứng dụng. Tổng số được thống kê cho từng library call thuộc nhóm `malloc`, chẳng hạn `malloc()`, `free()` và `realloc()`. Một điểm thú vị là log mặc định này báo cáo mười allocation lớn nhất cùng vị trí source code nơi chúng xảy ra. Điều này có thể rất hữu ích cho profiling system-level tổng thể.
 
-Gần cuối log thấy memory leak trong ứng dụng. Library `dmalloc` phát hiện bốn instance memory cấp phát nhưng có vẻ chưa giải phóng. Vì include `dmalloc.h` và compile debug symbol, dmalloc đưa source location cấp phát vào log.
+Ở gần cuối log, chúng ta thấy bằng chứng về memory leak trong ứng dụng. Bạn có thể thấy library `dmalloc` phát hiện bốn vùng memory đã được cấp phát nhưng dường như chưa bao giờ được giải phóng. Vì chúng ta đã include `dmalloc.h` và biên dịch với debug symbol, dmalloc ghi vào log vị trí source code nơi memory được cấp phát.
 
-Như công cụ khác trong chương, chỉ đủ chỗ giới thiệu ngắn công cụ debug mạnh này. `dmalloc` phát hiện nhiều điều kiện, giới hạn khác. Ví dụ `dmalloc` phát hiện ghi vào freed pointer. Cho biết pointer dùng truy cập ngoài boundary nhưng trong address range ứng dụng cho phép. Thực tế `dmalloc` có thể cấu hình log gần mọi memory transaction qua họ lời gọi `malloc`. `dmalloc` chắc chắn trả lại nhiều lần công sức học thành thạo.
+Cũng như các công cụ khác đã trình bày trong chương, khuôn khổ sách chỉ cho phép giới thiệu ngắn gọn công cụ debug rất mạnh này. `dmalloc` có thể phát hiện nhiều tình trạng và giới hạn khác. Ví dụ, `dmalloc` có thể phát hiện việc ghi qua pointer đã được giải phóng. Nó có thể cho biết pointer có được dùng để truy cập dữ liệu ngoài giới hạn của vùng nhớ nhưng vẫn trong phạm vi địa chỉ được phép của ứng dụng hay không. Thực tế, `dmalloc` có thể được cấu hình để ghi log gần như mọi memory transaction thông qua họ lời gọi `malloc`. `dmalloc` chắc chắn sẽ mang lại lợi ích lớn gấp nhiều lần công sức bạn bỏ ra để thành thạo công cụ này.
 
 ### 13.4.8 Kernel oops
 
-Dù không thực sự là công cụ, kernel oops chứa nhiều thông tin hữu ích khắc phục nguyên nhân. Kernel oops do nhiều kernel error, từ memory error đơn giản của process (đa số khôi phục hoàn toàn) tới hard kernel panic. Linux kernel gần đây hỗ trợ hiển thị symbolic information ngoài raw hexadecimal address. Listing 13-14 cho kernel oops từ Power Architecture target.
+Mặc dù không hoàn toàn là một công cụ, kernel oops chứa nhiều thông tin hữu ích để giúp bạn tìm nguyên nhân sự cố. Kernel oops có thể xuất phát từ nhiều loại kernel error, từ memory error đơn giản do process gây ra, thường có thể khôi phục hoàn toàn, đến hard kernel panic. Những Linux kernel gần đây hỗ trợ hiển thị symbolic information bên cạnh các giá trị địa chỉ thập lục phân thô. Listing 13-14 trình bày kernel oops từ một Power Architecture target.
 
 LISTING 13-14 Kernel oops display
 
@@ -806,33 +806,33 @@ Call trace:
 Segmentation fault
 ```
 
-Chú ý register dump gồm symbolic information khi thích hợp. Kernel phải bật `KALLSYMS` để có. Hình 13-4 cho configuration option dưới main menu General Setup.
+Chú ý rằng register dump có kèm symbolic information ở những chỗ thích hợp. Kernel của bạn phải bật `KALLSYMS` để có thông tin này. Hình 13-4 trình bày các configuration option trong main menu General Setup.
 
 ![Figure 13-4](images/ch13/fig13-04.png)
 
 HÌNH 13-4 Hỗ trợ symbol cho oops
 
-Nhiều thông tin kernel oops liên quan trực tiếp processor. Cần kiến thức architecture bên dưới để hiểu đầy đủ.
+Phần lớn thông tin trong kernel oops message liên quan trực tiếp đến processor. Bạn cần có một số kiến thức về architecture bên dưới để hiểu đầy đủ oops message.
 
-Phân tích oops Listing 13-14, thấy ngay do “kernel access of bad area, sig: 11”. Từ ví dụ trước biết signal 11 là segmentation fault.
+Khi phân tích oops trong Listing 13-14, chúng ta thấy ngay nguyên nhân tạo oops là “kernel access of bad area, sig: 11.” Từ các ví dụ trước trong chương, chúng ta đã biết signal 11 biểu thị segmentation fault.
 
-Phần đầu tóm tắt lý do oops, vài pointer quan trọng, task gây lỗi. Trong Listing 13-14 NIP là next instruction pointer, được decode sau trong oops message. Nó trỏ code gây lỗi. LR là Power Architecture register, thường chỉ return address của subroutine đang thực thi. SP là stack pointer. REGS chỉ kernel address của data structure chứa register dump data. TRAP chỉ exception type mà oops liên quan. Tham khảo PowerPC architecture user manual cuối Chương 7, “Bootloader”, thấy TRAP 0300 là Data Storage Interrupt, kích hoạt bởi data memory access error.
+Phần đầu tiên tóm tắt nguyên nhân oops, một vài pointer quan trọng và task gây lỗi. Trong Listing 13-14, NIP là next instruction pointer, được giải mã ở phần sau của oops message. Pointer này trỏ đến code gây ra oops. LR là một register của Power Architecture, thường cho biết return address của subroutine đang thực thi. SP là stack pointer. REGS cho biết kernel address của data structure chứa register dump data. TRAP biểu thị loại exception mà oops message này liên quan. Tham khảo PowerPC architecture user manual được dẫn ở cuối Chương 7, “Bootloader”, chúng ta thấy TRAP 0300 là Data Storage Interrupt, được kích hoạt bởi lỗi truy cập data memory.
 
-Dòng thứ ba oops có thêm Power Architecture machine register như MSR (machine state register), decode một số bit. Dòng tiếp có DAR (data access register), thường chứa memory address gây lỗi. Nội dung DSISR register kết hợp PowerPC architecture reference giúp tìm nhiều chi tiết nguyên nhân exception.
+Ở dòng thứ ba của oops message, chúng ta thấy thêm các machine register của Power Architecture, chẳng hạn MSR (machine state register), cùng kết quả giải mã một số bit của register này. Dòng tiếp theo hiển thị DAR (data access register), thường chứa memory address gây lỗi. Nội dung DSISR register có thể được sử dụng cùng tài liệu tham khảo PowerPC architecture để tìm hiểu nhiều chi tiết về nguyên nhân cụ thể của exception.
 
-Oops message còn chứa task pointer, decoded task name để nhanh biết task/thread chạy lúc oops. Cũng thấy processor register dump chi tiết, dùng thêm manh mối. Một lần nữa cần kiến thức architecture và compiler register usage để hiểu register value. Ví dụ PowerPC architecture dùng register r3 cho return value function C.
+Oops message còn chứa task pointer và task name đã được giải mã, giúp bạn nhanh chóng xác định task hoặc thread nào đang chạy tại thời điểm xảy ra oops. Chúng ta cũng thấy processor register dump chi tiết, có thể cung cấp thêm manh mối. Một lần nữa, chúng ta cần kiến thức về architecture và cách compiler sử dụng register để hiểu các manh mối từ register value. Ví dụ, PowerPC architecture sử dụng register r3 cho return value của function C.
 
-Phần cuối oops cung cấp stack backtrace có symbol decode nếu kernel bật symbol. Dùng thông tin này dựng chuỗi sự kiện dẫn tới điều kiện lỗi.
+Phần cuối oops message cung cấp stack backtrace kèm kết quả giải mã symbol nếu kernel đã bật symbol. Dựa vào thông tin này, chúng ta có thể dựng lại trình tự sự kiện dẫn đến tình trạng gây lỗi.
 
-Trong ví dụ đơn giản học được nhiều từ oops. Biết đó là Power Architecture Data Storage Exception do lỗi data memory access (không phải instruction fetch memory access). DAR cho data address gây exception là `0x0000_0000`. Biết process `modprobe` gây lỗi. Từ backtrace, NIP (next instruction pointer), biết trong lời gọi `strcpy()` trace thẳng về function `loop_init()` trong module `loop.ko` mà `modprobe` cố insert khi exception xảy ra. Với thông tin này, tìm nguồn null pointer dereference sai hẳn dễ.
+Trong ví dụ đơn giản này, chúng ta đã thu được rất nhiều thông tin từ oops message. Chúng ta biết đây là Power Architecture Data Storage Exception, do lỗi truy cập data memory gây ra, khác với truy cập memory để fetch instruction. DAR register cho biết data address gây exception là `0x0000_0000`. Chúng ta biết process `modprobe` gây ra lỗi. Từ backtrace và NIP (next instruction pointer), chúng ta biết lỗi xảy ra trong lời gọi `strcpy()`, có thể lần ngược trực tiếp về function `loop_init()` trong module `loop.ko`, mà `modprobe` đang cố insert tại thời điểm xảy ra exception. Với những thông tin này, việc tìm nguồn gốc null pointer dereference gây lỗi sẽ khá dễ dàng.
 
 ## 13.5 Binary utility
 
-Binary utility, hay binutils, là thành phần thiết yếu mọi toolchain. Thực tế để build compiler phải build binutils thành công trước. Phần này giới thiệu ngắn công cụ hữu ích hơn mà lập trình viên embedded cần biết. Như phần lớn công cụ khác trong chương, đây là cross-utilities, phải build chạy trên development host nhưng xử lý binary file cho architecture chọn. Hoặc compile/lấy phiên bản chạy trên target, nhưng ví dụ giả định môi trường cross-development.
+Binary utility, hay binutils, là thành phần thiết yếu của mọi toolchain. Thực tế, để build compiler, trước hết bạn phải build binutils thành công. Phần này giới thiệu ngắn gọn những công cụ hữu ích hơn mà lập trình viên embedded cần biết. Cũng như phần lớn công cụ khác trong chương, đây là các cross-utilities và phải được build để chạy trên development host trong khi xử lý binary file dành cho architecture đã chọn. Bạn cũng có thể biên dịch hoặc lấy các phiên bản chạy trên target, nhưng các ví dụ này giả định môi trường cross-development.
 
 ### 13.5.1 readelf
 
-Tiện ích `readelf` khảo sát thành phần target ELF binary file. Đặc biệt hữu ích tạo image cho ROM/Flash memory cần kiểm soát image layout rõ ràng. Cũng rất tốt để học cách toolchain build image, hiểu ELF file format.
+Tiện ích `readelf` khảo sát thành phần của target ELF binary file. Công cụ này đặc biệt hữu ích khi build image dành cho ROM hoặc Flash memory, nơi cần kiểm soát rõ ràng image layout. Đây cũng là một công cụ rất tốt để tìm hiểu cách toolchain build image và để hiểu ELF file format.
 
 Ví dụ hiển thị symbol table trong ELF image bằng lệnh:
 
@@ -846,7 +846,7 @@ $ readelf -s <elf-image>
 $ readelf -e <elf-image>
 ```
 
-Dùng flag `-S` liệt kê section header trong ELF image. Có thể ngạc nhiên ngay chương trình “Hello World” seven-line chứa 38 section riêng. Một số quen như `.text`, `.data`. Listing 13-15 liệt kê một phần section của ví dụ “Hello World”. Cho đơn giản chỉ liệt kê section có lẽ quen hoặc liên quan lập trình viên embedded.
+Sử dụng flag `-S` để liệt kê section header trong ELF image. Bạn có thể ngạc nhiên khi biết rằng ngay cả chương trình “Hello World” seven-line đơn giản cũng chứa 38 section riêng biệt. Một số section có thể quen thuộc với bạn, chẳng hạn `.text` và `.data`. Listing 13-15 liệt kê một phần các section trong ví dụ “Hello World” của chúng ta. Để đơn giản, chúng tôi chỉ liệt kê những section có khả năng quen thuộc hoặc liên quan đến lập trình viên embedded.
 
 LISTING 13-15 Section header từ `readelf`
 
@@ -870,7 +870,7 @@ Section Headers:
 ...
 ```
 
-Section `.text` chứa executable program code. Section `.rodata` chứa constant data. Section `.data` thường chứa initialized global data dùng bởi C library prologue code, có thể chứa initialized data item lớn của ứng dụng. Section `.sdata` dùng cho initialized global data item nhỏ hơn, chỉ có ở một số architecture. Một số processor architecture dùng optimized data access khi biết memory area attribute. Section `.sdata`, `.sbss` cho phép tối ưu này. Section `.bss`, `.sbss` chứa uninitialized data. Chúng không chiếm chỗ trong program image. Memory space được cấp phát, khởi tạo 0 lúc startup bằng C library prologue code.
+Section `.text` chứa executable program code. Section `.rodata` chứa dữ liệu hằng trong chương trình. Section `.data` thường chứa global data đã khởi tạo được C library prologue code sử dụng, và có thể chứa các data item lớn đã khởi tạo từ ứng dụng của bạn. Section `.sdata` được dùng cho các global data item nhỏ hơn đã khởi tạo và chỉ tồn tại trên một số architecture. Một số processor architecture có thể tận dụng việc truy cập dữ liệu được tối ưu khi các attribute của memory area đã được biết. Các section `.sdata` và `.sbss` cho phép thực hiện những tối ưu này. Các section `.bss` và `.sbss` chứa dữ liệu chưa khởi tạo trong chương trình. Những section này không chiếm dung lượng trong program image. Memory space của chúng được C library prologue code cấp phát và khởi tạo bằng 0 khi chương trình khởi động.
 
 Có thể dump section bất kỳ, hiển thị nội dung. Với dòng sau trong chương trình C khai báo ngoài mọi function, có thể khảo sát cách đặt trong section `.rodata`:
 
@@ -896,7 +896,7 @@ Thấy initialized global variable đã khai báo được biểu diễn trong s
 
 ### 13.5.2 Khảo sát debug information bằng readelf
 
-Một tính năng hữu ích hơn của `readelf` là hiện debug information trong ELF file. Khi đưa compiler flag `-g` lúc compile, compiler sinh debug information trong loạt section của ELF file kết quả. Có thể dùng `readelf` hiển thị ELF section header bên trong file:
+Một trong những tính năng hữu ích hơn của `readelf` là hiển thị debug information chứa trong ELF file. Khi compiler flag `-g` được chỉ định trong quá trình compile, compiler tạo debug information trong một loạt section bên trong ELF file kết quả. Chúng ta có thể dùng `readelf` để hiển thị các ELF section header này trong ELF file:
 
 ```
 $ ppc-linux-readelf -S ex_sync | grep debug
@@ -957,13 +957,13 @@ $ ppc-linux-readelf -debug-dump=info ex_sync
 ...
 ```
 
-Record đầu có tag Dwarf2[^6] `DW_TAG_compile_unit` nhận diện compilation unit đầu của Power Architecture executable. Là file `start.S`, cung cấp startup prologue cho chương trình C. Record tiếp có `DW_TAG_subprogram` chỉ đầu user program, function `main()` quen thuộc. Dwarf2 debug record chứa reference file, line number có `main()`. Record cuối Listing 13-16 nhận diện local variable trong routine `main()` tên `mybuf`. Một lần nữa có line number, file. Có thể suy ra `main()` tại dòng 9, `mybuf` dòng 11 source file. Debug record khác trong ELF file liên hệ filename qua Dwarf2 attribute `DW_AT_decl_file`.
+Record đầu tiên, được nhận diện bằng tag Dwarf2[^6] `DW_TAG_compile_unit`, xác định compilation unit đầu tiên của Power Architecture executable này. Đó là file có tên `start.S`, cung cấp startup prologue cho chương trình C. Record tiếp theo, được nhận diện bằng `DW_TAG_subprogram`, xác định điểm bắt đầu của user program, tức function `main()` quen thuộc. Dwarf2 debug record này chứa tham chiếu đến file và số dòng nơi có `main()`. Record cuối cùng trong Listing 13-16 xác định một local variable trong routine `main()` có tên `mybuf`. Một lần nữa, record này cung cấp số dòng và file. Từ thông tin đó, bạn có thể suy ra `main()` nằm ở dòng 9 và `mybuf` ở dòng 11 của source file. Các debug record khác trong ELF file liên kết filename thông qua attribute Dwarf2 `DW_AT_decl_file`.
 
 Có thể tìm đầy đủ Dwarf2 debug information format qua tham chiếu cuối chương.
 
 ### 13.5.3 objdump
 
-Tiện ích `objdump` chồng lấn đáng kể với `readelf`. Tuy nhiên tính năng hữu ích hơn của `objdump` là hiện disassembled object code. Listing 13-17 minh họa disassembly section `.text` của “Hello World” Power Architecture đơn giản. Chỉ đưa routine `main()` để tiết kiệm chỗ. Toàn dump gồm C library prologue, epilogue sẽ chiếm nhiều trang.
+Tiện ích `objdump` có nhiều chức năng trùng với công cụ `readelf`. Tuy nhiên, một trong những tính năng hữu ích hơn của `objdump` là khả năng hiển thị disassembled object code. Listing 13-17 cung cấp ví dụ disassembly section `.text` của phiên bản “Hello World” đơn giản cho Power Architecture. Chúng ta chỉ đưa routine `main()` vào để tiết kiệm dung lượng trình bày. Toàn bộ bản dump, bao gồm C library prologue và epilogue, sẽ chiếm nhiều trang.
 
 LISTING 13-17 Disassembly bằng `objdump`
 
@@ -994,17 +994,17 @@ $ ppc_82xx-objdump -S -m powerpc:common -j .text hello
 ...
 ```
 
-Phần lớn code routine `main()` đơn giản là tạo, hủy stack frame. Lời gọi thực `printf()` biểu diễn bằng branch link instruction (`bl`) gần giữa listing tại address `0x100004b0`. Đây là Power Architecture function call. Vì compile chương trình làm dynamically linked object, chưa có address function `printf()` tới runtime, khi link với shared library routine `printf()`. Nếu compile tĩnh sẽ thấy symbol và address tương ứng cho lời gọi `printf()`.
+Phần lớn code trong routine `main()` đơn giản là tạo và hủy stack frame. Lời gọi thực sự đến `printf()` được biểu diễn bằng instruction branch link (`bl`) gần giữa listing, tại address `0x100004b0`. Đây là một function call của Power Architecture. Vì chương trình này được compile thành một dynamically linked object, chúng ta sẽ chưa có address cho function `printf()` cho đến runtime, khi nó được link với routine `printf()` trong shared library. Nếu compile chương trình thành một statically linked object, chúng ta sẽ thấy symbol và address tương ứng cho lời gọi `printf()`.
 
 ### 13.5.4 objcopy
 
-`objcopy` định dạng và tùy chọn chuyển format binary object file. Utility rất hữu ích sinh code cho image nằm ROM/Flash. Bootloader U-Boot Chương 7 dùng `objcopy` tạo output binary, s-record[^7] từ ELF file cuối. Cách dùng mẫu minh họa khả năng `objcopy` và dùng tạo Flash image:
+`objcopy` định dạng binary object file và có thể chuyển đổi format của file nếu được yêu cầu. Tiện ích này rất hữu ích khi tạo code cho image nằm trong ROM hoặc Flash. Bootloader U-Boot được giới thiệu trong Chương 7 sử dụng `objcopy` để tạo các output format binary và s-record[^7] từ ELF file cuối cùng. Ví dụ sử dụng sau minh họa các khả năng của `objcopy` và cách dùng công cụ này để build Flash image:
 
 ```
 $ ppc_82xx-objcopy --gap-fill=0xff -O binary u-boot u-boot.bin
 ```
 
-Lời gọi `objcopy` này cho cách chuẩn bị image cho Flash memory. Input file—ở đây `u-boot`—là ELF U-Boot image đầy đủ gồm symbol, relocation information. Tiện ích `objcopy` chỉ lấy section liên quan chứa program code, data rồi đặt image trong output file, ở đây `u-boot.bin`.
+Lời gọi `objcopy` này cho thấy cách chuẩn bị một image cho Flash memory. Input file, trong ví dụ này là `u-boot`, là ELF image U-Boot đầy đủ, bao gồm symbol và relocation information. Tiện ích `objcopy` chỉ lấy các section liên quan chứa program code và dữ liệu rồi đặt image vào output file, ở đây được chỉ định là `u-boot.bin`.
 
 Flash memory chứa toàn bit 1 khi đã xóa. Vì thế lấp gap binary image bằng toàn bit 1 tăng hiệu quả lập trình và kéo dài tuổi thọ Flash vốn giới hạn write cycle. Thực hiện bằng parameter `--gap-fill` cho `objcopy`.
 
@@ -1016,11 +1016,11 @@ Toolchain chứa thêm một số utility hữu ích. Học dùng đơn giản. 
 
 ### 13.6.1 strip
 
-Tiện ích `strip` loại symbol, debug information khỏi binary, thường dùng tiết kiệm chỗ trên embedded device. Trong model cross-development, tiện đặt stripped binary trên target, giữ unstripped version trên development host. Như vậy có symbol để cross-debugging trên host mà tiết kiệm target. `strip` có nhiều option mô tả trong man page.
+Tiện ích `strip` có thể được dùng để loại bỏ symbol và debug information khỏi binary. Thao tác này thường được sử dụng để tiết kiệm dung lượng trên embedded device. Trong mô hình cross-development, cách thuận tiện là đặt stripped binary trên target system và giữ phiên bản chưa strip trên development host. Với phương pháp này, symbol vẫn có sẵn để cross-debugging trên development host, đồng thời tiết kiệm dung lượng trên target. `strip` có nhiều option được mô tả trong man page.
 
 ### 13.6.2 addr2line
 
-Khi nêu `mtrace` trong Listing 13-12, bạn thấy output analysis script `mtrace` chứa file, line number. Perl script `mtrace` dùng tiện ích `addr2line` đọc debug information trong executable ELF file, hiện line number tương ứng address. Dùng cùng sample executable `mtrace`, có thể tìm filename, line number cho virtual address:
+Khi chúng ta trình bày `mtrace` trong Listing 13-12, bạn đã thấy output từ analysis script `mtrace` chứa thông tin file và số dòng. Perl script `mtrace` dùng tiện ích `addr2line` để đọc debug information trong executable ELF file và hiển thị số dòng tương ứng với address. Sử dụng cùng executable mẫu `mtrace`, chúng ta có thể tìm filename và số dòng cho một virtual address:
 
 ```
 $ addr2line -f -e mt_ex 0x80487c6
@@ -1028,7 +1028,7 @@ $ addr2line -f -e mt_ex 0x80487c6
      /home/chris/examples/mt_ex.c:64
 ```
 
-Chú ý function `put_data()` cũng được liệt kê cùng file, line number. Nghĩa là address `0x80487c6` ở dòng 64 file `mt_ex.c`, trong function `put_data()`. Hữu ích hơn với binary lớn gồm nhiều filename như Linux kernel:
+Lưu ý rằng function `put_data()` cũng được liệt kê cùng file và số dòng. Điều này cho biết address `0x80487c6` nằm ở dòng 64 của file `mt_ex.c`, trong function `put_data()`. Thông tin này còn hữu ích hơn với các binary lớn gồm nhiều filename, chẳng hạn Linux kernel:
 
 ```
 $ ppc_82xx-addr2line -f -e vmlinux c000d95c
@@ -1036,11 +1036,11 @@ $ ppc_82xx-addr2line -f -e vmlinux c000d95c
      arch/ppc/syslib/mpc52xx_setup.c:41
 ```
 
-Ví dụ nhấn mạnh điểm lặp xuyên chương: đây là tool architecture-specific. Phải dùng tool cấu hình, compile khớp architecture target binary. Như cross-compiler, `addr2line` là cross tool thuộc binary utilities package.
+Ví dụ cụ thể này nhấn mạnh một điểm được nhắc lại xuyên suốt chương: đây là công cụ architecture-specific. Bạn phải sử dụng công cụ được cấu hình và biên dịch phù hợp với architecture của target binary đang dùng. Cũng như cross-compiler, `addr2line` là một cross tool và là thành phần của binary utilities package.
 
 ### 13.6.3 strings
 
-Tiện ích `strings` khảo sát ASCII string data trong binary file. Đặc biệt hữu ích xem memory dump khi không có source code hoặc debug symbol. Thường có thể khoanh vùng nguyên nhân crash bằng trace string về binary gây lỗi. Dù `strings` có vài command-line option, dễ học, dùng. Xem man page thêm chi tiết.
+Tiện ích `strings` xem xét dữ liệu ASCII string trong binary file. Điều này đặc biệt hữu ích để xem xét memory dump khi có thể không có source code hoặc debug symbol. Bạn thường có thể khoanh vùng nguyên nhân crash bằng cách truy ngược các string về binary gây lỗi. Mặc dù `strings` có một số command-line option, nó vẫn dễ học và dễ sử dụng. Hãy xem man page để biết thêm chi tiết.
 
 ### 13.6.4 ldd
 
@@ -1052,7 +1052,7 @@ Freeing unused kernel memory: 96k init
 Kernel panic - not syncing: No init found.  Try passing init=option to kernel.
 ```
 
-Nguyên nhân phổ biến nhất là root file system image (ramdisk, Flash hay NFS) không có library hỗ trợ binary kernel cố thực thi. Dùng `ldd` xác định mỗi binary cần library nào và bảo đảm thêm vào ramdisk/root file system image. Trong panic mẫu trước, `init` có trên file system nhưng thiếu Linux dynamic loader `ld.so.1`. Dùng `ldd` khá đơn giản:
+Một trong những nguyên nhân phổ biến nhất là root file system image, dù là ramdisk, Flash hay NFS root file system, không chứa các library cần thiết cho những binary mà kernel đang cố thực thi. Sử dụng `ldd`, bạn có thể xác định từng binary cần những library nào và bảo đảm đưa chúng vào ramdisk hoặc root file system image khác. Trong ví dụ kernel panic trước đó, `init` thực sự có mặt trên file system, nhưng Linux dynamic loader `ld.so.1` lại bị thiếu. Cách sử dụng `ldd` khá đơn giản:
 
 ```
 $ xscale_be-ldd init
@@ -1060,13 +1060,13 @@ $ xscale_be-ldd init
     ld-linux.so.3 => /opt/mvl/.../lib/ld-linux.so.3 (0xdead2000)
 ```
 
-Ví dụ cho binary `init` cần hai dynamic library object: libc và ld-linux. Cả hai phải trên target, init binary truy cập được—tức readable, executable.
+Ví dụ đơn giản này cho thấy binary `init` cần hai dynamic library object: libc và ld-linux. Cả hai phải có mặt trên target và init binary phải truy cập được chúng, nghĩa là chúng phải có quyền đọc và thực thi.
 
 ### 13.6.5 nm
 
-Tiện ích `nm` hiển thị symbol từ object file, hữu ích nhiều tác vụ. Ví dụ khi cross-compiling ứng dụng lớn gặp unresolved symbol, có thể dùng `nm` tìm object module chứa symbol, sửa build environment include nó.
+Tiện ích `nm` hiển thị các symbol trong object file. Công cụ này có thể hữu ích cho nhiều công việc. Ví dụ, giả sử khi cross-compiling một ứng dụng lớn, bạn gặp các unresolved symbol. Bạn có thể dùng `nm` để tìm object module chứa các symbol đó, rồi sửa build environment để đưa module này vào.
 
-Tiện ích `nm` cung cấp attribute từng symbol. Ví dụ biết symbol local/global, được defined hay chỉ referenced trong object module cụ thể. Listing 13-18 tái hiện vài dòng output `nm` chạy trên U-Boot ELF image `u-boot`.
+Tiện ích `nm` cung cấp attribute cho từng symbol. Chẳng hạn, bạn có thể xác định symbol đó là local hay global, và nó được định nghĩa hay chỉ được tham chiếu trong một object module cụ thể. Listing 13-18 trình bày lại một vài dòng từ output của `nm` khi chạy trên U-Boot ELF image `u-boot`.
 
 LISTING 13-18 Hiển thị symbol bằng `nm`
 
@@ -1082,15 +1082,15 @@ fff23000 A __bss_start
 ...
 ```
 
-Chú ý link address của symbol U-Boot. Chúng link cho Flash device ở phần cao nhất memory map của board này. Listing chỉ vài symbol mẫu để thảo luận. Cột giữa là symbol type. Chữ hoa chỉ global symbol, chữ thường local symbol. B chỉ symbol trong section `.bss`. T trong section `.text`. D trong section `.data`. A chỉ address absolute, không bị sửa bởi link stage bổ sung. Absolute symbol này chỉ đầu section `.bss`, dùng bởi code xóa `.bss` lúc startup như C execution environment yêu cầu.
+Chú ý các link address của những symbol U-Boot này. Chúng được link cho một Flash device nằm ở vùng cao nhất trong memory map của board cụ thể này. Listing chỉ chứa một vài symbol mẫu phục vụ việc thảo luận. Cột giữa là symbol type. Chữ hoa biểu thị global symbol, còn chữ thường biểu thị local symbol. B cho biết symbol nằm trong section `.bss`. T cho biết symbol nằm trong section `.text`. D cho biết symbol nằm trong section `.data`. A cho biết địa chỉ này là absolute và không bị thay đổi bởi một link stage bổ sung. Absolute symbol này biểu thị vị trí bắt đầu section `.bss` và được code sử dụng để xóa `.bss` khi khởi động, theo yêu cầu của C execution environment.
 
 ### 13.6.6 prelink
 
-Tiện ích `prelink` thường dùng khi startup time quan trọng. Dynamically linked ELF executable phải link lúc runtime khi mới load. Với ứng dụng lớn có thể tốn thời gian đáng kể. `prelink` chuẩn bị shared library và object file phụ thuộc, cung cấp kiến thức trước về unresolved library reference. Thực chất có thể giảm startup time ứng dụng. Man page có đầy đủ chi tiết sử dụng.
+Tiện ích `prelink` thường được dùng trong những hệ thống coi trọng startup time. Một dynamically linked ELF executable phải được link tại runtime khi chương trình được load lần đầu. Việc này có thể tốn thời gian đáng kể với ứng dụng lớn. `prelink` chuẩn bị các shared library và object file phụ thuộc vào chúng để cung cấp thông tin biết trước về những unresolved library reference. Nhờ đó, startup time của một ứng dụng có thể được giảm xuống. Man page có đầy đủ chi tiết về cách sử dụng tiện ích hữu ích này.
 
 ## 13.7 Tổng kết
 
-Chương khảo sát một số công cụ quan trọng hơn cho embedded Linux developer, cho thấy utility thông thường dùng mạnh để phân tích system behavior. Trình bày nhiều utility binutils gồm `readelf`, `objdump`, `objcopy`, một số khác.
+Chương này đã xem xét một số công cụ quan trọng hơn dành cho embedded Linux developer. Chúng ta đã cho thấy cách dùng các tiện ích thông thường một cách hiệu quả để phân tích hành vi hệ thống. Chúng ta đã trình bày nhiều tiện ích trong binutils, bao gồm `readelf`, `objdump`, `objcopy` và một số tiện ích khác.
 
 - GNU Debugger (GDB) là debugger phức tạp, mạnh với nhiều khả năng. Chúng ta trình bày cơ bản để bắt đầu.
 
@@ -1124,14 +1124,14 @@ The Eclipse Project www.eclipse.org/Trang này được cố ý để trống
 
 [^1]: Xem `SIG_KERNEL_COREDUMP_MASK` trong `.../include/linux/signal.h` để biết signal nào sinh core dump.
 
-[^2]: Signal và số tương ứng định nghĩa trong `.../arch/<arch>/include/asm/signal.h` của Linux kernel source tree.
+[^2]: Các signal và số tương ứng của chúng được định nghĩa trong `.../arch/<arch>/include/asm/signal.h` thuộc Linux kernel source tree của bạn.
 
-[^3]: Xem `man ldconfig` để biết tạo linker cache cho target system.
+[^3]: Xem `man ldconfig` để biết chi tiết về cách tạo linker cache cho target system của bạn.
 
-[^4]: Đôi khi address all-0s phù hợp context này. Nhưng đang điều tra vì sao chương trình kết thúc bất thường nên coi đáng ngờ.
+[^4]: Trong context này, một address all-0s đôi khi là hợp lệ. Tuy nhiên, chúng ta đang tìm hiểu vì sao chương trình kết thúc bất thường, nên cần xem đây là một điểm đáng ngờ.
 
 [^5]: Xem `man hosts` về system administration file này.
 
-[^6]: Tham chiếu Dwarf2 Debug Information Specification cuối chương.
+[^6]: Tài liệu tham khảo cho Dwarf2 Debug Information Specification được cung cấp ở cuối chương này.
 
-[^7]: File S-record là biểu diễn ASCII của binary file, dùng bởi nhiều device programmer, software binary utility.
+[^7]: Các file S-record là dạng biểu diễn ASCII của một binary file, được nhiều device programmer và tiện ích xử lý software binary sử dụng.

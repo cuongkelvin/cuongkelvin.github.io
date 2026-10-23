@@ -26,17 +26,17 @@ môi trường debug cụ thể này.
 
 ## 15.1 Debug trên target
 
-Chương 13, “Công cụ phát triển”, khảo sát nhiều debugging tool quan trọng. `strace`, `ltrace` quan sát, mô tả hành vi process và thường cô lập vấn đề. `dmalloc` giúp cô lập memory leak, profile memory usage. `ps`, `top` hữu ích xem process state. Công cụ tương đối nhỏ này thiết kế chạy trực tiếp target hardware.
+Chúng ta đã tìm hiểu một số debugging tool quan trọng trong Chương 13, “Công cụ phát triển”. `strace` và `ltrace` có thể được dùng để quan sát, mô tả hành vi của process và thường giúp khoanh vùng vấn đề. `dmalloc` có thể giúp khoanh vùng memory leak và lập profile mức sử dụng memory. `ps` và `top` hữu ích để xem xét trạng thái của các process. Những công cụ tương đối nhỏ này được thiết kế để chạy trực tiếp trên target hardware.
 
-Debug Linux application code trên embedded system có thách thức riêng. Tài nguyên target thường hạn chế. Giới hạn RAM, nonvolatile storage có thể ngăn chạy tool target-based. Có thể không Ethernet port hay connection high-speed khác. Target có thể không graphical display, keyboard, mouse.
+Debug Linux application code trên embedded system có những thách thức riêng. Tài nguyên trên embedded target của bạn thường hạn chế. Các giới hạn về RAM và nonvolatile storage có thể khiến bạn không chạy được development tool target-based. Bạn có thể không có Ethernet port hoặc kết nối high-speed khác. Target embedded system cũng có thể không có màn hình đồ họa, bàn phím hoặc chuột.
 
-Đây là nơi tool cross-development và môi trường NFS root mount rất có lợi. Nhiều tool, đặc biệt GDB, thiết kế thực thi trên development host trong khi debug code remote target. GDB dùng debug tương tác target code hoặc phân tích hậu kiểm core file do application crash sinh. Chi tiết application core dump analysis ở Chương 13.
+Đây là nơi các công cụ cross-development và môi trường NFS root mount mang lại lợi ích lớn. Nhiều công cụ, đặc biệt là GDB, được thiết kế để thực thi trên development host trong khi thực sự debug code trên remote target. GDB có thể được sử dụng để debug tương tác target code hoặc phân tích sau sự cố một core file được tạo do ứng dụng crash. Chúng ta đã trình bày chi tiết việc phân tích application core dump trong Chương 13.
 
 ## 15.2 Remote (cross) debugging
 
-Tool Cross-development phát triển chủ yếu khắc phục giới hạn tài nguyên embedded platform. Ứng dụng modest-size compile symbolic debug information dễ vượt vài megabyte. Với cross debugging, development host làm phần nặng. Khi gọi cross GDB trên host, truyền ELF file compile symbolic debug information. Trên target có thể strip[^1] mọi debug information không cần khỏi ELF file để image nhỏ nhất.
+Các công cụ Cross-development được phát triển chủ yếu để khắc phục giới hạn tài nguyên của embedded platform. Một ứng dụng modest-size được compile với symbolic debug information có thể dễ dàng vượt quá vài megabyte. Với cross debugging, development host có thể đảm nhận phần công việc nặng. Khi gọi cross version của GDB trên development host, bạn truyền cho nó một ELF file được compile với symbolic debug information. Trên target, bạn có thể strip[^1] mọi debugging information không cần thiết khỏi ELF file để giữ kích thước image kết quả ở mức tối thiểu.
 
-Đã giới thiệu `readelf` Chương 13. Trong Chương 14, “Kỹ thuật debug kernel”, dùng xem debug information trong ELF file compile symbolic debugging information. Listing 15-1 chứa output `readelf` cho web server nhỏ compile ARM architecture.
+Chúng ta đã giới thiệu tiện ích `readelf` trong Chương 13. Trong Chương 14, “Các kỹ thuật debug kernel”, chúng ta dùng nó để xem debug information trong một ELF file được compile với symbolic debugging information. Listing 15-1 chứa output của `readelf` cho một ứng dụng web server tương đối nhỏ được compile cho ARM architecture.
 
 LISTING 15-1 ELF file debug information của chương trình mẫu
 
@@ -92,7 +92,7 @@ O (extra OS processing required) o (OS specific), p (processor specific)
 $
 ```
 
-Listing 15-1 cho nhiều section chứa debug information. Section `.comment` chứa hơn 2KB (0x940) thông tin không cần cho hoạt động ứng dụng. Kích thước file mẫu gồm debug information hơn 275KB như sau:
+Từ Listing 15-1, bạn có thể thấy nhiều section chứa debug information. Một section tên là `.comment` chứa hơn 2KB (0x940) thông tin không cần thiết để ứng dụng hoạt động. Kích thước file mẫu này, bao gồm debug information, lớn hơn 275KB, như sau:
 
 ```
 $ ls -l websdemo
@@ -111,15 +111,15 @@ $ ls -l websdemo*
 $
 ```
 
-Ở đây strip cả symbolic debug information, section `.comment` khỏi executable. Chỉ tên stripped binary bằng switch command-line `-o`. Thấy stripped binary nhỏ hơn nửa gốc. Tất nhiên ứng dụng lớn tiết kiệm còn đáng kể hơn. Linux kernel gần đây compile debug information lớn hơn 18MB. Sau strip như Listing 15-2, binary chỉ hơn 2MB chút!
+Ở đây, chúng ta strip cả symbolic debug information lẫn section `.comment` khỏi executable file. Chúng ta chỉ định tên stripped binary bằng switch command-line `-o`. Bạn có thể thấy stripped binary nhỏ hơn một nửa kích thước ban đầu. Dĩ nhiên, với các ứng dụng lớn hơn, mức tiết kiệm dung lượng còn đáng kể hơn. Một Linux kernel gần đây được compile với debug information có kích thước hơn 18MB. Sau khi strip như trong Listing 15-2, binary kết quả chỉ lớn hơn 2MB một chút!
 
-Debug kiểu này đặt stripped binary trên target và giữ unstripped copy cục bộ trên workstation chứa symbolic information cần. Dùng `gdbserver` trên target board cung cấp interface về host, nơi chạy GDB full-blown (tất nhiên cross-gdb) trên unstripped binary.
+Để debug theo cách này, bạn đặt phiên bản binary đã được strip trên target system và giữ một bản sao cục bộ chưa strip trên development workstation, chứa symbolic information cần thiết cho việc debug. Bạn sử dụng `gdbserver` trên target board để cung cấp interface trở lại development host, nơi chạy phiên bản GDB full-blown, dĩ nhiên là cross-gdb, trên binary chưa strip.
 
 ### 15.2.1 gdbserver
 
-Dùng `gdbserver` cho chạy GDB từ workstation thay vì target embedded Linux. Lợi ích rõ: workstation thường CPU mạnh, memory, hard-drive storage nhiều hơn. Ngoài ra source code ứng dụng debug thường ở workstation, không embedded platform.
+Sử dụng `gdbserver` cho phép bạn chạy GDB trên development workstation thay vì trên target embedded Linux platform. Cấu hình này có những lợi ích rõ ràng. Trước hết, development workstation thường có CPU mạnh hơn, nhiều memory và hard-drive storage hơn rất nhiều so với embedded platform. Ngoài ra, source code của ứng dụng đang được debug thường nằm trên development workstation thay vì trên embedded platform.
 
-`gdbserver` là chương trình nhỏ trên target board, cho remote debugging process trên board. Gọi trên board chỉ chương trình debug, IP address, port number nghe request kết nối GDB. Listing 15-3 cho startup sequence khởi đầu session trên target.
+`gdbserver` là một chương trình nhỏ chạy trên target board và cho phép remote debugging một process trên board. Nó được gọi trên target board với chương trình cần debug cùng IP address và port number nơi nó lắng nghe yêu cầu kết nối từ GDB. Listing 15-3 trình bày trình tự startup để bắt đầu một debug session trên target board.
 
 LISTING 15-3 Khởi động `gdbserver` trên target board
 
@@ -131,7 +131,7 @@ Listening on port 2001
 
 Ví dụ chạy `gdbserver` cấu hình nghe Ethernet TCP/IP connection port 2001, sẵn debug stripped binary `websdemo-stripped`.
 
-Từ workstation, chạy GDB với tên binary executable chứa symbolic debug information muốn debug làm argument. Sau khởi tạo, gọi lệnh nối remote target board. Listing 15-4 cho chuỗi.
+Từ development workstation, chúng ta khởi chạy GDB và truyền tên binary executable chứa symbolic debug information cần debug làm đối số. Sau khi GDB khởi tạo, chúng ta thực hiện một lệnh kết nối đến remote target board. Listing 15-4 trình bày trình tự này.
 
 LISTING 15-4 Khởi động remote GDB session
 
@@ -147,22 +147,22 @@ Breakpoint 1 at 0x12b80: file main.c, line 72.
 (gdb)
 ```
 
-Listing 15-4 gọi cross-gdb trên host. Khi chạy gọi lệnh GDB `target remote`, khiến GDB khởi tạo TCP/IP connection từ workstation tới target IP chỉ định port 2001. Khi `gdbserver` chấp nhận, in dòng tương tự:
+Listing 15-4 gọi cross-gdb trên development host. Khi GDB đang chạy, chúng ta thực hiện lệnh GDB `target remote`. Lệnh này khiến GDB khởi tạo một TCP/IP connection từ development workstation đến target board, với IP address được chỉ định trên port 2001. Khi `gdbserver` chấp nhận yêu cầu kết nối, nó in một dòng tương tự như sau:
 
 ```
 Remote debugging from host 192.168.0.10
 ```
 
-Giờ GDB nối process `gdbserver` target, sẵn nhận GDB command. Phần còn lại giống hệt debug local application. Đây là tool mạnh, cho dùng workstation cho debug session, chỉ để GDB stub nhỏ ít can thiệp và chương trình debug trên target. Nếu thắc mắc, `gdbserver` cho ARM target này chỉ 54KB như sau:
+Bây giờ GDB đã kết nối với process `gdbserver` trên target board, sẵn sàng nhận các command từ GDB. Phần còn lại của session hoàn toàn giống như debug một ứng dụng cục bộ. Đây là công cụ mạnh, cho phép bạn tận dụng năng lực development workstation cho debug session, chỉ để lại một GDB stub nhỏ, tương đối ít gây ảnh hưởng, và chương trình đang debug trên target board. Nếu bạn thắc mắc, `gdbserver` dành cho ARM target cụ thể này chỉ có kích thước 54KB, như sau:
 
 ```
 root@coyote:~# ls -l /usr/bin/gdbserver
 -rwxr-xr-x  1 root root 54344 Jun 26  2009 /usr/bin/gdbserver
 ```
 
-Một lưu ý thường thành FAQ trên mailing list. Phải dùng GDB trên host cấu hình cross debugger: binary chạy trên workstation (thường x86), hiểu binary executable image compile cho architecture khác. Đây là sự thật quan trọng thường bị bỏ qua. Không thể debug Power Architecture target bằng native GDB trong Ubuntu desktop Linux điển hình. Phải có GDB cấu hình theo tổ hợp host, target.
+Một lưu ý thường xuất hiện trong các câu hỏi thường gặp (FAQ) trên mailing list là bạn phải sử dụng GDB trên development host đã được cấu hình làm cross debugger. Đây là một chương trình binary chạy trên development workstation, thường là x86, và hiểu các binary executable image được compile cho architecture khác. Điều này quan trọng nhưng thường bị bỏ qua. Bạn không thể debug Power Architecture target bằng native GDB như bản đi kèm một cài đặt Ubuntu desktop Linux điển hình. Bạn phải có GDB được cấu hình cho tổ hợp host và target của mình.
 
-Khi gọi, GDB hiện banner vài dòng thông tin rồi compiled configuration. Listing 15-5 là GDB dùng trong một số ví dụ sách, thuộc embedded Linux distribution MontaVista Software cấu hình Power Architecture cross- development.
+Khi được gọi, GDB hiển thị một banner gồm vài dòng thông tin, sau đó hiển thị cấu hình đã được compile vào nó. Listing 15-5 là một ví dụ GDB được sử dụng cho một số ví dụ trong sách này. Nó thuộc embedded Linux distribution do MontaVista Software cung cấp và được cấu hình cho Power Architecture cross- development.
 
 LISTING 15-5 Gọi cross-gdb
 
@@ -180,11 +180,11 @@ This GDB was configured as “--host=i686-pc-linux-gnu
 (gdb)
 ```
 
-Chú ý dòng cuối startup message. Đây là cấu hình compile vào bản GDB này: chạy trên x86 (i686) PC host GNU/Linux, debug binary compile cho Power Architecture processor GNU/Linux. Chỉ bởi variable `--host`, `--target` trong banner text. Cũng là phần configuration string truyền `./configure` khi build GDB.
+Hãy chú ý các dòng cuối của GDB startup message này. Đây là cấu hình được compile vào phiên bản GDB này. Nó được compile để thực thi trên PC host x86 (i686) chạy GNU/Linux và debug các chương trình binary được compile cho processor Power Architecture chạy GNU/Linux. Điều này được chỉ định bởi các variable `--host` và `--target` hiển thị trong banner. Đây cũng là một phần của configuration string truyền cho `./configure` khi build GDB.
 
 ## 15.3 Debug với shared library
 
-Giờ hiểu cách remote debug bằng GDB host, `gdbserver` target, chuyển tới shared library, debug symbol phức tạp. Trừ khi ứng dụng statically linked executable (link bằng switch command-line linker `-static`), nhiều symbol tham chiếu code ngoài ứng dụng. Rõ nhất standard C library routine `fopen`, `printf`, `malloc`, `memcpy`. Ít rõ hơn là function application-specific như `jack_transport_locate()` (routine từ JACK audio server low-latency), gọi library function ngoài standard C library.
+Bây giờ bạn đã hiểu cách bắt đầu remote debug session bằng GDB trên host và `gdbserver` trên target, chúng ta chuyển sang sự phức tạp của shared library và debug symbol. Trừ khi ứng dụng là một statically linked executable, được link bằng switch command-line của linker `-static`, nhiều symbol trong ứng dụng sẽ tham chiếu code nằm ngoài ứng dụng. Những ví dụ rõ ràng gồm việc sử dụng các standard C library routine như `fopen`, `printf`, `malloc` và `memcpy`. Ví dụ ít rõ ràng hơn có thể là lời gọi đến các function application-specific như `jack_transport_locate()`, một routine từ JACK audio server low-latency, gọi một library function bên ngoài các standard C library.
 
 Để có symbol routine này phải đáp ứng hai yêu cầu GDB:
 
@@ -192,7 +192,7 @@ Giờ hiểu cách remote debug bằng GDB host, `gdbserver` target, chuyển t�
 
 - GDB biết nơi tìm.
 
-Nếu không có debug version, vẫn debug ứng dụng được nhưng không có debug information cho library routine được gọi. Thường hoàn toàn chấp nhận—trừ khi đang phát triển shared library object trong dự án embedded.
+Nếu không có sẵn phiên bản debug của các library, bạn vẫn có thể debug ứng dụng; chỉ là bạn không có debug information cho các library routine được ứng dụng gọi. Điều này thường hoàn toàn chấp nhận được, trừ khi bạn đang phát triển một shared library object như một phần của dự án embedded.
 
 Xem lại Listing 15-4 gọi GDB trên remote target. Sau kết nối bằng `target remote`, GDB trả phản hồi two-line:
 
@@ -201,9 +201,9 @@ Remote debugging using 192.168.1.141:2001
 0x40000790 in ?? ()
 ```
 
-Điều này xác nhận GDB nối target IP, port chỉ định. Sau đó báo program counter tại `0x40000790`. Vì sao dấu hỏi thay symbolic location? Vì đây Linux dynamic loader (`ld-x.y.z.so`), platform này không có debug symbol cho shared library. Làm sao biết?
+Điều này xác nhận GDB đã kết nối với target tại IP address và port được chỉ định. Sau đó, GDB báo vị trí program counter là `0x40000790`. Vì sao chúng ta nhận dấu hỏi thay vì symbolic location? Vì đây là Linux dynamic loader (`ld-x.y.z.so`), và platform cụ thể này không có sẵn debug symbol cho shared library đó. Làm thế nào chúng ta biết điều này?
 
-Nhớ file system `/proc` Chương 9, “File system”. Entry hữu ích hơn là maps (Listing 9-16 Chương 9) trong directory structure per-process. Biết target application PID từ output `gdbserver` Listing 15-3: PID 197. Nhờ đó xem memory segment dùng ngay sau startup, như Listing 15-6.
+Nhớ lại phần thảo luận về file system `/proc` trong Chương 9, “File system”. Một entry hữu ích là maps entry, xem Listing 9-16 trong Chương 9, trong cấu trúc thư mục per-process. Chúng ta biết process ID (PID) của target application từ output `gdbserver` trong Listing 15-3. Process được gán PID 197. Với thông tin đó, chúng ta có thể xem các memory segment đang được sử dụng ngay sau process startup, như trong Listing 15-6.
 
 LISTING 15-6 Mapping target memory segment ban đầu
 
@@ -217,20 +217,20 @@ bedf9000-bee0e000 rwxp bedf9000 00:00 0          [stack]
 root@coyote:~#
 ```
 
-Thấy ứng dụng target `websdemo-stripped` chiếm hai segment. Đầu là executable segment read-only tại `0x8000`, sau là data segment read-write tại `0x2d000`. Segment thứ ba đáng quan tâm: Linux dynamic linker executable code segment, bắt đầu `0x40000000`. Điều tra thêm xác nhận GDB đang ở dòng code đầu dynamic linker trước mọi application code riêng. Dùng cross `readelf` xác nhận starting address:
+Ở đây, chúng ta thấy target application `websdemo-stripped` chiếm hai memory segment. Đầu tiên là executable segment read-only tại `0x8000`, thứ hai là data segment read-write tại `0x2d000`. Memory segment thứ ba là phần đáng quan tâm: executable code segment của Linux dynamic linker. Lưu ý nó bắt đầu tại địa chỉ `0x40000000`. Nếu tìm hiểu thêm, chúng ta có thể xác nhận GDB thực sự đang dừng ở dòng code đầu tiên của dynamic linker, trước khi bất kỳ code nào của ứng dụng được thực thi. Dùng phiên bản cross của `readelf`, chúng ta có thể xác nhận địa chỉ bắt đầu của linker như sau:
 
 ```
 # xscale_be-readelf -S ld-2.3.3.so | grep \.text
 [ 9] .text    PROGBITS    00000790 000790 012c6c 00  AX  0   0 16
 ```
 
-Từ dữ liệu kết luận address GDB báo startup là instruction đầu `ld-2.3.3.so`, Linux dynamic linker/loader. Có thể dùng kỹ thuật hình dung sơ vị trí code nếu thiếu symbolic debug information cho process/shared library.
+Từ dữ liệu này, chúng ta kết luận rằng address mà GDB báo khi khởi động là instruction đầu tiên từ `ld-2.3.3.so`, Linux dynamic linker/loader. Bạn có thể dùng kỹ thuật này để hình dung sơ bộ code của mình đang ở đâu nếu không có symbolic debug information cho một process hoặc shared library.
 
-Nhớ đang thực thi cross command `readelf` trên host. Vì thế file `ld-2.3.3.so`, bản thân XScale binary object, phải truy cập được từ host. Thường file nằm trên host, thuộc embedded Linux distribution cài ở đó.
+Hãy nhớ chúng ta đang thực thi lệnh cross `readelf` này trên development host. Vì vậy, file `ld-2.3.3.so`, bản thân là một XScale binary object, phải truy cập được từ development host. Thông thường, file này nằm trên development host và là một thành phần của embedded Linux distribution được cài trên host.
 
 ### 15.3.1 Shared library event trong GDB
 
-GDB có thể báo shared library event, hữu ích hiểu hành vi ứng dụng/Linux loader hoặc đặt breakpoint trong shared library routine muốn debug, step. Listing 15-7 minh họa. Bình thường hiện complete path library. Listing chỉnh để dễ đọc.
+GDB có thể thông báo các shared library event cho bạn. Điều này hữu ích để hiểu hành vi của ứng dụng hoặc Linux loader, hoặc để đặt breakpoint trong các shared library routine bạn muốn debug hay step qua. Listing 15-7 minh họa kỹ thuật này. Thông thường, path đầy đủ đến library được hiển thị. Listing này đã được chỉnh sửa để dễ đọc hơn.
 
 LISTING 15-7 Dừng GDB trên shared library event
 
@@ -263,11 +263,11 @@ From        To          Syms Read   Shared Object Library
 (gdb)
 ```
 
-Khi mới debug session, chưa load shared library. Thấy qua lệnh `i shared` đầu, hiển thị library đang load. Đặt breakpoint tại function `main()` ứng dụng, thấy hai shared library đã load: Linux dynamic linker/loader và standard C library component `libc`.
+Khi debug session mới bắt đầu, chưa có shared library nào được load. Bạn có thể thấy điều này qua lệnh `i shared` đầu tiên, lệnh hiển thị các shared library hiện được load. Khi đặt breakpoint tại function `main()` của ứng dụng, chúng ta thấy hai shared library đã được load. Đó là Linux dynamic linker/loader và thành phần standard C library `libc`.
 
-Từ đây gọi `set stop-on-solib-event`, continue. Khi ứng dụng thử function từ shared library khác, library được load. Nếu thắc mắc, function `gethostbyname()` được gặp, gây load shared object tiếp.
+Từ đây, chúng ta thực hiện lệnh `set stop-on-solib-event` và tiếp tục thực thi chương trình. Khi ứng dụng thử thực thi một function từ shared library khác, library đó được load. Nếu bạn thắc mắc, function `gethostbyname()` được gặp và khiến shared object tiếp theo được load.
 
-Ví dụ minh họa khái niệm cross-development quan trọng. Binary application (ELF image) trên target chứa thông tin library cần resolve external reference. Xem dễ bằng `ldd`, giới thiệu Chương 11, “BusyBox”, chi tiết Chương 13. Listing 15-8 cho output `ldd` trên target.
+Ví dụ này minh họa một khái niệm cross-development quan trọng. Binary application (ELF image) chạy trên target chứa thông tin về các library cần thiết để resolve những external reference của nó. Chúng ta có thể dễ dàng xem thông tin này bằng lệnh `ldd`, đã được giới thiệu trong Chương 11, “BusyBox”, và trình bày chi tiết trong Chương 13. Listing 15-8 cho thấy output của `ldd` được gọi từ target board.
 
 LISTING 15-8 `ldd` thực thi trên target board
 
@@ -278,9 +278,9 @@ root@coyote:/workspace# ldd websdemo
 root@coyote:/workspace#
 ```
 
-Chú ý path library trên target là absolute path bắt đầu `/lib` trên root file system. Nhưng GDB host không dùng được để tìm library, nếu làm sẽ load library sai architecture. Host có lẽ x86, còn target ví dụ ARM XScale.
+Lưu ý rằng các path đến shared library trên target là absolute path bắt đầu từ `/lib` trên root file system. Tuy nhiên, GDB chạy trên development workstation của host không thể sử dụng các path này để tìm library. Bạn cần hiểu rằng làm như vậy sẽ khiến GDB trên host load library của architecture không đúng. Host nhiều khả năng là x86, trong khi target trong ví dụ này là ARM XScale.
 
-Nếu gọi cross `ldd`, thấy path cấu hình trước trong toolchain. Toolchain phải biết nơi file trên host.[^2] Listing 15-9 minh họa. Một lần nữa chỉnh listing dễ đọc, path dài viết tắt.
+Nếu gọi phiên bản cross của `ldd`, bạn sẽ thấy các path đã được cấu hình sẵn trong toolchain. Toolchain phải biết nơi các file này tồn tại trên host development system.[^2] Listing 15-9 minh họa điều này. Một lần nữa, chúng tôi đã chỉnh sửa listing để dễ đọc; các path dài được viết tắt.
 
 LISTING 15-9 `ldd` thực thi trên development host
 
@@ -291,7 +291,7 @@ $ xscale_be-ldd websdemo
 $
 ```
 
-Cross toolchain nên cấu hình sẵn library location. Không chỉ host GDB mà compiler/linker cũng cần biết.[^3] GDB báo nơi cấu hình tìm library bằng `show solib-absolute-prefix`:
+Cross toolchain của bạn cần được cấu hình sẵn với các vị trí library này. Không chỉ GDB trên host cần biết chúng nằm ở đâu, mà compiler và linker cũng cần biết.[^3] GDB có thể cho biết nơi nó được cấu hình để tìm các library này bằng lệnh `show solib-absolute-prefix`:
 
 ```
 (gdb) show solib-absolute-prefix
@@ -300,9 +300,9 @@ Prefix for loading absolute shared library symbol files is
 (gdb)
 ```
 
-Có thể đặt, đổi nơi GDB tìm shared library bằng `set solib-absolute-prefix`, `set solib-search-path`. Nếu phát triển shared library module riêng hoặc custom location, dùng `solib-search-path` báo GDB nơi tìm. Xem online GDB manual cuối chương để thêm chi tiết.
+Bạn có thể thiết lập hoặc thay đổi nơi GDB tìm shared library bằng các lệnh GDB `set solib-absolute-prefix` và `set solib-search-path`. Nếu phát triển các shared library module riêng hoặc có các vị trí library tùy chỉnh trên hệ thống, bạn có thể sử dụng `solib-search-path` để chỉ dẫn GDB nơi tìm library. Để biết thêm chi tiết về các lệnh này và các GDB command khác, hãy xem tài liệu GDB trực tuyến được dẫn ở cuối chương.
 
-Lưu ý cuối về `ldd`. Có thể thấy address Listing 15-8, 15-9 gắn library. `ldd` hiện load address đầu code segment như khi chương trình load bởi Linux dynamic linker/loader. Chạy trên target, address Listing 15-5 hoàn toàn hợp lý, liên hệ được với listing `/proc/<pid>/maps` process trên target. Listing 15-10 hiện memory segment khi process đã load hoàn chỉnh, chạy.
+Một lưu ý cuối về `ldd`: bạn có thể đã chú ý các địa chỉ gắn với library trong Listing 15-8 và Listing 15-9. `ldd` hiển thị load address ở đầu các code segment này như khi chương trình được Linux dynamic linker/loader load. Khi thực thi trên target, các địa chỉ trong Listing 15-5 hoàn toàn hợp lý, và chúng ta có thể đối chiếu với listing `/proc/<pid>/maps` của process đang chạy trên target. Listing 15-10 hiển thị các memory segment của target process này sau khi nó được load đầy đủ và đang chạy.
 
 LISTING 15-10 Memory segment từ `/proc/<pid>/maps` trên target
 
@@ -329,15 +329,15 @@ becaa000-becbf000 rwxp becaa000 00:00 0          [stack]
 root@coyote:~#
 ```
 
-Chú ý liên hệ target output `ldd` Listing 15-8 với segment trong file system `/proc` cho process. Đầu Linux loader (đầu segment `.text`) là `0x40000000`, đầu `libc` là `0x40020000`. Đây là virtual address nơi các phần ứng dụng được load, báo bởi target `ldd`. Tuy nhiên load address từ cross `ldd` Listing 15-9 (`0xdead1000`, `0xdead2000`) nhắc rằng không thể load library trên host (là ARM binary). Chỉ là placeholder.
+Hãy chú ý mối tương quan giữa output `ldd` trên target trong Listing 15-8 và các memory segment hiển thị trong file system `/proc` cho process này. Vị trí bắt đầu Linux loader, tức đầu segment `.text`, là `0x40000000`, và vị trí bắt đầu `libc` là `0x40020000`. Đây là các virtual address nơi những phần này của ứng dụng đã được load; chúng được báo bởi lệnh `ldd` trên target. Tuy nhiên, load address do phiên bản cross của `ldd` báo trong Listing 15-9 (`0xdead1000` và `0xdead2000`) nhắc bạn rằng những library này không thể được load trên host system vì chúng là binary cho ARM architecture. Những load address này chỉ là placeholder.
 
 ## 15.4 Debug nhiều task
 
-Nhìn chung lập trình viên gặp hai tình huống debug nhiều execution thread. Process có thể ở address space riêng hoặc dùng chung address space (và system resource khác) với thread khác. Tình huống đầu (independent process không chung address space) phải dùng debug session độc lập. Không gì ngăn dùng `gdbserver` trên nhiều process target, dùng các lần gọi GDB riêng trên host điều phối debug nhiều process phối hợp nhưng độc lập.
+Nhìn chung, nhà phát triển gặp hai tình huống debug khác nhau khi làm việc với nhiều thread thực thi. Process có thể tồn tại trong address space riêng hoặc chia sẻ address space và các system resource khác với những thread thực thi khác. Tình huống thứ nhất, các process độc lập không chia sẻ address space, phải được debug bằng các debug session riêng biệt. Không có gì ngăn bạn sử dụng `gdbserver` trên nhiều process của target system và gọi các GDB riêng trên development host để điều phối việc debug nhiều process có phối hợp nhưng độc lập.
 
 ### 15.4.1 Debug nhiều process
 
-Khi process dưới GDB dùng system call `fork()`[^4] sinh process mới, GDB có hai hướng: tiếp tục điều khiển/debug parent hoặc ngừng debug parent, attach child mới. Điều khiển bằng `set follow-fork-mode`. Hai mode follow parent, follow child. Mặc định follow parent; child thực thi ngay sau fork thành công.
+Khi một process đang được debug bằng GDB sử dụng system call `fork()`[^4] để tạo một process mới, GDB có thể thực hiện một trong hai cách. Nó có thể tiếp tục điều khiển và debug parent process, hoặc dừng debug parent process rồi attach vào child process vừa được tạo. Bạn có thể điều khiển hành vi này bằng lệnh `set follow-fork-mode`. Hai mode là follow parent và follow child. Hành vi mặc định là GDB theo dõi parent. Trong trường hợp này, child process thực thi ngay khi fork thành công.
 
 Listing 15-11 tái hiện code snippet đơn giản fork nhiều process từ routine `main()`.
 
@@ -364,7 +364,7 @@ LISTING 15-11 Dùng `fork()` sinh child process
   }
 ```
 
-Loop đơn giản tạo `MAX_PROCESSES` process mới bằng system call `fork()`. Mỗi process thực thi code function `worker_process()`. Chạy dưới GDB mặc định, GDB phát hiện execution thread (process) mới nhưng vẫn attach parent. Listing 15-12 minh họa.
+Vòng lặp đơn giản này tạo `MAX_PROCESSES` process mới bằng system call `fork()`. Mỗi process vừa tạo thực thi một phần code được định nghĩa bởi function `worker_process()`. Khi code này chạy dưới GDB ở mode mặc định, GDB phát hiện các thread thực thi mới (process) được tạo nhưng vẫn attach vào thread thực thi của parent. Listing 15-12 minh họa GDB session này.
 
 LISTING 15-12 GDB trong `follow-fork-mode` = `parent`
 
@@ -394,9 +394,9 @@ Detaching after fork from child process 363.
 Detaching after fork from child process 364.
 ```
 
-Chú ý tám child process sinh với PID 357–364. Parent PID 356. Khi breakpoint `main()` chạm, nhập breakpoint ở routine `worker_process()` mà mỗi child thực thi sau `fork()`. Cho chương trình continue từ `main`, thấy process mới sinh, detach bởi debugger. Không chạm breakpoint vì GDB attach main process, không bao giờ thực thi `worker_process()`.
+Lưu ý tám child process đã được tạo, có PID từ 357 đến 364. Parent process được tạo với PID 356. Khi breakpoint trong `main()` được chạm đến, chúng ta đặt một breakpoint ở routine `worker_process()`, routine mà mỗi child process thực thi sau `fork()`. Cho chương trình tiếp tục từ `main`, chúng ta thấy từng process mới được tạo và bị debugger detach. Chúng không bao giờ chạm breakpoint vì GDB attach vào main process, process không bao giờ thực thi routine `worker_process()`.
 
-Nếu cần debug từng process, phải chạy GDB session độc lập, attach child sau `forked()`. GDB documentation cuối chương nêu kỹ thuật thêm `sleep()` trong child, cho thời gian attach debugger. Attach process mới giải thích Phần 15.5.2, “Attach process đang chạy”.
+Nếu cần debug từng process, bạn phải thực thi một GDB session độc lập và attach vào child process sau khi nó được `forked()`. Tài liệu GDB được dẫn ở cuối chương phác thảo một kỹ thuật hữu ích: đặt lời gọi `sleep()` trong child process để có thời gian attach debugger vào process mới. Việc attach vào process mới được giải thích trong Mục 15.5.2, “Attach process đang chạy”.
 
 Nếu chỉ cần follow child, đặt `follow-fork-mode` theo `child` trước parent tới system call `fork()`, như Listing 15-13.
 
@@ -421,15 +421,15 @@ Breakpoint 1, worker_process () at forker.c:45
 Continuing.
 ```
 
-Thấy parent PID 401. Khi child đầu sinh bởi system call `fork()`, GDB âm thầm detach parent, attach child PID 402. Giờ điều khiển child đầu, tôn trọng breakpoint `worker_process()`. Nhưng child khác sinh bởi code Listing 15-11 không debug và tiếp tục tự chạy đến xong.
+Ở đây, chúng ta thấy parent process được tạo với PID 401. Khi child đầu tiên được tạo bởi system call `fork()`, GDB âm thầm detach khỏi luồng thực thi của parent và attach vào child process vừa được tạo có PID 402. GDB lúc này điều khiển child process đầu tiên và dừng theo breakpoint được đặt tại `worker_process()`. Tuy nhiên, lưu ý rằng các child process khác do đoạn code trong Listing 15-11 tạo ra không được debug và tiếp tục chạy cho đến khi tự hoàn tất.
 
-Tóm lại dùng GDB kiểu này chỉ debug một process mỗi lần. Có thể debug qua system call `fork()` nhưng phải quyết định theo execution thread nào qua `fork()`—parent hay child. Như đầu phần, dùng nhiều GDB session độc lập nếu cần debug hơn một process phối hợp cùng lúc.
+Tóm lại, khi sử dụng GDB theo cách này, bạn chỉ có thể debug một process tại một thời điểm. Bạn có thể debug qua system call `fork()`, nhưng phải quyết định theo thread thực thi nào qua lời gọi `fork()`: parent hay child. Như đã đề cập ở đầu mục này, bạn có thể sử dụng nhiều GDB session độc lập nếu phải debug đồng thời nhiều process phối hợp với nhau.
 
 ### 15.4.2 Debug ứng dụng multithreaded
 
-Nếu ứng dụng dùng POSIX thread library cho threading function, GDB có thêm khả năng concurrent debugging multithreaded application. Native POSIX Thread Library (NPTL) trở thành chuẩn thực tế trên Linux system, gồm embedded. Phần còn lại giả định dùng library này.
+Nếu ứng dụng sử dụng POSIX thread library cho các threading function, GDB có thêm khả năng debug đồng thời một multithreaded application. Native POSIX Thread Library (NPTL) đã trở thành thread library tiêu chuẩn trên thực tế được dùng trong Linux system, bao gồm embedded Linux system. Phần thảo luận còn lại giả định bạn đang sử dụng thread library này.
 
-Phần này dùng demonstration program sinh nhiều thread bằng library function `pthread_create()` trong loop đơn giản. Sau sinh, routine `main()` chỉ chờ keyboard input để kết thúc ứng dụng. Mỗi thread hiện thông báo ngắn, sleep thời gian định sẵn. Listing 15-14 cho startup sequence trên target.
+Trong phần này, chúng ta dùng một chương trình minh họa tạo một số thread bằng library function `pthread_create()` trong một loop đơn giản. Sau khi các thread được tạo, routine `main()` chỉ chờ thao tác nhập từ bàn phím để kết thúc ứng dụng. Mỗi thread hiển thị một thông báo ngắn trên màn hình và sleep trong một khoảng thời gian được xác định trước. Listing 15-14 trình bày startup sequence trên target board.
 
 LISTING 15-14 Startup demo thread trên target
 
@@ -447,7 +447,7 @@ Starting worker thread 2
 Starting worker thread 3
 ```
 
-Như trước, `gdbserver` chuẩn bị ứng dụng chạy, đợi cross-gdb host-based. Khi GDB nối, `gdbserver` báo bằng message `Remote debugging`... Giờ khởi động GDB trên host, nối. Listing 15-15 tái hiện nửa này của session.
+Giống các ví dụ trước, `gdbserver` chuẩn bị ứng dụng để chạy và chờ kết nối từ cross-gdb host-based. Khi GDB kết nối, `gdbserver` báo kết nối bằng message `Remote debugging`... Bây giờ chúng ta khởi động GDB trên host và kết nối. Listing 15-15 trình bày lại nửa này của session.
 
 LISTING 15-15 Host GDB kết nối target thread demo
 
@@ -471,11 +471,11 @@ Breakpoint 1, main (argc=0x1, argv=0xbefffdd4) at tdemo.c:98
 (gdb)
 ```
 
-Ở đây nối target (gây message `Remote debugging`... trong Listing 15-14), đặt breakpoint ngay sau loop sinh thread, continue. Khi thread tạo, GDB báo cùng thread ID. Thread 1059 là application `tdemo` làm việc trực tiếp từ function `main()`. Thread 1060–1063 mới tạo từ `pthread_create()`.
+Ở đây, chúng ta kết nối đến target, tạo message `Remote debugging`... trong Listing 15-14, đặt breakpoint ngay sau vòng lặp tạo các thread mới rồi tiếp tục. Khi một thread mới được tạo, GDB hiển thị thông báo cùng thread ID. Thread 1059 là ứng dụng `tdemo`, thực hiện công việc trực tiếp từ function `main()`. Các thread từ 1060 đến 1063 là những thread mới được tạo từ lời gọi `pthread_create()`.
 
-Khi chạm breakpoint, GDB hiện `[Switching to Thread 1059]` chỉ đây là execution thread gặp breakpoint. Nó là active thread của session, gọi current thread trong documentation GDB.
+Khi GDB chạm breakpoint, nó hiển thị message `[Switching to Thread 1059]`, cho biết đây là thread thực thi đã gặp breakpoint. Nó là active thread của debug session, được gọi là current thread trong tài liệu GDB.
 
-GDB cho chuyển giữa thread, làm debug operation thường như đặt breakpoint thêm, xem data, backtrace, làm với stack frame riêng trong current thread. Listing 15-16 cho ví dụ, tiếp session Listing 15-15.
+GDB cho phép chúng ta chuyển giữa các thread và thực hiện những thao tác debug thông thường như đặt thêm breakpoint, kiểm tra dữ liệu, hiển thị backtrace và làm việc với từng stack frame trong current thread. Listing 15-16 cung cấp ví dụ về những thao tác này, tiếp tục debug session được bắt đầu trong Listing 15-15.
 
 LISTING 15-16 GDB operation trên thread
 
@@ -533,23 +533,23 @@ LISTING 15-16 Tiếp
 (gdb)
 ```
 
-Vài điểm đáng nói. GDB gán integer riêng mỗi thread, dùng tham chiếu từng thread. Khi breakpoint chạm trong thread, mọi thread trong process halt để xem. GDB đánh dấu current thread bằng sao (`*`). Có thể đặt breakpoint riêng từng thread—giả định tồn tại context riêng. Nếu đặt ở code chung mọi thread chạy, thread đầu chạm là tùy ý.
+Có một số điểm cần đề cập. GDB gán một giá trị integer riêng cho mỗi thread và sử dụng chúng để tham chiếu đến từng thread. Khi một thread chạm breakpoint, tất cả thread trong process đều được dừng để kiểm tra. GDB đánh dấu current thread bằng dấu hoa thị (`*`). Bạn có thể đặt breakpoint riêng trong từng thread, dĩ nhiên với giả định chúng tồn tại trong context riêng. Nếu đặt breakpoint ở phần code chung mà mọi thread đều thực thi, thread chạm breakpoint đầu tiên là bất kỳ.
 
 GDB user documentation cuối chương có thêm thông tin hữu ích debug multithreaded environment.
 
 ### 15.4.3 Debug bootloader/Flash code
 
-Debug code trong Flash có thách thức riêng. Giới hạn rõ nhất cách GDB, `gdbserver` phối hợp đặt target breakpoint. Khi nói GDB remote serial protocol Chương 14, bạn học cách insert breakpoint.[^5] GDB thay opcode vị trí breakpoint bằng opcode architecture-specific chuyển quyền debugger. Nhưng trong ROM/Flash, không ghi đè opcode được nên phương pháp vô dụng.
+Debug code nằm trong Flash có những thách thức riêng. Giới hạn rõ ràng nhất là cách GDB và `gdbserver` phối hợp để đặt breakpoint trên target. Khi thảo luận GDB remote serial protocol trong Chương 14, bạn đã tìm hiểu cách chèn breakpoint vào ứng dụng.[^5] GDB thay opcode tại vị trí breakpoint bằng một opcode architecture-specific chuyển quyền điều khiển cho debugger. Tuy nhiên, trong ROM hoặc Flash, GDB không thể ghi đè opcode nên phương pháp đặt breakpoint này không có tác dụng.
 
-Phần lớn processor hiện đại có debug register để vượt giới hạn. Khả năng này phải được hỗ trợ bởi hardware probe/stub architecture- và processor-specific. Kỹ thuật phổ biến nhất debug code Flash/ROM là JTAG hardware probe, hỗ trợ đặt hardware breakpoint processor-specific. Chi tiết Chương 14, Phần 14.4.2, “Debug với JTAG probe”.
+Phần lớn processor hiện đại chứa một số debug register có thể được sử dụng để vượt qua giới hạn này. Các khả năng đó phải được hỗ trợ bởi hardware probe hoặc stub architecture- và processor-specific. Kỹ thuật phổ biến nhất để debug code nằm trong Flash và ROM là sử dụng JTAG hardware probe. Những probe này hỗ trợ đặt hardware breakpoint processor-specific. Chủ đề này đã được trình bày chi tiết trong Chương 14. Xem Mục 14.4.2, “Debug với JTAG probe”, để biết thêm chi tiết.
 
 ## 15.5 Các remote debug option bổ sung
 
-Đôi khi muốn serial port cho remote debugging. Tác vụ khác có thể hữu ích attach debugger tới process đang chạy. Những operation đơn giản hữu ích trình bày đây.
+Đôi khi bạn muốn dùng serial port để remote debugging. Với những tác vụ khác, bạn có thể thấy hữu ích khi attach debugger vào một process đang chạy. Các thao tác đơn giản nhưng hữu ích này được trình bày chi tiết dưới đây.
 
 ### 15.5.1 Debug bằng serial port
 
-Debug bằng serial port khá dễ. Tất nhiên target phải có serial port không bị process khác dùng như serial console. Host cũng vậy. Nếu đáp ứng cả hai, chỉ thay IP address:port number truyền cho `gdbserver` bằng serial port specification. Dùng tương tự khi nối target từ GDB host-based.
+Debug bằng serial port khá đơn giản. Dĩ nhiên, bạn phải có serial port sẵn trên target mà không bị một process khác, chẳng hạn serial console, sử dụng. Host cũng có cùng giới hạn: phải có một serial port khả dụng. Nếu đáp ứng cả hai điều kiện, chỉ cần thay IP address:port number truyền cho `gdbserver` bằng thông tin chỉ định serial port. Dùng kỹ thuật tương tự khi kết nối đến target từ GDB host-based.
 
 Trên target:
 
@@ -580,7 +580,7 @@ Attached; pid = 1030
 Listening on port 2001
 ```
 
-Khi xem xong process debug, gọi GDB command `detach`. Nó detach `gdbserver` khỏi ứng dụng target, kết thúc session. Ứng dụng tiếp từ chỗ dừng. Kỹ thuật rất hữu ích xem running program. Nhưng khi attach, process halt đợi chỉ dẫn. Không resume tới khi yêu cầu bằng `continue` hoặc `detach`. Cũng chú ý dùng `detach` gần bất cứ lúc nào để kết thúc session, để ứng dụng tiếp tục trên target.
+Khi đã kiểm tra xong process đang debug, bạn có thể thực hiện lệnh GDB `detach`. Lệnh này detach `gdbserver` khỏi ứng dụng trên target và kết thúc debug session. Ứng dụng tiếp tục từ vị trí đã dừng. Đây là kỹ thuật rất hữu ích để kiểm tra một chương trình đang chạy. Tuy nhiên, cần biết rằng khi attach vào process, nó dừng lại để chờ chỉ dẫn của bạn. Nó không tiếp tục thực thi cho đến khi được yêu cầu bằng lệnh `continue` hoặc `detach`. Cũng lưu ý rằng có thể sử dụng lệnh `detach` ở hầu như bất kỳ thời điểm nào để kết thúc debug session và để ứng dụng tiếp tục chạy trên target.
 
 ## 15.6 Tổng kết
 
@@ -588,9 +588,9 @@ Khi xem xong process debug, gọi GDB command `detach`. Nó detach `gdbserver` k
 
 - `gdbserver` chạy target, làm cầu nối cross-gdb host và process debug trên target.
 
-- GDB host thường dùng IP connection Ethernet gửi, nhận command với `gdbserver` target. Dùng GDB remote protocol giữa GDB, `gdbserver`.
+- GDB trên host thường sử dụng IP connection qua Ethernet để gửi command đến và nhận command từ `gdbserver` chạy trên target. GDB remote protocol được sử dụng giữa GDB và `gdbserver`.
 
-- GDB halt được trên shared library event, tự load symbol khi có. Toolchain nên cấu hình default path trên hệ thống cross-development. Hoặc dùng GDB command đặt search path shared library object.
+- GDB có thể dừng khi có shared library event và tự động load shared library symbol khi chúng có sẵn. Toolchain cần được cấu hình cho các default path trên hệ thống cross-development. Hoặc bạn có thể sử dụng GDB command để đặt các search path cho shared library object.
 
 - GDB debug được nhiều independent process bằng nhiều session đồng thời.
 
@@ -606,12 +606,12 @@ GDB: The GNU Project Debugger Tài liệu trực tuyến http://sourceware.org/g
 
 GDB Pocket Reference Arnold Robbins O’Reilly Media, 2005
 
-[^1]: Nhớ dùng cross version `strip`, như `ppc_82xx-strip`.
+[^1]: Hãy nhớ sử dụng cross version của `strip`, chẳng hạn `ppc_82xx-strip`.
 
-[^2]: Hoàn toàn có thể truyền location cho compiler, linker, debugger mỗi lần gọi, nhưng embedded Linux distribution tốt cấu hình default trong toolchain để tiện.
+[^2]: Bạn hoàn toàn có thể truyền những vị trí này cho compiler, linker và debugger mỗi lần gọi chúng. Tuy nhiên, một embedded Linux distribution tốt sẽ cấu hình sẵn các giá trị mặc định này trong toolchain để thuận tiện cho developer.
 
-[^3]: Tất nhiên compiler cũng cần nơi target file như system/library header file architecture-specific.
+[^3]: Tất nhiên, compiler của bạn cũng cần biết vị trí các target file, chẳng hạn system header file và library header file architecture-specific.
 
-[^4]: Chúng ta dùng thuật ngữ system call, nhưng `fork()` ở context này thực là C library function, rồi gọi system call `Linux sys_fork()`.
+[^4]: Chúng ta sẽ dùng thuật ngữ system call, nhưng `fork()` trong context này thực ra là một C library function; function đó sau đó gọi system call `Linux sys_fork()`.
 
 [^5]: Tham khảo Listing 14-7.

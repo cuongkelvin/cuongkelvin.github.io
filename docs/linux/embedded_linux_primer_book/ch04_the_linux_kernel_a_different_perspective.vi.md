@@ -88,13 +88,13 @@ It is NOT protable (uses 386 task switching etc), and it probably never
 will support anything other than AT-harddisks, as that’s all I have :-(.
 ```
 
-Từ release đầu tiên, Linux trưởng thành thành operating system full-featured với robustness, reliability và feature high-end sánh ngang commercial operating system tốt nhất. Một số ước tính hơn nửa Internet server trên Web chạy Linux. Ai cũng biết Google dùng tập hợp lớn PC low-cost chạy Linux fault-tolerant để triển khai search engine phổ biến.
+Kể từ lần phát hành đầu tiên đó, Linux đã trưởng thành thành một operating system full-featured, có tính vững chắc, độ tin cậy và các tính năng high-end sánh ngang những operating system thương mại tốt nhất. Theo một số ước tính, hơn một nửa số Internet server trên Web sử dụng Linux server. Việc gã khổng lồ tìm kiếm trực tuyến Google dùng một tập hợp lớn các PC low-cost chạy phiên bản Linux fault-tolerant để triển khai search engine phổ biến của mình không phải điều bí mật.
 
 ### 4.1.1 Kernel Version
 
-Có thể lấy source code Linux kernel và component bổ sung từ nhiều nơi. Hiệu sách địa phương có thể kèm version trên CD-ROMs trong sách Linux. Cũng có thể tải kernel hoặc cả distribution từ nhiều nơi trên Internet. Địa chỉ chính thức Linux kernel là iswww.kernel.org. Bạn thường nghe mainline source/mainline kernel để chỉ source tree tại kernel.org.
+Bạn có thể lấy source code của Linux kernel và các thành phần bổ sung từ nhiều nơi. Hiệu sách địa phương có thể có một số phiên bản trên các CD-ROMs đi kèm sách về Linux. Bạn cũng có thể download chính kernel hoặc thậm chí toàn bộ Linux distribution từ nhiều địa chỉ trên Internet. Trang chủ chính thức của Linux kernel là iswww.kernel.org. Bạn sẽ thường nghe các thuật ngữ mainline source hoặc mainline kernel, chỉ những source tree có tại kernel.org.
 
-Đã khá lâu Linux 2.6 là version hiện tại. Đầu development cycle, developer chọn numbering system phân biệt source tree để phát triển/thử nghiệm và source tree ổn định production-ready. Scheme gồm major version, minor version và sequence number. Trước Linux 2.6, minor chẵn chỉ production kernel, lẻ chỉ development kernel. Ví dụ:
+Trong một thời gian khá dài, Linux phiên bản 2.6 là phiên bản hiện hành. Ngay từ đầu chu kỳ phát triển, các nhà phát triển đã chọn một hệ thống đánh số để phân biệt các kernel source tree dành cho phát triển và thử nghiệm với các source tree dành cho kernel ổn định, production-ready. Sơ đồ đánh số gồm major version number, minor version number và sequence number. Trước Linux phiên bản 2.6, minor version number chẵn biểu thị production kernel, còn số lẻ biểu thị development kernel. Ví dụ:
 
 - Linux 2.4.x—Production kernel
 
@@ -104,7 +104,7 @@ Có thể lấy source code Linux kernel và component bổ sung từ nhiều n�
 
 Hiện kernel Linux 2.6 không có development branch riêng. Mọi feature mới, enhancement và bug fix đi qua một loạt gatekeeper, cuối cùng lọc/đẩy thay đổi lên Linux source tree top-level do Andrew Morton và Linus Torvalds duy trì.
 
-Dễ biết kernel version đang làm việc. Vài dòng đầu makefile top-level[^4] trong kernel source tree nêu chính xác version của instance đó. Với release 2.6.30:
+Có thể dễ dàng xác định kernel version mà bạn đang làm việc. Một vài dòng đầu của makefile top-level[^4] trong kernel source tree nêu chi tiết kernel version chính xác của tree đó. Với kernel release 2.6.30, nội dung như sau:
 
 ```
 VERSION = 2
@@ -120,9 +120,9 @@ Sau đó trong cùng makefile, các macro tạo macro version-level như:
 KERNELVERSION=$(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
 ```
 
-Macro dùng nhiều nơi trong kernel build system chỉ kernel version. Kernel gần đây giảm dùng xuống vài chỗ trong directory scripts. Thay bằng descriptive string đầy đủ hơn tên `KERNELRELEASE`. Chứa kernel version cùng tag tương ứng source control revision level từ `git`, source control system Linux dùng.
+Macro này được sử dụng ở một số vị trí trong kernel build system để chỉ kernel version. Trong các kernel gần đây hơn, việc sử dụng nó đã giảm xuống chỉ còn vài vị trí trong thư mục scripts. Nó được thay thế bằng một chuỗi mô tả đầy đủ hơn tên là `KERNELRELEASE`. Chuỗi này chứa kernel version cùng một tag tương ứng với mức revision của source control, lấy từ `git`, hệ thống source control được Linux sử dụng.
 
-`KERNELRELEASE` dùng nhiều nơi trong kernel source tree. Macro cũng build vào kernel image để query từ console. Kiểm tra kernel release string từ command prompt hệ thống đang chạy:
+`KERNELRELEASE` được sử dụng ở một số vị trí trong kernel source tree. Macro này cũng được build vào kernel image để có thể truy vấn từ console. Bạn có thể kiểm tra kernel release string từ command prompt trên một Linux system đang chạy như sau:
 
 ```
 $ cat /proc/version
@@ -130,7 +130,7 @@ Linux version 2.6.13 (chris@pluto) (gcc version 4.0.0 (DENX ELDK 4.0
 4.0.0)) #2 Thu Feb 16 19:30:13 EST 2006
 ```
 
-Lưu ý cuối về version: dễ theo dõi version trong dự án bằng tùy chỉnh field `EXTRAVERSION`. Ví dụ đang phát triển enhancement cho kernel feature mới, có thể đặt `EXTRAVERSION` như:
+Một lưu ý cuối về kernel version: bạn có thể giúp việc theo dõi kernel version trong dự án kernel riêng dễ dàng hơn bằng cách tùy chỉnh field `EXTRAVERSION`. Ví dụ, nếu đang phát triển các cải tiến cho một kernel feature mới, bạn có thể đặt `EXTRAVERSION` thành một giá trị như sau:
 
 ```
 EXTRAVERSION=-foo
@@ -140,19 +140,19 @@ Sau đó dùng `cat /proc/version` sẽ thấy `Linux version 2.6.13-foo`, giúp
 
 ### 4.1.2 Kernel Source Repository
 
-Địa chỉ chính thức source code là www.kernel.org. Có cả version hiện tại/lịch sử và nhiều patch. FTP repository chính ftp.kernel.org chứa subdirectory từ Linux 1.0. Kernel.org là trọng tâm hoạt động phát triển kernel đang diễn ra.
+Nơi lưu trữ chính thức Linux kernel source code là www.kernel.org. Tại đó, bạn có thể tìm các phiên bản Linux kernel hiện tại và trước đây cùng nhiều patch. FTP repository chính tại ftp.kernel.org chứa các subdirectory từ tận Linux phiên bản 1.0. kernel.org là trung tâm chính của các hoạt động phát triển đang diễn ra trong Linux kernel.
 
-Tải kernel gần đây từ kernel.org sẽ thấy file cho hơn 20 architecture/subarchitecture. Nhiều development tree khác hỗ trợ major architecture. Một lý do là lượng developer và thay đổi quá lớn. Nếu mọi developer mọi architecture gửi patch vào một source tree, maintainer ngập thay đổi/patch management, không còn phát triển feature. Ai làm kernel development cũng biết đã rất bận!
+Nếu download một Linux kernel gần đây từ kernel.org, bạn sẽ tìm thấy các file trong source tree dành cho hơn 20 architecture và subarchitecture khác nhau. Một số development tree khác hỗ trợ các architecture chính. Một lý do đơn giản là số lượng nhà phát triển và thay đổi đối với kernel quá lớn. Nếu mọi nhà phát triển trên mọi architecture đều gửi patch vào cùng một source tree, maintainer sẽ ngập trong các thay đổi và công việc quản lý patch, không còn thời gian phát triển feature. Như bất kỳ ai tham gia kernel development đều có thể nói với bạn, công việc hiện đã rất bận rộn!
 
-Có public source tree khác ngoài mainline kernel.org, chủ yếu phát triển architecture-specific. Ví dụ developer MIPS có thể tìm kernel phù hợp tại atwww.linux-mips.org. Thường công việc trong architecture tree cuối cùng gửi mainline maintainer. Phần lớn cố sync mainline thường xuyên để theo phát triển mới khi có thể. Nhưng không luôn dễ đưa patch vào mainline. Thực tế luôn có khác biệt giữa architecture kernel tree và mainline tại mỗi thời điểm.
+Một số public source tree khác tồn tại bên ngoài source của mainline kernel.org, chủ yếu dành cho phát triển architecture-specific. Ví dụ, nhà phát triển làm việc với MIPS architecture có thể tìm kernel phù hợp tại atwww.linux-mips.org. Thông thường, công việc thực hiện trong architecture tree cuối cùng được gửi đến mainline kernel maintainer. Phần lớn nhà phát triển architecture cố gắng đồng bộ thường xuyên với mainline kernel để theo kịp các phát triển mới khi có thể. Tuy nhiên, việc đưa patch vào mainline kernel không phải lúc nào cũng đơn giản. Thực tế, tại bất kỳ thời điểm nào cũng luôn có khác biệt giữa architecture kernel tree và mainline.
 
-Nếu muốn tìm kernel cho application, tốt nhất lấy Linux source tree stable mới nhất. Kiểm tra hỗ trợ processor, rồi tìm Linux kernel mailing list cho patch/issue liên quan. Cũng tìm mailing list sát quan tâm nhất và tra archive.
+Nếu đang băn khoăn cách tìm kernel cho ứng dụng cụ thể, cách tốt nhất là lấy Linux source tree stable mới nhất. Hãy kiểm tra xem processor của bạn đã được hỗ trợ hay chưa, rồi tìm trong các Linux kernel mailing list những patch hoặc vấn đề liên quan đến ứng dụng. Đồng thời, hãy tìm mailing list phù hợp nhất với mối quan tâm của bạn và tra cứu archive của nó.
 
 Phụ lục E, “Tài nguyên mã nguồn mở”, chứa tham khảo/nguồn thông tin tốt về kernel source repository, mailing list, v.v.
 
 ### 4.1.3 Dùng git tải Kernel
 
-Cách đơn giản nhất tải kernel mới nhất là `git`, công cụ source control management được Linux kernel community chọn. Repository phần lớn desktop distribution hiện đại có version `git`. Ví dụ Ubuntu,[^5] nhập lệnh sau cài `git` trên desktop/laptop PC:
+Cách đơn giản nhất để download Linux kernel mới nhất là sử dụng `git`. Tiện ích này đã trở thành công cụ được cộng đồng Linux kernel lựa chọn để quản lý source control. Repository của phần lớn desktop distribution hiện đại có một phiên bản `git`. Ví dụ, trên Ubuntu,[^5] nhập lệnh sau để cài đặt `git` trên desktop hoặc laptop PC:
 
 ```
 $ sudo apt-get install git-core
@@ -167,17 +167,17 @@ $ git clone
 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git linux-2.6
 ```
 
-Tạo directory mới dưới current directory tên `linux-2.6`, chứa cloned tree từ kernel.org. Nhiều tutorial/web page dạy `git`. Có thể bắt đầu hướng dẫn Jeff Garzik: http://linux.yyz.us/git-howto.html.
+Kết quả là một thư mục mới tên `linux-2.6` được tạo bên dưới thư mục hiện tại nơi bạn thực hiện lệnh. Nó chứa tree được clone từ kernel.org. Có nhiều bài hướng dẫn và trang web dành cho việc học `git`. Bạn có thể bắt đầu bằng bài hướng dẫn này trên website của Jeff Garzik: http://linux.yyz.us/git-howto.html.
 
 ## 4.2 Cấu tạo Linux Kernel
 
-Các phần tiếp theo khám phá layout, tổ chức và cấu tạo Linux kernel. Kiến thức giúp dễ điều hướng code base lớn/phức tạp. Qua thời gian cải tiến đáng kể source tree organization, nhất là architecture branch hỗ trợ nhiều architecture/machine type.
+Các mục tiếp theo khảo sát cách bố trí, tổ chức và cấu tạo Linux kernel. Với kiến thức này, bạn sẽ dễ dàng hơn nhiều khi tìm hiểu source code base lớn và phức tạp này. Theo thời gian, cách tổ chức source tree đã được cải thiện đáng kể, đặc biệt ở architecture branch chứa hỗ trợ cho nhiều architecture và machine type.
 
 ### 4.2.1 Source Directory Top-Level
 
-Sách thường nói source directory top-level, luôn chỉ directory highest-level trong kernel source tree. Có thể ở bất cứ đâu, nhưng desktop Linux workstation thường tại `/usr/src/linux-x.y.z`, với `x.y.z` là version. Xuyên sách dùng viết tắt `.../` chỉ kernel source directory top-level.
+Cuốn sách này thường nhắc đến source directory top-level. Trong mọi trường hợp, chúng tôi đang nói đến thư mục highest-level trong kernel source tree. Trên một máy bất kỳ, nó có thể nằm ở bất cứ đâu, nhưng trên desktop Linux workstation, nó thường nằm tại `/usr/src/linux-x.y.z`, trong đó `x.y.z` biểu diễn kernel version. Trong suốt cuốn sách, chúng tôi dùng ký hiệu viết tắt `.../` để biểu diễn kernel source directory top-level.
 
-Kernel source directory top-level chứa subdirectory sau. (Bỏ nondirectory entry và directory source control để rõ/gọn.)
+Kernel source directory top-level chứa các subdirectory sau. (Để rõ ràng và ngắn gọn, chúng tôi đã bỏ các entry không phải thư mục cũng như những thư mục dùng cho source control khỏi listing này.)
 
 ```
 arch/           firmware/  kernel/   scripts/
@@ -187,23 +187,23 @@ Documentation/  init/      net/      usr/
 drivers/        ipc/       samples/  virt/
 ```
 
-Nhiều directory chứa thêm nhiều tầng subdirectory với source code, makefile và configuration file. Nhánh lớn nhất nằm dưới `.../drivers`, hỗ trợ Ethernet network card, USB controller và vô số hardware device. Như đoán được, `.../arch` lớn thứ nhì, hỗ trợ hơn 20 processor architecture riêng.
+Nhiều thư mục trong số này chứa thêm vài cấp subdirectory với source code, makefile và configuration file. Nhánh lớn nhất của Linux kernel source tree nằm dưới `.../drivers`. Tại đây, bạn có thể tìm hỗ trợ cho nhiều Ethernet network card, USB controller và vô số hardware device mà Linux kernel hỗ trợ. Như bạn có thể hình dung, subdirectory `.../arch` lớn thứ hai, chứa hỗ trợ cho hơn 20 processor architecture riêng biệt.
 
 File khác trong Linux subdirectory top-level gồm makefile top-level, hidden configuration file (dot-config, giới thiệu mục 4.3.1, “The Dot-Config”), và informational file không tham gia build. Cuối cùng sau build thành công có hai build target quan trọng ở kernel source tree top-level: `System.map` và kernel thực sự `vmlinux`. Phần tiếp mô tả cả hai.
 
 ### 4.2.2 Compile Kernel
 
-Hiểu software lớn như Linux có thể đáng sợ. Quá lớn để đơn giản “step through” code theo dõi. Multithreading/preemption thêm phức tạp phân tích. Ngay tìm entry point (dòng code đầu chạy khi vào kernel) cũng khó. Cách hữu ích hiểu cấu trúc binary image lớn là xem build component.
+Hiểu một khối software lớn như Linux có thể là một tác vụ khó khăn. Nó quá lớn để chỉ đơn giản “step through” code nhằm theo dõi điều đang xảy ra. Multithreading và preemption làm việc phân tích thêm phức tạp. Thực tế, ngay cả xác định entry point, dòng code đầu tiên được thực thi khi đi vào kernel, cũng có thể khó khăn. Một cách hữu ích để hiểu cấu trúc của binary image lớn là xem xét các thành phần build của nó.
 
-Output kernel build system gồm common file và một/nhiều binary module architecture-specific. Common file luôn build bất kể architecture. Hai file là `System.map` và `vmlinux`. File đầu hữu ích khi debug, đặc biệt thú vị, chứa list kernel symbol human-readable cùng address. File sau là file ELF [^7] architecture-specific dạng executable. Makefile kernel top-level tạo cho mọi architecture. Nếu compile có symbolic debug information, nằm trong image `vmlinux`. Thực tế dù ELF executable, gần như không boot trực tiếp, như sắp thấy.
+Output của kernel build system gồm một số file chung cùng một hoặc nhiều binary module architecture-specific. Các file chung luôn được build bất kể architecture. Hai file trong số đó là `System.map` và `vmlinux`. File thứ nhất hữu ích khi kernel debug và đặc biệt đáng chú ý: nó chứa danh sách kernel symbol human-readable cùng địa chỉ tương ứng. File thứ hai là một file ELF [^7] architecture-specific ở định dạng executable. Nó được kernel makefile top-level tạo cho mọi architecture. Nếu kernel được compile với symbolic debug information, thông tin đó nằm trong image `vmlinux`. Trong thực tế, mặc dù là ELF executable, file này gần như không bao giờ được boot trực tiếp, như bạn sẽ sớm thấy.
 
-Listing 4-1 là đoạn output khi chạy `make` trong kernel tree gần đây cấu hình ARM XScale. Source tree cấu hình cho ADI Engineering Coyote reference board dựa Intel IXP425 network processor bằng:
+Listing 4-1 là một đoạn output tạo ra khi thực thi `make` trong một kernel tree gần đây được cấu hình cho ARM XScale architecture. Kernel source tree được cấu hình cho reference board Coyote của ADI Engineering, dựa trên network processor Intel IXP425, bằng lệnh sau:
 
 ```
 $ make ARCH=arm CROSS_COMPILE=xscale_be- ixp4xx_defconfig
 ```
 
-Lệnh không build kernel mà chuẩn bị source tree cho XScale, gồm initial default configuration cho architecture/processor. Tạo default configuration (file dot-config) điều khiển kernel build, dựa default trong `ixp4xx_defconfig`. Mục 4.3, “Kernel Build System” nói thêm configuration process.
+Lệnh này không build kernel; nó chuẩn bị kernel source tree cho XScale architecture, bao gồm một cấu hình mặc định ban đầu cho architecture và processor này. Nó tạo cấu hình mặc định, file dot-config, điều khiển kernel build dựa trên các giá trị mặc định trong file `ixp4xx_defconfig`. Chúng ta sẽ thảo luận thêm quá trình cấu hình trong Mục 4.3, “Kernel Build System”.
 
 Listing 4-1 chỉ hiển thị vài dòng đầu/cuối build output để thảo luận.
 
@@ -241,15 +241,15 @@ $ make ARCH=arm CROSS_COMPILE=xscale_be- zImage
   ...
 ```
 
-Đầu tiên chú ý invocation: cả architecture (`ARCH=arm`) và toolchain[^8] (`CROSS_COMPILE=xscale_be-`) chỉ định trên command line. Buộc `make` dùng XScale toolchain[^9] build kernel image, nhánh arm-specific cho phần architecture-dependent. Cũng chỉ định target zImage, phổ biến nhiều architecture, mô tả Chương 5 “Kernel Initialization”. Kernel hiện đại build default target đúng không cần chỉ định target `make`, nên có thể không cần zImage/target khác.
+Trước tiên, hãy chú ý cách gọi build. Cả architecture mong muốn (`ARCH=arm`) lẫn toolchain[^8] (`CROSS_COMPILE=xscale_be-`) đều được chỉ định trên command line. Điều này buộc tiện ích `make` sử dụng XScale toolchain[^9] để build kernel image và sử dụng nhánh arm-specific của kernel source tree cho các phần architecture-dependent của quá trình build. Chúng ta cũng chỉ định một target tên là zImage. Target này phổ biến trên nhiều architecture và được mô tả trong Chương 5, “Kernel Initialization”. Các kernel hiện đại tự build đúng default target mà không cần chỉ định target của `make`, nên bạn có thể không cần chỉ định zImage hay target nào khác.
 
-Điều tiếp theo là command thực tế mỗi bước ẩn và thay shorthand notation. Mục đích làm sạch output, chú ý intermediate build issue, đặc biệt compiler warning. Source tree cũ in chi tiết mọi compilation/link command, thường nhiều dòng mỗi bước. Kết quả gần như không đọc được, warning bị chìm. Hệ thống mới cải thiện rõ vì dễ thấy anomaly. Muốn xem build step đầy đủ, buộc verbose output bằng `V=1` trên command line `make`:
+Điều tiếp theo bạn có thể nhận thấy là các command thực tế dùng cho mỗi bước đã được ẩn và thay bằng ký hiệu viết tắt. Mục đích là làm output của build gọn hơn để các vấn đề ở bước trung gian, đặc biệt compiler warning, dễ được chú ý. Trong các kernel source tree trước đây, mỗi command compile hoặc link đều được in chi tiết ra console, thường cần vài dòng cho mỗi bước. Kết quả gần như không thể đọc được, và compiler warning dễ bị bỏ qua giữa lượng output lớn. Hệ thống mới rõ ràng là một cải tiến vì mọi bất thường trong quá trình build đều dễ nhận thấy. Nếu muốn hoặc cần xem đầy đủ một bước build, bạn có thể buộc hiển thị verbose output bằng cách định nghĩa `V=1` trên command line của `make`:
 
 ```
 $ make ARCH=arm CROSS_COMPILE=xscale_be- V=1 zImage
 ```
 
-Đã bỏ phần lớn compile/link step Listing 4-1 cho rõ. (Build này hơn 1.000 command riêng compile, link và khác, sẽ rất dài.) Khi mọi intermediate file/library archive build/compile xong, ghép thành ELF build target lớn `vmlinux`. Dù architecture-specific, `vmlinux` là common target cho mọi Linux architecture hỗ trợ, nằm kernel source directory top-level để dễ tham chiếu.
+Chúng tôi đã bỏ phần lớn các bước compile và link thực tế trong Listing 4-1 để dễ theo dõi. (Lần build cụ thể này có hơn 1.000 command compile, link và các command khác; nếu đưa vào thì listing sẽ rất dài.) Sau khi mọi intermediate file và library archive được build và compile, chúng được kết hợp thành một ELF build target lớn tên là `vmlinux`. Mặc dù là architecture-specific, `vmlinux` vẫn là một target chung. Nó được tạo cho mọi Linux architecture được hỗ trợ và nằm trong kernel source directory top-level để thuận tiện tham chiếu.
 
 ### 4.2.3 Kernel thực sự: vmlinux
 
@@ -259,9 +259,9 @@ Chú ý dòng Listing 4-1:
 LD vmlinux
 ```
 
-File `vmlinux` là kernel thực sự. ELF image monolithic, stand-alone hoàn toàn. Tức binary `vmlinux` không unresolved external reference.. Khi thực thi đúng context (bootloader thiết kế boot Linux kernel), nó boot board đang chạy, để lại kernel đầy đủ chức năng. (Thực tế target ELF `vmlinux` hiếm dùng trực tiếp. Gần như luôn dùng dạng nén tạo ở bước cuối Listing 4-1. Sắp nói nhiều hơn.)
+File `vmlinux` chính là kernel thực sự. Nó là một ELF image monolithic, hoàn toàn stand-alone. Nghĩa là binary `vmlinux` không chứa tham chiếu bên ngoài nào chưa được resolve. Khi được thực thi trong context phù hợp bởi một bootloader được thiết kế để boot Linux kernel, nó boot board mà nó chạy trên đó và cung cấp một kernel đầy đủ chức năng. (Thực tế, ELF target `vmlinux` hiếm khi được sử dụng trực tiếp. Nó gần như luôn được dùng ở dạng nén, được tạo từ các bước cuối trong Listing 4-1. Chúng ta sẽ sớm thảo luận thêm nhiều về điều này.)
 
-Theo triết lý hiểu hệ thống trước hết hiểu thành phần, xem cấu tạo kernel object `vmlinux`. Listing 4-2 tái hiện link stage thực của build tạo ELF object `vmlinux`. Đã format ngắt dòng (ký tự UNIX line-continuation `\`) cho dễ đọc, ngoài ra đúng output link step `vmlinux` từ Listing 4-1. Nếu build kernel thủ công, đây là link command cần chạy.
+Theo quan điểm muốn hiểu một hệ thống thì trước tiên phải hiểu các thành phần của nó, hãy xem cách tạo kernel object `vmlinux`. Listing 4-2 trình bày lại link stage thực tế của quá trình build đã tạo ELF object `vmlinux`. Chúng tôi đã định dạng nó với các ngắt dòng, được biểu thị bằng ký tự UNIX line-continuation `\`, để dễ đọc hơn; ngoài thay đổi đó, đây là output chính xác do link step `vmlinux` tạo ra trong quá trình build ở Listing 4-1. Nếu build kernel thủ công, đây là link command bạn sẽ thực hiện từ command line.
 
 LISTING 4-2 Link Stage: `vmlinux`
 
@@ -301,15 +301,15 @@ init/built-in.o                   \
 
 Từ Listing 4-2, bạn có thể thấy image `vmlinux` gồm nhiều binary image thành phần. Lúc này, chưa cần hiểu mục đích của từng thành phần. Điều quan trọng là hiểu góc nhìn top-level về những thành phần tạo nên kernel. Dòng đầu tiên của link command trong Listing 4-2 chỉ định output file (`-o vmlinux`). Dòng thứ hai chỉ định linker script file (`-T vmlinux.lds`), một bản hướng dẫn chi tiết về cách link kernel binary image.[^10]
 
-Dòng ba trở đi Listing 4-2 chỉ object module tạo binary image. Chú ý object đầu `head.o`, assemble từ `.../arch/arm/kernel/head.S`, assembly source architecture-specific thực hiện kernel initialization rất low-level. Muốn tìm dòng code đầu kernel thực thi, hợp lý bắt đầu ở đây vì cuối cùng là code đầu trong binary image do link stage tạo. Chương 5 xem kỹ initialization.
+Dòng thứ ba và các dòng sau trong Listing 4-2 chỉ định những object module tạo thành binary image kết quả. Lưu ý object đầu tiên là `head.o`. Object này được assemble từ `.../arch/arm/kernel/head.S`, một source file assembly language architecture-specific thực hiện khởi tạo kernel rất low-level. Nếu đang tìm dòng code đầu tiên kernel thực thi, bạn nên bắt đầu ở đây vì cuối cùng đây sẽ là code đầu tiên trong binary image được link stage này tạo ra. Chúng ta xem xét chi tiết việc khởi tạo kernel trong Chương 5.
 
-Object kế `init_task.o` thiết lập initial thread/task structure kernel cần. Sau đó nhiều object module cùng tên `built-in.o`. Nhưng mỗi object `built-in.o` đến phần kernel source tree cụ thể như path trước tên `built-in.o` chỉ ra. Đây là binary object trong image. Minh họa giúp rõ hơn.
+Object tiếp theo, `init_task.o`, thiết lập các thread và task structure ban đầu mà kernel cần. Theo sau là một tập lớn object module có chung tên `built-in.o`. Tuy nhiên, bạn sẽ thấy mỗi object `built-in.o` đến từ một phần cụ thể của kernel source tree, như thành phần path đứng trước tên object `built-in.o` cho biết. Đây là các binary object được đưa vào kernel image. Một hình minh họa có thể giúp làm rõ hơn.
 
-Hình 4-1 minh họa cấu tạo binary image `vmlinux`. Có section cho mỗi dòng link stage. Không đúng tỷ lệ vì chỗ hạn chế, nhưng thấy relative size functional component. Một số rất nhỏ, như sound/firmware mỗi cái 8 byte trong build vì empty object file. (Sound compile module, build không firmware.)
+Hình 4-1 minh họa các thành phần binary của image `vmlinux`. Nó chứa một section cho mỗi dòng trong link stage. Do giới hạn chỗ trình bày, hình không theo đúng tỷ lệ, nhưng bạn có thể thấy kích thước tương đối của từng thành phần chức năng. Một số thành phần rất nhỏ. Ví dụ, sound và firmware mỗi phần chỉ dài 8 byte trong lần build này vì chúng là các object file rỗng. (Sound được compile thành module, và lần build này không có firmware.)
 
-Không ngạc nhiên ba binary component lớn nhất là file system code, network code và mọi driver built-in. Gộp kernel code cùng code architecture-specific là component next-largest. Có scheduler, process/thread management, timer management và core functionality khác. Dĩ nhiên kernel chứa chức năng architecture-specific như context switching low-level, xử lý interrupt/timer hardware-level, processor exception handling, v.v., trong `.../arch/arm/kernel`.
+Có lẽ không có gì ngạc nhiên khi ba binary component lớn nhất là file system code, network code và toàn bộ driver built-in. Nếu gộp kernel code với kernel code architecture-specific, đây sẽ là binary component next-largest. Ở đó, bạn sẽ tìm thấy scheduler, phần quản lý process và thread, quản lý timer cùng các chức năng kernel cốt lõi khác. Dĩ nhiên, kernel chứa một số chức năng architecture-specific, chẳng hạn context switching low-level, xử lý interrupt và timer ở hardware-level, xử lý processor exception, v.v. Phần này nằm trong `.../arch/arm/kernel`.
 
-Nhớ đây là ví dụ build cụ thể cho ARM XScale, chính xác hơn Intel IXP425 network processor trên ADI Engineering reference board. Hình 4-1 thấy binary component machine-specific `arch/arm/mach-ixp4xx`. Mỗi architecture/machine type (processor/reference board) khác phần architecture-specific nên cấu tạo image `vmlinux` hơi khác. Hiểu một ví dụ sẽ dễ điều hướng ví dụ khác.
+Hãy nhớ rằng chúng ta đang xem một ví dụ kernel build cụ thể. Trong ví dụ này, chúng ta build kernel riêng cho ARM XScale architecture, cụ thể hơn là network processor Intel IXP425 trên reference board của ADI Engineering. Bạn có thể thấy các binary component machine-specific trong Hình 4-1 dưới tên `arch/arm/mach-ixp4xx`. Mỗi architecture và machine type (processor/reference board) có các thành phần khác nhau trong những phần architecture-specific của kernel, nên cấu tạo image `vmlinux` hơi khác. Khi hiểu một ví dụ, bạn sẽ dễ dàng tìm hiểu các ví dụ khác.
 
 ![Figure 4-1](images/ch04/fig04-01.png)
 
@@ -347,11 +347,11 @@ BẢNG 4-1 Component của Image `vmlinux`
 | `net/built-in.o` | Linux networking. |
 | `.tmp_kallsyms2.o` | Kernel Symbol table. |
 
-Khi nói kernel thực sự là image `vmlinux` (trong kernel directory top-level). Như đã nói rất ít platform boot trực tiếp. Trước hết image boot gần như luôn nén. Ít nhất bootloader phải giải nén. Nhiều platform cần stub gắn image để giải nén. Chương 5 học cách đóng gói image cho architecture, machine type, bootloader và yêu cầu boot.
+Khi nói đến kernel thực sự, chúng ta đang đề cập image `vmlinux` nằm trong kernel directory top-level. Như đã nói, rất ít platform boot trực tiếp image này. Trước hết, image dùng để boot hầu như luôn được nén. Ít nhất, bootloader phải giải nén image. Nhiều platform yêu cầu một dạng stub gắn vào image để thực hiện giải nén. Trong Chương 5, bạn sẽ tìm hiểu cách đóng gói image này cho các architecture, machine type và bootloader khác nhau, cùng những yêu cầu để boot nó.
 
 ### 4.2.5 Subdirectory Layout
 
-Đã thấy thành phần image, giờ xem kernel subdirectory tiêu biểu. Listing 4-3 chi tiết nội dung subdirectory `mach-ix-p4xx`, dưới nhánh architecture-specific `.../arch/arm` của source tree.
+Bây giờ bạn đã thấy các thành phần tạo nên kernel image, hãy xem một kernel subdirectory tiêu biểu. Listing 4-3 trình bày chi tiết nội dung subdirectory `mach-ix-p4xx`. Thư mục này nằm dưới nhánh architecture-specific `.../arch/arm` của source tree.
 
 LISTING 4-3 Kernel Subdirectory
 
@@ -390,21 +390,21 @@ drwxr-xr-x 3 chris chris  4096 2009-11-19 17:12 include
 -rw-r--r-- 1 chris chris  2585 2009-11-19 17:12 wg302v2-setup.c
 ```
 
-Nội dung Listing 4-3 có component chung nhiều kernel source subdirectory: `Makefile` và `Kconfig`. Hai file điều khiển configuration/build process. Xem cách làm.
+Nội dung thư mục trong Listing 4-3 có các thành phần chung xuất hiện trong nhiều kernel source subdirectory: `Makefile` và `Kconfig`. Hai file này điều khiển quá trình cấu hình và build kernel. Hãy xem cơ chế đó hoạt động như thế nào.
 
 ## 4.3 Kernel Build System
 
-Linux kernel configuration/build system khá phức tạp, như kỳ vọng dự án hơn 10 triệu dòng code! Phần này trình bày nền tảng để bạn tùy chỉnh build environment nếu cần.
+Linux kernel configuration và build system khá phức tạp, đúng như bạn có thể mong đợi ở một dự án software chứa hơn 10 triệu dòng code! Mục này trình bày nền tảng kernel build system để bạn có thể tùy chỉnh build environment khi cần.
 
-Kernel snapshot gần đây có hơn 1.200 makefile[^11] trong source tree. (Ấn bản đầu chỉ 800, tăng 50% từ Linux 2.6.10!) Nghe lớn nhưng không lớn vậy khi hiểu structure/operation build system. Đã cải tiến đáng kể từ Linux 2.4 trở về trước. Nếu quen hệ cũ chắc thấy Kbuild mới cải thiện rất nhiều.
+Một Linux kernel snapshot gần đây cho thấy hơn 1.200 makefile[^11] trong kernel source tree. (Ấn bản đầu của cuốn sách chỉ ghi nhận 800 makefile. Đây là mức tăng 50% so với thời Linux 2.6.10!) Con số này có vẻ khá lớn, nhưng có thể không còn như vậy khi bạn hiểu cấu trúc và cách hoạt động của build system. Linux kernel build system đã được cập nhật đáng kể so với thời Linux 2.4 trở về trước. Nếu quen với kernel build system cũ, chắc chắn bạn sẽ thấy hệ thống Kbuild mới là một cải tiến rất lớn.
 
 ### 4.3.1 The Dot-Config
 
-Đã giới thiệu, file dot-config là bản thiết kế configuration để build kernel image. Đầu dự án có thể dành nhiều công xây configuration phù hợp embedded platform. Nhiều editor text-based và graphical để sửa. Output ghi file `.config` ở Linux source directory top-level điều khiển build.
+File dot-config đã được giới thiệu trước đó là bản thiết kế cấu hình để build Linux kernel image. Khi bắt đầu dự án Linux, bạn có thể phải bỏ nhiều công sức xây dựng một cấu hình phù hợp với embedded platform. Có nhiều editor, cả text-based lẫn graphical, được thiết kế để chỉnh sửa kernel configuration. Kết quả của việc cấu hình này được ghi vào configuration file tên là `.config`, nằm trong Linux source directory top-level và điều khiển kernel build.
 
-Có lẽ đã tốn nhiều thời gian hoàn thiện configuration nên muốn bảo vệ. Nhiều command `make` xóa file không cảnh báo. Phổ biến `make distclean`, target `make` trả source tree về trạng thái nguyên sơ chưa cấu hình, xóa mọi configuration data—đúng, xóa cả `.config` trước đó.
+Bạn có thể đã đầu tư một lượng thời gian đáng kể để hoàn thiện kernel configuration, vì vậy cần bảo vệ nó. Một số command `make` xóa configuration file này mà không cảnh báo. Phổ biến nhất là `make distclean`. Target `make` này được thiết kế để đưa kernel source tree về trạng thái nguyên sơ, chưa được cấu hình. Điều đó bao gồm xóa mọi dữ liệu cấu hình khỏi source tree, và đúng vậy, nó xóa cả `.config` đã có của bạn.
 
-Bạn có thể biết filename bắt đầu dot là hidden file Linux. Đáng tiếc file quan trọng lại hidden, khiến nhiều developer đau khổ. Nếu chạy `make` `distclean` hoặc `make mrproper` mà không backup `.config`, bạn cũng vậy. (Đã cảnh báo—backup `.config`!)
+Như bạn có thể biết, bất kỳ filename nào bắt đầu bằng dấu chấm trong Linux file system đều là hidden file. Thật không may khi một file quan trọng như vậy lại được đánh dấu ẩn; điều này đã gây khó khăn đáng kể cho nhiều nhà phát triển. Nếu thực thi `make` `distclean` hoặc `make mrproper` mà chưa có bản sao lưu file `.config`, bạn cũng sẽ gặp khó khăn tương tự. (Bạn đã được nhắc: hãy sao lưu file `.config`!)
 
 File `.config` là tập definition format đơn giản. Listing 4-4 là đoạn `.config` từ release gần đây.
 
@@ -433,19 +433,19 @@ CONFIG_USB_UHCI_HCD=m
 ...
 ```
 
-Để hiểu `.config`, phải hiểu đặc điểm cơ bản: Linux monolithic. Tức toàn kernel compile/link thành một statically linked executable. Tuy nhiên có thể compile và incremental link[^12] tập source thành object module đơn nhất để dynamic insertion vào running kernel. Cách thường hỗ trợ device driver phổ biến. Linux gọi loadable module, cũng gọi chung device driver. Sau boot, application program đặc biệt được gọi insert module vào running kernel.
+Để hiểu file `.config`, bạn cần hiểu một đặc điểm nền tảng của Linux kernel. Linux có cấu trúc monolithic. Nói cách khác, toàn bộ kernel được compile và link thành một executable được link tĩnh duy nhất. Tuy nhiên, có thể compile và link tăng dần[^12] một tập source thành một object module duy nhất phù hợp để được chèn động vào kernel đang chạy. Đây là cách thường dùng để hỗ trợ phần lớn device driver phổ biến. Trong Linux, chúng được gọi là loadable module. Chúng cũng được gọi chung là device driver. Sau khi kernel boot, một chương trình ứng dụng đặc biệt được gọi để chèn loadable module vào kernel đang chạy.
 
-Với kiến thức đó xem lại Listing 4-4. Đoạn configuration file (`.config`) thể hiện phần USB subsystem. Option đầu `CONFIG_USB=m` khai báo subsystem có trong configuration, compile dynamically loadable module (`=m`), load sau boot. Lựa chọn khác `=y` khiến compile/static link USB module vào chính kernel image, nằm composite binary `.../drivers/built-in.o` đã thấy Listing 4-2/Hình 4-1. Độc giả tinh ý hiểu driver loadable thì code không trong kernel thực, mà là object module stand-alone, loadable module insert sau boot.
+Với kiến thức đó, hãy xem lại Listing 4-4. Đoạn configuration file (`.config`) này cho thấy một phần cấu hình USB subsystem. Configuration option đầu tiên, `CONFIG_USB=m`, khai báo rằng USB subsystem được đưa vào kernel configuration này và sẽ được compile thành dynamically loadable module (`=m`), được load vào một thời điểm sau khi kernel đã boot. Lựa chọn khác là `=y`, khi đó USB module được compile và link tĩnh thành một phần của chính kernel image. Nó sẽ nằm trong composite binary `.../drivers/built-in.o` mà bạn đã thấy ở Listing 4-2 và Hình 4-1. Độc giả tinh ý sẽ nhận ra rằng nếu driver được cấu hình thành loadable module, code của nó không nằm trong kernel thực sự mà tồn tại như một object module stand-alone, một loadable module được chèn vào kernel đang chạy sau khi boot.
 
-Chú ý `CONFIG_USB_DEVICEFS=y` Listing 4-4. Option hành vi hơi khác. `USB_DEVICEFS` (cách viết tắt option thường dùng) không phải module stand-alone mà feature bật/tắt trong USB driver. Không nhất thiết tạo module compile vào kernel (`=y`); thay vào đó bật feature, thường bằng object module bổ sung trong toàn USB device driver module. Help text hoặc hierarchy editor thường làm rõ khác biệt.
+Lưu ý khai báo `CONFIG_USB_DEVICEFS=y` trong Listing 4-4. Configuration option này hoạt động hơi khác. Trong trường hợp này, `USB_DEVICEFS`, theo cách configuration option thường được viết tắt, không phải module stand-alone mà là một feature có thể bật hoặc tắt trong USB driver. Nó không nhất thiết tạo ra một module được compile vào kernel thực sự (`=y`). Thay vào đó, nó bật một hoặc nhiều feature, thường được biểu diễn bằng các object module bổ sung được đưa vào USB device driver module tổng thể. Thông thường, phần trợ giúp trong configuration editor hoặc hierarchy mà editor trình bày sẽ làm rõ sự phân biệt này.
 
 ### 4.3.2 Configuration Editor
 
-Kernel đầu dùng script command-line-driven đơn giản cấu hình. Cồng kềnh ngay lúc ít parameter hơn nhiều. Interface command-line-style vẫn hỗ trợ nhưng rất tẻ nhạt. Configuration điển hình kernel gần đây cần trả hơn 900 câu trên command line, nhập lựa chọn rồi Enter từng query. Sai thì không quay lại được, phải làm từ đầu. Rất bực nếu sai mục 899!
+Các kernel ban đầu sử dụng một script command-line-driven đơn giản để cấu hình kernel. Cách này đã cồng kềnh ngay cả với các kernel đầu tiên, khi số configuration parameter nhỏ hơn nhiều. Interface command-line-style này vẫn được hỗ trợ, nhưng nói nhẹ đi thì sử dụng nó rất tẻ nhạt. Một cấu hình điển hình từ kernel gần đây yêu cầu bạn trả lời hơn 900 câu hỏi từ command line. Bạn nhập lựa chọn rồi nhấn Enter cho mỗi câu hỏi trong script. Hơn nữa, nếu mắc lỗi, không có cách quay lại; bạn phải bắt đầu từ đầu. Điều đó có thể rất khó chịu nếu bạn mắc lỗi ở mục thứ 899!
 
-Một số trường hợp như build trên embedded system không graphics không tránh được command-line utility, nhưng tác giả sẽ cố hết sức tìm cách khác.
+Trong một số tình huống, chẳng hạn build kernel trên embedded system không có graphics, có thể không tránh được việc sử dụng tiện ích cấu hình command-line, nhưng tác giả này sẽ cố gắng rất nhiều để tìm cách khác.
 
-Kernel configuration subsystem có nhiều target; release gần đây 11 target. Tổng hợp từ output `make help`:
+Kernel configuration subsystem có một số configuration target. Thực tế, một Linux kernel release gần đây có 11 configuration target như vậy. Chúng được tổng hợp dưới đây từ nội dung output của `make help`:
 
 - `config`—Cập nhật current config bằng chương trình line-oriented
 
@@ -469,15 +469,15 @@ Kernel configuration subsystem có nhiều target; release gần đây 11 target
 
 - `allnoconfig`—Config tối thiểu mới
 
-Bốn makefile target đầu gọi dạng configuration editor như list. Vì chỗ hạn chế, chương và sách chỉ tập trung graphical front end GTK-based. Bạn có thể dùng editor ưa thích với cùng kết quả.
+Bốn configuration target đầu tiên của makefile gọi một dạng configuration editor, như mô tả trong danh sách. Do giới hạn chỗ trình bày, chương này và phần còn lại của cuốn sách chỉ tập trung vào graphical front end GTK-based. Bạn cần hiểu rằng có thể sử dụng configuration editor mình lựa chọn và vẫn có cùng kết quả.
 
-Gọi editor bằng `make gconfig` từ kernel directory top-level.[^13] Hình 4-2 là configuration menu top-level khi chạy `gconfig`, từ đây truy cập mọi parameter để tạo custom configuration.
+Bạn gọi configuration editor bằng cách nhập lệnh `make gconfig` từ kernel directory top-level.[^13] Hình 4-2 cho thấy configuration menu top-level được trình bày cho nhà phát triển khi chạy `gconfig`. Từ đây, bạn có thể truy cập mọi configuration parameter có sẵn để tạo một kernel configuration tùy chỉnh.
 
 ![Figure 4-2](images/ch04/fig04-02.png)
 
 HÌNH 4-2 Kernel configuration Top-level
 
-Thoát editor được hỏi lưu thay đổi. Nếu chọn lưu, global configuration file `.config` cập nhật (hoặc tạo nếu chưa có). File `.config` đã giới thiệu điều khiển build qua makefile top-level.
+Khi thoát configuration editor, bạn được hỏi có lưu thay đổi hay không. Nếu chọn lưu, global configuration file `.config` được cập nhật, hoặc được tạo nếu chưa tồn tại. File `.config` đã giới thiệu trước đó điều khiển kernel build thông qua makefile top-level.
 
 Phần lớn kernel software module cũng đọc configuration gián tiếp qua file `.config` như sau. Trong build process, file `.config` được xử lý thành một C header file trong directory `.../include/linux`, có tên là `autoconf.h`. File này được sinh tự động. Bạn không bao giờ nên sửa trực tiếp file này, vì các chỉnh sửa sẽ mất mỗi khi configuration thay đổi và một lượt build mới bắt đầu. Nhiều kernel source file include trực tiếp file này bằng preprocessor directive `#include`. Listing 4-5 tái hiện một phần của header file này liên quan đến hỗ trợ USB. Các kernel build file include file `autoconf.h` này vào mọi kernel compile command line, bằng directive `-include` của gcc như sau:
 
@@ -507,15 +507,15 @@ $ cat include/linux/autoconf.h | grep CONFIG_USB
 #define CONFIG_USB 1
 ```
 
-Nếu chưa làm, chạy `make gconfig` trong kernel source directory top-level, khám phá utility để thấy nhiều subsection/option cho developer. Miễn không chủ động lưu, thay đổi mất khi thoát, nên khám phá an toàn không sửa configuration.[^14] Nhiều parameter có explanatory text hữu ích tăng hiểu biết option.
+Nếu chưa thực hiện, hãy chạy `make gconfig` trong kernel source directory top-level và khám phá tiện ích cấu hình này để thấy số lượng lớn subsection và configuration option dành cho nhà phát triển Linux. Miễn là không chủ động lưu, các thay đổi sẽ mất khi bạn thoát configuration editor, nên bạn có thể khám phá an toàn mà không sửa kernel configuration.[^14] Nhiều configuration parameter chứa phần giải thích hữu ích giúp bạn hiểu rõ hơn các configuration option khác nhau.
 
 ### 4.3.3 Makefile Target
 
-Gõ `make help` tại Linux source directory top-level cho list target sinh từ source tree. Cách dùng `make` phổ biến không chỉ target, sinh ELF kernel `vmlinux` và default binary image cho architecture chọn (ví dụ `bzImage` x86). `make` không target cũng build mọi device driver module (kernel loadable module) configuration chỉ định.
+Nếu gõ `make help` tại Linux source directory top-level, bạn sẽ nhận được danh sách các target có thể được tạo từ source tree. Cách dùng `make` phổ biến nhất là không chỉ định target. Thao tác này tạo kernel ELF file `vmlinux` và binary image mặc định cho architecture đã chọn (chẳng hạn `bzImage` cho x86). Chạy `make` không có target cũng build toàn bộ device driver module (kernel loadable module) được chỉ định trong configuration.
 
 Nhiều architecture và machine type yêu cầu các binary target riêng cho architecture và bootloader đang sử dụng. Một trong những target architecture-specific phổ biến hơn là `zImage`. Trong nhiều architecture, đây là target image mặc định có thể được load và chạy trên embedded system đích. Một lỗi phổ biến của người mới là chỉ định `bzImage` làm target của `make`. Target `bzImage` dành riêng cho architecture x86/PC. Trái với quan niệm phổ biến, `bzImage` không phải image được nén bằng `bzip2`. Nó là một `zImage` lớn. Không đi sâu vào chi tiết của legacy PC architecture, bạn chỉ cần biết rằng `bzImage` chỉ phù hợp với các machine PC-compatible có BIOS PC-style theo chuẩn industry-standard.
 
-Listing 4-6 chứa output `make help` kernel gần đây. Thấy nhiều target, mỗi cái kèm mô tả ngắn. Phải hiểu ngay target `help make` (như `make help`) cũng architecture-specific. List target architecture-specific khác tùy architecture trong invocation `make`. Listing 4-6 chọn ARM như command line.
+Listing 4-6 chứa output của `make help` từ một Linux kernel gần đây. Bạn có thể thấy có nhiều target được cung cấp, mỗi target được liệt kê cùng mô tả ngắn về công dụng. Cần hiểu rằng ngay cả target `help make` như trong `make help` cũng là architecture-specific. Bạn nhận được danh sách target architecture-specific khác nhau tùy architecture được chỉ định khi gọi `make`. Listing 4-6 minh họa một lần gọi chỉ định ARM architecture, như bạn có thể thấy trên command line.
 
 LISTING 4-6 Makefile Target
 
@@ -738,7 +738,7 @@ Execute “make” or “make all” to build all targets marked with [*]
 For further info see the ./README file
 ```
 
-Nhiều target có thể không bao giờ dùng, nhưng biết tồn tại hữu ích. Listing 4-6 đánh dấu asterisk cho target build mặc định. Chú ý default configuration `*_defconfig`. Nhớ mục 4.2.2 “Compile Kernel”: preconfigure source tree nguyên sơ bằng `make` với architecture/default configuration. Default là `ixp4xx_defconfig`, có trong list ARM target. Đây là cách tốt tìm mọi default configuration cho release/architecture.
+Bạn có thể không bao giờ sử dụng nhiều target trong số này, nhưng biết chúng tồn tại vẫn hữu ích. Như trong Listing 4-6, các target được đánh dấu hoa thị được build mặc định. Hãy chú ý nhiều cấu hình mặc định được liệt kê dưới dạng `*_defconfig`. Nhớ lại lệnh trong Mục 4.2.2, “Compile Kernel”, dùng để cấu hình trước một kernel source tree nguyên sơ: chúng ta gọi `make` với một architecture và một cấu hình mặc định. Cấu hình mặc định là `ixp4xx_defconfig`, có trong danh sách ARM target này. Đây là cách hữu ích để tìm mọi cấu hình mặc định có sẵn cho một kernel release và architecture cụ thể.
 
 ## 4.4 Kernel Configuration
 
@@ -757,15 +757,15 @@ gconfig: $(obj)/gconf
         $< $(Kconfig)
 ```
 
-Tùy architecture build, `gconf` đọc `Kconfig` architecture-specific này làm definition top-level. Trong `Kconfig` có các dòng như:
+Tùy architecture đang được build, `gconf` đọc `Kconfig` architecture-specific này làm định nghĩa cấu hình top-level. Trong `Kconfig` có một số dòng như sau:
 
 ```
 source  “drivers/pci/Kconfig”
 ```
 
-Directive bảo editor đọc file `Kconfig` khác từ nơi khác trong source tree. Mỗi architecture chứa nhiều file `Kconfig`, cùng quyết định toàn bộ menu option khi cấu hình. Mỗi file `Kconfig` tự do source thêm `Kconfig` ở phần khác. Utility—ở đây `gconf`—đọc đệ quy chuỗi file `Kconfig`, dựng configuration menu structure.
+Directive này yêu cầu tiện ích configuration editor đọc thêm một file `Kconfig` từ vị trí khác trong kernel source tree. Mỗi architecture chứa nhiều file `Kconfig` như vậy; khi kết hợp, chúng xác định toàn bộ tập menu option được trình bày cho người dùng khi cấu hình kernel. Mỗi file `Kconfig` có thể source thêm các file `Kconfig` ở những phần khác của source tree. Tiện ích cấu hình, trong trường hợp này là `gconf`, đọc đệ quy chuỗi file `Kconfig` và xây dựng cấu trúc configuration menu.
 
-Listing 4-7 là tree view một phần file `Kconfig` ARM. Trong source tree Linux 2.6 gần đây dùng làm ví dụ, configuration định nghĩa bởi 473 file `Kconfig` riêng. Bỏ phần lớn để tiết kiệm chỗ và rõ, mục tiêu thể hiện overall structure. Liệt kê hết sẽ nhiều trang.
+Listing 4-7 là tree view một phần các file `Kconfig` liên quan đến ARM architecture. Trong Linux 2.6 source tree gần đây dùng cho ví dụ này, kernel configuration được định nghĩa bởi 473 file `Kconfig` riêng biệt. Listing bỏ phần lớn các file đó để tiết kiệm chỗ và dễ theo dõi; mục tiêu là cho thấy cấu trúc tổng thể. Liệt kê tất cả trong tree view này sẽ cần vài trang.
 
 LISTING 4-7 Danh sách một phần `Kconfig` cho ARM Architecture
 
@@ -803,7 +803,7 @@ source “net/ipv4/Kconfig”
 
 và cứ tiếp tục vậy.
 
-Như đã nói, tập file `Kconfig` quyết định configuration menu structure/option trình bày khi cấu hình. Hình 4-3 ví dụ utility (`gconf`) cho ARM.
+Như đã đề cập, các file `Kconfig` này kết hợp với nhau để xác định cấu trúc configuration menu và các configuration option được trình bày cho người dùng trong quá trình cấu hình kernel. Hình 4-3 là một ví dụ tiện ích cấu hình (`gconf`) cho ARM architecture.
 
 ![Figure 4-3](images/ch04/fig04-03.png)
 
@@ -811,7 +811,7 @@ HÌNH 4-3 Màn hình configuration `gconf`
 
 ### 4.4.1 Configuration Option tùy chỉnh
 
-Nhiều embedded developer thêm feature hỗ trợ custom hardware. Configuration management architecture trên giúp dễ tùy chỉnh/thêm feature. Xem nhanh `Kconfig` điển hình thấy configuration script language structure. Giả sử hai platform IXP425 network processor được engineering team đặt Vega/Constellation. Mỗi board có hardware riêng cần khởi tạo sớm khi boot kernel. Xem dễ thêm option vào lựa chọn developer thế nào. Listing 4-8 là đoạn file ARM `Kconfig` top-level.
+Nhiều nhà phát triển embedded bổ sung feature support vào Linux kernel để hỗ trợ hardware tùy chỉnh cụ thể của họ. Kiến trúc quản lý cấu hình vừa mô tả giúp việc tùy chỉnh và thêm feature trở nên dễ dàng. Xem nhanh một file `Kconfig` điển hình sẽ thấy cấu trúc của ngôn ngữ configuration script. Ví dụ, giả sử bạn có hai hardware platform dựa trên network processor IXP425 và đội kỹ thuật đặt tên chúng là Vega và Constellation. Mỗi board có hardware chuyên biệt phải được khởi tạo sớm trong kernel boot phase. Hãy xem việc thêm các configuration option này vào tập lựa chọn trình bày cho nhà phát triển khi cấu hình kernel dễ dàng như thế nào. Listing 4-8 là một đoạn trong file ARM `Kconfig` top-level.
 
 LISTING 4-8 Đoạn trích `.../arch/arm/Kconfig`
 
@@ -835,7 +835,7 @@ config ARCH_CLPS711X
 source “arch/arm/mach-ixp4xx/Kconfig”
 ```
 
-Trong đoạn `Kconfig`, menu item System Type được định nghĩa. Sau prompt `ARM System type` là list lựa chọn ARM. Sau đó include definition `Kconfig` IXP4xx-specific. Thêm custom configuration switch tại file này. Listing 4-9 trích đoạn; lần nữa bỏ text không liên quan bằng ellipsis cho dễ đọc/tiện.
+Trong đoạn `Kconfig` này, bạn thấy menu item System Type được định nghĩa. Sau prompt `ARM System type` là một danh sách lựa chọn liên quan đến ARM architecture. Ở phần sau của file, bạn thấy các định nghĩa `Kconfig` IXP4xx-specific được đưa vào. Trong file đó, bạn thêm các configuration switch tùy chỉnh. Listing 4-9 trình bày lại một đoạn của file này. Một lần nữa, để dễ đọc và thuận tiện, chúng tôi đã bỏ phần văn bản không liên quan, như dấu ba chấm thể hiện.
 
 LISTING 4-9 Đoạn trích `.../arch/arm/mach-ixp4xx/Kconfig`
 
@@ -869,9 +869,9 @@ config ARCH_CONSTELLATION
 ...
 ```
 
-Hình 4-4 là kết quả khi chạy `gconf` (qua `make ARCH=arm gconfig`). Thay đổi đơn giản khiến editor có option cho hai platform mới.[^15] Sắp thấy dùng configuration information trong source tree để chọn object hỗ trợ board theo điều kiện.
+Hình 4-4 cho thấy kết quả của những thay đổi này khi chạy tiện ích `gconf` thông qua `make ARCH=arm gconfig`. Nhờ các thay đổi đơn giản này, configuration editor hiện có các option dành cho hai hardware platform mới.[^15] Bạn sẽ sớm thấy cách sử dụng thông tin cấu hình này trong source tree để lựa chọn có điều kiện các object chứa hỗ trợ cho những board mới.
 
-Sau chạy editor (`gconf` ở đây), chọn custom platform, file `.config` chứa macro cho option mới. Như mọi option kernel-configuration, prefix `CONFIG_` nhận diện option kernel-configuration. Vì vậy có hai option mới, state ghi trong `.config`. Listing 4-10 cho file `.config` mới.
+Sau khi chạy configuration editor (`gconf` trong các ví dụ này) và chọn hỗ trợ một trong các hardware platform tùy chỉnh, file `.config` đã giới thiệu trước đó chứa các macro cho option mới. Giống mọi option kernel-configuration, mỗi option có prefix `CONFIG_` để nhận diện nó là một option kernel-configuration. Kết quả là hai configuration option mới được định nghĩa và trạng thái của chúng được ghi trong file `.config`. Listing 4-10 trình bày file `.config` mới với các configuration option bạn vừa bổ sung.
 
 ![Figure 4-4](images/ch04/fig04-04.png)
 
@@ -893,13 +893,13 @@ CONFIG_ARCH_VEGA=y
 ...
 ```
 
-Chú ý hai option mới cho Vega/Constellation. Như Hình 4-4 chọn Vega; trong `.config`, option `CONFIG_` mới biểu diễn Vega được chọn và đặt `y`. Option `CONFIG_` Constellation có nhưng chưa chọn.
+Hãy chú ý hai configuration option mới liên quan đến các hardware platform Vega và Constellation. Như trong Hình 4-4, bạn đã chọn hỗ trợ Vega; trong file `.config`, bạn có thể thấy option `CONFIG_` mới biểu diễn Vega board được chọn và đặt thành giá trị `y`. Cũng lưu ý rằng option `CONFIG_` liên quan đến Constellation có xuất hiện nhưng không được chọn.
 
 ### 4.4.2 Kernel Makefile
 
-Khi build, makefile quét configuration quyết định subdirectory đi vào/source file compile. Để hoàn tất ví dụ Vega/Constellation, xem makefile đọc configuration và hành động theo tùy chỉnh.
+Khi build kernel, các makefile quét configuration để quyết định cần đi vào những subdirectory nào và compile những source file nào cho configuration cụ thể. Để hoàn tất ví dụ bổ sung hỗ trợ cho hai hardware platform tùy chỉnh Vega và Constellation, hãy xem makefile đọc configuration này và thực hiện thao tác dựa trên các tùy chỉnh.
 
-Vì ví dụ option hardware-specific, giả sử tùy chỉnh bằng hai module hardware-setup `vega_setup.c` và `constellation_setup.c`. Đặt C source file trong subdirectory `.../arch/arm/mach-ixp4xx` của source tree. Listing 4-11 là makefile đầy đủ directory này từ release gần đây.
+Vì đang làm việc với các option hardware-specific trong ví dụ này, giả sử các tùy chỉnh được biểu diễn bằng hai module hardware-setup tên là `vega_setup.c` và `constellation_setup.c`. Chúng ta đặt các C source file này trong subdirectory `.../arch/arm/mach-ixp4xx` của kernel source tree. Listing 4-11 chứa makefile đầy đủ của thư mục này từ một Linux release gần đây.
 
 LISTING 4-11 Makefile từ Kernel Subdirectory `.../arch/arm/mach-ixp4xx`
 
@@ -916,34 +916,34 @@ obj-$(CONFIG_ARCH_ADI_COYOTE)  += coyote-pci.o coyote-setup.o
 obj-$(CONFIG_MACH_GTWX5715)    += gtwx5715-pci.o gtwx5715-setup.o
 ```
 
-Có thể ngạc nhiên makefile đơn giản. Đã đầu tư nhiều công build system chính vì lý do này. Developer bình thường chỉ cần hỗ trợ custom hardware sẽ thấy thiết kế khiến tùy chỉnh rất thẳng thắn.[^16]
+Bạn có thể ngạc nhiên vì makefile này đơn giản. Nhiều công sức đã được đầu tư phát triển kernel build system chính vì lý do đó. Với nhà phát triển thông thường chỉ cần thêm hỗ trợ cho hardware tùy chỉnh, thiết kế kernel build system giúp các kiểu tùy chỉnh này rất dễ thực hiện.[^16]
 
-Xem makefile dễ thấy cần gì thêm hardware setup routine theo condition configuration. Chỉ thêm hai dòng cuối makefile là xong:
+Khi xem makefile này, bạn có thể dễ dàng thấy cần làm gì để đưa các hardware setup routine mới vào theo điều kiện dựa trên configuration option. Chỉ cần thêm hai dòng sau ở cuối makefile là hoàn tất:
 
 ```
 obj-$(CONFIG_ARCH_VEGA)   += vega_setup.o
 obj-$(CONFIG_ARCH_CONSTELLATION)   += costellation_setup.o
 ```
 
-Các bước hoàn tất thêm setup module riêng custom hardware giả định. Dùng logic tương tự, giờ bạn có thể tự sửa configuration/build system.
+Các bước này hoàn tất việc bổ sung đơn giản các setup module riêng cho hardware tùy chỉnh giả định trong ví dụ. Sử dụng logic tương tự, bây giờ bạn có thể tự sửa đổi kernel configuration/build system.
 
 ## 4.5 Kernel Documentation
 
-Linux source tree có rất nhiều thông tin. Khó đọc hết vì directory `.../Documentation` gần 1.300 documentation file trong 118 subdirectory. Cẩn thận: kernel phát triển/release nhanh khiến tài liệu sớm lỗi thời. Nhưng thường là điểm bắt đầu tốt xây nền kiến thức kernel subsystem/khái niệm.
+Linux source tree có rất nhiều thông tin. Khó có thể đọc hết vì thư mục `.../Documentation` chứa gần 1.300 file tài liệu trong 118 subdirectory. Hãy thận trọng khi đọc: với tốc độ phát triển và phát hành kernel nhanh chóng, tài liệu này có xu hướng nhanh lỗi thời. Tuy vậy, nó thường là điểm khởi đầu rất tốt để xây dựng nền tảng kiến thức về một kernel subsystem hoặc khái niệm cụ thể.
 
-Đừng bỏ qua theLinux Documentation Project tại www.tldp.org, có thể chứa version up-to-date nhất của document/man page.[^17] Đặc biệt liên quan phần trước là Kbuild documentation trong subdirectory kernel `.../Documentation/kbuild`.
+Đừng bỏ qua theLinux Documentation Project tại www.tldp.org, nơi bạn có thể tìm thấy phiên bản up-to-date nhất của một tài liệu hoặc man page cụ thể.[^17] Đặc biệt liên quan đến phần thảo luận trước là tài liệu Kbuild, nằm trong kernel subdirectory `.../Documentation/kbuild`.
 
-Nói kernel documentation không thể thiếu Google. Một ngày gần đây Google sẽ xuất hiện trong Merriam-Webster’s như động từ! Có lẽ nhiều vấn đề/câu hỏi của bạn đã được giải đáp. Dành thời gian thành thạo tìm Internet. Sẽ thấy nhiều mailing list/information repository đầy thông tin quý liên quan dự án/vấn đề. Phụ lục E có list tài nguyên open-source hữu ích.
+Không phần thảo luận nào về kernel documentation có thể đầy đủ nếu không nhắc Google. Một ngày không xa, Google sẽ xuất hiện trong Merriam-Webster’s như một động từ! Nhiều khả năng, không ít vấn đề bạn gặp và câu hỏi bạn đặt ra đã được xử lý và trả lời. Hãy dành thời gian thành thạo việc tìm câu trả lời trên Internet. Bạn sẽ khám phá nhiều mailing list và kho thông tin chứa đầy nội dung vô giá liên quan đến dự án hoặc vấn đề cụ thể của mình. Phụ lục E chứa một danh sách tài nguyên open-source hữu ích.
 
 ## 4.6 Lấy Custom Linux Kernel
 
-Nói chung lấy embedded Linux kernel cho platform bằng ba cách: mua commercial embedded Linux distribution phù hợp; tải embedded distribution miễn phí hỗ trợ hardware nếu tìm thấy phù hợp architecture/processor; hoặc tìm kernel open-source gần application nhất rồi tự port.
+Nhìn chung, bạn có thể lấy embedded Linux kernel cho hardware platform theo ba cách: mua một embedded Linux distribution thương mại phù hợp; download một embedded distribution miễn phí hỗ trợ hardware platform nếu tìm được bản phù hợp với architecture và processor; hoặc tìm Linux kernel open-source gần với ứng dụng nhất rồi tự port.
 
-Dù port open source kernel tới custom board không nhất thiết khó, vẫn đầu tư đáng kể engineering/development resource. Cách này cho software miễn phí nhưng triển khai Linux trong dự án hoàn toàn không miễn phí, như Chương 1 “Giới thiệu”. Ngay hệ thống nhỏ yêu cầu application tối thiểu cũng cần nhiều component ngoài kernel.
+Mặc dù port một kernel open source sang custom board của bạn không nhất thiết là việc khó, nó vẫn đòi hỏi đầu tư đáng kể về nguồn lực kỹ thuật và phát triển. Cách tiếp cận này cho phép bạn tiếp cận phần mềm tự do, nhưng việc triển khai Linux trong dự án phát triển hoàn toàn không miễn phí, như chúng ta đã thảo luận trong Chương 1, “Giới thiệu”. Ngay cả với hệ thống nhỏ có yêu cầu ứng dụng tối thiểu, bạn cũng cần nhiều thành phần khác ngoài Linux kernel.
 
 ### 4.6.1 Còn cần gì?
 
-Chương tập trung layout/cấu tạo kernel. Như thấy, Linux chỉ là component nhỏ trong embedded system Linux. Ngoài kernel, cần component sau để phát triển, test, khởi chạy embedded Linux widget:
+Chương này tập trung vào cách bố trí và cấu tạo của chính Linux kernel. Như bạn có thể đã nhận ra, Linux chỉ là một thành phần nhỏ của embedded system dựa trên Linux. Ngoài Linux kernel, bạn cần các thành phần sau để phát triển, kiểm thử và đưa thiết bị embedded Linux vào hoạt động:
 
 - Bootloader port và cấu hình cho hardware platform cụ thể
 
@@ -961,7 +961,7 @@ Chương tập trung layout/cấu tạo kernel. Như thấy, Linux chỉ là com
 
 ## 4.7 Tổng kết
 
-Chương trình bày kernel build system và cách sửa để hỗ trợ thay đổi. Để sách tốt khác mô tả lý thuyết/hoạt động kernel. Ở đây nói cách build và nhận diện thành phần image. Chia kernel thành phần dễ hiểu là chìa khóa điều hướng dự án software lớn.
+Chương này đã trình bày kernel build system và quá trình sửa đổi build system để hỗ trợ các thay đổi. Chúng tôi để các cuốn sách hay khác mô tả lý thuyết và cách hoạt động của Linux kernel. Ở đây, chúng ta thảo luận cách build nó và xác định các thành phần tạo nên image. Chia kernel thành các phần dễ hiểu là chìa khóa để tìm hiểu dự án software lớn này.
 
 - Linux kernel gần 20 tuổi, đã thành operating system chủ lưu, well-supported cho nhiều architecture.
 
@@ -1005,13 +1005,13 @@ Linux Kernel Development, 3rd Edition Robert Love Addison-Wesley, 2010
 
 [^2]: Nhiều hơn 4 triệu dòng code so với ấn bản đầu!
 
-[^3]: Xấp xỉ từ đếm raw line header file, C/assembler source, makefile và Kconfig. Không gồm script.
+[^3]: Con số gần đúng này được tính bằng cách đếm các dòng thô trong header file, source code C và assembler, makefile cùng các file Kconfig. Các script không được tính vào.
 
 [^4]: Sắp nói build system/makefile.
 
-[^5]: Xem tài liệu distribution để cài `git`.
+[^5]: Hãy tham khảo tài liệu của Linux distribution bạn đang dùng để biết cách cài `git` trên hệ thống của mình.
 
-[^6]: Lưu ý distribution có thể gọi tên khác. Tiếc là `git` trùng tên package GNU Interactive Tools!
+[^6]: Lưu ý rằng distribution của bạn có thể dùng một tên khác. Đáng tiếc là tên `git` trùng với một package khác có cùng tên: GNU Interactive Tools!
 
 [^7]: Executable and Linking Format, format tiêu chuẩn thực tế cho binary executable file.
 
@@ -1019,18 +1019,18 @@ Linux Kernel Development, 3rd Edition Robert Love Addison-Wesley, 2010
 
 [^9]: Thực ra chỉ thêm giá trị `CROSS_COMPILE` trước `CC`, `LD`, `AR`, v.v. trong makefile.
 
-[^10]: Linker script file có cú pháp riêng, chi tiết trong tài liệu GNU linker.
+[^10]: Linker script file có cú pháp riêng khá đặc biệt. Bạn có thể tìm hiểu chi tiết trong tài liệu của GNU linker.
 
-[^11]: Không phải mọi makefile tham gia build kernel trực tiếp. Một số build documentation file.
+[^11]: Không phải tất cả các makefile này đều trực tiếp tham gia build kernel. Chẳng hạn, một số makefile được dùng để build các file tài liệu.
 
-[^12]: Incremental linking tạo object module dự định link lại vào object khác. Vì vậy unresolved symbol còn lại không báo lỗi—được resolve tại link stage sau.
+[^12]: Incremental linking là kỹ thuật được dùng để tạo một object module với mục đích tiếp tục link nó vào một object khác. Theo cách này, các unresolved symbol còn lại sau incremental linking không gây ra lỗi; chúng sẽ được resolve ở giai đoạn link tiếp theo.
 
-[^13]: Như đã nói có thể dùng editor chọn, như `make xconfig` hoặc `make menuconfig.`
+[^13]: Như đã đề cập, bạn có thể sử dụng configuration editor mà mình lựa chọn, chẳng hạn `make xconfig` hoặc `make menuconfig.`
 
 [^14]: Tốt hơn hãy backup file `.config`.
 
-[^15]: Đã bỏ nhiều option ARM system type và Intel IXP4xx Implementation Options cho hình vừa trang.
+[^15]: Chúng tôi đã bỏ nhiều option trong ARM system type và Intel IXP4xx Implementation Options để hình vừa với trang sách.
 
-[^16]: Thực tế build system phức tạp nhưng phần lớn khéo giấu khỏi developer bình thường. Vì vậy thêm/sửa/xóa configuration tương đối dễ mà không cần chuyên gia.
+[^16]: Thực tế, kernel build system rất phức tạp, nhưng phần lớn sự phức tạp đó được che giấu khéo léo khỏi developer thông thường. Nhờ vậy, việc thêm, sửa hoặc xóa configuration tương đối dễ dàng mà không đòi hỏi bạn phải là chuyên gia.
 
-[^17]: Luôn giả định feature phát triển nhanh hơn tài liệu; coi tài liệu là hướng dẫn thay vì sự thật không tranh cãi.
+[^17]: Hãy luôn giả định rằng các tính năng phát triển nhanh hơn tài liệu tương ứng, vì vậy hãy coi tài liệu là hướng dẫn thay vì những sự thật không thể tranh cãi.

@@ -52,7 +52,7 @@ Hình 15.1. Operation trên `sk_buff`.
 
 ![image](images/ch15/p511_ch15-511_1.png)
 
-Giả sử `skb` trỏ tới `sk_buff`, các pointer `skb->head`, `skb->data`, `skb->tail` và `skb->end` trượt trên packet buffer tương ứng khi packet đi qua protocol stack theo cả hai hướng. Ví dụ `skb->data` trỏ header của protocol hiện đang xử lý packet. Khi packet đến IP layer qua receive path, `skb->data` trỏ IP header; nhưng khi chuyển tới TCP, `skb->data` dịch đến đầu TCP header. Khi packet đi qua protocol thêm hoặc bỏ header data, `skb->len` cũng cập nhật. Các `sk_buff` còn chứa pointer ngoài bốn cái chính đã nêu. Ví dụ `skb->nh` nhớ vị trí network protocol header bất kể vị trí hiện tại của `skb->data`.
+Giả sử `skb` trỏ đến một `sk_buff`, các pointer `skb->head`, `skb->data`, `skb->tail` và `skb->end` dịch chuyển trên packet buffer tương ứng khi packet đi qua protocol stack theo cả hai hướng. Ví dụ, `skb->data` trỏ đến header của protocol hiện đang xử lý packet. Khi một packet đến IP layer qua receive path, `skb->data` trỏ đến IP header; tuy nhiên, khi packet được chuyển tiếp đến TCP, `skb->data` dịch chuyển đến đầu TCP header. Khi packet đi qua các protocol khác nhau và dữ liệu header được thêm vào hoặc loại bỏ, `skb->len` cũng được cập nhật. Các `sk_buff` còn chứa những pointer khác ngoài bốn pointer chính đã đề cập. Ví dụ, `skb->nh` ghi nhớ vị trí của network protocol header bất kể vị trí hiện tại của `skb->data`.
 
 Để minh họa NIC driver làm việc với các `sk_buff`, Hình 15.1 thể hiện chuyển tiếp dữ liệu trên receive data path. Để tiện minh họa, hình giả định đơn giản các operation thực hiện tuần tự. Nhưng để hiệu quả thực tế, hai bước đầu (`dev_alloc_skb()` và `skb_reserve()`) thực hiện khi ban đầu preallocate ring receive buffer; bước ba do NIC hardware làm khi trực tiếp DMA received packet vào `sk_buff;` preallocate; hai bước cuối (`skb_put()` và `netif_rx()`) thực hiện từ receive interrupt handler.
 
@@ -72,9 +72,9 @@ NIC driver dùng standard interface tương tác TCP/IP stack. Structure `net_de
 
 - Driver đọc Media Access Control (MAC) address của NIC từ EEPROM đi kèm, cấu hình Wake-On-LAN (WOL) nếu cần. Ethernet controller thường có nonvolatile EEPROM đi kèm giữ thông tin như MAC address và WOL pattern như Hình 15.2. MAC address là địa chỉ duy nhất 48-bit gán toàn cầu. WOL pattern là magic sequence; nếu tìm thấy trong received data, nó đánh thức NIC đang suspend mode.
 
-- Nếu NIC cần firmware on-card để chạy, driver tải bằng `request_firmware()`, như phần “Tải Microcode” trong Chương 4, “Đặt nền móng”.
+- Nếu NIC cần on-card firmware để hoạt động, driver tải firmware đó bằng `request_firmware()`, như đã thảo luận trong mục “Tải Microcode” của Chương 4, “Đặt nền móng”.
 
-Giờ xem method định nghĩa interface `net_device`. Để đơn giản chia sáu nhóm. Khi liên quan, phần này chỉ tới NIC driver ví dụ trong Listing 15.1 của phần “Ví dụ Device: Ethernet NIC”.
+Bây giờ hãy xem các method định nghĩa interface `net_device`. Để đơn giản, chúng ta phân loại chúng thành sáu nhóm. Khi thích hợp, mục này sẽ dẫn bạn đến NIC driver ví dụ được phát triển trong Listing 15.1 của mục “Ví dụ Device: Ethernet NIC”.
 
 ### Kích hoạt
 
@@ -110,7 +110,7 @@ Vì recovery method chạy trong context timer-interrupt, thường schedule tas
 
 ### Thống kê
 
-Để user land thu thập network statistic, NIC driver điền structure `net_device_stats`, cung cấp method `get_stats()` lấy nó. Cơ bản driver làm:
+Để cho phép user land thu thập số liệu thống kê mạng, NIC driver điền một structure `net_device_stats` và cung cấp method `get_stats()` để truy xuất structure đó. Về cơ bản, driver thực hiện các thao tác sau:
 
 1\. Cập nhật các loại thống kê từ entry point liên quan:
 
@@ -124,15 +124,15 @@ Vì recovery method chạy trong context timer-interrupt, thường schedule tas
 
 ![image](images/ch15/p515_ch15-515_4.jpg)
 
-Để lấy thống kê NIC, kích hoạt lời gọi `mycard_get_stats()` bằng user mode command phù hợp. Ví dụ tìm số packet nhận qua eth0:
+Để thu thập số liệu thống kê từ NIC, hãy kích hoạt lời gọi `mycard_get_stats()` bằng cách thực thi một user mode command phù hợp. Ví dụ, để tìm số packet nhận được qua interface eth0, thực hiện như sau:
 
 ![image](images/ch15/p516_ch15-516_1.jpg)
 
-WiFi driver cần theo dõi tham số không liên quan NIC thông thường, nên triển khai method lấy thống kê `get_wireless_stats()` ngoài `get_stats()`. Cơ chế đăng ký `get_wireless_stats()` cho utility user-space WiFi-aware được trình bày phần “WiFi” chương tiếp theo.
+WiFi driver cần theo dõi một số parameter không liên quan đến NIC thông thường, vì vậy chúng triển khai method thu thập số liệu thống kê tên là `get_wireless_stats()` ngoài `get_stats()`. Cơ chế đăng ký `get_wireless_stats()` để các tiện ích user-space WiFi-aware sử dụng được thảo luận trong mục “WiFi” của chương tiếp theo.
 
 ### Cấu hình
 
-NIC driver cần hỗ trợ tool user-space chịu trách nhiệm đặt/lấy device parameter. Ethtool cấu hình tham số Ethernet NIC. Để hỗ trợ, NIC driver bên dưới làm:
+NIC driver cần hỗ trợ các công cụ user-space chịu trách nhiệm thiết lập và lấy device parameter. Ethtool cấu hình các parameter cho Ethernet NIC. Để hỗ trợ ethtool, NIC driver bên dưới thực hiện các thao tác sau:
 
 1\. Điền structure `ethtool_ops`, định nghĩa trong include/linux/ethtool.h, bằng entry point quy định:
 
@@ -152,7 +152,7 @@ Xong thì ethtool thao tác được Ethernet NIC. Để dump EEPROM content b�
 
 Ethtool đóng gói cùng một số distribution; nếu chưa có tải tại http://sourceforge.net/projects/gkernel/. Tham khảo man page để biết đầy đủ khả năng.
 
-NIC driver còn cung cấp method configuration-related khác cho higher layer. Ví dụ method đổi MTU size network interface. Để hỗ trợ, cung cấp method cho `net_device`:
+NIC driver còn cung cấp các method configuration-related khác cho higher layer. Một ví dụ là method thay đổi kích thước MTU của network interface. Để hỗ trợ việc này, hãy cung cấp method tương ứng cho `net_device`:
 
 ![image](images/ch15/p517_ch15-517_3.jpg)
 
@@ -180,7 +180,7 @@ Chương 4 cho biết softirq là bottom half mechanism dùng bởi subsystem pe
 
 ![image](images/ch15/p518_ch15-518_1.jpg)
 
-NAPI đã nhắc cải thiện receive algorithm interrupt-driven thông thường để giảm CPU utilization. Khi network load nặng, hệ thống có thể ì ạch vì nhiều interrupt. Chiến lược NAPI dùng polled mode khi network activity nặng, quay về interrupt mode khi traffic nhẹ. Driver NAPI-aware chuyển interrupt/polled mode theo network load. Cách làm:
+NAPI, đã được đề cập trước đó, cải thiện receive algorithm interrupt-driven thông thường này để giảm nhu cầu sử dụng CPU. Khi network load cao, hệ thống có thể bị quá tải do phải xử lý số lượng lớn interrupt. Chiến lược của NAPI là sử dụng polled mode khi hoạt động mạng nhiều, nhưng quay về interrupt mode khi traffic giảm. Các driver NAPI-aware chuyển đổi giữa interrupt mode và polled mode theo network load. Việc này được thực hiện như sau:
 
 1\. Trong interrupt mode, interrupt handler post received packet tới protocol layer bằng schedule `NET_RX_SOFTIRQ`. Sau đó tắt NIC interrupt, chuyển polled mode bằng thêm device vào poll list:
 
@@ -196,13 +196,13 @@ Xem `mycard_interrupt()`, `init_mycard()` và `mycard_poll()` trong Listing 15.1
 
 Với data transmission, tương tác protocol layer và NIC driver đơn giản. Protocol stack gọi method `hard_start_xmit()` của driver với outgoing `sk_buff` làm đối số. Driver gửi packet bằng cách DMA-ing packet data tới NIC. DMA và quản lý data structure liên quan cho PCI NIC driver đã trình bày Chương 10.
 
-Driver lập trình NIC interrupt processor sau khi truyền xong số packet định trước. Chỉ khi interrupt transmit-complete báo operation truyền hoàn tất, driver mới reclaim hoặc giải phóng resource như DMA descriptor, DMA buffer và `sk_buffs` gắn transmitted packet.
+Driver lập trình NIC để interrupt processor sau khi truyền xong một số lượng packet định trước. Chỉ khi một interrupt transmit-complete xảy ra, báo hiệu transmit operation đã hoàn tất, driver mới có thể thu hồi hoặc giải phóng các tài nguyên như DMA descriptor, DMA buffer và `sk_buffs` gắn với packet đã truyền.
 
 ### Flow Control
 
 Driver thể hiện sẵn sàng hoặc không muốn nhận protocol data bằng cách lần lượt gọi `netif_start_queue()` và `netif_stop_queue()`.
 
-Trong device `open()`, NIC driver gọi `netif_start_queue()` yêu cầu protocol layer bắt đầu thêm transmit packet vào egress queue. Nhưng khi hoạt động thường, thỉnh thoảng cần dừng egress queuing. Ví dụ khoảng đang bổ sung data structure hoặc đóng device. Throttle downstream flow bằng `netif_stop_queue()`. Để yêu cầu networking stack restart egress queuing, chẳng hạn khi đủ free buffer, NIC driver gọi `netif_wake_queue()`. Để kiểm tra flow-control state hiện tại, gọi `netif_queue_stopped()`.
+Trong device `open()`, NIC driver gọi `netif_start_queue()` để yêu cầu protocol layer bắt đầu thêm các packet cần truyền vào egress queue. Tuy nhiên, trong quá trình hoạt động bình thường, đôi khi driver cần dừng egress queuing. Ví dụ là khoảng thời gian driver đang bổ sung các data structure hoặc đang đóng device. Việc điều tiết downstream flow được thực hiện bằng cách gọi `netif_stop_queue()`. Để yêu cầu networking stack khởi động lại egress queuing, chẳng hạn khi đã có đủ buffer trống, NIC driver gọi `netif_wake_queue()`. Để kiểm tra flow-control state hiện tại, hãy gọi `netif_queue_stopped()`.
 
 ## Quản lý Buffer và điều khiển Concurrency
 
@@ -218,7 +218,7 @@ Bảo vệ concurrent access đi hand-in-hand với quản lý data structure ph
 
 ## Ví dụ Device: Ethernet NIC
 
-Giờ có nền tảng, đến lúc viết NIC driver bằng ghép các phần đã trình bày. Listing 15.1 triển khai skeletal Ethernet NIC driver, chỉ các method chính của `net_device`. Để phát triển method còn lại, tham khảo e1000 driver đã nêu. Listing 15.1 nhìn chung độc lập I/O bus bên dưới nhưng hơi thiên PCI. Nếu viết PCI NIC driver, phải kết hợp Listing 15.1 với PCI driver ví dụ trong Chương 10.
+Sau khi đã có kiến thức nền tảng, bây giờ là lúc viết một NIC driver bằng cách kết hợp các phần đã thảo luận. Listing 15.1 triển khai một Ethernet NIC driver dạng khung, chỉ bao gồm các method chính của `net_device`. Để được hướng dẫn phát triển các method còn lại, hãy tham khảo e1000 driver đã đề cập trước đó. Listing 15.1 nhìn chung độc lập với I/O bus bên dưới nhưng hơi thiên về PCI. Nếu viết PCI NIC driver, bạn phải kết hợp Listing 15.1 với PCI driver ví dụ được triển khai trong Chương 10.
 
 Listing 15.1. Ethernet NIC Driver
 
@@ -250,7 +250,7 @@ Ethernet controller triển khai MAC layer, phải dùng cùng Physical layer (P
 
 ## ISA Network Driver
 
-Giờ xem ISA NIC. CS8900 là Ethernet controller chip 10Mbps của Crystal Semiconductor (nay Cirrus Logic). Thường dùng để Ethernet-enable embedded device, đặc biệt cho debug. Hình 15.2 thể hiện connection diagram quanh CS8900. Tùy processor trên board và chip-select điều khiển, CS8900 register map vào region khác nhau trong I/O address space CPU. Device driver cho controller là driver ISA-type (xem phần “ISA và MCA” trong Chương 20, “Thêm Device và Driver”) probe candidate address region để phát hiện controller. ISA probe method tìm I/O base address bằng signature như chip ID.
+Bây giờ hãy xem một ISA NIC. CS8900 là Ethernet controller chip 10Mbps của Crystal Semiconductor (nay là Cirrus Logic). Chip này thường được dùng để Ethernet-enable các embedded device, đặc biệt cho mục đích debug. Hình 15.2 minh họa sơ đồ kết nối xung quanh CS8900. Tùy theo processor trên board và chip-select được dùng để điều khiển chip, các CS8900 register được ánh xạ vào những vùng khác nhau trong I/O address space của CPU. Device driver cho controller này là một driver ISA-type (xem mục “ISA và MCA” trong Chương 20, “Thêm Device và Driver”), probe các vùng địa chỉ có khả năng phù hợp để phát hiện sự hiện diện của controller. ISA probe method xác định I/O base address của controller bằng cách tìm một signature, chẳng hạn chip ID.
 
 Hình 15.2. Connection diagram quanh CS8900 Ethernet controller.
 
@@ -280,7 +280,7 @@ Protocol tên Multiprotocol Label Switching (MPLS) đang thay ATM. Dự án Linu
 
 Có nhiều công cụ benchmark network performance. Netperf miễn phí từ www.netperf.org thiết lập được TCP/UDP connection scenario phức tạp. Dùng script điều khiển đặc điểm như protocol parameter, số simultaneous session và size data block. Benchmark bằng so throughput đạt được với maximum practical bandwidth networking technology mang lại. Ví dụ ATM adapter 155Mbps cho IP throughput tối đa 135Mbps, tính cả ATM cell header size, overhead do ATM Adaptation Layer (AAL) và maintenance cell thỉnh thoảng physical Synchronous Optical Networking (SONET) layer gửi.
 
-Để throughput tối ưu phải thiết kế NIC driver cho hiệu năng cao. Ngoài ra cần hiểu in-depth network protocol driver vận chuyển.
+Để đạt throughput tối ưu, bạn phải thiết kế NIC driver hướng đến hiệu năng cao. Ngoài ra, bạn cần có hiểu biết in-depth về network protocol mà driver vận chuyển.
 
 ### Driver Performance
 
@@ -288,11 +288,11 @@ Xem một số driver design issue ảnh hưởng sức mạnh NIC:
 
 - Giảm số instruction trong main data path là tiêu chí chủ chốt thiết kế driver cho NIC nhanh. Xét Ethernet adapter 1Gbps với memory on-board 1MB. Ở line rate, card memory chứa tối đa 8 mili giây received data. Trực tiếp suy ra instruction path length tối đa cho phép. Trong path length đó, incoming packet phải reassemble, DMA-ed tới memory, được driver xử lý, bảo vệ concurrent access và giao higher layer protocol.
 
-- Trong programmed I/O (PIO), dữ liệu đi từ device tới CPU rồi mới ghi memory. Hơn nữa CPU bị interrupt mỗi khi device cần truyền, góp vào latency và context switch delay. DMA không bị bottleneck đó nhưng có thể tốn hơn PIO nếu dữ liệu dưới threshold. Vì DMA nhỏ có relative overhead cao để dựng descriptor và flush processor cache line tương ứng cho data coherency. Device driver performance-sensitive có thể dùng PIO cho packet nhỏ, DMA cho packet lớn sau khi thử nghiệm xác định threshold.
+- Trong programmed I/O (PIO), dữ liệu đi từ device đến CPU trước khi được ghi vào memory. Ngoài ra, CPU bị interrupt mỗi khi device cần truyền dữ liệu, góp phần gây latency và độ trễ context switch. DMA không gặp các bottleneck này, nhưng có thể tốn kém hơn PIO nếu lượng dữ liệu cần truyền nhỏ hơn một threshold. Nguyên nhân là các DMA nhỏ có overhead tương đối cao để tạo descriptor và flush các processor cache line tương ứng nhằm bảo đảm data coherency. Một device driver performance-sensitive có thể dùng PIO cho packet nhỏ và DMA cho packet lớn sau khi xác định threshold bằng thực nghiệm.
 
-- Với PCI network card có DMA mastering capability, phải xác định optimal DMA burst size, là thời gian card kiểm soát bus mỗi đợt. Burst quá lâu có thể chiếm bus, ngăn processor theo kịp dữ liệu DMA-ed trước đó. PCI driver lập trình burst size qua register trong PCI configuration space. Thường NIC burst size đặt bằng processor cache line size, số byte processor đọc từ system memory mỗi cache miss. Nhưng thực tế có thể cần bus analyzer để xác định burst duration có lợi vì yếu tố như split bus (nhiều bus type ISA và PCI) trên hệ thống ảnh hưởng giá trị tối ưu.
+- Với các PCI network card có khả năng DMA mastering, bạn phải xác định DMA burst size tối ưu, tức khoảng thời gian card kiểm soát bus trong một đợt liên tục. Nếu card thực hiện burst quá lâu, nó có thể chiếm dụng bus và khiến processor không theo kịp dữ liệu đã được DMA-ed trước đó. PCI driver lập trình burst size qua một register trong PCI configuration space. Thông thường, burst size của NIC được đặt bằng cache line size của processor, tức số byte processor đọc từ system memory mỗi khi xảy ra cache miss. Tuy nhiên, trong thực tế, bạn có thể cần kết nối một bus analyzer để xác định burst duration có lợi, vì các yếu tố như sự hiện diện của split bus (nhiều loại bus như ISA và PCI) trong hệ thống có thể ảnh hưởng đến giá trị tối ưu.
 
-- Nhiều NIC high-speed offload việc tính TCP checksum CPU-intensive khỏi protocol stack. Một số hỗ trợ DMA scatter-gather đã xem ở Chương 10. Driver cần tận dụng để đạt maximum practical bandwidth network bên dưới mang lại.
+- Nhiều NIC high-speed có khả năng offload việc tính TCP checksum CPU-intensive khỏi protocol stack. Một số NIC hỗ trợ DMA scatter-gather mà chúng ta đã tìm hiểu trong Chương 10. Driver cần tận dụng các khả năng này để đạt bandwidth thực tế tối đa mà mạng bên dưới cung cấp.
 
 - Đôi khi tối ưu driver tạo điểm chậm ngoài dự kiến nếu không chú ý chi tiết higher protocol implementation. Xét filesystem NFS-mounted trên computer có NIC high-speed. Giả sử driver chỉ nhận transmit complete interrupt thỉnh thoảng để giảm latency, nhưng NFS server implementation dùng giải phóng transmit buffer làm cơ chế flow-control. Vì driver chỉ giải phóng NFS transmit buffer trong transmit complete interrupt thưa thớt, copy file NFS chậm chạp dù Internet download vẫn nhanh, đạt maximum throughput.
 
@@ -300,9 +300,9 @@ Xem một số driver design issue ảnh hưởng sức mạnh NIC:
 
 Giờ xem đặc điểm protocol-specific có thể tăng/giảm network throughput:
 
-- TCP window size ảnh hưởng throughput. Window size đo lượng dữ liệu truyền trước acknowledgment. Với NIC nhanh, window nhỏ có thể khiến TCP idle chờ acknowledgment packet đã truyền. Dù window lớn, ít TCP packet mất cũng ảnh hưởng vì lost frame có thể dùng hết window ở line speed. Với UDP, window size không liên quan vì không hỗ trợ acknowledgment. Tuy nhiên packet loss nhỏ có thể thành rate drop lớn vì thiếu cơ chế flow-control.
+- TCP window size có thể ảnh hưởng đến throughput. Window size thể hiện lượng dữ liệu có thể truyền trước khi nhận acknowledgement. Với NIC tốc độ cao, window size nhỏ có thể khiến TCP phải nằm chờ acknowledgement của các packet đã truyền. Ngay cả khi window size lớn, việc mất một số ít TCP packet cũng có thể ảnh hưởng đến hiệu năng, vì các frame bị mất có thể chiếm hết window ở tốc độ đường truyền. Với UDP, window size không có ý nghĩa vì UDP không hỗ trợ acknowledgement. Tuy nhiên, một lượng packet loss nhỏ có thể kéo theo mức giảm tốc độ lớn do thiếu các cơ chế flow-control.
 
-- Khi block size application data ghi vào TCP socket tăng, số buffer copy từ user space sang kernel space giảm. Giảm processor utilization demand, tốt cho hiệu năng. Nhưng nếu block size vượt MTU tương ứng network protocol, processor cycle phí cho fragmentation. Vì vậy block size mong muốn là outgoing interface MTU, hoặc packet lớn nhất gửi không fragmentation qua IP path nếu Path MTU discovery đang chạy. Ví dụ khi chạy IP over ATM, ATM adaptation layer có MTU 64K nên gần như không có upper bound block size. (RFC 1626 mặc định 9180.) Nhưng nếu chạy IP over ATM LANE, block size phải phản ánh MTU size LAN technology được mô phỏng: 1500 cho standard Ethernet, 8000 cho jumbo Gigabit Ethernet, 18K cho Token Ring 16Mbps.
+- Khi block size của dữ liệu ứng dụng ghi vào TCP socket tăng, số buffer được sao chép từ user space sang kernel space giảm. Điều này giảm nhu cầu sử dụng processor và có lợi cho hiệu năng. Tuy nhiên, nếu block size vượt MTU tương ứng với network protocol, các processor cycle sẽ bị tiêu tốn cho fragmentation. Vì vậy, block size mong muốn là MTU của outgoing interface, hoặc kích thước packet lớn nhất có thể gửi qua một IP path mà không cần fragmentation nếu cơ chế Path MTU discovery đang hoạt động. Ví dụ, khi chạy IP over ATM, ATM adaptation layer có MTU 64K nên hầu như không có giới hạn trên cho block size. (RFC 1626 đặt giá trị mặc định này là 9180.) Tuy nhiên, nếu chạy IP over ATM LANE, block size phải tương ứng với MTU của công nghệ LAN đang được mô phỏng: 1500 cho standard Ethernet, 8000 cho jumbo Gigabit Ethernet và 18K cho Token Ring 16Mbps.
 
 ## Xem Source
 
@@ -310,11 +310,11 @@ Directory drivers/net/ chứa source các NIC driver. Xem drivers/net/e1000/ cho
 
 ### TUN/TAP Driver
 
-TUN/TAP device driver drivers/net/tun.c, dùng protocol tunneling, là ví dụ kết hợp virtual network driver và pseudo char driver. Pseudo char device (/dev/net/tun) làm hardware bên dưới virtual network interface (tunX), nên thay truyền frame tới physical network, TUN network driver gửi tới ứng dụng đọc /dev/net/tun. Tương tự thay nhận từ physical network, TUN driver nhận từ ứng dụng ghi /dev/net/tun. Xem Documentation/networking/tuntap.txt để thêm giải thích và usage scenario. Vì cả phần network/char không phải xử lý hardware interaction phức tạp, đây là driver ví dụ dễ đọc dù đơn giản hóa.
+TUN/TAP device driver drivers/net/tun.c, được sử dụng cho protocol tunneling, là một ví dụ kết hợp virtual network driver và pseudo char driver. Pseudo char device (/dev/net/tun) đóng vai trò hardware bên dưới virtual network interface (tunX), vì vậy thay vì truyền frame đến physical network, TUN network driver gửi frame đến một ứng dụng đang đọc từ /dev/net/tun. Tương tự, thay vì nhận dữ liệu từ physical network, TUN driver nhận dữ liệu từ một ứng dụng ghi vào /dev/net/tun. Xem Documentation/networking/tuntap.txt để biết thêm giải thích và các tình huống sử dụng. Vì cả phần network lẫn phần char của driver đều không phải xử lý sự phức tạp khi tương tác với hardware, đây là một ví dụ driver rất dễ đọc, dù đã được đơn giản hóa.
 
 File dưới /sys/class/net/ cho thao tác NIC driver parameter. Dùng node dưới /proc/sys/net/ cấu hình biến protocol-specific. Ví dụ đặt maximum TCP transmit window size bằng echo giá trị mong muốn vào /proc/sys/net/core/wmem\_max. Directory /proc/net/ tập hợp network information system-specific. Xem /proc/net/dev cho thống kê mọi NIC trên hệ thống, /proc/net/arp cho ARP table.
 
-Bảng 15.1 chứa data structure chính dùng trong chương và vị trí trong source tree. Bảng 15.2 liệt kê kernel programming interface chính đã dùng cùng vị trí định nghĩa.
+Bảng 15.1 chứa các data structure chính được sử dụng trong chương này và vị trí của chúng trong source tree. Bảng 15.2 liệt kê các kernel programming interface chính mà bạn đã sử dụng trong chương, cùng vị trí định nghĩa của chúng.
 
 Bảng 15.1. Tổng hợp Data Structure
 

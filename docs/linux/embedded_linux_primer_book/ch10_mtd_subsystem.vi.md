@@ -48,7 +48,7 @@ board bằng JFFS2 file system image in-Flash.
 
 ## 10.1 Tổng quan MTD
 
-Nói đơn giản, MTD là device driver layer cung cấp API thống nhất giao tiếp raw Flash device. MTD hỗ trợ nhiều Flash device. Tuy nhiên MTD không phải block device. MTD xử lý device theo đơn vị erase block không phải luôn có kích thước đồng nhất, còn block device hoạt động theo read/write block fixed-size gọi là sector. Block device có hai operation chính—read, write sector—còn MTD có ba: read, write và erase. MTD device có write life cycle giới hạn, và MTD có logic trải write operation suốt tuổi thọ device để tăng tuổi thọ. Đây gọi là wear leveling.
+Nói đơn giản, MTD là một lớp device driver cung cấp API thống nhất để giao tiếp với các raw Flash device. MTD hỗ trợ rất nhiều loại Flash device. Tuy nhiên, MTD không phải block device. MTD làm việc với device theo đơn vị erase block, mà kích thước không phải lúc nào cũng đồng nhất, trong khi block device hoạt động trên các block đọc/ghi fixed-size gọi là sector. Block device có hai thao tác chính là đọc và ghi một sector, còn MTD có ba thao tác: đọc, ghi và xóa. MTD device có số lần ghi hữu hạn, và MTD có logic phân bổ các thao tác ghi trong suốt vòng đời device nhằm tăng tuổi thọ của device. Kỹ thuật này được gọi là wear leveling.
 
 Trái quan niệm phổ biến, SD/MMC card, CompactFlash card, USB Flash drive và device phổ biến khác không phải MTD device. Tất cả chứa Flash translation layer nội bộ xử lý chức năng MTD-like như block erasure và wear leveling. Vì vậy chúng xuất hiện với hệ thống như block device truyền thống, không cần xử lý chuyên biệt của MTD.
 
@@ -56,7 +56,7 @@ Phần lớn device driver Linux là character device hoặc block device. MTD k
 
 ### 10.1.1 Bật MTD service
 
-Để dùng MTD service, kernel phải cấu hình bật MTD. Điều này áp dụng cho cả development workstation và embedded system. Để đơn giản, chúng ta minh họa thao tác MTD trên development workstation. Để làm theo, phải bật MTD trên workstation như mô tả. Tương tự, phải bật MTD trên embedded target để dùng khả năng MTD ở đó.
+Để sử dụng MTD service, kernel của bạn phải được cấu hình với MTD được bật. Điều này áp dụng như nhau cho development workstation và embedded system. Để đơn giản, chúng ta sẽ minh họa các thao tác MTD trên development workstation. Để thực hiện theo, bạn phải bật MTD trên workstation như mô tả ở đây. Tương tự, bạn cũng phải bật MTD trên embedded target để sử dụng các khả năng của MTD ở đó.
 
 MTD có nhiều configuration option, một số gây khó hiểu. Cách tốt nhất hiểu vô số lựa chọn là bắt đầu làm việc với chúng. Để minh họa cơ chế MTD subsystem và cách tích hợp hệ thống, chúng ta bắt đầu với một số thao tác đơn giản trên Linux development workstation. Hình 10-1 cho kernel configuration (gọi bằng `make ARCH=<arch> gconfig` như thường lệ) cần để bật chức năng bare-minimum MTD. Listing 10-1 hiển thị entry file `.config` từ lựa chọn Hình 10-1. Các option nằm dưới Device drivers trong kernel configuration utility.
 
@@ -75,17 +75,17 @@ CONFIG_MTDRAM_ERASE_SIZE=128
 
 HÌNH 10-1 Cấu hình MTD
 
-MTD subsystem bật qua configuration option đầu, được chọn bằng ô đầu ở Hình 10-1, Memory Technology Device (MTD) Support. Hai entry tiếp trong cấu hình Hình 10-1 bật truy cập device-level đặc biệt tới MTD device như Flash memory từ user space. Đầu tiên (`CONFIG_MTD_CHAR`) bật character device mode, thực chất truy cập tuần tự đặc trưng bởi read/write byte-at-a-time. Thứ hai (`CONFIG_MTD_BLOCK`) bật truy cập MTD device ở block device mode, phương pháp dùng cho disk drive đọc hoặc ghi block nhiều byte mỗi lần. Các access mode cho phép dùng lệnh Linux quen thuộc đọc, ghi dữ liệu Flash memory như sẽ thấy.
+MTD subsystem được bật thông qua configuration option đầu tiên, bằng cách đánh dấu ô đầu tiên trong Hình 10-1, Memory Technology Device (MTD) Support. Hai entry tiếp theo trong cấu hình ở Hình 10-1 cho phép truy cập device-level đặc biệt từ user space đến các MTD device, chẳng hạn Flash memory. Entry đầu tiên (`CONFIG_MTD_CHAR`) cho phép truy cập ở character device mode, về cơ bản là truy cập tuần tự với các thao tác đọc và ghi byte-at-a-time. Entry thứ hai (`CONFIG_MTD_BLOCK`) cho phép truy cập MTD device ở block device mode, phương pháp dùng cho disk drive, trong đó các block gồm nhiều byte dữ liệu được đọc hoặc ghi trong một lần. Các access mode này cho phép dùng những lệnh Linux quen thuộc để đọc và ghi dữ liệu vào Flash memory, như bạn sẽ thấy ngay sau đây.
 
 Phần tử `CONFIG_MTD_MTDRAM` bật test driver đặc biệt cho phép khảo sát MTD subsystem trên development host ngay cả khi không có MTD device (như Flash memory). Nhớ trong các ví dụ chúng ta làm việc với MTD trên development workstation như cách thuận tiện làm quen subsystem. Bạn hiếm khi hoặc không bao giờ làm điều này trên embedded target.
 
-Đi cùng lựa chọn cấu hình là hai parameter của test driver RAM-based: device size và erase size. Ví dụ chỉ định tổng kích thước 8192KB và erase size 128KB. Mục tiêu test driver là mô phỏng Flash device, chủ yếu hỗ trợ test và phát triển MTD subsystem. Vì Flash memory tổ chức theo erase block fixed-size, test driver cũng chứa khái niệm erase block. Bạn sẽ thấy cách dùng parameter ngay sau đây.
+Đi kèm lựa chọn cấu hình này là hai parameter liên quan đến test driver RAM-based: device size và erase size. Trong ví dụ này, chúng ta chỉ định tổng dung lượng 8192KB và erase size 128KB. Mục tiêu của test driver là mô phỏng Flash device, chủ yếu để hỗ trợ kiểm thử và phát triển MTD subsystem. Vì Flash memory được tổ chức theo các erase block fixed-size, test driver cũng có khái niệm erase block. Bạn sẽ sớm thấy các parameter này được sử dụng như thế nào.
 
 ### 10.1.2 Kiến thức MTD cơ bản
 
-Linux kernel release gần đây đã tích hợp MTD nên không cần MTD patch để bật. Nếu muốn theo sát phát triển MTD tiên tiến nhất, có thể download source code mới nhất từ trang chủ MTD liệt kê cuối chương. Tất nhiên dù cách nào cũng phải bật MTD trong kernel configuration như Hình 10-1.
+Các Linux kernel release gần đây đã tích hợp MTD, nên bạn không cần áp dụng MTD patch để bật nó. Nếu muốn theo sát những bước phát triển mới nhất của MTD, bạn có thể download source code mới nhất từ trang chủ MTD được liệt kê ở phần cuối chương. Tất nhiên, trong cả hai trường hợp, MTD đều phải được bật trong kernel configuration, như Hình 10-1.
 
-Sau khi bật MTD, có thể khảo sát subsystem trên Linux development workstation. Dùng RAM test driver vừa cấu hình, có thể mount JFFS2 image bằng MTD device. Giả sử đã tạo JFFS2 image như Chương 9, “File system”, bạn có thể muốn mount, khảo sát. Image tạo trong Chương 9 tên `jffs2.bin`.[^1] Nhớ rằng đã tạo image `jffs2.bin` bằng lệnh:
+Sau khi bật MTD, chúng ta có thể xem xét cách subsystem này hoạt động trên Linux development workstation. Với RAM test driver vừa cấu hình, chúng ta có thể mount một JFFS2 image bằng MTD device. Giả sử bạn đã tạo JFFS2 image theo hướng dẫn chi tiết trong Chương 9, “File system”, bạn có thể muốn mount và xem xét nó. Image mà chúng ta tạo trong Chương 9 có tên `jffs2.bin`.[^1] Hãy nhớ rằng trong Chương 9, chúng ta tạo image `jffs2.bin` bằng lệnh sau:
 
 ```
 # mkfs.jffs2 -d ./jffs2-image-dir -o jffs2.bin
@@ -118,17 +118,17 @@ drwxr-xr-x  14 root root 0 Sep 17 15:31 var
 #
 ```
 
-Trong Listing 10-2, đầu tiên cài loadable module Linux kernel cần để hỗ trợ JFFS2 và MTD subsystem. Load module `jffs2`, sau đó `mtdblock` và `mtdram`. Khi driver cần thiết đã load, dùng lệnh Linux `dd` copy JFFS2 file system image vào MTD RAM test driver qua device `mtdblock`. Về bản chất, dùng system RAM làm backing device mô phỏng MTD block device.
+Trong Listing 10-2, trước tiên chúng ta cài các loadable module mà Linux kernel yêu cầu để hỗ trợ JFFS2 và MTD subsystem. Chúng ta load module `jffs2`, tiếp theo là các module `mtdblock` và `mtdram`. Sau khi các device driver cần thiết được load, chúng ta dùng lệnh Linux `dd` để copy JFFS2 file system image vào MTD RAM test driver thông qua device `mtdblock`. Về bản chất, chúng ta đang dùng system RAM làm backing device để mô phỏng một MTD block device.
 
 Sau khi copy JFFS2 file system image vào MTD block device, có thể mount bằng lệnh `mount` như Listing 10-2. Khi MTD pseudo-device đã mount, có thể làm việc với image theo ý muốn. Giới hạn duy nhất của phương pháp là không đổi kích thước image. Nó bị giới hạn bởi hai yếu tố. Đầu tiên, khi cấu hình MTD RAM test device trong Linux kernel configuration user interface, đặt kích thước tối đa 8MB. Thứ hai, khi tạo JFFS2 image, đã cố định kích thước bằng tiện ích `mkfs.jffs2`. Kích thước được xác định bởi nội dung directory chỉ định lúc tạo. Tham khảo Listing 9-9 ở Chương 9 để nhớ cách build image `jffs2.bin`.
 
-Quan trọng là hiểu giới hạn phương pháp khảo sát JFFS2 file system này. Xét những gì đã làm: copy nội dung file (JFFS2 file system binary image) vào kernel block device (`/dev/mtdblock0`). Sau đó mount kernel block device (`/dev/mtdblock0`) làm JFFS2 file system. Sau đó có thể dùng mọi file system utility truyền thống để khảo sát, thậm chí sửa. Công cụ `ls`, `df`, `dh`, `mv`, `rm`, `cp` đều dùng được. Tuy nhiên khác loopback device, không có liên hệ giữa file đã copy và JFFS2 file system image được mount. Vì thế nếu unmount sau khi sửa, thay đổi mất. Muốn lưu phải copy lại vào file. Một cách như sau:
+Cần hiểu các giới hạn của phương pháp khảo sát nội dung JFFS2 file system này. Hãy xem lại những gì chúng ta đã làm: sao chép nội dung của một file (JFFS2 file system binary image) vào một kernel block device (`/dev/mtdblock0`), rồi mount kernel block device (`/dev/mtdblock0`) đó dưới dạng JFFS2 file system. Sau đó, chúng ta có thể dùng tất cả tiện ích file system truyền thống để khảo sát, thậm chí sửa đổi file system. Các công cụ như `ls`, `df`, `dh`, `mv`, `rm` và `cp` đều có thể được dùng để khảo sát và sửa đổi file system. Tuy nhiên, khác với loopback device, không có mối liên hệ nào giữa file đã sao chép và JFFS2 file system image đang được mount. Vì vậy, nếu unmount file system sau khi thay đổi, những thay đổi đó sẽ bị mất. Muốn lưu lại chúng, bạn phải sao chép chúng trở lại một file. Sau đây là một cách thực hiện:
 
 ```
 # dd if=/dev/mtdblock0 of=./your-modified-fs-image.bin
 ```
 
-Lệnh tạo file `your-modified-fs-image.bin` cùng kích thước device `mtdblock0` chỉ định lúc cấu hình. Ví dụ là 8MB. Khi thiếu công cụ sửa JFFS2 phù hợp, đây là cách hoàn toàn hợp lệ khảo sát, sửa JFFS2 file system. Quan trọng hơn, nó minh họa MTD subsystem cơ bản trên development system không có Flash memory thật. Giờ xem phần cứng có physical Flash device.
+Lệnh này tạo một file có tên `your-modified-fs-image.bin`, có kích thước bằng device `mtdblock0` được chỉ định trong quá trình cấu hình. Trong ví dụ của chúng ta, kích thước đó là 8MB. Khi không có công cụ chỉnh sửa JFFS2 phù hợp, đây là một cách hoàn toàn hợp lệ để xem xét và sửa đổi JFFS2 file system. Quan trọng hơn, nó minh họa các nguyên tắc cơ bản của MTD subsystem trên development system mà không cần Flash memory thực. Bây giờ hãy xem một số hardware có các Flash device vật lý.
 
 ### 10.1.3 Cấu hình MTD trên target
 
@@ -146,13 +146,13 @@ Từng bước được khảo sát trong các phần sau.
 
 ## 10.2 MTD partition
 
-Phần lớn Flash device trên hardware platform được chia nhiều phần gọi là partition, tương tự partition trên hard drive desktop workstation điển hình. MTD subsystem hỗ trợ Flash partition như vậy. Phải cấu hình hỗ trợ MTD partitioning. Hình 10-2 cho configuration option hỗ trợ từ Linux kernel snapshot gần đây.
+Phần lớn Flash device trên một hardware platform được chia thành nhiều phần gọi là partition, tương tự các partition trên hard drive của desktop workstation điển hình. MTD subsystem hỗ trợ các Flash partition như vậy. MTD subsystem phải được cấu hình để hỗ trợ MTD partitioning. Hình 10-2 trình bày các configuration option cho MTD partitioning support từ một Linux kernel snapshot gần đây.
 
 ![Figure 10-2](images/ch10/fig10-02.png)
 
 HÌNH 10-2 Kernel configuration hỗ trợ MTD partitioning
 
-Có thể truyền partition data đến Linux kernel bằng nhiều cách. Hình 10-2 có configuration option cho từng cách dưới “MTD partitioning support”. Hiện hỗ trợ các phương pháp:
+Bạn có thể truyền partition data cho Linux kernel theo nhiều cách. Có thể xem configuration option của từng cách trong Hình 10-2, dưới mục “MTD partitioning support”. Hiện tại, những phương pháp sau được hỗ trợ:
 
 - Parse Redboot partition table
 
@@ -170,7 +170,7 @@ Một phương pháp định nghĩa và phát hiện MTD partition phổ biến 
 
 MTD subsystem định nghĩa phương pháp lưu partition information ngay trên Flash device, tương tự khái niệm partition table trên hard disk. Với Redboot partition, lập trình viên dành riêng và chỉ định Flash erase block chứa partition definition. Mapping driver được chọn gọi partition parsing function lúc boot để phát hiện partition trên Flash device. Hình 10-2 cho mapping driver của board mẫu; entry được làm nổi cuối cùng định nghĩa `CONFIG_MTD_IXP4XX`.
 
-Như thường lệ, xem chi tiết ví dụ giúp minh họa khái niệm. Bắt đầu từ thông tin Redboot bootloader cung cấp cho Coyote platform. Listing 10-3 ghi một phần output Redboot bootloader khi power-up.
+Như thường lệ, việc xem xét chi tiết một ví dụ giúp minh họa các khái niệm này. Chúng ta bắt đầu bằng thông tin do Redboot bootloader cung cấp cho Coyote platform. Listing 10-3 ghi lại một phần output của Redboot bootloader khi power-up.
 
 LISTING 10-3 Thông báo Redboot khi Power-Up
 
@@ -186,7 +186,7 @@ FLASH: 0x50000000 - 0x51000000, 128 blocks of 0x00020000 bytes each.
 
 Console output cho biết RAM trên board được map vật lý từ địa chỉ `0x00000000`, Flash map tại physical address `0x50000000` đến `0x51000000`. Cũng thấy Flash có 128 block, mỗi block `0x00020000` (128KB).
 
-Redboot có lệnh tạo, hiển thị partition information lưu trên Flash. Listing 10-4 là output lệnh `fis list`, thuộc họ lệnh Flash Image System trong Redboot bootloader.
+Redboot có một lệnh để tạo và hiển thị thông tin partition lưu trên Flash. Listing 10-4 là output của lệnh `fis list`, thuộc họ lệnh Flash Image System có trong Redboot bootloader.
 
 LISTING 10-4 Danh sách Flash partition của Redboot
 
@@ -199,9 +199,9 @@ FIS directory     0x50FE0000  0x50FE0000  0x00020000  0x00000000
 RedBoot>
 ```
 
-Từ Listing 10-4 thấy Coyote board có ba partition định nghĩa trên Flash. Partition tên RedBoot chứa executable Redboot bootloader image. Partition RedBoot config chứa configuration parameter do bootloader duy trì. Partition cuối FIS directory giữ thông tin chính partition table.
+Từ Listing 10-4, chúng ta thấy Coyote board có ba partition được định nghĩa trên Flash. Partition có tên RedBoot chứa executable image của Redboot bootloader. Partition có tên RedBoot config chứa các configuration parameter do bootloader duy trì. Partition cuối cùng, có tên FIS directory, chứa thông tin về chính partition table.
 
-Cấu hình đúng, Linux kernel phát hiện, parse partition table và tạo MTD partition biểu diễn physical partition trên Flash. Listing 10-5 tái hiện một phần boot message từ ADI Engineering Coyote board nói trên, boot Linux kernel cấu hình hỗ trợ phát hiện Redboot partition.
+Khi được cấu hình đúng, Linux kernel có thể phát hiện và parse partition table này, rồi tạo các MTD partition biểu diễn những physical partition trên Flash. Listing 10-5 trình bày lại một phần boot message được xuất từ ADI Engineering Coyote board đã đề cập, khi boot một Linux kernel được cấu hình hỗ trợ phát hiện Redboot partition.
 
 LISTING 10-5 Phát hiện Redboot partition khi Linux boot
 
@@ -227,9 +227,9 @@ CFI bật qua tiện ích kernel-configuration trong menu top-level Memory Techn
 
 HÌNH 10-3 Kernel configuration hỗ trợ MTD CFI
 
-Vì cũng bật `CONFIG_MTD_REDBOOT_PARTS` (xem Hình 10-3), MTD scan Redboot partition table trên Flash chip. Chú ý chip còn được enumerate với device name `IXP4XX-Flash.0`. Từ Listing 10-5 thấy Linux kernel phát hiện ba partition trên Flash chip, như liệt kê trước bằng lệnh `fis list` trong Redboot.
+Vì chúng ta cũng bật `CONFIG_MTD_REDBOOT_PARTS` (xem Hình 10-3), MTD quét tìm Redboot partition table trên Flash chip. Cũng hãy chú ý rằng chip được enumerate với device name `IXP4XX-Flash.0`. Từ Listing 10-5, bạn có thể thấy Linux kernel phát hiện ba partition trên Flash chip, giống những partition đã được liệt kê trước đó bằng lệnh `fis list` trong Redboot.
 
-Khi hạ tầng như mô tả đã có, Linux kernel tự phát hiện và tạo kernel data structure biểu diễn ba Flash partition. Bằng chứng có trong file system `/proc` khi kernel khởi tạo xong, như Listing 10-6.
+Khi hạ tầng đã được thiết lập như mô tả ở đây, Linux kernel tự động phát hiện và tạo các kernel data structure biểu diễn ba Flash partition. Có thể tìm thấy bằng chứng về các partition này trong file system `/proc` khi kernel hoàn tất khởi tạo, như trong Listing 10-6.
 
 LISTING 10-6 MTD Flash partition của kernel
 
@@ -259,7 +259,7 @@ RedBoot> fis create -b 0x01008000 -l 0x145cd0 -f 0x50100000 MyKernel
 ... Lock from 0x50fe0000-0x51000000: .
 ```
 
-Đầu tiên load image dùng để tạo partition mới. Dùng kernel image cho ví dụ, load vào memory address `0x01008000`. Sau đó tạo partition mới bằng lệnh Redboot `fis create`. Yêu cầu Redboot tạo partition trong vùng Flash từ `0x50100000`. Bạn thấy Redboot đầu tiên xóa vùng Flash rồi lập trình kernel image. Cuối cùng Redboot unlock directory area và cập nhật FIS Directory bằng partition information mới. Listing 10-8 cho output `fis list` với partition mới. So với Listing 10-4.
+Trước tiên, chúng ta load image sẽ được dùng để tạo partition mới. Trong ví dụ này, chúng ta dùng kernel image và load nó vào memory address `0x01008000`. Sau đó, chúng ta tạo partition mới bằng lệnh Redboot `fis create`. Chúng ta yêu cầu Redboot tạo partition mới trong vùng Flash bắt đầu tại `0x50100000`. Bạn có thể thấy Redboot trước tiên xóa vùng Flash này rồi lập trình kernel image vào đó. Ở bước cuối, Redboot unlock vùng directory của nó và cập nhật FIS Directory bằng thông tin partition mới. Listing 10-8 cho thấy output của `fis list` với partition mới. Hãy so sánh output này với output trong Listing 10-4.
 
 LISTING 10-8 Danh sách Redboot partition mới
 
@@ -272,7 +272,7 @@ FIS directory     0x50FE0000  0x50FE0000  0x00020000  0x00000000
 MyKernel          0x50100000  0x50100000  0x00160000  0x01008000
 ```
 
-Tất nhiên khi boot Linux kernel, nó phát hiện partition mới và có thể thao tác tùy ý. Có thể bạn đã nhận ra lợi ích khác: giờ boot kernel từ Flash thay vì load bằng TFTP mỗi lần. Lệnh Redboot để làm như sau. Chỉ truyền cho lệnh Redboot `exec` Flash start address của partition và chiều dài image để chuyển vào RAM:
+Tất nhiên, khi chúng ta boot Linux kernel, kernel sẽ phát hiện partition mới và chúng ta có thể thao tác trên đó theo nhu cầu. Có lẽ bạn đã nhận ra một lợi ích khác của partition mới này: giờ đây chúng ta có thể boot kernel từ Flash thay vì phải load kernel bằng TFTP mỗi lần. Lệnh Redboot để thực hiện việc đó được trình bày dưới đây. Chỉ cần truyền cho lệnh Redboot `exec` địa chỉ bắt đầu của partition trong Flash và chiều dài image cần chuyển vào RAM:
 
 ```
 RedBoot> exec -b 0x50100000 -l 0x145cd0
@@ -311,7 +311,7 @@ Với định nghĩa này, kernel tạo bốn MTD partition, MTD ID MainFlash, c
 
 Phương pháp cuối định nghĩa Flash layout board-specific là dùng mapping driver board-specific chuyên dụng. Linux kernel source tree chứa nhiều ví dụ trong `.../drivers/mtd/maps`. Bất kỳ ví dụ nào cũng hướng dẫn tốt cách tạo riêng. Chi tiết implementation thay đổi theo architecture.
 
-Mapping driver là kernel module đầy đủ, có lời gọi `module_init()` và `module_exit()` như Chương 8, “Kiến thức cơ bản về device driver”. Mapping driver điển hình nhỏ, dễ đọc, thường dưới vài chục dòng C.
+Mapping driver là một kernel module hoàn chỉnh, có đầy đủ các lời gọi `module_init()` và `module_exit()`, như đã mô tả trong Chương 8, “Kiến thức cơ bản về device driver”. Mapping driver điển hình có kích thước nhỏ và dễ đọc, thường chứa ít hơn vài chục dòng code C.
 
 Listing 10-10 tái hiện một phần `.../drivers/mtd/maps/pq2fads.c`. Mapping driver định nghĩa Flash device trên Freescale PQ2FADS evaluation board hỗ trợ MPC8272 và processor khác.
 
@@ -387,13 +387,13 @@ Theo ví dụ đơn giản này, có thể tạo mapping driver cho board riêng
 
 ### 10.2.4 Flash chip driver
 
-MTD hỗ trợ nhiều Flash chip và device. Rất có khả năng chip đã chọn cũng được hỗ trợ. Flash chip phổ biến nhất hỗ trợ Common Flash Interface (CFI) đã nói. Chip cũ có thể hỗ trợ JEDEC, chuẩn tương thích Flash cũ hơn. Hình 10-4 cho kernel configuration từ Linux kernel snapshot gần đây, hỗ trợ nhiều Flash type.
+MTD hỗ trợ rất nhiều Flash chip và device. Khả năng chip bạn chọn cũng được hỗ trợ là rất cao. Những Flash chip phổ biến nhất hỗ trợ Common Flash Interface (CFI) đã đề cập trước đó. Các Flash chip cũ hơn có thể hỗ trợ JEDEC, một tiêu chuẩn tương thích Flash cũ hơn. Hình 10-4 trình bày kernel configuration từ một Linux kernel snapshot gần đây. Phiên bản này hỗ trợ nhiều loại Flash.
 
-Nếu Flash chip chưa được hỗ trợ, phải tự cung cấp device file. Dùng ví dụ trong `.../drivers/mtd/chips` làm điểm bắt đầu, tùy chỉnh hoặc tạo Flash device driver riêng. Tốt hơn nữa, trừ khi chip vừa ra với interface mới lạ, có lẽ ai đó đã viết driver.
+Nếu Flash chip của bạn chưa được hỗ trợ, bạn phải tự cung cấp một device file. Hãy dùng một trong nhiều ví dụ trong `.../drivers/mtd/chips` làm điểm khởi đầu để tùy chỉnh hoặc tạo Flash device driver của riêng mình. Tốt hơn nữa, trừ khi chip vừa được giới thiệu với một interface mới lạ, có lẽ ai đó đã tạo sẵn một driver.
 
 ### 10.2.5 Khởi tạo Board-Specific
 
-Cùng mapping driver, thiết lập board-specific (platform) phải cung cấp định nghĩa nền tảng cho MTD Flash system hoạt động đúng. Listing 10-11 tái hiện phần liên quan của `.../arch/arm/mach-ixp4xx/coyote-setup.c`.
+Cùng với mapping driver, phần thiết lập board-specific (platform) phải cung cấp các định nghĩa nền tảng để MTD Flash system hoạt động đúng. Listing 10-11 trình bày lại các phần liên quan của `.../arch/arm/mach-ixp4xx/coyote-setup.c`.
 
 ![Figure 10-4](images/ch10/fig10-04.png)
 
@@ -447,11 +447,11 @@ Tùy architecture và board, có thể dùng phương pháp tương tự định
 
 ## 10.3 MTD utility
 
-MTD package chứa một số system utility hữu ích thiết lập, quản lý MTD subsystem. Tiện ích build riêng với MTD subsystem chính, vốn nên build trong Linux kernel source tree. Có thể build tiện ích tương tự user space code cross-compiled khác.
+MTD package chứa một số system utility hữu ích cho việc thiết lập và quản lý MTD subsystem của bạn. Các tiện ích được build riêng với MTD subsystem chính, vốn nên được build từ bên trong Linux kernel source tree. Các tiện ích này có thể được build theo cách tương tự mọi user space code cross-compiled khác.
 
 Phải thận trọng khi dùng vì Linux không bảo vệ khỏi sai lầm. Lỗi gõ single-digit có thể xóa bootloader trên hardware platform. Điều đó có thể phá hỏng ngày của bạn trừ khi đã backup và biết lập trình lại bằng JTAG Flash programmer.
 
-Theo cách làm chung của sách, không thể dành đủ chỗ trình bày mọi MTD utility. Chúng ta nhấn mạnh các loại phổ biến, hữu ích nhất và để bạn tự khám phá phần còn lại. MTD snapshot gần đây có hơn 20 binary utility.
+Theo cách trình bày thường dùng xuyên suốt cuốn sách này, chúng ta không thể dành đủ dung lượng để trình bày mọi MTD utility. Chúng ta sẽ nêu bật những tiện ích phổ biến và hữu ích nhất, còn việc khám phá những tiện ích còn lại được dành cho bạn như một bài thực hành. Một MTD snapshot gần đây chứa hơn 20 binary utility.
 
 Họ tiện ích `flash_*` hữu ích cho raw device operation trên MTD partition, gồm `flashcp`, `flash_erase`, `flash_info`, `flash_lock`, `flash_unlock` và các loại khác. Hy vọng tên đủ mô tả để hình dung chức năng. Khi partition được định nghĩa và enumerate làm kernel device, có thể chạy bất kỳ user space utility này trên partition. Nhắc lại cảnh báo: nếu thực thi `flash_erase` trên partition chứa bootloader, bạn sẽ sở hữu cục chặn giấy silicon. Nếu định thử như vậy, nên backup bootloader image và biết cách re-Flash bằng hardware JTAG emulator hoặc công cụ Flash programming khác.
 
@@ -482,19 +482,19 @@ Performing Flash Erase of length 131072 at offset 0x0 done
 root@coyote:~# flashcp /workspace/coyote-40-zImage /dev/mtd1
 ```
 
-Làm việc với root file system partition thú vị hơn chút. Có thể dùng bootloader hoặc Linux kernel đặt initial image lên Redboot Flash partition. Đầu tiên dùng Redboot tạo partition chứa root file system. Lệnh sau tạo partition mới trên Flash device tên `RootFS` từ physical memory address `0x50300000`, dài 30 block. Nhớ block, gọi chung erase unit, là 128KB trên Flash chip này.
+Làm việc với root file system partition thú vị hơn một chút. Chúng ta có thể chọn dùng bootloader hoặc Linux kernel để đặt image ban đầu lên Redboot Flash partition. Trước tiên, chúng ta dùng Redboot để tạo partition mới sẽ chứa root file system. Lệnh sau tạo một partition mới trên Flash device có tên `RootFS`, bắt đầu tại physical memory address `0x50300000`, với chiều dài 30 block. Hãy nhớ rằng trên Flash chip này, một block, thường gọi chung là erase unit, có kích thước 128KB.
 
 ```
 RedBoot> fis create -f 0x50300000 -l 0x600000 -n RootFS
 ```
 
-Tiếp theo boot kernel và copy root file system image vào partition mới tên `RootFS`. Thực hiện bằng lệnh sau từ Linux command prompt trên target board. Giả định đã đặt file system image trong directory board truy cập được. Như nhắc nhiều lần, NFS root mount là người bạn tốt nhất khi phát triển.
+Tiếp theo, chúng ta boot kernel và copy root file system image vào partition mới có tên `RootFS`. Việc này được thực hiện bằng lệnh sau từ Linux command prompt trên target board của bạn. Lưu ý rằng điều này giả định bạn đã đặt file system image trong một directory mà board có thể truy cập. Như đã đề cập nhiều lần trong cuốn sách, NFS root mount là người bạn tốt nhất của bạn trong quá trình phát triển.
 
 ```
 root@coyote:~# flashcp /rootfs.ext2 /dev/mtd2
 ```
 
-File system có thể từ vài megabyte tới kích thước lớn nhất cho partition, nên có thể mất thời gian. Nhớ operation này lập trình (đôi khi gọi flashing) image vào Flash memory. Sau khi copy có thể mount partition làm file system. Listing 10-13 hiển thị trình tự.
+File system có thể có kích thước từ vài megabyte đến giới hạn lớn nhất mà chúng ta cho phép trên partition này, nên thao tác có thể mất một chút thời gian. Hãy nhớ rằng thao tác này lập trình image vào Flash memory, đôi khi được gọi là flashing. Sau khi copy, chúng ta có thể mount partition làm file system. Listing 10-13 trình bày trình tự này.
 
 LISTING 10-13 Mount MTD Flash partition làm ext2 file system
 
@@ -523,13 +523,13 @@ root@coyote:~#
 
 Listing 10-13 có hai chi tiết tinh tế quan trọng. Chú ý chỉ định `/dev/mtdblock2` trên command line `mount`. Đây là MTD block driver cho phép truy cập partition như block device. Chỉ định `/dev/mtd2` yêu cầu kernel dùng MTD character driver. Cả `mtdchar` và `mtdblock` là pseudo driver cung cấp truy cập character-based hoặc block-oriented đến Flash partition bên dưới. Vì `mount` cần block device, phải dùng chỉ định block-device. Hình 10-1 cho kernel configuration bật các access method. Các macro tương ứng là `CONFIG_MTD_CHAR` và `CONFIG_MTD_BLOCK`.
 
-Chi tiết thứ hai là switch command-line read-only (`ro`) trên lệnh `mount`. Hoàn toàn được phép mount ext2 image từ Flash bằng MTD block emulation driver cho mục đích read-only. Tuy nhiên không hỗ trợ ghi vào ext2 device bằng driver `mtdblock`, vì ext2 không hiểu Flash erase block. Muốn write access tới file system Flash-based, cần loại hiểu Flash như JFFS2.
+Chi tiết tinh tế thứ hai là việc sử dụng command-line switch read-only (`ro`) trong lệnh `mount`. Việc mount ext2 image từ Flash bằng MTD block emulation driver cho mục đích read-only là hoàn toàn hợp lệ. Tuy nhiên, driver `mtdblock` không hỗ trợ ghi vào ext2 device. Lý do là ext2 không có hiểu biết về Flash erase block. Để truy cập ghi vào một file system Flash-based, chúng ta cần dùng file system có hiểu biết về Flash, chẳng hạn JFFS2.
 
 ### 10.3.1 JFFS2 root file system
 
-Tạo JFFS2 root file system là quá trình đơn giản. Ngoài nén, JFFS2 hỗ trợ wear leveling, tăng tuổi thọ Flash bằng phân bổ đều write cycle giữa các block device. Như Chương 9, Flash memory chịu giới hạn write cycle. Wear leveling nên được coi bắt buộc trong mọi file system Flash-based dùng. Như đã nói nơi khác trong sách, nên coi Flash memory là medium write-occasional. Cụ thể, tránh để process cần write thường xuyên nhắm Flash file system. Đặc biệt chú ý logging program như `syslogd`.
+Tạo một JFFS2 root file system là quá trình khá đơn giản. Ngoài khả năng nén, JFFS2 còn hỗ trợ wear leveling, một tính năng được thiết kế để tăng tuổi thọ Flash bằng cách phân bổ đều các write cycle giữa những block của device. Như đã nêu ở Chương 9, Flash memory chỉ chịu được số write cycle hữu hạn. Wear leveling nên được xem là tính năng bắt buộc trong bất kỳ file system Flash-based nào bạn sử dụng. Như đã đề cập ở những phần khác của cuốn sách, bạn nên coi Flash memory là phương tiện lưu trữ write-occasional. Cụ thể, hãy tránh để bất kỳ process nào cần ghi thường xuyên ghi vào Flash file system. Đặc biệt chú ý các chương trình ghi log như `syslogd`.
 
-Có thể build JFFS2 image trên development workstation bằng ext2 image đã dùng trên Redboot partition `RootFS`. Lợi ích nén sẽ rõ ngay. Image dùng trong ví dụ `RootFS` trước là ext2 file system image. Đây là listing dạng long (`-l`):
+Chúng ta có thể build một JFFS2 image trên development workstation bằng ext2 image đã dùng trên Redboot partition `RootFS`. Lợi ích của việc nén sẽ rõ ràng ngay lập tức. Image mà chúng ta dùng trong ví dụ `RootFS` trước đó là một ext2 file system image. Sau đây là listing ở định dạng long (`-l`):
 
 ```
 # ls -l rootfs.ext2
@@ -548,11 +548,11 @@ LISTING 10-14 Chuyển RootFS sang JFFS2
 #
 ```
 
-Đầu tiên mount ext2 file system image trên loopback device tại mount point tùy ý của development workstation. Tiếp theo gọi tiện ích MTD `mkfs.` `jffs2` tạo JFFS2 file system image. Flag `-r` báo `mkfs.jffs2` vị trí root file system image. `-e` yêu cầu `mkfs.jffs2` build image giả định block size 128KB. Mặc định 64KB. JFFS2 không hiệu quả nhất nếu Flash device có block size khác image. Cuối cùng hiển thị long listing và thấy JFFS2 root file system image giảm hơn 60 phần trăm. Khi Flash memory giới hạn, đây là giảm đáng kể sử dụng tài nguyên Flash quý giá.
+Trước tiên, chúng ta mount ext2 file system image bằng loopback device tại một mount point tùy ý trên development workstation. Tiếp theo, chúng ta gọi tiện ích MTD `mkfs.` `jffs2` để tạo JFFS2 file system image. Flag `-r` cho `mkfs.jffs2` biết vị trí root file system image. Flag `-e` yêu cầu `mkfs.jffs2` build image với giả định block size là 128KB. Block size mặc định là 64KB. JFFS2 không hoạt động hiệu quả nhất nếu Flash device có block size khác block size của image. Cuối cùng, chúng ta hiển thị một long listing và thấy rằng JFFS2 root file system image kết quả đã giảm kích thước hơn 60 phần trăm. Khi làm việc với Flash memory hạn chế, đây là mức giảm đáng kể trong việc sử dụng tài nguyên Flash quý giá.
 
 Chú ý command-line flag quan trọng truyền cho `mkfs.jffs2` trong Listing 10-14. Flag `-b` là flag `-big-endian`, yêu cầu tiện ích `mkfs.jffs2` tạo JFFS2 Flash image phù hợp target big-endian. Vì nhắm ADI Engineering Coyote board chứa Intel IXP425 processor chạy big-endian, bước này thiết yếu để hoạt động đúng. Nếu không chỉ định big-endian, sẽ nhận nhiều màn hình đầy phàn nàn từ kernel khi cố xử lý superblock JFFS2 file system thực chất vô nghĩa.[^2] Bạn muốn đoán tôi nhớ chi tiết này thế nào không?
 
-Tương tự ví dụ trước, có thể copy image vào Redboot RootFS Flash partition bằng `flashcp`. Sau đó boot Linux kernel dùng JFFS2 root file system. Listing 10-15 cung cấp chi tiết, chạy MTD utility trên target hardware.
+Theo cách tương tự ví dụ trước, chúng ta có thể copy image này vào Redboot RootFS Flash partition bằng tiện ích `flashcp`. Sau đó, chúng ta có thể boot Linux kernel bằng JFFS2 root file system. Listing 10-15 trình bày chi tiết, với các MTD utility chạy trên target hardware của chúng ta.
 
 LISTING 10-15 Copy JFFS2 vào partition `RootFS`
 
@@ -589,21 +589,21 @@ Uncompressing Linux...... done, booting the kernel.
 
 ## 10.4 UBI file system
 
-Unsorted Block Image (UBI) File System được thiết kế khắc phục một số giới hạn JFFS2. Có thể coi là hậu duệ JFFS2, dù JFFS2 vẫn phổ biến trên embedded Linux device có Flash memory. UBI File System (UBIFS) nằm trên UBI device, vốn phụ thuộc MTD device.
+Unsorted Block Image (UBI) File System được thiết kế để khắc phục một số giới hạn của JFFS2 file system. Nó có thể được xem là thế hệ kế tiếp của JFFS2, dù JFFS2 vẫn được dùng rộng rãi trên các embedded Linux device có Flash memory. UBI File System (UBIFS) được xây dựng trên các UBI device, còn các device này lại phụ thuộc vào MTD device.
 
-UBIFS cải tiến giới hạn quan trọng hơn của JFFS2: mount time. JFFS2 duy trì indexing metadata trong system memory và phải đọc index để tạo directory tree hoàn chỉnh mỗi lần boot. Có thể cần đọc phần đáng kể Flash device. Ngược lại UBIFS giữ indexing metadata trên chính Flash device, bỏ nhu cầu scan, tái tạo dữ liệu mỗi mount. Vì vậy UBIFS mount nhanh hơn JFFS2 nhiều lần.
+UBIFS cải thiện một trong những giới hạn đáng kể của JFFS2 file system: mount time. JFFS2 duy trì indexing metadata trong system memory và phải đọc index này để xây dựng một directory tree hoàn chỉnh mỗi lần hệ thống boot. Điều này có thể đòi hỏi đọc một phần đáng kể của Flash device. Ngược lại, UBIFS duy trì indexing metadata ngay trên Flash device, loại bỏ nhu cầu quét và xây dựng lại dữ liệu này trong mỗi lần mount. Vì vậy, UBIFS mount nhanh hơn JFFS2 nhiều lần.
 
 UBIFS còn hỗ trợ write caching, có thể tăng hiệu năng đáng kể. Đọc thêm ưu điểm tại www.linux-mtd. infradead.org/doc/ubifs.html.
 
 ### 10.4.1 Cấu hình UBIFS
 
-Để dùng UBIFS, kernel phải bật UBI support. Hai kernel configuration menu item khác nhau phải bật để có UBIFS. Đầu tiên bật hỗ trợ MTD\_UBI. Option nằm dưới Device Drivers --\> Memory Technology Device (MTD) support --\> UBI - Unsorted block images --\> Enable UBI. Chọn xong sẽ bật file system support configuration option dưới File Systems --\> Miscellaneous filesystems --\> UBIFS file system support.
+Để sử dụng UBIFS, kernel của bạn phải được bật UBI support. Bạn phải bật hai mục khác nhau trong kernel configuration menu để có UBIFS. Trước tiên, hãy bật hỗ trợ MTD\_UBI. Bạn có thể tìm option này trong kernel configuration tại Device Drivers --\> Memory Technology Device (MTD) support --\> UBI - Unsorted block images --\> Enable UBI. Khi được chọn, mục này cho phép các file system support configuration option nằm tại File Systems --\> Miscellaneous filesystems --\> UBIFS file system support.
 
 ### 10.4.2 Build UBIFS image
 
-Build UBIFS image khó hơn JFFS2 một chút. Phức tạp bổ sung đến từ công nghệ NAND Flash. Build UBIFS image cần biết NAND Flash architecture của target system. Điều này sẽ rõ ngay. Cũng cần MTD Utils phiên bản khá mới trên development workstation. Có thể tìm tại git://git.infradead.org/mtd-utils.git.
+Build UBIFS image phức tạp hơn build JFFS2 image một chút. Phần phức tạp bổ sung xuất phát từ công nghệ NAND Flash. Để build UBIFS image, bạn cần hiểu NAND Flash architecture trên target system; điều này sẽ rõ ngay sau đây. Bạn cũng cần cài một phiên bản MTD Utils tương đối mới trên development workstation. Có thể tìm MTD Utils tại git://git.infradead.org/mtd-utils.git.
 
-Listing 10-17 trình bày tạo UBIFS image trên development workstation. Giả định bài tập có nội dung file system mong muốn trong directory `rootfs`.
+Listing 10-17 trình bày chi tiết quá trình tạo UBIFS image trên development workstation của bạn. Trong bài thực hành này, giả sử bạn đã có nội dung mong muốn của file system trong một directory có tên `rootfs`.
 
 LISTING 10-17 Build UBIFS image
 
@@ -618,9 +618,9 @@ drwxr-xr-x 17 chris chris      4096 2010-03-01 11:33 rootfs
 -rw-r--r--  1 chris chris       112 2010-03-01 11:54 ubinize.cfg
 ```
 
-Raw UBIFS image build bằng tiện ích `mkfs.ubifs` của package mtd-utils, tạo target file `ubifs.img`. Thiết yếu phải truyền parameter đúng cho `mkfs.ubifs`, lấy từ hardware design và NAND Flash architecture. `-m` chỉ minimum I/O unit size—ở đây 2KB. `-e` chỉ logical erase block (LEB) size cho image. Số LEB tối đa chỉ bằng `-c`. Tên output image chỉ bằng `-o`. Ở ví dụ gọi `ubifs.img`.
+Raw UBIFS image được build bằng tiện ích `mkfs.ubifs` từ package mtd-utils. Thao tác này tạo ra target file `ubifs.img`. Điều thiết yếu là phải truyền đúng parameter cho `mkfs.ubifs`. Các parameter này được xác định từ hardware design và NAND Flash architecture của bạn. `-m` chỉ định minimum I/O unit size, ở đây là 2KB. `-e` chỉ định kích thước logical erase block (LEB) của image. Số LEB tối đa của image được chỉ định bằng `-c`. Tên output image được chỉ định bằng `-o`. Trong ví dụ này, chúng ta đặt tên image là `ubifs.img`.
 
-Giờ có UBIFS image, phải sinh UBI volume image. Dùng công cụ `ubinize` (thuộc package mtd-utils). Một lần nữa phải dùng parameter đúng cho target environment. Ngoài ra thấy `ubinize` yêu cầu configuration file. File `ubinize.cfg` chứa volume name cùng những thứ khác, như sẽ thấy.
+Giờ đã có UBIFS image, chúng ta phải tạo UBI volume image. Chúng ta dùng công cụ `ubinize` (thuộc package mtd-utils) để thực hiện việc này. Một lần nữa, chúng ta phải dùng các parameter chính xác cho target environment. Ngoài ra, bạn sẽ thấy `ubinize` yêu cầu một configuration file. File `ubinize.cfg` chứa volume name cùng các thông tin khác, như chúng ta sẽ thấy ngay sau đây.
 
 Listing 10-17 chỉ minimum I/O size 2KB như trong `mkfs.ubifs`. Ở đây chỉ physical erase block size bằng parameter `-p`. Trong trường hợp này dùng NAND Flash có physical erase block 128KiB. Parameter `-s` chỉ subpage size, minimum I/O unit. Đặt tên target output file bằng `-o ubi.img`. Chúng ta sẽ flash image này vào device.
 
@@ -639,9 +639,9 @@ vol_type=dynamic
 vol_name=rootfs
 ```
 
-Ở đây thấy đặt tên volume rootfs, raw image từ file `ubifs.img`. Nhớ Listing 10-17 đây là image tiện ích `mkfs.ubifs` tạo. Có thể đọc thêm configuration file `ubinize` từ man page tiện ích.
+Ở đây, bạn có thể thấy chúng ta đặt tên volume là rootfs và lấy raw image từ file có tên `ubifs.img`. Hãy nhớ từ Listing 10-17 rằng đây là image do tiện ích `mkfs.ubifs` tạo ra. Bạn có thể đọc thêm về configuration file của `ubinize` trong man page của tiện ích này.
 
-Có final image, có thể flash vào device. Dùng lệnh `ubiformat`. Không thể chỉ flash raw image vào device vì NAND Flash dùng bởi UBI layer chứa header đặc biệt ghi erase count, cùng thông tin khác, cho từng physical erase block. Dùng cho wear leveling. Dùng `ubiformat` giữ các error count header này. Listing 10-19 cho chi tiết.
+Khi có image cuối cùng, chúng ta có thể flash nó vào device. Chúng ta sẽ dùng lệnh `ubiformat` để thực hiện việc này. Bạn không thể chỉ đơn giản flash raw image vào device. Lý do là NAND Flash được UBI layer sử dụng có các header đặc biệt ghi lại erase count, cùng những thông tin khác, cho từng physical erase block. Thông tin này được dùng cho wear leveling. Việc sử dụng `ubiformat` bảo toàn các error count header này. Listing 10-19 trình bày chi tiết.
 
 LISTING 10-19 Dùng UBIFS image
 
@@ -661,21 +661,21 @@ bin     dev     home    linuxrc  mnt     sbin    sys     usr
 boot    etc     lib     media    proc    srv     tmp     var
 ```
 
-Ở đây thấy chuỗi sự kiện đến mount UBIFS file system. Đầu tiên xóa Flash device bằng `flash_eraseall`, một tiện ích mtd-utils. Cân nhắc nhu cầu dùng vì nó không giữ error counter. Đây là tình huống first-time-use.
+Ở đây, bạn có thể thấy chuỗi thao tác dẫn đến việc mount UBIFS file system. Trước hết, chúng ta xóa Flash device bằng `flash_eraseall`, một tiện ích của mtd-utils. Hãy cân nhắc nhu cầu sử dụng tiện ích xóa này vì nó không giữ lại các error counter. Đây là trường hợp sử dụng lần đầu, hay first-time-use.
 
-Lệnh `ubiformat` đặt image lên NAND Flash trong ví dụ. `-s` chỉ subpage size phải khớp image, còn `-f` chọn image file. Sau operation này có thể attach UBI device, cần trước khi mount. `ubiattach` cần UBI control device (`/dev/ubi_ctrl`) và specifier chọn MTD device để attach. Vì ghi image vào MTD partition 4 (`/dev/mtd4`), chỉ điều đó cho `ubiattach` bằng parameter `-m 4`.
+Trong ví dụ của chúng ta, lệnh `ubiformat` ghi image lên NAND Flash. `-s` chỉ định subpage size, giá trị này phải khớp với image, còn `-f` được dùng để chọn image file. Sau khi thao tác này hoàn tất, chúng ta có thể attach UBI device; đây là bước bắt buộc trước khi mount UBI device. `ubiattach` yêu cầu UBI control device (`/dev/ubi_ctrl`) và một giá trị chỉ định MTD device cần attach. Vì đã ghi image vào MTD partition 4 (`/dev/mtd4`), chúng ta chỉ định partition đó cho `ubiattach` bằng parameter `-m 4`.
 
 Với mọi thứ sẵn, giờ mount UBIFS image. Chú ý Listing 10-19 truyền volume name chỉ định trong configuration file `ubinize.cfg` cho lệnh `mount`.
 
 ### 10.4.3 Dùng UBIFS làm root file system
 
-Giờ image đã đặt trên `/dev/mtd4`, có thể yêu cầu kernel mount làm root file system. Để làm vậy truyền các parameter kernel command-line sau cho kernel:
+Giờ đã có image trên `/dev/mtd4`, chúng ta có thể yêu cầu kernel mount file system này làm root file system. Để thực hiện, hãy truyền các kernel command-line parameter sau cho kernel:
 
 ```
 ubi.mtd=4 root=ubi0:rootfs rw rootfstype=ubifs
 ```
 
-Tập parameter kernel command-line này yêu cầu kernel attach device mtd4 vào ubi0 và mount UBI device kết quả làm root file system. Nếu gặp khó, bảo đảm thêm option `rootdelay` phù hợp vào kernel command line. Bài tập cần `rootdelay=1` để UBI và UBIFS layer có thời gian sẵn sàng lúc mount UBIFS làm root file system.
+Tập hợp kernel command-line parameter này yêu cầu kernel attach device mtd4 vào ubi0 và mount UBI device kết quả làm root file system. Nếu gặp khó khăn, hãy bảo đảm bạn thêm một option `rootdelay` phù hợp vào kernel command line. Trong bài thực hành này, cần có `rootdelay=1` để UBI layer và UBIFS layer có đủ thời gian sẵn sàng khi đến lúc mount UBIFS làm root file system.
 
 ## 10.5 Tổng kết
 
@@ -707,6 +707,6 @@ Tài liệu người dùng Redboot http://ecos.sourceware.org/ecos/docs-latest/r
 
 Common Flash Memory Interface Specification AMD Corporation www.amd.com/us-en/assets/content\_type/DownloadableAssets/cfi\_r20.pdf
 
-[^1]: Có thể dễ re-create file system tối thiểu cho bài tập bằng ví dụ Listing 6-1.
+[^1]: Bạn có thể dễ dàng re-create một file system tối thiểu cho bài thực hành này bằng cách sử dụng ví dụ trong Listing 6-1.
 
-[^2]: Kernel có thể cấu hình hoạt động với MTD file system wrong-endian, đánh đổi hiệu năng giảm. Trong một số cấu hình (như thiết kế multiprocessor), đây có thể là tính năng hữu ích.
+[^2]: Kernel có thể được cấu hình để hoạt động với một MTD file system wrong-endian, nhưng phải đánh đổi bằng hiệu năng thấp hơn. Trong một số cấu hình, chẳng hạn thiết kế multiprocessor, đây có thể là một tính năng hữu ích.

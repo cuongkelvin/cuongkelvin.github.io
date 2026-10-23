@@ -4,7 +4,7 @@
 
 Sau khi trình bày char driver và block driver, giờ ta sẵn sàng bước sang networking. Network interface là class tiêu chuẩn thứ ba của Linux device; chương này mô tả cách chúng tương tác với phần còn lại của kernel.
 
-Vai trò network interface trong hệ thống giống mounted block device. Block device đăng ký disk và method với kernel, rồi “truyền” và “nhận” block theo yêu cầu bằng request function. Tương tự, network interface phải đăng ký trong kernel data structure cụ thể để được gọi khi trao đổi packet với bên ngoài.
+Vai trò của network interface trong hệ thống tương tự một mounted block device. Block device đăng ký các disk và method của nó với kernel, sau đó “truyền” và “nhận” block theo yêu cầu thông qua request function. Tương tự, network interface phải đăng ký chính nó trong các kernel data structure cụ thể để được gọi khi packet được trao đổi với bên ngoài.
 
 Có vài khác biệt quan trọng giữa mounted disk và packet-delivery interface. Trước hết, disk tồn tại dưới dạng special file trong directory /dev, còn network interface không có entry point như vậy. File operation thông thường (read, write, v.v.) không có ý nghĩa khi áp dụng cho network interface, nên không thể áp dụng cách tiếp cận Unix “mọi thứ đều là file”. Vì vậy network interface tồn tại trong namespace riêng và export tập operation khác.
 
@@ -12,7 +12,7 @@ Dù bạn có thể phản biện rằng ứng dụng dùng system call read và
 
 Nhưng khác biệt quan trọng nhất là block driver chỉ hoạt động đáp ứng request từ kernel, còn network driver nhận packet bất đồng bộ từ bên ngoài. Vì vậy, trong khi block driver được yêu cầu gửi buffer về kernel, network device yêu cầu đẩy incoming packet vào kernel. Kernel interface cho network driver được thiết kế cho mode hoạt động khác biệt này.
 
-Network driver cũng phải sẵn sàng hỗ trợ các tác vụ quản trị như đặt địa chỉ, sửa transmission parameter, duy trì thống kê traffic và lỗi. API cho network driver phản ánh nhu cầu này, do đó hơi khác interface đã thấy đến đây.
+Network driver cũng phải sẵn sàng hỗ trợ một số tác vụ quản trị, chẳng hạn thiết lập địa chỉ, sửa đổi transmission parameter và duy trì số liệu thống kê traffic cùng lỗi. API dành cho network driver phản ánh nhu cầu này, vì vậy trông hơi khác các interface mà chúng ta đã thấy đến đây.
 
 Network subsystem của Linux kernel được thiết kế hoàn toàn độc lập protocol. Điều này áp dụng cho cả networking protocol (Internet protocol \[IP\] so với IPX hoặc protocol khác) và hardware protocol (Ethernet so với token ring, v.v.). Tương tác đúng giữa network driver và kernel xử lý mỗi lần một network packet; nhờ đó che giấu vấn đề protocol khỏi driver và che giấu physical transmission khỏi protocol một cách gọn gàng.
 
@@ -26,7 +26,7 @@ Thuật ngữ “header” cũng cần nhắc ngắn gọn. Header là tập byt
 
 ## Cách thiết kế snull
 
-Phần này trình bày design concept dẫn đến snull network interface. Dù thông tin có vẻ ít hữu ích, không hiểu có thể gây vấn đề khi thử sample code.
+Mục này thảo luận về các khái niệm thiết kế dẫn đến snull network interface. Mặc dù thông tin này có vẻ ít hữu ích, việc không hiểu nó có thể gây ra vấn đề khi bạn thử nghiệm với code mẫu.
 
 Quyết định thiết kế đầu tiên và quan trọng nhất là sample interface độc lập với hardware thực, như phần lớn sample code trong sách. Ràng buộc dẫn đến thứ giống loopback interface. Tuy nhiên snull không phải loopback interface; nó mô phỏng hội thoại với remote host thực để minh họa rõ hơn tác vụ viết network driver. Linux loopback driver thực ra khá đơn giản, nằm trong drivers/net/loopback.c.
 
@@ -46,7 +46,7 @@ Snull module tạo hai interface. Chúng khác loopback đơn giản ở chỗ b
 
 - `local0` là IP address gán cho interface `sn0`; thuộc `snullnet0`. Address gắn với `sn1` là `local1`. `local0` và `local1` phải khác ở least significant bit của octet thứ ba và ở octet thứ tư.
 
-- `remote0` là host trong `snullnet0`, có octet thứ tư giống `local1`. Mọi packet gửi tới `remote0` đến `local1` sau khi network address được interface code sửa. Host `remote1` thuộc `snullnet1`, có octet thứ tư giống `local0`.
+- `remote0` là một host trong `snullnet0`, có octet thứ tư giống octet thứ tư của `local1`. Mọi packet gửi đến `remote0` đều đến `local1` sau khi network address của packet được interface code sửa đổi. Host `remote1` thuộc `snullnet1`, có octet thứ tư giống octet thứ tư của `local0`.
 
 Hoạt động snull interface thể hiện ở Hình 17-1, hostname gắn với mỗi interface in gần interface name.
 
@@ -70,9 +70,9 @@ Sau đây là host number có thể thêm vào /etc/hosts:
 192.168.1.1   remote1
 ```
 
-Đặc điểm quan trọng là host portion của `local0` giống `remote1`, host portion của `local1` giống `remote0`. Có thể dùng số hoàn toàn khác miễn giữ quan hệ này.
+Đặc điểm quan trọng của các số này là host portion của `local0` giống host portion của `remote1`, và host portion của `local1` giống host portion của `remote0`. Bạn có thể sử dụng các số hoàn toàn khác miễn là vẫn giữ được mối quan hệ này.
 
-Tuy nhiên hãy cẩn thận nếu computer đã nối mạng. Số chọn có thể là Internet hoặc intranet number thực; gán chúng cho interface ngăn giao tiếp với host thực. Ví dụ dù số trên không phải routable Internet number, private network có thể đã dùng chúng.
+Tuy nhiên, hãy cẩn thận nếu máy tính của bạn đã kết nối với một mạng. Các số bạn chọn có thể là địa chỉ Internet hoặc intranet thực; việc gán chúng cho interface sẽ ngăn giao tiếp với các host thực đó. Ví dụ, mặc dù các số vừa nêu không phải địa chỉ có thể được route trên Internet, chúng có thể đã được sử dụng trong private network của bạn.
 
 Dù chọn số nào, có thể thiết lập interface đúng để hoạt động bằng các lệnh:
 
@@ -97,7 +97,7 @@ morgana% ping -c 2 remote1
 2 packets transmitted, 2 packets received, 0% packet loss
 ```
 
-Lưu ý không thể đến “host” khác thuộc hai network vì computer loại packet sau khi sửa address và nhận packet. Ví dụ packet tới 192.168.0.32 đi ra qua `sn0`, xuất hiện lại tại `sn1` với destination address 192.168.1.32, không phải local address của host computer.
+Lưu ý rằng bạn không thể tiếp cận bất kỳ “host” nào khác thuộc hai mạng này, vì máy tính sẽ loại bỏ packet sau khi địa chỉ đã được sửa đổi và packet đã được nhận. Ví dụ, một packet gửi đến 192.168.0.32 sẽ đi ra qua `sn0` và xuất hiện trở lại tại `sn1` với destination address là 192.168.1.32, không phải một địa chỉ cục bộ của máy tính host.
 
 ### Physical Transport của Packet
 
@@ -107,7 +107,7 @@ Snull mô phỏng Ethernet vì phần lớn network hiện có—ít nhất segm
 
 Lợi thế cuối của việc dùng Ethernet setup cho snull là có thể chạy tcpdump trên interface để xem packet đi qua. Quan sát interface bằng tcpdump là cách hữu ích để thấy hai interface hoạt động.
 
-Như đã nói, snull chỉ làm việc với IP packet. Giới hạn do snull xem bên trong và thậm chí sửa packet để code hoạt động. Code sửa source, destination và checksum trong IP header của mỗi packet mà không kiểm tra có thực sự mang IP information không.
+Như đã đề cập trước đó, snull chỉ hoạt động với IP packet. Giới hạn này xuất phát từ việc snull xem xét nội dung packet và thậm chí sửa đổi chúng để code hoạt động. Code sửa đổi source, destination và checksum trong IP header của mỗi packet mà không kiểm tra xem packet có thực sự mang thông tin IP hay không.
 
 Sửa dữ liệu quick-and-dirty này phá hỏng packet non-IP. Muốn giao protocol khác qua snull phải sửa source code của module.
 
@@ -125,7 +125,7 @@ Mỗi interface được mô tả bằng một `struct net_device`, định ngh�
 struct net_device *snull_devs[2];
 ```
 
-Structure `net_device`, như nhiều kernel structure khác, chứa kobject nên được reference-counted và export qua sysfs. Như structure tương tự, phải cấp phát động. Kernel function cấp phát là alloc\_netdev, có prototype:
+Structure `net_device`, giống nhiều kernel structure khác, chứa một kobject nên được reference-counted và export qua sysfs. Giống các structure tương tự, nó phải được cấp phát động. Kernel function được cung cấp để thực hiện việc cấp phát này là alloc\_netdev, có prototype như sau:
 
 ```c
 struct net_device *alloc_netdev(int sizeof_priv,
@@ -154,7 +154,7 @@ struct net_device *alloc_etherdev(int sizeof_priv);
 
 Function cấp phát network device dùng `eth%d` cho đối số name. Cung cấp initialization function riêng (ether\_setup), đặt một số field `net_device` bằng giá trị phù hợp Ethernet device. Vì vậy không có initialization function driver-supplied cho alloc\_etherdev; driver chỉ cần tự khởi tạo theo yêu cầu ngay sau cấp phát thành công. Người viết driver cho device type khác có thể dùng helper function như alloc\_fcdev (định nghĩa trong \<linux/fcdevice.h\>) cho fiber-channel device, alloc\_fddidev (\<linux/fddidevice.h\>) cho FDDI device, hoặc alloc\_trdev (\<linux/trdevice.h\>) cho token ring device.
 
-Snull có thể dùng alloc\_etherdev không vấn đề; ta chọn alloc\_netdev để minh họa interface lower-level và kiểm soát tên gán cho interface.
+snull có thể sử dụng alloc\_etherdev mà không gặp vấn đề; chúng ta chọn alloc\_netdev để minh họa interface lower-level và có quyền kiểm soát tên được gán cho interface.
 
 Khi structure `net_device` đã khởi tạo, hoàn tất quá trình chỉ cần truyền structure cho register\_netdev. Trong snull, lời gọi như sau:
 
@@ -169,7 +169,7 @@ Cảnh báo thông thường áp dụng: ngay khi gọi register\_netdev, driver
 
 ### Khởi tạo từng Device
 
-Ta đã xem cấp phát và đăng ký structure `net_device` nhưng bỏ qua bước trung gian khởi tạo hoàn chỉnh. Lưu ý `struct net_device` luôn được dựng tại runtime; không thể thiết lập tại compile time như structure `file_operations` hay `block_device_operations`. Phải khởi tạo xong trước khi gọi register\_netdev. Structure `net_device` lớn và phức tạp; may thay kernel lo một số Ethernetwide default qua function ether\_setup (được alloc\_etherdev gọi).
+Chúng ta đã xem xét việc cấp phát và đăng ký các structure `net_device`, nhưng đã bỏ qua bước trung gian là khởi tạo đầy đủ structure đó. Lưu ý rằng `struct net_device` luôn được tạo tại runtime; nó không thể được thiết lập tại compile time theo cách của structure `file_operations` hoặc `block_device_operations`. Việc khởi tạo phải hoàn tất trước khi gọi register\_netdev. Structure `net_device` lớn và phức tạp; may mắn là kernel xử lý một số giá trị mặc định chung cho Ethernet thông qua function ether\_setup (được alloc\_etherdev gọi).
 
 Vì snull dùng alloc\_netdev, nó có initialization function riêng. Phần core của function (snull\_init) như sau:
 
@@ -192,7 +192,7 @@ dev->features        |= NETIF_F_NO_CSUM;
 dev->hard_header_cache = NULL;      /* Disable caching */
 ```
 
-Code trên khởi tạo structure `net_device` khá thông thường, chủ yếu lưu pointer đến các driver function. Điểm khác thường duy nhất là đặt `IFF_NOARP` trong flag. Chỉ định interface không dùng được Address Resolution Protocol (ARP). ARP là Ethernet protocol low-level; nhiệm vụ chuyển IP address sang Ethernet medium access control (MAC) address. Vì hệ thống “remote” snull mô phỏng không thực sự tồn tại, không ai trả lời ARP request. Thay vì làm phức tạp snull bằng triển khai ARP, ta đánh dấu interface không xử lý protocol đó. Gán `hard_header_cache` cũng vì lý do tương tự: tắt cache ARP reply (không tồn tại) trên interface. Chủ đề trình bày chi tiết trong phần “MAC Address Resolution” phía sau chương.
+Code trên thực hiện việc khởi tạo structure `net_device` khá thông thường, chủ yếu là lưu các pointer trỏ đến những driver function khác nhau. Điểm khác thường duy nhất là thiết lập `IFF_NOARP` trong các flag. Điều này chỉ định rằng interface không thể sử dụng Address Resolution Protocol (ARP). ARP là một Ethernet protocol low-level, có nhiệm vụ chuyển IP address thành Ethernet medium access control (MAC) address. Vì các hệ thống “remote” do snull mô phỏng không thực sự tồn tại, không có hệ thống nào trả lời ARP request thay cho chúng. Thay vì làm snull phức tạp hơn bằng cách bổ sung một cách triển khai ARP, chúng ta chọn đánh dấu interface là không thể xử lý protocol đó. Phép gán cho `hard_header_cache` cũng có lý do tương tự: nó vô hiệu hóa việc cache các ARP reply không tồn tại trên interface này. Chủ đề này được thảo luận chi tiết trong mục “MAC Address Resolution” ở phần sau của chương.
 
 Initialization code cũng đặt hai field (`tx_timeout` và `watchdog_timeo`) liên quan xử lý transmission timeout. Ta trình bày kỹ trong phần “Transmission Timeout”.
 
@@ -229,7 +229,7 @@ snull_rx_ints(dev, 1);      /* enable receive interrupts */
 
 ### Unload Module
 
-Không có gì đặc biệt khi unload module. Module cleanup function chỉ hủy đăng ký interface, cleanup nội bộ theo yêu cầu và trả structure `net_device` về hệ thống:
+Không có điều gì đặc biệt xảy ra khi module được unload. Module cleanup function chỉ hủy đăng ký các interface, thực hiện mọi thao tác dọn dẹp nội bộ cần thiết và trả structure `net_device` về hệ thống:
 
 ```c
 void snull_cleanup(void)
@@ -253,7 +253,7 @@ Lưu ý cleanup nội bộ (trong snull\_teardown\_pool) không được xảy r
 
 ## Chi tiết Structure net\_device
 
-Structure `net_device` nằm ở trung tâm network driver layer và đáng được mô tả đầy đủ. Danh sách mô tả mọi field, chủ yếu để tham khảo thay vì học thuộc. Phần còn lại chương mô tả ngắn từng field khi dùng trong sample code, nên không cần liên tục quay lại phần này.
+Structure `net_device` nằm ở trung tâm của network driver layer và cần được mô tả đầy đủ. Danh sách này mô tả tất cả field, chủ yếu để tham khảo thay vì học thuộc. Phần còn lại của chương mô tả ngắn gọn mỗi field ngay khi nó được sử dụng trong code mẫu, vì vậy bạn không cần liên tục quay lại mục này.
 
 ### Thông tin toàn cục
 
@@ -261,11 +261,11 @@ Phần đầu `struct net_device` gồm field sau:
 
 `char name[IFNAMSIZ]`;
 
-Tên device. Nếu tên driver đặt chứa format string `%d`, register\_netdev thay bằng số để tạo tên duy nhất; số gán bắt đầu từ `0`.
+Tên của device. Nếu tên do driver thiết lập chứa format string `%d`, register\_netdev thay thế nó bằng một số để tạo tên duy nhất; các số được gán bắt đầu từ `0`.
 
 `unsigned long state`;
 
-Device state. Field chứa một số flag. Driver thường không thao tác trực tiếp mà dùng tập utility function cung cấp sẵn. Ta sẽ trình bày khi đi vào driver operation.
+Trạng thái của device. Field này chứa một số flag. Driver thường không thao tác trực tiếp với các flag này; thay vào đó, một tập utility function đã được cung cấp. Các function này sẽ sớm được thảo luận khi chúng ta tìm hiểu driver operation.
 
 `struct net_device *next`;
 
@@ -273,11 +273,11 @@ Pointer đến device tiếp theo trong global linked list. Driver không nên c
 
 `int (*init)(struct net_device *dev)`;
 
-Initialization function. Nếu pointer được đặt, register\_netdev gọi function để hoàn tất khởi tạo structure `net_device`. Phần lớn network driver hiện đại không dùng nữa; thay vào đó khởi tạo trước đăng ký interface.
+Một initialization function. Nếu pointer này được thiết lập, function được register\_netdev gọi để hoàn tất việc khởi tạo structure `net_device`. Phần lớn network driver hiện đại không còn sử dụng function này; thay vào đó, việc khởi tạo được thực hiện trước khi đăng ký interface.
 
 ### Thông tin Hardware
 
-Các field sau chứa thông tin hardware low-level cho device tương đối đơn giản. Chúng sót lại từ thời đầu Linux networking; phần lớn driver hiện đại có dùng (có thể trừ `if_port`). Liệt kê ở đây cho đầy đủ.
+Các field sau chứa thông tin hardware low-level cho những device tương đối đơn giản. Chúng là phần còn lại từ thời kỳ đầu của Linux networking; phần lớn driver hiện đại có sử dụng chúng (có thể ngoại trừ `if_port`). Chúng được liệt kê ở đây để bảo đảm đầy đủ.
 
 `unsigned long rmem_end`;
 
@@ -291,7 +291,7 @@ Thông tin device memory. Field giữ địa chỉ bắt đầu/kết thúc shar
 
 `unsigned long base_addr`;
 
-I/O base address của network interface. Field này như field trước, được driver gán khi probe device. Lệnh ifconfig hiển thị hoặc sửa giá trị hiện tại. `base_addr` có thể gán rõ ràng trên kernel command line lúc boot (qua tham số `netdev=`) hoặc khi load module. Field này, như memory field trên, không được kernel dùng.
+I/O base address của network interface. Field này, giống các field trước, được driver gán trong quá trình probe device. Lệnh ifconfig có thể được sử dụng để hiển thị hoặc sửa đổi giá trị hiện tại. `base_addr` có thể được gán tường minh trên kernel command line khi hệ thống boot (qua parameter `netdev=`) hoặc khi load module. Field này, giống các memory field mô tả ở trên, không được kernel sử dụng.
 
 `unsigned char irq`;
 
@@ -303,11 +303,11 @@ Port đang dùng trên multiport device. Ví dụ dùng với device hỗ trợ 
 
 `unsigned char dma`;
 
-DMA channel device cấp phát. Chỉ có ý nghĩa với peripheral bus nhất định như ISA. Không dùng ngoài device driver trừ mục đích thông tin (trong ifconfig).
+DMA channel do device cấp phát. Field này chỉ có ý nghĩa với một số peripheral bus, chẳng hạn ISA. Ngoài chính device driver, nó chỉ được sử dụng để cung cấp thông tin (trong ifconfig).
 
 ### Thông tin Interface
 
-Phần lớn thông tin interface được function ether\_setup đặt đúng (hoặc setup function khác phù hợp hardware type). Ethernet card có thể dựa vào general-purpose function này cho phần lớn field, nhưng `flags` và `dev_addr` riêng device và phải gán rõ tại initialization time.
+Phần lớn thông tin về interface được function ether\_setup thiết lập đúng, hoặc bởi setup function khác phù hợp với hardware type cụ thể. Ethernet card có thể dựa vào function general-purpose này cho phần lớn các field, nhưng `flags` và `dev_addr` là các field riêng của device và phải được gán tường minh tại thời điểm khởi tạo.
 
 Một số interface non-Ethernet dùng helper function tương tự ether\_setup. drivers/net/net\_init.c export một số function như:
 
@@ -351,7 +351,7 @@ Hardware type của interface. ARP dùng field `type` xác định hardware addr
 
 `unsigned char dev_addr[MAX_ADDR_LEN]`;
 
-Hardware (MAC) address length và device hardware address. Ethernet address dài sáu octet (đang nói hardware ID của interface board), broadcast address gồm sáu octet `0xff`; ether\_setup bảo đảm giá trị đúng. Device address phải đọc từ interface board theo cách device-specific, driver copy vào `dev_addr`. Hardware address dùng tạo Ethernet header đúng trước khi giao packet cho driver truyền. Snull device không dùng physical interface, tự tạo hardware address.
+Độ dài hardware (MAC) address và các hardware address của device. Địa chỉ Ethernet dài sáu octet (ở đây chúng ta nói đến hardware ID của interface board), còn broadcast address gồm sáu octet `0xff`; ether\_setup bảo đảm các giá trị này đúng. Ngược lại, device address phải được đọc từ interface board theo cách device-specific, và driver cần sao chép nó vào `dev_addr`. Hardware address được dùng để tạo Ethernet header đúng trước khi packet được chuyển cho driver để truyền. snull device không sử dụng physical interface và tự tạo hardware address riêng.
 
 `unsigned short flags`;
 
@@ -383,7 +383,7 @@ Flag báo interface nối tới link point-to-point. Driver hoặc đôi khi ifc
 
 `IFF_NOARP`
 
-Nghĩa là interface không thực hiện ARP được. Ví dụ interface point-to-point không cần ARP vì chỉ thêm traffic mà không lấy thông tin hữu ích. Snull không có ARP capability nên đặt flag.
+Điều này có nghĩa là interface không thể thực hiện ARP. Ví dụ, các interface point-to-point không cần chạy ARP vì nó chỉ tạo thêm traffic mà không thu được thông tin hữu ích. snull hoạt động mà không có khả năng ARP, vì vậy nó thiết lập flag này.
 
 `IFF_PROMISC`
 
@@ -407,7 +407,7 @@ Load equalization code dùng các flag này. Interface driver không cần biế
 
 `IFF_AUTOMEDIA`
 
-Flag báo device có khả năng chuyển giữa nhiều media type; ví dụ unshielded twisted pair (UTP) và coaxial Ethernet cable. Nếu `IFF_AUTOMEDIA` đặt, device tự chọn medium phù hợp. Thực tế kernel không dùng cả hai flag.
+Các flag này cho biết device có khả năng chuyển đổi giữa nhiều media type, chẳng hạn unshielded twisted pair (UTP) và cáp Ethernet đồng trục. Nếu `IFF_AUTOMEDIA` được thiết lập, device tự động chọn medium phù hợp. Trong thực tế, kernel không sử dụng flag nào trong hai flag này.
 
 `IFF_DYNAMIC`
 
@@ -415,7 +415,7 @@ Driver đặt flag này để chỉ báo address của interface có thể đổ
 
 `IFF_RUNNING`
 
-Flag chỉ báo interface up và đang chạy. Chủ yếu để tương thích BSD; kernel ít dùng. Phần lớn network driver không cần quan tâm `IFF_RUNNING`.
+Flag này cho biết interface ở trạng thái up và đang hoạt động. Nó chủ yếu tồn tại để tương thích với BSD; kernel ít sử dụng nó. Phần lớn network driver không cần quan tâm đến `IFF_RUNNING`.
 
 `IFF_NOTRAILERS`
 
@@ -423,15 +423,15 @@ Linux không dùng flag nhưng giữ để tương thích BSD.
 
 Khi chương trình đổi `IFF_UP`, device method open hoặc stop được gọi. Hơn nữa khi `IFF_UP` hay flag khác sửa, method set\_multicast\_list được gọi. Nếu driver cần hành động đáp ứng sửa flag, phải thực hiện trong set\_multicast\_list. Ví dụ khi đặt/xóa `IFF_PROMISC`, set\_multicast\_list phải thông báo onboard hardware filter. Trách nhiệm device method trình bày trong phần “Multicast”.
 
-Driver đặt field `features` của structure `net_device` để báo kernel về special hardware capability của interface. Ta trình bày vài feature; số khác ngoài phạm vi sách. Tập đầy đủ là:
+Driver thiết lập field `features` của structure `net_device` để thông báo cho kernel về các khả năng hardware đặc biệt của interface này. Chúng ta sẽ thảo luận một số feature; những feature khác nằm ngoài phạm vi cuốn sách. Tập đầy đủ gồm:
 
 `NETIF_F_SG`
 
 `NETIF_F_FRAGLIST`
 
-Cả hai flag điều khiển scatter/gather I/O. Nếu interface truyền được packet chia thành nhiều memory segment riêng, nên đặt `NETIF_F_SG`. Dĩ nhiên phải thực sự triển khai scatter/gather I/O (mô tả trong phần “Scatter/Gather I/O”). `NETIF_F_FRAGLIST` cho biết interface xử lý được packet đã fragment; chỉ loopback driver làm vậy trong 2.6.
+Cả hai flag này điều khiển việc sử dụng scatter/gather I/O. Nếu interface có thể truyền một packet đã được chia thành nhiều memory segment riêng biệt, bạn cần thiết lập `NETIF_F_SG`. Dĩ nhiên, bạn phải thực sự triển khai scatter/gather I/O (chúng ta mô tả cách thực hiện trong mục “Scatter/Gather I/O”). `NETIF_F_FRAGLIST` cho biết interface có thể xử lý các packet đã được phân mảnh; chỉ loopback driver thực hiện điều này trong phiên bản 2.6.
 
-Lưu ý kernel không thực hiện scatter/gather I/O tới device nếu nó không cung cấp hình thức checksumming nào. Vì nếu kernel phải duyệt fragmented packet (“nonlinear”) để tính checksum thì cũng có thể copy dữ liệu và gộp packet cùng lúc.
+Lưu ý rằng kernel không thực hiện scatter/gather I/O đến device của bạn nếu device không đồng thời cung cấp một hình thức tính checksum nào đó. Lý do là nếu kernel phải duyệt qua một packet đã phân mảnh (“nonlinear”) để tính checksum, nó cũng có thể sao chép dữ liệu và gộp packet cùng lúc.
 
 `NETIF_F_IP_CSUM`
 
@@ -463,11 +463,11 @@ Option mô tả hardware hỗ trợ 802.1q VLAN packet. VLAN support ngoài nộ
 
 Như char driver và block driver, mỗi network device khai báo function tác động lên nó. Operation thực hiện trên network interface liệt kê ở đây. Có thể để một số operation `NULL`; số khác thường không chạm tới vì ether\_setup gán method phù hợp.
 
-Device method cho network interface chia hai nhóm: cơ bản và tùy chọn. Method cơ bản gồm thứ cần để dùng interface; method tùy chọn triển khai chức năng nâng cao không bắt buộc. Sau đây là method cơ bản:
+Các device method cho network interface có thể được chia thành hai nhóm: cơ bản và tùy chọn. Các method cơ bản là những method cần thiết để có thể sử dụng interface; các method tùy chọn triển khai những chức năng nâng cao không bắt buộc. Sau đây là các method cơ bản:
 
 `int (*open)(struct net_device *dev)`;
 
-Mở interface. Interface được mở mỗi khi ifconfig kích hoạt. Method open phải đăng ký mọi system resource cần (I/O port, IRQ, DMA, v.v.), bật hardware và setup khác device yêu cầu.
+Mở interface. Interface được mở mỗi khi ifconfig kích hoạt nó. Method open cần đăng ký mọi system resource cần thiết (I/O port, IRQ, DMA, v.v.), bật hardware và thực hiện các bước thiết lập khác mà device yêu cầu.
 
 `int (*stop)(struct net_device *dev)`;
 
@@ -489,15 +489,15 @@ Function dựng lại hardware header sau khi ARP resolution hoàn tất nhưng 
 
 `void (*tx_timeout)(struct net_device *dev)`;
 
-Method networking code gọi khi packet transmission không hoàn tất trong khoảng hợp lý, giả định mất interrupt hoặc interface lock up. Phải xử lý vấn đề và tiếp tục packet transmission.
+Method được networking code gọi khi việc truyền packet không hoàn tất trong một khoảng thời gian hợp lý, với giả định rằng một interrupt đã bị bỏ lỡ hoặc interface bị treo. Method này cần xử lý vấn đề và tiếp tục truyền packet.
 
 `struct net_device_stats *(*get_stats)(struct net_device *dev)`;
 
-Method được gọi mỗi khi ứng dụng cần interface statistic. Ví dụ khi chạy ifconfig hoặc netstat -i. Triển khai mẫu snull giới thiệu trong phần “Thông tin thống kê”.
+Method này được gọi mỗi khi một ứng dụng cần lấy số liệu thống kê cho interface, chẳng hạn khi chạy ifconfig hoặc netstat -i. Một cách triển khai mẫu cho snull được giới thiệu trong mục “Thông tin thống kê”.
 
 `int (*set_config)(struct net_device *dev, struct ifmap *map)`;
 
-Đổi interface configuration. Method là entry point cấu hình driver. I/O address và interrupt number device đổi được tại runtime bằng set\_config. System administrator có thể dùng nếu không probe được interface. Driver hardware hiện đại thường không cần triển khai.
+Thay đổi cấu hình interface. Method này là entry point để cấu hình driver. I/O address và interrupt number của device có thể được thay đổi tại runtime bằng set\_config. System administrator có thể sử dụng khả năng này nếu không thể probe interface. Driver cho hardware hiện đại thường không cần triển khai method này.
 
 Device operation còn lại là tùy chọn:
 
@@ -509,7 +509,7 @@ Method driver NAPI-compliant cung cấp để vận hành interface trong polled
 
 `void (*poll_controller)(struct net_device *dev)`;
 
-Function yêu cầu driver kiểm tra event trên interface khi interrupt tắt. Dùng cho networking task in-kernel cụ thể như remote console và kernel debugging qua mạng.
+Function yêu cầu driver kiểm tra các event trên interface trong những tình huống interrupt bị vô hiệu hóa. Nó được sử dụng cho các tác vụ networking in-kernel cụ thể, chẳng hạn remote console và kernel debugging qua mạng.
 
 `int (*do_ioctl)(struct net_device *dev, struct ifreq *ifr, int cmd)`;
 
@@ -525,7 +525,7 @@ Function có thể triển khai nếu interface hỗ trợ đổi hardware addre
 
 `int (*change_mtu)(struct net_device *dev, int new_mtu)`;
 
-Function hành động nếu maximum transfer unit (MTU) của interface đổi. Nếu driver cần làm gì đặc biệt khi user đổi MTU, phải khai báo function riêng; nếu không default xử lý đúng. Snull có template nếu bạn quan tâm.
+Function thực hiện thao tác khi maximum transfer unit (MTU) của interface thay đổi. Nếu driver cần làm điều gì đặc biệt khi người dùng thay đổi MTU, nó cần khai báo function riêng; nếu không, function mặc định xử lý phù hợp. snull có một template cho function này nếu bạn quan tâm.
 
 `int (*header_cache) (struct neighbour *neigh, struct hh_cache *hh)`;
 
@@ -539,17 +539,17 @@ Method cập nhật destination address trong structure `hh_cache` để đáp �
 
 `int (*hard_header_parse) (struct sk_buff *skb, unsigned char *haddr)`;
 
-Method hard\_header\_parse trích source address từ packet trong `skb`, copy vào buffer tại `haddr`. Function trả độ dài address. Ethernet device thường dùng eth\_header\_parse.
+Method hard\_header\_parse trích xuất source address từ packet chứa trong `skb` và sao chép địa chỉ đó vào buffer tại `haddr`. Giá trị trả về của function là độ dài của địa chỉ đó. Ethernet device thường sử dụng eth\_header\_parse.
 
 ### Utility Field
 
-Data field còn lại của `struct net_device` được interface dùng giữ thông tin status hữu ích. Một số field được ifconfig và netstat dùng cung cấp user thông tin cấu hình hiện tại. Vì vậy interface phải gán giá trị:
+Các data field còn lại của `struct net_device` được interface dùng để lưu thông tin trạng thái hữu ích. Một số field được ifconfig và netstat sử dụng để cung cấp cho người dùng thông tin về cấu hình hiện tại. Vì vậy, interface cần gán giá trị cho các field này:
 
 `unsigned long trans_start`;
 
 `unsigned long last_rx`;
 
-Field giữ giá trị jiffies. Driver chịu trách nhiệm cập nhật lần lượt khi bắt đầu truyền và khi nhận packet. Networking subsystem dùng `trans_start` phát hiện transmitter lockup. `last_rx` hiện không dùng nhưng driver vẫn nên duy trì cho tương lai.
+Các field lưu giá trị jiffies. Driver chịu trách nhiệm cập nhật các giá trị này tương ứng khi bắt đầu truyền và khi nhận được một packet. Giá trị `trans_start` được networking subsystem sử dụng để phát hiện tình trạng bộ truyền bị treo. `last_rx` hiện chưa được sử dụng, nhưng driver vẫn cần duy trì field này để sẵn sàng cho việc sử dụng trong tương lai.
 
 `int watchdog_timeo`;
 
@@ -569,13 +569,13 @@ Field xử lý multicast transmission. `mc_count` là số item trong `mc_list`.
 
 `int xmit_lock_owner`;
 
-`xmit_lock` tránh nhiều lời gọi đồng thời tới function hard\_start\_xmit của driver. `xmit_lock_owner` là số CPU đã lấy `xmit_lock`. Driver không nên sửa các field.
+`xmit_lock` được dùng để tránh nhiều lời gọi đồng thời đến function hard\_start\_xmit của driver. `xmit_lock_owner` là số hiệu CPU đã lấy được `xmit_lock`. Driver không nên thay đổi các field này.
 
 Có field khác trong `struct net_device` nhưng network driver không dùng.
 
 ## Mở và đóng
 
-Driver có thể probe interface khi load module hoặc boot kernel. Tuy nhiên trước khi interface mang packet, kernel phải mở và gán address. Kernel mở/đóng interface đáp ứng lệnh ifconfig.
+Driver của chúng ta có thể probe interface khi load module hoặc khi kernel boot. Tuy nhiên, trước khi interface có thể vận chuyển packet, kernel phải mở interface và gán cho nó một địa chỉ. Kernel mở hoặc đóng interface để đáp ứng lệnh ifconfig.
 
 Khi ifconfig gán address cho interface, thực hiện hai tác vụ. Đầu tiên gán address bằng `ioctl(SIOCSIFADDR)` (Socket I/O Control Set Interface Address). Sau đó đặt bit `IFF_UP` trong `dev->flag` bằng `ioctl(SIOCSIFFLAGS)` (Socket I/O Control Set Interface Flags) để bật interface.
 
@@ -585,7 +585,7 @@ Tương tự khi tắt interface, ifconfig dùng `ioctl(SIOCSIFFLAGS)` xóa `IFF
 
 Cả hai device method trả `0` khi thành công và giá trị âm thông thường khi lỗi.
 
-Về code thực tế, driver phải làm nhiều tác vụ giống char/block driver. Open yêu cầu system resource cần và bảo interface đi lên; stop tắt interface và giải phóng resource. Tuy nhiên network driver phải làm thêm vài bước khi open.
+Xét về code thực tế, driver phải thực hiện nhiều tác vụ giống char driver và block driver. open yêu cầu các system resource cần thiết và yêu cầu interface chuyển sang trạng thái up; stop tắt interface và giải phóng system resource. Tuy nhiên, network driver phải thực hiện thêm một số bước tại thời điểm open.
 
 Đầu tiên phải copy hardware (MAC) address từ hardware device vào `dev->dev_addr` trước khi interface giao tiếp bên ngoài. Sau đó có thể copy hardware address vào device khi open. Snull software interface gán trong open; chỉ giả hardware number bằng ASCII string dài `ETH_ALEN`, độ dài Ethernet hardware address.
 
@@ -615,7 +615,7 @@ int snull_open(struct net_device *dev)
 }
 ```
 
-Như thấy, không có hardware thực thì method open ít việc. Method stop tương tự, chỉ đảo operation của open. Vì vậy function triển khai stop thường gọi close hoặc release.
+Như bạn thấy, khi không có hardware thực, method open có rất ít việc phải làm. Method stop cũng tương tự; nó chỉ đảo ngược các thao tác của open. Vì lý do này, function triển khai stop thường được gọi là close hoặc release.
 
 ```c
 int snull_release(struct net_device *dev)
@@ -633,7 +633,7 @@ Function:
 void netif_stop_queue(struct net_device *dev);
 ```
 
-ngược với netif\_start\_queue; đánh dấu device không truyền thêm packet được. Phải gọi khi đóng interface (trong method stop), nhưng cũng dùng tạm dừng truyền như phần tiếp theo.
+ngược với netif\_start\_queue: nó đánh dấu device là không thể truyền thêm packet. Function này phải được gọi khi đóng interface (trong method stop), nhưng cũng có thể được dùng để tạm dừng việc truyền, như được giải thích trong mục tiếp theo.
 
 ## Packet Transmission
 
@@ -643,9 +643,9 @@ Transmission là gửi packet qua network link. Mỗi khi kernel cần truyền 
 
 Pointer đến `sk_buff` thường gọi `skb`, ta theo cách này trong sample code lẫn văn bản.
 
-Socket buffer là structure phức tạp, kernel cung cấp function thao tác. Mô tả phía sau trong phần “Socket Buffer”; hiện vài thông tin cơ bản về `sk_buff` đủ viết driver hoạt động.
+Socket buffer là một structure phức tạp, và kernel cung cấp một số function để thao tác với nó. Các function được mô tả ở phần sau trong mục “Socket Buffer”; hiện tại, một vài thông tin cơ bản về `sk_buff` là đủ để chúng ta viết một driver hoạt động được.
 
-Socket buffer truyền tới hard\_start\_xmit chứa physical packet đúng như xuất hiện trên media, đầy đủ header transmission-level. Interface không cần sửa dữ liệu truyền. `skb->data` trỏ packet đang truyền, `skb->len` là độ dài theo octet. Phức tạp hơn nếu driver xử lý scatter/gather I/O; ta trình bày phần “Scatter/Gather I/O”.
+Socket buffer truyền cho hard\_start\_xmit chứa physical packet đúng như nó sẽ xuất hiện trên media, bao gồm đầy đủ các transmission-level header. Interface không cần sửa đổi dữ liệu được truyền. `skb->data` trỏ đến packet đang được truyền, và `skb->len` là độ dài của packet tính bằng octet. Tình huống này phức tạp hơn đôi chút nếu driver có thể xử lý scatter/gather I/O; chúng ta sẽ đề cập trong mục “Scatter/Gather I/O”.
 
 Sau đây là snull packet transmission code; bộ phận physical transmission tách thành function khác vì mỗi interface driver phải triển khai theo hardware cụ thể đang điều khiển:
 
@@ -676,19 +676,19 @@ int snull_tx(struct sk_buff *skb, struct net_device *dev)
 }
 ```
 
-Vì vậy transmission function chỉ sanity check packet và truyền dữ liệu qua function hardware-related. Tuy nhiên lưu ý cẩn thận khi packet ngắn hơn minimum length underlying media hỗ trợ (với snull là “Ethernet” ảo). Nhiều Linux network driver (và operating system khác) bị phát hiện leak data khi đó. Thay vì tạo security vulnerability như vậy, ta copy packet ngắn vào array riêng có thể zero-pad rõ ràng tới đủ độ dài media yêu cầu. (Có thể đặt dữ liệu lên stack an toàn vì minimum length—60 byte—khá nhỏ).
+Vì vậy, transmission function chỉ thực hiện một số sanity check trên packet và truyền dữ liệu qua function hardware-related. Tuy nhiên, cần chú ý cách xử lý khi packet cần truyền ngắn hơn độ dài tối thiểu mà media bên dưới hỗ trợ (với snull, đó là “Ethernet” ảo). Nhiều Linux network driver, cũng như driver trên các hệ điều hành khác, đã bị phát hiện làm rò rỉ dữ liệu trong tình huống này. Để tránh tạo ra lỗ hổng bảo mật đó, chúng ta sao chép các packet ngắn vào một array riêng, có thể được zero-pad tường minh đến đủ độ dài mà media yêu cầu. (Có thể đặt dữ liệu đó trên stack một cách an toàn vì độ dài tối thiểu, 60 byte, khá nhỏ).
 
-Hard\_start\_xmit phải trả `0` khi thành công; khi đó driver nhận trách nhiệm packet, cố bảo đảm truyền thành công và phải giải phóng skb cuối cùng. Giá trị khác 0 chỉ báo hiện không truyền được; kernel thử lại sau. Khi đó driver phải dừng queue đến khi tình huống gây lỗi được giải quyết.
+Giá trị trả về của hard\_start\_xmit phải là `0` khi thành công; tại thời điểm đó, driver đã nhận trách nhiệm đối với packet, cần cố gắng hết sức để bảo đảm việc truyền thành công và phải giải phóng skb khi kết thúc. Giá trị trả về khác 0 cho biết hiện chưa thể truyền packet; kernel sẽ thử lại sau. Trong trường hợp này, driver cần dừng queue cho đến khi tình huống gây thất bại được giải quyết.
 
-Function truyền “hardware-related” (snull\_hw\_tx) bỏ qua ở đây vì hoàn toàn triển khai thủ thuật snull device, gồm sửa source/destination address, ít hữu ích cho người viết network driver thực. Dĩ nhiên có trong sample source cho người muốn xem hoạt động.
+Function truyền “hardware-related” (snull\_hw\_tx) không được trình bày ở đây vì nó chỉ tập trung triển khai các thủ thuật của snull device, bao gồm thao tác source address và destination address, nên ít hữu ích với người viết network driver thực. Dĩ nhiên, function này có trong source code mẫu dành cho những người muốn tìm hiểu cách nó hoạt động.
 
 ### Điều khiển Transmission Concurrency
 
-Function hard\_start\_xmit được spinlock (`xmit_lock`) trong structure `net_device` bảo vệ khỏi concurrent call. Tuy nhiên ngay khi trả về có thể gọi lại. Function trả khi software đã chỉ dẫn hardware truyền packet xong, nhưng hardware transmission có thể chưa hoàn tất. Snull không gặp vấn đề vì làm mọi việc bằng CPU, nên truyền packet xong trước khi function trả.
+Function hard\_start\_xmit được bảo vệ khỏi các lời gọi đồng thời bằng một spinlock (`xmit_lock`) trong structure `net_device`. Tuy nhiên, ngay sau khi function trả về, nó có thể được gọi lại. Function trả về khi software đã hoàn tất việc chỉ dẫn hardware về việc truyền packet, nhưng quá trình truyền bằng hardware nhiều khả năng chưa hoàn tất. Điều này không gây vấn đề cho snull, vì nó thực hiện mọi công việc bằng CPU nên việc truyền packet hoàn tất trước khi transmission function trả về.
 
-Ngược lại hardware interface thực truyền bất đồng bộ, có memory hữu hạn lưu outgoing packet. Khi memory hết (với hardware nhất định chỉ cần một outstanding packet), driver phải báo networking system không bắt đầu transmission nữa đến khi hardware sẵn sàng nhận dữ liệu mới.
+Ngược lại, các hardware interface thực truyền packet bất đồng bộ và chỉ có một lượng memory giới hạn để lưu outgoing packet. Khi memory đó cạn kiệt (với một số hardware, chỉ một packet đang chờ truyền cũng có thể gây ra điều này), driver cần yêu cầu networking system không bắt đầu thêm lần truyền nào cho đến khi hardware sẵn sàng nhận dữ liệu mới.
 
-Thông báo bằng lời gọi netif\_stop\_queue, function đã giới thiệu để dừng queue. Khi đã dừng, driver phải bố trí restart queue trong tương lai lúc lại nhận packet để truyền được. Phải gọi:
+Thông báo này được thực hiện bằng cách gọi netif\_stop\_queue, function đã được giới thiệu để dừng queue. Sau khi dừng queue, driver phải sắp xếp để khởi động lại queue vào một thời điểm trong tương lai, khi nó lại có khả năng nhận packet để truyền. Để làm vậy, driver cần gọi:
 
 ```c
 void netif_wake_queue(struct net_device *dev);
@@ -696,9 +696,9 @@ void netif_wake_queue(struct net_device *dev);
 
 Function giống netif\_start\_queue nhưng còn thúc networking system bắt đầu truyền packet lại.
 
-Phần lớn network hardware hiện đại duy trì internal queue với nhiều packet cần truyền để đạt hiệu năng mạng tốt nhất. Driver phải hỗ trợ nhiều outstanding transmission tại mỗi thời điểm, nhưng device memory có thể đầy dù hardware hỗ trợ nhiều outstanding transmission hay không. Mỗi khi device memory đầy đến mức không chứa được packet lớn nhất có thể, driver phải dừng queue đến khi lại có chỗ.
+Phần lớn network hardware hiện đại duy trì một internal queue chứa nhiều packet cần truyền; nhờ đó, chúng có thể đạt hiệu năng mạng tốt nhất. Network driver cho các device này phải hỗ trợ nhiều transmission đang chờ tại một thời điểm, nhưng device memory có thể đầy bất kể hardware có hỗ trợ nhiều outstanding transmission hay không. Mỗi khi device memory đầy đến mức không còn chỗ cho packet lớn nhất có thể, driver cần dừng queue cho đến khi lại có vùng trống.
 
-Nếu phải tắt packet transmission từ nơi khác function hard\_start\_xmit (có thể đáp ứng reconfiguration request), function cần dùng là:
+Nếu phải vô hiệu hóa việc truyền packet từ một vị trí ngoài function hard\_start\_xmit (chẳng hạn để đáp ứng một yêu cầu cấu hình lại), function bạn cần sử dụng là:
 
 ```c
 void netif_tx_disable(struct net_device *dev);
@@ -710,11 +710,11 @@ Function khá giống netif\_stop\_queue nhưng bảo đảm khi trả về, met
 
 Phần lớn driver làm việc với hardware thực phải chuẩn bị việc đôi khi hardware không phản hồi. Interface có thể quên đang làm gì, hoặc hệ thống mất interrupt. Vấn đề phổ biến với một số device thiết kế cho personal computer.
 
-Nhiều driver xử lý bằng timer; operation chưa xong khi timer hết thì có vấn đề. Network system thực chất là tổ hợp state machine phức tạp do nhiều timer điều khiển. Vì vậy networking code ở vị trí thuận lợi để phát hiện transmission timeout trong hoạt động thường lệ.
+Nhiều driver xử lý vấn đề này bằng cách thiết lập timer: nếu operation chưa hoàn tất khi timer hết hạn thì đã có vấn đề. Thực tế, network system là một tổ hợp phức tạp gồm các state machine được điều khiển bởi nhiều timer. Vì vậy, networking code có điều kiện thuận lợi để phát hiện transmission timeout trong quá trình hoạt động thường lệ.
 
-Do đó network driver không cần tự phát hiện. Chỉ cần đặt timeout period vào field `watchdog_timeo` của structure `net_device`. Khoảng theo jiffies phải đủ dài tính đến transmission delay bình thường (như collision do congestion trên network media).
+Do đó, network driver không cần tự phát hiện những vấn đề này. Thay vào đó, chúng chỉ cần thiết lập một timeout period trong field `watchdog_timeo` của structure `net_device`. Khoảng thời gian này, tính bằng jiffies, cần đủ dài để tính đến các transmission delay bình thường (chẳng hạn collision do congestion trên network media).
 
-Nếu system time hiện tại vượt `trans_start` của device ít nhất timeout period, networking layer cuối cùng gọi method tx\_timeout của driver. Method làm mọi việc cần để giải quyết và bảo đảm hoàn tất đúng transmission đã tiến hành. Đặc biệt driver không được mất dấu socket buffer networking code giao phó.
+Nếu thời gian hệ thống hiện tại vượt thời điểm `trans_start` của device ít nhất một timeout period, networking layer cuối cùng sẽ gọi method tx\_timeout của driver. Method này có nhiệm vụ thực hiện mọi thao tác cần thiết để giải quyết vấn đề và bảo đảm các transmission đã bắt đầu được hoàn tất đúng cách. Đặc biệt, driver không được mất dấu bất kỳ socket buffer nào mà networking code đã giao cho nó.
 
 Snull mô phỏng được transmitter lockup, điều khiển bằng hai tham số load-time:
 
@@ -726,7 +726,7 @@ static int timeout = SNULL_TIMEOUT;
 module_param(timeout, int, 0);
 ```
 
-Nếu load driver với `lockup=n`, mô phỏng lockup mỗi `n` packet truyền, field `watchdog_timeo` đặt bằng `timeout` cho trước. Khi mô phỏng, snull cũng gọi netif\_stop\_queue ngăn thử truyền khác.
+Nếu driver được load với parameter `lockup=n`, một lockup được mô phỏng sau mỗi `n` packet được truyền, và field `watchdog_timeo` được đặt bằng giá trị `timeout` cho trước. Khi mô phỏng lockup, snull cũng gọi netif\_stop\_queue để ngăn các lần thử truyền khác xảy ra.
 
 Snull transmission timeout handler như sau:
 
@@ -745,13 +745,13 @@ void snull_tx_timeout (struct net_device *dev)
 }
 ```
 
-Khi transmission timeout, driver phải đánh dấu lỗi trong interface statistic và bố trí reset device về trạng thái hợp lý để truyền packet mới. Trong snull, driver gọi snull\_interrupt bù interrupt “thiếu” và restart transmit queue bằng netif\_wake\_queue.
+Khi xảy ra transmission timeout, driver phải ghi nhận lỗi trong số liệu thống kê của interface và sắp xếp reset device về trạng thái hợp lệ để có thể truyền packet mới. Khi timeout xảy ra trong snull, driver gọi snull\_interrupt để bù interrupt “bị thiếu” và khởi động lại transmit queue bằng netif\_wake\_queue.
 
 ### Scatter/Gather I/O
 
-Tạo packet truyền qua mạng đòi hỏi ghép nhiều phần. Packet data thường phải copy từ user space, cũng phải thêm header của các level network stack. Có thể cần copy khá nhiều dữ liệu. Tuy nhiên nếu interface sẽ truyền packet thực hiện được scatter/gather I/O, không cần ghép packet thành một chunk, tránh nhiều copy. Scatter/gather I/O cũng cho phép truyền “zero-copy” network data trực tiếp từ buffer user-space.
+Quá trình tạo một packet để truyền trên mạng bao gồm việc ghép nhiều phần. Dữ liệu packet thường phải được sao chép từ user space, và các header được sử dụng bởi nhiều level của network stack cũng phải được thêm vào. Việc ghép này có thể đòi hỏi sao chép khá nhiều dữ liệu. Tuy nhiên, nếu network interface sẽ truyền packet có thể thực hiện scatter/gather I/O, packet không cần được ghép thành một khối duy nhất và có thể tránh phần lớn việc sao chép đó. Scatter/gather I/O cũng cho phép truyền dữ liệu mạng theo kiểu “zero-copy” trực tiếp từ các buffer user-space.
 
-Kernel không chuyển scattered packet tới method hard\_start\_xmit trừ khi bit `NETIF_F_SG` được đặt trong field `features` của device structure. Nếu đã đặt, phải xem field “shared info” đặc biệt trong skb để biết packet gồm một hay nhiều fragment và tìm scattered fragment khi cần. Macro đặc biệt truy cập thông tin tên skb\_shinfo. Bước đầu khi truyền packet có thể fragment thường như:
+Kernel không chuyển các scattered packet đến method hard\_start\_xmit trừ khi bit `NETIF_F_SG` đã được thiết lập trong field `features` của device structure. Nếu đã thiết lập flag đó, bạn cần xem một field “shared info” đặc biệt trong skb để biết packet gồm một hay nhiều fragment và tìm các scattered fragment khi cần. Một macro đặc biệt tên là skb\_shinfo được cung cấp để truy cập thông tin này. Bước đầu khi truyền các packet có thể đã phân mảnh thường có dạng như sau:
 
 ```c
 if (skb_shinfo(skb)->nr_frags = = 0) {
@@ -759,7 +759,7 @@ if (skb_shinfo(skb)->nr_frags = = 0) {
 }
 ```
 
-Field `nr_frags` cho biết số fragment dùng để dựng packet. Nếu bằng `0`, packet tồn tại nguyên một phần, truy cập qua field `data` như thường. Nếu khác 0, driver phải duyệt và bố trí truyền từng fragment. Field `data` của skb structure trỏ thuận tiện tới fragment đầu (thay vì toàn packet như trường hợp chưa fragment). Độ dài fragment phải tính bằng cách trừ `skb->data_len` khỏi `skb->len` (vẫn chứa độ dài toàn packet). Fragment còn lại nằm trong array `frags` thuộc shared information structure; mỗi entry `frags` là structure `skb_frag_struct`:
+Field `nr_frags` cho biết số fragment đã được sử dụng để tạo packet. Nếu bằng `0`, packet tồn tại dưới dạng một khối duy nhất và có thể được truy cập qua field `data` như thông thường. Nếu khác 0, driver phải duyệt qua và sắp xếp truyền từng fragment riêng. Field `data` của skb structure trỏ đến fragment đầu tiên, thay vì toàn bộ packet như trong trường hợp không phân mảnh. Độ dài fragment phải được tính bằng cách trừ `skb->data_len` khỏi `skb->len` (field này vẫn chứa độ dài toàn bộ packet). Các fragment còn lại nằm trong một array tên là `frags` trong shared information structure; mỗi entry trong `frags` là một structure `skb_frag_struct`:
 
 ```c
 struct skb_frag_struct {
@@ -769,13 +769,13 @@ struct skb_frag_struct {
 };
 ```
 
-Như thấy, lại làm việc với structure `page` thay kernel virtual address. Driver phải lặp qua fragment, map mỗi cái cho DMA transfer, không quên fragment đầu được skb trỏ trực tiếp. Dĩ nhiên hardware phải ghép fragment và truyền thành một packet. Lưu ý nếu đặt feature flag `NETIF_F_HIGHDMA`, một số hoặc mọi fragment có thể trong high memory.
+Như bạn thấy, chúng ta lại làm việc với các structure `page` thay vì kernel virtual address. Driver cần lặp qua các fragment, map từng fragment cho một DMA transfer và không được quên fragment đầu tiên được skb trỏ đến trực tiếp. Dĩ nhiên, hardware phải ghép các fragment và truyền chúng thành một packet duy nhất. Lưu ý rằng nếu bạn đã thiết lập feature flag `NETIF_F_HIGHDMA`, một số hoặc tất cả fragment có thể nằm trong high memory.
 
 ## Packet Reception
 
-Nhận dữ liệu từ mạng khó hơn truyền vì phải cấp phát `sk`\_`buff` và giao upper layer trong atomic context. Network driver có thể triển khai hai mode nhận: interrupt driven và polled. Phần lớn dùng kỹ thuật interrupt-driven, ta trình bày trước. Một số driver cho adapter high-bandwidth cũng có thể triển khai polled; xem phần “Giảm Receive Interrupt”.
+Nhận dữ liệu từ mạng khó hơn truyền dữ liệu vì một `sk`\_`buff` phải được cấp phát và chuyển lên upper layer từ trong atomic context. Network driver có thể triển khai hai mode nhận packet: interrupt driven và polled. Phần lớn driver triển khai kỹ thuật interrupt-driven, và chúng ta trình bày kỹ thuật đó trước. Một số driver cho adapter high-bandwidth cũng có thể triển khai kỹ thuật polled; chúng ta xem xét cách này trong mục “Giảm Receive Interrupt”.
 
-Triển khai snull tách chi tiết “hardware” khỏi housekeeping device-independent. Vì vậy function snull\_rx gọi từ snull “interrupt” handler sau khi hardware nhận packet, đã nằm trong computer memory. Snull\_rx nhận pointer dữ liệu và độ dài packet; trách nhiệm duy nhất là gửi packet cùng thông tin bổ sung tới upper layer của networking code. Code độc lập cách lấy data pointer và length.
+Cách triển khai snull tách các chi tiết “hardware” khỏi công việc quản lý device-independent. Vì vậy, function snull\_rx được gọi từ snull “interrupt” handler sau khi hardware đã nhận packet và packet đã nằm trong memory của máy tính. snull\_rx nhận một pointer trỏ đến dữ liệu và độ dài packet; trách nhiệm duy nhất của nó là gửi packet cùng một số thông tin bổ sung lên upper layer của networking code. Code này độc lập với cách lấy data pointer và độ dài.
 
 ```c
 void snull_rx(struct net_device *dev, struct snull_packet *pkt)
@@ -812,13 +812,13 @@ Function đủ tổng quát để làm template cho network driver bất kỳ, n
 
 Bước đầu cấp phát buffer chứa packet. Lưu ý buffer allocation function (dev\_alloc\_skb) cần biết data length. Function dùng thông tin để cấp phát chỗ buffer. dev\_alloc\_skb gọi kmalloc với atomic priority nên dùng an toàn tại interrupt time. Kernel có interface khác cấp phát socket-buffer nhưng không cần giới thiệu tại đây; socket buffer giải thích chi tiết trong phần “Socket Buffer”.
 
-Dĩ nhiên phải kiểm tra return value dev\_alloc\_skb, snull có làm. Tuy nhiên gọi printk\_ratelimit trước khi báo lỗi. Sinh hàng trăm/nghìn console message mỗi giây dễ làm hệ thống chậm hoàn toàn và che nguồn lỗi thực; printk\_ratelimit giúp ngăn bằng cách trả `0` khi quá nhiều output ra console và cần chậm lại.
+Dĩ nhiên, giá trị trả về của dev\_alloc\_skb phải được kiểm tra, và snull có thực hiện việc đó. Tuy nhiên, chúng ta gọi printk\_ratelimit trước khi thông báo thất bại. Việc tạo hàng trăm hoặc hàng nghìn console message mỗi giây có thể làm toàn bộ hệ thống chậm đi và che khuất nguyên nhân thực sự của vấn đề; printk\_ratelimit giúp ngăn tình trạng này bằng cách trả về `0` khi đã có quá nhiều output gửi đến console và cần giảm tốc độ thông báo.
 
-Khi có pointer `skb` hợp lệ, packet data copy vào buffer bằng memcpy; function skb\_put cập nhật end-of-data pointer và trả pointer đến vùng mới tạo.
+Khi đã có pointer `skb` hợp lệ, dữ liệu packet được sao chép vào buffer bằng cách gọi memcpy; function skb\_put cập nhật end-of-data pointer trong buffer và trả về một pointer trỏ đến vùng vừa được tạo.
 
-Nếu viết driver high-performance cho interface làm được full bus-mastering I/O, có tối ưu đáng cân nhắc. Một số driver cấp phát socket buffer cho incoming packet trước khi nhận, rồi chỉ dẫn interface đặt packet data trực tiếp vào vùng socket buffer. Networking layer hợp tác bằng cách cấp phát mọi socket buffer trong vùng DMA-capable (có thể high memory nếu device đặt flag `NETIF_F_HIGHDMA`). Cách này tránh copy riêng để điền socket buffer nhưng phải cẩn thận buffer size vì chưa biết incoming packet lớn bao nhiêu. Triển khai method change\_mtu cũng quan trọng, cho phép driver đáp ứng thay đổi maximum packet size.
+Nếu đang viết một driver high-performance cho interface có thể thực hiện đầy đủ bus-mastering I/O, có một cách tối ưu đáng cân nhắc ở đây. Một số driver cấp phát socket buffer cho incoming packet trước khi nhận chúng, rồi chỉ dẫn interface đặt dữ liệu packet trực tiếp vào vùng của socket buffer. Networking layer hỗ trợ chiến lược này bằng cách cấp phát mọi socket buffer trong vùng DMA-capable (có thể nằm trong high memory nếu device có feature flag `NETIF_F_HIGHDMA` được thiết lập). Cách này tránh một thao tác sao chép riêng để điền socket buffer, nhưng đòi hỏi cẩn thận với kích thước buffer vì bạn không biết trước incoming packet lớn bao nhiêu. Việc triển khai method change\_mtu cũng quan trọng trong trường hợp này vì nó cho phép driver đáp ứng thay đổi về kích thước packet tối đa.
 
-Network layer cần thông tin rõ ràng để hiểu packet. Vì vậy phải gán field `dev` và `protocol` trước khi chuyển buffer lên trên. Ethernet support code export helper function (eth\_type\_trans) tìm giá trị phù hợp đặt vào `protocol`. Sau đó cần chỉ định cách checksumming sẽ hoặc đã thực hiện (snull không cần checksum). Policy có thể cho `skb->ip_summed` là:
+Network layer cần được cung cấp rõ một số thông tin trước khi có thể hiểu packet. Vì vậy, các field `dev` và `protocol` phải được gán trước khi buffer được chuyển lên trên. Ethernet support code export một helper function (eth\_type\_trans), tìm giá trị phù hợp để đặt vào `protocol`. Sau đó, chúng ta cần chỉ định việc tính checksum sẽ được thực hiện hoặc đã được thực hiện như thế nào trên packet (snull không cần tính checksum). Các policy có thể sử dụng cho `skb->ip_summed` là:
 
 `CHECKSUM_HW`
 
@@ -834,13 +834,13 @@ Không checksum. Policy trong snull và loopback interface.
 
 Có thể bạn tự hỏi vì sao phải chỉ định checksum status tại đây khi đã đặt flag trong field `features` của structure `net_device`. Vì flag `features` báo kernel cách device xử lý outgoing packet. Không dùng cho incoming packet, chúng phải được đánh dấu riêng.
 
-Cuối cùng driver cập nhật statistics counter ghi nhận đã nhận packet. Statistics structure có nhiều field; quan trọng nhất là `rx_packets`, `rx_bytes`, `tx_packets` và `tx_bytes`, chứa số packet nhận/truyền và tổng octet chuyển. Mọi field mô tả kỹ trong phần “Thông tin thống kê”.
+Cuối cùng, driver cập nhật statistics counter để ghi nhận đã nhận được một packet. Statistics structure gồm nhiều field; quan trọng nhất là `rx_packets`, `rx_bytes`, `tx_packets` và `tx_bytes`, chứa số packet nhận, số packet truyền và tổng số octet được truyền. Tất cả field được mô tả chi tiết trong mục “Thông tin thống kê”.
 
-Bước cuối nhận packet do netif\_rx thực hiện, giao socket buffer cho upper layer. netif\_rx thực tế trả integer; `NET_RX_SUCCESS` (`0`) nghĩa là nhận thành công; giá trị khác báo vấn đề. Ba return value (`NET_RX_CN_LOW`, `NET_RX_CN_MOD` và `NET_RX_CN_HIGH`) báo congestion tăng dần trong networking subsystem; `NET_RX_DROP` nghĩa là packet bị drop. Driver có thể dùng để ngừng đưa packet vào kernel khi congestion cao, nhưng thực tế phần lớn bỏ qua return value netif\_rx. Nếu viết driver cho device high-bandwidth và muốn phản ứng đúng congestion, tốt nhất triển khai NAPI, được trình bày sau phần ngắn về interrupt handler.
+Bước cuối cùng khi nhận packet được thực hiện bởi netif\_rx, chuyển socket buffer lên upper layer. netif\_rx thực tế trả về một giá trị integer; `NET_RX_SUCCESS` (`0`) nghĩa là packet đã được nhận thành công, còn bất kỳ giá trị nào khác đều cho biết có vấn đề. Ba giá trị trả về `NET_RX_CN_LOW`, `NET_RX_CN_MOD` và `NET_RX_CN_HIGH` cho biết các mức congestion tăng dần trong networking subsystem; `NET_RX_DROP` nghĩa là packet đã bị loại bỏ. Driver có thể dùng các giá trị này để dừng đưa packet vào kernel khi congestion cao, nhưng trong thực tế, phần lớn driver bỏ qua giá trị trả về của netif\_rx. Nếu đang viết driver cho device high-bandwidth và muốn phản ứng phù hợp với congestion, cách tốt nhất là triển khai NAPI, nội dung sẽ được trình bày sau phần thảo luận ngắn về interrupt handler.
 
 ## Interrupt Handler
 
-Phần lớn hardware interface điều khiển qua interrupt handler. Hardware interrupt processor để báo một trong hai event: packet mới đến hoặc truyền outgoing packet hoàn tất. Network interface cũng sinh interrupt báo lỗi, link status change, v.v.
+Phần lớn hardware interface được điều khiển thông qua interrupt handler. Hardware interrupt processor để báo hiệu một trong hai event: một packet mới đã đến hoặc việc truyền một outgoing packet đã hoàn tất. Network interface cũng có thể tạo interrupt để báo lỗi, thay đổi trạng thái link và các event khác.
 
 Interrupt routine thông thường phân biệt interrupt new-packet-arrived và thông báo done-transmitting bằng kiểm tra status register trên physical device. Snull tương tự nhưng status word triển khai bằng software trong `dev->priv`. Interrupt handler cho network interface như sau:
 
@@ -893,7 +893,7 @@ static void snull_regular_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 
 Tác vụ đầu handler là lấy pointer tới `struct net_device` đúng. Pointer thường từ `dev_id` nhận làm đối số.
 
-Phần thú vị của handler xử lý tình huống “transmission done”. Khi đó cập nhật thống kê, gọi dev\_kfree\_skb trả socket buffer (không cần nữa) về hệ thống. Thực tế có ba variant có thể gọi:
+Phần đáng chú ý của handler này xử lý tình huống “transmission done”. Trong trường hợp đó, số liệu thống kê được cập nhật và dev\_kfree\_skb được gọi để trả socket buffer không còn cần thiết về hệ thống. Thực tế, có ba biến thể của function này có thể được gọi:
 
 `dev_kfree_skb(struct sk_buff *skb)`;
 
@@ -913,17 +913,17 @@ Nhận packet khác truyền, không cần xử lý interrupt đặc biệt. Ch�
 
 ## Giảm Receive Interrupt
 
-Khi viết network driver như trên, processor bị interrupt cho mỗi packet interface nhận. Trong nhiều trường hợp đó là mode mong muốn, không vấn đề. Tuy nhiên interface High-bandwidth có thể nhận hàng nghìn packet mỗi giây. Với interrupt load đó, overall system performance có thể giảm.
+Khi network driver được viết như mô tả ở trên, processor bị interrupt cho mỗi packet mà interface nhận được. Trong nhiều trường hợp, đây là mode hoạt động mong muốn và không gây vấn đề. Tuy nhiên, High-bandwidth interface có thể nhận hàng nghìn packet mỗi giây. Với interrupt load như vậy, hiệu năng tổng thể của hệ thống có thể bị ảnh hưởng.
 
-Để cải thiện Linux performance trên hệ thống high-end, developer networking subsystem tạo interface thay thế (NAPI)[^1] dựa trên polling. “Polling” có thể là từ xấu với driver developer, thường coi kỹ thuật này không đẹp và kém hiệu quả. Nhưng chỉ kém hiệu quả nếu poll interface lúc không có việc. Khi hệ thống có interface high-speed xử lý heavy traffic, luôn còn packet để xử lý. Không cần interrupt processor trong tình huống này; chỉ cần định kỳ lấy packet mới từ interface.
+Để cải thiện hiệu năng Linux trên các hệ thống high-end, các nhà phát triển networking subsystem đã tạo một interface thay thế tên là NAPI[^1], dựa trên polling. “Polling” có thể bị xem là một từ không hay trong giới phát triển driver, vì họ thường coi các kỹ thuật polling là thiếu tinh tế và kém hiệu quả. Tuy nhiên, polling chỉ kém hiệu quả nếu interface bị poll khi không có công việc cần làm. Khi hệ thống có một interface high-speed xử lý lượng traffic lớn, luôn còn packet cần xử lý. Không cần interrupt processor trong những tình huống này; chỉ cần định kỳ thu thập các packet mới từ interface.
 
-Dừng receive interrupt giảm đáng kể processor load. Driver NAPI-compliant cũng có thể được yêu cầu không đưa packet vào kernel nếu packet chỉ bị networking code drop do congestion, giúp hiệu năng khi cần nhất. Vì nhiều lý do NAPI driver cũng ít làm sai thứ tự packet hơn.
+Dừng receive interrupt có thể giảm đáng kể tải cho processor. Các driver NAPI-compliant cũng có thể được yêu cầu không đưa packet vào kernel nếu những packet đó chỉ bị networking code loại bỏ do congestion; điều này còn giúp cải thiện hiệu năng đúng lúc cần thiết nhất. Vì nhiều lý do, NAPI driver cũng ít có khả năng làm thay đổi thứ tự packet hơn.
 
 Tuy nhiên không phải mọi device dùng được NAPI mode. Interface NAPI-capable phải lưu được nhiều packet (trên card hoặc DMA ring in-memory). Interface phải tắt được interrupt cho received packet trong khi vẫn interrupt cho truyền thành công và event khác. Còn vấn đề tinh tế khác khiến viết driver NAPI-compliant khó hơn; xem Documentation/networking/NAPI\_HOWTO.txt trong kernel source tree để biết chi tiết.
 
 Tương đối ít driver triển khai NAPI interface. Tuy nhiên nếu viết driver cho interface có thể sinh rất nhiều interrupt, dành thời gian triển khai NAPI có thể đáng giá.
 
-Snull driver hoạt động trong NAPI mode khi load với tham số `use_napi` khác 0. Tại initialization time phải đặt thêm hai field `struct net_device`:
+snull driver hoạt động ở NAPI mode khi được load với parameter `use_napi` đặt thành giá trị khác 0. Tại thời điểm khởi tạo, chúng ta phải thiết lập thêm một vài field của `struct net_device`:
 
 ```c
 if (use_napi) {
@@ -932,9 +932,9 @@ if (use_napi) {
 }
 ```
 
-Field `poll` phải đặt bằng polling function của driver; ta sắp xem snull\_poll. Field `weight` mô tả tầm quan trọng tương đối của interface: nhận bao nhiêu traffic khi resource eo hẹp. Không có quy tắc chặt đặt tham số `weight`; theo quy ước Ethernet interface 10 MBps đặt `weight` bằng `16`, interface nhanh hơn dùng `64`. Không đặt `weight` lớn hơn số packet interface lưu được. Trong snull đặt `weight` bằng hai để minh họa deferred packet reception.
+Field `poll` phải được đặt bằng polling function của driver; chúng ta sẽ sớm xem xét snull\_poll. Field `weight` mô tả tầm quan trọng tương đối của interface: lượng traffic cần được chấp nhận từ interface khi tài nguyên hạn chế. Không có quy tắc nghiêm ngặt về cách thiết lập parameter `weight`; theo quy ước, các Ethernet interface 10 MBps đặt `weight` bằng `16`, còn các interface nhanh hơn sử dụng `64`. Bạn không nên đặt `weight` lớn hơn số packet mà interface có thể lưu. Trong snull, chúng ta đặt `weight` bằng hai để minh họa deferred packet reception.
 
-Bước tiếp theo tạo driver NAPI-compliant là đổi interrupt handler. Khi interface (phải bắt đầu với receive interrupt bật) báo packet đến, interrupt handler không xử lý packet. Thay vào đó tắt receive interrupt tiếp theo và báo kernel bắt đầu poll interface. Trong snull “interrupt” handler, code đáp ứng packet reception interrupt đổi thành:
+Bước tiếp theo để tạo một driver NAPI-compliant là thay đổi interrupt handler. Khi interface, vốn cần bắt đầu với receive interrupt được bật, báo hiệu một packet đã đến, interrupt handler không nên xử lý packet đó. Thay vào đó, nó cần vô hiệu hóa các receive interrupt tiếp theo và thông báo cho kernel rằng đã đến lúc bắt đầu poll interface. Trong snull “interrupt” handler, code phản hồi packet reception interrupt được thay đổi thành:
 
 ```c
 if (statusword & SNULL_RX_INTR) {
@@ -943,7 +943,7 @@ if (statusword & SNULL_RX_INTR) {
 }
 ```
 
-Khi interface báo có packet, interrupt handler để packet trong interface; chỉ cần gọi netif\_rx\_schedule, khiến method poll được gọi lúc nào đó sau này.
+Khi interface báo có packet, interrupt handler để packet đó trong interface; thao tác duy nhất cần thực hiện lúc này là gọi netif\_rx\_schedule, khiến method poll của chúng ta được gọi vào một thời điểm sau đó.
 
 Method poll có prototype:
 
@@ -996,28 +996,28 @@ static int snull_poll(struct net_device *dev, int *budget)
 }
 ```
 
-Phần trung tâm function tạo skb chứa packet; code giống đã thấy trong snull\_rx. Tuy nhiên có khác biệt:
+Phần trung tâm của function tạo một skb chứa packet; code này giống code chúng ta đã thấy trước đó trong snull\_rx. Tuy nhiên, có một số điểm khác biệt:
 
-- Tham số `budget` cung cấp số packet tối đa được phép chuyển vào kernel. Trong device structure, field `quota` cho giới hạn khác; method poll phải tôn trọng giới hạn thấp hơn. Cũng phải giảm cả `dev->quota` và `*budget` theo số packet thực nhận. Giá trị `budget` là số packet tối đa CPU hiện tại nhận từ mọi interface, còn `quota` là giá trị per-interface thường bắt đầu bằng `weight` gán tại initialization time.
+- Parameter `budget` cung cấp số packet tối đa mà chúng ta được phép chuyển vào kernel. Trong device structure, field `quota` cung cấp một giới hạn tối đa khác; method poll phải tuân theo giá trị nhỏ hơn trong hai giới hạn. Nó cũng cần giảm cả `dev->quota` và `*budget` theo số packet thực sự nhận được. Giá trị `budget` là số packet tối đa mà CPU hiện tại có thể nhận từ tất cả interface, trong khi `quota` là giá trị per-interface, thường bắt đầu bằng `weight` được gán cho interface tại thời điểm khởi tạo.
 
 - Phải đưa packet vào kernel bằng netif\_receive\_skb thay netif\_rx.
 
-- Nếu method poll xử lý được mọi packet khả dụng trong giới hạn cho trước, phải re-enable receive interrupt, gọi netif\_rx\_complete tắt polling và trả `0`. Return value `1` báo còn packet chờ xử lý.
+- Nếu method poll có thể xử lý tất cả packet hiện có trong các giới hạn được cung cấp, nó cần re-enable receive interrupt, gọi netif\_rx\_complete để tắt polling và trả về `0`. Giá trị trả về `1` cho biết vẫn còn packet cần xử lý.
 
-Networking subsystem bảo đảm method poll của device không bị gọi đồng thời trên nhiều processor. Tuy nhiên lời gọi poll vẫn có thể đồng thời với device method khác.
+Networking subsystem bảo đảm method poll của một device cụ thể không được gọi đồng thời trên nhiều processor. Tuy nhiên, các lời gọi poll vẫn có thể xảy ra đồng thời với các lời gọi đến những device method khác của bạn.
 
 ## Thay đổi Link State
 
-Network connection theo định nghĩa làm việc với thế giới ngoài local system. Vì vậy thường chịu external event, có thể tạm thời. Networking subsystem cần biết khi network link up/down, cung cấp function để driver chuyển thông tin.
+Theo định nghĩa, network connection làm việc với thế giới bên ngoài hệ thống cục bộ. Vì vậy, chúng thường chịu ảnh hưởng của các event bên ngoài và có thể chỉ tồn tại tạm thời. Networking subsystem cần biết khi nào network link chuyển sang up hoặc down và cung cấp một số function để driver truyền đạt thông tin đó.
 
-Phần lớn networking technology có kết nối vật lý thực cung cấp carrier state; có carrier nghĩa là hardware hiện diện và sẵn sàng. Ví dụ Ethernet adapter cảm nhận carrier signal trên dây; khi user vấp cable, carrier mất, link down. Mặc định giả định network device có carrier signal. Tuy nhiên driver có thể đổi rõ trạng thái bằng function:
+Phần lớn công nghệ mạng có kết nối vật lý thực cung cấp một carrier state; sự hiện diện của carrier có nghĩa là hardware hiện diện và sẵn sàng hoạt động. Ví dụ, Ethernet adapter cảm nhận carrier signal trên dây; khi người dùng vấp phải cáp, carrier đó biến mất và link chuyển sang down. Theo mặc định, network device được giả định là có carrier signal. Tuy nhiên, driver có thể thay đổi trạng thái này một cách tường minh bằng các function sau:
 
 ```c
 void netif_carrier_off(struct net_device *dev);
 void netif_carrier_on(struct net_device *dev);
 ```
 
-Nếu driver phát hiện thiếu carrier trên device, phải gọi netif\_carrier\_off báo kernel. Khi carrier trở lại gọi netif\_carrier\_on. Một số driver cũng gọi netif\_carrier\_off khi thay cấu hình lớn (như media type); khi adapter reset xong, carrier mới được phát hiện và traffic tiếp tục.
+Nếu driver phát hiện mất carrier trên một device của nó, nó cần gọi netif\_carrier\_off để thông báo thay đổi này cho kernel. Khi carrier trở lại, cần gọi netif\_carrier\_on. Một số driver cũng gọi netif\_carrier\_off khi thực hiện thay đổi cấu hình lớn (chẳng hạn media type); sau khi adapter reset xong, carrier mới được phát hiện và traffic có thể tiếp tục.
 
 Cũng có integer function:
 
@@ -1029,11 +1029,11 @@ Dùng kiểm tra carrier state hiện tại (phản ánh trong device structure)
 
 ## Socket Buffer
 
-Ta đã trình bày phần lớn vấn đề network interface. Còn thiếu thảo luận chi tiết hơn về structure `sk_buff`. Structure ở trung tâm network subsystem Linux kernel, giờ giới thiệu field chính và function thao tác.
+Chúng ta đã trình bày phần lớn các vấn đề liên quan đến network interface. Phần còn thiếu là thảo luận chi tiết hơn về structure `sk_buff`. Structure này nằm ở trung tâm network subsystem của Linux kernel; bây giờ chúng ta giới thiệu cả các field chính của structure và các function dùng để thao tác với nó.
 
-Dù không bắt buộc hiểu internals của `sk_buff`, xem được nội dung hữu ích khi truy tìm vấn đề và tối ưu code. Ví dụ xem loopback.c có tối ưu dựa trên hiểu `sk_buff` internals. Cảnh báo thông thường áp dụng: nếu viết code tận dụng hiểu biết structure `sk_buff`, phải sẵn sàng thấy hỏng trong kernel release tương lai. Tuy nhiên đôi khi lợi thế hiệu năng đáng chi phí bảo trì thêm.
+Mặc dù không bắt buộc phải hiểu cấu trúc bên trong của `sk_buff`, khả năng xem nội dung của nó có thể hữu ích khi truy tìm vấn đề và tối ưu code. Ví dụ, nếu xem loopback.c, bạn sẽ thấy một cách tối ưu dựa trên hiểu biết về cấu trúc bên trong của `sk_buff`. Cảnh báo thông thường vẫn áp dụng ở đây: nếu viết code tận dụng hiểu biết về structure `sk_buff`, bạn cần chuẩn bị cho khả năng code đó không còn hoạt động trong các kernel release tương lai. Tuy nhiên, đôi khi lợi thế hiệu năng đủ để chấp nhận chi phí bảo trì bổ sung.
 
-Ta không mô tả toàn structure, chỉ field có thể dùng trong driver. Muốn thêm xem \<linux/skbuff.h\>, nơi định nghĩa structure và prototype function. Dễ tìm thêm cách dùng field/function bằng grep trong kernel source.
+Chúng ta không mô tả toàn bộ structure ở đây, mà chỉ trình bày các field có thể được sử dụng trong driver. Nếu muốn tìm hiểu thêm, bạn có thể xem \<linux/skbuff.h\>, nơi structure được định nghĩa và các function được khai báo prototype. Có thể dễ dàng tìm thêm chi tiết về cách sử dụng field và function bằng cách tìm kiếm với grep trong kernel source code.
 
 ### Field quan trọng
 
@@ -1051,7 +1051,7 @@ Device nhận hoặc gửi buffer này.
 
 Pointer tới các level header trong packet. Mỗi field union là pointer tới data structure type khác. `h` giữ pointer tới transport layer header (ví dụ `struct tcphdr *th`); `nh` chứa network layer header (như `struct iphdr *iph`); `mac` tập hợp pointer tới header link-layer (như `struct ethdr *ethernet`).
 
-Nếu driver cần source/destination address của TCP packet, tìm trong `skb->h.th`. Xem header file cho đầy đủ header type truy cập theo cách này.
+Nếu driver cần xem source address và destination address của một TCP packet, nó có thể tìm chúng trong `skb->h.th`. Xem header file để biết đầy đủ các header type có thể truy cập theo cách này.
 
 Lưu ý network driver chịu trách nhiệm đặt pointer `mac` cho incoming packet. Thường eth\_type\_trans xử lý, nhưng driver non-Ethernet phải đặt trực tiếp `skb->mac.raw` như phần “Header Non-Ethernet”.
 
@@ -1063,13 +1063,13 @@ Lưu ý network driver chịu trách nhiệm đặt pointer `mac` cho incoming p
 
 `unsigned char *end`;
 
-Pointer định vị dữ liệu trong packet. `head` trỏ đầu vùng cấp phát, `data` là đầu octet hợp lệ (thường lớn hơn `head` một chút), `tail` là cuối octet hợp lệ, `end` trỏ địa chỉ tối đa `tail` đạt tới. Cách nhìn khác là buffer space khả dụng bằng `skb->end - skb->head`, data space hiện dùng bằng `skb->tail - skb->data`.
+Các pointer được sử dụng để định vị dữ liệu trong packet. `head` trỏ đến đầu vùng đã được cấp phát, `data` là vị trí bắt đầu các octet hợp lệ (và thường lớn hơn `head` một chút), `tail` là vị trí kết thúc các octet hợp lệ, còn `end` trỏ đến địa chỉ tối đa mà `tail` có thể đạt tới. Một cách nhìn khác là dung lượng buffer khả dụng bằng `skb->end - skb->head`, còn vùng dữ liệu hiện đang được sử dụng bằng `skb->tail - skb->data`.
 
 `unsigned int len`;
 
 `unsigned int data_len`;
 
-`len` là độ dài đầy đủ dữ liệu packet, `data_len` là độ dài phần lưu trong fragment riêng. Field `data_len` bằng `0` trừ khi dùng scatter/gather I/O.
+`len` là độ dài toàn bộ dữ liệu trong packet, còn `data_len` là độ dài phần packet được lưu trong các fragment riêng. Field `data_len` bằng `0` trừ khi scatter/gather I/O đang được sử dụng.
 
 `unsigned char ip_summed`;
 
@@ -1085,9 +1085,9 @@ Packet classification dùng khi giao packet. Driver chịu trách nhiệm đặt
 
 `skb_frag_t shinfo(skb)->frags`;
 
-Vì hiệu năng, một số skb information lưu trong structure riêng ngay sau skb trong memory. “Shared info” (vì có thể chia sẻ giữa các copy của skb trong networking code) phải truy cập qua macro shinfo. Structure có nhiều field nhưng phần lớn ngoài phạm vi. Ta đã thấy `nr_frags` và `frags` trong phần “Scatter/Gather I/O”.
+Vì lý do hiệu năng, một số thông tin của skb được lưu trong một structure riêng nằm ngay sau skb trong memory. “Shared info” này, được gọi như vậy vì có thể được chia sẻ giữa các bản sao của skb trong networking code, phải được truy cập qua macro shinfo. Structure này có một số field, nhưng phần lớn nằm ngoài phạm vi cuốn sách. Chúng ta đã thấy `nr_frags` và `frags` trong mục “Scatter/Gather I/O”.
 
-Field còn lại không đặc biệt thú vị. Dùng duy trì buffer list, accounting memory thuộc socket sở hữu buffer, v.v.
+Các field còn lại trong structure không có gì đặc biệt đáng chú ý. Chúng được sử dụng để duy trì các buffer list, thống kê memory thuộc socket sở hữu buffer và thực hiện các công việc tương tự.
 
 ### Function thao tác Socket Buffer
 
@@ -1113,17 +1113,17 @@ Giải phóng buffer. Kernel dùng nội bộ kfree\_skb. Driver nên dùng mộ
 
 `unsigned char *__skb_put(struct sk_buff *skb, int len)`;
 
-Cập nhật field `tail` và `len` của structure `sk_buff`; dùng thêm dữ liệu vào cuối buffer. Return value mỗi function là giá trị `skb->tail` trước đó (tức trỏ vùng dữ liệu vừa tạo). Driver dùng để copy dữ liệu bằng `memcpy(skb_put(...), data, len)` hoặc tương đương. Khác biệt là skb\_put kiểm tra dữ liệu vừa buffer, còn \_\_skb\_put bỏ kiểm tra.
+Cập nhật các field `tail` và `len` của structure `sk_buff`; các function này được sử dụng để thêm dữ liệu vào cuối buffer. Giá trị trả về của mỗi function là giá trị trước đó của `skb->tail` (nói cách khác, nó trỏ đến vùng dữ liệu vừa được tạo). Driver có thể dùng giá trị trả về để sao chép dữ liệu bằng cách gọi `memcpy(skb_put(...), data, len)` hoặc một thao tác tương đương. Khác biệt giữa hai function là skb\_put kiểm tra để bảo đảm dữ liệu vừa với buffer, còn \_\_skb\_put bỏ qua bước kiểm tra.
 
 `unsigned char *skb_push(struct sk_buff *skb, int len)`;
 
 `unsigned char *__skb_push(struct sk_buff *skb, int len)`;
 
-Function giảm `skb->data` và tăng `skb->len`. Giống skb\_put nhưng thêm dữ liệu vào đầu thay vì cuối packet. Return value trỏ vùng vừa tạo. Dùng thêm hardware header trước khi truyền. Một lần nữa \_\_skb\_push khác ở chỗ không kiểm tra đủ chỗ.
+Các function giảm `skb->data` và tăng `skb->len`. Chúng tương tự skb\_put, nhưng dữ liệu được thêm vào đầu packet thay vì cuối packet. Giá trị trả về trỏ đến vùng dữ liệu vừa được tạo. Các function được sử dụng để thêm hardware header trước khi truyền packet. Một lần nữa, \_\_skb\_push khác ở chỗ không kiểm tra xem có đủ vùng trống hay không.
 
 `int skb_tailroom(struct sk_buff *skb)`;
 
-Trả lượng chỗ khả dụng để thêm dữ liệu vào buffer. Driver thêm quá sức chứa khiến system panic. Dù có thể cho rằng printk đủ đánh dấu lỗi, memory corruption nguy hại đến mức developer quyết định hành động dứt khoát. Thực tế không cần kiểm tra chỗ nếu cấp phát đúng. Vì driver thường biết packet size trước cấp phát, chỉ driver hỏng nặng mới thêm quá nhiều dữ liệu, panic có thể coi là hình phạt xứng đáng.
+Trả về lượng vùng trống khả dụng để thêm dữ liệu vào buffer. Nếu driver thêm nhiều dữ liệu hơn sức chứa của buffer, hệ thống sẽ panic. Mặc dù bạn có thể cho rằng một printk là đủ để báo lỗi, memory corruption gây hại cho hệ thống đến mức các nhà phát triển quyết định thực hiện hành động dứt khoát. Trong thực tế, bạn không cần kiểm tra vùng trống nếu buffer đã được cấp phát đúng. Vì driver thường biết kích thước packet trước khi cấp phát buffer, chỉ một driver bị lỗi nghiêm trọng mới thêm quá nhiều dữ liệu vào buffer, và panic có thể được xem là hình phạt xứng đáng.
 
 `int skb_headroom(struct sk_buff *skb)`;
 
@@ -1131,11 +1131,11 @@ Trả lượng chỗ khả dụng trước `data`, tức bao nhiêu octet có th
 
 `void skb_reserve(struct sk_buff *skb, int len)`;
 
-Tăng cả `data` và `tail`. Dùng reserve headroom trước khi điền buffer. Phần lớn Ethernet interface reserve hai byte trước packet; nhờ vậy IP header align tại boundary 16-byte sau Ethernet header 14-byte. Snull cũng làm, dù instruction không nêu ở “Packet Reception” để tránh thêm khái niệm lúc đó.
+Tăng cả `data` và `tail`. Function này có thể được dùng để dành trước headroom trước khi điền dữ liệu vào buffer. Phần lớn Ethernet interface dành trước hai byte ở đầu packet; nhờ đó, IP header được căn chỉnh tại ranh giới 16-byte, sau một Ethernet header dài 14-byte. snull cũng thực hiện điều này, mặc dù lệnh đó không được trình bày trong mục “Packet Reception” để tránh đưa thêm khái niệm vào thời điểm ấy.
 
 `unsigned char *skb_pull(struct sk_buff *skb, int len)`;
 
-Xóa dữ liệu khỏi head của packet. Driver không cần dùng nhưng liệt kê cho đầy đủ. Giảm `skb->len`, tăng `skb->data`; đó là cách bỏ hardware header (Ethernet hoặc tương đương) khỏi đầu incoming packet.
+Loại bỏ dữ liệu khỏi đầu packet. Driver không cần sử dụng function này, nhưng nó được đưa vào đây để bảo đảm đầy đủ. Function giảm `skb->len` và tăng `skb->data`; đây là cách hardware header (Ethernet hoặc tương đương) được loại bỏ khỏi đầu incoming packet.
 
 `int skb_is_nonlinear(struct sk_buff *skb)`;
 
@@ -1149,7 +1149,7 @@ Trả độ dài segment đầu của skb (phần `skb->data` trỏ tới).
 
 `void kunmap_skb_frag(void *vaddr)`;
 
-Nếu phải truy cập trực tiếp fragment trong nonlinear skb từ kernel, function map/unmap giúp. Dùng atomic kmap nên không map được hơn một fragment cùng lúc.
+Nếu cần truy cập trực tiếp các fragment trong một nonlinear skb từ bên trong kernel, các function này thực hiện map và unmap chúng cho bạn. Một atomic kmap được sử dụng, vì vậy không thể map nhiều hơn một fragment tại một thời điểm.
 
 Kernel định nghĩa function khác thao tác socket buffer nhưng dành cho networking code layer cao hơn, driver không cần.
 
@@ -1161,11 +1161,11 @@ Vấn đề thú vị của Ethernet communication là gắn MAC address (hardwa
 
 Cách thông thường xử lý address resolution là Address Resolution Protocol (ARP). May thay kernel quản lý ARP, Ethernet interface không cần làm gì đặc biệt để hỗ trợ. Miễn `dev->addr` và `dev->addr_len` gán đúng khi open, driver không cần lo resolve IP number thành MAC address; ether\_setup gán device method đúng cho `dev->hard_header` và `dev->rebuild_header`.
 
-Dù kernel thường xử lý chi tiết address resolution (và cache kết quả), vẫn gọi interface driver hỗ trợ dựng packet. Driver biết chi tiết physical layer header, còn tác giả networking code cố cách ly phần còn lại kernel khỏi kiến thức đó. Vì vậy kernel gọi method hard\_header của driver bố trí packet bằng kết quả ARP query. Thường người viết Ethernet driver không cần biết—common Ethernet code lo mọi thứ.
+Mặc dù kernel thường xử lý các chi tiết của address resolution và cache kết quả, nó vẫn yêu cầu interface driver hỗ trợ tạo packet. Xét cho cùng, driver biết các chi tiết của physical layer header, trong khi những người viết networking code cố gắng tách phần còn lại của kernel khỏi những kiến thức đó. Vì vậy, kernel gọi method hard\_header của driver để bố trí packet bằng kết quả ARP query. Thông thường, người viết Ethernet driver không cần biết quá trình này vì common Ethernet code xử lý mọi thứ.
 
 ### Override ARP
 
-Network interface point-to-point đơn giản như plip có thể hưởng lợi dùng Ethernet header mà tránh overhead gửi ARP packet qua lại. Sample code snull cũng thuộc class này. Snull không dùng ARP được vì driver đổi IP address trong packet truyền và ARP packet cũng trao đổi IP address. Dù có thể triển khai simple ARP reply generator dễ dàng, minh họa xử lý header physical-layer trực tiếp có giá trị hơn.
+Các network interface point-to-point đơn giản, chẳng hạn plip, có thể hưởng lợi từ việc sử dụng Ethernet header trong khi tránh overhead do gửi ARP packet qua lại. Code mẫu trong snull cũng thuộc nhóm network device này. snull không thể sử dụng ARP vì driver thay đổi IP address trong packet đang được truyền, trong khi ARP packet cũng trao đổi IP address. Mặc dù chúng ta có thể dễ dàng triển khai một bộ tạo ARP reply đơn giản, việc minh họa cách xử lý trực tiếp các physical-layer header có giá trị hơn.
 
 Nếu device muốn dùng hardware header thông thường mà không chạy ARP, cần override default method dev-\>hard\_header. Snull triển khai bằng function rất ngắn:
 
@@ -1184,7 +1184,7 @@ int snull_header(struct sk_buff *skb, struct net_device *dev,
 }
 ```
 
-Function lấy thông tin kernel cung cấp, format thành standard Ethernet header. Cũng đảo bit trong destination Ethernet address vì lý do nêu sau.
+Function này lấy thông tin do kernel cung cấp và định dạng thành một standard Ethernet header. Nó cũng đảo một bit trong destination Ethernet address vì những lý do được mô tả ở phần sau.
 
 Khi interface nhận packet, eth\_type\_trans dùng hardware header theo vài cách. Ta đã thấy lời gọi trong snull\_rx:
 
@@ -1192,17 +1192,17 @@ Khi interface nhận packet, eth\_type\_trans dùng hardware header theo vài c�
 skb->protocol = eth_type_trans(skb, dev);
 ```
 
-Function trích protocol identifier (`ETH_P_IP` ở đây) từ Ethernet header; cũng gán `skb->mac.raw`, bỏ hardware header khỏi packet data (bằng skb\_pull), đặt `skb->pkt_type`. Mục cuối mặc định `PACKET_HOST` khi cấp phát `skb` (packet hướng host này), eth\_type\_trans đổi phản ánh Ethernet destination address: nếu không khớp address interface nhận thì field `pkt_type` đặt thành `PACKET_OTHERHOST`. Sau đó trừ khi interface ở promiscuous mode hoặc kernel bật packet forwarding, netif\_rx drop mọi packet type `PACKET_OTHERHOST`. Vì vậy snull\_header cẩn thận làm destination hardware address khớp interface “nhận”.
+Function trích xuất protocol identifier (`ETH_P_IP` trong trường hợp này) từ Ethernet header; nó cũng gán `skb->mac.raw`, loại bỏ hardware header khỏi dữ liệu packet bằng skb\_pull và thiết lập `skb->pkt_type`. Mục cuối mặc định là `PACKET_HOST` khi cấp phát `skb`, cho biết packet được gửi đến host này; eth\_type\_trans thay đổi nó để phản ánh Ethernet destination address. Nếu địa chỉ đó không khớp địa chỉ của interface nhận packet, field `pkt_type` được đặt thành `PACKET_OTHERHOST`. Sau đó, trừ khi interface ở promiscuous mode hoặc kernel đã bật packet forwarding, netif\_rx loại bỏ mọi packet có type `PACKET_OTHERHOST`. Vì lý do này, snull\_header cẩn thận làm cho destination hardware address khớp địa chỉ của interface “nhận”.
 
 Nếu interface là link point-to-point, bạn không muốn nhận multicast packet ngoài dự kiến. Để tránh, nhớ destination address có octet đầu với `0` ở least significant bit (LSB) hướng tới một host (tức `PACKET_HOST` hoặc `PACKET_OTHERHOST`). Plip driver dùng `0xfc` làm octet đầu hardware address, snull dùng `0x00`. Cả hai tạo link point-to-point Ethernet-like hoạt động.
 
 ### Header Non-Ethernet
 
-Ta vừa thấy hardware header chứa thông tin ngoài destination address, quan trọng nhất là communication protocol. Giờ mô tả cách dùng hardware header encapsulate thông tin liên quan. Nếu cần chi tiết, lấy từ kernel source hoặc technical documentation cho transmission medium cụ thể. Phần lớn driver writer có thể bỏ qua và dùng Ethernet implementation.
+Chúng ta vừa thấy rằng hardware header chứa một số thông tin ngoài destination address, trong đó quan trọng nhất là communication protocol. Bây giờ chúng ta mô tả cách sử dụng hardware header để encapsulate thông tin liên quan. Nếu cần biết chi tiết, bạn có thể tìm chúng trong kernel source code hoặc tài liệu kỹ thuật của transmission medium cụ thể. Phần lớn người viết driver có thể bỏ qua phần thảo luận này và chỉ sử dụng cách triển khai Ethernet.
 
 Lưu ý không phải protocol nào cũng cần cung cấp mọi thông tin. Link point-to-point như plip hoặc snull có thể tránh truyền toàn Ethernet header mà không mất tính tổng quát. Device method hard\_header, trước đó triển khai bằng snull\_header, nhận delivery information—cả protocol-level và hardware address—từ kernel. Cũng nhận protocol number 16-bit trong đối số `type`; ví dụ IP nhận diện bằng `ETH_P_IP`. Driver phải giao đúng cả packet data và protocol number cho receiving host. Link point-to-point có thể bỏ address khỏi hardware header, chỉ truyền protocol number vì giao packet bảo đảm độc lập source/destination address. Link IP-only thậm chí không cần truyền hardware header nào.
 
-Khi lấy packet ở đầu kia link, receiving function trong driver phải đặt đúng field `skb->protocol`, `skb->pkt_type` và `skb->mac.raw`.
+Khi packet được nhận ở đầu kia của link, receiving function trong driver cần thiết lập đúng các field `skb->protocol`, `skb->pkt_type` và `skb->mac.raw`.
 
 `skb->mac.raw` là char pointer dùng bởi cơ chế address-resolution ở networking code layer cao hơn (như net/ipv4/arp.c). Phải trỏ tới machine address khớp `dev->type`. Device type value có thể có định nghĩa trong \<linux/if\_arp.h\>; Ethernet interface dùng `ARPHRD_ETHER`. Ví dụ cách eth\_type\_trans xử lý Ethernet header cho received packet:
 
@@ -1213,7 +1213,7 @@ skb_pull(skb, dev->hard_header_len);
 
 Trong trường hợp đơn giản nhất (link point-to-point không header), `skb->mac.raw` có thể trỏ static buffer chứa hardware address của interface, `protocol` đặt `ETH_P_IP`, `packet_type` giữ mặc định `PACKET_HOST`.
 
-Vì mỗi hardware type riêng biệt, khó khuyên cụ thể hơn điều đã nói. Tuy nhiên kernel đầy ví dụ. Xem AppleTalk driver (drivers/net/appletalk/cops.c), infrared driver (như drivers/net/irda/smc\_ircc.c) hoặc PPP driver (drivers/net/ppp\_generic.c).
+Vì mỗi hardware type có đặc điểm riêng, khó đưa ra lời khuyên cụ thể hơn những gì đã thảo luận. Tuy nhiên, kernel có rất nhiều ví dụ. Chẳng hạn, hãy xem AppleTalk driver (drivers/net/appletalk/cops.c), các infrared driver (như drivers/net/irda/smc\_ircc.c) hoặc PPP driver (drivers/net/ppp\_generic.c).
 
 ## Ioctl Command tùy chỉnh
 
@@ -1231,15 +1231,15 @@ Khi nhận diện một command, `dev->do_ioctl` được gọi trong interface 
 int (*do_ioctl)(struct net_device *dev, struct ifreq *ifr, int cmd);
 ```
 
-Pointer `ifr` trỏ address kernel-space chứa copy structure user truyền. Sau khi do\_ioctl trả, structure copy lại về user space; vì vậy driver dùng private command để cả nhận và trả dữ liệu.
+Pointer `ifr` trỏ đến một kernel-space address chứa bản sao của structure do người dùng truyền vào. Sau khi do\_ioctl trả về, structure được sao chép trở lại user space; vì vậy, driver có thể dùng các private command để vừa nhận vừa trả dữ liệu.
 
-Command device-specific có thể chọn field trong `struct ifreq`, nhưng chúng đã mang ý nghĩa tiêu chuẩn nên khó thích nghi theo nhu cầu driver. Field `ifr_data` là `caddr_t` (pointer) dành cho nhu cầu device-specific. Driver và chương trình gọi ioctl command phải thống nhất dùng `ifr_data`. Ví dụ pppstats dùng command device-specific lấy thông tin từ ppp interface driver.
+Các command device-specific có thể chọn sử dụng các field trong `struct ifreq`, nhưng những field đó đã mang ý nghĩa được chuẩn hóa nên driver khó điều chỉnh structure cho phù hợp nhu cầu riêng. Field `ifr_data` là một phần tử `caddr_t` (một pointer) dành cho các nhu cầu device-specific. Driver và chương trình gọi các ioctl command của nó cần thống nhất cách sử dụng `ifr_data`. Ví dụ, pppstats sử dụng các command device-specific để truy xuất thông tin từ ppp interface driver.
 
-Không cần trình bày triển khai do\_ioctl ở đây, nhưng với thông tin chương và ví dụ kernel, bạn có thể tự viết khi cần. Tuy nhiên lưu ý triển khai plip dùng `ifr_data` sai, không nên làm ví dụ ioctl implementation.
+Không cần trình bày cách triển khai do\_ioctl ở đây, nhưng với thông tin trong chương này và các ví dụ trong kernel, bạn có thể viết một function như vậy khi cần. Tuy nhiên, lưu ý rằng cách triển khai plip sử dụng `ifr_data` không đúng và không nên được dùng làm ví dụ cho cách triển khai ioctl.
 
 ## Thông tin thống kê
 
-Method cuối driver cần là get\_stats. Trả pointer tới device statistic. Triển khai khá dễ; bản dưới hoạt động ngay cả khi cùng driver quản lý nhiều interface vì statistic nằm trong device data structure.
+Method cuối cùng mà driver cần là get\_stats. Method này trả về một pointer trỏ đến số liệu thống kê của device. Cách triển khai khá đơn giản; bản được trình bày hoạt động ngay cả khi cùng một driver quản lý nhiều interface, vì số liệu thống kê được lưu trong device data structure.
 
 ```c
 struct net_device_stats *snull_stats(struct net_device *dev)
@@ -1249,7 +1249,7 @@ struct net_device_stats *snull_stats(struct net_device *dev)
 }
 ```
 
-Công việc thực sự để trả thống kê có ý nghĩa phân tán khắp driver, tại nơi cập nhật field. Danh sách sau là field đáng chú ý nhất của `struct net_device_stats`:
+Công việc thực sự cần thiết để trả về số liệu thống kê có ý nghĩa nằm rải rác khắp driver, tại các vị trí cập nhật những field khác nhau. Danh sách sau trình bày các field đáng chú ý nhất trong `struct net_device_stats`:
 
 `unsigned long rx_packets`;
 
@@ -1267,7 +1267,7 @@ Số byte interface nhận và truyền.
 
 `unsigned long tx_errors`;
 
-Số lần nhận/truyền lỗi. Vô số điều có thể sai khi truyền packet, structure `net_device_stats` có sáu counter cho receive error cụ thể, năm cho transmit error. Xem \<linux/netdevice.h\> để đầy đủ. Nếu có thể, driver nên duy trì error statistic chi tiết vì rất hữu ích cho system administrator truy tìm vấn đề.
+Số lần nhận và truyền bị lỗi. Có vô số vấn đề có thể xảy ra khi truyền packet, và structure `net_device_stats` bao gồm sáu counter cho các receive error cụ thể cùng năm counter cho transmit error. Xem \<linux/netdevice.h\> để biết danh sách đầy đủ. Nếu có thể, driver cần duy trì số liệu thống kê lỗi chi tiết vì chúng rất hữu ích cho system administrator khi truy tìm vấn đề.
 
 `unsigned long rx_dropped`;
 
@@ -1283,27 +1283,27 @@ Số collision do congestion trên medium.
 
 Số multicast packet nhận.
 
-Cần nhắc lại method get\_stats có thể gọi bất cứ lúc nào—ngay khi interface down—nên driver phải giữ thống kê suốt thời gian structure `net_device` tồn tại.
+Cần nhắc lại rằng method get\_stats có thể được gọi bất cứ lúc nào, ngay cả khi interface ở trạng thái down, vì vậy driver phải giữ lại thông tin thống kê trong suốt thời gian structure `net_device` tồn tại.
 
 ## Multicast
 
-Multicast packet là network packet dành cho nhiều host nhưng không mọi host. Đạt chức năng bằng gán special hardware address cho nhóm host. Mọi host trong nhóm phải nhận packet hướng đến special address. Với Ethernet, multicast address có least significant bit của address octet đầu được đặt trong destination address, còn mỗi device board xóa bit đó trong hardware address riêng.
+Multicast packet là một network packet dành cho nhiều host nhận, nhưng không phải tất cả host. Chức năng này được thực hiện bằng cách gán các hardware address đặc biệt cho những nhóm host. Packet gửi đến một trong các địa chỉ đặc biệt cần được tất cả host trong nhóm đó nhận. Với Ethernet, multicast address có bit thấp nhất của octet địa chỉ đầu tiên được thiết lập trong destination address, trong khi mỗi device board có bit đó bằng 0 trong hardware address riêng.
 
 Phần khó xử lý host group và hardware address do ứng dụng và kernel thực hiện, interface driver không cần xử lý.
 
-Truyền multicast packet đơn giản vì trông giống packet khác. Interface truyền trên communication medium mà không xem destination address. Kernel phải gán hardware destination address đúng; device method hard\_header, nếu định nghĩa, không cần xem dữ liệu bố trí.
+Việc truyền multicast packet khá đơn giản vì chúng trông giống mọi packet khác. Interface truyền chúng trên communication medium mà không xem destination address. Kernel mới là thành phần phải gán hardware destination address đúng; device method hard\_header, nếu được định nghĩa, không cần xem dữ liệu mà nó bố trí.
 
-Kernel theo dõi multicast address đang được quan tâm. List đổi thường xuyên vì phụ thuộc ứng dụng đang chạy và quan tâm của user. Driver phải nhận list multicast address quan tâm và giao kernel packet gửi tới chúng. Cách triển khai multicast list phần nào phụ thuộc hardware bên dưới. Về multicast, hardware thường thuộc một trong ba class:
+Kernel chịu trách nhiệm theo dõi các multicast address đang được quan tâm tại một thời điểm. Danh sách có thể thay đổi thường xuyên vì nó phụ thuộc vào các ứng dụng đang chạy và nhu cầu của người dùng tại thời điểm đó. Driver có nhiệm vụ nhận danh sách multicast address cần quan tâm và chuyển cho kernel mọi packet gửi đến những địa chỉ đó. Cách driver triển khai multicast list phần nào phụ thuộc vào cách hoạt động của hardware bên dưới. Xét về multicast, hardware thường thuộc một trong ba nhóm:
 
-- Interface không xử lý multicast được. Chỉ nhận packet hướng chính hardware address (cùng broadcast packet) hoặc nhận mọi packet. Chỉ nhận multicast được bằng nhận tất cả, có thể làm operating system quá tải với rất nhiều packet “không quan tâm”. Thường không coi là multicast capable, driver không đặt `IFF_MULTICAST` trong `dev->flags`.
+- Các interface không thể xử lý multicast. Chúng hoặc chỉ nhận packet gửi riêng đến hardware address của mình cùng các broadcast packet, hoặc nhận mọi packet. Chúng chỉ có thể nhận multicast packet bằng cách nhận tất cả packet, do đó có thể khiến hệ điều hành quá tải với số lượng lớn packet “không liên quan”. Thông thường, những interface này không được coi là có khả năng multicast, và driver không thiết lập `IFF_MULTICAST` trong `dev->flags`.
 
 Interface Point-to-point là trường hợp riêng vì luôn nhận mọi packet, không hardware filtering.
 
-- Interface phân biệt multicast packet với packet khác (host-to-host hoặc broadcast). Có thể chỉ dẫn nhận mọi multicast packet rồi để software quyết định address có liên quan host không. Overhead chấp nhận được vì multicast packet trên network điển hình ít.
+- Các interface có thể phân biệt multicast packet với các packet khác (host-to-host hoặc broadcast). Có thể yêu cầu các interface này nhận mọi multicast packet rồi để software xác định địa chỉ có liên quan đến host này hay không. Overhead trong trường hợp này chấp nhận được vì số multicast packet trên một mạng thông thường khá ít.
 
-- Interface phát hiện multicast address bằng hardware được. Có thể truyền list multicast address cần nhận, bỏ qua multicast packet khác. Tối ưu với kernel vì không phí processor time drop packet “không quan tâm” interface nhận.
+- Các interface có thể phát hiện multicast address bằng hardware. Có thể truyền cho các interface này một danh sách multicast address cần nhận packet và yêu cầu bỏ qua các multicast packet khác. Đây là trường hợp tối ưu cho kernel vì không lãng phí thời gian processor để loại bỏ các packet “không liên quan” mà interface nhận được.
 
-Kernel cố tận dụng tốt nhất capability của interface high-level bằng hỗ trợ device class thứ ba linh hoạt nhất. Vì vậy thông báo driver mỗi khi list multicast address hợp lệ đổi và chuyển list mới để cập nhật hardware filter.
+Kernel cố tận dụng tốt nhất khả năng của các interface high-level bằng cách hỗ trợ tối đa device class thứ ba, là class linh hoạt nhất. Vì vậy, kernel thông báo cho driver mỗi khi danh sách multicast address hợp lệ thay đổi và chuyển danh sách mới cho driver để nó cập nhật hardware filter theo thông tin mới.
 
 ### Kernel hỗ trợ Multicasting
 
@@ -1311,7 +1311,7 @@ Hỗ trợ multicast packet gồm nhiều thành phần: device method, data str
 
 `void (*dev->set_multicast_list)(struct net_device *dev)`;
 
-Device method gọi mỗi khi list machine address gắn với device đổi. Cũng gọi khi sửa `dev->flags` vì một số flag (như `IFF_PROMISC`) có thể yêu cầu lập trình lại hardware filter. Method nhận pointer `struct net_device` làm đối số, trả `void`. Driver không muốn triển khai có thể để field `NULL`.
+Device method được gọi mỗi khi danh sách machine address gắn với device thay đổi. Nó cũng được gọi khi `dev->flags` bị sửa đổi, vì một số flag (chẳng hạn `IFF_PROMISC`) cũng có thể yêu cầu lập trình lại hardware filter. Method nhận một pointer trỏ đến `struct net_device` làm đối số và trả về `void`. Driver không muốn triển khai method này có thể giữ field ở giá trị `NULL`.
 
 `struct dev_mc_list *dev->mc_list`;
 
@@ -1327,7 +1327,7 @@ Trừ khi driver đặt flag trong `dev->flags`, interface không được yêu 
 
 `IFF_ALLMULTI`
 
-Networking software đặt flag trong `dev->flags` để bảo driver lấy mọi multicast packet từ mạng. Xảy ra khi bật multicast routing. Nếu flag đặt, không dùng `dev->mc_list` lọc multicast packet.
+Networking software thiết lập flag này trong `dev->flags` để yêu cầu driver lấy tất cả multicast packet từ mạng. Điều này xảy ra khi multicast routing được bật. Nếu flag được thiết lập, không nên dùng `dev->mc_list` để lọc multicast packet.
 
 `IFF_PROMISC`
 
@@ -1345,13 +1345,13 @@ struct dev_mc_list {
 };
 ```
 
-Vì multicasting và hardware address độc lập truyền packet thực tế, structure portable giữa network implementation, mỗi address nhận diện bằng octet string và length như `dev->dev_addr`.
+Vì multicasting và hardware address độc lập với việc truyền packet thực tế, structure này có thể được sử dụng trên các cách triển khai mạng khác nhau; mỗi địa chỉ được nhận diện bằng một chuỗi octet và một độ dài, giống như `dev->dev_addr`.
 
 ### Triển khai điển hình
 
 Cách tốt nhất mô tả thiết kế set\_multicast\_list là pseudocode.
 
-Function sau triển khai điển hình trong driver full-featured (`ff`). Đầy đủ tính năng vì interface điều khiển có hardware packet filter phức tạp, giữ table multicast address host cần nhận. Table size tối đa `FF_TABLE_SIZE`.
+Function sau là cách triển khai điển hình trong một driver full-featured (`ff`). Driver có đầy đủ tính năng theo nghĩa interface mà nó điều khiển có một hardware packet filter phức tạp, có thể lưu một table các multicast address mà host này cần nhận packet. Kích thước tối đa của table là `FF_TABLE_SIZE`.
 
 Mọi function prefix `ff_` là placeholder cho operation hardware-specific:
 
@@ -1383,9 +1383,9 @@ void ff_set_multicast_list(struct net_device *dev)
 }
 ```
 
-Có thể đơn giản nếu interface không lưu được multicast table trong hardware filter cho incoming packet. Khi đó `FF_TABLE_SIZE` giảm về `0`, không cần bốn dòng code cuối.
+Cách triển khai này có thể được đơn giản hóa nếu interface không thể lưu một multicast table trong hardware filter dành cho incoming packet. Trong trường hợp đó, `FF_TABLE_SIZE` giảm về `0` và không cần bốn dòng code cuối.
 
-Như đã nói, ngay interface không xử lý multicast packet cũng cần method set\_multicast\_list để nhận thông báo đổi `dev->flags`. Có thể gọi cách này triển khai “nonfeatured” (`nf`). Rất đơn giản như code:
+Như đã đề cập trước đó, ngay cả interface không thể xử lý multicast packet cũng cần triển khai method set\_multicast\_list để nhận thông báo về những thay đổi trong `dev->flags`. Cách này có thể được gọi là cách triển khai “nonfeatured” (`nf`). Việc triển khai rất đơn giản, như đoạn code sau minh họa:
 
 ```c
 void nf_set_multicast_list(struct net_device *dev)
@@ -1401,11 +1401,11 @@ Triển khai `IFF_PROMISC` quan trọng vì nếu không user không chạy tcpd
 
 ## Một số chi tiết khác
 
-Phần này trình bày vài chủ đề khác có thể hữu ích cho network driver author. Mỗi trường hợp chỉ cố chỉ đúng hướng. Muốn hiểu đầy đủ có lẽ cũng cần dành thời gian xem kernel source.
+Mục này trình bày một vài chủ đề khác có thể hữu ích cho người viết network driver. Trong mỗi trường hợp, chúng ta chỉ cố gắng chỉ ra hướng tìm hiểu phù hợp. Để có cái nhìn đầy đủ về chủ đề, có lẽ bạn cũng cần dành thời gian nghiên cứu kernel source code.
 
 ### Hỗ trợ Media Independent Interface
 
-Media Independent Interface (MII) là chuẩn IEEE 802.3 mô tả cách Ethernet transceiver interface với network controller; nhiều sản phẩm tuân thủ. Nếu viết driver cho controller MII-compliant, kernel export generic MII support layer có thể giúp dễ hơn.
+Media Independent Interface (MII) là một chuẩn IEEE 802.3 mô tả cách Ethernet transceiver giao tiếp với network controller; nhiều sản phẩm trên thị trường tuân theo interface này. Nếu viết driver cho một controller MII-compliant, bạn có thể sử dụng generic MII support layer do kernel export để giảm công sức.
 
 Để dùng generic MII layer, include \<linux/mii.h\>. Cần điền structure `mii_if_info` bằng thông tin physical ID transceiver, full duplex có hiệu lực không, v.v. Cũng cần hai method cho structure `mii_if_info`:
 
@@ -1422,7 +1422,7 @@ Generic MII code cung cấp function truy vấn và đổi operating mode của 
 
 Ethtool là tiện ích cho system administrator nhiều quyền kiểm soát hoạt động network interface. Có thể điều khiển interface parameter như speed, media type, duplex operation, DMA ring setup, hardware checksumming, wake-on-LAN operation, v.v., nhưng chỉ nếu driver hỗ trợ ethtool. Tải ethtool từ http://sf.net/projects/gkernel/.
 
-Khai báo liên quan hỗ trợ ethtool trong \<linux/ethtool.h\>. Trung tâm là structure type `ethtool_ops`, chứa đủ 24 method hỗ trợ. Phần lớn tương đối đơn giản; xem \<linux/ethtool.h\> cho chi tiết. Nếu driver dùng MII layer, có thể dùng mii\_ethtool\_gset và mii\_ethtool\_sset triển khai lần lượt method get\_settings và set\_settings.
+Các khai báo liên quan đến hỗ trợ ethtool nằm trong \<linux/ethtool.h\>. Phần cốt lõi là một structure có type `ethtool_ops`, chứa đầy đủ 24 method khác nhau để hỗ trợ ethtool. Phần lớn method tương đối đơn giản; xem \<linux/ethtool.h\> để biết chi tiết. Nếu driver đang sử dụng MII layer, bạn có thể dùng mii\_ethtool\_gset và mii\_ethtool\_sset để triển khai tương ứng các method get\_settings và set\_settings.
 
 Để ethtool hoạt động với device, phải đặt pointer tới structure `ethtool_ops` trong structure `net_device`. Nên dùng macro `SET_ETHTOOL_OPS` (định nghĩa trong \<linux/netdevice.h\>). Lưu ý ethtool method có thể gọi cả khi interface down.
 
@@ -1445,7 +1445,7 @@ Về bản chất method poll\_controller chỉ mô phỏng interrupt từ devic
 
 ## Tham khảo nhanh
 
-Phần này tham khảo các khái niệm giới thiệu trong chương. Cũng giải thích vai trò mỗi header file driver cần include. Tuy nhiên không lặp lại list field của structure `net_device` và `sk_buff`.
+Mục này cung cấp tài liệu tham khảo cho các khái niệm được giới thiệu trong chương. Nó cũng giải thích vai trò của từng header file mà driver cần include. Tuy nhiên, danh sách field trong các structure `net_device` và `sk_buff` không được lặp lại ở đây.
 
 `#include <linux/netdevice.h>`
 
@@ -1481,7 +1481,7 @@ Structure giữ device statistic.
 
 `netif_wake_queue(struct net_device *dev)`;
 
-Function điều khiển chuyển packet tới driver để truyền. Không truyền packet trước khi gọi netif\_start\_queue. netif\_stop\_queue tạm dừng, netif\_wake\_queue restart queue và thúc network layer truyền lại.
+Các function điều khiển việc chuyển packet đến driver để truyền. Không có packet nào được truyền cho đến khi netif\_start\_queue được gọi. netif\_stop\_queue tạm dừng việc truyền, còn netif\_wake\_queue khởi động lại queue và yêu cầu network layer bắt đầu truyền packet trở lại.
 
 `skb_shinfo(struct sk_buff *skb)`;
 
@@ -1511,7 +1511,7 @@ Function chỉ driver NAPI-compliant nên dùng. netif\_receive\_skb tương đ�
 
 `int netif_carrier_ok(struct net_device *dev)`;
 
-Hai function đầu có thể báo kernel carrier signal hiện có trên interface không. netif\_carrier\_ok kiểm tra carrier state phản ánh trong device structure.
+Hai function đầu có thể được sử dụng để thông báo cho kernel xem hiện có carrier signal trên interface được chỉ định hay không. netif\_carrier\_ok kiểm tra carrier state được phản ánh trong device structure.
 
 `#include <linux/if_ether.h>`
 
@@ -1549,7 +1549,7 @@ Function xử lý cấp phát/giải phóng socket buffer. Driver thường nên
 
 `unsigned char *__skb_push(struct sk_buff *skb, int len)`;
 
-Function thêm dữ liệu vào `skb`; skb\_put đặt cuối `skb`, skb\_push đặt đầu. Version thường kiểm tra đủ chỗ; version double-underscore bỏ kiểm tra.
+Các function thêm dữ liệu vào một `skb`; skb\_put đặt dữ liệu ở cuối `skb`, còn skb\_push đặt dữ liệu ở đầu. Các phiên bản thông thường thực hiện kiểm tra để bảo đảm có đủ vùng trống; các phiên bản double-underscore bỏ qua những bước kiểm tra đó.
 
 `int skb_headroom(struct sk_buff *skb)`;
 
@@ -1557,7 +1557,7 @@ Function thêm dữ liệu vào `skb`; skb\_put đặt cuối `skb`, skb\_push �
 
 `void skb_reserve(struct sk_buff *skb, int len)`;
 
-Function quản lý chỗ trong `skb`. skb\_headroom và skb\_tailroom cho lượng chỗ khả dụng lần lượt ở đầu và cuối `skb`. skb\_reserve reserve chỗ ở đầu `skb`, phải rỗng.
+Các function quản lý vùng trống trong một `skb`. skb\_headroom và skb\_tailroom lần lượt cho biết lượng vùng trống ở đầu và cuối một `skb`. skb\_reserve có thể được dùng để dành trước vùng trống ở đầu một `skb`; skb này phải đang rỗng.
 
 `unsigned char *skb_pull(struct sk_buff *skb, int len)`;
 

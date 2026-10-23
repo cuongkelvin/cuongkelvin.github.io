@@ -36,7 +36,7 @@ trong cuộc sống hằng ngày.
 
 ## 1.1 Vì sao chọn Linux?
 
-Nhờ nhiều lợi ích kinh tế và kỹ thuật, ta đang thấy việc dùng Linux cho embedded device tăng mạnh. Xu hướng đã vượt qua gần như mọi thị trường và công nghệ. Linux được chọn cho embedded product trong public switched telephone network toàn cầu, global data network và wireless cellular handset, cũng như radio node controller và backhaul infrastructure vận hành các mạng này. Linux thành công trong ứng dụng ô tô, consumer product như game và PDA, printer, enterprise switch/router cùng nhiều sản phẩm khác. Hàng chục triệu điện thoại di động đang xuất xưởng trên thế giới với Linux làm operating system được chọn. Tỷ lệ sử dụng embedded Linux tiếp tục tăng, chưa thấy điểm dừng.
+Nhờ nhiều lợi ích kinh tế và kỹ thuật, chúng ta đang chứng kiến sự tăng trưởng mạnh trong việc sử dụng Linux cho embedded device. Xu hướng này đã lan rộng ra hầu như mọi thị trường và công nghệ. Linux được sử dụng cho embedded product trong public switched telephone network toàn cầu, global data network và wireless cellular handset, cũng như radio node controller và backhaul infrastructure vận hành các mạng này. Linux đã thành công trong ứng dụng ô tô, sản phẩm tiêu dùng như game và PDA, printer, enterprise switch và router cùng nhiều sản phẩm khác. Hàng chục triệu điện thoại di động đang được xuất xưởng trên toàn thế giới với Linux là operating system được lựa chọn. Tỷ lệ sử dụng embedded Linux tiếp tục tăng và chưa có dấu hiệu dừng lại.
 
 Sau đây là một số lý do embedded Linux tăng trưởng:
 
@@ -56,15 +56,15 @@ Vì các lý do này và lý do khác, ta thấy tốc độ sử dụng Linux t
 
 ## 1.2 Embedded Linux ngày nay
 
-Không ngạc nhiên khi Linux tăng trưởng đáng kể trong lĩnh vực embedded. Thực tế việc bạn đọc sách cho thấy Linux đã chạm tới cuộc sống của bạn. Khó ước lượng market size vì nhiều công ty tiếp tục xây dựng embedded Linux distribution riêng.
+Không có gì ngạc nhiên khi Linux đã tăng trưởng đáng kể trong lĩnh vực embedded. Thực tế, việc bạn đang đọc cuốn sách này cho thấy Linux đã có ảnh hưởng đến cuộc sống của bạn. Khó ước tính quy mô thị trường vì nhiều công ty tiếp tục xây dựng embedded Linux distribution riêng.
 
-LinuxDevices.com, cổng thông tin và tin tức phổ biến do Rick Lehrbaum sáng lập, hiện thuộc Ziff Davis, khảo sát thị trường embedded Linux hằng năm. Khảo sát mới nhất báo Linux trở thành operating system thống trị, được dùng trong hàng nghìn thiết kế mới mỗi năm. Thực tế gần một nửa người trả lời cho biết dùng Linux trong embedded design. Operating system phổ biến kế tiếp được báo chỉ khoảng một phần tám người dùng. Commercial operating system từng thống trị thị trường embedded được báo ít hơn một phần mười người dùng. Dù có lý do phản biện kết quả, không ai có thể bỏ qua đà phát triển thị trường embedded Linux hiện nay.
+LinuxDevices.com, cổng tin tức và thông tin phổ biến do Rick Lehrbaum thành lập, hiện thuộc sở hữu Ziff Davis, tiến hành khảo sát thị trường embedded Linux hằng năm. Trong khảo sát mới nhất, trang này báo cáo Linux đã trở thành operating system chiếm ưu thế, được sử dụng trong hàng nghìn thiết kế mới mỗi năm. Thực tế, gần một nửa số người trả lời cho biết sử dụng Linux trong một embedded design. Operating system phổ biến tiếp theo được cho biết chỉ có khoảng một phần tám số người trả lời sử dụng. Các operating system thương mại từng thống trị thị trường embedded được báo cáo là có ít hơn một phần mười số người trả lời sử dụng. Ngay cả khi có lý do tranh luận về các kết quả này, không ai có thể bỏ qua đà phát triển của thị trường embedded Linux hiện nay.
 
 ## 1.3 Mã nguồn mở và GPL
 
-Một yếu tố nền tảng thúc đẩy dùng Linux là tính mã nguồn mở. Để có góc nhìn thú vị và sâu sắc về lịch sử, văn hóa phong trào mã nguồn mở, đọc sách của Eric S. Raymond được dẫn cuối chương.
+Một trong những yếu tố nền tảng thúc đẩy việc sử dụng Linux là tính open source. Để có góc nhìn hấp dẫn và sâu sắc về lịch sử cùng văn hóa của phong trào open source, hãy đọc cuốn sách của Eric S. Raymond được dẫn ở cuối chương này.
 
-Linux kernel được cấp phép theo GNU GPL[^1] (General Public License), dẫn tới quan niệm phổ biến Linux miễn phí. Thực tế đoạn hai GNU GPL Version 3 tuyên bố: “Khi nói phần mềm tự do, chúng tôi nói tới tự do, không phải giá cả.” Phần lớn professional development manager đồng ý: có thể tải Linux miễn phí, nhưng phát triển và triển khai OS bất kỳ trên embedded platform đều có chi phí (thường đáng kể). Linux không khác ở điểm này.
+Linux kernel được cấp phép theo các điều khoản của GNU GPL[^1] (General Public License), dẫn đến quan niệm phổ biến rằng Linux miễn phí. Thực tế, đoạn thứ hai của GNU GPL Version 3 tuyên bố: “Khi nói đến phần mềm tự do, chúng tôi đề cập đến tự do, không phải giá cả.” Phần lớn người quản lý phát triển chuyên nghiệp đều đồng ý: bạn có thể download Linux miễn phí, nhưng phát triển và triển khai bất kỳ OS nào trên embedded platform đều có chi phí, thường là đáng kể. Linux không khác ở khía cạnh này.
 
 GPL ngắn và dễ đọc đáng ngạc nhiên. Sau đây là một số đặc điểm quan trọng nhất:
 
@@ -78,37 +78,37 @@ GPL ngắn và dễ đọc đáng ngạc nhiên. Sau đây là một số đặc
 
 - License có tính lan truyền. Nói cách khác, cấp cùng quyền đó cho bất kỳ ai được bạn phân phối GPL software.
 
-Khi software phát hành theo GPL, phải mãi mang license đó.[^2] Dù code sửa rất nhiều, điều license cho phép và thậm chí khuyến khích, GPL yêu cầu phát hành theo cùng license. Mục đích là bảo đảm tự do truy cập software, gồm bản sửa đổi (hay derived work như thường gọi).
+Khi software được phát hành theo các điều khoản của GPL, nó phải luôn mang license đó.[^2] Ngay cả khi code được sửa đổi rất nhiều, điều được license cho phép và thậm chí khuyến khích, GPL vẫn yêu cầu code phải được phát hành theo cùng license. Mục đích của quy định này là bảo đảm quyền tự do truy cập software, bao gồm các phiên bản đã sửa đổi của software (hay derived work, như thường được gọi).
 
-Dù lấy software thế nào, GPL cấp licensee quyền phân phối không giới hạn, không phải trả royalty hoặc phí per-unit. Điều này không nghĩa vendor không thể thu tiền GPL software—đó là business practice hợp lý và phổ biến. Nghĩa là khi sở hữu GPL software, được phép sửa và phân phối lại dù là derived (modified) work hay không. Tuy nhiên theo GPL, tác giả modified work có nghĩa vụ phát hành theo GPL nếu quyết định làm vậy. Mọi phân phối derived work, như giao cho khách hàng, kích hoạt nghĩa vụ.
+Bất kể software được lấy bằng cách nào, GPL cấp cho người được cấp phép quyền phân phối không giới hạn mà không có nghĩa vụ trả royalty hoặc phí per-unit. Điều này không có nghĩa vendor không thể thu tiền cho GPL software; đây là một thông lệ kinh doanh hợp lý và phổ biến. Nó có nghĩa là khi sở hữu GPL software, bạn được phép sửa đổi và phân phối lại, dù đó có phải derived (modified) work hay không. Tuy nhiên, theo GPL, tác giả của modified work có nghĩa vụ phát hành tác phẩm theo GPL nếu quyết định phát hành. Mọi việc phân phối derived work, chẳng hạn giao cho khách hàng, đều làm phát sinh nghĩa vụ này.
 
 ### 1.3.1 Miễn phí và tự do
 
-Hai câu thường lặp lại khi nói tính “free” của mã nguồn mở: “free như tự do” và “free như bia miễn phí”. (Tác giả đặc biệt thích câu sau.) GPL tồn tại bảo đảm “free như tự do” cho tập software nhất định. Bảo đảm tự do dùng, nghiên cứu và sửa. Cũng bảo đảm tự do đó cho mọi người nhận modified code bạn phân phối. Khái niệm đã được hiểu khá rộng rãi.
+Hai cụm từ phổ biến thường được nhắc lại khi thảo luận tính “free” của open source là “free as in freedom” và “free as in beer”. (Tác giả đặc biệt thích cụm thứ hai.) GPL tồn tại để bảo đảm “free as in freedom” cho một khối software cụ thể. Nó bảo đảm quyền tự do sử dụng, nghiên cứu và sửa đổi software. Nó cũng bảo đảm các quyền tự do này cho bất kỳ ai được bạn phân phối modified code. Khái niệm này đã được hiểu tương đối rộng rãi.
 
-Một hiểu nhầm thường nghe là Linux “free như bia miễn phí”. Có thể lấy Linux không mất tiền. Có thể tải Linux kernel trong vài phút. Nhưng như professional development manager hiểu, software bất kỳ tích hợp vào thiết kế đều gắn chi phí nhất định. Gồm thu nhận, tích hợp, sửa đổi, bảo trì và hỗ trợ. Thêm chi phí lấy và duy trì toolchain cấu hình đúng, library, application program cùng tool cross-development chuyên dụng tương thích architecture đã chọn, bạn nhanh chóng thấy phát triển software component và development environment cần để phát triển/triển khai embedded system Linux-based không phải việc đơn giản.
+Một hiểu nhầm thường nghe là Linux “free as in beer”. Bạn có thể lấy Linux mà không mất tiền và download Linux kernel trong vài phút. Tuy nhiên, như mọi người quản lý phát triển chuyên nghiệp đều hiểu, bất kỳ software nào được tích hợp vào thiết kế cũng có các chi phí nhất định. Chúng gồm chi phí thu nhận, tích hợp, sửa đổi, bảo trì và hỗ trợ. Cộng thêm chi phí lấy và duy trì toolchain được cấu hình đúng, library, application program và các công cụ cross-development chuyên dụng tương thích với architecture đã chọn, bạn sẽ nhanh chóng thấy rằng phát triển các thành phần software cùng môi trường cần thiết để phát triển và triển khai embedded system Linux-based không phải một công việc đơn giản.
 
 ## 1.4 Tiêu chuẩn và tổ chức liên quan
 
-Khi Linux tiếp tục tăng thị phần desktop, enterprise và embedded, tiêu chuẩn và tổ chức mới xuất hiện để tác động việc dùng/chấp nhận Linux. Phần này giới thiệu tiêu chuẩn bạn có thể muốn làm quen.
+Khi Linux tiếp tục tăng thị phần trong các phân khúc desktop, enterprise và embedded, những tiêu chuẩn và tổ chức mới đã xuất hiện để tác động đến việc sử dụng và chấp nhận Linux. Mục này giới thiệu các tiêu chuẩn mà bạn có thể muốn làm quen.
 
 ### 1.4.1 Linux Standard Base
 
-Có lẽ tiêu chuẩn liên quan nhất với Linux distribution maintainer là Linux Standard Base (LSB). Mục tiêu thiết lập tập tiêu chuẩn tăng interoperability của application giữa Linux distribution khác nhau. Hiện LSB bao phủ nhiều architecture gồm IA32/64, Power Architecture 32- và 64-bit, AMD64, v.v. Tiêu chuẩn chia core component và architectural component riêng.
+Có lẽ tiêu chuẩn liên quan nhất đối với Linux distribution maintainer là Linux Standard Base (LSB). Mục tiêu của LSB là thiết lập một tập tiêu chuẩn giúp tăng khả năng tương tác của ứng dụng giữa các Linux distribution khác nhau. Hiện tại, LSB bao phủ một số architecture, bao gồm IA32/64, Power Architecture 32- và 64-bit, AMD64 cùng các architecture khác. Tiêu chuẩn được chia thành một thành phần cốt lõi và các thành phần architecture riêng.
 
-LSB quy định thuộc tính chung của Linux distribution, gồm object format, standard library interface, tập command/utility tối thiểu và hành vi, file system layout, system initialization, v.v.
+LSB quy định các thuộc tính chung của Linux distribution, bao gồm object format, standard library interface, tập command và tiện ích tối thiểu cùng hành vi của chúng, file system layout, system initialization và các thuộc tính khác.
 
 Có thể tìm hiểu thêm LSB tại link cuối chương.
 
 ### 1.4.2 Linux Foundation
 
-Theo website, Linux Foundation “là liên minh non-profit chuyên thúc đẩy Linux tăng trưởng”. Linux Foundation tài trợ công việc Linus Torvalds, người tạo Linux. Tài trợ nhiều working group định nghĩa tiêu chuẩn và tham gia phát triển feature hướng tới nhiều thuộc tính Linux platform quan trọng. Hai phần tiếp theo giới thiệu một số sáng kiến.
+Theo website của mình, Linux Foundation “là một liên minh non-profit chuyên thúc đẩy sự phát triển của Linux”. Linux Foundation tài trợ công việc của Linus Torvalds, người tạo ra Linux. Linux Foundation tài trợ một số working group để định nghĩa tiêu chuẩn và tham gia phát triển các feature hướng đến nhiều thuộc tính quan trọng của Linux platform. Hai mục tiếp theo giới thiệu một số sáng kiến đó.
 
 ### 1.4.3 Carrier-Grade Linux
 
-Nhiều nhà sản xuất networking và telecommunications equipment lớn nhất thế giới đang phát triển hoặc xuất xưởng thiết bị carrier-class chạy Linux làm operating system. Feature quan trọng của thiết bị carrier-class gồm reliability cao, availability cao và serviceability nhanh. Vendor thiết kế sản phẩm với redundant architecture hot-swap, feature fault-tolerant, clustering và thường cả hiệu năng real-time.
+Một số lượng đáng kể các nhà sản xuất thiết bị mạng và viễn thông lớn nhất thế giới đang phát triển hoặc xuất xưởng thiết bị carrier-class sử dụng Linux làm operating system. Những feature quan trọng của thiết bị carrier-class gồm độ tin cậy cao, tính sẵn sàng cao và khả năng bảo trì nhanh. Các vendor này thiết kế sản phẩm bằng kiến trúc dự phòng hot-swap, feature fault-tolerant, clustering và thường cả hiệu năng real-time.
 
-Working group Carrier Grade Linux của Linux Foundation tạo specification định nghĩa tập yêu cầu cho thiết bị carrier-class. Version hiện tại bao phủ bảy functional area:
+Working group Carrier Grade Linux của Linux Foundation đã tạo một specification định nghĩa tập yêu cầu dành cho thiết bị carrier-class. Phiên bản hiện tại của specification bao phủ bảy lĩnh vực chức năng:
 
 - Availability—Yêu cầu tăng availability, gồm online maintenance operation, redundancy và status monitoring
 
@@ -126,19 +126,19 @@ Working group Carrier Grade Linux của Linux Foundation tạo specification đ�
 
 ### 1.4.4 Mobile Linux Initiative: Moblin
 
-Nhiều mobile handset (điện thoại di động) trên thị trường toàn cầu xây dựng quanh embedded Linux. Nhiều báo cáo cho biết hàng chục triệu handset xuất xưởng với Linux làm operating system platform. Điều chắc chắn duy nhất là còn nhiều hơn nữa. Hứa hẹn đây là một market segment bùng nổ nhất cho vai trò trước kia của proprietary operating system real-time. Điều này thể hiện rõ Linux sẵn sàng cho commercial embedded application.
+Một số mobile handset (điện thoại di động) có trên thị trường toàn cầu được xây dựng dựa trên embedded Linux. Nhiều báo cáo cho biết hàng chục triệu handset đã được xuất xưởng với Linux làm operating system platform. Điều chắc chắn duy nhất là số lượng sẽ tiếp tục tăng. Đây hứa hẹn là một trong những phân khúc thị trường bùng nổ nhất cho lĩnh vực vốn thuộc vai trò của một proprietary real-time operating system. Điều này cho thấy rõ mức độ sẵn sàng của Linux đối với các ứng dụng embedded thương mại.
 
-Linux Foundation tài trợ working group ban đầu gọi Mobile Linux Initiative, nay là Moblin. Theo website Linux Foundation, mục đích đẩy nhanh dùng Linux trên mobile handset next-generation và portable device hội tụ voice/data khác. Trọng tâm gồm development tool, I/O và networking, memory management, multimedia, performance, power management, security và storage. Moblin website tại http://moblin.org. Có thể thử release như Fedora/Moblin tại http://fedoraproject.org/wiki/Features/FedoraMoblin, hoặc Ubuntu Moblin remix trên Dell Mini 10 Netbook của tác giả.
+Linux Foundation tài trợ một working group ban đầu tên là Mobile Linux Initiative, nay được gọi là Moblin. Theo website Linux Foundation, mục đích của nhóm là đẩy nhanh việc sử dụng Linux trên các mobile handset next-generation và những thiết bị di động hội tụ voice/data khác. Các lĩnh vực trọng tâm của working group này gồm development tool, I/O và networking, memory management, multimedia, performance, power management, security và storage. Website Moblin có tại http://moblin.org. Bạn có thể thử một Moblin release như Fedora/Moblin tại http://fedoraproject.org/wiki/Features/FedoraMoblin, hoặc Ubuntu Moblin remix có trên Dell Mini 10 Netbook của tác giả.
 
-Bức tranh embedded Linux liên tục thay đổi. Khi chuẩn bị ấn bản thứ hai, dự án Moblin và Maemo hợp nhất thành MeeGo. Có thể tìm hiểu thêm, thậm chí tải MeeGo image thử tại http://meego.com/.
+Bức tranh embedded Linux liên tục phát triển. Trong khi chuẩn bị ấn bản thứ hai này, các dự án Moblin và Maemo đã hợp nhất thành MeeGo. Bạn có thể tìm hiểu thêm về MeeGo, thậm chí download MeeGo image để thử, tại http://meego.com/.
 
 ### 1.4.5 Service Availability Forum
 
-Nếu xây sản phẩm cho môi trường coi trọng high reliability, availability và serviceability (RAS), nên biết Service Availability Forum (SA Forum). Tổ chức dẫn đầu định nghĩa tập interface chung để system management trong thiết bị carrier-grade và commercial equipment khác. Website tại www.saforum.org.
+Nếu đang xây dựng sản phẩm cho những môi trường coi trọng độ tin cậy, tính sẵn sàng và khả năng bảo trì cao (RAS), bạn cần biết Service Availability Forum (SA Forum). Tổ chức này đóng vai trò dẫn đầu trong việc định nghĩa một tập interface chung phục vụ quản lý hệ thống trong thiết bị carrier-grade và các thiết bị thương mại khác. Website SA Forum có tại www.saforum.org.
 
 ## 1.5 Tổng kết
 
-Embedded Linux đã thắng cuộc đua. Thực tế có lẽ bạn có embedded Linux trong ô tô hoặc nhà. Chương xem lý do và xây góc nhìn cho tài liệu tiếp theo:
+Embedded Linux đã giành chiến thắng trong cuộc đua. Thực tế, có thể bạn đã có embedded Linux trong ô tô hoặc nhà mình. Chương này xem xét các lý do và xây dựng góc nhìn cho nội dung tiếp theo:
 
 - Việc dùng Linux trong developer và manufacturer embedded product tiếp tục tăng tốc.
 
@@ -158,4 +158,4 @@ Linux Foundation http://www.linuxfoundation.org/
 
 [^1]: Xem http://www.gnu.org/licenses/gpl.html để đọc đầy đủ license.
 
-[^2]: Nếu mọi copyright holder đồng ý, theo lý thuyết software có thể phát hành theo license mới. Thực sự rất khó xảy ra, đặc biệt với software base lớn có hàng nghìn contributor.
+[^2]: Nếu tất cả chủ sở hữu bản quyền đồng ý, về lý thuyết software có thể được phát hành theo một license mới. Đây thực sự là tình huống rất khó xảy ra, đặc biệt với một software base lớn có hàng nghìn người đóng góp.
