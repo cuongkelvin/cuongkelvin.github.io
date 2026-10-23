@@ -339,7 +339,7 @@ Bắt đầu với 10 bit trọng số cao nhất của linear address được 
 
 Hình 2-9. Ví dụ paging
 
-Giá trị 10 bit ở giữa (tức giá trị field Table) từ 0 đến `0x03f`, hay 0 đến 63 thập phân. Vì vậy chỉ 64 entry đầu của Page Table hợp lệ. 960 entry còn lại được điền số 0.
+Các giá trị của 10 bit ở giữa, tức giá trị field Table, nằm trong khoảng từ 0 đến `0x03f`, hay từ 0 đến 63 ở hệ thập phân. Vì vậy, chỉ 64 entry đầu tiên của Page Table hợp lệ. 960 entry còn lại được điền bằng số 0.
 
 Giả sử process cần đọc byte tại linear address `0x20021406`. Paging unit xử lý address như sau:
 
@@ -449,7 +449,7 @@ Như Hình 2-10, cache unit nằm giữa paging unit và main memory. Nó có c�
 
 Hình 2-10. Processor hardware cache
 
-Khi truy cập RAM memory cell, CPU trích subset index từ physical address và so tag của mọi line trong subset với high-order bit của physical address. Nếu tìm thấy line có tag giống high-order bit của address, CPU có cache hit; nếu không có cache miss.
+Khi truy cập một RAM memory cell, CPU trích subset index từ physical address và so sánh tag của mọi line trong subset với các high-order bit của physical address. Nếu tìm được một line có tag giống các high-order bit của address, CPU có cache hit; nếu không, CPU có cache miss.
 
 Khi cache hit xảy ra, cache controller hoạt động khác nhau tùy access type. Với read operation, controller chọn data từ cache line và truyền vào CPU register; RAM không bị truy cập và CPU tiết kiệm thời gian, chính là lý do cache system được phát minh. Với write operation, controller có thể triển khai một trong hai strategy cơ bản gọi là write-through và write-back. Trong write-through, controller luôn ghi vào cả RAM lẫn cache line, thực chất tắt cache cho write operation. Trong write-back, có hiệu quả tức thời hơn, chỉ cache line được cập nhật còn nội dung RAM không đổi. Tất nhiên, sau write-back cuối cùng RAM phải được cập nhật. Cache controller chỉ ghi cache line trở lại RAM khi CPU thực thi instruction yêu cầu flush cache entry hoặc khi có hardware signal FLUSH (thường sau cache miss).
 

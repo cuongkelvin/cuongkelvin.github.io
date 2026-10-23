@@ -508,7 +508,7 @@ Khi device driver đang được đăng ký, kernel tìm hardware device chưa �
 
 Chúng ta đã thấy ví dụ trong phần “I/O Interrupt Handling” ở Chương 4: việc gán IRQ cho device thường làm động, ngay trước khi dùng, vì nhiều device có thể chia sẻ cùng IRQ line. Resource khác có thể cấp phát ở thời điểm muộn nhất là page frame cho DMA transfer buffer và chính DMA channel (cho non-PCI device cũ như floppy disk driver).
 
-Để đảm bảo lấy resource khi cần nhưng không yêu cầu thừa khi đã được cấp, device driver thường dùng mô hình sau:
+Để bảo đảm các resource được lấy khi cần nhưng không bị yêu cầu thừa khi đã được cấp, device driver thường áp dụng mô hình sau:
 
 - Usage counter theo dõi số process hiện truy cập device file. Counter tăng trong method `open` của device file và giảm trong method `release`.[^4]
 
@@ -677,7 +677,7 @@ Nhờ các function này, có thể che mọi phụ thuộc vào cách truy cậ
 
 Trong kiến trúc PC gốc, CPU là bus master duy nhất của hệ thống, tức hardware device duy nhất điều khiển address/data bus để lấy và lưu giá trị trong RAM location. Với bus architecture hiện đại hơn như PCI, mỗi peripheral có thể đóng vai trò bus master nếu có circuitry thích hợp. Do đó, ngày nay mọi PC có auxiliary DMA circuit, có thể truyền dữ liệu giữa RAM và I/O device. Khi được CPU kích hoạt, DMA có thể tự tiếp tục truyền dữ liệu; khi hoàn tất, DMA phát interrupt request. Xung đột xảy ra khi CPU và DMA circuit cần truy cập cùng memory location cùng lúc được hardware circuit tên memory arbiter giải quyết (xem phần “Atomic Operations” trong Chương 5).
 
-DMA chủ yếu do disk driver và device khác truyền số byte lớn mỗi lần dùng. Vì setup time cho DMA tương đối cao, dùng CPU trực tiếp truyền dữ liệu hiệu quả hơn khi số byte nhỏ.
+DMA chủ yếu được sử dụng bởi disk driver và những device khác truyền một lượng lớn byte cùng lúc. Vì thời gian thiết lập DMA tương đối cao, sử dụng CPU trực tiếp để truyền data sẽ hiệu quả hơn khi số byte nhỏ.
 
 DMA circuit đầu cho ISA bus cũ phức tạp, khó lập trình và giới hạn trong 16 MB physical memory thấp nhất. DMA circuit mới hơn cho PCI bus và SCSI bus dựa vào dedicated hardware circuit trong bus, giúp người phát triển device driver dễ làm việc hơn.
 

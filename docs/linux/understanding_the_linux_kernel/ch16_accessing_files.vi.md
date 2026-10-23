@@ -293,9 +293,9 @@ Kernel xem file access là tuần tự so với file access trước nếu page 
 
 Khi truy cập file cho trước, read-ahead algorithm dùng hai tập page, mỗi tập tương ứng phần liên tiếp của file. Hai tập gọi là current window và ahead window.
 
-Current window gồm page process yêu cầu hoặc kernel đọc trước và có trong page cache. (Page trong current window không nhất thiết up-to-date vì I/O data transfer có thể vẫn diễn ra.) Current window chứa cả page cuối process truy cập tuần tự và có thể cả một số page kernel đã đọc trước nhưng process chưa yêu cầu.
+Current window gồm những page do process yêu cầu hoặc được kernel đọc trước và nằm trong page cache. Một page trong current window không nhất thiết up-to-date vì quá trình truyền data I/O có thể vẫn đang diễn ra. Current window chứa cả những page cuối cùng mà process đã truy cập tuần tự và có thể một số page mà kernel đã đọc trước nhưng process chưa yêu cầu.
 
-Ahead window gồm page—theo sau page trong current window—hiện đang được kernel đọc trước. Chưa page nào trong ahead window được process yêu cầu, nhưng kernel giả định sớm muộn process sẽ yêu cầu.
+Ahead window gồm những page nằm sau các page trong current window và hiện đang được kernel đọc trước. Chưa page nào trong ahead window được process yêu cầu, nhưng kernel giả định sớm muộn process cũng sẽ yêu cầu chúng.
 
 Khi kernel nhận ra sequential access và page ban đầu thuộc current window, nó kiểm tra ahead window đã thiết lập chưa. Nếu chưa, kernel tạo ahead window mới và kích hoạt read operation cho page tương ứng. Lý tưởng là process vẫn yêu cầu page từ current window trong khi page của ahead window đang truyền. Khi process yêu cầu page trong ahead window, ahead window thành current window mới.
 
@@ -724,7 +724,7 @@ Function `do_no_page()` thực hiện mọi operation chung cho mọi loại dem
 
 6\. Nếu process cố ghi page, buộc các bit `Read/Write` và `Dirty` của Page Table entry thành 1. Trong trường hợp này, page frame được gán độc quyền cho process hoặc page shared; cả hai trường hợp đều nên cho ghi.
 
-Cốt lõi demand paging algorithm gồm method `nopage` của memory region. Nói chung, phải trả về địa chỉ page frame chứa page process truy cập. Cách triển khai phụ thuộc loại memory region chứa page.
+Cốt lõi của thuật toán demand paging là method `nopage` của memory region. Nói chung, method phải trả về address của page frame chứa page mà process truy cập. Cách triển khai method phụ thuộc vào loại memory region chứa page đó.
 
 Khi xử lý memory region map file trên disk, method `nopage` trước tiên phải tìm page yêu cầu trong page cache. Nếu không thấy, method phải đọc từ disk. Phần lớn filesystem triển khai method `nopage` qua function `filemap_nopage()`, nhận ba parameter:
 

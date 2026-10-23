@@ -40,7 +40,7 @@ Ngoài Real Time Clock và Time Stamp Counter, PC IBM-compatible có loại devi
 
 Như sẽ thấy chi tiết các đoạn sau, Linux lập trình PIT của PC IBM-compatible phát timer interrupt trên IRQ0 ở tần số (xấp xỉ) 1000-Hz — tức mỗi millisecond một lần. Khoảng này gọi là tick, độ dài theo nanosecond lưu trong variable `tick_nsec`. Trên PC, `tick_nsec` initialize thành 999.848 nanosecond (cho clock signal frequency khoảng 1000,15 Hz), nhưng giá trị có thể được kernel tự điều chỉnh nếu máy tính đồng bộ với external clock (xem phần “System call adjtimex()” sau). Tick đánh nhịp cho mọi hoạt động hệ thống; theo nghĩa nào đó giống tiếng nhịp metronome khi nhạc công tập luyện.
 
-Nhìn chung tick ngắn hơn cho timer resolution cao hơn, giúp multimedia playback mượt và response time nhanh hơn khi thực hiện synchronous I/O multiplexing (system call `poll()` và `select()`). Tuy nhiên đây là trade-off: tick ngắn hơn đòi CPU dành tỷ lệ thời gian lớn hơn trong Kernel Mode — tức tỷ lệ nhỏ hơn trong User Mode. Kết quả user program chạy chậm hơn.
+Nhìn chung, tick ngắn hơn tạo ra các timer có resolution cao hơn, giúp phát multimedia mượt hơn và có response time nhanh hơn khi thực hiện synchronous I/O multiplexing qua các system call `poll()` và `select()`. Tuy nhiên, đây là một trade-off: tick ngắn hơn đòi hỏi CPU dành tỷ lệ thời gian lớn hơn trong Kernel Mode, tức tỷ lệ thời gian nhỏ hơn trong User Mode. Vì vậy, các chương trình của người dùng chạy chậm hơn.
 
 Tần số timer interrupt phụ thuộc hardware architecture. Máy chậm có tick khoảng 10 millisecond (100 timer interrupt mỗi giây), máy nhanh có tick khoảng 1 millisecond (1000 hoặc 1024 timer interrupt mỗi giây).
 
@@ -82,7 +82,7 @@ CPU local timer là device tương tự Programmable Interval Timer vừa mô t�
 
 High Precision Event Timer (HPET) là timer chip mới do Intel và Microsoft cùng phát triển. Dù HPET chưa phổ biến trên máy end-user, Linux 2.6 đã hỗ trợ nên dành vài lời mô tả đặc điểm.
 
-HPET cung cấp một số hardware timer kernel có thể tận dụng. Về cơ bản chip có tối đa tám counter độc lập 32-bit hoặc 64-bit. Mỗi counter được clock signal riêng điều khiển, tần số ít nhất 10 MHz; vì vậy counter tăng ít nhất một lần trong 100 nanosecond. Mỗi counter gắn với tối đa 32 timer, mỗi timer gồm comparator và match register. Comparator là circuit so giá trị counter với giá trị match register, phát hardware interrupt nếu khớp. Một số timer có thể enable để tạo periodic interrupt.
+HPET cung cấp một số hardware timer mà kernel có thể tận dụng. Về cơ bản, chip chứa tối đa tám counter độc lập 32-bit hoặc 64-bit. Mỗi counter được điều khiển bởi clock signal riêng có tần số ít nhất 10 MHz; vì vậy, counter được tăng ít nhất một lần trong 100 nanosecond. Mỗi counter gắn với tối đa 32 timer, mỗi timer gồm một comparator và một match register. Comparator là circuit so sánh giá trị counter với giá trị trong match register và phát hardware interrupt nếu tìm thấy giá trị khớp. Một số timer có thể được enable để tạo periodic interrupt.
 
 HPET chip có thể lập trình qua register map vào memory space (giống I/O APIC). BIOS thiết lập mapping trong bootstrapping phase và báo kernel hệ điều hành initial memory address. HPET register cho kernel đọc và ghi giá trị counter và match register, lập trình one-shot interrupt, enable hoặc disable periodic interrupt trên timer hỗ trợ.
 
@@ -128,7 +128,7 @@ Timekeeping architecture của Linux 2.6 dùng rất nhiều data structure. Nh�
 
 #### Timer object
 
-Để xử lý thống nhất các timer source có thể có, kernel dùng “timer object”, descriptor type `timer_opts` gồm timer name và bốn standard method trong Bảng 6-1.
+Để xử lý các timer source có thể có theo một cách thống nhất, kernel sử dụng một “timer object”, là descriptor có kiểu `timer_opts`, gồm tên timer và bốn method chuẩn được trình bày trong Bảng 6-1.
 
 Bảng 6-1. Field của data structure timer\_opts
 
@@ -336,7 +336,7 @@ void update_times(void)
 }
 ```
 
-Từ mô tả timer interrupt handler trước, nhớ rằng khi code function thực thi, seqlock `xtime_lock` đã được acquire để ghi.
+Hãy nhớ lại từ phần mô tả timer interrupt handler trước đó rằng khi code của function này được thực thi, seqlock `xtime_lock` đã được acquire để ghi.
 
 Variable `wall_jiffies` lưu thời điểm cập nhật cuối variable `xtime`. Chú ý giá trị `wall_jiffies` có thể nhỏ hơn `jiffies-1` vì một vài timer interrupt có thể bị mất, ví dụ khi interrupt disable lâu; nói cách khác kernel không nhất thiết cập nhật variable `xtime` mỗi tick. Tuy nhiên không tick nào mất vĩnh viễn và về lâu dài `xtime` lưu system time đúng. Kiểm tra timer interrupt bị mất thực hiện trong method `mark_offset` của `cur_timer`; xem phần “Timekeeping architecture trong uniprocessor system” trước. Function `update_wall_time()` gọi function `update_wall_time_one_tick()` liên tiếp `ticks` lần; thông thường mỗi lời gọi cộng 1.000.000 vào field `xtime.tv_nsec`. Nếu giá trị `xtime.tv_nsec` lớn hơn 999.999.999, function `update_wall_time()` còn cập nhật field `tv_sec` của `xtime`. Nếu system call `adjtimex()` đã thực hiện, vì lý do giải thích trong phần “System call adjtimex()” sau, function có thể tinh chỉnh giá trị 1.000.000 một chút để clock nhanh hoặc chậm hơn chút.
 
@@ -410,11 +410,11 @@ Timer được cả kernel lẫn process dùng rộng rãi. Phần lớn device 
 
 Lập trình viên cũng thường dùng timer buộc thực thi function cụ thể tại thời điểm tương lai (xem phần “System call setitimer() và alarm()” sau).
 
-Triển khai timer tương đối dễ. Mỗi timer có field chỉ định sau bao lâu trong tương lai sẽ expire. Field ban đầu tính bằng cộng số tick phù hợp vào giá trị hiện tại `jiffies`. Field không thay đổi. Mỗi khi kernel kiểm tra timer, so expiration field với giá trị `jiffies` hiện tại, timer expire khi `jiffies` lớn hơn hoặc bằng giá trị lưu.
+Triển khai một timer tương đối đơn giản. Mỗi timer chứa một field chỉ định thời điểm trong tương lai mà timer cần expire. Ban đầu, field này được tính bằng cách cộng số tick thích hợp vào giá trị hiện tại của `jiffies`. Field này không thay đổi. Mỗi lần kernel kiểm tra timer, nó so sánh expiration field với giá trị `jiffies` tại thời điểm hiện tại, và timer expire khi `jiffies` lớn hơn hoặc bằng giá trị được lưu.
 
 Linux xét hai loại timer gọi là dynamic timer và interval timer. Loại đầu do kernel dùng, còn interval timer có thể được process trong User Mode tạo.
 
-Lưu ý về Linux timer: vì kiểm tra timer function luôn do deferrable function thực hiện, có thể thực thi lâu sau khi activate, kernel không bảo đảm timer function bắt đầu đúng expiration time. Chỉ bảo đảm thực thi đúng lúc hoặc sau đó với delay đến vài trăm millisecond. Vì vậy timer không phù hợp real-time application cần tuân thủ expiration time nghiêm ngặt.
+Một lưu ý về Linux timer: vì việc kiểm tra các timer function luôn do các deferrable function thực hiện, mà chúng có thể chạy rất lâu sau khi được activate, kernel không thể bảo đảm timer function bắt đầu đúng expiration time. Kernel chỉ có thể bảo đảm chúng được thực thi đúng lúc hoặc sau đó với độ trễ đến vài trăm millisecond. Vì vậy, timer không phù hợp với real-time application đòi hỏi tuân thủ expiration time nghiêm ngặt.
 
 Ngoài software timer, kernel còn dùng delay function thực thi tight instruction loop đến khi khoảng thời gian cho trước trôi qua. Thảo luận trong phần “Delay function” sau.
 
@@ -440,7 +440,7 @@ Field `function` chứa address function cần thực thi khi timer expire. Fiel
 
 Field `expires` chỉ định khi nào timer expire; thời gian biểu diễn bằng số tick trôi qua từ system startup. Mọi timer có giá trị `expires` nhỏ hơn hoặc bằng giá trị `jiffies` được xem là expired hoặc decayed.
 
-Field `entry` dùng insert software timer vào một doubly linked circular list nhóm timer theo giá trị field `expires`. Algorithm dùng các list mô tả sau trong chương.
+Field `entry` được sử dụng để insert software timer vào một trong các doubly linked circular list, nhóm các timer theo giá trị của field `expires`. Thuật toán sử dụng những list này được mô tả ở phần sau của chương.
 
 Để tạo và activate dynamic timer, kernel phải:
 
@@ -506,7 +506,7 @@ Field `tv1` là structure type `tvec_root_t`, chứa array `vec` gồm 256 phầ
 
 Field `tv2`, `tv3` và `tv4` là structure type `tvec_t` gồm array `vec` có 64 phần tử `list_head`. List lần lượt chứa mọi dynamic timer sẽ decay trong 2<sup>14</sup>–1, 2<sup>20</sup>–1 và 2<sup>26</sup>–1 tick tới.
 
-Field `tv5` giống field trước, ngoại trừ entry cuối array `vec` là list chứa dynamic timer có field `expires` cực lớn. Không bao giờ cần bổ sung từ array khác. Hình 6-1 minh họa sơ lược năm nhóm list.
+Field `tv5` giống các field trước, ngoại trừ entry cuối cùng của array `vec` là một list chứa các dynamic timer có field `expires` cực lớn. Nó không bao giờ cần được bổ sung từ một array khác. Hình 6-1 minh họa sơ đồ của năm nhóm list.
 
 Field `timer_jiffies` biểu diễn expiration time sớm nhất của dynamic timer chưa kiểm tra: nếu trùng giá trị `jiffies`, không backlog deferrable function tích lũy; nếu nhỏ hơn `jiffies`, phải xử lý list dynamic timer tham chiếu tick trước. Field đặt thành `jiffies` ở system startup và chỉ được function `run_timer_softirq()` mô tả phần tiếp theo tăng. Chú ý field `timer_jiffies` có thể tụt xa sau `jiffies` khi deferrable function xử lý dynamic timer lâu không thực thi — ví dụ vì bị disable hoặc nhiều interrupt handler đã thực thi.
 
@@ -670,7 +670,7 @@ Return trong data structure tên `timeval` số giây từ nửa đêm ngày 1 t
 
 System call `time()` được `gettimeofday()` thay thế nhưng vẫn có trong Linux để backward compatibility. Function khác dùng rộng rãi `ftime()`, không còn triển khai dạng system call, return số giây từ nửa đêm ngày 1 tháng 1 năm 1970 (UTC) và số millisecond trôi qua trong giây gần nhất.
 
-System call `gettimeofday()` được function `sys_gettimeofday()` triển khai. Để tính ngày và giờ hiện tại, function gọi `do_gettimeofday()` thực hiện:
+System call `gettimeofday()` được triển khai bởi function `sys_gettimeofday()`. Để tính ngày và giờ hiện tại, function này gọi `do_gettimeofday()`, thực hiện các thao tác sau:
 
 1\. Acquire seqlock `xtime_lock` để đọc.
 
@@ -682,11 +682,11 @@ usec = cur_timer->getoffset();
 
 Như giải thích trong phần “Data structure của timekeeping architecture” trước, có bốn trường hợp:
 
-a. Nếu `cur_timer` trỏ đến object `timer_hpet`, method so giá trị hiện tại HPET counter với giá trị cùng counter lưu ở execution cuối của timer interrupt handler.
+a. Nếu `cur_timer` trỏ đến object `timer_hpet`, method so sánh giá trị hiện tại của HPET counter với giá trị của cùng counter đó được lưu trong lần thực thi timer interrupt handler gần nhất.
 
-b. Nếu `cur_timer` trỏ đến object `timer_pmtmr`, method so giá trị hiện tại ACPI PMT counter với giá trị cùng counter lưu ở execution cuối của timer interrupt handler.
+b. Nếu `cur_timer` trỏ đến object `timer_pmtmr`, method so sánh giá trị hiện tại của ACPI PMT counter với giá trị của cùng counter đó được lưu trong lần thực thi timer interrupt handler gần nhất.
 
-c. Nếu `cur_timer` trỏ đến object `timer_tsc`, method so giá trị hiện tại Time Stamp Counter với giá trị TSC lưu ở execution cuối của timer interrupt handler.
+c. Nếu `cur_timer` trỏ đến object `timer_tsc`, method so sánh giá trị hiện tại của Time Stamp Counter với giá trị TSC được lưu trong lần thực thi timer interrupt handler gần nhất.
 
 d. Nếu `cur_timer` trỏ đến object `timer_pit`, method đọc giá trị hiện tại PIT counter để tính số microsecond từ timer interrupt cuối của PIT.
 

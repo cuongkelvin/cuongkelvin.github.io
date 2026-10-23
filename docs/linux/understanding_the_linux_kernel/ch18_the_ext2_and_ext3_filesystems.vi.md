@@ -688,7 +688,7 @@ Hàm sau tìm free block trong partition Ext2 theo chiến lược sau:
 
 2\. Nếu goal đang bận, hàm kiểm tra một trong các block tiếp sau block ưu tiên có free không.
 
-3\. Nếu không tìm được free block gần block ưu tiên, hàm xét tất cả block group, bắt đầu từ nhóm chứa goal. Với mỗi block group, hàm thực hiện:
+3\. Nếu không tìm thấy free block trong vùng lân cận block ưu tiên, function xem xét tất cả các block group, bắt đầu từ nhóm chứa goal. Đối với mỗi block group, function thực hiện như sau:
 
 a. Tìm một nhóm gồm ít nhất tám free block liền kề.
 

@@ -312,7 +312,7 @@ Pipe và socket là special file dùng cho interprocess communication (xem phầ
 
 ### File descriptor và inode
 
-Unix phân biệt rõ nội dung file với thông tin về file. Ngoại trừ device file và file của special filesystem, mỗi file gồm byte sequence. File không chứa control information như độ dài hoặc end-of-file (EOF) delimiter.
+Unix phân biệt rõ nội dung file với thông tin về file. Ngoại trừ device file và các file thuộc special filesystem, mỗi file gồm một chuỗi byte. File không chứa control information, chẳng hạn độ dài của nó hoặc dấu phân cách end-of-file (EOF).
 
 Mọi thông tin filesystem cần để xử lý file nằm trong data structure gọi là inode. Mỗi file có inode riêng mà filesystem dùng để nhận diện file.
 
@@ -426,7 +426,7 @@ Chỉ định giá trị signed integer dùng để tính vị trí mới của 
 
 `whence`
 
-Chỉ định có tính vị trí mới bằng cách cộng giá trị `offset` vào số 0 (offset từ đầu file), current file pointer hay vị trí byte cuối (offset từ cuối file)
+Chỉ định vị trí mới được tính bằng cách cộng giá trị `offset` vào số 0, tức offset từ đầu file, vào current file pointer hay vào vị trí byte cuối cùng, tức offset từ cuối file
 
 System call `read()` yêu cầu các parameter sau:
 

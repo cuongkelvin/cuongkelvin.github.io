@@ -300,7 +300,7 @@ Bảng 5-7. Spin lock macro
 
 #### Macro spin\_lock có kernel preemption
 
-Thảo luận chi tiết macro `spin_lock` dùng acquire spin lock. Mô tả sau nói về preemptive kernel cho SMP system. Macro nhận parameter là address `slp` của spin lock và thực hiện:
+Chúng ta hãy thảo luận chi tiết macro `spin_lock`, được sử dụng để acquire spin lock. Mô tả sau dành cho preemptive kernel trên SMP system. Macro nhận address `slp` của spin lock làm tham số và thực hiện các thao tác sau:
 
 1\. Gọi `preempt_disable()` để disable kernel preemption.
 
@@ -332,7 +332,7 @@ Macro `cpu_relax()` rút thành assembly language instruction `pause`. Instructi
 
 ##### Macro spin\_lock không có kernel preemption
 
-Nếu không chọn kernel preemption option khi compile kernel, macro `spin_lock` khá khác mô tả trên. Khi đó macro tạo assembly language fragment về cơ bản tương đương tight busy wait sau:[^3]
+Nếu tùy chọn kernel preemption không được chọn khi biên dịch kernel, macro `spin_lock` khá khác với macro được mô tả ở trên. Trong trường hợp này, macro tạo ra một đoạn assembly language về cơ bản tương đương vòng tight busy wait sau:[^3]
 
 ```c
 1: lock; decb slp->slock
@@ -536,7 +536,7 @@ Lưu giá trị `atomic_t`. Nếu lớn hơn 0, resource rảnh — tức hiện
 
 `wait`
 
-Lưu address của wait queue list chứa mọi sleeping process hiện chờ resource. Tất nhiên nếu `count` lớn hơn hoặc bằng 0, wait queue rỗng.
+Lưu address của một wait queue list chứa tất cả các process đang ngủ và chờ resource. Dĩ nhiên, nếu `count` lớn hơn hoặc bằng 0 thì wait queue rỗng.
 
 `sleepers`
 
@@ -572,7 +572,7 @@ __attribute__((regparm(3))) void __up(struct semaphore *sem)
 
 Function `up()` tăng field `count` của semaphore `*sem`, rồi kiểm tra giá trị lớn hơn 0 không. Tăng `count` và set flag mà jump instruction tiếp theo kiểm tra phải thực thi atomically, nếu không kernel control path khác có thể truy cập field value đồng thời với kết quả thảm khốc. Nếu `count` lớn hơn 0, không process sleep trong wait queue nên không cần làm gì. Nếu không function `__up()` được gọi để wake up một sleeping process. Chú ý `__up()` nhận parameter từ register `eax` (xem mô tả function `__switch_to()` trong phần “Thực hiện process switch” của Chương 3).
 
-Ngược lại khi process muốn acquire kernel semaphore lock, gọi function `down()`. Triển khai `down()` khá phức tạp nhưng về cơ bản tương đương:
+Ngược lại, khi một process muốn acquire kernel semaphore lock, nó gọi function `down()`. Cách triển khai `down()` khá phức tạp, nhưng về cơ bản tương đương với phần sau:
 
 ```c
 down:

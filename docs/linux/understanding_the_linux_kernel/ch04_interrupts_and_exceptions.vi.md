@@ -287,9 +287,9 @@ Sau khi thực thi instruction, cặp register `cs` và `eip` chứa logical add
 
 3\. Lấy base address của GDT từ register `gdtr` và tìm trong GDT để đọc Segment Descriptor được selector trong IDT entry nhận diện. Descriptor chỉ định base address của segment chứa interrupt hoặc exception handler.
 
-4\. Bảo đảm interrupt được nguồn có quyền phát. Trước tiên so Current Privilege Level (CPL), lưu trong hai bit trọng số thấp nhất của register `cs`, với Descriptor Privilege Level (DPL) của Segment Descriptor trong GDT. Phát exception “General protection” nếu CPL thấp hơn DPL vì interrupt handler không thể có privilege thấp hơn chương trình gây interrupt. Với programmed exception, thực hiện security check bổ sung: so CPL với DPL của gate descriptor trong IDT và phát exception “General protection” nếu DPL thấp hơn CPL. Kiểm tra cuối cho phép ngăn user application truy cập trap gate hoặc interrupt gate cụ thể.
+4\. Bảo đảm interrupt được phát bởi một nguồn có quyền. Trước tiên, so sánh Current Privilege Level (CPL), được lưu trong hai bit trọng số thấp nhất của register `cs`, với Descriptor Privilege Level (DPL) của Segment Descriptor trong GDT. Phát exception “General protection” nếu CPL thấp hơn DPL, vì interrupt handler không thể có privilege thấp hơn chương trình gây ra interrupt. Đối với programmed exception, thực hiện thêm security check: so sánh CPL với DPL của gate descriptor trong IDT và phát exception “General protection” nếu DPL thấp hơn CPL. Phép kiểm tra cuối này cho phép ngăn user application truy cập các trap gate hoặc interrupt gate cụ thể.
 
-5\. Kiểm tra có privilege level change không — tức CPL khác DPL của Segment Descriptor đã chọn. Nếu có, control unit phải bắt đầu dùng stack gắn với privilege level mới. Thực hiện các bước:
+5\. Kiểm tra liệu có thay đổi privilege level hay không, tức CPL có khác DPL của Segment Descriptor đã chọn hay không. Nếu có, control unit phải bắt đầu sử dụng stack gắn với privilege level mới. Nó thực hiện việc này qua các bước sau:
 
 a. Đọc register `tr` để truy cập TSS segment của running process.
 
@@ -609,7 +609,7 @@ Hình 4-4. I/O interrupt handling
 
 - External mathematical coprocessor phải nối IRQ13 line (dù processor 80×86 gần đây không còn dùng device đó, Linux vẫn hỗ trợ model 80386 bền bỉ).
 
-- Nhìn chung I/O device có thể nối với số IRQ line hạn chế. (Thực tế khi làm việc với PC cũ không thể IRQ sharing, bạn có thể không cài được card mới do IRQ conflict với hardware device đã có.)
+- Nhìn chung, một I/O device chỉ có thể được nối với một số IRQ line hạn chế. Thực tế, khi làm việc với PC cũ không hỗ trợ IRQ sharing, bạn có thể không cài được card mới vì IRQ conflict với các hardware device đã có.
 
 Bảng 4-2. Interrupt vector trong Linux
 
@@ -765,7 +765,7 @@ Bảng 4-8. Field của structure irq\_cpustat\_t
 
 Linux tuân theo mô hình Symmetric Multiprocessing (SMP); về cơ bản nghĩa là kernel không nên thiên vị CPU nào so với CPU khác.
 
-Vì vậy kernel cố phân phối IRQ signal từ hardware device theo round-robin giữa mọi CPU. Do đó mọi CPU nên dành tỷ lệ execution time gần bằng nhau để phục vụ I/O interrupt.
+Vì vậy, kernel cố gắng phân phối các IRQ signal đến từ hardware device theo cách round-robin giữa tất cả CPU. Do đó, mọi CPU nên dành tỷ lệ execution time gần bằng nhau để phục vụ các I/O interrupt.
 
 Trong phần “Advanced Programmable Interrupt Controller (APIC)” trước, đã nói multi-APIC system có cơ chế tinh vi phân phối động IRQ signal giữa CPU.
 
@@ -860,7 +860,7 @@ Function `do_IRQ()` thực hiện:
 
 a. Thực thi function `current_thread_info()` lấy address descriptor `thread_info` gắn với Kernel Mode stack do register `esp` address (xem phần “Nhận diện process” trong Chương 3).
 
-b. So address descriptor `thread_info` lấy ở bước trước với address lưu trong `hardirq_ctx[smp_processor_id()]`, tức address descriptor `thread_info` gắn với local CPU. Nếu bằng nhau, kernel đang dùng hard IRQ stack nên jump bước 3. Xảy ra khi IRQ được phát lúc kernel còn xử lý interrupt khác.
+b. So sánh address của descriptor `thread_info` lấy ở bước trước với address lưu trong `hardirq_ctx[smp_processor_id()]`, tức address của descriptor `thread_info` gắn với local CPU. Nếu hai address bằng nhau, kernel đã sử dụng hard IRQ stack nên chuyển đến bước 3. Điều này xảy ra khi một IRQ được phát trong lúc kernel vẫn đang xử lý một interrupt khác.
 
 c. Ở đây phải switch Kernel Mode stack. Lưu pointer đến current process descriptor trong field `task` của descriptor `thread_info` trong union `irq_ctx` của local CPU. Làm vậy để macro `current` hoạt động như mong đợi khi kernel dùng hard IRQ stack (xem phần “Nhận diện process” trong Chương 3).
 
@@ -1179,7 +1179,7 @@ Nên kiểm tra active (pending) softirq định kỳ nhưng không gây quá nh
 
 ##### Function do\_softirq()
 
-Nếu phát hiện pending softirq tại checkpoint đó (`local_softirq_pending()` khác 0), kernel gọi `do_softirq()` xử lý. Function thực hiện:
+Nếu phát hiện các softirq đang chờ tại một checkpoint như vậy, tức `local_softirq_pending()` khác 0, kernel gọi `do_softirq()` để xử lý chúng. Function này thực hiện các thao tác sau:
 
 1\. Nếu `in_interrupt()` cho giá trị 1, function return. Tình huống cho biết `do_softirq()` đã được gọi trong interrupt context hoặc softirq hiện bị disable.
 
@@ -1279,7 +1279,7 @@ Giả sử đang viết device driver và muốn dùng tasklet: cần làm gì? 
 
 Có thể disable tasklet có chọn lọc bằng `tasklet_disable_nosync()` hoặc `tasklet_disable()`. Cả hai tăng field `count` của tasklet descriptor nhưng function sau không return đến khi instance đang chạy của tasklet function kết thúc. Để enable lại tasklet, dùng `tasklet_enable()`.
 
-Để activate tasklet, nên gọi function `tasklet_schedule()` hoặc `tasklet_hi_schedule()` tùy priority yêu cầu. Hai function rất giống; mỗi function thực hiện:
+Để activate tasklet, bạn nên gọi function `tasklet_schedule()` hoặc `tasklet_hi_schedule()`, tùy priority mà bạn yêu cầu cho tasklet. Hai function này rất giống nhau; mỗi function thực hiện các thao tác sau:
 
 1\. Kiểm tra flag `TASKLET_STATE_SCHED`; nếu set, return (tasklet đã được schedule).
 

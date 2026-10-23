@@ -363,7 +363,7 @@ Return process descriptor address của lightweight process theo sau `task` tron
 
 ### Cách tổ chức process
 
-Runqueue list nhóm mọi process ở state `TASK_RUNNING`. Khi nhóm process ở state khác, mỗi state đòi hỏi cách xử lý khác nhau, với Linux chọn một trong các phương án sau.
+Các runqueue list nhóm tất cả các process ở state `TASK_RUNNING`. Khi nhóm các process ở những state khác, mỗi state đòi hỏi cách xử lý khác nhau; Linux chọn một trong những phương án được trình bày trong danh sách sau.
 
 - Process ở state `TASK_STOPPED`, `EXIT_ZOMBIE` hoặc `EXIT_DEAD` không được liên kết trong list cụ thể. Không cần nhóm process thuộc ba state này vì stopped, zombie và dead process chỉ được truy cập qua PID hoặc linked list child process của parent cụ thể.
 
@@ -920,7 +920,7 @@ Trỏ đến data truyền cho function `fn()`.
 
 `flags`
 
-Thông tin khác. Low byte chỉ định signal number gửi đến parent process khi child kết thúc; thường chọn signal `SIGCHLD`. Ba byte còn lại encode nhóm clone flag trong Bảng 3-8.
+Thông tin khác. Byte thấp chỉ định số hiệu signal cần gửi đến parent process khi child process kết thúc; thông thường, signal `SIGCHLD` được chọn. Ba byte còn lại encode một nhóm clone flag, được trình bày trong Bảng 3-8.
 
 `child_stack`
 
@@ -1228,7 +1228,7 @@ Chạy tasklet (xem phần “Softirq và tasklet” trong Chương 4); mỗi CP
 
 ## Hủy process
 
-Phần lớn process “chết” theo nghĩa kết thúc execution của code đáng lẽ chạy. Khi xảy ra, phải thông báo kernel để release resource thuộc process; gồm memory, open file và mọi thành phần khác sẽ gặp trong sách như semaphore.
+Phần lớn process “chết” theo nghĩa chúng kết thúc việc thực thi code mà chúng có nhiệm vụ chạy. Khi điều này xảy ra, kernel phải được thông báo để có thể release các resource thuộc process, bao gồm memory, các file đang mở và những thành phần khác mà chúng ta sẽ gặp trong cuốn sách này, chẳng hạn semaphore.
 
 Cách thông thường để process kết thúc là gọi library function `exit()`, release resource do C library allocate, thực thi mỗi function lập trình viên đăng ký và cuối cùng gọi system call loại process khỏi hệ thống. Library function `exit()` có thể được lập trình viên insert tường minh. Ngoài ra, C compiler luôn insert function call `exit()` ngay sau statement cuối của function `main()`.
 

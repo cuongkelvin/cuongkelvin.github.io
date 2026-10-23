@@ -140,7 +140,7 @@ Cách tốt nhất hiểu page lookup là nhớ lại cách paging system dùng 
 
 Radix tree dùng cách tương tự. Tương đương linear address là index của page. Tuy nhiên, số field cần xét trong index của page phụ thuộc height của radix tree. Nếu radix tree height 1, chỉ biểu diễn được index từ 0 đến 63, nên 6 bit thấp nhất của index của page được diễn giải là array index `slots` cho node duy nhất ở cấp 1. Nếu radix tree height 2, index biểu diễn được từ 0 đến 4095; do đó 12 bit thấp nhất của index của page chia thành 2 field, mỗi field 6 bit; field cao dùng làm array index cho node ở cấp 1, còn field thấp dùng làm array index cho node ở cấp 2. Procedure tương tự cho mọi height khác của radix tree. Nếu height bằng 6, 2 bit cao nhất của index của page là array index cho node ở cấp 1, 6 bit tiếp là array index cho node ở cấp 2, v.v. đến 6 bit thấp nhất là array index cho node ở cấp 6.
 
-Nếu index lớn nhất của radix tree nhỏ hơn index của page cần thêm, kernel tăng tree height tương ứng; node trung gian của radix tree phụ thuộc giá trị page index (xem ví dụ Hình 15-1).
+Nếu index lớn nhất của radix tree nhỏ hơn index của page cần được thêm, kernel tăng tree height tương ứng; các node trung gian của radix tree phụ thuộc vào giá trị page index, xem ví dụ trong Hình 15-1.
 
 ### Function xử lý page cache
 

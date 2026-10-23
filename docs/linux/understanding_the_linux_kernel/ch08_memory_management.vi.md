@@ -40,7 +40,7 @@ Bảng 8-1. Field của page descriptor
 | `unsigned long` | `index` | Được nhiều kernel component dùng với nghĩa khác nhau. Ví dụ nhận diện vị trí data lưu trong page frame trong disk image của page hoặc anonymous region (Chương 15), hoặc lưu swapped-out page identifier (Chương 17). |
 | `struct list_head` | `lru` | Chứa pointer đến least recently used doubly linked list của page. |
 
-Hiện chưa cần hiểu đầy đủ vai trò mọi field page descriptor. Trong chương sau thường quay lại field page descriptor. Hơn nữa nhiều field có nghĩa khác tùy page frame free hay kernel component nào đang dùng.
+Hiện tại, bạn chưa cần hiểu đầy đủ vai trò của tất cả các field trong page descriptor. Trong các chương tiếp theo, chúng ta sẽ thường quay lại những field này. Hơn nữa, một số field có ý nghĩa khác nhau tùy page frame đang free hay kernel component nào đang sử dụng page frame đó.
 
 Mô tả chi tiết hơn hai field:
 
@@ -176,7 +176,7 @@ Khi kernel gọi memory allocation function, phải chỉ định zone chứa pa
 
 ### Pool reserved page frame
 
-Memory allocation request được đáp ứng theo hai cách. Nếu đủ free memory, đáp ứng ngay. Nếu không phải memory reclaiming, kernel control path đưa request bị block đến khi free thêm memory.
+Các memory allocation request có thể được đáp ứng theo hai cách khác nhau. Nếu có đủ free memory, request được đáp ứng ngay. Nếu không, phải thực hiện memory reclaiming, và kernel control path đưa ra request bị block cho đến khi giải phóng thêm memory.
 
 Tuy nhiên một số kernel control path không thể block khi yêu cầu memory — ví dụ khi xử lý interrupt hoặc thực thi code trong critical region. Khi đó kernel control path nên đưa atomic memory allocation request (dùng flag `GFP_ATOMIC`; xem phần “Zoned page frame allocator” sau). Atomic request không bao giờ block: nếu không đủ free page, allocation đơn giản thất bại.
 
@@ -324,13 +324,13 @@ Linear address tương ứng cuối directly mapped physical memory, tức đầ
 
 Ví dụ giả sử kernel gọi `__get_free_pages(GFP_HIGHMEM,0)` allocate page frame high memory. Nếu allocator cấp page frame high memory, `__get_free_pages()` không thể return linear address vì không tồn tại; do đó function return `NULL`. Đến lượt kernel không dùng được page frame; tệ hơn không release được vì kernel mất dấu.
 
-Vấn đề không tồn tại trên hardware platform 64-bit vì linear address space khả dụng lớn hơn nhiều lượng RAM có thể cài — tóm lại zone `ZONE_HIGHMEM` luôn rỗng. Tuy nhiên trên platform 32-bit như architecture 80×86, Linux designer phải tìm cách cho kernel khai thác toàn RAM khả dụng đến 64 GB PAE hỗ trợ. Cách áp dụng:
+Vấn đề này không tồn tại trên các hardware platform 64-bit vì linear address space khả dụng lớn hơn nhiều lượng RAM có thể lắp đặt; nói ngắn gọn, zone `ZONE_HIGHMEM` của những architecture này luôn rỗng. Tuy nhiên, trên platform 32-bit như architecture 80×86, người thiết kế Linux phải tìm cách cho phép kernel khai thác toàn bộ RAM có sẵn, đến mức 64 GB mà PAE hỗ trợ. Cách tiếp cận được áp dụng như sau:
 
 - Allocation high-memory page frame chỉ qua function `alloc_pages()` và shortcut `alloc_page()`. Không return linear address của page frame đầu allocate vì nếu page frame thuộc high memory, linear address đơn giản không tồn tại. Thay vào đó return linear address của page descriptor của page frame đầu allocate. Linear address này luôn tồn tại vì mọi page descriptor allocate trong low memory một lần vĩnh viễn trong kernel initialization.
 
 - Page frame high memory không có linear address không thể được kernel truy cập. Vì vậy một phần 128 MB cuối kernel linear address space dành map high-memory page frame. Tất nhiên mapping tạm thời, nếu không chỉ 128 MB high memory accessible. Thay vào đó tái sử dụng linear address có thể truy cập toàn high memory dù khác thời điểm.
 
-Kernel dùng ba cơ chế map page frame high memory: permanent kernel mapping, temporary kernel mapping và noncontiguous memory allocation. Phần này trình bày hai kỹ thuật đầu; thứ ba trong phần “Quản lý noncontiguous memory area” sau.
+Kernel sử dụng ba cơ chế khác nhau để map các page frame trong high memory: permanent kernel mapping, temporary kernel mapping và noncontiguous memory allocation. Trong phần này, chúng ta sẽ trình bày hai kỹ thuật đầu tiên; kỹ thuật thứ ba được thảo luận trong phần “Quản lý noncontiguous memory area” ở phía sau chương này.
 
 Thiết lập permanent kernel mapping có thể block current process; xảy ra khi không free Page Table entry dùng làm “cửa sổ” trên high-memory page frame. Vì vậy không thiết lập được permanent kernel mapping trong interrupt handler và deferrable function. Ngược lại thiết lập temporary kernel mapping không bao giờ cần block current process; nhược điểm là rất ít temporary kernel mapping có thể thiết lập cùng lúc.
 
@@ -360,7 +360,7 @@ Page Table entry tương ứng map high-memory page frame, được đúng n −
 
 Function `page_address()` return linear address gắn page frame hoặc `NULL` nếu page frame high memory chưa mapped. Nhận parameter là page descriptor pointer `page`, phân biệt hai trường hợp:
 
-1\. Nếu page frame không trong high memory (flag `PG_highmem` clear), linear address luôn tồn tại, lấy bằng tính page frame index, chuyển thành physical address rồi suy ra linear address tương ứng. Thực hiện bằng code:
+1\. Nếu page frame không nằm trong high memory, tức flag `PG_highmem` bị clear, linear address luôn tồn tại. Address này được lấy bằng cách tính page frame index, chuyển nó thành physical address rồi suy ra linear address tương ứng với physical address đó. Việc này được thực hiện bằng code sau:
 
 ```c
 __va((unsigned long)(page - mem_map) << 12)

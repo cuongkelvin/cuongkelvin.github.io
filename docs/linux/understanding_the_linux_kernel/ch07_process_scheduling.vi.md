@@ -18,7 +18,7 @@ Linux scheduling dựa trên kỹ thuật time sharing: nhiều process chạy t
 
 Scheduling policy còn dựa trên xếp hạng process theo priority. Đôi khi dùng algorithm phức tạp suy ra current priority của process nhưng kết quả cuối giống nhau: mỗi process gắn với giá trị cho scheduler biết mức phù hợp để cho process chạy trên CPU.
 
-Trong Linux, process priority là dynamic. Scheduler theo dõi process làm gì và định kỳ điều chỉnh priority; bằng cách này process lâu không được dùng CPU được hỗ trợ bằng tăng priority động. Tương ứng process chạy lâu bị giảm priority.
+Trong Linux, process priority thay đổi động. Scheduler theo dõi hoạt động của các process và định kỳ điều chỉnh priority của chúng; nhờ vậy, các process không được sử dụng CPU trong thời gian dài được hỗ trợ bằng cách tăng priority một cách động. Tương ứng, các process chạy trong thời gian dài bị giảm priority.
 
 Khi nói scheduling, process truyền thống được phân loại I/O-bound hoặc CPU-bound. Loại đầu dùng nhiều I/O device và dành nhiều thời gian chờ I/O operation hoàn tất; loại sau thực hiện application number-crunching cần nhiều CPU time.
 
@@ -72,7 +72,7 @@ Quantum duration thiết yếu cho system performance: không nên quá dài hay
 
 Nếu average quantum duration quá ngắn, system overhead do process switch quá cao. Ví dụ giả sử process switch cần 5 millisecond; nếu quantum cũng đặt 5 millisecond thì ít nhất 50 phần trăm CPU cycle dành cho process switching.[^2]
 
-Nếu average quantum duration quá dài, process không còn có vẻ thực thi đồng thời. Ví dụ giả sử quantum đặt năm giây; mỗi runnable process tiến triển khoảng năm giây rồi dừng rất lâu (thường năm giây nhân số runnable process).
+Nếu thời lượng quantum trung bình quá dài, các process không còn có vẻ được thực thi đồng thời. Ví dụ, giả sử quantum được đặt thành năm giây; mỗi runnable process tiến triển trong khoảng năm giây, nhưng sau đó dừng trong một khoảng rất dài, thường bằng năm giây nhân với số runnable process.
 
 Thường có niềm tin rằng quantum duration dài làm giảm response time của interactive application. Điều này thường sai. Như mô tả phần “Process preemption” trước, interactive process có priority tương đối cao nên nhanh chóng preempt batch process bất kể quantum duration dài bao nhiêu.
 
@@ -139,11 +139,11 @@ Ngoài static priority, conventional process còn có dynamic priority, giá tr�
 
 dynamic priority = max(100, min(static priority − bonus + 5, 139)) (2)
 
-Bonus là giá trị từ 0 đến 10; dưới 5 biểu diễn penalty hạ dynamic priority, trên 5 là premium tăng dynamic priority. Đến lượt bonus value phụ thuộc lịch sử process; chính xác hơn liên quan average sleep time.
+Bonus là một giá trị từ 0 đến 10; giá trị nhỏ hơn 5 biểu diễn một penalty làm giảm dynamic priority, còn giá trị lớn hơn 5 là một phần thưởng làm tăng dynamic priority. Giá trị bonus lại phụ thuộc vào lịch sử hoạt động của process; chính xác hơn, nó liên quan đến average sleep time của process.
 
 Đại khái average sleep time là số nanosecond trung bình process dành khi sleep. Tuy nhiên lưu ý đây không phải average operation trên elapsed time. Ví dụ sleep trong state `TASK_INTERRUPTIBLE` đóng góp average sleep time khác sleep trong state `TASK_UNINTERRUPTIBLE`. Hơn nữa average sleep time giảm khi process chạy. Cuối cùng average sleep time không bao giờ lớn hơn 1 giây.
 
-Tương ứng giữa average sleep time và bonus value trong Bảng 7-3. (Bảng còn liệt kê time slice granularity tương ứng, thảo luận sau.)
+Quan hệ tương ứng giữa average sleep time và giá trị bonus được trình bày trong Bảng 7-3. Bảng cũng liệt kê granularity tương ứng của time slice, sẽ được thảo luận ở phần sau.
 
 Bảng 7-3. Average sleep time, bonus value và time slice granularity
 
@@ -161,7 +161,7 @@ Bảng 7-3. Average sleep time, bonus value và time slice granularity
 | Lớn hơn hoặc bằng 900 ms nhưng nhỏ hơn 1000 ms | 9 | 10 |
 | 1 giây | 10 | 10 |
 
-Scheduler còn dùng average sleep time xác định process cho trước nên xem là interactive hay batch. Chính xác hơn process là “interactive” nếu thỏa công thức:
+Scheduler cũng sử dụng average sleep time để xác định một process nên được xem là interactive hay batch. Chính xác hơn, một process được xem là “interactive” nếu thỏa mãn công thức sau:
 
 dynamic priority ≤ 3×static priority / 4 + 28 (3) tương đương:
 
@@ -333,7 +333,7 @@ b. Jump bước 7 (không cần cập nhật time slice counter của swapper pr
 
 4\. Acquire spin lock `this_rq()->lock`.
 
-5\. Giảm time slice counter của current process và kiểm tra quantum đã hết chưa. Operation function thực hiện khá khác theo scheduling class; sẽ thảo luận ngay sau.
+5\. Giảm time slice counter của current process và kiểm tra quantum đã hết hay chưa. Các thao tác mà function thực hiện khác nhau khá nhiều tùy scheduling class của process; chúng ta sẽ thảo luận ngay sau đây.
 
 6\. Release spin lock `this_rq()->lock`.
 
@@ -356,7 +356,7 @@ if (current->policy == SCHED_RR && !--current->time_slice) {
 }
 ```
 
-Nếu function xác định time quantum thực sự hết, thực hiện vài operation để bảo đảm `current` sẽ bị preempt sớm nhất nếu cần.
+Nếu function xác định time quantum thực sự đã hết, nó thực hiện một số thao tác nhằm bảo đảm `current` sẽ bị preempt sớm nhất có thể nếu cần.
 
 Operation đầu là refill time slice counter bằng `task_timeslice()`. Function xét static priority của process và return base time quantum tương ứng theo công thức (1) trong phần “Scheduling conventional process” trước. Hơn nữa field `first_time_slice` của `current` clear: flag được `copy_process()` set trong service routine system call `fork()`, nên clear ngay khi time quantum đầu process trôi qua.
 
@@ -439,7 +439,7 @@ Function `try_to_wake_up()` wake up sleeping hoặc stopped process bằng đặ
 
 1\. Gọi function `task_rq_lock()` disable local interrupt và acquire lock của runqueue `rq` do CPU thực thi process gần nhất sở hữu (có thể khác local CPU). Logical number CPU đó lưu trong field `p->thread_info->cpu`.
 
-2\. Kiểm tra state process `p->state` thuộc mask state `state` truyền làm argument không; nếu không jump bước 9 kết thúc function.
+2\. Kiểm tra xem state của process `p->state` có thuộc mask các state `state` được truyền làm argument cho function hay không; nếu không, nó chuyển đến bước 9 để kết thúc function.
 
 3\. Nếu field `p->array` không `NULL`, process đã thuộc runqueue nên jump bước 8.
 
@@ -453,7 +453,7 @@ Function `try_to_wake_up()` wake up sleeping hoặc stopped process bằng đặ
 
   - Nếu chuyển process đến local CPU giảm mất cân bằng giữa CPU, target là local runqueue (xem phần “Runqueue balancing trong multiprocessor system” sau).
 
-Sau bước này, function đã nhận diện target CPU sẽ thực thi process được wake up và tương ứng target runqueue `rq` để insert process.
+Sau khi bước này được thực hiện, function đã xác định target CPU sẽ thực thi process được đánh thức và target runqueue `rq` tương ứng để insert process vào.
 
 5\. Nếu process ở state `TASK_UNINTERRUPTIBLE`, giảm field `nr_uninterruptible` của target runqueue và đặt field `p->activated` của process descriptor thành `-`1. Xem phần “Function recalc\_task\_prio()” sau để giải thích field `activated`.
 
@@ -531,7 +531,7 @@ Function `schedule()` triển khai scheduler. Mục tiêu là tìm process trong
 
 #### Gọi trực tiếp
 
-Scheduler được gọi trực tiếp khi process `current` phải block ngay vì resource cần không khả dụng. Khi đó kernel routine muốn block thực hiện:
+Scheduler được gọi trực tiếp khi process `current` phải bị block ngay vì resource mà nó cần không có sẵn. Trong trường hợp này, kernel routine muốn block process thực hiện như sau:
 
 1\. Insert `current` vào wait queue phù hợp.
 
@@ -687,7 +687,7 @@ next = list_entry(array->queue[idx].next, task_t, run_list);
 
 Function `sched_find_first_bit()` dựa trên assembly language instruction `bsfl`, return bit index của bit trọng số thấp nhất set thành 1 trong word 32-bit.
 
-Local variable `next` giờ lưu descriptor pointer của process sẽ thay `prev`. Function `schedule()` xem field `next->activated`. Field encode state process khi wake up như Bảng 7-6.
+Biến cục bộ `next` hiện lưu descriptor pointer của process sẽ thay thế `prev`. Function `schedule()` xem field `next->activated`. Field này encode state của process vào thời điểm nó được đánh thức, như minh họa trong Bảng 7-6.
 
 Bảng 7-6. Ý nghĩa field activated trong process descriptor
 
@@ -844,7 +844,7 @@ Như thấy, `schedule()` reacquire big kernel lock nếu cần, enable lại ke
 
 ## Runqueue balancing trong multiprocessor system
 
-Chương 4 đã cho thấy Linux tuân theo mô hình Symmetric Multiprocessing (SMP); cơ bản kernel không nên thiên vị CPU nào so với CPU khác. Tuy nhiên multiprocessor machine có nhiều dạng, scheduler hoạt động khác tùy hardware characteristic. Cụ thể xét ba loại multiprocessor machine:
+Chúng ta đã thấy trong Chương 4 rằng Linux tuân theo mô hình Symmetric Multiprocessing (SMP); về cơ bản, điều này có nghĩa kernel không nên thiên vị một CPU nào so với những CPU khác. Tuy nhiên, multiprocessor machine có nhiều dạng khác nhau, và scheduler hoạt động khác nhau tùy đặc tính hardware. Cụ thể, chúng ta sẽ xem xét ba loại multiprocessor machine sau:
 
 Classic multiprocessor architecture
 
@@ -862,7 +862,7 @@ Các loại multiprocessor system cơ bản thường kết hợp. Ví dụ moth
 
 Như phần trước, function `schedule()` lấy process mới chạy từ runqueue local CPU. Vì vậy CPU cho trước chỉ thực thi runnable process trong runqueue tương ứng. Mặt khác runnable process luôn lưu trong đúng một runqueue: không bao giờ xuất hiện trong từ hai runqueue trở lên. Vì vậy chừng nào process còn runnable thường gắn với một CPU.
 
-Lựa chọn thiết kế thường có lợi system performance vì hardware cache mỗi CPU có khả năng đầy data thuộc runnable process trong runqueue. Tuy nhiên đôi khi gắn runnable process với CPU cho trước có thể gây performance penalty nghiêm trọng. Ví dụ xét nhiều batch process dùng CPU nặng: nếu phần lớn vào cùng runqueue, một CPU quá tải còn CPU khác gần idle.
+Lựa chọn thiết kế này thường có lợi cho hiệu năng hệ thống vì hardware cache của mỗi CPU nhiều khả năng chứa data thuộc các runnable process trong runqueue. Tuy nhiên, trong một số trường hợp, gắn một runnable process với một CPU cụ thể có thể gây tổn thất hiệu năng nghiêm trọng. Ví dụ, xét một số lượng lớn batch process sử dụng CPU nhiều: nếu phần lớn chúng nằm trong cùng runqueue, một CPU trong hệ thống sẽ quá tải, trong khi những CPU khác gần như không hoạt động.
 
 Vì vậy kernel định kỳ kiểm tra workload runqueue có cân bằng không và nếu cần chuyển process từ runqueue này sang khác. Tuy nhiên để multiprocessor system đạt performance tốt nhất, load balancing algorithm nên tính CPU topology. Từ kernel phiên bản 2.6.7, Linux có runqueue balancing algorithm tinh vi dựa trên khái niệm “scheduling domain”. Nhờ scheduling domain, algorithm dễ tinh chỉnh cho mọi multiprocessor architecture hiện có (ngay cả architecture gần đây dựa trên microprocessor “multicore”).
 
@@ -964,7 +964,7 @@ Nếu `can_migrate_task()` return 1, `move_tasks()` gọi function `pull_task()`
 
 ## System call liên quan scheduling
 
-Nhiều system call được đưa vào cho process đổi priority và scheduling policy. Theo quy tắc chung, người dùng luôn được hạ priority process của mình. Tuy nhiên nếu muốn sửa priority process thuộc người dùng khác hoặc tăng priority process của mình phải có superuser privilege.
+Một số system call đã được đưa vào để cho phép process thay đổi priority và scheduling policy. Theo quy tắc chung, người dùng luôn được phép hạ priority của process thuộc mình. Tuy nhiên, nếu muốn sửa priority của process thuộc người dùng khác hoặc tăng priority của chính process mình, họ phải có superuser privilege.
 
 ### System call nice()
 
