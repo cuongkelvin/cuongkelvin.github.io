@@ -691,7 +691,7 @@ Nếu SKB được chia sẻ, bạn phải clone vì nó có thể bị đối t
         arp = arp_hdr(skb);
 ```
 
-`ar_hln` của ARP header biểu diễn độ dài địa chỉ phần cứng, phải là 6 byte với Ethernet header và bằng `addr_len` của object `net_device`. `ar_pln` của ARP header biểu diễn độ dài protocol address và phải bằng độ dài địa chỉ IPv4, là 4 byte:
+Field `ar_hln` của ARP header biểu diễn độ dài hardware address, phải bằng 6 byte đối với Ethernet header và bằng `addr_len` của object `net_device`. Field `ar_pln` của ARP header biểu diễn độ dài protocol address và phải bằng độ dài của địa chỉ IPv4, tức 4 byte:
 
 ```
             if (arp->ar_hln != dev->addr_len || arp->ar_pln != 4)

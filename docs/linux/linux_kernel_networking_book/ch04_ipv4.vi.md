@@ -1716,7 +1716,7 @@ Vì `ttl` và checksum của IPv4 header sắp thay đổi, phải giữ một b
          iph = ip_hdr(skb);
 ```
 
-Như đã nói, mỗi node forwarding packet phải giảm `ttl`. Do `ttl` thay đổi, checksum cũng được cập nhật tương ứng trong method `ip_decrease_ttl()`:
+Như đã đề cập trước đó, mỗi node forward packet phải giảm `ttl`. Do `ttl` thay đổi, checksum cũng được cập nhật tương ứng trong method `ip_decrease_ttl()`:
 
 ```
          /* Decrease ttl after skb cow done */

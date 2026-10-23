@@ -64,7 +64,7 @@ struct ieee80211_hdr {
 
 Khác Ethernet header (`struct ethhdr`) chỉ chứa ba trường (địa chỉ MAC nguồn, địa chỉ MAC đích và Ethertype), 802.11 header chứa tối đa sáu địa chỉ cùng các trường khác. Tuy nhiên data frame điển hình chỉ dùng ba địa chỉ (chẳng hạn giao tiếp Access Point hay AP/client). ACK frame chỉ dùng receiver address. Lưu ý Hình 12-1 chỉ hiển thị bốn địa chỉ, nhưng Mesh networking dùng Mesh extension header có hai địa chỉ bổ sung.
 
-Bây giờ mô tả các trường 802.11 header, bắt đầu từ frame control. Đây là trường quan trọng, nội dung thường quyết định ý nghĩa các trường khác của 802.11 MAC header (đặc biệt địa chỉ).
+Bây giờ tôi chuyển sang mô tả các field của 802.11 header, bắt đầu từ field đầu tiên trong header, tên là frame control. Đây là một field quan trọng; trong nhiều trường hợp, nội dung của nó quyết định ý nghĩa của các field khác trong 802.11 MAC header (đặc biệt là các địa chỉ).
 
 ### Frame Control
 
@@ -86,7 +86,7 @@ Sau đây là mô tả các member frame control:
 
 - Data packet (IEEE80211\_FTYPE\_DATA) là raw data packet. Null packet là trường hợp đặc biệt của raw packet, không mang dữ liệu, chủ yếu dùng điều khiển power management. Tôi trình bày null packet trong phần “Power Save Mode” phía sau chương.
 
-- `Subtype`: Với cả ba loại packet đã đề cập (management, control, data), có trường sub-type xác định đặc tính packet. Chẳng hạn:
+- `Subtype`: Với cả ba loại packet đã đề cập (management, control và data), có một field sub-type xác định đặc tính của packet được sử dụng. Ví dụ:
 
 - Giá trị 0100 của trường sub-type trong management frame biểu thị Probe Request (IEEE80211\_STYPE\_PROBE\_REQ) management packet, dùng trong scan.
 
@@ -126,7 +126,7 @@ Sau đây mô tả các member khác của mac802.11 header sau frame control:
 
 - HT Control Field: HT (high throughput) control field được thêm bởi 802.11n amendment (xem 7.1.3.5(a) của spec 802.11n-2009).
 
-Phần này trình bày 802.11 MAC header, mô tả member và cách dùng. Làm quen với 802.11 MAC header thiết yếu để hiểu mac802.11 stack.
+Mục này trình bày 802.11 MAC header, mô tả các member và cách sử dụng chúng. Việc làm quen với 802.11 MAC header là điều thiết yếu để hiểu mac802.11 stack.
 
 ## Network Topology
 
@@ -140,7 +140,7 @@ bằng cách gửi packet đến AP để AP relay đến đích cuối. Để p
 
 ### IBSS, hay Ad Hoc Mode
 
-Mạng IBSS thường hình thành không cần lập kế hoạch trước, chỉ tồn tại khi cần WLAN. Còn gọi là mạng ad hoc. Tạo IBSS đơn giản. Có thể thiết lập bằng lệnh `iw` sau từ dòng lệnh (tham số 2412 dùng channel 1):
+Mạng IBSS thường được hình thành mà không lập kế hoạch trước và chỉ tồn tại trong thời gian cần WLAN. Mạng IBSS còn được gọi là mạng ad hoc. Tạo một IBSS là một thao tác đơn giản. Bạn có thể thiết lập IBSS bằng cách chạy lệnh `iw` sau từ dòng lệnh (lưu ý rằng parameter 2412 tương ứng với việc sử dụng channel 1):
 
 ```
 iw wlan0 ibss join AdHocNetworkName 2412
@@ -179,7 +179,7 @@ Hình 12-3. Buffer packet trong AP
 
 AP được triển khai bằng object `ieee80211_if_ap` trong mac80211. Mỗi object `ieee80211_if_ap` có member `ps` (instance của `ps_data`) lưu power save data. Một member của structure `ps_data` là broadcast/multicast buffer `bc_buf`. Trong Hình 12-4, client gửi flow PS-Poll packet để lấy packet từ AP
 
-unicast buffer, `ps_tx_buf`. Lưu ý AP gửi mọi packet với flag IEEE80211\_FCTL\_MOREDATA trừ packet cuối. Nhờ đó client biết phải tiếp tục gửi PS-Poll đến khi buffer rỗng. Để đơn giản, sơ đồ bỏ ACK traffic, nhưng cần lưu ý packet phải được acknowledge.
+unicast buffer, `ps_tx_buf`. Lưu ý rằng AP gửi tất cả packet với flag IEEE80211\_FCTL\_MOREDATA, ngoại trừ packet cuối cùng. Nhờ đó, client biết cần tiếp tục gửi PS-Poll packet cho đến khi buffer rỗng. Để đơn giản, sơ đồ này không bao gồm ACK traffic, nhưng cần lưu ý rằng các packet phải được acknowledge.
 
 ![Figure 12-4](images/ch12/fig12-04.png)
 
@@ -229,7 +229,7 @@ Mac80211 có API giao tiếp low level device driver. Cách triển khai phức 
 
 - `ieee80211_rx_irqsafe()`: Method nhận packet, triển khai trong `net/mac80211/rx.c`, được low level wireless driver gọi.
 
-Object `ieee80211_ops` truyền cho method `ieee80211_alloc_hw()` như trên gồm pointer đến callback của driver. Driver không bắt buộc triển khai mọi callback. Sau đây là mô tả ngắn:
+Object `ieee80211_ops`, được truyền cho method `ieee80211_alloc_hw()` như bạn đã thấy trước đó, chứa các pointer trỏ đến callback của driver. Driver không bắt buộc phải triển khai tất cả callback này. Sau đây là mô tả ngắn về các method đó:
 
 - `tx()`: Transmit handler gọi cho mỗi packet truyền đi. Thường trả về NETDEV\_TX\_OK (trừ một số điều kiện hạn chế).
 
@@ -375,7 +375,7 @@ Chẳng hạn `phy` là `phy0`; sau đây trình bày một số entry dưới `
 
 - `fragmentation_threshold:` Kích thước fragmentation threshold tính bằng byte. Xem phần “Fragmentation” ở trên.
 
-- Dưới `/sys/kernel/debug/ieee80211/phy0/netdev:wlan0` có entry thông tin interface; chẳng hạn ở station mode có `aid` cho association id, `assoc_tries` cho số lần station thử association, `bssid` cho bssid station, v.v.
+- Bên dưới `/sys/kernel/debug/ieee80211/phy0/netdev:wlan0` có một số entry cung cấp thông tin về interface. Ví dụ, nếu interface ở station mode, bạn sẽ có `aid` cho association id của station, `assoc_tries` cho số lần các station đã thử thực hiện association, `bssid` cho bssid của station, v.v.
 
 - Mỗi station dùng rate control algorithm. Tên được xuất qua entry `debugfs`: `/sys/kernel/debug/ieee80211/phy1/rc/name`.
 
@@ -454,7 +454,7 @@ Có hai loại Block Ack: Immediate Block Ack và Delayed Block Ack. Hình 12-7 
 
 Hình 12-7. Immediate Block Ack
 
-Khác biệt là với Delayed Block Ack, BAR request được trả lời trước bằng ACK, sau khoảng trễ bằng BA (Block Ack). Delayed Block Ack cho thêm thời gian xử lý BAR, đôi khi cần với xử lý phần mềm. Immediate Block Ack tốt hơn về hiệu năng. Bản thân BA cũng được acknowledge. Khi originator không còn dữ liệu gửi, có thể kết thúc Block Ack session bằng method `ieee80211_send_delba()`; hàm gửi DELBA request packet đến phía kia. Request được method `ieee80211_process_delba()` xử lý. Message DELBA gây teardown Block Ack session có thể được originator hoặc recipient gửi. Độ dài AMPDU tối đa 65535 octet. Lưu ý packet aggregation chỉ triển khai cho AP và managed station; spec không hỗ trợ packet aggregation cho IBSS.
+Khác biệt giữa Immediate Block Ack và Delayed Block Ack là với Delayed Block Ack, bản thân BAR request được phản hồi trước bằng ACK, rồi sau một khoảng trễ mới bằng BA (Block Ack). Khi sử dụng Delayed Block Ack, có nhiều thời gian hơn để xử lý BAR; điều này đôi khi cần thiết khi xử lý bằng phần mềm. Immediate Block Ack tốt hơn về hiệu năng. Bản thân BA cũng được acknowledge. Khi originator không còn dữ liệu để gửi, nó có thể kết thúc Block Ack session bằng cách gọi method `ieee80211_send_delba()`; hàm này gửi một DELBA request packet đến phía bên kia. DELBA request được xử lý bởi method `ieee80211_process_delba()`. DELBA message, khiến Block Ack session được tháo dỡ, có thể được gửi bởi originator hoặc recipient của session. Độ dài AMPDU tối đa là 65535 octet. Lưu ý rằng packet aggregation chỉ được triển khai cho AP và managed station; đặc tả không hỗ trợ packet aggregation cho IBSS.
 
 ## Mesh Networking (802.11s)
 
@@ -476,9 +476,9 @@ Sau khi tìm hiểu Mesh networking và topology, bạn sẵn sàng cho phần t
 
 ### Protocol HWMP
 
-802.11s định nghĩa routing protocol mặc định HWMP (Hybrid Wireless Mesh Protocol). HWMP hoạt động với Layer 2 và địa chỉ MAC, khác chẳng hạn IPV4 routing protocol hoạt động với Layer 3 và địa chỉ IP. HWMP routing dựa trên hai loại routing (nên gọi hybrid). Đầu tiên là on-demand routing, thứ hai là proactive routing. Khác biệt chính là thời điểm khởi tạo thiết lập path (path là tên gọi route ở Layer 2). Với on-demand routing, protocol chỉ thiết lập path đến đích sau khi protocol stack nhận frame dành cho đích đó. Giảm management traffic cần để duy trì Mesh network, đổi lại tăng latency data traffic. Proactive routing dùng khi biết Mesh node nhận nhiều mesh traffic. Node định kỳ quảng bá bản thân qua Mesh network, kích hoạt thiết lập path đến nó từ mọi Mesh node trong mạng. Linux kernel triển khai cả on-demand và proactive routing. Có bốn loại routing message:
+802.11s protocol định nghĩa một routing protocol mặc định tên là HWMP (Hybrid Wireless Mesh Protocol). HWMP protocol hoạt động ở Layer 2 và sử dụng MAC address, khác với ví dụ IPV4 routing protocol hoạt động ở Layer 3 và sử dụng IP address. HWMP routing dựa trên hai loại routing, vì vậy được gọi là hybrid: loại thứ nhất là on-demand routing, loại thứ hai là proactive routing. Khác biệt chính giữa hai cơ chế nằm ở thời điểm khởi tạo việc thiết lập path (path là tên gọi của route ở Layer 2). Với on-demand routing, protocol chỉ thiết lập path đến một đích sau khi protocol stack nhận được frame dành cho đích đó. Điều này giảm thiểu lượng management traffic cần để duy trì Mesh network, nhưng đổi lại làm tăng latency của data traffic. Proactive routing có thể được sử dụng khi biết một Mesh node sẽ nhận nhiều mesh traffic. Trong trường hợp đó, node định kỳ quảng bá bản thân trên Mesh network và kích hoạt việc thiết lập path đến nó từ tất cả Mesh node trong mạng. Linux kernel triển khai cả on-demand routing và proactive routing. Có bốn loại routing message:
 
-- PREQ (Path Request): Message được gửi broadcast khi tìm đích chưa có route. PREQ được lan truyền trong Mesh network đến đích. Lookup tại mỗi station đến khi đạt đích cuối (bằng method `mesh_path_lookup()`). Nếu lookup thất bại, PREQ được forwarding broadcast đến station khác. PREQ gửi trong management packet; sub-type là action (IEEE80211\_STYPE\_ACTION). Được method `hwmp_preq_frame_process()` xử lý.
+- PREQ (Path Request): Loại message này được gửi dưới dạng broadcast khi tìm một đích mà bạn chưa có route đến. PREQ message được lan truyền trong Mesh network cho đến khi đến đích. Việc tra cứu được thực hiện tại mỗi station cho đến khi đến đích cuối cùng (bằng cách gọi method `mesh_path_lookup()`). Nếu tra cứu thất bại, PREQ được forward dưới dạng broadcast đến các station khác. PREQ message được gửi trong một management packet; sub-type của nó là action (IEEE80211\_STYPE\_ACTION). Nó được xử lý bởi method `hwmp_preq_frame_process()`.
 
 - PREP (Path Reply): Unicast packet gửi trả lời PREQ message trên reverse path. PREP cũng gửi trong management packet với `subtype` là action sub-type (IEEE80211\_STYPE\_ACTION). Được method `hwmp_prep_frame_process()` xử lý. Cả PREQ và PREP được method `mesh_path_sel_frame_tx()` gửi.
 
@@ -488,7 +488,7 @@ Sau khi tìm hiểu Mesh networking và topology, bạn sẵn sàng cho phần t
 
 Lưu ý Route xét metric radio-aware (airtime metric). Airtime metric được method `airtime_link_metric_get()` tính (dựa trên rate và tham số phần cứng khác). Mesh point liên tục giám sát link và cập nhật metric với neighbour.
 
-Station gửi PREQ có thể thử gửi packet đến đích cuối khi chưa biết route; packet được giữ trong SKB buffer `frame_queue`, member của object `mesh_path` (`net/mac80211/mesh.h`). Khi PREP đến, packet chờ trong buffer được gửi đến đích (bằng method `mesh_path_tx_pending()`). Số frame buffer tối đa mỗi đích chưa resolve là 10 (MESH\_FRAME\_QUEUE\_LEN). Ưu điểm Mesh networking:
+Station đã gửi PREQ có thể thử gửi packet đến đích cuối cùng trong khi vẫn chưa biết route đến đích đó; các packet này được giữ trong một buffer chứa SKB tên là `frame_queue`, là member của object `mesh_path` (`net/mac80211/mesh.h`). Trong trường hợp đó, khi PREP cuối cùng đến nơi, các packet đang chờ trong buffer được gửi đến đích cuối cùng (bằng cách gọi method `mesh_path_tx_pending()`). Số frame tối đa được lưu trong buffer cho mỗi đích chưa xác định được route là 10 (MESH\_FRAME\_QUEUE\_LEN). Các ưu điểm của Mesh networking như sau:
 
 - Triển khai nhanh
 

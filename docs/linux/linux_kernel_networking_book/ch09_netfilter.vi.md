@@ -698,7 +698,7 @@ static unsigned int iptable_filter_hook(unsigned int hook, struct sk_buff *skb,
 (net/ipv4/netfilter/iptable_filter.c)
 ```
 
-Method `ipt_do_table()` thực chất gọi LOG target callback, `ipt_log_packet()`, ghi packet header vào syslog. Nếu có thêm rule, chúng được gọi tại đây. Vì không còn rule, tiếp tục đến method `ip_local_deliver_finish()`, và packet tiếp tục lên transport layer (L4) để socket tương ứng xử lý.
+Method `ipt_do_table()` thực tế gọi callback của target LOG, `ipt_log_packet()`, để ghi các packet header vào syslog. Nếu có thêm rule, chúng sẽ được gọi tại thời điểm này. Vì không còn rule nào, quá trình tiếp tục đến method `ip_local_deliver_finish()`, và packet tiếp tục đi đến transport layer (L4) để được socket tương ứng xử lý.
 
 ### Forwarding Packet
 

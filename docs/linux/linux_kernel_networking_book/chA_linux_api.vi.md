@@ -614,7 +614,7 @@ static int vlan_dev_init(struct net_device *dev)
 (net/8021q/vlan_dev.c)
 ```
 
-Nghĩa là đặt feature của VLAN child device bằng `vlan_features` của real device (ở đây là `eth0`), được đặt như đã thấy trong method `rtl_init_one()`.
+Điều này có nghĩa là nó thiết lập các feature của VLAN child device bằng `vlan_features` của real device (trong trường hợp này là `eth0`), vốn đã được thiết lập theo cách bạn thấy trước đó trong method `rtl_init_one()`.
 
 - `netdev_features_t hw_enc_features`
 
@@ -1026,7 +1026,7 @@ Trong ví dụ, bạn thấy dùng `qdisc` là `pfifo_fast`, giá trị mặc đ
 
 Số packet tối đa cho phép mỗi queue. Mỗi hardware layer có `tx_queue_len` mặc định riêng. Với Ethernet device, `tx_queue_len` mặc định 1.000 (xem method `ether_setup()`). Với FDDI, `tx_queue_len` mặc định 100 (xem method `fddi_setup()` trong `net/802/fddi.c`).
 
-Field `tx_queue_len` đặt bằng 0 cho virtual device như VLAN device vì real device mà virtual device dựa vào thực sự truyền packet. Có thể đặt Tx queue length của device bằng lệnh `ifconfig` (option tên `txqueuelen`) hoặc lệnh `ip link show` (tên `qlen`), ví dụ:
+Field `tx_queue_len` được đặt bằng 0 cho các virtual device, chẳng hạn VLAN device, vì việc truyền packet thực tế được thực hiện bởi real device mà các virtual device này dựa trên. Bạn có thể thiết lập độ dài Tx queue của device bằng lệnh `ifconfig` (option này có tên là `txqueuelen`) hoặc bằng lệnh `ip link show` (có tên là `qlen`), ví dụ như sau:
 
 ```
            ifconfig  p2p1 txqueuelen 900
@@ -1055,7 +1055,7 @@ Method hỗ trợ:
 
 - `struct hlist_node index_hlist`
 
-Đây là hash table network device, index bằng network device index (field `ifindex`). Lookup bằng method `dev_get_by_index()`. Chèn vào table bằng method `list_netdevice()`, xóa khỏi list bằng method `unlist_netdevice()`.
+Đây là hash table của các network device, được đánh index bằng network device index (field `ifindex`). Việc tra cứu được thực hiện bằng method `dev_get_by_index()`. Việc chèn vào table được thực hiện bằng method `list_netdevice()`, còn việc xóa khỏi list được thực hiện bằng method `unlist_netdevice()`.
 
 - `enum {...} reg_state`
 
@@ -2597,7 +2597,7 @@ int ib_modify_cq(structib_cq *cq, u16 cq_count, u16 cq_period);
 
 ### Method ib\_peek\_cq()
 
-Method `ib_peek_cq()` trả số Work Completion sẵn có trong CQ. Nếu số Work Completion trong CQ bằng hoặc lớn hơn `wc_cnt`, trả `wc_cnt`. Ngược lại trả số Work Completion thực tế trong CQ. Nếu có lỗi, trả giá trị errno cho biết lý do thất bại.
+Method `ib_peek_cq()` trả về số Work Completion hiện có trong CQ. Nếu số Work Completion trong CQ lớn hơn hoặc bằng `wc_cnt`, method trả về `wc_cnt`. Ngược lại, nó trả về số Work Completion thực tế trong CQ. Nếu xảy ra lỗi, method trả về giá trị errno cho biết nguyên nhân thất bại.
 
 ```
 int ib_peek_cq(structib_cq *cq, intwc_cnt);
@@ -2646,7 +2646,7 @@ static inline int ib_req_ncomp_notif(struct ib_cq *cq, int wc_cnt);
 
 ### Method ib\_poll\_cq()
 
-Method `ib_poll_cq()` poll Work Completion từ CQ. Đọc Work Completion từ CQ và xóa chúng. Work Completion được đọc theo thứ tự thêm vào CQ. Trả 0 hoặc số dương chỉ số Work Completion đã đọc, hoặc giá trị -errno cho biết lý do thất bại.
+Method `ib_poll_cq()` poll các Work Completion từ CQ. Nó đọc các Work Completion từ CQ và xóa chúng khỏi CQ. Work Completion được đọc theo thứ tự chúng được thêm vào CQ. Method trả về 0 hoặc một số dương cho biết số Work Completion đã đọc, hoặc giá trị -errno cho biết nguyên nhân thất bại.
 
 ```
 static inline int ib_poll_cq(struct ib_cq *cq, int num_entries,
@@ -2765,7 +2765,7 @@ struct ib_wc {
 
 - `byte_len`: Nếu Work Completion này tạo từ kết thúc của Receive Request, giá trị `byte_len` chỉ số byte đã nhận.
 
-- `qp`: Handle của QP nhận Work Completion. Hữu ích khi QP gắn với SRQ—như vậy biết handle gắn với QP có incoming message đã tiêu thụ Receive Request từ SRQ.
+- `qp`: Handle của QP nhận được Work Completion. Thông tin này hữu ích khi các QP liên kết với một SRQ: nhờ đó, bạn biết handle của QP có incoming message đã sử dụng Receive Request từ SRQ.
 
 - `ex.imm_data`: Out Of Band data (32 bit), theo network order, gửi kèm message. Có nếu IB\_WC\_WITH\_IMM đặt trong `wc_flags`.
 
@@ -2805,7 +2805,7 @@ int ib_destroy_cq(struct ib_cq *cq);
 
 ## Queue Pair (QP)
 
-QP là resource kết hợp hai Work Queue: Send Queue và Receive Queue. Mỗi queue hoạt động như FIFO. WR post vào mỗi Work Queue được xử lý theo thứ tự đến. Tuy nhiên không bảo đảm thứ tự giữa các Queue. Resource này gửi và nhận packet.
+QP là một resource kết hợp hai Work Queue: Send Queue và Receive Queue. Mỗi queue hoạt động theo nguyên tắc FIFO. Các WR được post vào mỗi Work Queue sẽ được xử lý theo thứ tự đến. Tuy nhiên, không có bảo đảm về thứ tự giữa hai queue. Resource này thực hiện việc gửi và nhận packet.
 
 ### Struct ib\_qp\_cap
 

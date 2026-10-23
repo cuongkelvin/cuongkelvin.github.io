@@ -79,7 +79,7 @@ static int __net_init xfrm_user_net_init(struct net *net)
 
 Message gửi từ userspace (như XFRM\_MSG\_NEWPOLICY để tạo Security Policy mới hoặc XFRM\_MSG\_NEWSA để tạo Security Association mới) được method `xfrm_netlink_rcv()` xử lý (`net/xfrm/xfrm_user.c`), sau đó gọi method `xfrm_user_rcv_msg()` (tôi trình bày netlink socket trong Chương 2).
 
-XFRM policy và XFRM state là data structure nền tảng của XFRM framework. Tôi bắt đầu mô tả XFRM policy là gì, sau đó mô tả XFRM state.
+XFRM policy và XFRM state là các data structure nền tảng của XFRM framework. Tôi bắt đầu bằng việc mô tả XFRM policy là gì, sau đó mô tả XFRM state là gì.
 
 ### XFRM Policy
 

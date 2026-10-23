@@ -566,7 +566,7 @@ Nếu tìm thấy object tương tự, giải phóng object `fib_info` và tăng
 }
 ```
 
-Bây giờ kiểm tra xem có alias cho object `fib_info` không; trong trường hợp này không có alias vì TOS của rule thứ hai khác TOS của rule đầu tiên:
+Bây giờ, việc kiểm tra được thực hiện để xác định xem có alias nào cho object `fib_info` hay không. Trong trường hợp này sẽ không có alias vì TOS của rule thứ hai khác với TOS của rule thứ nhất:
 
 ```
      l = fib_find_node(t, key);

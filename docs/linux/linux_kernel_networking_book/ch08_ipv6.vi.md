@@ -361,7 +361,7 @@ Lưu ý có hai cách triển khai method `fib6_rule_lookup()` khác nhau: một
 
 Như đã thấy trong Chương 5 về các chủ đề nâng cao của IPv4 Routing Subsystem, lookup trong routing subsystem tạo object `dst` và thiết lập callback `input` cùng `output`; IPv6 thực hiện các tác vụ tương tự. Sau khi method `ip6_rcv_finish()` lookup trong routing subsystem, nó gọi method `dst_input()`, thực chất gọi callback `input` của object `dst` gắn với packet.
 
-Hình 8-2 minh họa receive path (Rx) của packet được network driver nhận. Packet có thể được chuyển đến máy cục bộ hoặc forwarding đến host khác. Kết quả lookup trong routing table quyết định lựa chọn nào diễn ra.
+Hình 8-2 minh họa receive path (Rx) của một packet được network driver nhận. Packet này có thể được chuyển đến máy cục bộ hoặc được forward đến host khác. Kết quả tra cứu trong các routing table quyết định lựa chọn nào trong hai lựa chọn này sẽ được thực hiện.
 
 ![Figure 8-2](images/ch08/fig08-02.png)
 

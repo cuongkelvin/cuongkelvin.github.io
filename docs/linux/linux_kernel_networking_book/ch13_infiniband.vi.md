@@ -76,7 +76,7 @@ Giống công nghệ interconnect khác, spec InfiniBand mô tả nhiều hardwa
 
 - Router: Thành phần kết nối nhiều InfiniBand subnet khác nhau.
 
-Subnet là tập HCA, switch và router port nối với nhau. Phần này mô tả hardware component InfiniBand; tiếp theo trình bày đánh địa chỉ thiết bị, hệ thống và port.
+Subnet là một tập hợp các HCA, switch và router port được kết nối với nhau. Trong mục này, tôi đã mô tả các thành phần hardware khác nhau trong InfiniBand; bây giờ tôi sẽ thảo luận về cách đánh địa chỉ cho device, hệ thống và port trong InfiniBand.
 
 ### Đánh địa chỉ trong InfiniBand
 
@@ -100,7 +100,7 @@ Ví dụ minh họa các GUID trên: hệ thống switch lớn gồm nhiều swi
 
 Ở đây trình bày một số tính năng protocol InfiniBand:
 
-- InfiniBand cho phép cấu hình partition các port HCA, switch và router, cung cấp cách ly ảo trên cùng physical subnet. Mỗi Partition Key (P\_Key) là giá trị 16-bit gồm: 15 lsb là key value, msb là membership level; 0 là limited membership, 1 là full membership. Mỗi port có P\_Key table do SM cấu hình, và mỗi Queue Pair (QP), object thực sự gửi/nhận dữ liệu trong InfiniBand, gắn với một P\_Key index trong bảng. QP chỉ gửi/nhận packet với remote QP nếu các P\_Key tương ứng thỏa:
+- InfiniBand cho phép bạn cấu hình các partition của port thuộc HCA, switch và router, đồng thời cung cấp khả năng cô lập ảo trên cùng physical subnet. Mỗi Partition Key (P\_Key) là một giá trị 16-bit gồm 15 bit thấp nhất làm key value và bit cao nhất làm membership level; 0 là limited membership, còn 1 là full membership. Mỗi port có một P\_Key table do SM cấu hình, và mỗi Queue Pair (QP), object thực sự gửi và nhận dữ liệu trong InfiniBand, được liên kết với một P\_Key index trong table này. Một QP chỉ có thể gửi hoặc nhận packet từ remote QP nếu các P\_Key mà chúng liên kết đáp ứng điều kiện sau:
 
 - Key value bằng nhau.
 
@@ -118,9 +118,9 @@ Phần tiếp theo xem packet InfiniBand có dạng thế nào, rất hữu ích
 
 ### InfiniBand Packet
 
-Mỗi InfiniBand packet kết hợp nhiều header và thường có payload, là dữ liệu message client muốn gửi. Message chỉ chứa ACK hoặc message 0 byte (chẳng hạn
+Mỗi packet trong InfiniBand là sự kết hợp của một số header và, trong nhiều trường hợp, một payload chứa dữ liệu của các message mà client muốn gửi. Các message chỉ chứa ACK hoặc message có 0 byte (ví dụ,
 
-chỉ gửi immediate data) không có payload. Header mô tả packet gửi từ đâu, đích là gì, operation dùng, thông tin cần phân chia packet thành message và đủ thông tin phát hiện lỗi packet loss.
+nếu chỉ gửi immediate data) sẽ không chứa payload. Các header này mô tả packet được gửi từ đâu, đích của packet là gì, operation được sử dụng, thông tin cần thiết để tách các packet thành message và thông tin đủ để phát hiện lỗi mất packet.
 
 Hình 13-2 trình bày InfiniBand packet header.
 
@@ -160,9 +160,9 @@ SM là thực thể trong subnet chịu trách nhiệm phân tích và cấu hì
 
 - Xử lý lỗi trong subnet.
 
-Subnet Manager thường là software entity chạy trong switch (gọi là managed switch) hoặc node bất kỳ trong subnet. Có thể có nhiều SM nhưng chỉ một active, các SM còn lại ở standby
+Subnet Manager thường là một thực thể phần mềm chạy trong switch (được gọi là managed switch) hoặc trong bất kỳ node nào thuộc subnet. Có thể có nhiều SM, nhưng chỉ một SM ở trạng thái active, còn các SM khác ở trạng thái standby
 
-mode. Có protocol nội bộ thực hiện master election để quyết định SM active. Nếu active SM ngừng hoạt động, một standby SM trở thành active. Mỗi port có Subnet Management Agent (SMA), agent biết nhận management message SM gửi, xử lý và trả lời. Subnet Administrator (SA) là service thuộc SM. Một số nhiệm vụ:
+mode. Có một protocol nội bộ thực hiện master election và quyết định SM nào sẽ ở trạng thái active. Nếu active SM ngừng hoạt động, một trong các standby SM sẽ trở thành active SM. Mỗi port trong subnet có một Subnet Management Agent (SMA), là một agent biết cách nhận management message do SM gửi, xử lý chúng và trả về phản hồi. Subnet Administrator (SA) là một service thuộc SM. Sau đây là một số nhiệm vụ của nó:
 
 - Cung cấp thông tin subnet—chẳng hạn cách đi từ port này đến port khác (path query).
 
@@ -182,7 +182,7 @@ Hình 13-3. RDMA resource creation hierarchy
 
 ### RDMA Device
 
-Client cần đăng ký với RDMA stack để nhận thông báo RDMA device thêm/xóa khỏi hệ thống. Sau đăng ký ban đầu, client được báo về mọi RDMA device hiện có. Callback được gọi cho mỗi device và client có thể bắt đầu làm việc theo cách:
+Client cần đăng ký với RDMA stack để được thông báo khi có RDMA device được thêm vào hoặc xóa khỏi hệ thống. Sau lần đăng ký ban đầu, client được thông báo về tất cả RDMA device hiện có. Một callback sẽ được gọi cho mỗi RDMA device, và client có thể bắt đầu làm việc với các device này theo những cách sau:
 
 - Truy vấn các thuộc tính device
 
@@ -190,7 +190,7 @@ Client cần đăng ký với RDMA stack để nhận thông báo RDMA device th
 
 - Tạo, làm việc và hủy tài nguyên. Method `ib_register_client()` đăng ký kernel client muốn dùng RDMA stack. Các callback chỉ định
 
-được gọi cho mọi InfiniBand device hiện có, được thêm hoặc xóa (bằng chức năng hot-plug) khỏi hệ thống. Method `ib_unregister_client()` hủy đăng ký kernel client muốn ngừng dùng RDMA stack. Thường gọi khi unload driver. Đây là code mẫu đăng ký RDMA stack trong kernel client:
+các callback sẽ được gọi cho mọi InfiniBand device hiện có trong hệ thống cũng như các device sẽ được thêm vào hoặc xóa khỏi hệ thống (bằng chức năng hot-plug). Method `ib_unregister_client()` hủy đăng ký một kernel client muốn ngừng sử dụng RDMA stack. Thông thường, method này được gọi khi driver được unload. Sau đây là code mẫu minh họa cách đăng ký với RDMA stack trong một kernel client:
 
 ```
 static void my_add_one(struct ib_device *device)
@@ -243,7 +243,7 @@ Sau đây là mô tả thêm các method xử lý InfiniBand device.
 
 - Method `ib_query_device()` truy vấn thuộc tính InfiniBand device. Thuộc tính cố định, không đổi trong lần gọi sau.
 
-- Method `ib_query_port()` truy vấn thuộc tính InfiniBand device port. Một số cố định, số khác có thể đổi trong lần gọi sau—chẳng hạn port LID, state và thuộc tính khác.
+- Method `ib_query_port()` truy vấn các thuộc tính của InfiniBand device port. Một số thuộc tính là cố định, còn một số có thể thay đổi trong những lần gọi method tiếp theo, ví dụ như LID của port, trạng thái và một số thuộc tính khác.
 
 - Method `rdma_port_get_link_layer()` trả link layer của device port.
 
@@ -253,7 +253,7 @@ Sau đây là mô tả thêm các method xử lý InfiniBand device.
 
 ### Protection Domain (PD)
 
-PD cho phép gắn với tài nguyên RDMA khác như SRQ, QP, AH hoặc MR để bảo vệ giữa chúng. Tài nguyên gắn PDx không thể làm việc với tài nguyên gắn PDy. Trộn chúng gây lỗi. Thường mỗi module có một PD. Tuy nhiên nếu module muốn tăng bảo mật, dùng một PD cho mỗi remote QP hoặc service. Cấp phát/giải phóng PD như sau:
+Một PD cho phép liên kết nó với một số tài nguyên RDMA khác, chẳng hạn SRQ, QP, AH hoặc MR, để cung cấp cơ chế bảo vệ giữa các tài nguyên đó. Các tài nguyên RDMA liên kết với PDx không thể làm việc với những tài nguyên RDMA liên kết với PDy. Việc cố gắng sử dụng lẫn các tài nguyên này sẽ dẫn đến lỗi. Thông thường, mỗi module có một PD. Tuy nhiên, nếu một module cụ thể muốn tăng mức bảo mật, nó sẽ sử dụng một PD cho mỗi remote QP hoặc service mà nó sử dụng. Việc cấp phát và giải phóng PD được thực hiện như sau:
 
 - Method `ib_alloc_pd()` cấp phát PD. Nhận pointer device object được trả khi driver callback được gọi sau đăng ký.
 
@@ -263,7 +263,7 @@ PD cho phép gắn với tài nguyên RDMA khác như SRQ, QP, AH hoặc MR đ�
 
 AH được dùng trong Send Request của UD QP để mô tả path message từ local port đến remote port. Có thể dùng cùng AH cho nhiều QP nếu cùng gửi đến remote port với cùng thuộc tính. Sau đây là bốn method liên quan AH:
 
-- Method `ib_create_ah()` tạo AH. Nhận PD và AH attribute làm đối số. AH attribute có thể điền trực tiếp hoặc bằng method `ib_init_ah_from_wc()`, nhận Work Completion đã nhận (object `ib_wc`) gồm thuộc tính incoming message hoàn tất thành công và port nhận. Thay vì gọi `ib_init_ah_from_wc()` rồi `ib_create_ah()`, có thể gọi method `ib_create_ah_from_wc()`.
+- Method `ib_create_ah()` tạo một AH. Method này nhận các đối số là một PD và các thuộc tính của AH. Các thuộc tính AH có thể được điền trực tiếp hoặc bằng cách gọi method `ib_init_ah_from_wc()`, nhận parameter là một Work Completion đã nhận được (object `ib_wc`) chứa các thuộc tính của incoming message đã hoàn tất thành công, cùng port nhận message đó. Thay vì gọi method `ib_init_ah_from_wc()` rồi method `ib_create_ah()`, bạn có thể gọi method `ib_create_ah_from_wc()`.
 
 - Method `ib_modify_ah()` sửa thuộc tính AH hiện có.
 
@@ -289,7 +289,7 @@ Sau khi đăng ký memory thành công, có hai key:
 
 - Remote key (rkey): Key truy cập memory từ máy từ xa bằng RDMA operation.
 
-Key được dùng trong Work Request khi tham chiếu memory buffer. Cùng buffer có thể đăng ký nhiều lần, kể cả permission khác nhau. Sau đây là method liên quan MR:
+Các key này sẽ được sử dụng trong Work Request khi tham chiếu đến những memory buffer đó. Cùng một memory buffer có thể được đăng ký nhiều lần, thậm chí với các quyền khác nhau. Sau đây là mô tả một số method liên quan đến MR:
 
 - Method `ib_get_dma_mr()` trả Memory Region cho system memory dùng được với DMA. Nhận PD và access permission yêu cầu cho MR.
 
@@ -307,7 +307,7 @@ Trước khi truy cập DMA mapped memory, phải gọi:
 
 - Method `ib_dma_free_coherent()` giải phóng memory block được cấp phát bằng `ib_dma_alloc_coherent()`.
 
-- Method `ib_reg_phys_mr()` nhận tập physical page, đăng ký và chuẩn bị virtual address RDMA device truy cập được. Muốn đổi sau khi tạo, gọi method `ib_rereg_phys_mr()`.
+- Method `ib_reg_phys_mr()` nhận một tập physical page, đăng ký chúng và chuẩn bị một virtual address mà RDMA device có thể truy cập. Nếu muốn thay đổi các thuộc tính sau khi tạo, hãy gọi method `ib_rereg_phys_mr()`.
 
 - Method `ib_query_mr()` lấy thuộc tính MR cụ thể. Lưu ý phần lớn driver low-level không triển khai method.
 
@@ -315,7 +315,7 @@ Trước khi truy cập DMA mapped memory, phải gọi:
 
 ### Fast Memory Region (FMR) Pool
 
-Đăng ký Memory Region là thủ tục “nặng”, có thể mất thời gian, context thực hiện thậm chí sleep nếu tài nguyên yêu cầu chưa có khi gọi. Hành vi có thể gây vấn đề trong context nhất định, như interrupt handler. FMR pool cho phép làm việc với FMR có đăng ký “nhẹ”, thực hiện được trong mọi context. API FMR pool nằm trong `include/rdma/ib_fmr_pool.h`.
+Đăng ký Memory Region là một thao tác “nặng”, có thể mất thời gian để hoàn tất; context thực hiện thao tác này thậm chí có thể sleep nếu các tài nguyên cần thiết chưa sẵn có tại thời điểm gọi. Hành vi này có thể gây vấn đề trong một số context, chẳng hạn interrupt handler. Sử dụng FMR pool cho phép bạn làm việc với FMR thông qua các thao tác đăng ký “nhẹ”, có thể thực hiện trong bất kỳ context nào. API của FMR pool nằm trong `include/rdma/ib_fmr_pool.h`.
 
 ### Memory Window (MW)
 
@@ -325,7 +325,7 @@ Cho phép remote access memory bằng hai cách:
 
 - Đăng ký Memory Region rồi bind Memory Window vào.
 
-Cả hai tạo remote key (`rkey`) để truy cập memory với permission chỉ định. Tuy nhiên muốn vô hiệu `rkey` để ngăn remote access, hủy đăng ký Memory Region có thể là thủ tục nặng. Dùng Memory Window trên Memory Region và bind/unbind khi cần có thể là thủ tục nhẹ để bật/tắt remote access memory. Sau đây là ba method MW:
+Cả hai cách trên đều tạo một remote key (`rkey`) có thể được sử dụng để truy cập vùng memory này với các quyền đã chỉ định. Tuy nhiên, nếu muốn vô hiệu hóa `rkey` để ngăn truy cập từ xa vào vùng memory đó, việc hủy đăng ký Memory Region có thể là một thao tác tốn kém. Sử dụng Memory Window trên Memory Region này và thực hiện bind hoặc unbind khi cần có thể cung cấp một thao tác nhẹ hơn để bật và tắt khả năng truy cập memory từ xa. Sau đây là mô tả ba method liên quan đến MW:
 
 - Method `ib_alloc_mw()` cấp phát Memory Window. Nhận PD và MW type.
 
@@ -341,19 +341,19 @@ Mọi Work Request post vào Send hoặc Receive Queue được xem outstanding 
 
 - Nếu RDMA device ghi message vào memory, client không biết buffer đã chứa incoming message chưa.
 
-Work Completion cho biết Work Request tương ứng hoàn tất và cung cấp thông tin: status, opcode, kích thước, v.v. CQ là object chứa Work Completion. Client phải poll CQ để đọc. CQ hoạt động first-in, first-out (FIFO): thứ tự Work Completion được client de-queued theo thứ tự RDMA device enqueue vào CQ. Client có thể đọc bằng polling hoặc yêu cầu notification khi Work Completion mới được thêm. CQ không giữ quá kích thước của nó. Nếu thêm vượt capacity, Work Completion lỗi được thêm, CQ error asynchronous event được tạo và mọi Work Queue liên quan nhận lỗi. Sau đây là các method CQ:
+Một Work Completion cho biết Work Request tương ứng đã hoàn tất và cung cấp một số thông tin về nó: trạng thái, opcode được sử dụng, kích thước, v.v. CQ là một object chứa các Work Completion. Client cần poll CQ để đọc các Work Completion có trong đó. CQ hoạt động theo nguyên tắc first-in, first-out (FIFO): thứ tự các Work Completion được client lấy ra theo kiểu de-queued sẽ tương ứng với thứ tự chúng được RDMA device đưa vào CQ. Client có thể đọc Work Completion bằng polling hoặc yêu cầu nhận thông báo khi một Work Completion mới được thêm vào CQ. CQ không thể chứa số Work Completion vượt quá kích thước của nó. Nếu số Work Completion được thêm vào vượt quá sức chứa của CQ, một Work Completion có lỗi sẽ được thêm vào, một CQ error asynchronous event sẽ được tạo và mọi Work Queue liên kết với CQ đó sẽ nhận lỗi. Sau đây là một số method liên quan đến CQ:
 
-- Method `ib_create_cq()` tạo CQ. Nhận pointer device object trả về khi driver callback được gọi sau đăng ký và CQ attribute, gồm kích thước và callback khi có asynchronous event trên CQ hoặc Work Completion được thêm.
+- Method `ib_create_cq()` tạo một CQ. Method này nhận các đối số sau: pointer trỏ đến device object được trả về khi driver callback được gọi sau khi đăng ký, cùng các thuộc tính của CQ, bao gồm kích thước và các callback sẽ được gọi khi xảy ra asynchronous event trên CQ này hoặc khi một Work Completion được thêm vào CQ.
 
 - Method `ib_resize_cq()` đổi kích thước CQ. Số entry mới không được nhỏ hơn số Work Completion hiện có.
 
-- Method `ib_modify_cq()` đổi moderation parameter của CQ. Completion event được tạo nếu ít nhất số Work Completion chỉ định vào CQ hoặc timeout. Giúp giảm interrupt trong RDMA device.
+- Method `ib_modify_cq()` thay đổi moderation parameter của một CQ. Một Completion event sẽ được tạo nếu có ít nhất số Work Completion được chỉ định đi vào CQ hoặc khi hết timeout. Sử dụng method này có thể giúp giảm số interrupt xảy ra trong một RDMA device.
 
 - Method `ib_peek_cq()` trả số Work Completion có trong CQ.
 
 - Method `ib_req_notify_cq()` yêu cầu Completion event notification khi Work Completion tiếp theo, hoặc Work Completion chứa solicited event indication, được thêm vào CQ. Nếu không có Work Completion thêm sau lời gọi `ib_req_notify_cq()`, không có notification.
 
-- Method `ib_req_ncomp_notif()` yêu cầu Completion event notification khi CQ có số Work Completion cụ thể. Khác method `ib_req_notify_cq()`, khi gọi `ib_req_ncomp_notif()`, notification được tạo ngay cả khi CQ hiện đã có số lượng đó.
+- Method `ib_req_ncomp_notif()` yêu cầu tạo một Completion event notification khi CQ có một số lượng Work Completion cụ thể. Khác với method `ib_req_notify_cq()`, khi gọi method `ib_req_ncomp_notif()`, một Completion event notification sẽ được tạo ngay cả khi CQ hiện đã chứa số lượng Work Completion đó.
 
 - Method `ib_poll_cq()` poll Work Completion từ CQ. Đọc theo thứ tự thêm và xóa khỏi CQ.
 
@@ -379,7 +379,7 @@ XRC Domain là object giới hạn các XRC SRQ mà incoming message có thể n
 
 ### Shared Receive Queue (SRQ)
 
-SRQ giúp kiến trúc RDMA mở rộng tốt hơn phía nhận. Thay vì Receive Queue riêng cho mỗi Queue Pair, có shared Receive Queue nối mọi QP. Khi cần tiêu thụ Receive Request, chúng lấy từ SRQ. Hình 13-4 trình bày QP gắn với SRQ.
+SRQ giúp kiến trúc RDMA có khả năng mở rộng tốt hơn ở phía nhận. Thay vì có một Receive Queue riêng cho mỗi Queue Pair, tất cả QP được kết nối với một Receive Queue dùng chung. Khi cần sử dụng một Receive Request, chúng lấy request đó từ SRQ. Hình 13-4 trình bày các QP liên kết với một SRQ.
 
 ![Figure 13-4](images/ch13/fig13-04.png)
 
@@ -391,13 +391,13 @@ Nếu có N QP, mỗi QP có thể nhận burst M message vào thời điểm ng
 
 - Với SRQ, post K\*M (với K \<\< N) Receive Request.
 
-Khác QP không có cơ chế xác định số outstanding Work Request, SRQ có thể đặt watermark limit. Khi số Receive Request xuống dưới giới hạn, SRQ limit asynchronous event được tạo. Nhược điểm là không dự đoán được QP nào tiêu thụ từng Receive Request post vào SRQ, nên kích thước message mà mỗi Receive Request chứa được phải bằng incoming message lớn nhất mọi QP có thể nhận. Có thể xử lý bằng cách tạo nhiều SRQ, mỗi SRQ cho một maximum message size, rồi gắn QP phù hợp theo kích thước dự kiến.
+Khác với QP, vốn không có cơ chế xác định số outstanding Work Request bên trong nó, SRQ cho phép bạn thiết lập một watermark limit. Khi số Receive Request giảm xuống dưới giới hạn này, một SRQ limit asynchronous event sẽ được tạo cho SRQ đó. Nhược điểm của việc sử dụng SRQ là bạn không thể dự đoán QP nào sẽ sử dụng từng Receive Request được post vào SRQ; do đó, kích thước message mà mỗi Receive Request chứa được phải bằng kích thước incoming message lớn nhất mà bất kỳ QP nào có thể nhận. Có thể xử lý giới hạn này bằng cách tạo nhiều SRQ, mỗi SRQ dành cho một kích thước message tối đa khác nhau, rồi liên kết chúng với các QP phù hợp theo kích thước message dự kiến.
 
 Sau đây là method liên quan SRQ và ví dụ:
 
 - Method `ib_create_srq()` tạo SRQ. Nhận PD và SRQ attribute.
 
-- Method `ib_modify_srq()` sửa SRQ attribute. Dùng đặt watermark mới cho limit event hoặc resize SRQ nếu device hỗ trợ.
+- Method `ib_modify_srq()` sửa đổi các thuộc tính của SRQ. Nó được sử dụng để thiết lập một giá trị watermark mới cho limit event của SRQ hoặc thay đổi kích thước SRQ đối với những device hỗ trợ thao tác này.
 
 Ví dụ đặt watermark để nhận asynchronous event khi số RR trong SRQ xuống dưới 5:
 
@@ -450,7 +450,7 @@ if (ret) {
 
 ### Queue Pair (QP)
 
-Queue Pair là object thực sự dùng gửi/nhận dữ liệu trong InfiniBand. Có hai Work Queue riêng: Send và Receive Queue. Mỗi Work Queue có số Work Request (WR) cụ thể có thể post, số scatter/gather element hỗ trợ mỗi WR và CQ để Work Request kết thúc xử lý thêm Work Completion vào. Work Queue có thể tạo với thuộc tính giống hoặc khác—chẳng hạn số WR có thể post. Thứ tự trong mỗi queue được bảo đảm: xử lý Work Request ở Send Queue bắt đầu theo thứ tự submit Send Request. Receive Queue tương tự. Tuy nhiên không có quan hệ thứ tự giữa hai queue: outstanding Send Request có thể được xử lý dù post sau Receive Request vào Receive Queue. Hình 13-5 trình bày QP.
+Queue Pair là object thực sự dùng để gửi và nhận dữ liệu trong InfiniBand. Nó có hai Work Queue riêng biệt: Send Queue và Receive Queue. Mỗi Work Queue có một số lượng Work Request (WR) cụ thể có thể được post vào, số scatter/gather element được hỗ trợ cho mỗi WR và một CQ để các Work Request đã xử lý xong thêm Work Completion vào đó. Các Work Queue này có thể được tạo với các thuộc tính giống hoặc khác nhau, chẳng hạn số WR có thể được post vào mỗi Work Queue. Thứ tự trong từng Work Queue được bảo đảm, nghĩa là việc xử lý Work Request trong Send Queue bắt đầu theo thứ tự submit Send Request. Receive Queue cũng hoạt động tương tự. Tuy nhiên, không có quan hệ thứ tự giữa hai queue: một outstanding Send Request có thể được xử lý ngay cả khi nó được post sau một Receive Request vào Receive Queue. Hình 13-5 trình bày một QP.
 
 ![Figure 13-5](images/ch13/fig13-05.png)
 
@@ -462,7 +462,7 @@ Khi tạo, mỗi QP có số duy nhất trên toàn RDMA device tại thời đi
 
 InfiniBand hỗ trợ các QP transport type:
 
-- Reliable Connected (RC): RC QP nối một remote RC QP, bảo đảm độ tin cậy—mọi packet đến theo thứ tự, giữ nguyên nội dung đã gửi. Mỗi message được fragmentation thành packet kích thước path MTU phía gửi và defragmentation phía nhận. QP hỗ trợ operation Send, RDMA Write, RDMA Read và Atomic.
+- Reliable Connected (RC): Một RC QP được kết nối với một remote RC QP duy nhất và bảo đảm độ tin cậy, tức là bảo đảm mọi packet đến theo đúng thứ tự và giữ nguyên nội dung khi gửi. Mỗi message được phân mảnh thành các packet có kích thước bằng path MTU ở phía gửi và được tái hợp ở phía nhận. QP này hỗ trợ các operation Send, RDMA Write, RDMA Read và Atomic.
 
 - Unreliable Connected (UC): UC QP nối một remote UC QP, không bảo đảm độ tin cậy. Nếu mất packet trong message, mất toàn message. Mỗi message được fragmentation thành packet kích thước path MTU phía gửi và defragmentation phía nhận. QP hỗ trợ Send và RDMA Write.
 
@@ -480,7 +480,7 @@ Có QP transport type đặc biệt cho subnet management và special service:
 
 - GSI/QP1: QP cho general service packet.
 
-Method `ib_create_qp()` tạo QP. Nhận PD và thuộc tính yêu cầu cho QP. Ví dụ tạo RC QP bằng PD đã tạo, với hai CQ khác: một cho Send Queue, một cho Receive Queue.
+Method `ib_create_qp()` tạo một QP. Method này nhận các đối số là một PD và các thuộc tính được yêu cầu để tạo QP đó. Sau đây là ví dụ tạo một RC QP bằng một PD đã được tạo, với hai CQ khác nhau: một CQ cho Send Queue và một CQ cho Receive Queue.
 
 ```
     struct ib_qp_init_attr init_attr;
@@ -510,31 +510,31 @@ QP có state machine xác định khả năng ở mỗi trạng thái:
 
 - Reset state: Mỗi QP được tạo ở đây. Không thể post Send Request hoặc Receive Request. Mọi incoming message âm thầm bị drop.
 
-- Initialized state: Không thể post Send Request. Có thể post Receive Request nhưng chưa xử lý. Mọi incoming message âm thầm bị drop. Nên post Receive Request ở trạng thái này trước khi chuyển RTR (Ready To Receive), tránh remote QP gửi message cần tiêu thụ Receive Request nhưng chưa post.
+- Initialized state: Trong trạng thái này, không thể post Send Request vào QP. Tuy nhiên, Receive Request có thể được post nhưng chưa được xử lý. Tất cả incoming message bị loại bỏ mà không phản hồi. Nên post một Receive Request vào QP ở trạng thái này trước khi chuyển nó sang RTR (Ready To Receive). Việc này tránh trường hợp remote QP gửi message cần sử dụng một Receive Request nhưng chưa có request nào được post.
 
 - Ready To Receive (RTR) state: Không thể post Send Request, nhưng có thể post và xử lý Receive Request. Xử lý mọi incoming message. Message đầu tiên nhận ở trạng thái này tạo communication-established asynchronous event. QP chỉ nhận có thể giữ ở trạng thái này.
 
 - Ready To Send (RTS) state: Có thể post và xử lý cả Send Request lẫn Receive Request. Xử lý mọi incoming message. Đây là trạng thái phổ biến.
 
-- Send Queue Drained (SQD) state: QP hoàn tất mọi Send Request đã bắt đầu xử lý. Chỉ khi không còn message có thể gửi mới đổi một số thuộc tính QP. Gồm hai trạng thái nội bộ:
+- Send Queue Drained (SQD) state: Trong trạng thái này, QP hoàn tất việc xử lý tất cả Send Request đã bắt đầu được xử lý. Chỉ khi không còn message nào có thể được gửi, bạn mới có thể thay đổi một số thuộc tính của QP. Trạng thái này được chia thành hai trạng thái nội bộ:
 
 - Draining: Message vẫn đang gửi.
 
 - Drained: Gửi message đã hoàn tất.
 
-- Send Queue Error (SQE) state: RDMA device tự chuyển QP vào đây khi Send Queue lỗi với unreliable transport type. Send Request gây lỗi kết thúc với nguyên nhân lỗi, mọi Send Request tiếp theo được flush. Receive Queue vẫn làm việc—có thể post Receive Request và xử lý incoming message. Client có thể phục hồi, đổi QP về RTS.
+- Send Queue Error (SQE) state: RDMA device tự động chuyển QP sang trạng thái này khi có lỗi trong Send Queue đối với unreliable transport type. Send Request gây lỗi sẽ hoàn tất với nguyên nhân lỗi, và tất cả Send Request tiếp theo sẽ được flush. Receive Queue vẫn hoạt động, nghĩa là có thể post Receive Request và các incoming message vẫn được xử lý. Client có thể phục hồi từ trạng thái này và chuyển trạng thái QP trở lại RTS.
 
-- Error state: Mọi outstanding Work Request được flush. RDMA device có thể chuyển QP vào đây nếu reliable transport type gặp lỗi Send Request, hoặc Receive Queue lỗi bất kể transport type. Mọi incoming message âm thầm bị drop.
+- Error state: Trong trạng thái này, tất cả outstanding Work Request sẽ được flush. RDMA device có thể chuyển QP sang trạng thái này nếu QP sử dụng reliable transport type và có lỗi với một Send Request, hoặc nếu có lỗi trong Receive Queue bất kể transport type nào được sử dụng. Tất cả incoming message bị loại bỏ mà không phản hồi.
 
-Có thể dùng `ib_modify_qp()` chuyển QP từ mọi state sang Reset và Error. Chuyển Error flush mọi outstanding Work Request. Chuyển Reset xóa mọi thuộc tính đã cấu hình, bỏ mọi outstanding Work Request và Work Completion kết thúc trên QP trong các Completion Queue QP dùng. Hình 13-6 là QP state machine diagram.
+Có thể dùng `ib_modify_qp()` để chuyển một QP từ bất kỳ trạng thái nào sang Reset state hoặc Error state. Chuyển QP sang Error state sẽ flush tất cả outstanding Work Request. Chuyển QP sang Reset state sẽ xóa mọi thuộc tính đã được cấu hình trước đó, loại bỏ tất cả outstanding Work Request và các Work Completion đã hoàn tất trên QP này trong những Completion Queue mà QP sử dụng. Hình 13-6 trình bày sơ đồ state machine của QP.
 
 ![Figure 13-6](images/ch13/fig13-06.png)
 
 Hình 13-6. QP state machine
 
-Method `ib_modify_qp()` sửa thuộc tính QP. Nhận QP cần sửa và thuộc tính sẽ sửa. State machine có thể đổi theo Hình 13-6. Mỗi QP transport type đòi hỏi thuộc tính khác nhau trong từng state transition.
+Method `ib_modify_qp()` sửa đổi các thuộc tính của một QP. Method này nhận các đối số là QP cần sửa đổi và các thuộc tính của QP sẽ được sửa đổi. State machine của QP có thể thay đổi theo sơ đồ trong Hình 13-6. Mỗi QP transport type yêu cầu thiết lập các thuộc tính khác nhau trong từng lần chuyển trạng thái của QP.
 
-Ví dụ sửa RC QP mới tạo sang RTS, nơi có thể gửi/nhận packet. Local attribute là outgoing port, SL và Packet Serial Number khởi đầu của Send Queue. Remote attribute cần là Receive PSN, QP number và LID của port nó dùng.
+Sau đây là ví dụ sửa đổi một RC QP vừa được tạo sang trạng thái RTS, trong đó nó có thể gửi và nhận packet. Các thuộc tính cục bộ là outgoing port, SL được sử dụng và Packet Serial Number bắt đầu của Send Queue. Các thuộc tính từ xa cần thiết là Receive PSN, QP number và LID của port mà QP sử dụng.
 
 ```
         struct ib_qp_attr attr = {
@@ -600,7 +600,7 @@ if (ret) {
 
 Sau đây là thêm các method xử lý QP:
 
-- Method `ib_query_qp()` truy vấn QP attribute hiện tại. Một số cố định (giá trị client chỉ định), số khác có thể đổi (như state).
+- Method `ib_query_qp()` truy vấn các thuộc tính hiện tại của QP. Một số thuộc tính là cố định (các giá trị do client chỉ định), còn một số thuộc tính có thể thay đổi (ví dụ, trạng thái).
 
 - Method `ib_destroy_qp()` hủy QP. Gọi khi không cần nữa.
 
@@ -612,7 +612,7 @@ Mọi Work Request post vào Send hoặc Receive Queue được xem outstanding 
 
 Hình 13-7. Work Request processing flow
 
-Trong Send Queue, có thể chọn khi tạo QP: mọi Send Request kết thúc bằng Work Completion, hoặc chọn Send Request nào tạo Work Completion—selective signaling. Unsignaled Send Request vẫn có thể lỗi; khi đó Work Completion với bad status vẫn được tạo.
+Trong Send Queue, khi tạo QP, bạn có thể chọn để mọi Send Request kết thúc bằng một Work Completion hoặc tự chọn các Send Request sẽ kết thúc bằng Work Completion; đó là selective signaling. Một unsignaled Send Request vẫn có thể gặp lỗi; trong trường hợp đó, một Work Completion có trạng thái lỗi vẫn được tạo cho request này.
 
 Khi Work Request outstanding, không thể dùng (lại) hoặc giải phóng tài nguyên được chỉ định khi post. Chẳng hạn:
 
@@ -620,7 +620,7 @@ Khi Work Request outstanding, không thể dùng (lại) hoặc giải phóng t�
 
 - Khi post Receive Request, không được đọc memory buffer tham chiếu trong scatter/gather (s/g) list vì chưa biết RDMA device đã ghi dữ liệu chưa.
 
-“Fencing” là khả năng ngăn xử lý Send Request cụ thể đến khi RDMA Read và Atomic operation trước đó kết thúc. Thêm Fence indication hữu ích chẳng hạn khi RDMA Read từ remote address rồi gửi dữ liệu hoặc một phần dữ liệu trong cùng Send Queue. Không fencing, send operation có thể bắt đầu trước khi dữ liệu được lấy về local memory. Khi post Send Request đến UC hoặc RC QP, path đích đã biết vì cung cấp khi chuyển QP sang RTR. Nhưng với UD QP, phải thêm AH mô tả path đến đích của message. Nếu lỗi liên quan Send Queue và Unreliable transport type, Send Queue sang Error (SQE) nhưng Receive Queue vẫn hoạt động đầy đủ. Client có thể phục hồi và đổi QP về RTS. Nếu lỗi Receive Queue, QP sang Error vì không phục hồi được. Khi Work Queue sang Error, Work Request gây lỗi kết thúc với status chỉ bản chất lỗi, các Work Request còn lại được flush với lỗi.
+“Fencing” là khả năng ngăn xử lý một Send Request cụ thể cho đến khi các RDMA Read và Atomic operation trước đó được xử lý xong. Việc thêm chỉ dấu Fence vào Send Request có thể hữu ích, chẳng hạn khi dùng RDMA Read để đọc từ một remote address rồi gửi dữ liệu đó hoặc một phần của nó trong cùng Send Queue. Nếu không có fencing, send operation có thể bắt đầu trước khi dữ liệu được lấy về và sẵn có trong local memory. Khi post Send Request vào UC hoặc RC QP, path đến đích đã được biết vì đã được cung cấp lúc chuyển QP sang trạng thái RTR. Tuy nhiên, khi post Send Request vào UD QP, bạn cần thêm một AH để mô tả path đến một hoặc nhiều đích của message. Nếu có lỗi liên quan đến Send Queue và transport type là Unreliable, Send Queue sẽ chuyển sang Error state (tức SQE state), nhưng Receive Queue vẫn hoạt động đầy đủ. Client có thể phục hồi từ trạng thái này và chuyển QP trở lại RTS. Nếu có lỗi liên quan đến Receive Queue, QP sẽ chuyển sang Error state vì đây là lỗi không thể phục hồi. Khi một Work Queue chuyển sang Error state, Work Request gây lỗi kết thúc với trạng thái cho biết bản chất của lỗi, còn các Work Request còn lại trong queue đó được flush với lỗi.
 
 ### Operation được hỗ trợ trong kiến trúc RDMA
 
@@ -628,7 +628,7 @@ InfiniBand hỗ trợ các operation type:
 
 - Send: Gửi message qua mạng. Remote side cần Receive Request sẵn có; message được ghi vào buffer của nó.
 
-- Send with Immediate: Gửi message kèm 32 bit dữ liệu out-of-band. Remote side cần Receive Request sẵn có; message ghi vào buffer. Immediate data có trong Work Completion của bên nhận.
+- Send with Immediate: Gửi một message qua đường truyền cùng với 32 bit dữ liệu out-of-band bổ sung. Phía nhận phải có sẵn một Receive Request, và message sẽ được ghi vào các buffer của request đó. Immediate data này sẽ có trong Work Completion của bên nhận.
 
 - RDMA Write: Gửi message qua mạng đến remote address.
 
@@ -648,11 +648,11 @@ InfiniBand hỗ trợ các operation type:
 
 - Fast registration: Đăng ký Fast Memory Region bằng Work Request.
 
-- Local invalidate: Vô hiệu Fast Memory Region bằng Work Request. Nếu dùng `lkey`/`rkey` cũ thì bị coi lỗi. Có thể kết hợp send/RDMA read; khi đó thực hiện send/read trước, rồi mới vô hiệu Fast Memory Region.
+- Local invalidate: Vô hiệu hóa một Fast Memory Region bằng Work Request. Nếu sử dụng `lkey`/`rkey` cũ, thao tác sẽ bị coi là lỗi. Có thể kết hợp operation này với send/RDMA read; trong trường hợp đó, send/read được thực hiện trước, sau đó Fast Memory Region mới bị vô hiệu hóa.
 
-Receive Request chỉ nơi lưu incoming message cho operation tiêu thụ Receive Request. Tổng kích thước memory buffer trong scatter list phải lớn hơn hoặc bằng incoming message.
+Receive Request chỉ định nơi lưu incoming message đối với các operation cần sử dụng một Receive Request. Tổng kích thước các memory buffer trong scatter list phải lớn hơn hoặc bằng kích thước incoming message.
 
-Với UD QP, vì chưa biết trước nguồn message (cùng/khác subnet, unicast/multicast), phải thêm 40 byte, kích thước GRH header, vào Receive Request buffer. 40 byte đầu chứa GRH nếu có. GRH mô tả cách gửi message trả bên gửi. Message thực bắt đầu tại offset 40 trong memory buffer của scatter list.
+Với UD QP, do không biết trước nguồn của message (cùng subnet hay subnet khác, unicast message hay multicast message), cần bổ sung thêm 40 byte vào các Receive Request buffer, bằng kích thước của GRH header. 40 byte đầu tiên sẽ chứa GRH của message, nếu có. Thông tin GRH này mô tả cách gửi một message trả lại cho bên gửi. Bản thân message sẽ bắt đầu tại offset 40 trong các memory buffer được mô tả trong scatter list.
 
 Method `ib_post_recv()` nhận linked list Receive Request và thêm vào Receive Queue của QP cụ thể để xử lý sau. Ví dụ post một Receive Request cho QP. Lưu incoming
 
@@ -716,7 +716,7 @@ Mỗi Work Completion có thể kết thúc thành công hoặc lỗi. Nếu th�
 
 #### Retry Flow
 
-Nếu bên nhận không trả ACK/NACK trong timeout dự kiến, bên gửi có thể gửi lại message theo timeout và retry count đã cấu hình trong QP attribute. Có các nguyên nhân:
+Nếu bên nhận không trả về ACK hoặc NACK cho bên gửi trong khoảng timeout dự kiến, bên gửi có thể gửi lại message theo các thuộc tính timeout và retry count đã được cấu hình trong các thuộc tính của QP. Có thể có một số nguyên nhân dẫn đến vấn đề này:
 
 - Thuộc tính remote QP hoặc path đến nó không đúng.
 
@@ -734,13 +734,13 @@ Hình 13-8 minh họa retry flow khắc phục packet loss do packet drop.
 
 Hình 13-8. Retry flow (trên reliable transport type)
 
-Nếu cuối cùng sender QP nhận ACK/NACK thành công, tiếp tục gửi message còn lại. Nếu message sau cũng gặp vấn đề, retry flow thực hiện lại cho message đó, không giữ lịch sử trước. Nếu sau nhiều lần retry bên nhận vẫn không phản hồi, phía gửi có Work Completion với Retry Error.
+Nếu cuối cùng sender QP nhận được ACK/NACK thành công, nó sẽ tiếp tục gửi các message còn lại. Nếu một message trong tương lai cũng gặp vấn đề này, retry flow sẽ được thực hiện lại cho message đó mà không giữ lịch sử về những lần thực hiện trước. Nếu bên nhận vẫn không phản hồi sau nhiều lần thử lại, phía gửi sẽ có một Work Completion với Retry Error.
 
 #### Receiver Not Ready (RNR) Flow
 
-Nếu bên nhận nhận message cần tiêu thụ Receive Request từ Receiver Queue nhưng không có outstanding Receive Request, nó gửi trả RNR NACK. Sau khoảng thời gian chỉ định trong RNR NACK, bên gửi thử gửi lại.
+Nếu bên nhận nhận được một message cần sử dụng một Receive Request từ Receiver Queue nhưng không có outstanding Receive Request nào, bên nhận sẽ gửi trả một RNR NACK cho bên gửi. Sau một khoảng thời gian được chỉ định trong RNR NACK, bên gửi sẽ thử gửi lại message.
 
-Nếu cuối cùng bên nhận post Receiver Request kịp và incoming message tiêu thụ nó, ACK gửi đến bên gửi báo message đã lưu thành công. Nếu message sau cũng gặp vấn đề, RNR retry flow thực hiện lại không giữ lịch sử. Nếu sau nhiều lần retry bên nhận vẫn chưa post Receiver Request, và mỗi message gửi đều nhận RNR NACK, Work Completion với RNR Retry Error được tạo phía gửi. Hình 13-9 minh họa RNR retry flow khắc phục thiếu Receive Request phía nhận.
+Nếu cuối cùng bên nhận post một Receiver Request kịp thời và incoming message sử dụng request đó, một ACK sẽ được gửi đến bên gửi để cho biết message đã được lưu thành công. Nếu một message trong tương lai cũng gặp vấn đề này, RNR retry flow sẽ được thực hiện lại cho message đó mà không giữ lịch sử những lần thực hiện trước. Nếu sau nhiều lần thử lại, bên nhận vẫn chưa post Receiver Request và một RNR NACK được gửi về cho mỗi message được gửi đi, một Work Completion với RNR Retry Error sẽ được tạo ở phía gửi. Hình 13-9 minh họa RNR retry flow khắc phục tình trạng thiếu Receive Request ở phía nhận.
 
 ![Figure 13-9](images/ch13/fig13-09.png)
 
@@ -750,7 +750,7 @@ Phần này trình bày Work Request status và một số bad flow có thể x�
 
 ### Multicast Group
 
-Multicast group cho phép gửi message từ một UD QP đến nhiều UD QP. Mỗi UD QP muốn nhận phải attach vào multicast group. Khi device nhận multicast packet, nhân bản đến mọi QP attach group. Sau đây là hai method:
+Multicast group cung cấp cách gửi một message từ một UD QP đến nhiều UD QP. Mỗi UD QP muốn nhận message này phải được gắn vào multicast group. Khi một device nhận multicast packet, nó nhân bản packet đến tất cả QP được gắn vào group đó. Sau đây là mô tả hai method liên quan đến multicast group:
 
 - Method `ib_attach_mcast()` attach UD QP vào multicast group trong InfiniBand device. Nhận QP cần attach và thuộc tính multicast group.
 
@@ -758,7 +758,7 @@ Multicast group cho phép gửi message từ một UD QP đến nhiều UD QP. M
 
 ### Khác biệt RDMA API Userspace và Kernel-Level
 
-Userspace và kernel level RDMA stack API khá giống vì cùng công nghệ và cần cung cấp cùng chức năng. Khi userspace gọi control path method của RDMA API, context switch sang kernel level để bảo vệ privileged resource và đồng bộ object cần thiết (chẳng hạn không thể gán cùng QP number cho nhiều QP đồng thời).
+Userspace API và kernel level API của RDMA stack khá giống nhau vì chúng phục vụ cùng một công nghệ và cần cung cấp cùng chức năng. Khi userspace gọi một method thuộc control path của RDMA API, một context switch sang kernel level được thực hiện để bảo vệ các tài nguyên đặc quyền và đồng bộ những object cần được đồng bộ (ví dụ, không thể gán cùng một QP number cho nhiều QP tại cùng một thời điểm).
 
 Tuy nhiên có khác biệt API và chức năng giữa userspace và kernel-level:
 
@@ -778,11 +778,11 @@ Tuy nhiên có khác biệt API và chức năng giữa userspace và kernel-lev
 
 - Có tính năng mới được giới thiệu ở kernel level nhưng chưa có trong userspace.
 
-Userspace API được thư viện “libibverbs” cung cấp. Dù chức năng RDMA user level ít hơn kernel-level, vẫn đủ hưởng lợi công nghệ InfiniBand.
+Userspace API được cung cấp bởi userspace library “libibverbs”. Mặc dù một số chức năng RDMA ở user level ít hơn so với ở kernel-level, chúng vẫn đủ để tận dụng những lợi ích của công nghệ InfiniBand.
 
 ## Tổng kết
 
-Trong chương, bạn tìm hiểu ưu điểm InfiniBand. Tôi xem xét tổ chức RDMA stack, resource-creation hierarchy và mọi object quan trọng cùng API cần để viết client code dùng InfiniBand. Bạn cũng thấy ví dụ dùng API. Chương tiếp theo trình bày chủ đề nâng cao như network namespace và Bluetooth subsystem.
+Trong chương này, bạn đã tìm hiểu các ưu điểm của InfiniBand. Tôi đã xem xét cách tổ chức RDMA stack, resource-creation hierarchy và tất cả object quan trọng cùng API cần thiết để viết client code sử dụng InfiniBand. Bạn cũng đã thấy các ví dụ sử dụng API. Chương tiếp theo trình bày các chủ đề nâng cao như network namespace và Bluetooth subsystem.
 
 ## Tham khảo nhanh
 

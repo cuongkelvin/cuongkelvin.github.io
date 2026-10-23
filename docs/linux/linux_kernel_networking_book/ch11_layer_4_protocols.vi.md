@@ -578,7 +578,7 @@ Protocol TCP được mô tả trong RFC 793 năm 1981. Qua nhiều năm kể t�
 
 TCP là transport protocol được dùng phổ biến nhất trên Internet hiện nay. Nhiều protocol well-known dựa trên TCP. Protocol well-known nhất có lẽ là HTTP, và cũng cần đề cập các protocol well-known khác như `ftp`, `ssh`, `telnet`, `smtp` và `ssl`. TCP cung cấp transport đáng tin cậy và connection-oriented, khác UDP. Truyền dữ liệu được bảo đảm bằng sequence number và acknowledgement.
 
-TCP rất phức tạp; chương này không trình bày mọi chi tiết, tối ưu và sắc thái của cách triển khai TCP vì cần cả một cuốn sách riêng. Chức năng TCP gồm hai thành phần: quản lý connection, và truyền/nhận dữ liệu. Phần này tập trung khởi tạo TCP và thiết lập TCP connection, thuộc thành phần đầu, cùng nhận/gửi packet, thuộc thành phần thứ hai. Đây là nền tảng quan trọng để tìm hiểu sâu cách triển khai TCP. Cần lưu ý TCP self-regulates flow byte-stream qua congestion control. Nhiều algorithm congestion-control được quy định, và Linux cung cấp kiến trúc pluggable, cấu hình được để hỗ trợ nhiều algorithm. Chi tiết từng algorithm congestion-control nằm ngoài phạm vi sách.
+TCP là một protocol rất phức tạp; chúng ta sẽ không thảo luận mọi chi tiết, tối ưu và sắc thái trong cách triển khai TCP ở chương này vì bản thân nội dung đó cần một cuốn sách riêng. Chức năng TCP gồm hai thành phần: quản lý connection và truyền, nhận dữ liệu. Trong mục này, chúng ta tập trung vào khởi tạo TCP và thiết lập TCP connection, thuộc thành phần thứ nhất là quản lý connection, cùng việc nhận và gửi packet, thuộc thành phần thứ hai. Đây là những kiến thức cơ bản quan trọng để tiếp tục tìm hiểu sâu cách triển khai TCP protocol. Cần lưu ý rằng TCP protocol self-regulates byte-stream flow thông qua congestion control. Nhiều congestion-control algorithm khác nhau đã được quy định, và Linux cung cấp một kiến trúc có thể mở rộng bằng thành phần bổ sung và có thể cấu hình để hỗ trợ nhiều algorithm. Việc đi sâu vào chi tiết từng congestion-control algorithm nằm ngoài phạm vi cuốn sách.
 
 Mỗi TCP packet bắt đầu bằng TCP header. Cần tìm hiểu TCP header để hiểu hoạt động TCP. Phần tiếp theo mô tả IPv4 TCP header.
 
@@ -669,7 +669,7 @@ Hình 11-3 minh họa sơ đồ TCP header.
 
 Hình 11-3. TCP header (IPv4)
 
-Trong phần này, tôi mô tả IPv4 TCP header và các member. Bạn thấy khác UDP header chỉ có 4 member, TCP header có nhiều member hơn vì TCP phức tạp hơn nhiều. Phần tiếp theo mô tả khởi tạo TCP để biết cách thức và nơi khởi tạo callback nhận/gửi TCP packet.
+Trong mục này, tôi đã mô tả IPv4 TCP header và các member của nó. Bạn đã thấy rằng, khác với UDP header chỉ có 4 member, TCP header có nhiều member hơn vì TCP là một protocol phức tạp hơn rất nhiều. Trong mục tiếp theo, tôi sẽ mô tả cách khởi tạo TCP để bạn biết các callback nhận và gửi TCP packet được khởi tạo như thế nào và ở đâu.
 
 ### Khởi tạo TCP
 
@@ -795,7 +795,7 @@ int tcp_v4_rcv(struct sk_buff *skb)
                 goto no_tcp_socket;
 ```
 
-Bây giờ kiểm tra socket có thuộc ứng dụng nào không. Macro `sock_owned_by_user()` trả về 1 khi có ứng dụng sở hữu socket và 0 khi không có ứng dụng sở hữu:
+Bây giờ chúng ta kiểm tra xem socket có thuộc quyền sở hữu của một ứng dụng nào hay không. Macro `sock_owned_by_user()` trả về 1 khi hiện có một ứng dụng sở hữu socket và trả về 0 khi không có ứng dụng nào sở hữu socket:
 
 ```
         if (!sock_owned_by_user(sk)) {
@@ -876,9 +876,9 @@ Giống UDP, gửi packet từ TCP socket tạo trong userspace có thể qua c�
     int tcp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
                     size_t size)
     {
-            struct iovec *iov;
-            struct tcp_sock *tp = tcp_sk(sk);
-            struct sk_buff *skb;
+        struct iovec *iov;
+        struct tcp_sock *tp = tcp_sk(sk);
+        struct sk_buff *skb;
         int iovlen, flags, err, copied = 0;
         int mss_now = 0, size_goal, copied_syn = 0, offset = 0;
         bool sg;
@@ -904,7 +904,7 @@ Object `icsk_af_ops` (INET Connection Socket ops) là object riêng theo address
 (net/ipv4/tcp_output.c)
 ```
 
-Sau khi tìm hiểu TCP và UDP, bạn sẵn sàng chuyển sang protocol SCTP (Stream Control Transmission Protocol). SCTP kết hợp tính năng UDP và TCP, mới hơn cả hai.
+Sau khi đã tìm hiểu TCP và UDP, bạn đã sẵn sàng chuyển sang mục tiếp theo về SCTP (Stream Control Transmission Protocol). SCTP protocol kết hợp các tính năng của cả UDP và TCP, đồng thời ra đời sau cả hai protocol này.
 
 ## SCTP (Stream Control Transmission Protocol)
 
@@ -1176,7 +1176,7 @@ Lưu ý Về socket cho SCTP, cần đề cập dự án `lksctp-tools` (`http:/
 
 SCTP multihoming chỉ việc có nhiều địa chỉ IP trên cả hai endpoint. Tính năng hay của SCTP là endpoint mặc định multihomed nếu local IP address được chỉ định wildcard. Cũng có nhiều nhầm lẫn vì người dùng nghĩ chỉ bind nhiều địa chỉ thì association sẽ multihomed. Điều này không đúng vì chỉ triển khai destination multihoming. Nói cách khác, cả hai endpoint kết nối phải multihomed mới có failover thực sự. Nếu local association chỉ biết một địa chỉ đích, chỉ có một path và do đó không có multihoming.
 
-Với mô tả SCTP multihoming, phần SCTP của chương kết thúc. Phần tiếp theo mô tả DCCP, transport protocol cuối cùng trong chương.
+Phần trình bày về SCTP trong chương này kết thúc với nội dung mô tả SCTP multihoming ở mục này. Trong mục tiếp theo, tôi sẽ mô tả DCCP protocol, transport protocol cuối cùng được thảo luận trong chương này.
 
 ## DCCP: Datagram Congestion Control Protocol
 
@@ -1434,7 +1434,7 @@ Một số NAT device không cho DCCP qua (thường vì firmware nhỏ nên kh�
 
 ## Tổng kết
 
-Chương này trình bày bốn transport protocol: UDP và TCP phổ biến nhất, SCTP và DCCP mới hơn. Bạn đã tìm hiểu khác biệt cơ bản giữa các protocol. Bạn biết TCP phức tạp hơn UDP nhiều vì dùng state machine, nhiều timer và yêu cầu acknowledgement. Bạn tìm hiểu header của từng protocol cùng cách gửi/nhận packet. Tôi trình bày các tính năng SCTP riêng như multihoming và multistreaming.
+Chương này đã thảo luận về bốn transport protocol: UDP và TCP, hai protocol được sử dụng phổ biến nhất, cùng SCTP và DCCP, hai protocol mới hơn. Bạn đã tìm hiểu các khác biệt cơ bản giữa những protocol này. Bạn đã biết TCP phức tạp hơn UDP rất nhiều vì nó sử dụng một state machine, nhiều timer và yêu cầu acknowledgement. Bạn đã tìm hiểu header của từng protocol cũng như cách gửi và nhận packet bằng những protocol này. Tôi đã thảo luận về một số tính năng riêng của SCTP protocol, chẳng hạn multihoming và multistreaming.
 
 Chương tiếp theo trình bày Wireless subsystem và cách triển khai trong Linux. Trong phần “Tham khảo nhanh” sau đây, tôi liệt kê các method chính liên quan đến chủ đề trong chương theo ngữ cảnh, đồng thời trình bày hai bảng đã đề cập.
 

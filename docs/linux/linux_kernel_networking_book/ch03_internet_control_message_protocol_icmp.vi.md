@@ -1,16 +1,16 @@
 # Chương 3. Internet Control Message Protocol (ICMP)
 
-Chương 2 thảo luận triển khai netlink socket và cách dùng làm kênh giao tiếp kernel/userspace. Chương này về ICMP protocol, một Layer 4 protocol. Userspace application có thể dùng ICMP để gửi/nhận packet bằng sockets API (ví dụ best-known có lẽ utility `ping`). Chương thảo luận cách kernel xử lý ICMP packet và đưa ví dụ.
+Chương 2 thảo luận về cách triển khai netlink socket và cách sử dụng chúng làm kênh giao tiếp giữa kernel và userspace. Chương này trình bày ICMP protocol, một Layer 4 protocol. Userspace application có thể sử dụng ICMP protocol để gửi và nhận ICMP packet thông qua sockets API (ví dụ best-known có lẽ là tiện ích `ping`). Chương này thảo luận cách xử lý các ICMP packet đó trong kernel và đưa ra một số ví dụ.
 
-ICMP chủ yếu là cơ chế bắt buộc gửi error message và control message về network layer (L3). Protocol cho phép nhận feedback về vấn đề môi trường giao tiếp bằng ICMP message, cung cấp error handling và diagnostics. ICMP tương đối đơn giản nhưng rất quan trọng để bảo đảm hệ thống hoạt động đúng. Định nghĩa ICMPv4 cơ bản ở RFC 792, “Internet Control Message Protocol”, định nghĩa mục tiêu và format các message. Chương cũng nhắc RFC 1122 (“Requirements for Internet Hosts—Communication Layers”) quy định yêu cầu cho một số ICMP message; RFC 4443 định nghĩa ICMPv6; RFC 1812 về router. Tôi mô tả type ICMPv4/ICMPv6, cách gửi và xử lý, cùng ICMP socket, lý do thêm và cách dùng. Nhớ ICMP cũng dùng trong security attack; ví dụ Smurf Attack là denial-of-service attack gửi số lượng lớn ICMP packet có source IP giả mạo của nạn nhân dưới dạng broadcast tới computer network bằng IP broadcast address.
+ICMP protocol chủ yếu được sử dụng như một cơ chế bắt buộc để gửi error message và control message về network layer (L3). Protocol này cho phép nhận phản hồi về các vấn đề trong môi trường giao tiếp bằng cách gửi ICMP message. Các message này cung cấp khả năng error handling và diagnostics. ICMP protocol tương đối đơn giản nhưng rất quan trọng để bảo đảm hệ thống hoạt động đúng. Định nghĩa cơ bản của ICMPv4 nằm trong RFC 792, “Internet Control Message Protocol”. RFC này định nghĩa mục tiêu của ICMPv4 protocol và định dạng của các ICMPv4 message khác nhau. Trong chương này, tôi cũng đề cập RFC 1122 (“Requirements for Internet Hosts—Communication Layers”), quy định một số yêu cầu đối với các ICMP message; RFC 4443, định nghĩa ICMPv6 protocol; và RFC 1812, định nghĩa các yêu cầu đối với router. Tôi cũng mô tả các loại ICMPv4 và ICMPv6 message hiện có, cách gửi và xử lý chúng. Tôi trình bày ICMP socket, bao gồm lý do chúng được bổ sung và cách sử dụng. Hãy nhớ rằng ICMP protocol cũng được sử dụng trong nhiều cuộc tấn công bảo mật; ví dụ, Smurf Attack là một denial-of-service attack trong đó số lượng lớn ICMP packet có source IP giả mạo của nạn nhân được gửi dưới dạng broadcast đến một mạng máy tính bằng IP broadcast address.
 
 ## ICMPv4
 
-ICMPv4 message chia hai nhóm: error message và information message (RFC 1812 gọi “query message”). ICMPv4 dùng trong diagnostic tool như `ping` và `traceroute`. Utility `ping` nổi tiếng thực tế là userspace application (package `iputils`) mở raw socket, gửi ICMP\_ECHO và cần nhận ICMP\_REPLY trả lời. `Traceroute` tìm path giữa host và destination IP address. Utility `traceroute` dựa trên đặt các value khác nhau cho Time To Live (TTL), field trong IP header biểu diễn hop count. `traceroute` tận dụng forwarding machine gửi ICMP\_TIME\_EXCEED khi TTL về 0. `traceroute` bắt đầu gửi TTL 1, và mỗi lần nhận ICMP\_DEST\_UNREACH code ICMP\_TIME\_EXCEED trả lời, tăng TTL 1 rồi gửi lại cùng đích. Dùng ICMP “Time Exceeded” trả về để dựng list router packet đi qua, tới khi đến đích và nhận ICMP “Echo Reply”. Traceroute mặc định dùng UDP. ICMPv4 module là `net/ipv4/icmp.c`. Lưu ý không thể build ICMPv4 thành kernel module.
+ICMPv4 message có thể được chia thành hai loại: error message và information message (được gọi là “query message” trong RFC 1812). ICMPv4 protocol được sử dụng trong các công cụ chẩn đoán như `ping` và `traceroute`. Tiện ích `ping` nổi tiếng thực tế là một userspace application thuộc package `iputils`, mở raw socket và gửi ICMP\_ECHO message, rồi chờ nhận ICMP\_REPLY message làm phản hồi. `Traceroute` là tiện ích tìm path giữa một host và một destination IP address cụ thể. Tiện ích `traceroute` hoạt động bằng cách đặt các giá trị khác nhau cho Time To Live (TTL), một field trong IP header biểu diễn hop count. Tiện ích `traceroute` tận dụng việc forwarding machine gửi trả ICMP\_TIME\_EXCEED message khi TTL của packet đạt 0. Tiện ích `traceroute` bắt đầu bằng cách gửi các message có TTL bằng 1; với mỗi ICMP\_DEST\_UNREACH có code ICMP\_TIME\_EXCEED nhận được làm phản hồi, nó tăng TTL thêm 1 rồi gửi lại đến cùng đích. Nó sử dụng các ICMP message “Time Exceeded” được trả về để tạo danh sách router mà packet đi qua, cho đến khi đến đích và đích trả về ICMP message “Echo Reply”. Traceroute mặc định sử dụng UDP protocol. ICMPv4 module là `net/ipv4/icmp.c`. Lưu ý rằng ICMPv4 không thể được build thành kernel module.
 
 ### Khởi tạo ICMPv4
 
-Khởi tạo ICMPv4 trong method `inet_init()`, gọi ở boot phase. `inet_init()` gọi `icmp_init()`, rồi gọi `icmp_sk_init()` tạo kernel ICMP socket để gửi message, khởi tạo một số ICMP variable `procfs` về default value. (Bạn sẽ gặp một số variable `procfs` sau trong chương.)
+Việc khởi tạo ICMPv4 được thực hiện trong method `inet_init()`, được gọi ở boot phase. Method `inet_init()` gọi method `icmp_init()`, method này lại gọi method `icmp_sk_init()` để tạo một kernel ICMP socket dùng gửi ICMP message và khởi tạo một số ICMP variable `procfs` về giá trị mặc định. (Bạn sẽ gặp một số variable `procfs` này ở phần sau của chương.)
 
 Đăng ký ICMPv4 như IPv4 protocol khác trong `inet_init()`:
 
@@ -27,7 +27,7 @@ static const struct net_protocol icmp_protocol = {
 
 - `icmp_rcv`: Callback `handler`. Nghĩa là incoming packet có protocol field trong IP header bằng IPPROTO\_ICMP (0x1) sẽ gọi `icmp_rcv()`.
 
-- `no_policy:` Flag set 1, nghĩa là không cần IPsec policy check; ví dụ không gọi `xfrm4_policy_check()` trong `ip_local_deliver_finish()` vì flag `no_policy` set.
+- `no_policy:` Flag này được đặt bằng 1, nghĩa là không cần kiểm tra IPsec policy; ví dụ, `xfrm4_policy_check()` không được gọi trong `ip_local_deliver_finish()` vì flag `no_policy` đã được thiết lập.
 
 - `netns_ok:` Flag set 1, chỉ báo protocol nhận biết network namespace. Namespace được mô tả ở Phụ lục A, mục `net_device`. Method `inet_add_protocol()` thất bại với protocol có field `netns_ok` 0, lỗi `-EINVAL`.
 
@@ -59,11 +59,11 @@ int __net_init icmp_sk_init(struct net *net)
 }
 ```
 
-Trong `icmp_sk_init()`, mỗi CPU được tạo raw ICMPv4 socket, giữ trong array. Current `sk` truy cập bằng `icmp_sk(struct net *net)`. Socket dùng trong `icmp_push_reply()`. ICMPv4 entry `procfs` khởi tạo ở `icmp_sk_init()`; tôi nhắc trong chương và tóm tắt mục “Tham khảo nhanh” cuối chương. Mỗi ICMP packet bắt đầu ICMPv4 header. Trước khi nói nhận/truyền message, mục sau mô tả header để hiểu cách dựng message.
+Trong method `icmp_sk_init()`, một raw ICMPv4 socket được tạo cho mỗi CPU và được lưu trong một array. Có thể truy cập `sk` hiện tại bằng method `icmp_sk(struct net *net)`. Các socket này được sử dụng trong method `icmp_push_reply()`. Các entry `procfs` của ICMPv4 được khởi tạo trong method `icmp_sk_init()`; tôi đề cập đến chúng trong chương này và tổng hợp trong mục “Tham khảo nhanh” ở cuối chương. Mỗi ICMP packet bắt đầu bằng một ICMPv4 header. Trước khi thảo luận cách nhận và truyền ICMPv4 message, mục tiếp theo mô tả ICMPv4 header để bạn hiểu rõ hơn cách tạo các ICMPv4 message.
 
 ### ICMPv4 header
 
-ICMPv4 header gồm type (8 bit), code (8 bit), checksum (16 bit), và member phần biến đổi 32 bit (nội dung tùy type/code), như Hình 3-1. Sau header là payload, cần chứa IPv4 header của originating packet và một phần payload. Theo RFC 1812, chứa nhiều original datagram nhất có thể mà ICMPv4 datagram không vượt 576 byte. Kích thước phù hợp RFC 791, quy định mọi host phải sẵn sàng nhận datagram tới 576 octet.
+ICMPv4 header gồm type (8 bit), code (8 bit), checksum (16 bit) và một member có nội dung biến đổi dài 32 bit (nội dung thay đổi theo ICMPv4 type và code), như bạn thấy trong Hình 3-1. Theo sau ICMPv4 header là payload, cần chứa IPv4 header của packet gốc và một phần payload của packet đó. Theo RFC 1812, phần này cần chứa nhiều nhất có thể nội dung của datagram gốc mà không khiến độ dài ICMPv4 datagram vượt quá 576 byte. Kích thước này phù hợp với RFC 791, quy định rằng “Mọi host phải sẵn sàng chấp nhận datagram có độ dài lên đến 576 octet”.
 
 ![Figure 3-1](images/ch03/fig03-01.png)
 
@@ -113,7 +113,7 @@ NR\_ICMP\_TYPES là ICMPv4 type cao nhất, bằng 18.
 
 Error field của object `icmp_control` trong array chỉ bằng 1 với error message type như “Destination Unreachable” (ICMP\_DEST\_UNREACH), và ngầm bằng 0 với information message như echo (ICMP\_ECHO). Một số handler gán cho nhiều type. Tiếp theo tôi thảo luận handler và type chúng quản lý.
 
-`ping_rcv()` xử lý nhận ping reply (ICMP\_ECHOREPLY). Method `ping_rcv()` triển khai trong ICMP sockets code `net/ipv4/ping.c`. Trước kernel 3.0, để gửi ping phải tạo raw socket trong userspace. Khi nhận reply (ICMP\_ECHOREPLY), raw socket đã gửi ping xử lý. Để hiểu triển khai, xem `ip_local_deliver_finish()`, method xử lý incoming IPv4 packet và chuyển tới socket cần xử lý:
+`ping_rcv()` xử lý việc nhận ping reply (ICMP\_ECHOREPLY). Method `ping_rcv()` được triển khai trong ICMP sockets code, `net/ipv4/ping.c`. Trong các kernel trước phiên bản 3.0, để gửi ping, bạn phải tạo một raw socket trong userspace. Khi nhận được phản hồi cho ping (ICMP\_ECHOREPLY message), raw socket đã gửi ping sẽ xử lý phản hồi đó. Để hiểu cách triển khai, hãy xem `ip_local_deliver_finish()`, method xử lý incoming IPv4 packet và chuyển chúng đến những socket cần xử lý chúng:
 
 ```
 static int ip_local_deliver_finish(struct sk_buff *skb)
@@ -135,13 +135,13 @@ static int ip_local_deliver_finish(struct sk_buff *skb)
 
 (`net/ipv4/ip_input.c`)
 
-Khi `ip_local_deliver_finish()` nhận packet ICMP\_ECHOREPLY, trước hết thử chuyển tới listening raw socket để xử lý. Vì raw socket mở trong userspace đã xử lý message, không cần làm thêm. Vì vậy khi `ip_local_deliver_finish()` nhận ICMP\_ECHOREPLY, gọi `raw_local_deliver()` trước để raw socket xử lý, rồi `ipprot->handler(skb)` (callback `icmp_rcv()` với ICMPv4). Vì raw socket đã xử lý, không còn gì làm. Packet bị loại âm thầm bằng `icmp_discard()`, handler cho ICMP\_ECHOREPLY.
+Khi method `ip_local_deliver_finish()` nhận một packet ICMP\_ECHOREPLY, trước tiên nó thử chuyển packet đến một raw socket đang lắng nghe để socket đó xử lý. Vì một raw socket được mở trong userspace xử lý ICMP\_ECHOREPLY message nên không cần thực hiện thêm thao tác nào với message đó. Do vậy, khi method `ip_local_deliver_finish()` nhận ICMP\_ECHOREPLY, method `raw_local_deliver()` được gọi trước để xử lý message bằng raw socket, sau đó `ipprot->handler(skb)` được gọi (đây là callback `icmp_rcv()` trong trường hợp ICMPv4 packet). Vì packet đã được raw socket xử lý nên không còn việc gì cần thực hiện. Packet vì thế bị loại bỏ mà không phản hồi bằng cách gọi method `icmp_discard()`, handler của các ICMP\_ECHOREPLY message.
 
 Khi ICMP socket (“ping socket”) tích hợp vào Linux kernel 3.0, điều này thay đổi. Ping socket thảo luận trong mục “ICMP socket (“Ping socket”)” sau. Trong ngữ cảnh này cần
 
 lưu ý với ICMP socket, bên gửi `ping` có thể không phải raw socket. Ví dụ tạo `socket (PF_INET, SOCK_DGRAM, PROT_ICMP)` rồi gửi packet `ping`. Không phải raw socket nên echo reply không được chuyển tới raw socket nào vì không có socket tương ứng lắng nghe. Để tránh, ICMPv4 module xử lý nhận ICMP\_ECHOREPLY bằng callback `ping_rcv()`. Module `ping` nằm ở IPv4 layer (`net/ipv4/ping.c`). Tuy nhiên phần lớn code trong `net/ipv4/ping.c` là dual-stack (IPv4 và IPv6). Do đó `ping_rcv()` cũng xử lý ICMPV6\_ECHO\_REPLY cho IPv6 (xem `icmpv6_rcv()` trong `net/ipv6/icmp.c)`. Tôi nói thêm ICMP socket sau.
 
-`icmp_discard()` là empty handler cho message type không tồn tại (số type không có khai báo tương ứng trong header file) và message không cần xử lý như ICMP\_TIMESTAMPREPLY. ICMP\_TIMESTAMP và ICMP\_TIMESTAMPREPLY dùng time synchronization; bên gửi gửi `originate timestamp` trong request ICMP\_TIMESTAMP; bên nhận gửi ICMP\_TIMESTAMPREPLY với ba timestamp: originating timestamp từ bên gửi, receive timestamp và transmit timestamp. Có protocol time synchronization phổ biến hơn ICMPv4 timestamp như Network Time Protocol (NTP). Cũng cần nhắc Address Mask request (ICMP\_ADDRESS), thường host gửi router để lấy subnet mask thích hợp. Bên nhận cần trả address mask reply. ICMP\_ADDRESS và ICMP\_ADDRESSREPLY từng do `icmp_address()` và `icmp_address_reply()` xử lý, giờ cũng do `icmp_discard()`. Vì có cách khác lấy subnet mask như DHCP.
+`icmp_discard()` là một handler rỗng, được sử dụng cho các message type không tồn tại (các số message type không có khai báo tương ứng trong header file) và một số message không cần xử lý, chẳng hạn ICMP\_TIMESTAMPREPLY. Các message ICMP\_TIMESTAMP và ICMP\_TIMESTAMPREPLY được sử dụng để đồng bộ thời gian: bên gửi gửi `originate timestamp` trong một ICMP\_TIMESTAMP request; bên nhận gửi ICMP\_TIMESTAMPREPLY với ba timestamp, gồm originating timestamp do bên gửi timestamp request cung cấp, receive timestamp và transmit timestamp. Có các protocol đồng bộ thời gian được sử dụng phổ biến hơn ICMPv4 timestamp message, chẳng hạn Network Time Protocol (NTP). Tôi cũng cần đề cập Address Mask request (ICMP\_ADDRESS), thường được host gửi đến router để lấy subnet mask phù hợp. Bên nhận cần phản hồi message này bằng address mask reply message. Các message ICMP\_ADDRESS và ICMP\_ADDRESSREPLY trước đây được xử lý bởi method `icmp_address()` và method `icmp_address_reply()`, nhưng hiện cũng được xử lý bởi `icmp_discard()`. Lý do là có những cách khác để lấy subnet mask, chẳng hạn DHCP.
 
 `icmp_unreach()` xử lý type ICMP\_DEST\_UNREACH, ICMP\_TIME\_EXCEED, ICMP\_PARAMETERPROB và ICMP\_QUENCH.
 
@@ -149,7 +149,7 @@ Message `ICMP_DEST_UNREACH` có thể gửi dưới nhiều điều kiện. Mộ
 
 Message `ICMP_TIME_EXCEEDED` gửi trong hai trường hợp: trong `ip_forward()`, mỗi packet giảm TTL. Theo RFC 1700, TTL khuyến nghị cho IPv4
 
-protocol là 64. Nếu TTL về 0, packet nên bị drop vì có lẽ có loop. Vì vậy nếu TTL về 0 trong `ip_forward()`, gọi method `icmp_send()`:
+protocol là 64. Nếu TTL đạt 0, điều đó cho biết packet cần bị loại bỏ vì có thể đã xảy ra vòng lặp. Vì vậy, nếu TTL đạt 0 trong `ip_forward()`, method `icmp_send()` được gọi:
 
 ```
 icmp_send(skb, ICMP_TIME_EXCEEDED, ICMP_EXC_TTL, 0);
@@ -169,11 +169,11 @@ icmp_send(head, ICMP_TIME_EXCEEDED, ICMP_EXC_FRAGTIME, 0);
 
 Message ICMP\_PARAMETERPROB gửi khi parse IPv4 header option thất bại trong `ip_options_compile()` hoặc `ip_options_rcv_srr()` (`net/ipv4/ip_options.c`). Option là field tùy chọn độ dài biến đổi tới 40 byte trong IPv4 header. IP option thảo luận Chương 4.
 
-Type ICMP\_QUENCH thực tế đã deprecated. Theo RFC 1812 mục 4.3.3.3 (Source Quench), router không nên tạo ICMP Source Quench message và có thể bỏ qua message nhận được. ICMP\_QUENCH nhằm giảm congestion nhưng hóa ra không hiệu quả.
+Message type ICMP\_QUENCH thực tế đã bị deprecated. Theo mục 4.3.3.3 (Source Quench) của RFC 1812, “Router không nên tạo ICMP Source Quench message” và “Router có thể bỏ qua bất kỳ ICMP Source Quench message nào mà nó nhận được”. ICMP\_QUENCH message được thiết kế để giảm congestion, nhưng hóa ra đây là một giải pháp không hiệu quả.
 
 `icmp_redirect()` xử lý ICMP\_REDIRECT; theo RFC 1122 mục 3.2.2.2, host không nên gửi ICMP redirect; chỉ gateway gửi. `icmp_redirect()` xử lý ICMP\_REDIRECT. Trước đây `icmp_redirect()` gọi `ip_rt_redirect()`, nhưng lời gọi `ip_rt_redirect()`
 
-không còn cần vì protocol handler giờ truyền redirect đúng về routing code. Thực tế kernel 3.6 bỏ `ip_rt_redirect()`. Vì vậy `icmp_redirect()` trước sanity check rồi gọi `icmp_socket_deliver()`, chuyển packet tới raw socket và gọi protocol error handler nếu có. Chương 6 nói sâu ICMP\_REDIRECT.
+không còn cần thiết vì các protocol handler hiện đều chuyển redirect đúng cách trở lại routing code. Thực tế, method `ip_rt_redirect()` đã bị loại bỏ trong kernel 3.6. Vì vậy, method `icmp_redirect()` trước tiên thực hiện các sanity check rồi gọi `icmp_socket_deliver()`, method chuyển packet đến các raw socket và gọi protocol error handler nếu handler đó tồn tại. Chương 6 thảo luận sâu hơn về ICMP\_REDIRECT message.
 
 `icmp_echo()` xử lý echo (“ping”) request (ICMP\_ECHO) bằng gửi reply (ICMP\_ECHOREPLY) với `icmp_reply()`. Nếu `net->ipv4.sysctl_icmp_echo_ignore_all` set thì không reply. Cấu hình ICMPv4 `procfs` xem “Tham khảo nhanh” cuối chương và `Documentation/networking/ip-sysctl.txt`.
 
@@ -196,7 +196,7 @@ struct icmp_bxm {
 };
 ```
 
-- `skb`: Với `icmp_reply()`, `skb` này là request packet; object `icmp_param` (instance `icmp_bxm`) dựng từ đó (trong `icmp_echo()` và `icmp_timestamp()`). Với `icmp_send()`, `skb` là packet kích hoạt gửi ICMPv4 message do điều kiện nào đó; bạn sẽ thấy ví dụ trong mục.
+- `skb`: Với method `icmp_reply()`, `skb` này là request packet; object `icmp_param` (instance của `icmp_bxm`) được tạo từ packet đó (trong method `icmp_echo()` và method `icmp_timestamp()`). Với method `icmp_send()`, `skb` này là packet đã kích hoạt việc gửi ICMPv4 message do một số điều kiện; bạn sẽ thấy một số ví dụ về các message như vậy trong mục này.
 
 - `offset`: Chênh lệch (offset) giữa `skb_network_header(skb)` và `skb->data`.
 
@@ -212,11 +212,11 @@ struct icmp_bxm {
 
 ### Nhận ICMPv4 message
 
-Method `ip_local_deliver_finish()` xử lý packet cho local machine. Khi nhận ICMP packet, chuyển tới raw socket đã đăng ký ICMPv4 protocol. Trong `icmp_rcv()`, đầu tiên tăng SNMP counter `InMsgs` (ICMP\_MIB\_INMSGS). Sau đó
+Method `ip_local_deliver_finish()` xử lý các packet dành cho máy cục bộ. Khi nhận một ICMP packet, method chuyển packet đến các raw socket đã đăng ký ICMPv4 protocol. Trong method `icmp_rcv()`, trước tiên SNMP counter `InMsgs` (ICMP\_MIB\_INMSGS) được tăng lên. Sau đó,
 
-kiểm tra checksum. Nếu sai, tăng hai SNMP counter `InCsumErrors` và `InErrors` (ICMP\_MIB\_CSUMERRORS và ICMP\_MIB\_INERRORS tương ứng), giải phóng SKB, return 0. `icmp_rcv()` không return error ở đây. Thực tế `icmp_rcv()` luôn return 0; vì khi nhận ICMP message lỗi chỉ cần loại, không làm gì đặc biệt; khi protocol handler return negative error, sẽ thử xử lý packet lần nữa, không cần ở đây. Chi tiết xem `ip_local_deliver_finish()`. Sau đó kiểm tra ICMP header tìm type; tăng message type counter `procfs` tương ứng (mỗi type có counter `procfs`), sanity check không vượt tối đa (NR\_ICMP\_TYPES). Theo RFC 1122 mục 3.2.2, ICMP type không biết phải bị loại âm thầm. Nếu ngoài range, tăng SNMP counter `InErrors` (ICMP\_MIB\_INERRORS), giải phóng SKB.
+tính đúng đắn của checksum được kiểm tra. Nếu checksum không đúng, hai SNMP counter `InCsumErrors` và `InErrors` được tăng lên (tương ứng là ICMP\_MIB\_CSUMERRORS và ICMP\_MIB\_INERRORS), SKB được giải phóng và method trả về 0. Method `icmp_rcv()` không trả về lỗi trong trường hợp này. Thực tế, method `icmp_rcv()` luôn trả về 0. Lý do trả về 0 khi có lỗi checksum là khi nhận một ICMP message lỗi, không cần làm gì đặc biệt ngoài việc loại bỏ message đó; khi một protocol handler trả về giá trị lỗi âm, hệ thống sẽ thử xử lý packet một lần nữa, điều không cần thiết trong trường hợp này. Để biết thêm chi tiết, hãy tham khảo cách triển khai method `ip_local_deliver_finish()`. Sau đó, ICMP header được xem xét để xác định type; message type counter `procfs` tương ứng được tăng lên (mỗi ICMP message type có một counter `procfs`), và một sanity check được thực hiện để xác minh type không lớn hơn giá trị tối đa cho phép (NR\_ICMP\_TYPES). Theo mục 3.2.2 của RFC 1122, nếu nhận được một ICMP message có type không xác định thì phải loại bỏ nó mà không phản hồi. Vì vậy, nếu message type nằm ngoài phạm vi, SNMP counter `InErrors` (ICMP\_MIB\_INERRORS) được tăng lên và SKB được giải phóng.
 
-Nếu packet broadcast hoặc multicast và là ICMP\_ECHO hoặc ICMP\_TIMESTAMP, kiểm tra có cho phép broadcast/multicast echo request không bằng `net->ipv4.sysctl_icmp_echo_ignore_broadcasts`. Có thể cấu hình qua `procfs` bằng ghi `/proc/sys/net/ipv4/icmp_echo_ignore_broadcasts`, mặc định 1. Nếu set, drop âm thầm. Theo RFC 1122 mục 3.2.2.6, ICMP Echo Request tới IP broadcast hoặc IP multicast address có thể bị loại âm thầm; mục 3.2.2.8 cũng cho phép loại ICMP Timestamp Request tới address như vậy. Rồi kiểm tra type có được phép cho broadcast/multicast không (ICMP\_ECHO, ICMP\_TIMESTAMP, ICMP\_ADDRESS, ICMP\_ADDRESSREPLY). Nếu không, drop và return 0. Rồi lấy entry tương ứng type trong array `icmp_pointers`, gọi handler thích hợp. Hãy xem entry ICMP\_ECHO trong dispatch table `icmp_control`:
+Nếu packet là broadcast hoặc multicast và là ICMP\_ECHO message hoặc ICMP\_TIMESTAMP message, việc kiểm tra xem broadcast/multicast echo request có được cho phép hay không được thực hiện bằng cách đọc variable `net->ipv4.sysctl_icmp_echo_ignore_broadcasts`. Variable này có thể được cấu hình qua `procfs` bằng cách ghi vào `/proc/sys/net/ipv4/icmp_echo_ignore_broadcasts`; giá trị mặc định là 1. Nếu variable được thiết lập, packet bị loại bỏ mà không phản hồi. Việc này tuân theo mục 3.2.2.6 của RFC 1122: “ICMP Echo Request gửi đến IP broadcast address hoặc IP multicast address có thể bị loại bỏ mà không phản hồi”. Mục 3.2.2.8 của RFC này cũng quy định: “ICMP Timestamp Request message gửi đến IP broadcast address hoặc IP multicast address có thể bị loại bỏ mà không phản hồi”. Sau đó, việc kiểm tra được thực hiện để xác định type có được phép dùng cho broadcast/multicast hay không (ICMP\_ECHO, ICMP\_TIMESTAMP, ICMP\_ADDRESS và ICMP\_ADDRESSREPLY). Nếu không thuộc một trong các message type này, packet bị loại bỏ và giá trị 0 được trả về. Tiếp theo, entry tương ứng với type được lấy từ array `icmp_pointers` và handler phù hợp được gọi. Hãy xem entry ICMP\_ECHO trong dispatch table `icmp_control`:
 
 ```
 static const struct icmp_control icmp_pointers[NR_ICMP_TYPES + 1] = {
@@ -228,7 +228,7 @@ static const struct icmp_control icmp_pointers[NR_ICMP_TYPES + 1] = {
 }
 ```
 
-Khi nhận ping (type “Echo Request”, ICMP\_ECHO), method `icmp_echo()` xử lý. `icmp_echo()` đổi type trong ICMP header thành ICMP\_ECHOREPLY và reply bằng `icmp_reply()`. Ngoài `ping`, ICMP message duy nhất khác cần response là timestamp (ICMP\_TIMESTAMP); do `icmp_timestamp()` xử lý, tương tự ICMP\_ECHO, đổi type ICMP\_TIMESTAMPREPLY rồi gọi `icmp_reply()`. Gửi bằng `ip_append_data()` và `ip_push_pending_frames()`. Nhận ping reply (ICMP\_ECHOREPLY) do method `ping_rcv()` xử lý`.`
+Vì vậy, khi nhận một ping (message type là “Echo Request”, ICMP\_ECHO), nó được xử lý bởi method `icmp_echo()`. Method `icmp_echo()` đổi type trong ICMP header thành ICMP\_ECHOREPLY và gửi phản hồi bằng cách gọi method `icmp_reply()`. Ngoài `ping`, ICMP message duy nhất khác yêu cầu phản hồi là timestamp message (ICMP\_TIMESTAMP); message này được xử lý bởi method `icmp_timestamp()`, tương tự trường hợp ICMP\_ECHO, đổi type thành ICMP\_TIMESTAMPREPLY và gửi phản hồi bằng cách gọi method `icmp_reply()`. Việc gửi được thực hiện bằng `ip_append_data()` và `ip_push_pending_frames()`. Việc nhận ping reply (ICMP\_ECHOREPLY) được xử lý bởi method `ping_rcv()``.`
 
 Có thể disable reply ping bằng:
 
@@ -236,17 +236,17 @@ Có thể disable reply ping bằng:
 echo 1 >  /proc/sys/net/ipv4/icmp_echo_ignore_all
 ```
 
-Một số callback xử lý nhiều ICMP type. Ví dụ `icmp_discard()` xử lý type ICMPv4 không được Linux triển khai, và message như ICMP\_TIMESTAMPREPLY, ICMP\_INFO\_REQUEST , ICMP\_ADDRESSREPLY, v.v.
+Một số callback xử lý nhiều hơn một ICMP type. Ví dụ, callback `icmp_discard()` xử lý các ICMPv4 packet có type không được cách triển khai ICMPv4 của Linux hỗ trợ, cũng như các message như ICMP\_TIMESTAMPREPLY, ICMP\_INFO\_REQUEST, ICMP\_ADDRESSREPLY và các message khác.
 
 ### Gửi ICMPv4 message: “Destination Unreachable”
 
-Có hai method gửi ICMPv4: `icmp_reply()` gửi response cho hai request type ICMP\_ECHO và ICMP\_TIMESTAMP. Thứ hai `icmp_send()`, local machine chủ động gửi dưới điều kiện nhất định (trong mục). Cả hai cuối cùng gọi `icmp_push_reply()` để thực sự gửi packet. `icmp_reply()` được gọi đáp ICMP\_ECHO từ `icmp_echo()`, và ICMP\_TIMESTAMP từ `icmp_timestamp()`. `icmp_send()` được gọi nhiều nơi trong IPv4 network stack, ví dụ netfilter, forwarding code (`ip_forward.c`), tunnel như `ipip`, `ip_gre`, v.v.
+Có hai method để gửi ICMPv4 message. Method thứ nhất là `icmp_reply()`, được dùng để gửi phản hồi cho hai loại ICMP request là ICMP\_ECHO và ICMP\_TIMESTAMP. Method thứ hai là `icmp_send()`, trong đó máy cục bộ chủ động gửi ICMPv4 message trong những điều kiện nhất định (được mô tả trong mục này). Cuối cùng, cả hai method đều gọi `icmp_push_reply()` để thực sự gửi packet. Method `icmp_reply()` được gọi từ method `icmp_echo()` để phản hồi ICMP\_ECHO message, và từ method `icmp_timestamp()` để phản hồi ICMP\_TIMESTAMP message. Method `icmp_send()` được gọi từ nhiều vị trí trong IPv4 network stack, chẳng hạn netfilter, forwarding code (`ip_forward.c`), các tunnel như `ipip`, `ip_gre` và những vị trí khác.
 
 Mục này xem một số trường hợp gửi “Destination Unreachable” (type ICMP\_DEST\_UNREACH).
 
 ### Code 2: ICMP\_PROT\_UNREACH (Protocol Unreachable)
 
-Khi protocol trong IP header (field 8-bit) không tồn tại, gửi ICMP\_DEST\_UNREACH/ICMP\_PROT\_UNREACH về bên gửi vì không có protocol handler (array index bằng protocol number nên protocol không tồn tại không có handler). Ý là do lỗi protocol number thực sự không xuất hiện trong danh sách (ở `include/uapi/linux/in.h` với IPv4), hoặc kernel build không hỗ trợ nên protocol không đăng ký, không có entry trong protocol handler array. Vì không xử lý được packet, phải gửi ICMPv4 “Destination Unreachable” về; code ICMP\_PROT\_UNREACH chỉ nguyên nhân “protocol không tới được”. Xem:
+Khi protocol trong IP header (là một field 8-bit) là một protocol không tồn tại, một message ICMP\_DEST\_UNREACH/ICMP\_PROT\_UNREACH được gửi trả cho bên gửi vì không có protocol handler cho protocol đó (protocol handler array được đánh index bằng protocol number, nên protocol không tồn tại sẽ không có handler). “Protocol không tồn tại” ở đây có nghĩa là do một lỗi nào đó, protocol number trong IPv4 header thực sự không xuất hiện trong danh sách protocol number (bạn có thể tìm danh sách dành cho IPv4 trong `include/uapi/linux/in.h`), hoặc kernel được build mà không hỗ trợ protocol đó; do đó, protocol không được đăng ký và không có entry trong protocol handler array. Vì packet như vậy không thể được xử lý, cần gửi trả cho bên gửi một ICMPv4 message “Destination Unreachable”; code ICMP\_PROT\_UNREACH trong ICMPv4 reply cho biết nguyên nhân lỗi là “protocol is unreachable”. Xem đoạn code sau:
 
 ```
 static int ip_local_deliver_finish(struct sk_buff *skb)
@@ -278,7 +278,7 @@ Ví dụ này lookup array `inet_protos` theo protocol; không tìm thấy entry
 
 ### Code 3: ICMP\_PORT\_UNREACH (“Port Unreachable”)
 
-Khi nhận UDPv4 packet, tìm UDP socket khớp. Nếu không có, kiểm tra checksum. Nếu sai, drop âm thầm. Nếu đúng, cập nhật statistics và gửi ICMP “Destination Unreachable”/“Port Unreachable” về:
+Khi nhận UDPv4 packet, hệ thống tìm một UDP socket phù hợp. Nếu không tìm thấy socket phù hợp, tính đúng đắn của checksum được kiểm tra. Nếu checksum sai, packet bị loại bỏ mà không phản hồi. Nếu checksum đúng, các số liệu thống kê được cập nhật và một ICMP message “Destination Unreachable”/“Port Unreachable” được gửi trả lại:
 
 ```
 int __udp4_lib_rcv(struct sk_buff *skb, struct udp_table *udptable, int proto)
@@ -306,11 +306,11 @@ int __udp4_lib_rcv(struct sk_buff *skb, struct udp_table *udptable, int proto)
 
 (`net/ipv4/udp.c`)
 
-Method `__udp4_lib_lookup_skb()` lookup; nếu không socket, cập nhật statistics và gửi ICMP\_DEST\_UNREACH code ICMP\_PORT\_UNREACH.
+Việc tra cứu được thực hiện bằng method `__udp4_lib_lookup_skb()`. Nếu không có socket, các số liệu thống kê được cập nhật và một message ICMP\_DEST\_UNREACH với code ICMP\_PORT\_UNREACH được gửi trả lại.
 
 ### Code 4: ICMP\_FRAG\_NEEDED
 
-Khi forward packet dài hơn MTU outgoing link, nếu bit don’t fragment (DF) trong IPv4 header (IP\_DF) set, loại packet và gửi ICMP\_DEST\_UNREACH code ICMP\_FRAG\_NEEDED về bên gửi:
+Khi forward một packet có độ dài lớn hơn MTU của outgoing link, nếu bit don’t fragment (DF) trong IPv4 header (IP\_DF) được thiết lập, packet sẽ bị loại bỏ và một message ICMP\_DEST\_UNREACH với code ICMP\_FRAG\_NEEDED được gửi trả cho bên gửi:
 
 ```
     int ip_forward(struct sk_buff *skb)
@@ -351,9 +351,9 @@ sr_failed:
 
 (`net/ipv4/ip_forward.c`)
 
-Danh sách đầy đủ IPv4 “Destination Unreachable” code xem Bảng 3-1 trong “Tham khảo nhanh” cuối chương. Người dùng có thể cấu hình rule với target REJECT của `iptables` và qualifier `--reject-with` để gửi message theo lựa chọn; chi tiết ở cuối chương.
+Để xem danh sách đầy đủ các code “Destination Unreachable” của IPv4, hãy xem Bảng 3-1 trong mục “Tham khảo nhanh” ở cuối chương này. Lưu ý rằng người dùng có thể cấu hình các rule với target REJECT của `iptables` và qualifier `--reject-with` để gửi “Destination Unreachable” message theo lựa chọn; xem thêm trong mục “Tham khảo nhanh” ở cuối chương.
 
-Cả `icmp_reply()` và `icmp_send()` hỗ trợ rate limiting; gọi `icmpv4_xrlim_allow()`, nếu kiểm tra cho phép (`icmpv4_xrlim_allow()` return `true`) thì gửi. Lưu ý không tự động rate limit mọi traffic type. Điều kiện không kiểm tra rate limiting:
+Cả method `icmp_reply()` và `icmp_send()` đều hỗ trợ rate limiting. Chúng gọi `icmpv4_xrlim_allow()` và gửi packet nếu việc kiểm tra rate limiting cho phép gửi packet (tức là `icmpv4_xrlim_allow()` trả về `true`). Cần lưu ý rằng rate limiting không được thực hiện tự động đối với mọi loại traffic. Sau đây là các điều kiện mà trong đó việc kiểm tra rate limiting sẽ không được thực hiện:
 
 - Không biết message type.
 
@@ -363,7 +363,7 @@ Cả `icmp_reply()` và `icmp_send()` hỗ trợ rate limiting; gọi `icmpv4_xr
 
 - ICMP type không enable trong rate mask.
 
-Nếu không khớp mọi điều kiện trên, rate limiting bằng `inet_peer_xrlim_allow()`. Rate mask nói thêm trong “Tham khảo nhanh” cuối chương.
+Nếu không điều kiện nào trong số các điều kiện trên được đáp ứng, rate limiting được thực hiện bằng cách gọi method `inet_peer_xrlim_allow()`. Bạn sẽ tìm thấy thêm thông tin về rate mask trong mục “Tham khảo nhanh” ở cuối chương này.
 
 Hãy xem bên trong method `icmp_send()`. Trước hết prototype:
 
@@ -371,7 +371,7 @@ Hãy xem bên trong method `icmp_send()`. Trước hết prototype:
 void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
 ```
 
-skb`_in` là SKB gây gọi `icmp_send()`, `type` và `code` lần lượt là ICMPv4 message `type` và `code`. Parameter cuối `info` dùng khi:
+skb`_in` là SKB đã khiến method `icmp_send()` được gọi; `type` và `code` lần lượt là `type` và `code` của ICMPv4 message. Parameter cuối cùng, `info`, được sử dụng trong các trường hợp sau:
 
 - Type ICMP\_PARAMETERPROB: offset trong IPv4 header nơi parse lỗi.
 
@@ -379,7 +379,7 @@ skb`_in` là SKB gây gọi `icmp_send()`, `type` và `code` lần lượt là I
 
 - Type ICMP\_REDIRECT code ICMP\_REDIR\_HOST: IP address của destination address trong IPv4 header của provoking SKB.
 
-Xem tiếp `icmp_send()`, đầu tiên sanity check. Rồi từ chối multicast/broadcast packet. Kiểm tra fragment bằng field `frag_off` của IPv4 header. Nếu fragmented, chỉ gửi ICMPv4 message cho fragment đầu. Theo RFC 1812 mục 4.3.2.7, không được gửi ICMP error message do nhận ICMP error message. Vì vậy trước kiểm tra message sắp gửi có error không; nếu có, kiểm tra provoking SKB chứa ICMPv4 error không, nếu có return không gửi. Nếu type không biết (vượt NR\_ICMP\_TYPES), cũng return không gửi dù RFC không nói tường minh. Rồi xác định source address theo `net->ipv4.sysctl_icmp_errors_use_inbound_ifaddr` (chi tiết cuối chương). Gọi `ip_options_echo()` copy IP option từ IPv4 header của invoking SKB. Object `icmp_bxm` `(icmp_param)` được cấp phát/khởi tạo, routing lookup bằng `icmp_route_lookup()`. Rồi gọi `icmp_push_reply()`.
+Khi xem xét kỹ hơn method `icmp_send()`, trước tiên ta thấy một số sanity check được thực hiện. Sau đó, các multicast/broadcast packet bị từ chối. Việc kiểm tra packet có phải là fragment hay không được thực hiện bằng cách xem xét field `frag_off` của IPv4 header. Nếu packet bị phân mảnh, ICMPv4 message được gửi, nhưng chỉ dành cho fragment đầu tiên. Theo mục 4.3.2.7 của RFC 1812, không được gửi ICMP error message do nhận được một ICMP error message. Vì vậy, trước tiên cần kiểm tra xem ICMPv4 message sắp gửi có phải là error message hay không. Nếu đúng, tiếp tục kiểm tra xem SKB gây ra việc gửi message có chứa ICMPv4 error message hay không; nếu có, method trả về mà không gửi ICMPv4 message. Nếu type là một ICMPv4 type không xác định (lớn hơn NR\_ICMP\_TYPES), method cũng trả về mà không gửi ICMPv4 message, mặc dù RFC không quy định điều này một cách tường minh. Tiếp theo, source address được xác định theo giá trị của `net->ipv4.sysctl_icmp_errors_use_inbound_ifaddr` (xem thêm chi tiết trong mục “Tham khảo nhanh” ở cuối chương này). Sau đó, method `ip_options_echo()` được gọi để sao chép các IP option trong IPv4 header của SKB gây ra việc gửi message. Một object `icmp_bxm` `(icmp_param)` được cấp phát và khởi tạo, đồng thời việc tra cứu trong routing subsystem được thực hiện bằng method `icmp_route_lookup()`. Sau đó, method `icmp_push_reply()` được gọi.
 
 Hãy xem `icmp_push_reply()`, thực sự gửi packet. Trước hết `icmp_push_reply()` tìm socket gửi bằng:
 
@@ -387,25 +387,25 @@ Hãy xem `icmp_push_reply()`, thực sự gửi packet. Trước hết `icmp_pus
 sk = icmp_sk(dev_net((*rt)->dst.dev));
 ```
 
-Method `dev_net()` trả network namespace của outgoing network device. (`dev_net()` và network namespace thảo luận Chương 14, Phụ lục A.) Rồi `icmp_sk()` lấy socket (vì SMP có socket mỗi CPU). Gọi `ip_append_data()` chuyển packet tới IP layer. Nếu `ip_append_data()` thất bại, cập nhật statistics tăng ICMP\_MIB\_OUTERRORS, gọi `ip_flush_pending_frames()` giải phóng SKB. Chương 4 thảo luận `ip_append_data()` và `ip_flush_pending_frames()`.
+Method `dev_net()` trả về network namespace của outgoing network device. (Method `dev_net()` và network namespace được thảo luận trong Chương 14 và Phụ lục A.) Sau đó, method `icmp_sk()` lấy socket, vì trong SMP có một socket cho mỗi CPU. Tiếp theo, method `ip_append_data()` được gọi để chuyển packet đến IP layer. Nếu method `ip_append_data()` thất bại, các số liệu thống kê được cập nhật bằng cách tăng counter ICMP\_MIB\_OUTERRORS, và method `ip_flush_pending_frames()` được gọi để giải phóng SKB. Tôi thảo luận về method `ip_append_data()` và method `ip_flush_pending_frames()` trong Chương 4.
 
 Giờ đã biết ICMPv4, tới lúc chuyển ICMPv6.
 
 ## ICMPv6
 
-ICMPv6 tương tự ICMPv4 về báo lỗi network layer L3, nhưng có thêm tác vụ IPv4 không có. Mục này thảo luận protocol, feature mới và feature tương tự. ICMPv6 định nghĩa trong RFC 4443. Đọc code có thể sớm gặp comment nhắc RFC 1885. Thực tế RFC 1885, “Internet Control Message Protocol (ICMPv6) for the Internet Protocol Version 6 (IPv6)”, là RFC gốc, được thay bằng RFC 2463 rồi RFC 4443. ICMPv6 implementation dựa trên IPv4 nhưng phức tạp hơn; mục này nói thay đổi và bổ sung.
+ICMPv6 có nhiều điểm tương đồng với ICMPv4 trong việc báo lỗi ở network layer (L3). ICMPv6 còn có những tác vụ bổ sung không được thực hiện trong ICMPv4. Mục này thảo luận về ICMPv6 protocol, các tính năng mới của nó (không được triển khai trong ICMPv4) và các tính năng tương đồng. ICMPv6 được định nghĩa trong RFC 4443. Nếu tìm hiểu kỹ code ICMPv6, sớm hay muộn bạn có thể gặp các comment nhắc đến RFC 1885. Thực tế, RFC 1885, “Internet Control Message Protocol (ICMPv6) for the Internet Protocol Version 6 (IPv6)”, là RFC nền tảng của ICMPv6. RFC này được thay thế bởi RFC 2463, rồi RFC 2463 lại được thay thế bởi RFC 4443. Cách triển khai ICMPv6 dựa trên IPv4 nhưng phức tạp hơn; các thay đổi và phần bổ sung được thảo luận trong mục này.
 
-ICMPv6 có next header value 58 theo RFC 4443 mục 1 (Chương 8 nói IPv6 next header). ICMPv6 là phần không thể tách IPv6, mọi IPv6 node phải triển khai đầy đủ. Ngoài error handling và diagnostics, dùng cho Neighbour Discovery (ND) trong IPv6 thay/mở rộng ARP IPv4, và Multicast Listener Discovery (MLD), tương ứng IGMP IPv4, như Hình 3-2.
+ICMPv6 protocol có next header value bằng 58 theo mục 1 của RFC 4443 (Chương 8 thảo luận về IPv6 next header). ICMPv6 là một phần không thể tách rời của IPv6 và phải được triển khai đầy đủ bởi mọi IPv6 node. Ngoài error handling và diagnostics, ICMPv6 được sử dụng cho Neighbour Discovery (ND) protocol trong IPv6, thay thế và mở rộng các chức năng của ARP trong IPv4; đồng thời, nó được dùng cho Multicast Listener Discovery (MLD) protocol, tương ứng với IGMP protocol trong IPv4, như trong Hình 3-2.
 
 ![Figure 3-2](images/ch03/fig03-02.png)
 
 Hình 3-2. ICMP trong IPv4 và IPv6. MLD tương ứng IGMP, ND tương ứng ARP trong IPv6
 
-Mục này về ICMPv6 implementation. Bạn sẽ thấy nhiều điểm chung với ICMPv4 về xử lý/gửi message. Có trường hợp gọi cùng method (ví dụ `ping_rcv()` và `inet_peer_xrlim_allow()`). Có khác biệt và chủ đề riêng IPv6. Utility `ping6` và `traceroute6` dựa ICMPv6, tương ứng `ping` và `traceroute` của IPv4 (đầu chương). ICMPv6 triển khai trong `net/ipv6/icmp.c` và `net/ipv6/ip6_icmp.c`. Giống ICMPv4, không build thành kernel module được.
+Mục này trình bày cách triển khai ICMPv6. Như bạn sẽ thấy, nó có nhiều điểm chung với cách triển khai ICMPv4 trong việc xử lý và gửi message. Thậm chí có những trường hợp ICMPv4 và ICMPv6 gọi cùng các method (ví dụ, `ping_rcv()` và `inet_peer_xrlim_allow()`). Tuy nhiên, vẫn có một số khác biệt và những nội dung riêng của ICMPv6. Các tiện ích `ping6` và `traceroute6` dựa trên ICMPv6, tương ứng với các tiện ích `ping` và `traceroute` của IPv4 (được đề cập trong mục ICMPv4 ở đầu chương này). ICMPv6 được triển khai trong `net/ipv6/icmp.c` và `net/ipv6/ip6_icmp.c`. Giống ICMPv4, ICMPv6 không thể được build thành kernel module.
 
 ### Khởi tạo ICMPv6
 
-Khởi tạo ICMPv6 bằng `icmpv6_init()` và `icmpv6_sk_init()`. Đăng ký protocol bằng `icmpv6_init()` (`net/ipv6/icmp.c`):
+Việc khởi tạo ICMPv6 được thực hiện bằng method `icmpv6_init()` và method `icmpv6_sk_init()`. Việc đăng ký ICMPv6 protocol được thực hiện bởi `icmpv6_init()` (`net/ipv6/icmp.c`):
 
 ```
 static const struct inet6_protocol icmpv6_protocol = {
@@ -464,7 +464,7 @@ struct icmp6hdr {
 }
 ```
 
-Không đủ chỗ hiện mọi field `struct icmp6hdr` vì quá lớn (định nghĩa ở `include/uapi/linux/icmpv6.h`). Khi bit high-order của type bằng 0 (0–127) là error message; khi bit high-order bằng 1 (128–255) là information message. Bảng 3-1 cho message type theo số và kernel symbol.
+Không có đủ chỗ để hiển thị tất cả field của `struct icmp6hdr` vì structure này quá lớn (được định nghĩa trong `include/uapi/linux/icmpv6.h`). Khi bit high-order của type field bằng 0 (giá trị từ 0 đến 127), đó là error message; khi bit high-order bằng 1 (giá trị từ 128 đến 255), đó là information message. Bảng 3-1 trình bày các ICMPv6 message type theo số và kernel symbol tương ứng.
 
 Bảng 3-1. ICMPv6 message
 
@@ -487,7 +487,7 @@ Bảng 3-1. ICMPv6 message
 
 Danh sách đầy đủ hiện tại ICMPv6 type và code được gán ở `www.iana.org/assignments/icmpv6-parameters/icmpv6-parameters.xml`.
 
-ICMPv6 làm tác vụ ICMPv4 không làm. Ví dụ Neighbour Discovery do ICMPv6, còn IPv4 do ARP/RARP. Multicast group membership do ICMPv6 cùng MLD (Multicast Listener Discovery), còn IPv4 do IGMP (Internet Group Management Protocol). Một số ICMPv6 message tương tự ICMPv4, như “Destination Unreachable” (ICMPV6\_DEST\_UNREACH), “Time Exceeded” (ICMPV6\_TIME\_EXCEED), “Parameter Problem” (ICMPV6\_PARAMPROB), “Echo Request” (ICMPV6\_ECHO\_REQUEST), v.v. Ngược lại một số riêng IPv6 như NDISC\_NEIGHBOUR\_SOLICITATION.
+ICMPv6 thực hiện một số tác vụ không được ICMPv4 thực hiện. Ví dụ, Neighbour Discovery được thực hiện bởi ICMPv6, còn trong IPv4, tác vụ này do các protocol ARP/RARP thực hiện. Multicast group membership được ICMPv6 xử lý cùng với MLD (Multicast Listener Discovery) protocol, còn trong IPv4, việc này được thực hiện bởi IGMP (Internet Group Management Protocol). Một số ICMPv6 message có ý nghĩa tương tự ICMPv4 message; ví dụ, ICMPv6 có các message “Destination Unreachable” (ICMPV6\_DEST\_UNREACH), “Time Exceeded” (ICMPV6\_TIME\_EXCEED), “Parameter Problem” (ICMPV6\_PARAMPROB), “Echo Request” (ICMPV6\_ECHO\_REQUEST) và các message khác. Mặt khác, một số ICMPv6 message chỉ có trong IPv6, chẳng hạn NDISC\_NEIGHBOUR\_SOLICITATION message.
 
 ### Nhận ICMPv6 message
 
@@ -497,7 +497,7 @@ Khi nhận ICMPv6 packet, chuyển tới `icmpv6_rcv()`, chỉ nhận SKB làm p
 
 Hình 3-4. Receive path của ICMPv6 message
 
-Trong `icmpv6_rcv()`, sau sanity check, tăng SNMP counter `InMsgs` (ICMP6\_MIB\_INMSGS). Rồi kiểm tra checksum. Nếu sai, tăng `InErrors` (ICMP6\_MIB\_INERRORS), giải phóng SKB. `icmpv6_rcv()` không return error (thực tế luôn return 0 như `icmp_rcv()` IPv4). Rồi đọc header tìm type; tăng counter message type `procfs` bằng macro ICMP6MSGIN\_INC\_STATS\_BH (mỗi type có counter `procfs`). Ví dụ nhận ICMPv6 ECHO request (“ping”) tăng `/proc/net/snmp6/Icmp6InEchos`; nhận Neighbour Solicitation request tăng `/proc/net/snmp6/Icmp6InNeighborSolicits`.
+Trong method `icmpv6_rcv()`, sau một số sanity check, SNMP counter `InMsgs` (ICMP6\_MIB\_INMSGS) được tăng lên. Tiếp theo, tính đúng đắn của checksum được kiểm tra. Nếu checksum không đúng, SNMP counter `InErrors` (ICMP6\_MIB\_INERRORS) được tăng lên và SKB được giải phóng. Method `icmpv6_rcv()` không trả về lỗi trong trường hợp này (thực tế, nó luôn trả về 0, giống như method tương ứng của IPv4 là `icmp_rcv()`). Sau đó, ICMPv6 header được đọc để xác định type; message type counter `procfs` tương ứng được tăng bằng macro ICMP6MSGIN\_INC\_STATS\_BH (mỗi ICMPv6 message type có một counter `procfs`). Ví dụ, khi nhận ICMPv6 ECHO request (“ping”), counter `/proc/net/snmp6/Icmp6InEchos` được tăng lên; khi nhận ICMPv6 Neighbour Solicitation request, counter `/proc/net/snmp6/Icmp6InNeighborSolicits` được tăng lên.
 
 ICMPv6 không có dispatch table như `icmp_pointers` IPv4. Handler gọi theo message type trong command `switch(type)` dài:
 
@@ -507,7 +507,7 @@ ICMPv6 không có dispatch table như `icmp_pointers` IPv4. Handler gọi theo m
 
 - Packet too big (ICMPV6\_PKT\_TOOBIG).
 
-- Trước kiểm tra data block area (pointer `skb->data`) chứa data block ít nhất bằng ICMP header. Dùng `pskb_may_pull()`. Nếu không, drop.
+- Trước tiên, việc kiểm tra được thực hiện để xác minh rằng vùng data block (được trỏ đến bởi `skb->data`) chứa một khối dữ liệu có kích thước ít nhất bằng một ICMP header. Việc này được thực hiện bằng method `pskb_may_pull()`. Nếu điều kiện này không được đáp ứng, packet sẽ bị loại bỏ.
 
 - Rồi gọi `icmpv6_notify()`, cuối cùng gọi `raw6_icmp_error()` để raw socket đăng ký xử lý ICMP message.
 
@@ -517,7 +517,7 @@ ICMPv6 không có dispatch table như `icmp_pointers` IPv4. Handler gọi theo m
 
 - NDISC\_ROUTER\_SOLICITATION: Thường gửi tới multicast address `all-routers` FF02::2, được trả bằng router advertisement. (IPv6 multicast address đặc biệt ở Chương 8).
 
-- NDISC\_ROUTER\_ADVERTISEMENT: Router gửi định kỳ hoặc trả ngay router solicitation request. Chứa prefix dùng on-link determination và/hoặc address configuration, hop limit value đề xuất, v.v.
+- NDISC\_ROUTER\_ADVERTISEMENT: Các message được router gửi định kỳ hoặc gửi ngay để phản hồi router solicitation request. Router advertisement chứa các prefix dùng cho on-link determination và/hoặc cấu hình địa chỉ, một giá trị hop limit được đề xuất, v.v.
 
 - NDISC\_NEIGHBOUR\_SOLICITATION: Tương ứng ARP request IPv4.
 
@@ -568,11 +568,11 @@ Lưu ý command `switch(type)` kết thúc như sau:
     }
 ```
 
-Information message thỏa điều kiện `(type & ICMPV6_INFOMSG_MASK)` nên bị loại; message khác không thỏa (do đó phải là error message) được chuyển upper layer. Theo RFC 4443 mục 2.4 “Message Processing Rules”.
+Các information message thỏa mãn điều kiện `(type & ICMPV6_INFOMSG_MASK)` nên bị loại bỏ, còn các message khác không thỏa mãn điều kiện này (và do đó phải là error message) được chuyển lên upper layer. Việc này tuân theo mục 2.4, “Message Processing Rules”, của RFC 4443.
 
 ### Gửi ICMPv6 message
 
-Method chính gửi ICMPv6 là `icmpv6_send()`, gọi khi local machine chủ động gửi dưới điều kiện trong mục. Còn `icmpv6_echo_reply()` chỉ gọi đáp ICMPV6\_ECHO\_REQUEST (“ping”). `icmp6_send()` được gọi nhiều nơi trong IPv6 network stack. Mục này xem vài ví dụ.
+Method chính để gửi ICMPv6 message là `icmpv6_send()`. Method này được gọi khi máy cục bộ chủ động gửi một ICMPv6 message trong các điều kiện được mô tả ở mục này. Ngoài ra còn có method `icmpv6_echo_reply()`, chỉ được gọi để phản hồi một ICMPV6\_ECHO\_REQUEST (“ping”) message. Method `icmp6_send()` được gọi từ nhiều vị trí trong IPv6 network stack. Mục này xem xét một số ví dụ.
 
 ### Ví dụ: gửi ICMPv6 message “Hop Limit Time Exceeded”
 
@@ -616,7 +616,7 @@ void ip6_expire_frag_queue(struct net *net, struct frag_queue *fq,
 
 ### Ví dụ: gửi ICMPv6 message “Destination Unreachable”/“Port Unreachable”
 
-Khi nhận UDPv6 packet, tìm UDPv6 socket khớp. Nếu không, kiểm tra checksum. Nếu sai, drop âm thầm. Nếu đúng, cập nhật statistics (MIB counter UDP\_MIB\_NOPORTS export tới `procfs` bằng `/proc/net/snmp6/Udp6NoPorts`) và gửi “Destination Unreachable”/“Port Unreachable” bằng `icmpv6_send()`:
+Khi nhận UDPv6 packet, hệ thống tìm một UDPv6 socket phù hợp. Nếu không tìm thấy socket phù hợp, tính đúng đắn của checksum được kiểm tra. Nếu checksum sai, packet bị loại bỏ mà không phản hồi. Nếu checksum đúng, số liệu thống kê được cập nhật (MIB counter UDP\_MIB\_NOPORTS, được export tới `procfs` qua `/proc/net/snmp6/Udp6NoPorts`), và một ICMPv6 message “Destination Unreachable”/“Port Unreachable” được gửi trả lại bằng `icmpv6_send()`:
 
 ```
 int __udp6_lib_rcv(struct sk_buff *skb, struct udp_table *udptable, int proto)
@@ -641,9 +641,9 @@ Trường hợp rất giống ví dụ UDPv4 trước trong chương.
 
 ### Ví dụ: gửi ICMPv6 message “Fragmentation Needed”
 
-Khi forward packet lớn hơn MTU outgoing link và bit `local_df` trong SKB không set, loại packet và gửi ICMPV6\_PKT\_TOOBIG về. Thông tin message dùng trong Path MTU (PMTU) discovery.
+Khi forward một packet, nếu kích thước của nó lớn hơn MTU của outgoing link và bit `local_df` trong SKB chưa được thiết lập, packet sẽ bị loại bỏ và một message ICMPV6\_PKT\_TOOBIG được gửi trả cho bên gửi. Thông tin trong message này được sử dụng trong quá trình Path MTU (PMTU) discovery.
 
-Lưu ý khác IPv4 gửi ICMP\_DEST\_UNREACH code ICMP\_FRAG\_NEEDED, ở đây gửi ICMPV6\_PKT\_TOOBIG chứ không “Destination Unreachable” (ICMPV6\_DEST\_UNREACH). ICMPV6\_PKT\_TOOBIG có message type number riêng trong IPv6:
+Lưu ý rằng, khác với trường hợp tương ứng trong IPv4, nơi một message ICMP\_DEST\_UNREACH với code ICMP\_FRAG\_NEEDED được gửi đi, ở đây message được gửi trả là ICMPV6\_PKT\_TOOBIG, thay vì “Destination Unreachable” (ICMPV6\_DEST\_UNREACH). Message ICMPV6\_PKT\_TOOBIG có message type number riêng trong ICMPv6:
 
 ```
 int ip6_forward(struct sk_buff *skb)
@@ -683,7 +683,7 @@ static bool ip6_tlvopt_unknown(struct sk_buff *skb, int optoff) {
 
 (`net/ipv6/exthdrs.c`)
 
-Method `icmpv6_send()` hỗ trợ rate limiting bằng `icmpv6_xrlim_allow()`. Như ICMPv4, không tự động rate limit mọi traffic. Không kiểm tra khi:
+Method `icmpv6_send()` hỗ trợ rate limiting bằng cách gọi `icmpv6_xrlim_allow()`. Cần lưu ý rằng, giống như trong ICMPv4, rate limiting trong ICMPv6 không được thực hiện tự động đối với mọi loại traffic. Sau đây là các điều kiện mà trong đó việc kiểm tra rate limiting sẽ không được thực hiện:
 
 - Informational message
 
@@ -691,15 +691,15 @@ Method `icmpv6_send()` hỗ trợ rate limiting bằng `icmpv6_xrlim_allow()`. N
 
 - Loopback device
 
-Nếu không khớp mọi điều kiện trên, rate limit bằng `inet_peer_xrlim_allow()`, dùng chung IPv4/IPv6. Khác IPv4, không đặt rate mask trong IPv6 được. RFC 4443 không cấm, nhưng chưa triển khai. Hãy xem `icmp6_send()`. Prototype:
+Nếu không điều kiện nào trong số các điều kiện trên được đáp ứng, rate limiting được thực hiện bằng cách gọi method `inet_peer_xrlim_allow()`, được dùng chung cho ICMPv4 và ICMPv6. Lưu ý rằng, khác với IPv4, bạn không thể thiết lập rate mask trong IPv6. Đặc tả ICMPv6, RFC 4443, không cấm điều này, nhưng tính năng đó chưa từng được triển khai. Hãy xem bên trong method `icmp6_send()`. Trước tiên, đây là prototype của method:
 
 ```
 static void icmp6_send(struct sk_buff *skb, u8 type, u8 code, __u32 info)
 ```
 
-Parameter giống `icmp_send()` IPv4 nên không giải thích lại. Xem tiếp `icmp6_send()` có sanity check. Kiểm tra provoking message có ICMPv6 error không bằng `is_ineligible()`; nếu có, `icmp6_send()` kết thúc. Message length không vượt 1280, IPv6 minimum MTU (IPV6\_MIN\_MTU trong `include/linux/ipv6.h`). Theo RFC 4443 mục 2.4(c), mỗi ICMPv6 error message phải chứa nhiều offending (invoking) IPv6 packet (gây lỗi) nhất có thể mà error message packet không vượt minimum IPv6 MTU. Rồi chuyển tới IPv6 layer bằng `ip6_append_data()` và `icmpv6_push_pending_frame()` để giải phóng SKB.
+Các parameter tương tự những parameter của method `icmp_send()` trong IPv4, vì vậy tôi không lặp lại phần giải thích ở đây. Khi xem xét kỹ hơn code `icmp6_send()`, bạn sẽ thấy một số sanity check. Việc kiểm tra message gây ra phản hồi có phải là ICMPv6 error message hay không được thực hiện bằng method `is_ineligible()`; nếu đúng, method `icmp6_send()` kết thúc. Độ dài message không được vượt quá 1280, là MTU tối thiểu của IPv6 (IPV6\_MIN\_MTU, được định nghĩa trong `include/linux/ipv6.h`). Việc này tuân theo mục 2.4(c) của RFC 4443, quy định mỗi ICMPv6 error message phải chứa nhiều nhất có thể phần nội dung của IPv6 packet gây lỗi (offending hoặc invoking packet), nhưng không được khiến error message packet vượt quá MTU tối thiểu của IPv6. Sau đó, message được chuyển đến IPv6 layer bằng method `ip6_append_data()` và method `icmpv6_push_pending_frame()` để giải phóng SKB.
 
-Giờ tới `icmpv6_echo_reply()`; nhắc lại gọi đáp ICMPV6\_ECHO. `icmpv6_echo_reply()` chỉ nhận SKB, dựng object `icmpv6_msg`, đặt type ICMPV6\_ECHO\_REPLY. Rồi chuyển IPv6 layer bằng `ip6_append_data()` và `icmpv6_push_pending_frame()`. Nếu `ip6_append_data()` thất bại, tăng SNMP counter (ICMP6\_MIB\_OUTERRORS), gọi `ip6_flush_pending_frames()` giải phóng SKB.
+Bây giờ tôi chuyển sang method `icmpv6_echo_reply()`; xin nhắc lại rằng method này được gọi để phản hồi ICMPV6\_ECHO message. Method `icmpv6_echo_reply()` chỉ nhận một parameter là SKB. Nó tạo một object `icmpv6_msg` và đặt type thành ICMPV6\_ECHO\_REPLY. Sau đó, nó chuyển message đến IPv6 layer bằng method `ip6_append_data()` và method `icmpv6_push_pending_frame()`. Nếu method `ip6_append_data()` thất bại, một SNMP counter (ICMP6\_MIB\_OUTERRORS) được tăng lên và `ip6_flush_pending_frames()` được gọi để giải phóng SKB.
 
 Chương 7 và 8 cũng nói ICMPv6. Mục sau giới thiệu ICMP socket và mục đích.
 
@@ -731,7 +731,7 @@ socket(PF_INET6, SOCK_RAW, IPPROTO_ICMP6);
 
 Chức năng tương tự (ICMP non-privileged) có trong Mac OS X; xem `www.manpagez.com/man/4/icmp/`. Phần lớn ICMP sockets code ở `net/ipv4/ping.c`; thực tế phần lớn code trong `net/ipv4/ping.c`
 
-là dual-stack (IPv4/IPv6). `net/ipv6/ping.c` chỉ có ít phần IPv6-specific. Mặc định disable ICMP socket. Có thể enable bằng entry `procfs`: `/proc/sys/net/ipv4/ping_group_range`. Mặc định “1 0”, không ai (kể cả root) tạo ping socket được. Nếu muốn user `uid` và `gid` 1000 dùng, chạy command (root privilege): `echo 1000 1000 > /proc/sys/net/ipv4/ping_group_range`, rồi có thể `ping` từ user
+là dual-stack (IPv4 và IPv6). Trong `net/ipv6/ping.c` chỉ có một số ít phần IPv6-specific. Việc sử dụng ICMP socket bị vô hiệu hóa theo mặc định. Bạn có thể bật ICMP socket bằng cách thiết lập entry `procfs` sau: `/proc/sys/net/ipv4/ping_group_range`. Giá trị mặc định là “1 0”, nghĩa là không ai (kể cả root) có thể tạo ping socket. Vì vậy, nếu muốn cho phép một user có `uid` và `gid` bằng 1000 sử dụng ICMP socket, bạn nên chạy lệnh sau từ dòng lệnh với quyền root: `echo 1000 1000 > /proc/sys/net/ipv4/ping_group_range`, sau đó bạn có thể chạy `ping` từ user này
 
 account này bằng ICMP socket. Nếu muốn đặt privilege cho user trong hệ thống, chạy `echo 0 2147483647 > /proc/sys/net/ipv4/ping_group_range`. (2147483647 là GID\_T\_MAX; xem `include/net/ping.h`.) Không có security setting riêng IPv4/IPv6; tất cả do `/` `proc/sys/net/ipv4/ping_group_range` điều khiển. ICMP socket chỉ hỗ trợ ICMP\_ECHO IPv4 hoặc ICMPV6\_ECHO\_REQUEST IPv6, code phải bằng 0 trong cả hai.
 
@@ -753,9 +753,9 @@ ICMP socket export entry procfs: `/proc/net/icmp` cho IPv4, `/proc/net/icmp6` ch
 
 ## Tóm tắt
 
-Chương trình bày ICMPv4/ICMPv6 implementation. Bạn học ICMP header format, nhận/gửi message cả hai protocol. Feature mới IPv6 sẽ gặp chương tới cũng được thảo luận. Neighbouring Discovery dùng ICMPv6 ở Chương 7, MLD cũng dùng ICMPv6 ở Chương 8. Chương tiếp, Chương 4, nói triển khai IPv4 network layer.
+Chương này đã trình bày cách triển khai ICMPv4 và ICMPv6. Bạn đã tìm hiểu định dạng ICMP header của cả hai protocol cũng như cách nhận và gửi message bằng hai protocol này. Các tính năng mới của ICMPv6 mà bạn sẽ gặp trong những chương tiếp theo cũng đã được thảo luận. Neighbouring Discovery protocol, sử dụng ICMPv6 message, được thảo luận trong Chương 7; MLD protocol, cũng sử dụng ICMPv6 message, được trình bày trong Chương 8. Chương tiếp theo, Chương 4, trình bày cách triển khai IPv4 network layer.
 
-Trong “Tham khảo nhanh” sau, tôi trình bày method chính theo context. Rồi hai bảng nhắc trong chương, entry `procfs` quan trọng và mục ngắn về ICMP message trong rule `iptables reject`.
+Trong mục “Tham khảo nhanh” tiếp theo, tôi trình bày các method chính liên quan đến những chủ đề đã thảo luận trong chương này, được sắp xếp theo ngữ cảnh sử dụng. Sau đó, tôi trình bày hai bảng đã được đề cập trong chương, một số entry `procfs` quan trọng có liên quan và một mục ngắn về cách sử dụng ICMP message trong các rule `iptables reject`.
 
 ## Tham khảo nhanh
 
@@ -783,7 +783,7 @@ Method gửi ICMPv6 message. Parameter gồm provoking SKB, message type, messag
 
 ### void icmpv6\_param\_prob(struct sk\_buff \*skb, u8 code, int pos);
 
-Method là phiên bản tiện lợi của `icmp6_send()`, chỉ gọi `icmp6_send()` với type ICMPV6\_PARAMPROB, parameter `skb`, `code`, `pos` chỉ định, rồi giải phóng SKB.
+Method này là một phiên bản tiện dụng của method `icmp6_send()`. Nó chỉ gọi `icmp6_send()` với type là ICMPV6\_PARAMPROB và các parameter khác được chỉ định là `skb`, `code` và `pos`, sau đó giải phóng SKB.
 
 ### Bảng
 
@@ -856,7 +856,7 @@ Bảng 3-7. Code ICMPv6 Parameter Problem (ICMPV6\_PARAMPROB)
 
 ### Entry procfs
 
-Kernel cho cấu hình setting các subsystem từ userspace bằng ghi value vào entry dưới `/proc`, gọi là entry `procfs`. Mọi ICMPv4 entry `procfs` biểu diễn bằng variable trong structure `netns_ipv4` (`include/net/netns/ipv4.h`), object trong network namespace (`struct net`). Namespace và triển khai ở Chương 14. Sau đây là tên variable `sysctl` tương ứng phần tử ICMPv4 `netns_ipv4`, giải thích sử dụng, default value và method khởi tạo.
+Kernel cung cấp cách cấu hình nhiều thiết lập của các subsystem từ userspace bằng cách ghi giá trị vào các entry bên dưới `/proc`. Các entry này được gọi là entry `procfs`. Tất cả entry `procfs` của ICMPv4 được biểu diễn bằng các variable trong structure `netns_ipv4` (`include/net/netns/ipv4.h`), là một object trong network namespace (`struct net`). Network namespace và cách triển khai chúng được thảo luận trong Chương 14. Sau đây là tên các variable `sysctl` tương ứng với những phần tử ICMPv4 trong `netns_ipv4`, phần giải thích cách sử dụng, giá trị mặc định được khởi tạo và method thực hiện việc khởi tạo.
 
 ### sysctl\_icmp\_echo\_ignore\_all
 
@@ -866,7 +866,7 @@ Entry `procfs`: `/proc/sys/net/ipv4/icmp_echo_ignore_all` Khởi tạo 0 trong `
 
 ### sysctl\_icmp\_echo\_ignore\_broadcasts
 
-Khi nhận broadcast/multicast echo (ICMP\_ECHO) hoặc timestamp (ICMP\_TIMESTAMP), kiểm tra request được phép không bằng `sysctl_icmp_echo_ignore_broadcasts`. Nếu set, drop packet, return 0.
+Khi nhận một broadcast hoặc multicast echo message (ICMP\_ECHO) hoặc timestamp message (ICMP\_TIMESTAMP), việc kiểm tra xem broadcast/multicast request có được cho phép hay không được thực hiện bằng cách đọc `sysctl_icmp_echo_ignore_broadcasts`. Nếu variable này được thiết lập, packet bị loại bỏ và giá trị 0 được trả về.
 
 Entry `procfs`: `/proc/sys/net/ipv4/icmp_echo_ignore_broadcasts` Khởi tạo 1 trong `icmp_sk_init()`
 
@@ -890,7 +890,7 @@ Entry `procfs`: `/proc/sys/net/ipv4/icmp_ratemask` Khởi tạo 0x1818 trong `ic
 
 ### sysctl\_icmp\_errors\_use\_inbound\_ifaddr
 
-Value variable kiểm tra trong `icmp_send()`. Khi không set, ICMP error message gửi với primary address của interface gửi packet. Khi set, gửi với primary address của interface nhận packet gây icmp error.
+Giá trị của variable này được kiểm tra trong `icmp_send()`. Khi variable chưa được thiết lập, các ICMP error message được gửi với primary address của interface sẽ gửi packet. Khi variable được thiết lập, ICMP message được gửi với primary address của interface đã nhận packet gây ra ICMP error.
 
 Entry `procfs`: `/proc/sys/net/ipv4/icmp_errors_use_inbound_ifaddr` Khởi tạo 0 trong `icmp_sk_init()`
 
@@ -900,7 +900,7 @@ Lưu ý Xem thêm ICMP variable `sysctl`, type và default value trong
 
 ### Tạo “Destination Unreachable” message bằng iptables
 
-Userspace tool `iptables` cho đặt rule quyết định kernel làm gì với traffic theo filter. Netfilter subsystem xử lý rule `iptables`, ở Chương 9. Một rule `iptables` là `reject`, loại packet không xử lý tiếp. Khi đặt target `iptables reject`, user có thể đặt rule gửi ICMPv4 “Destination Unreachable” với code khác nhau bằng qualifier `-j REJECT` và `--reject-with`. Ví dụ rule `iptables` sau loại mọi packet từ mọi source, gửi về ICMP “ICMP Host Prohibited”:
+Userspace tool `iptables` cho phép chúng ta thiết lập các rule quy định kernel cần làm gì với traffic theo các filter do những rule đó đặt ra. Việc xử lý các rule `iptables` được thực hiện trong netfilter subsystem và được thảo luận trong Chương 9. Một trong các rule của `iptables` là `reject`, loại bỏ packet mà không xử lý thêm. Khi thiết lập target `iptables reject`, người dùng có thể đặt rule gửi ICMPv4 message “Destination Unreachable” với các code khác nhau bằng các qualifier `-j REJECT` và `--reject-with`. Ví dụ, rule `iptables` sau sẽ loại bỏ mọi packet từ mọi source và gửi trả một ICMP message “ICMP Host Prohibited”:
 
 ```
 iptables -A INPUT -j REJECT --reject-with icmp-host-prohibited

@@ -701,7 +701,7 @@ Ví dụ lọc UDP packet có port trong port range 6000–8000:
 tshark -R udp portrange 6000-8000
 ```
 
-Ví dụ đặt filter capture traffic có source IP address 192.168.2.200 và port 80 (không nhất thiết chỉ là TCP traffic vì ở đây không đặt filter theo protocol cụ thể):
+Ví dụ thiết lập một filter để capture traffic có source IP address là 192.168.2.200 và port là 80 (traffic không nhất thiết chỉ thuộc TCP vì ở đây không thiết lập filter cho một protocol cụ thể):
 
 ```
 tshark -i eth1 -f "src host 192.168.2.200 and port 80"

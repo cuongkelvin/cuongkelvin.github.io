@@ -340,7 +340,7 @@ PSK—Preshared Key. Qdisc—Queuing Disciplines.
 
 QP—Queue Pair (InfinBand).
 
-RA—Router Alert. Một IPv4 option. Thông báo transit router kiểm tra kỹ hơn nội dung IP packet. Dùng bởi nhiều protocol như IGMP, MLD, v.v.
+RA—Router Alert. Một trong các IPv4 option. Nó thông báo cho các transit router cần kiểm tra kỹ hơn nội dung của IP packet. Nó được sử dụng bởi nhiều protocol, chẳng hạn IGMP, MLD và các protocol khác.
 
 RANN—Root Announcement. Broadcast packet do Root Mesh point gửi định kỳ trong wireless Mesh network.
 

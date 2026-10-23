@@ -18,15 +18,15 @@ Netlink protocol là cơ chế Inter Process Communication (IPC) socket-based, d
 
 Ngoài ra còn vài header file. Thực tế module `af_netlink` được dùng phổ biến nhất; cung cấp netlink kernel socket API, còn module `genetlink` cung cấp generic netlink API mới giúp tạo netlink message dễ hơn. Module monitoring interface `diag` (`diag.c`) cung cấp API dump và lấy thông tin netlink socket. Tôi thảo luận module `diag` phía sau trong mục “Socket monitoring interface”.
 
-Cần nhắc về lý thuyết netlink socket có thể giao tiếp giữa hai hoặc nhiều userspace process (kể cả multicast message), dù thường không dùng và không phải mục tiêu gốc. UNIX domain socket cung cấp IPC API, được dùng rộng rãi giao tiếp hai userspace process.
+Cần đề cập rằng về lý thuyết, netlink socket có thể được dùng để giao tiếp giữa hai hoặc nhiều userspace process, kể cả bằng multicast message, mặc dù cách sử dụng này không phổ biến và không phải mục tiêu ban đầu của netlink socket. UNIX domain socket cung cấp IPC API và được sử dụng rộng rãi để giao tiếp giữa hai userspace process.
 
-Netlink có ưu điểm so với cách giao tiếp userspace/kernel khác. Ví dụ không cần polling. Userspace application mở socket rồi gọi `recvmsg()`, vào blocking state nếu kernel không gửi message; ví dụ xem method `rtnl_listen()` của package `iproute2` (`lib/libnetlink.c`). Ưu điểm khác là kernel có thể chủ động
+Netlink có một số ưu điểm so với các cách giao tiếp khác giữa userspace và kernel. Ví dụ, không cần polling khi làm việc với netlink socket. Userspace application mở socket rồi gọi `recvmsg()` và chuyển sang blocking state nếu không có message nào được kernel gửi đến; xem ví dụ trong method `rtnl_listen()` của package `iproute2` (`lib/libnetlink.c`). Một ưu điểm khác là kernel có thể chủ động
 
 gửi asynchronous message tới userspace, không cần userspace kích hoạt action nào (ví dụ gọi IOCTL hoặc ghi entry `sysfs`). Ưu điểm nữa là netlink socket hỗ trợ multicast transmission.
 
 Tạo netlink socket từ userspace bằng system call `socket()`. Netlink socket có thể là SOCK\_RAW hoặc SOCK\_DGRAM.
 
-Netlink socket có thể tạo trong kernel hoặc userspace; kernel netlink socket bằng method `netlink_kernel_create()`, userspace netlink socket bằng system call `socket()`. Tạo từ đâu cũng tạo object `netlink_sock`. Từ userspace do method `netlink_create()` xử lý. Trong kernel do `__netlink_kernel_create()` xử lý; method set flag NETLINK\_KERNEL\_SOCKET. Cuối cùng cả hai gọi `__netlink_create()` để cấp phát socket theo cách chung (gọi `sk_alloc()`) và khởi tạo. Hình 2-1 cho thấy tạo netlink socket trong kernel và userspace.
+Netlink socket có thể được tạo trong kernel hoặc trong userspace. Kernel netlink socket được tạo bằng method `netlink_kernel_create()`, còn userspace netlink socket được tạo bằng system call `socket()`. Việc tạo netlink socket từ userspace hay kernel đều tạo một object `netlink_sock`. Khi socket được tạo từ userspace, việc tạo được xử lý bởi method `netlink_create()`. Khi socket được tạo trong kernel, việc tạo được xử lý bởi `__netlink_kernel_create()`; method này thiết lập flag NETLINK\_KERNEL\_SOCKET. Cuối cùng, cả hai method đều gọi `__netlink_create()` để cấp phát socket theo cách chung (bằng cách gọi method `sk_alloc()`) và khởi tạo nó. Hình 2-1 minh họa cách tạo netlink socket trong kernel và userspace.
 
 ![Figure 2-1](images/ch02/fig02-01.png)
 
@@ -95,7 +95,7 @@ qua netlink socket. Có vài ngoại lệ dùng IOCTL trong `iproute2`. Ví dụ
 
 - `rarp`
 
-Một số chức năng nâng cao của `iproute2` không có trong `net-tools`. Mục tiếp theo nói kernel netlink socket, core engine xử lý giao tiếp giữa
+Một số chức năng nâng cao của package `iproute2` không có trong package `net-tools`. Mục tiếp theo thảo luận về kernel netlink socket, cơ chế cốt lõi xử lý giao tiếp giữa
 
 userspace và kernel bằng trao đổi netlink message nhiều type. Hiểu kernel netlink socket là thiết yếu để hiểu interface netlink layer cung cấp cho userspace.
 
@@ -203,7 +203,7 @@ Parameter thứ hai là netlink message type như RTM\_NEWLINK hoặc RTM\_NEWNE
 
 Ba parameter cuối là callback `doit`, `dumpit`, `calcit`. Callback là action muốn thực hiện để xử lý message, thường chỉ chỉ định một callback.
 
-Callback `doit` cho action thêm/xóa/sửa; callback `dumpit` lấy thông tin, callback `calcit` tính buffer size. Rtnetlink module có table `rtnl_msg_handlers`, index theo protocol number. Mỗi entry tự là table index theo message type. Mỗi phần tử là instance `rtnl_link`, structure gồm pointer tới ba callback. Khi đăng ký callback bằng `rtnl_register()`, thêm callback vào table này.
+Callback `doit` dùng cho các thao tác như thêm, xóa và sửa đổi; callback `dumpit` dùng để truy xuất thông tin; callback `calcit` dùng để tính kích thước buffer. Rtnetlink module có một table tên là `rtnl_msg_handlers`. Table này được đánh index bằng protocol number. Bản thân mỗi entry trong table lại là một table được đánh index bằng message type. Mỗi phần tử trong table là một instance của `rtnl_link`, một structure gồm các pointer trỏ đến ba callback trên. Khi đăng ký callback bằng `rtnl_register()`, bạn thêm callback được chỉ định vào table này.
 
 Ví dụ đăng ký như sau: `rtnl_register(PF_UNSPEC, RTM_NEWLINK, rtnl_newlink, NULL, NULL) in net/core/rtnetlink.c`. Thêm `rtnl_newlink` làm callback `doit` cho message RTM\_NEWLINK trong entry `rtnl_msg_handlers` tương ứng.
 
@@ -213,11 +213,11 @@ Gửi rtnelink message bằng `rtmsg_ifinfo()`. Ví dụ trong `dev_open()` tạ
 
 Hình 2-2. Gửi rtnelink message bằng method `rtmsg_ifinfo()`
 
-Mục tiếp theo về netlink message trao đổi giữa userspace và kernel. Message luôn bắt đầu bằng netlink message header, nên bước đầu tìm hiểu message là nghiên cứu header format.
+Mục tiếp theo trình bày netlink message, được trao đổi giữa userspace và kernel. Một netlink message luôn bắt đầu bằng một netlink message header, vì vậy bước đầu tiên khi tìm hiểu netlink message là nghiên cứu định dạng netlink message header.
 
 ### Netlink message header
 
-Netlink message phải tuân format xác định trong RFC 3549, “Linux Netlink as an IP Services Protocol”, mục 2.2 “Message Format”. Bắt đầu bằng netlink header kích thước cố định, sau đó payload. Mục này mô tả Linux implementation của netlink message header.
+Một netlink message phải tuân theo định dạng cụ thể được quy định trong mục 2.2, “Message Format”, của RFC 3549, “Linux Netlink as an IP Services Protocol”. Netlink message bắt đầu bằng một netlink header có kích thước cố định, theo sau là payload. Mục này mô tả cách Linux triển khai netlink message header.
 
 Netlink message header được định nghĩa bằng `struct nlmsghdr` trong `include/uapi/linux/netlink.h`:
 
@@ -249,7 +249,7 @@ Mỗi netlink packet bắt đầu bằng netlink message header, biểu diễn b
 
 (`include/uapi/linux/netlink.h`)
 
-Tuy nhiên family có thể thêm netlink message header type riêng. Ví dụ rtnetlink protocol family thêm RTM\_NEWLINK, RTM\_DELLINK, RTM\_NEWROUTE và nhiều type khác (xem `include/uapi/linux/rtnetlink.h`). Danh sách đầy đủ kèm giải thích từng loại ở `man 7 rtnetlink`. Lưu ý message type nhỏ hơn NLMSG\_MIN\_TYPE (0x10) dành control message và không được dùng.
+Tuy nhiên, các family có thể bổ sung netlink message header type riêng. Ví dụ, rtnetlink protocol family bổ sung các message header type như RTM\_NEWLINK, RTM\_DELLINK, RTM\_NEWROUTE và nhiều type khác (xem `include/uapi/linux/rtnetlink.h`). Để xem danh sách đầy đủ các netlink message header type do rtnetlink family bổ sung cùng phần giải thích chi tiết cho từng type, xem `man 7 rtnetlink`. Lưu ý rằng các giá trị message type nhỏ hơn NLMSG\_MIN\_TYPE (0x10) được dành riêng cho control message và không được sử dụng.
 
 - Field `nlmsg_flags` có thể như sau:
 
@@ -319,7 +319,7 @@ attribute nhận được. Policy biểu diễn bằng object `nla_policy`. Th�
 (include/uapi/linux/netlink.h)
 ```
 
-Attribute validation policy là array object `nla_policy`, index bằng attribute number. Với mỗi attribute (trừ fixed-length attribute), nếu value `len` trong object `nla_policy` bằng 0, không validation. Nếu thuộc string type (như `NLA_STRING`), `len` là độ dài tối đa không gồm terminating NULL byte. Nếu type là NLA\_UNSPEC hoặc không biết, `len` phải bằng độ dài chính xác attribute payload. Nếu NLA\_FLAG, không dùng `len`. (Vì sự hiện diện attribute ngụ ý `true`, không hiện diện ngụ ý `false`).
+Attribute validation policy là một array chứa các object `nla_policy`; array này được đánh index bằng attribute number. Với mỗi attribute (ngoại trừ fixed-length attribute), nếu giá trị `len` trong object `nla_policy` bằng 0 thì không thực hiện validation. Nếu attribute thuộc một trong các string type (chẳng hạn `NLA_STRING`), `len` phải là độ dài tối đa của chuỗi, không bao gồm NULL byte kết thúc. Nếu attribute type là NLA\_UNSPEC hoặc không xác định, `len` phải được đặt bằng độ dài chính xác của attribute payload. Nếu attribute type là NLA\_FLAG, `len` không được sử dụng. (Lý do là bản thân sự hiện diện của attribute hàm ý giá trị `true`, còn sự vắng mặt của attribute hàm ý giá trị `false`.)
 
 Nhận generic netlink message trong kernel do `genl_rcv_msg()` xử lý. Nếu dump request (flag `NLM_F_DUMP` set), dump table bằng `netlink_dump_start()`. Nếu không, parse payload bằng `nlmsg_parse()`. Method `nlmsg_parse()` validation attribute bằng `validate_nla()` (`lib/nlattr.c`). Attribute type vượt maxtype bị bỏ qua âm thầm để backwards compatibility. Nếu validation thất bại, không tiếp tục bước sau trong `genl_rcv_msg()` (chạy callback `doit()`), và `genl_rcv_msg()` return error code.
 
@@ -351,7 +351,7 @@ NETLINK\_ROUTE message chia thành family:
 
 - ADDRLABEL (address labeling) Mỗi family có ba message type: tạo, xóa và lấy thông tin. Vì vậy với
 
-routing message, có RTM\_NEWROUTE tạo route, RTM\_DELROUTE xóa route, RTM\_GETROUTE lấy route. Với LINK message, ngoài ba phương thức tạo/xóa/lấy thông tin, còn message sửa link: RTM\_SETLINK.
+routing message, bạn có message type RTM\_NEWROUTE để tạo route, RTM\_DELROUTE để xóa route và RTM\_GETROUTE để truy xuất route. Với LINK message, ngoài ba phương thức tạo, xóa và truy xuất thông tin, còn có một message bổ sung để sửa đổi link: RTM\_SETLINK.
 
 Có trường hợp lỗi và gửi error message trả lời. Netlink error message biểu diễn bằng `nlmsgerr struct`:
 
@@ -363,21 +363,21 @@ struct nlmsgerr {
 (include/uapi/linux/netlink.h)
 ```
 
-Thực tế như Hình 2-4, netlink error message gồm netlink message header và error code. Khi error code khác 0, netlink message header của request gốc gây lỗi được nối sau error code field.
+Thực tế, như trong Hình 2-4, một netlink error message bao gồm netlink message header và một error code. Khi error code khác 0, netlink message header của request gốc đã gây ra lỗi được nối vào sau error code field.
 
 ![Figure 2-4](images/ch02/fig02-04.png)
 
 Hình 2-4. Netlink error message
 
-Nếu gửi message tạo sai (ví dụ `nlmsg_type` không hợp lệ), netlink error message được gửi về, error code đặt theo lỗi. Ví dụ `nlmsg_type` không hợp lệ (âm hoặc vượt tối đa), error code là –EOPNOTSUPP. Xem `rtnetlink_rcv_msg()` trong `net/core/rtnetlink.c`. Sequence number trong error message bằng sequence number của request gây lỗi.
+Nếu bạn gửi một message được tạo không đúng (ví dụ, `nlmsg_type` không hợp lệ), một netlink error message sẽ được gửi trả lại và error code được thiết lập theo lỗi đã xảy ra. Ví dụ, khi `nlmsg_type` không hợp lệ (là giá trị âm hoặc lớn hơn giá trị tối đa cho phép), error code được đặt thành –EOPNOTSUPP. Xem method `rtnetlink_rcv_msg()` trong `net/core/rtnetlink.c`. Trong error message, sequence number được đặt bằng sequence number của request đã gây ra lỗi.
 
-Bên gửi có thể yêu cầu ACK cho netlink message bằng cách đặt netlink message header type (`nlmsg_type`) thành NLM\_F\_ACK. Khi kernel gửi ACK, dùng error message (header type là NLMSG\_ERROR) với error code 0. Khi đó không nối original netlink header của request vào error message. Chi tiết xem method `netlink_ack()` trong `net/netlink/af_netlink.c`.
+Bên gửi có thể yêu cầu nhận ACK cho một netlink message. Việc này được thực hiện bằng cách đặt netlink message header type (`nlmsg_type`) thành NLM\_F\_ACK. Khi kernel gửi ACK, nó sử dụng một error message (netlink message header type của message này được đặt thành NLMSG\_ERROR) với error code bằng 0. Trong trường hợp này, netlink header gốc của request không được nối vào error message. Để biết chi tiết triển khai, xem method `netlink_ack()` trong `net/netlink/af_netlink.c`.
 
 Sau khi học NETLINK\_ROUTE message, bạn sẵn sàng xem ví dụ thêm/xóa routing entry trong routing table bằng NETLINK\_ROUTE message.
 
 ### Thêm và xóa routing entry trong routing table
 
-Hãy xem bên trong kernel trong ngữ cảnh netlink protocol khi thêm/xóa routing entry. Ví dụ thêm bằng:
+Hãy xem điều gì diễn ra bên trong kernel, trong ngữ cảnh netlink protocol, khi thêm và xóa một routing entry. Bạn có thể thêm một routing entry vào routing table bằng cách chạy lệnh như sau:
 
 ```
 ip route add 192.168.2.11 via 192.168.2.20
@@ -401,7 +401,7 @@ ip monitor route
 
 Ví dụ mở một terminal chạy `ip monitor route`, rồi terminal khác chạy `ip route add 192.168.1.10 via 192.168.2.200`, terminal đầu hiện `192.168.1.10 via 192.168.2.200 dev em1`. Khi chạy `ip route del 192.168.1.10` trên terminal thứ hai, terminal đầu hiện `Deleted 192.168.1.10 via 192.168.2.200 dev em1`.
 
-Chạy `ip monitor route` khởi chạy daemon mở netlink socket và subscribe multicast group RTNLGRP\_IPV4\_ROUTE. Giờ thêm/xóa route như ví dụ khiến message gửi bằng `rtnl_notify()` được daemon nhận và hiện trên terminal.
+Chạy `ip monitor route` sẽ khởi chạy một daemon mở netlink socket và subscribe multicast group RTNLGRP\_IPV4\_ROUTE. Bây giờ, việc thêm hoặc xóa route như trong các ví dụ sẽ khiến daemon nhận được các message gửi bằng `rtnl_notify()` và hiển thị chúng trên terminal.
 
 Có thể subscribe multicast group khác theo cách này. Ví dụ subscribe RTNLGRP\_LINK bằng `ip monitor link`. Daemon nhận netlink message từ kernel, chẳng hạn khi thêm/xóa link. Nếu mở terminal chạy `ip monitor link`, rồi terminal khác thêm VLAN interface bằng `vconfig add eth1 200,`, terminal đầu hiện dòng như:
 
@@ -417,7 +417,7 @@ Nếu thêm bridge trên terminal thứ hai bằng `brctl addbr mybr`, terminal 
     link/ether a2:7c:be:62:b5:b6 brd ff:ff:ff:ff:ff:ff
 ```
 
-Bạn đã thấy netlink message là gì, cách tạo và xử lý, cùng cách xử lý netlink socket. Tiếp theo học vì sao generic netlink family (kernel 2.6.15) được tạo và Linux implementation.
+Bạn đã tìm hiểu netlink message là gì, cách tạo và xử lý chúng, cũng như cách xử lý netlink socket. Tiếp theo, bạn sẽ tìm hiểu vì sao generic netlink family được tạo ra (trong kernel 2.6.15) và cách triển khai nó trong Linux.
 
 ## Generic netlink protocol
 
@@ -482,7 +482,7 @@ int __init nfc_genl_init(void)
 (net/nfc/netlink.c)
 ```
 
-Tên multicast group phải duy nhất vì là primary key cho lookup. Trong multicast group, `id` cũng tạo động khi đăng ký bằng lời gọi
+Tên của multicast group phải là duy nhất vì nó là primary key dùng để tra cứu. Trong multicast group, `id` cũng được tạo động khi đăng ký multicast group bằng cách gọi
 
 method `find_first_zero_bit()` trong `genl_register_mc_group()`. Chỉ một multicast group `notify_grp` có id cố định GENL\_ID\_CTRL.
 
@@ -568,7 +568,7 @@ Có thể thêm một hoặc nhiều command bằng structure `genl_ops`. Hãy x
 
 - `flags`: Operation flag. Value có thể:
 
-- GENL\_ADMIN\_PERM: Khi set, operation đòi privilege CAP\_NET\_ADMIN; xem `genl_rcv_msg()` trong `net/netlink/genetlink.c`.
+- GENL\_ADMIN\_PERM: Khi flag này được thiết lập, operation yêu cầu quyền CAP\_NET\_ADMIN; xem method `genl_rcv_msg()` trong `net/netlink/genetlink.c`.
 
 - GENL\_CMD\_CAP\_DO: Set nếu `genl_ops struct` triển khai callback `doit()`.
 
@@ -608,7 +608,7 @@ Khi chạy scan command từ userspace, ví dụ `iw dev wlan0 scan`, gửi gene
 
 Message được method `nl80211_dump_scan()` xử lý, là callback `dumpit` của command (`net/wireless/nl80211.c`). Có hơn 50 entry trong object `nl80211_ops` xử lý command, gồm NL80211\_CMD\_GET\_INTERFACE, NL80211\_CMD\_SET\_INTERFACE, NL80211\_CMD\_START\_AP, v.v.
 
-Để gửi command tới kernel, userspace application cần biết family id. Family name được biết trong userspace, nhưng family id không biết vì chỉ xác định tại runtime trong kernel. Để lấy, application gửi request generic netlink CTRL\_CMD\_GETFAMILY tới kernel. Method `ctrl_getfamily()` xử lý, trả family id cùng thông tin khác như operation family hỗ trợ. Rồi userspace gửi command chỉ định family id nhận trong reply. Tôi thảo luận thêm ở mục sau.
+Để gửi command đến kernel, userspace application cần biết family id. Family name được biết trong userspace, nhưng family id thì không, vì nó chỉ được xác định trong kernel tại runtime. Để lấy family id, userspace application phải gửi một generic netlink request CTRL\_CMD\_GETFAMILY đến kernel. Request này được xử lý bởi method `ctrl_getfamily()`. Nó trả về family id cùng các thông tin khác, chẳng hạn các operation được family hỗ trợ. Sau đó, userspace có thể gửi command đến kernel bằng cách chỉ định family id nhận được trong phản hồi. Tôi sẽ thảo luận thêm về điều này trong mục tiếp theo.
 
 ### Tạo và gửi generic netlink message
 
@@ -683,11 +683,11 @@ Trong kernel, generic netlink controller (`"nlctrl"`) xử lý command CTRL\_CMD
 
 Lưu ý Có thể lấy parameter (như generated id, header size, max attribute, v.v.) của mọi generic netlink family đã đăng ký bằng userspace tool `genl` (thuộc `iproute2`) khi chạy `genl ctrl list`.
 
-Giờ bạn sẵn sàng học socket monitoring interface để lấy thông tin socket. Interface được dùng trong userspace tool như `ss`, hiển thị thông tin và thống kê nhiều socket type, cùng dự án khác như mục sau.
+Bây giờ bạn đã sẵn sàng tìm hiểu socket monitoring interface, cho phép lấy thông tin về socket. Socket monitoring interface được sử dụng trong các userspace tool như `ss`, công cụ hiển thị thông tin và số liệu thống kê cho nhiều socket type, cũng như trong các dự án khác mà bạn sẽ thấy ở mục tiếp theo.
 
 ### Socket monitoring interface
 
-Netlink socket `sock_diag` cung cấp subsystem netlink-based để lấy thông tin socket. Feature thêm vào kernel để hỗ trợ checkpoint/restore cho Linux trong userspace (CRIU). Cần thêm socket data để hỗ trợ. Ví dụ `/procfs` không cho biết peer của UNIX domain socket (AF\_UNIX), nhưng checkpoint/restore cần. Data bổ sung không export qua `/proc`, và đổi entry `procfs` không phải lúc nào mong muốn vì có thể phá userspace application. Netlink socket `sock_diag` cung cấp API truy cập data này. API dùng trong CRIU và utility `ss`. Không có `sock_diag`, sau checkpoint process (lưu process state vào filesystem), không thể dựng lại UNIX domain socket vì không biết peer.
+Các netlink socket `sock_diag` cung cấp một subsystem netlink-based có thể được sử dụng để lấy thông tin về socket. Feature này được bổ sung vào kernel để hỗ trợ chức năng checkpoint/restore cho Linux trong userspace (CRIU). Để hỗ trợ chức năng đó, cần có thêm dữ liệu về socket. Ví dụ, `/procfs` không cho biết peer của một UNIX domain socket (AF\_UNIX), trong khi thông tin này cần thiết để hỗ trợ checkpoint/restore. Dữ liệu bổ sung này không được export qua `/proc`, và việc thay đổi các entry `procfs` không phải lúc nào cũng mong muốn vì có thể khiến userspace application không còn hoạt động đúng. Các netlink socket `sock_diag` cung cấp API cho phép truy cập dữ liệu bổ sung này. API được sử dụng trong dự án CRIU cũng như tiện ích `ss`. Nếu không có `sock_diag`, sau khi checkpoint một process (lưu trạng thái của process vào filesystem), bạn không thể tái tạo các UNIX domain socket của nó vì không biết các peer là ai.
 
 Để hỗ trợ monitoring interface của tool `ss`, tạo kernel socket netlink-based (NETLINK\_SOCK\_DIAG). Tool `ss`, thuộc package `iproute2`, cho lấy socket statistics tương tự `netstat`. Có thể hiện nhiều TCP information và state information hơn tool khác.
 
@@ -744,7 +744,7 @@ Cũng có module `diag` cho chính netlink socket. Entry `/proc/net/netlink` cun
 
 ## Tóm tắt
 
-Chương trình bày netlink socket, cơ chế giao tiếp hai chiều userspace/kernel được networking subsystem dùng rộng rãi. Bạn đã xem ví dụ sử dụng, netlink message cùng cách tạo và xử lý. Chủ đề quan trọng khác là generic netlink socket, ưu điểm và cách dùng. Chương tiếp theo trình bày ICMP protocol, cách dùng và triển khai trong IPv4 và IPv6.
+Chương này đã trình bày netlink socket, cung cấp cơ chế giao tiếp hai chiều giữa userspace và kernel và được networking subsystem sử dụng rộng rãi. Bạn đã thấy một số ví dụ sử dụng netlink socket. Tôi cũng đã thảo luận về netlink message, cách tạo và xử lý chúng. Một chủ đề quan trọng khác của chương là generic netlink socket, bao gồm các ưu điểm và cách sử dụng. Chương tiếp theo trình bày ICMP protocol, bao gồm cách sử dụng và triển khai nó trong IPv4 và IPv6.
 
 ### Tham khảo nhanh
 
@@ -800,11 +800,11 @@ Method gửi rtnetlink message.
 
 ### int genl\_register\_mc\_group(struct genl\_family \*family, struct genl\_multicast\_group \*grp)
 
-Method đăng ký multicast group chỉ định, báo userspace và return 0 nếu thành công hoặc negative error code. Group phải có tên. Multicast group id tạo động bằng `find_first_zero_bit()` cho mọi group trừ `notify_grp`, có id cố định 0x10 (GENL\_ID\_CTRL).
+Method này đăng ký multicast group được chỉ định, thông báo cho userspace và trả về 0 khi thành công hoặc một error code âm. Multicast group được chỉ định phải có tên. Multicast group id được tạo động trong method này bằng method `find_first_zero_bit()` đối với tất cả multicast group, ngoại trừ `notify_grp`, có id cố định bằng 0x10 (GENL\_ID\_CTRL).
 
 ### void genl\_unregister\_mc\_group(struct genl\_family \*family, struct genl\_multicast\_group \*grp)
 
-Method hủy đăng ký multicast group và báo userspace. Mọi listener hiện tại trên group bị loại. Không cần hủy đăng ký mọi group trước family; hủy family tự động hủy mọi multicast group gán cho nó.
+Method này hủy đăng ký multicast group được chỉ định và thông báo việc đó cho userspace. Tất cả listener hiện có của group đều bị loại bỏ. Không cần hủy đăng ký tất cả multicast group trước khi hủy đăng ký family; việc hủy đăng ký family sẽ tự động hủy đăng ký mọi multicast group được gán cho family đó.
 
 ### int genl\_register\_ops(struct genl\_family \*family, struct genl\_ops \*ops)
 
@@ -812,7 +812,7 @@ Method đăng ký operation chỉ định và gán cho family chỉ định. Ph�
 
 ### int genl\_unregister\_ops(struct genl\_family \*family, struct genl\_ops \*ops)
 
-Method hủy đăng ký operation và bỏ gán khỏi family. Operation block tới khi xử lý message hiện tại xong, không bắt đầu lại tới khi unregister process hoàn tất. Không cần hủy mọi operation trước family; hủy family tự động hủy mọi operation được gán. Return 0 thành công hoặc negative error code.
+Method này hủy đăng ký các operation được chỉ định và bỏ liên kết của chúng với family được chỉ định. Thao tác này chặn cho đến khi việc xử lý message hiện tại hoàn tất, và việc xử lý message không bắt đầu lại cho đến khi quá trình hủy đăng ký hoàn tất. Không cần hủy đăng ký tất cả operation trước khi hủy đăng ký family; việc hủy đăng ký family sẽ tự động hủy đăng ký mọi operation được gán cho nó. Method trả về 0 khi thành công hoặc một error code âm.
 
 ### int genl\_register\_family(struct genl\_family \*family)
 

@@ -2,27 +2,27 @@
 
 Chương 13 trình bày InfiniBand subsystem và cách triển khai trong Linux. Chương này trình bày một số chủ đề nâng cao và những chủ đề không phù hợp về logic với chương khác. Chương bắt đầu với network namespace, một dạng cơ chế process virtualization nhẹ được thêm vào Linux những năm gần đây. Tôi sẽ trình bày triển khai namespace nói chung và network namespace nói riêng. Bạn sẽ biết chỉ cần hai system call mới để triển khai namespace. Bạn cũng sẽ thấy một số ví dụ cho thấy việc tạo và quản lý network namespace bằng lệnh `ip` của `iproute2` đơn giản thế nào, cũng như việc chuyển một network device từ network namespace này sang network namespace khác và gắn process chỉ định vào network namespace chỉ định đơn giản ra sao. Cgroups subsystem cũng cung cấp giải pháp quản lý tài nguyên, khác namespace. Tôi sẽ mô tả cgroups subsystem cùng hai network module của nó, `net_prio` và `cls_cgroup`, và đưa ra hai ví dụ dùng các cgroup network module này.
 
-Phía sau chương, bạn tìm hiểu Busy Poll Sockets và cách tinh chỉnh. Tính năng này cung cấp kỹ thuật tối ưu hiệu năng thú vị cho socket cần latency thấp, chấp nhận CPU utilization cao hơn. Có từ kernel 3.11. Tôi cũng trình bày Bluetooth subsystem, IEEE 802.15.4 subsystem và Near Field Communication (NFC) subsystem; cả ba thường dùng mạng tầm ngắn, đang phát triển tính năng mới nhanh chóng. Tôi còn trình bày Notification Chains, cơ chế quan trọng khi phát triển/debug kernel networking code, và PCI subsystem vì nhiều network device là PCI device. Tôi không đi sâu PCI vì sách không nói về device driver. Kết thúc chương là ba phần ngắn về teaming network driver (giải pháp kernel link aggregation mới), protocol Point-to-Point over Ethernet (PPPoE) và cuối cùng Android.
+Ở phần sau của chương này, bạn sẽ tìm hiểu Busy Poll Sockets và cách tinh chỉnh chúng. Feature Busy Poll Sockets cung cấp một kỹ thuật tối ưu hiệu năng thú vị cho các socket cần latency thấp và chấp nhận đánh đổi bằng mức sử dụng CPU cao hơn. Feature Busy Poll Sockets có từ kernel 3.11. Tôi cũng sẽ trình bày Bluetooth subsystem, IEEE 802.15.4 subsystem và Near Field Communication (NFC) subsystem; ba subsystem này thường hoạt động trong mạng tầm ngắn, và việc phát triển các tính năng mới cho chúng đang tiến triển nhanh chóng. Tôi cũng sẽ thảo luận về Notification Chains, một cơ chế quan trọng mà bạn có thể gặp khi phát triển hoặc debug kernel networking code, cùng PCI subsystem vì nhiều network device là PCI device. Tôi sẽ không đi sâu vào chi tiết PCI subsystem vì cuốn sách này không trình bày về device driver. Tôi sẽ kết thúc chương bằng ba mục ngắn: một mục về teaming network driver (giải pháp kernel link aggregation mới), một mục về Point-to-Point over Ethernet (PPPoE) Protocol và cuối cùng là một mục về Android.
 
 ## Network Namespace
 
 Phần này trình bày Linux namespace, mục đích và cách triển khai. Bao gồm nội dung in-depth về network namespace và ví dụ minh họa. Linux namespace thực chất là giải pháp virtualization. Operating system virtualization đã có trong mainframe nhiều năm trước Xen hay KVM. Linux namespace, dạng process virtualization, cũng không phải ý tưởng mới. Đã thử trong hệ điều hành Plan 9 (xem bài năm 1992: “The Use of Name Spaces in Plan 9”, `www.cs.bell-labs.com/sys/doc/names.html`).
 
-Namespace là dạng process virtualization nhẹ, cung cấp resource isolation. Khác KVM hay Xen, namespace không tạo thêm operating system instance trên cùng host mà chỉ dùng một instance. Trong ngữ cảnh này, Solaris có giải pháp Solaris Zones, cũng dùng một operating system instance nhưng cách phân vùng tài nguyên hơi khác (chẳng hạn có global zone chính với nhiều khả năng hơn). FreeBSD có cơ chế `jails,` cũng phân vùng tài nguyên mà không chạy nhiều kernel instance. Ý tưởng chính Linux namespace là chia tài nguyên giữa nhóm process để process
+Namespace là một dạng process virtualization nhẹ, cung cấp khả năng cô lập tài nguyên. Khác với các giải pháp virtualization như KVM hoặc Xen, khi sử dụng namespace, bạn không tạo thêm các instance của hệ điều hành trên cùng một host mà chỉ sử dụng một instance duy nhất. Trong ngữ cảnh này, tôi cũng cần đề cập rằng hệ điều hành Solaris có một giải pháp virtualization tên là Solaris Zones, cũng sử dụng một instance hệ điều hành duy nhất, nhưng cách phân chia tài nguyên hơi khác so với Linux namespace (ví dụ, Solaris Zones có một global zone là zone chính và có nhiều khả năng hơn). Trong hệ điều hành FreeBSD, có một cơ chế tên là `jails,` cũng cung cấp khả năng phân chia tài nguyên mà không chạy nhiều hơn một instance của kernel. Ý tưởng chính của Linux namespace là phân chia tài nguyên giữa các nhóm process để cho phép một process
 
-(hoặc nhiều process) có góc nhìn hệ thống khác process trong nhóm khác. Ví dụ tính năng cung cấp resource isolation trong dự án Linux containers (`http://lxc.sourceforge.net/`). Dự án còn dùng cơ chế quản lý tài nguyên cgroups subsystem, được trình bày phía sau chương. Container cho phép chạy nhiều Linux distribution trên cùng host bằng một operating system instance. Namespace cũng cần cho checkpoint/restore dùng trong high performance computing (HPC). Chẳng hạn CRIU (`http://criu.org/Main_Page)`, công cụ phần mềm của OpenVZ (`http://openvz.org/Main_Page`), triển khai checkpoint/restore process Linux chủ yếu trong userspace, dù có rất ít nơi CRIU kernel patch được merge. Từng có dự án triển khai checkpoint/restore trong kernel nhưng không được mainline chấp nhận vì quá phức tạp. Chẳng hạn CKPT: `https://ckpt.wiki.kernel.org/index.php/Main_Page`. Checkpoint/restore (còn gọi checkpoint/restart) cho phép dừng và lưu các process trên filesystem, sau đó restore (có thể trên host khác) và tiếp tục từ chỗ dừng. Không namespace, use case rất hạn chế; đặc biệt live migration chỉ có thể thực hiện nhờ namespace. Use case khác của network namespace là mô phỏng nhiều network stack để kiểm thử/debug, v.v. Muốn tìm hiểu thêm checkpoint/restart, tôi đề xuất bài “Virtual Servers and Checkpoint/Restart in Mainstream Linux” của Sukadev Bhattiprolu, Eric W. Biederman, Serge Hallyn và Daniel Lezcano.
+(hoặc nhiều process) có góc nhìn về hệ thống khác với các process thuộc những nhóm process khác. Ví dụ, tính năng này được sử dụng để cung cấp resource isolation trong dự án Linux containers (`http://lxc.sourceforge.net/`). Dự án Linux containers cũng sử dụng một cơ chế quản lý tài nguyên khác do cgroups subsystem cung cấp, sẽ được mô tả ở phần sau của chương này. Với container, bạn có thể chạy nhiều Linux distribution khác nhau trên cùng host bằng một instance của hệ điều hành. Namespace cũng cần thiết cho feature checkpoint/restore, được sử dụng trong high performance computing (HPC). Ví dụ, nó được sử dụng trong CRIU (`http://criu.org/Main_Page)`, một công cụ phần mềm của OpenVZ (`http://openvz.org/Main_Page`), triển khai checkpoint/restore cho Linux process chủ yếu trong userspace, mặc dù có rất ít vị trí mà CRIU kernel patch đã được merge. Tôi cần đề cập rằng từng có một số dự án triển khai checkpoint/restore trong kernel, nhưng các dự án này không được chấp nhận vào mainline vì quá phức tạp. Ví dụ, hãy xem dự án CKPT: `https://ckpt.wiki.kernel.org/index.php/Main_Page`. Feature checkpoint/restore (đôi khi được gọi là checkpoint/restart) cho phép dừng và lưu một số process trên filesystem, rồi vào một thời điểm sau đó khôi phục những process này từ filesystem, có thể trên một host khác, và tiếp tục thực thi từ vị trí đã dừng. Nếu không có namespace, checkpoint/restore chỉ có rất ít trường hợp sử dụng; đặc biệt, live migration chỉ có thể thực hiện khi có namespace. Một trường hợp sử dụng khác của network namespace là thiết lập môi trường cần mô phỏng các network stack khác nhau để kiểm thử, debug, v.v. Với những độc giả muốn tìm hiểu thêm về checkpoint/restart, tôi đề xuất bài viết “Virtual Servers and Checkpoint/Restart in Mainstream Linux” của Sukadev Bhattiprolu, Eric W. Biederman, Serge Hallyn và Daniel Lezcano.
 
-Mount namespace là loại đầu tiên merge năm 2002 cho kernel 2.4.19. User namespace được triển khai cuối cùng trong kernel 3.8 cho hầu hết filesystem type. Có thể sẽ phát triển thêm namespace như trình bày phía sau. Để tạo namespace cần capability CAP\_SYS\_ADMIN cho mọi namespace trừ user namespace. Thử tạo mà không có capability này, trừ user namespace, gây lỗi –EPRM (“Thao tác không được phép”). Nhiều nhà phát triển tham gia như Eric W. Biederman, Pavel Emelyanov, Al Viro, Cyrill Gorcunov, Andrew Vagin, v.v.
+Mount namespace là loại Linux namespace đầu tiên được merge vào năm 2002, cho kernel 2.4.19. User namespace được triển khai sau cùng trong kernel 3.8 cho hầu hết các loại filesystem. Có thể sẽ có thêm namespace được phát triển, như được thảo luận ở phần sau của mục này. Để tạo namespace, bạn cần capability CAP\_SYS\_ADMIN đối với mọi loại namespace, ngoại trừ user namespace. Việc thử tạo namespace mà không có capability CAP\_SYS\_ADMIN, trừ trường hợp user namespace, sẽ dẫn đến lỗi –EPRM (“Operation not permitted”). Nhiều nhà phát triển đã tham gia phát triển namespace, trong đó có Eric W. Biederman, Pavel Emelyanov, Al Viro, Cyrill Gorcunov, Andrew Vagin và những người khác.
 
 Sau nền tảng process virtualization, Linux namespace và cách dùng, bạn sẵn sàng tìm hiểu chi tiết triển khai.
 
 ### Triển khai Namespace
 
-Tại thời điểm viết sách, Linux kernel triển khai sáu namespace. Sau đây là bổ sung/thay đổi chính cần để triển khai và hỗ trợ trong userspace package:
+Tại thời điểm viết sách, Linux kernel đã triển khai sáu namespace. Sau đây là mô tả những phần bổ sung và thay đổi chính cần thiết để triển khai namespace trong Linux kernel và hỗ trợ namespace trong các userspace package:
 
-- Thêm structure `nsproxy` (namespace proxy), chứa pointer đến năm trong sáu namespace. Không có pointer user namespace trong `nsproxy`; tuy nhiên năm namespace object khác đều chứa pointer đến user namespace sở hữu chúng, tên `user_ns`. User namespace là trường hợp đặc biệt; thuộc credentials structure (`cred)`, tên `user_ns`. Structure `cred` biểu diễn security context của process. Mỗi process descriptor (`task_struct)` chứa hai object `cred`, cho effective và objective process descriptor credential. Tôi không đi sâu mọi chi tiết user namespace vì ngoài phạm vi. Object `nsproxy` được method `create_nsproxy()` tạo và method `free_nsproxy()` giải phóng. Pointer đến object `nsproxy`, cũng tên `nsproxy`,
+- Một structure tên là `nsproxy` (namespace proxy) đã được bổ sung. Structure này chứa các pointer trỏ đến năm trong số sáu namespace được triển khai. Structure `nsproxy` không có pointer trỏ đến user namespace; tuy nhiên, cả năm namespace object còn lại đều chứa pointer trỏ đến user namespace object sở hữu chúng, và trong mỗi namespace, pointer đó có tên là `user_ns`. User namespace là trường hợp đặc biệt: nó là một member trong credentials structure (`cred)`, có tên là `user_ns`. Structure `cred` biểu diễn security context của một process. Mỗi process descriptor (`task_struct)` chứa hai object `cred`, dành cho effective và objective process descriptor credential. Tôi sẽ không đi sâu vào mọi chi tiết và sắc thái trong cách triển khai user namespace vì nội dung đó nằm ngoài phạm vi cuốn sách. Object `nsproxy` được tạo bởi method `create_nsproxy()` và được giải phóng bởi method `free_nsproxy()`. Một pointer trỏ đến object `nsproxy`, cũng có tên là `nsproxy`,
 
-được thêm vào process descriptor (biểu diễn bằng structure `task_struct`, `include/linux/sched.h`.) Hãy xem structure `nsproxy`, khá ngắn và self-explanatory:
+được thêm vào process descriptor (process descriptor được biểu diễn bằng structure `task_struct`, `include/linux/sched.h`). Hãy xem structure `nsproxy`, vì nó khá ngắn và self-explanatory:
 
 ```
 struct nsproxy {
@@ -38,9 +38,9 @@ struct nsproxy {
 
 - Có thể thấy năm namespace pointer trong structure `nsproxy` (không có user namespace pointer). Dùng object `nsproxy` trong process descriptor (object `task_struct`) thay vì năm namespace object là một tối ưu. Khi thực hiện `fork()`, child mới có khả năng ở cùng tập namespace với parent. Vì vậy, thay vì năm lần tăng reference counter (mỗi namespace một lần), chỉ có một lần tăng reference counter (của object `nsproxy`). Member `nsproxy count` là reference counter, được khởi tạo bằng 1 khi object `nsproxy` được tạo bởi method `create_nsproxy()`, giảm bởi method `put_nsproxy()` và tăng bởi method `get_nsproxy()`. Lưu ý member `pid_ns` của object `nsproxy` được đổi tên thành `pid_ns_for_children` trong kernel 3.11.
 
-- Thêm system call mới `unshare()`, nhận một tham số bitmask CLONE\* flag. Khi đối số gồm một hoặc nhiều namespace flag CLONE\_NEW\*, system call `unshare()` thực hiện:
+- Một system call mới, `unshare()`, đã được bổ sung. System call này nhận một parameter duy nhất là bitmask của các flag CLONE\*. Khi đối số flags chứa một hoặc nhiều namespace flag CLONE\_NEW\*, system call `unshare()` thực hiện các bước sau:
 
-- Đầu tiên tạo namespace mới (hoặc nhiều namespace) theo flag chỉ định. Gọi method `unshare_nsproxy_namespaces()`, method này tạo object `nsproxy` mới và một hoặc nhiều namespace bằng method `create_new_namespaces()`. Type namespace mới theo flag CLONE\_NEW\*. Method `create_new_namespaces()` trả object `nsproxy` mới chứa namespace vừa tạo.
+- Trước tiên, nó tạo một hoặc nhiều namespace mới theo flag được chỉ định. Việc này được thực hiện bằng cách gọi method `unshare_nsproxy_namespaces()`, method này tạo một object `nsproxy` mới và một hoặc nhiều namespace bằng cách gọi method `create_new_namespaces()`. Type của một hoặc nhiều namespace mới được xác định theo flag CLONE\_NEW\* được chỉ định. Method `create_new_namespaces()` trả về một object `nsproxy` mới chứa một hoặc nhiều namespace vừa được tạo.
 
 - Sau đó gắn calling process vào object `nsproxy` mới bằng method `switch_task_namespaces()`.
 
@@ -52,7 +52,7 @@ Sáu flag CLONE\_NEW\* thêm để tạo namespace được mô tả phía sau p
 
 - `fd`: File descriptor tham chiếu namespace, lấy bằng cách mở link trong `/proc/<pid>/ns/`.
 
-- `nstype`: Tham số tùy chọn. Nếu là một flag namespace CLONE\_NEW\*, file descriptor chỉ định phải tham chiếu namespace cùng type với flag. Nếu `nstype` không đặt (0), đối số `fd` có thể tham chiếu namespace bất kỳ type. Nếu `nstype` không tương ứng namespace type gắn với `fd`, trả –EINVAL.
+- `nstype`: Một parameter tùy chọn. Khi nó là một trong các namespace flag CLONE\_NEW\*, file descriptor được chỉ định phải tham chiếu đến một namespace có type khớp với flag CLONE\_NEW\* đó. Khi `nstype` không được thiết lập (giá trị bằng 0), đối số `fd` có thể tham chiếu đến namespace thuộc bất kỳ type nào. Nếu `nstype` không tương ứng với namespace type gắn với `fd` được chỉ định, giá trị –EINVAL được trả về.
 
 Cách triển khai system call `setns()` nằm trong `kernel/nsproxy.c`.
 
@@ -70,11 +70,11 @@ Cách triển khai system call `setns()` nằm trong `kernel/nsproxy.c`.
 
 - CLONE\_NEWUSER (cho user namespace)
 
-System call `clone()` truyền thống tạo process mới. Được điều chỉnh hỗ trợ flag mới để tạo process gắn namespace mới (hoặc nhiều namespace). Bạn sẽ gặp flag CLONE\_NEWNET tạo network namespace mới trong ví dụ phía sau chương.
+System call `clone()` theo cách sử dụng truyền thống được dùng để tạo một process mới. Nó đã được điều chỉnh để hỗ trợ các flag mới này, nhằm tạo một process mới thuộc một hoặc nhiều namespace mới. Lưu ý rằng bạn sẽ gặp cách sử dụng flag CLONE\_NEWNET để tạo một network namespace mới trong một số ví dụ ở phần sau của chương này.
 
-- Mỗi trong sáu subsystem hỗ trợ namespace triển khai namespace riêng. Chẳng hạn mount namespace là structure `mnt_namespace`, network namespace là structure `net`, được trình bày phía sau. Tôi sẽ đề cập các namespace khác phía sau chương.
+- Mỗi subsystem trong số sáu subsystem có hỗ trợ namespace đều triển khai namespace riêng của nó. Ví dụ, mount namespace được biểu diễn bằng structure `mnt_namespace`, còn network namespace được biểu diễn bằng structure `net`, sẽ được thảo luận ở phần sau của mục này. Tôi sẽ đề cập đến các namespace khác ở phần sau của chương này.
 
-- Thêm method `create_new_namespaces()` để tạo namespace (`kernel/nsproxy.c`). Tham số đầu là flag hoặc bitmap flag CLONE\_NEW\*. Đầu tiên tạo object `nsproxy` bằng method `create_nsproxy()`, sau đó gắn namespace theo flag; vì có thể là bitmask, method `create_new_namespaces()` có thể gắn nhiều namespace. Hãy xem method `create_new_namespaces()`:
+- Để tạo namespace, một method tên là `create_new_namespaces()` đã được bổ sung (`kernel/nsproxy.c`). Method này nhận parameter đầu tiên là một flag CLONE\_NEW\* hoặc bitmap của các flag CLONE\_NEW\*. Trước tiên, nó tạo một object `nsproxy` bằng cách gọi method `create_nsproxy()`, sau đó liên kết namespace theo flag được chỉ định. Vì flag có thể là một bitmask chứa nhiều flag, method `create_new_namespaces()` có thể liên kết nhiều namespace. Hãy xem method `create_new_namespaces()`:
 
 ```
 static struct nsproxy *create_new_namespaces(unsigned long flags,
@@ -105,7 +105,7 @@ Sau khi tạo object `nsproxy` thành công, cần tạo namespace theo flag ho�
         . . .
 ```
 
-Sau UTS, tiếp tục method `copy_ipcs()` cho IPC, `copy_pid_ns()` cho PID và `copy_net_ns()` cho network namespace. Không gọi method `copy_user_ns()` vì `nsproxy` không chứa pointer user namespace như đã nói. Tôi mô tả ngắn method `copy_net_ns()`. Nếu CLONE\_NEWNET không đặt trong flag method `create_new_namespaces()`, method `copy_net_ns()` trả network namespace truyền làm tham số thứ ba cho `copy_net_ns()`, `tsk->nsproxy->net_ns`, giống `copy_utsname()` ở trên. Nếu CLONE\_NEWNET đặt, method `copy_net_ns()` cấp phát namespace mới bằng method `net_alloc()`, `i`khởi tạo bằng method `setup_net()` rồi thêm vào global list mọi network namespace, `net_namespace_list`:
+Sau khi xử lý UTS namespace, chúng ta tiếp tục gọi method `copy_ipcs()` để xử lý IPC namespace, `copy_pid_ns()` để xử lý PID namespace và `copy_net_ns()` để xử lý network namespace. Lưu ý rằng không có lời gọi method `copy_user_ns()` vì `nsproxy` không chứa pointer trỏ đến user namespace, như đã đề cập trước đó. Tôi sẽ mô tả ngắn gọn method `copy_net_ns()` tại đây. Nếu CLONE\_NEWNET không được thiết lập trong các flag được chỉ định cho method `create_new_namespaces()`, method `copy_net_ns()` trả về network namespace được truyền làm parameter thứ ba cho method `copy_net_ns()`, là `tsk->nsproxy->net_ns`, tương tự cách `copy_utsname()` hoạt động mà bạn đã thấy trước đó trong mục này. Nếu CLONE\_NEWNET được thiết lập, method `copy_net_ns()` cấp phát một network namespace mới bằng cách gọi method `net_alloc()`, `i`khởi tạo nó bằng method `setup_net()` và thêm nó vào global list của tất cả network namespace, `net_namespace_list`:
 
 ```
         new_nsp->net_ns = copy_net_ns(flags, user_ns, tsk->nsproxy->net_ns);
@@ -146,7 +146,7 @@ lrwxrwxrwx 1 root root 0 Nov  3 13:32 uts -> uts:[4026531838]
 
 - Bind mount namespace proc file ở nơi khác, chẳng hạn PID namespace: `mount --bind /proc/self/ns/pid /some/filesystem/path`
 
-- Mỗi namespace định nghĩa proc namespace operations object (instance structure `proc_ns_operations`). Object gồm callback như `inum` trả unique proc inode number, hoặc `install` để cài namespace (callback `install` thực hiện thao tác riêng namespace,
+- Mỗi namespace định nghĩa một proc namespace operations object (instance của structure `proc_ns_operations`). Object này chứa các callback như `inum`, trả về số proc inode duy nhất, hoặc `install`, dùng để cài đặt namespace (callback `install` thực hiện các thao tác riêng cho namespace,
 
 như gắn namespace object vào object `nsproxy`, v.v.; callback `install` được system call `setns` gọi). Structure `proc_ns_operations` định nghĩa trong `include/linux/proc_fs.h`. Sau đây là sáu object `proc_ns_operations`:
 
@@ -196,9 +196,9 @@ struct nsproxy init_nsproxy = {
 
 Đây là sáu namespace có trong Linux kernel tại thời điểm viết sách:
 
-- Mount namespace: Cho process có góc nhìn filesystem và mount point riêng. Mount filesystem trong một mount namespace không lan sang namespace khác. Tạo bằng flag CLONE\_NEWNS khi gọi system call `clone()` hoặc `unshare()`. Để triển khai, thêm structure `mnt_namespace` (`fs/mount.h`),
+- Mount namespace: Mount namespace cho phép một process có góc nhìn riêng về filesystem và các mount point của nó. Việc mount một filesystem trong một mount namespace không lan truyền sang các mount namespace khác. Mount namespace được tạo bằng cách thiết lập flag CLONE\_NEWNS khi gọi system call `clone()` hoặc `unshare()`. Để triển khai mount namespace, một structure tên là `mnt_namespace` đã được bổ sung (`fs/mount.h`),
 
-và `nsproxy` giữ pointer đến object `mnt_namespace` tên `mnt_ns`. Có từ kernel 2.4.19. Chủ yếu triển khai trong `fs/namespace.c`. Khi tạo namespace mới, áp dụng:
+và `nsproxy` giữ một pointer trỏ đến object `mnt_namespace`, với tên pointer là `mnt_ns`. Mount namespace có từ kernel 2.4.19 và được triển khai chủ yếu trong `fs/namespace.c`. Khi tạo một mount namespace mới, các quy tắc sau được áp dụng:
 
 - Mọi mount trước đó thấy được trong namespace mới.
 
@@ -208,17 +208,17 @@ và `nsproxy` giữ pointer đến object `mnt_namespace` tên `mnt_ns`. Có t�
 
 Mount namespace dùng cải tiến VFS shared subtrees, giới thiệu trong Linux kernel 2.6.15; tính năng `shared subtrees` thêm các flag MS\_PRIVATE, MS\_SHARED, MS\_SLAVE và MS\_UNBINDABLE . (Xem `http://lwn.net/Articles/159077/` và `Documentation/filesystems/sharedsubtree.txt`.) Tôi không trình bày nội bộ triển khai. Muốn tìm hiểu cách dùng, xem “Applying Mount Namespaces” của Serge E. Hallyn và Ram Pai (`http://www.ibm.com/developerworks/linux/library/ l-mount-namespaces/index.html`).
 
-- PID namespace: Cho process trong PID namespace khác nhau có cùng PID. Là nền tảng Linux container. Quan trọng cho checkpoint/restore: process checkpoint trên host này có thể restore trên host khác dù host đó có process cùng PID. Process đầu tiên trong PID namespace mới có PID 1, hành vi hơi giống process `init`: khi process chết, mọi orphaned child có process PID 1 làm parent (child reaping). Gửi SIGKILL đến process PID 1 không giết process bất kể gửi trong initial PID namespace hay namespace khác. Nhưng giết `init` của một PID namespace từ namespace parent thì được; mọi task trong namespace đó bị giết và namespace dừng. Tạo bằng CLONE\_NEWPID khi gọi system call `clone()` hoặc `unshare()`. Thêm structure `pid_namespace` (`include/linux/pid_namespace.h`), và `nsproxy` giữ pointer đến object `pid_namespace` tên `pid_ns`. Phải bật CONFIG\_PID\_NS. Có từ kernel 2.6.24, chủ yếu triển khai trong `kernel/pid_namespace.c`.
+- PID namespace: PID namespace cho phép các process trong những PID namespace khác nhau có cùng PID. Tính năng này là một thành phần nền tảng của Linux container. Nó quan trọng đối với checkpoint/restore của process vì một process được checkpoint trên host này có thể được restore trên host khác ngay cả khi host đó có một process mang cùng PID. Process đầu tiên được tạo trong một PID namespace mới có PID bằng 1. Hành vi của process này phần nào giống process `init`: khi một process chết, tất cả child process mồ côi của nó sẽ có process mang PID 1 làm parent (child reaping). Gửi signal SIGKILL đến process có PID 1 không kết thúc process đó, bất kể signal được gửi trong initial PID namespace hay một PID namespace khác. Tuy nhiên, có thể kết thúc `init` của một PID namespace từ namespace khác là parent của nó. Trong trường hợp này, tất cả task thuộc namespace bị tác động sẽ bị kết thúc và PID namespace đó sẽ dừng. PID namespace được tạo bằng cách thiết lập flag CLONE\_NEWPID khi gọi system call `clone()` hoặc `unshare()`. Để triển khai PID namespace, một structure tên là `pid_namespace` đã được bổ sung (`include/linux/pid_namespace.h`), và `nsproxy` giữ một pointer trỏ đến object `pid_namespace`, với tên pointer là `pid_ns`. Để hỗ trợ PID namespace, cần thiết lập CONFIG\_PID\_NS. PID namespace có từ kernel 2.6.24 và được triển khai chủ yếu trong `kernel/pid_namespace.c`.
 
-- Network namespace: Cho tạo các bản sao biểu kiến của kernel network stack. Tạo bằng CLONE\_NEWNET khi gọi system call `clone()` hoặc `unshare()`. Thêm structure `net` (`include/net/net_namespace.h`), `nsproxy` giữ pointer đến object `net` tên `net_ns`. Phải bật CONFIG\_NET\_NS. Tôi trình bày phía sau. Có từ kernel 2.6.29, chủ yếu triển khai trong `net/core/net_namespace.c`.
+- Network namespace: Network namespace cho phép tạo ra những gì có vẻ như là nhiều instance của kernel network stack. Network namespace được tạo bằng cách thiết lập flag CLONE\_NEWNET khi gọi system call `clone()` hoặc `unshare()`. Để triển khai network namespace, một structure tên là `net` đã được bổ sung (`include/net/net_namespace.h`), và `nsproxy` giữ một pointer trỏ đến object `net`, với tên pointer là `net_ns`. Để hỗ trợ network namespace, cần thiết lập CONFIG\_NET\_NS. Tôi sẽ thảo luận về network namespace ở phần sau của mục này. Network namespace có từ kernel 2.6.29 và được triển khai chủ yếu trong `net/core/net_namespace.c`.
 
-- IPC namespace: Cho process có tài nguyên System V IPC và POSIX message queue riêng. Tạo bằng CLONE\_NEWIPC khi gọi system call `clone()` hoặc `unshare()`. Thêm structure `ipc_namespace` (`include/linux/ipc_namespace.h`), `nsproxy` giữ pointer đến object `ipc_namespace` tên `ipc_ns`.
+- IPC namespace: IPC namespace cho phép một process có các tài nguyên System V IPC và POSIX message queue riêng. IPC namespace được tạo bằng cách thiết lập flag CLONE\_NEWIPC khi gọi system call `clone()` hoặc `unshare()`. Để triển khai IPC namespace, một structure tên là `ipc_namespace` đã được bổ sung (`include/linux/ipc_namespace.h`), và `nsproxy` giữ một pointer trỏ đến object `ipc_namespace`, với tên pointer là `ipc_ns`.
 
-Phải bật CONFIG\_IPC\_NS để hỗ trợ. Tài nguyên System V IPC có từ kernel 2.6.19. POSIX message queue được thêm sau trong kernel 2.6.30. Chủ yếu triển khai trong `ipc/namespace.c`.
+Để hỗ trợ IPC namespace, cần thiết lập CONFIG\_IPC\_NS. Khả năng hỗ trợ tài nguyên System V IPC trong IPC namespace có từ kernel 2.6.19. Khả năng hỗ trợ tài nguyên POSIX message queue trong IPC namespace được bổ sung sau đó, trong kernel 2.6.30. IPC namespace được triển khai chủ yếu trong `ipc/namespace.c`.
 
-- UTS namespace: Cho các UTS namespace có host name/domain name khác nhau (hoặc thông tin khác do system call `uname()` trả). Tạo bằng CLONE\_NEWUTS khi gọi system call `clone()` hoặc `unshare()`. Cách triển khai đơn giản nhất trong sáu namespace. Thêm structure `uts_namespace` (`include/linux/utsname.h`), `nsproxy` giữ pointer đến object `uts_namespace` tên `uts_ns`. Phải bật CONFIG\_UTS\_NS. Có từ kernel 2.6.19, chủ yếu trong `kernel/utsname.c`.
+- UTS namespace: UTS namespace cho phép các UTS namespace khác nhau có host name hoặc domain name khác nhau (hoặc các thông tin khác do system call `uname()` trả về). UTS namespace được tạo bằng cách thiết lập flag CLONE\_NEWUTS khi gọi system call `clone()` hoặc `unshare()`. Việc triển khai UTS namespace là đơn giản nhất trong số sáu namespace đã được triển khai. Để triển khai UTS namespace, một structure tên là `uts_namespace` đã được bổ sung (`include/linux/utsname.h`), và `nsproxy` giữ một pointer trỏ đến một object `uts_namespace`, với tên pointer là `uts_ns`. Để hỗ trợ UTS namespace, cần thiết lập CONFIG\_UTS\_NS. UTS namespace có từ kernel 2.6.19 và được triển khai chủ yếu trong `kernel/utsname.c`.
 
-- User namespace: Cho ánh xạ user/group ID bằng cách ghi hai entry `procfs` thêm để hỗ trợ: `/proc/sys/kernel/overflowuid` và `/proc/sys/kernel/overflowgid`. Process gắn user namespace có thể có tập capability khác host. Tạo bằng CLONE\_NEWUSER khi gọi system call `clone()` hoặc `unshare()`. Thêm structure `user_namespace` (`include/linux/user_namespace.h`). Object `user_namespace` chứa pointer đến user namespace tạo nó (`parent`). Khác năm namespace kia, `nsproxy` không giữ pointer đến object `user_namespace`. Tôi không đi sâu vì có lẽ phức tạp nhất và ngoài phạm vi. Phải bật CONFIG\_USER\_NS. Có từ kernel 3.8 cho hầu hết filesystem type, chủ yếu trong `kernel/user_namespace.c`.
+- User namespace: User namespace cho phép ánh xạ user ID và group ID. Việc ánh xạ được thực hiện bằng cách ghi vào hai entry `procfs` đã được bổ sung để hỗ trợ user namespace: `/proc/sys/kernel/overflowuid` và `/proc/sys/kernel/overflowgid`. Một process thuộc user namespace có thể có tập capability khác với host. User namespace được tạo bằng cách thiết lập flag CLONE\_NEWUSER khi gọi system call `clone()` hoặc `unshare()`. Để triển khai user namespace, một structure tên là `user_namespace` đã được bổ sung (`include/linux/user_namespace.h`). Object `user_namespace` chứa một pointer trỏ đến user namespace object đã tạo ra nó (`parent`). Khác với năm namespace còn lại, `nsproxy` không giữ pointer trỏ đến object `user_namespace`. Tôi sẽ không đi sâu hơn vào chi tiết triển khai user namespace vì đây có lẽ là namespace phức tạp nhất và nằm ngoài phạm vi cuốn sách. Để hỗ trợ user namespace, cần thiết lập CONFIG\_USER\_NS. User namespace có từ kernel 3.8 đối với hầu hết các loại filesystem và được triển khai chủ yếu trong `kernel/user_namespace.c`.
 
 Hỗ trợ namespace được thêm vào bốn userspace package:
 
@@ -228,9 +228,9 @@ Hỗ trợ namespace được thêm vào bốn userspace package:
 
 - Tiện ích `nsenter` (thực chất wrapper nhẹ cho system call `setns`), có từ version 2.23.
 
-- Trong `iproute2`, quản lý network namespace bằng lệnh `ip netns`, sẽ có ví dụ phía sau. Hơn nữa có thể chuyển network interface sang namespace khác bằng lệnh `ip link`, như phần “Chuyển Network Interface sang Network Namespace khác”.
+- Trong `iproute2`, việc quản lý network namespace được thực hiện bằng lệnh `ip netns`; bạn sẽ thấy một số ví dụ ở phần sau của chương này. Ngoài ra, bạn có thể chuyển một network interface sang network namespace khác bằng lệnh `ip link`, như được trình bày trong mục “Chuyển Network Interface sang Network Namespace khác” ở phần sau của chương này.
 
-- `ethtool` được thêm hỗ trợ xác định feature NETIF\_F\_NETNS\_LOCAL của network interface có được đặt không. Nếu đặt, interface là local của namespace đó, không thể chuyển sang namespace khác. Feature được trình bày phía sau.
+- Trong `ethtool`, khả năng hỗ trợ đã được bổ sung để xác định xem feature NETIF\_F\_NETNS\_LOCAL có được thiết lập cho một network interface cụ thể hay không. Khi feature NETIF\_F\_NETNS\_LOCAL được thiết lập, điều đó cho biết network interface là cục bộ đối với network namespace đó và bạn không thể chuyển nó sang network namespace khác. Feature NETIF\_F\_NETNS\_LOCAL sẽ được thảo luận ở phần sau của mục này.
 
 - Wireless package `iw` thêm option chuyển wireless interface sang namespace khác.
 
@@ -238,15 +238,15 @@ Lưu ý Trong bài thuyết trình Ottawa Linux Symposium (OLS) năm 2006, “Mu
 
 Ba system call sau dùng với namespace:
 
-- `clone():` Tạo process mới gắn namespace mới (hoặc nhiều namespace). Type chỉ định bằng flag CLONE\_NEW\* truyền làm tham số. Có thể dùng bitmask các flag. Triển khai system call `clone()` trong `kernel/fork.c`.
+- `clone():` Tạo một process mới thuộc một hoặc nhiều namespace mới. Type của namespace được chỉ định bằng flag CLONE\_NEW\* truyền làm parameter. Lưu ý rằng bạn cũng có thể sử dụng một bitmask chứa các flag CLONE\_NEW\* này. Cách triển khai system call `clone()` nằm trong `kernel/fork.c`.
 
 - `unshare()`: Đã trình bày ở trên.
 
 - `setns()`: Đã trình bày ở trên.
 
-Lưu ý Namespace không có tên trong kernel để process userspace giao tiếp. Nếu có tên phải giữ toàn cục trong namespace đặc biệt khác, làm phức tạp triển khai và có thể gây vấn đề checkpoint/restore. Thay vào đó, userspace mở namespace file dưới `/proc/<pid>/ns/`, dùng file descriptor giao tiếp namespace cụ thể và giữ nó tồn tại. Namespace được xác định bằng unique proc inode number tạo khi tạo namespace, giải phóng khi release. Mỗi trong sáu namespace structure chứa integer member `proc_inum`, unique proc inode number được gán bằng method `proc_alloc_inum()`. Mỗi namespace cũng có object `proc_ns_operations` chứa callback namespace-specific; callback `inum` trả `proc_inum` tương ứng (xem định nghĩa structure `proc_ns_operations` trong `include/linux/proc_fs.h`).
+Lưu ý Namespace không có tên bên trong kernel để userspace process có thể dùng khi giao tiếp với chúng. Nếu namespace có tên, cần lưu các tên đó ở phạm vi toàn cục trong một namespace đặc biệt khác. Điều này sẽ làm phức tạp việc triển khai và có thể gây vấn đề, chẳng hạn với checkpoint/restore. Thay vào đó, userspace process cần mở các namespace file bên dưới `/proc/<pid>/ns/`; file descriptor của chúng có thể được dùng để giao tiếp với một namespace cụ thể và giữ namespace đó tồn tại. Namespace được nhận diện bằng một số proc inode duy nhất, được tạo khi namespace được tạo và được giải phóng khi namespace được giải phóng. Mỗi structure trong số sáu namespace chứa một integer member tên là `proc_inum`, là số proc inode duy nhất của namespace, được gán bằng cách gọi method `proc_alloc_inum()`. Mỗi namespace trong số sáu namespace còn có một object `proc_ns_operations` chứa các callback namespace-specific; một callback tên là `inum` trả về `proc_inum` của namespace tương ứng (xem định nghĩa structure `proc_ns_operations` trong `include/linux/proc_fs.h`).
 
-Trước network namespace, hãy mô tả triển khai namespace đơn giản nhất UTS. Đây là khởi đầu tốt để hiểu namespace phức tạp hơn.
+Trước khi thảo luận về network namespace, hãy mô tả cách triển khai namespace đơn giản nhất là UTS namespace. Đây là điểm khởi đầu tốt để hiểu các namespace khác phức tạp hơn.
 
 ### Triển khai UTS Namespace
 
@@ -283,7 +283,7 @@ struct nsproxy {
 (include/linux/nsproxy.h)
 ```
 
-Như đã thấy, object `uts_namespace` chứa instance structure `new_utsname`. Hãy xem structure `new_utsname`, cốt lõi UTS namespace:
+Như bạn đã thấy trước đó, object `uts_namespace` chứa một instance của structure `new_utsname`. Hãy xem structure `new_utsname`, phần cốt lõi của UTS namespace:
 
 ```
 struct new_utsname {
@@ -297,7 +297,7 @@ struct new_utsname {
 (include/uapi/linux/utsname.h)
 ```
 
-Member `nodename` của `new_utsname` là host name, `domainname` là domain name. Thêm method `utsname()`, chỉ trả object `new_utsname` gắn process đang chạy (`current`):
+Member `nodename` của `new_utsname` là host name, còn `domainname` là domain name. Một method tên là `utsname()` đã được bổ sung; method này chỉ trả về object `new_utsname` gắn với process đang chạy (`current`):
 
 ```
 static inline struct new_utsname *utsname(void)
@@ -347,7 +347,7 @@ Sau khi biết triển khai UTS namespace đơn giản nhất, đã đến lúc 
 
 ### Triển khai Network Namespace
 
-Network namespace về logic là bản sao network stack, có network device, routing table, neighbouring table, netfilter table, network socket, entry network `procfs`, network `sysfs` và tài nguyên mạng riêng. Tính năng thực tế là ứng dụng trong namespace (ví dụ `ns1`) tìm file cấu hình dưới `/etc/netns/ns1` trước rồi `/etc`. Chẳng hạn tạo namespace `ns1` và `/etc/netns/ns1/hosts`, ứng dụng userspace truy cập file `hosts` sẽ truy cập `/etc/netns/ns1/hosts` trước, chỉ sau đó (nếu không có entry cần tìm) đọc `/etc/hosts`. Tính năng triển khai bằng bind mount, chỉ có cho namespace tạo bằng lệnh `ip netns add`.
+Về mặt logic, network namespace là một bản sao khác của network stack, có các network device, routing table, neighbouring table, netfilter table, network socket, network entry `procfs`, network entry `sysfs` và các tài nguyên mạng khác của riêng nó. Một tính năng hữu ích của network namespace là các ứng dụng mạng chạy trong một namespace nhất định (giả sử là `ns1`) sẽ tìm file cấu hình bên dưới `/etc/netns/ns1` trước, rồi mới tìm bên dưới `/etc`. Ví dụ, nếu bạn tạo namespace tên là `ns1` và tạo `/etc/netns/ns1/hosts`, mọi userspace application thử truy cập file `hosts` sẽ truy cập `/etc/netns/ns1/hosts` trước; chỉ sau đó, nếu không có entry cần tìm, nó mới đọc `/etc/hosts`. Tính năng này được triển khai bằng bind mount và chỉ có đối với network namespace được tạo bằng lệnh `ip netns add`.
 
 ### Network Namespace Object (struct net)
 
@@ -414,11 +414,11 @@ Mô tả ngắn một số member structure `net`:
 
 - `dev_index_head` trỏ hashtable network device với key là device index.
 
-- `ifindex` là device index cuối gán trong namespace. Index được virtualize; loopback luôn có index 1 trong mọi namespace, device khác có thể trùng index khi thuộc namespace khác.
+- `ifindex` là device index cuối cùng được gán bên trong một network namespace. Các index được virtualize trong network namespace; điều này có nghĩa là loopback device luôn có index bằng 1 trong mọi network namespace, còn các network device khác có thể có index trùng nhau khi chúng thuộc các network namespace khác nhau.
 
-- `loopback_dev` là loopback device. Mỗi namespace mới chỉ có một network device là loopback. Object `loopback_dev` được gán trong method `loopback_net_init()`, `drivers/net/loopback.c`. Không thể chuyển loopback giữa namespace.
+- `loopback_dev` là loopback device. Mỗi namespace mới chỉ có một network device là loopback device. Object `loopback_dev` được gán trong method `loopback_net_init()`, nằm trong `drivers/net/loopback.c`. Không thể chuyển loopback device giữa các namespace.
 
-- `count` là reference counter network namespace. Khởi tạo 1 khi method `setup_net()` tạo namespace. Tăng bởi method `get_net()`, giảm bởi method `put_net()`. Nếu `count` đạt 0 trong `put_net()`, gọi method `__put_net()`. Method `__put_net()` thêm namespace vào global list cần xóa `cleanup_list`, rồi xóa sau.
+- `count` là reference counter của network namespace. Counter này được khởi tạo bằng 1 khi network namespace được tạo bởi method `setup_net()`. Nó được tăng bởi method `get_net()` và giảm bởi method `put_net()`. Nếu reference counter `count` đạt 0 trong method `put_net()`, method `__put_net()` được gọi. Đến lượt mình, method `__put_net()` thêm network namespace vào global list các network namespace cần xóa, `cleanup_list`, rồi xóa namespace đó sau.
 
 - `ipv4` (instance structure `netns_ipv4`) cho IPv4 subsystem. Structure `netns_ipv4` chứa trường riêng IPv4 khác nhau giữa namespace. Chẳng hạn Chương 6 cho thấy multicast routing table của namespace `net` nằm trong `net->ipv4.mrt`. Tôi trình bày `netns_ipv4` phía sau.
 
@@ -491,7 +491,7 @@ Có thể thấy trong structure `netns_ipv4` nhiều bảng/biến IPv4-specifi
 
 ### Triển khai Network Namespace: Data Structure khác
 
-Để hỗ trợ network namespace, member `nd_net`, pointer đến network namespace, được thêm vào network device object (`struct net_device`). Đặt namespace cho network device bằng method `dev_net_set()`, lấy namespace gắn device bằng method `dev_net()`. Lưu ý device chỉ thuộc một namespace tại mỗi thời điểm. `nd_net` thường đặt khi đăng ký device hoặc chuyển device sang namespace khác. Chẳng hạn khi đăng ký VLAN device, cả hai method được dùng:
+Để hỗ trợ network namespace, một member tên là `nd_net`, là pointer trỏ đến network namespace, đã được bổ sung vào network device object (`struct net_device`). Việc thiết lập network namespace cho network device được thực hiện bằng method `dev_net_set()`, còn việc lấy network namespace gắn với network device được thực hiện bằng method `dev_net()`. Lưu ý rằng tại một thời điểm, network device chỉ có thể thuộc một network namespace. `nd_net` thường được thiết lập khi đăng ký network device hoặc khi chuyển network device sang network namespace khác. Ví dụ, khi đăng ký VLAN device, cả hai method vừa đề cập đều được sử dụng:
 
 ```
 static int register_vlan_device(struct net_device *real_dev, u16 vlan_id)
@@ -499,7 +499,7 @@ static int register_vlan_device(struct net_device *real_dev, u16 vlan_id)
     struct net_device *new_dev;
 ```
 
-Namespace gán cho VLAN device mới là namespace gắn real device, được truyền làm tham số cho method `register_vlan_device()`; lấy bằng `dev_net(real_dev)`:
+Network namespace được gán cho VLAN device mới là network namespace gắn với real device, được truyền làm parameter cho method `register_vlan_device()`. Chúng ta lấy namespace này bằng cách gọi `dev_net(real_dev)`:
 
 ```
     struct net *net = dev_net(real_dev);
@@ -523,7 +523,7 @@ Member tên `sk_net`, pointer đến network namespace, được thêm vào `str
 
 Khi boot, default network namespace `init_net,` được tạo. Sau boot, mọi physical network device và socket thuộc initial namespace, cùng network loopback device.
 
-Một số network device/subsystem cần dữ liệu riêng namespace. Để hỗ trợ, thêm structure `pernet_operations`, gồm callback `init` và `exit`:
+Một số network device và network subsystem cần có dữ liệu riêng cho từng network namespace. Để hỗ trợ điều này, một structure tên là `pernet_operations` đã được bổ sung; structure này chứa các callback `init` và `exit`:
 
 ```
 struct pernet_operations {
@@ -597,7 +597,7 @@ static int __init net_ns_init(void)
 (net/core/net_namespace.c)
 ```
 
-Mỗi lần tạo namespace mới, callback `init` (`net_ns_net_init`) được gọi; mỗi lần xóa, callback `exit` (`net_ns_net_exit`) được gọi. `net_ns_net_init()` chỉ cấp phát unique proc inode cho namespace mới bằng method `proc_alloc_inum()`; số inode được gán cho `net->proc_inum`:
+Mỗi khi một network namespace mới được tạo, callback `init` (`net_ns_net_init`) được gọi; mỗi khi một network namespace bị xóa, callback `exit` (`net_ns_net_exit`) được gọi. Việc duy nhất mà `net_ns_net_init()` thực hiện là cấp phát một proc inode duy nhất cho namespace vừa tạo bằng cách gọi method `proc_alloc_inum()`; số proc inode duy nhất vừa tạo được gán cho `net->proc_inum`:
 
 ```
 static __net_init int net_ns_net_init(struct net *net)
@@ -625,7 +625,7 @@ Namespace mới chỉ có network loopback device. Các cách tạo phổ biến
 
 ### Quản lý Network Namespace
 
-Tiếp theo là ví dụ dùng lệnh `ip netns` của package `iproute2` để tạo, xóa, hiển thị mọi network namespace, v.v.
+Tiếp theo, bạn sẽ thấy một số ví dụ sử dụng lệnh `ip netns` của package `iproute2` để thực hiện các thao tác như tạo network namespace, xóa network namespace, hiển thị tất cả network namespace và các thao tác khác.
 
 - Tạo network namespace tên `ns1` bằng:
 
@@ -641,7 +641,7 @@ Lệnh trước tiên tạo file `/var/run/netns/ns1`, sau đó tạo network na
 ip netns del ns1
 ```
 
-Lưu ý không xóa namespace nếu còn process gắn vào. Nếu không còn, file `/var/run/netns/ns1` bị xóa. Khi xóa namespace, mọi network device chuyển về initial default namespace `init_net`, trừ network namespace local device có feature NETIF\_F\_NETNS\_LOCAL; các device đó bị xóa. Xem thêm phần “Chuyển Network Interface sang Network Namespace” phía sau và Phụ lục A.
+Lưu ý rằng thao tác này sẽ không xóa network namespace nếu vẫn còn một hoặc nhiều process thuộc namespace đó. Nếu không còn process như vậy, file `/var/run/netns/ns1` sẽ bị xóa. Cũng cần lưu ý rằng khi xóa một namespace, tất cả network device của nó được chuyển về network namespace mặc định ban đầu, `init_net`, ngoại trừ các network namespace local device, tức những network device có feature NETIF\_F\_NETNS\_LOCAL được thiết lập; các network device này sẽ bị xóa. Xem thêm trong mục “Chuyển Network Interface sang Network Namespace” ở phần sau của chương này và trong Phụ lục A.
 
 - Hiển thị mọi namespace trong hệ thống được thêm bằng `ip netns add`:
 
@@ -649,7 +649,7 @@ Lưu ý không xóa namespace nếu còn process gắn vào. Nếu không còn, 
 ip netns list
 ```
 
-Thực tế `ip netns list` chỉ hiển thị tên file dưới `/var/run/netns`. Namespace không thêm bằng `ip netns add` không hiển thị qua `ip netns list`, vì không tạo file trong `/var/run/netns`. Chẳng hạn namespace tạo bằng `unshare --net bash` không xuất hiện khi chạy `ip netns list`.
+Thực tế, chạy `ip netns list` chỉ hiển thị tên các file bên dưới `/var/run/netns`. Lưu ý rằng các network namespace không được thêm bằng `ip netns add` sẽ không được hiển thị bởi `ip netns list`, vì việc tạo chúng không khiến file nào được tạo bên dưới `/var/run/netns`. Ví dụ, network namespace được tạo bằng `unshare --net bash` sẽ không xuất hiện khi chạy `ip netns list`.
 
 - Giám sát tạo/xóa namespace bằng:
 
@@ -657,7 +657,7 @@ Thực tế `ip netns list` chỉ hiển thị tên file dưới `/var/run/netns
 ip netns monitor
 ```
 
-Sau `ip netns monitor`, thêm namespace bằng `ip netns add ns2` sẽ hiển thị “add ns2”, xóa bằng `ip netns delete ns2` hiển thị “delete ns2”. Thêm/xóa namespace không qua `ip netns add` và `ip netns delete` không khiến `ip netns monitor` hiển thị. Lệnh `ip netns monitor` triển khai bằng `inotify` watch trên `/var/run/netns`. Nếu chạy `ip netns monitor` trước khi thêm ít nhất một namespace bằng `ip netns add`, nhận lỗi `inotify_add_watch failed: No such file or directory`. Vì đặt watch trên `/var/run/netns` chưa tồn tại thất bại. Xem `man inotify_init() and man inotify_add_watch()`.
+Sau khi chạy `ip netns monitor`, khi thêm namespace mới bằng `ip netns add ns2`, bạn sẽ thấy message “add ns2” trên màn hình; khi xóa namespace đó bằng `ip netns delete ns2`, bạn sẽ thấy message “delete ns2”. Lưu ý rằng việc thêm và xóa network namespace mà không chạy các lệnh tương ứng `ip netns add` và `ip netns delete` sẽ không khiến `ip netns monitor` hiển thị message nào trên màn hình. Lệnh `ip netns monitor` được triển khai bằng cách thiết lập một `inotify` watch trên `/var/run/netns`. Nếu chạy `ip netns monitor` trước khi thêm ít nhất một network namespace bằng `ip netns add`, bạn sẽ nhận được lỗi sau: `inotify_add_watch failed: No such file or directory`. Nguyên nhân là việc thiết lập watch trên `/var/run/netns` thất bại vì thư mục này chưa tồn tại. Xem `man inotify_init() and man inotify_add_watch()`.
 
 - Khởi động shell trong namespace chỉ định (`ns1` ở đây):
 
@@ -665,7 +665,7 @@ Sau `ip netns monitor`, thêm namespace bằng `ip netns add ns2` sẽ hiển th
 ip netns exec ns1 bash
 ```
 
-Với `ip netns exec`, có thể chạy mọi lệnh trong namespace chỉ định. Chẳng hạn lệnh sau hiển thị mọi network interface trong `ns1`:
+Lưu ý rằng với `ip netns exec`, bạn có thể chạy bất kỳ lệnh nào trong một network namespace được chỉ định. Ví dụ, lệnh sau sẽ hiển thị tất cả network interface trong network namespace tên là `ns1`:
 
 ```
 ip netns exec ns1 ifconfig -a
@@ -693,7 +693,7 @@ Lưu ý Xem thêm option lệnh ip netns trong `man ip netns`.
 
 ### Chuyển Network Interface sang Network Namespace khác
 
-Có thể chuyển network interface vào namespace `ns1` bằng lệnh `ip`, chẳng hạn `ip link set eth0 netns ns1`. Khi triển khai namespace, thêm feature NETIF\_F\_NETNS\_LOCAL vào object `net_device` (Structure `net_device` biểu diễn network interface. Xem Phụ lục A để biết thêm về structure `net_device` và feature của nó). Kiểm tra feature đặt không bằng flag `netns-local` trong output `ethtool -k eth0` hoặc `ethtool --show-features eth0` (hai lệnh tương đương). Không thể đặt NETIF\_F\_NETNS\_LOCAL bằng `ethtool`. Feature được đặt nghĩa là network namespace local device. Chẳng hạn loopback, bridge, VXLAN và PPP là local device. Chuyển device có feature này sang namespace khác thất bại với –EINVAL như đoạn code sau. Method `dev_change_net_namespace()` được gọi khi chuyển interface, chẳng hạn bằng `ip link set eth0 netns ns1`. Hãy xem method `dev_change_net_namespace()`:
+Bạn có thể chuyển một network interface vào network namespace tên là `ns1` bằng lệnh `ip`, ví dụ: `ip link set eth0 netns ns1`. Trong quá trình triển khai network namespace, một feature mới tên là NETIF\_F\_NETNS\_LOCAL đã được bổ sung vào các feature của object `net_device` (structure `net_device` biểu diễn một network interface; xem Phụ lục A để biết thêm về structure `net_device` và các feature của nó). Bạn có thể xác định feature NETIF\_F\_NETNS\_LOCAL có được thiết lập cho một network device cụ thể hay không bằng cách xem flag `netns-local` trong output của `ethtool -k eth0` hoặc `ethtool --show-features eth0` (hai lệnh tương đương). Lưu ý rằng bạn không thể thiết lập feature NETIF\_F\_NETNS\_LOCAL bằng `ethtool`. Khi được thiết lập, feature này cho biết network device là một network namespace local device. Ví dụ, loopback, bridge, VXLAN và PPP device đều là network namespace local device. Việc thử chuyển một network device có feature NETIF\_F\_NETNS\_LOCAL được thiết lập sang namespace khác sẽ thất bại với lỗi –EINVAL, như bạn sắp thấy trong đoạn code sau. Method `dev_change_net_namespace()` được gọi khi thử chuyển một network interface sang network namespace khác, ví dụ bằng `ip link set eth0 netns ns1`. Hãy xem method `dev_change_net_namespace()`:
 
 ```
 int dev_change_net_namespace(struct net_device *dev, struct net *net, const char *pat)
@@ -726,11 +726,11 @@ out:
 (net/core/dev.c)
 ```
 
-Lưu ý Có thể chuyển network interface vào namespace `ns1` bằng PID process gắn namespace mà không chỉ định tên. Chẳng hạn process PID \<pidNumber\> gắn `ns1`, chạy `ip link set eth1 netns <pidNumber>` chuyển `eth1` vào namespace `ns1`. Chi tiết: lấy namespace theo PID process gắn vào bằng method `get_net_ns_by_pid()`, còn theo tên namespace bằng method `get_net_ns_by_fd()`; đều trong `net/core/net_namespace.c`. Để chuyển wireless interface sang namespace khác phải dùng lệnh `iw`. Chẳng hạn muốn chuyển `wlan0`, biết process PID \<pidNumber\> gắn namespace đó, chạy `iw phy phy0 set netns <pidNumber>`. Xem method `nl80211_wiphy_netns()` trong `net/wireless/nl80211.c` cho chi tiết.
+Lưu ý Bạn cũng có thể chuyển một network interface vào network namespace tên là `ns1` bằng cách chỉ định PID của một process thuộc namespace đó, mà không cần chỉ định tường minh tên namespace. Ví dụ, nếu bạn biết rằng process có PID là \<pidNumber\> thuộc `ns1`, thì chạy `ip link set eth1 netns <pidNumber>` sẽ chuyển `eth1` vào namespace `ns1`. Về chi tiết triển khai: khi chỉ định một trong các PID của các process thuộc namespace, việc lấy network namespace object được thực hiện bằng method `get_net_ns_by_pid()`; còn khi chỉ định tên network namespace, việc lấy object được thực hiện bằng method `get_net_ns_by_fd()`. Cả hai method đều nằm trong `net/core/net_namespace.c`. Để chuyển một wireless network interface sang network namespace khác, bạn nên sử dụng lệnh `iw`. Ví dụ, nếu muốn chuyển `wlan0` vào một network namespace và biết rằng process có PID là \<pidNumber\> thuộc namespace đó, bạn có thể chạy `iw phy phy0 set netns <pidNumber>` để chuyển interface vào network namespace ấy. Để biết chi tiết triển khai, hãy tham khảo method `nl80211_wiphy_netns()` trong `net/wireless/nl80211.c`.
 
 ### Giao tiếp giữa hai Network Namespace
 
-Kết thúc phần này bằng ví dụ ngắn giao tiếp giữa hai namespace. Có thể dùng Unix socket hoặc Virtual Ethernet (VETH) network driver để tạo cặp virtual network device rồi chuyển một sang namespace khác. Chẳng hạn hai namespace đầu tiên `ns1`, `ns2`:
+Tôi sẽ kết thúc mục về network namespace bằng một ví dụ ngắn minh họa cách hai network namespace giao tiếp với nhau. Có thể thực hiện điều này bằng Unix socket hoặc bằng Virtual Ethernet (VETH) network driver để tạo một cặp virtual network device rồi chuyển một device sang network namespace khác. Ví dụ, trước tiên đây là hai namespace `ns1` và `ns2`:
 
 ```
 ip netns add ns1
@@ -763,15 +763,15 @@ Trong phần này tôi đã trình bày namespace là gì, đặc biệt network
 
 ## Cgroups
 
-Cgroups subsystem được Paul Menage, Rohit Seth và nhà phát triển Google khác khởi xướng năm 2006. Ban đầu tên “process containers”, sau đổi “Control Groups”. Cung cấp resource management và accounting cho nhóm process. Thuộc mainline từ kernel 2.6.24, dùng trong dự án như `systemd` (service manager thay SysV init script; Fedora và openSUSE dùng), Linux Containers đã đề cập, Google containers (`https://github.com/google/lmctfy/`), `libvirt` (`http://libvirt.org/cgroups.html`), v.v. Triển khai kernel chủ yếu trên path non-critical về hiệu năng. Subsystem triển khai Virtual File System (VFS) type mới “cgroups”. Mọi thao tác qua filesystem như tạo thư mục cgroup, đọc/ghi entry, mount cgroup filesystem, v.v. Thư viện `libcgroup` (còn gọi `libcg)` cung cấp tiện ích userspace quản lý: `cgcreate` tạo cgroup, `cgdelete` xóa cgroup`, cgexec` chạy task trong control group, v.v. Thực chất gọi cgroup filesystem operation từ thư viện `libcg`. `libcg` có thể ít dùng hơn tương lai vì không phối hợp nhiều bên cùng dùng controller. Có thể mọi file operation sẽ qua thư viện/daemon thay vì trực tiếp. Triển khai hiện tại cần phối hợp vì mỗi resource type chỉ có một controller. Nhiều bên sửa gây xung đột. Controller có thể được `libvirt`, `systemd`, `lxc`, v.v. dùng đồng thời. Khi chỉ làm việc qua filesystem operation và mọi dự án áp policy riêng ở mức quá thấp mà không biết nhau, chúng
+Cgroups subsystem là một dự án được Paul Menage, Rohit Seth và các nhà phát triển Google khác khởi xướng vào năm 2006. Ban đầu nó được gọi là “process containers”, nhưng sau đó được đổi tên thành “Control Groups”. Nó cung cấp khả năng quản lý và thống kê việc sử dụng tài nguyên cho các nhóm process. Nó là một phần của mainline kernel từ kernel 2.6.24 và được sử dụng trong nhiều dự án, chẳng hạn `systemd` (một service manager thay thế SysV init script, được Fedora và openSUSE sử dụng), dự án Linux Containers đã đề cập trước đó trong chương, Google containers (`https://github.com/google/lmctfy/`), `libvirt` (`http://libvirt.org/cgroups.html`) và các dự án khác. Phần triển khai cgroups trong kernel chủ yếu nằm trên các path non-critical về hiệu năng. Cgroups subsystem triển khai một Virtual File System (VFS) type mới tên là “cgroups”. Tất cả thao tác cgroups được thực hiện thông qua thao tác filesystem, chẳng hạn tạo thư mục cgroup trong cgroup filesystem, ghi hoặc đọc các entry trong những thư mục đó, mount cgroup filesystem, v.v. Một thư viện tên là `libcgroup` (còn gọi là `libcg)` cung cấp tập tiện ích userspace để quản lý cgroups, ví dụ `cgcreate` để tạo cgroup mới, `cgdelete` để xóa cgroup`, cgexec` để chạy một task trong control group được chỉ định và các tiện ích khác. Thực tế, việc này được thực hiện bằng cách gọi các cgroup filesystem operation từ thư viện `libcg`. Thư viện `libcg` có thể ít được sử dụng hơn trong tương lai vì không cung cấp khả năng phối hợp giữa nhiều bên cùng sử dụng cgroup controller. Trong tương lai, có thể tất cả thao tác trên cgroup file sẽ được thực hiện qua một thư viện hoặc daemon thay vì trực tiếp. Với cách triển khai hiện tại, cgroups subsystem cần một hình thức phối hợp vì mỗi loại tài nguyên chỉ có một controller duy nhất. Khi nhiều bên cùng sửa đổi controller, xung đột tất yếu xảy ra. Các cgroup controller có thể được nhiều dự án như `libvirt`, `systemd`, `lxc` và những dự án khác sử dụng đồng thời. Khi chỉ làm việc thông qua cgroups filesystem operation và mọi dự án đều cố áp dụng policy riêng qua cgroups ở mức quá thấp mà không biết đến nhau, chúng
 
 có thể vô tình ghi đè nhau. Nếu mỗi bên giao tiếp daemon chẳng hạn sẽ tránh xung đột. Xem thêm `libcg` tại `http://libcg.sourceforge.net/`.
 
-Khác namespace, không thêm system call mới để triển khai cgroup. Giống namespace, nhiều cgroup lồng nhau được. Có bổ sung code trong boot, chủ yếu khởi tạo, và trong subsystem như memory/security. Sau đây là danh sách ngắn một phần tác vụ làm được:
+Khác với namespace, không có system call mới nào được bổ sung để triển khai cgroup subsystem. Giống như namespace, nhiều cgroup có thể được lồng nhau. Code đã được bổ sung trong boot phase, chủ yếu để khởi tạo cgroups subsystem, và trong nhiều subsystem khác, chẳng hạn memory subsystem hoặc security subsystem. Sau đây là một danh sách ngắn, chưa đầy đủ, về các tác vụ bạn có thể thực hiện với cgroup:
 
 - Gán tập CPU cho tập process bằng cpusets controller. Cũng điều khiển NUMA node cấp phát memory bằng controller này.
 
-- Thao tác out of memory (`oom`) killer hoặc tạo process có memory giới hạn bằng memory controller (`memcg`). Có ví dụ phía sau.
+- Điều chỉnh hoạt động của out of memory (`oom`) killer hoặc tạo một process có lượng memory giới hạn bằng memory cgroup controller (`memcg`). Bạn sẽ thấy một ví dụ ở phần sau của chương này.
 
 - Gán permission cho device dưới `/dev` bằng devices cgroup. Có ví dụ trong phần “Cgroup Devices – Ví dụ đơn giản”.
 
@@ -834,7 +834,7 @@ static const struct super_operations cgroup_ops = {
 
 Đăng ký như filesystem khác bằng method `register_filesystem()` trong method `cgroup_init()`; xem `kernel/cgroup.c`.
 
-- Entry `sysfs` `/sys/fs/cgroup` mặc định tạo khi khởi tạo subsystem bằng `kobject_create_and_add("cgroup", fs_kobj)` trong method `cgroup_init()`. Controller cũng có thể mount ở thư mục khác.
+- Entry `sysfs` sau đây, `/sys/fs/cgroup`, được tạo mặc định khi cgroup subsystem được khởi tạo. Việc này được thực hiện bằng cách gọi `kobject_create_and_add("cgroup", fs_kobj)` trong method `cgroup_init()`. Lưu ý rằng cgroup controller cũng có thể được mount tại các thư mục khác.
 
 - Có global array object `cgroup_subsys` tên `subsys`, trong `kernel/cgroup.c` (từ kernel 3.11 đổi tên `subsys` thành `cgroup_subsys`). Array có CGROUP\_SUBSYS\_COUNT phần tử. Subsystem xuất entry `procfs` `/proc/cgroups`. Có thể hiển thị phần tử global array `subsys` theo hai cách:
 
@@ -848,13 +848,13 @@ static const struct super_operations cgroup_ops = {
 
 - `cgroup.event_control`: Cho nhận notification từ cgroup bằng system call `eventfd()`. Xem `man 2 eventfd` và `fs/eventfd.c`.
 
-- `tasks`: Danh sách PID gắn group. Gắn process bằng ghi PID vào control file `tasks`, do method `cgroup_attach_task()` xử lý trong `kernel/cgroup.c`. Hiển thị cgroup process gắn bằng `cat /proc/<processPid>/cgroup`, do method `proc_cgroup_show()` trong `kernel/cgroup.c` xử lý.
+- `tasks`: Danh sách PID thuộc group này. Việc gắn một process vào cgroup được thực hiện bằng cách ghi giá trị PID của nó vào control file `tasks` và được xử lý bởi method `cgroup_attach_task()` trong `kernel/cgroup.c`. Để hiển thị các cgroup mà một process thuộc về, sử dụng `cat /proc/<processPid>/cgroup`. Thao tác này được xử lý trong kernel bởi method `proc_cgroup_show()` trong `kernel/cgroup.c`.
 
-- `cgroup.procs`: Danh sách thread group ID gắn cgroup. Entry `tasks` cho gắn thread cùng process vào controller khác, còn `cgroup.procs` ở granularity process-level (mọi thread process chuyển cùng và thuộc cùng cgroup).
+- `cgroup.procs`: Danh sách các thread group id thuộc cgroup này. Entry `tasks` cho phép gắn các thread của cùng một process vào những cgroup controller khác nhau, trong khi `cgroup.procs` hoạt động ở mức process-level (tất cả thread của một process được chuyển cùng nhau và thuộc cùng một cgroup).
 
 - Ngoài bốn control file này, control file tên `release_agent` chỉ được tạo cho topmost cgroup root object. Giá trị file là path của executable được thực thi khi process cuối của cgroup kết thúc; phải đặt `notify_on_release` đã nói trước đó để bật tính năng `release_agent`. Có thể gán `release_agent` làm cgroup mount option; ví dụ đây là trường hợp của `systemd` trong Fedora. Cơ chế `release_agent` dựa trên user-mode helper: method `call_usermodehelper()` được gọi và userspace process mới được tạo mỗi lần `release_agent` được kích hoạt, tốn kém về hiệu năng. Xem: “The past, present, and future of control groups”, `lwn.net/Articles/574317/`. Chi tiết triển khai `release_agent` xem method `cgroup_release_agent()` trong `kernel/cgroup.c`.
 
-- Ngoài bốn default file và file topmost-only `release_agent`, mỗi subsystem có thể tạo file riêng bằng array object `cftype` (Control File type), gán cho member `base_cftypes` của object `cgroup_subsys`. Chẳng hạn memory controller định nghĩa control file `usage_in_bytes`:
+- Ngoài bốn control file mặc định này và control file topmost-only `release_agent`, mỗi subsystem có thể tạo các control file riêng. Việc này được thực hiện bằng cách định nghĩa một array chứa các object `cftype` (Control File type) và gán array đó cho member `base_cftypes` của object `cgroup_subsys`. Ví dụ, với memory cgroup controller, chúng ta có định nghĩa sau cho control file `usage_in_bytes`:
 
 ```
 static struct cftype mem_cgroup_files[] = {
@@ -970,7 +970,7 @@ echo 20M \> /sys/fs/cgroup/memory/0/memory.limit\_in\_bytes
 
 ### Module net\_prio
 
-Network priority control group (`net_prio`) cung cấp interface đặt priority lưu lượng do ứng dụng userspace tạo. Thường làm bằng socket option SO\_PRIORITY, đặt priority SKB, nhưng không phải luôn muốn dùng option. Để hỗ trợ module `net_prio`, thêm object `priomap`, instance structure `netprio_map`, vào object `net_device`. Hãy xem structure `netprio_map`:
+Network priority control group (`net_prio`) cung cấp một interface để thiết lập priority của network traffic do các userspace application tạo ra. Thông thường, có thể thực hiện việc này bằng cách thiết lập socket option SO\_PRIORITY, qua đó đặt priority của SKB, nhưng không phải lúc nào cũng muốn sử dụng socket option này. Để hỗ trợ module `net_prio`, một object tên là `priomap`, là instance của structure `netprio_map`, đã được bổ sung vào object `net_device`. Hãy xem structure `netprio_map`:
 
 ```
 struct netprio_map {
@@ -996,7 +996,7 @@ Lưu ý Phải bật CONFIG\_NETPRIO\_CGROUP để dùng net\_prio.
 
 ### Classifier cls\_cgroup
 
-Classifier `cls_cgroup` cung cấp interface gán class identifier (`classid`) cho network packet. Dùng cùng công cụ `tc` để đặt priority khác nhau cho packet từ cgroup khác nhau như ví dụ sau. Module `cls_cgroup` xuất entry cgroup `sysfs` `net_cls.classid`. Control group classifier (`cls_cgroup)` merge kernel 2.6.29, do Thomas Graf phát triển. Giống module `net_prio` phần trước, module này dưới 400 dòng code, chứng minh thêm controller không phải tác vụ nặng. Ví dụ dùng classifier (phải load kernel module `cls_cgroup.ko` nếu CONFIG\_NETPRIO\_CGROUP là module thay vì built-in):
+Classifier `cls_cgroup` cung cấp một interface để gắn class identifier (`classid`) cho network packet. Bạn có thể kết hợp nó với công cụ `tc` để gán priority khác nhau cho packet từ các cgroup khác nhau, như ví dụ sắp tới minh họa. Module `cls_cgroup` export một entry vào cgroup `sysfs`, là `net_cls.classid`. Control group classifier (`cls_cgroup)` được merge trong kernel 2.6.29 và do Thomas Graf phát triển. Giống module `net_prio` đã thảo luận ở mục trước, cgroup kernel module này cũng có dưới 400 dòng code, một lần nữa chứng tỏ việc bổ sung cgroup controller bằng kernel module không phải là một tác vụ nặng nề. Sau đây là ví dụ sử dụng control group classifier (lưu ý rằng bạn phải load kernel module `cls_cgroup.ko` nếu CONFIG\_NETPRIO\_CGROUP được thiết lập dưới dạng module thay vì built-in):
 
 ```
 mkdir /sys/fs/cgroup/net_cls
@@ -1021,7 +1021,7 @@ Tôi kết thúc nội dung cgroup bằng phần ngắn về mount.
 
 ### Mount Cgroup Subsystem
 
-Có thể mount subsystem ở mount point khác `/sys/fs/cgroup` mặc định. Chẳng hạn mount memory controller tại `/mycgroup/mymemtest` bằng chuỗi lệnh:
+Bạn cũng có thể mount một cgroup subsystem tại các mount point khác với `/sys/fs/cgroup`, là mount point được tạo mặc định. Ví dụ, bạn có thể mount memory controller tại `/mycgroup/mymemtest` bằng chuỗi thao tác sau:
 
 ```
 mkdir –p /mycgroup/mymemtest
@@ -1036,7 +1036,7 @@ Một số mount option:
 
 - `release_agent`: Path executable chạy khi process cuối cgroup kết thúc. `Systemd` dùng mount option cgroup `release_agent`.
 
-- `noprefix`: Bỏ prefix control file. Mỗi controller có prefix riêng; chẳng hạn entry `mem_exclusive` của cpuset xuất hiện `cpuset.mem_exclusive`. Mount option noprefix tránh thêm prefix. Ví dụ,
+- `noprefix`: Không sử dụng prefix trong control file. Mỗi cgroup controller có prefix riêng cho các control file của nó; ví dụ, entry `mem_exclusive` của cpuset controller xuất hiện dưới dạng `cpuset.mem_exclusive`. Mount option noprefix ngăn việc thêm prefix của controller. Ví dụ,
 
 ```
 mkdir /cgroup
@@ -1778,7 +1778,7 @@ Hình 14-8 thể hiện block diagram của NFC Linux Architecture.
 
 Hình 14-8. NFC Linux Kernel Architecture. (Lưu ý NFC Digital layer không có trong kernel 3.9. Sẽ tích hợp vào kernel 3.13.)
 
-Có thể hiểu rõ hơn hierarchy trong hình bằng cách xem chi tiết triển khai đăng ký NFC device driver trực tiếp với NFC core và với HCI, NCI layer:
+Bạn có thể hiểu rõ hơn hierarchy trong hình bằng cách xem chi tiết triển khai việc đăng ký NFC device driver trực tiếp với NFC core và với các HCI, NCI layer:
 
 - Đăng ký trực tiếp với NFC core thường thực hiện trong callback `probe()` của driver. Các bước đăng ký:
 
@@ -1798,7 +1798,7 @@ Có thể hiểu rõ hơn hierarchy trong hình bằng cách xem chi tiết tri�
 
 - Xem `drivers/nfc/pn544/pn544.c` và `drivers/nfc/microread/microread.c`.
 
-- Đăng ký với NCI layer cũng thường trong callback `probe()` của driver, ví dụ trong driver `nfcwilink`. Các bước đăng ký:
+- Việc đăng ký với NCI layer cũng thường được thực hiện trong callback `probe()` của driver, ví dụ trong driver `nfcwilink`. Việc đăng ký được thực hiện theo các bước sau:
 
 - Tạo object `nci_dev` bằng lời gọi method `nci_allocate_device()`.
 
@@ -2488,7 +2488,7 @@ http://www.linuxplumbersconf.org/2013/ocw/sessions/1491.
 
 ### Android internals: Tài liệu
 
-Dù có nhiều tài liệu về phát triển ứng dụng Android (sách, mailing list, forum, khóa học, v.v.), rất ít tài liệu về Android internals. Với độc giả muốn tìm hiểu thêm, tôi đề xuất:
+Mặc dù có nhiều tài liệu về phát triển ứng dụng cho Android (sách, mailing list, diễn đàn, khóa học, v.v.), tài liệu về cách hoạt động bên trong Android lại rất ít. Với những độc giả muốn tìm hiểu thêm, tôi đề xuất các tài liệu sau:
 
 - Sách Embedded Android: Porting, Extending, and Customizing, của Karim Yaghmour (O’Reilly Media, 2013)
 
