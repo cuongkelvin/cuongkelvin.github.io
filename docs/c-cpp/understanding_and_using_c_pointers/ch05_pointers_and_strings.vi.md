@@ -1,57 +1,57 @@
 # Chương 5. Pointer và string
 
-String có thể được cấp trong các vùng memory khác nhau, và pointer thường hỗ trợ string operation. Pointer hỗ trợ cấp động string và truyền string cho function. Hiểu rõ pointer và cách dùng với string giúp programmer phát triển application đúng và hiệu quả.
+String có thể được cấp phát tại những vùng memory khác nhau, và pointer thường được sử dụng để hỗ trợ các string operation. Pointer hỗ trợ cấp phát động string và truyền string cho function. Hiểu rõ pointer và cách sử dụng chúng với string giúp lập trình viên phát triển những ứng dụng đúng đắn và hiệu quả.
 
-String là thành phần phổ biến của nhiều application và là chủ đề phức tạp. Chương này tìm hiểu nhiều cách khai báo và khởi tạo string, việc dùng literal pool trong C application cùng tác động của nó. Ngoài ra, xem các operation phổ biến như so sánh, copy và nối string.
+String là một thành phần thường gặp trong nhiều ứng dụng và là một chủ đề phức tạp. Trong chương này, chúng ta sẽ tìm hiểu các cách khai báo và khởi tạo string khác nhau. Chúng ta sẽ xem xét việc sử dụng literal pool trong ứng dụng C và tác động của chúng. Ngoài ra, chúng ta sẽ tìm hiểu những string operation phổ biến như so sánh, copy và nối string.
 
-String thường được truyền vào và trả về từ function như pointer đến `char`. Khi truyền, có thể dùng pointer đến `char` hoặc pointer đến constant `char`. Cách sau bảo vệ string khỏi bị sửa trong function. Nhiều ví dụ chương này minh họa thêm các khái niệm của chương function; điểm khác là không cần truyền kích thước cho function.
+String thường được truyền vào và trả về từ function dưới dạng pointer tới `char`. Khi truyền một string, chúng ta có thể dùng pointer tới `char` hoặc pointer tới constant `char`. Cách thứ hai bảo vệ string khỏi bị sửa đổi bên trong function. Nhiều ví dụ trong chương này minh họa thêm những khái niệm đã trình bày trong chương về function. Điểm khác biệt là không cần truyền kích thước của string cho function.
 
-Cũng có thể trả string từ function để đáp ứng yêu cầu. String có thể được truyền vào để sửa hoặc cấp phát bên trong function. Cũng có thể trả string cấp phát static. Chúng ta sẽ xét từng cách.
+Một function cũng có thể trả về string để đáp ứng một yêu cầu. String này có thể được truyền vào function để sửa đổi hoặc được cấp phát bên trong function. Chúng ta cũng có thể trả về một string được cấp phát tĩnh. Từng cách tiếp cận này sẽ được xem xét.
 
-Cũng xem function pointer và cách hỗ trợ sorting operation. Hiểu cách pointer hoạt động trong các tình huống này là trọng tâm chương.
+Chúng ta cũng sẽ xem xét việc sử dụng function pointer và cách chúng hỗ trợ các thao tác sắp xếp. Hiểu cách pointer hoạt động trong những tình huống này là trọng tâm chính của chương.
 
 ## Cơ bản về string
 
-String là chuỗi character kết thúc bằng ASCII `NUL`. ASCII character `NUL` biểu diễn là `\0`. String thường lưu trong array hoặc memory cấp từ heap. Tuy nhiên, không phải mọi array character đều là string. Array `char` có thể không chứa `NUL`. Array `char` từng được dùng biểu diễn đơn vị integer nhỏ hơn như boolean để tiết kiệm memory cho application.
+String là một dãy character kết thúc bằng ASCII character `NUL`. ASCII character `NUL` được biểu diễn là `\0`. String thường được lưu trong array hoặc trong memory cấp phát từ heap. Tuy nhiên, không phải mọi array gồm các character đều là string. Một array `char` có thể không chứa character `NUL`. Array `char` từng được dùng để biểu diễn những đơn vị integer nhỏ hơn, chẳng hạn boolean, nhằm tiết kiệm memory trong ứng dụng.
 
 Có hai loại string trong C:
 
 Byte string
 
-Gồm chuỗi data type `char`
+Gồm một dãy phần tử thuộc data type `char`
 
 Wide string
 
-Gồm chuỗi data type `wchar_t`
+Gồm một dãy phần tử thuộc data type `wchar_t`
 
-Data type `wchar_t` dùng cho wide character, có thể rộng 16 hoặc 32 bit. Cả hai loại string đều kết thúc bằng `NUL`. Byte string function nằm trong string.h; wide string function trong wchar.h. Trừ khi nói khác, chương này dùng byte string. Wide char được tạo để hỗ trợ character set non-Latin, hữu ích trong application hỗ trợ ngoại ngữ.
+Data type `wchar_t` được dùng cho wide character và có thể rộng 16 hoặc 32 bit. Cả hai loại string đều kết thúc bằng character `NUL`. Các byte string function nằm trong file string.h. Các wide string function nằm trong file wchar.h. Trừ khi có ghi chú khác, chúng ta sẽ dùng byte string trong chương này. Wide char được tạo ra để hỗ trợ các character set non-Latin và hữu ích trong những ứng dụng hỗ trợ ngoại ngữ.
 
-Độ dài string là số character, không gồm `NUL`. Khi cấp memory cho string, nhớ cấp đủ cho mọi character cộng thêm `NUL`.
+Độ dài của string là số character trong string, không bao gồm character `NUL`. Khi cấp phát memory cho string, hãy nhớ cấp đủ memory cho tất cả character cộng thêm character `NUL`.
 
 ![image](images/ch05/fig05-01.png)
 
-Nhớ rằng `NULL` khác `NUL`. `NULL` dùng như pointer đặc biệt, thường định nghĩa `((void*)0)`. `NUL` là `char`, định nghĩa `'\0'`. Không nên dùng thay nhau.
+Hãy nhớ rằng `NULL` và `NUL` khác nhau. `NULL` được dùng làm một pointer đặc biệt và thường được định nghĩa là `((void*)0)`. `NUL` là một `char` và được định nghĩa là `'\0'`. Không nên sử dụng chúng thay thế cho nhau.
 
-Character constant là chuỗi character trong nháy đơn. Thường chỉ có một character nhưng có thể nhiều hơn như escape sequence. Trong C, chúng có type `int`. Minh họa như sau:
+Character constant là những dãy character đặt trong dấu nháy đơn. Thông thường chúng gồm một character, nhưng có thể chứa nhiều hơn một character, như trong các escape sequence. Trong C, chúng có type `int`. Điều này được minh họa như sau:
 
 ```
 printf("%d\n",sizeof(char));
 printf("%d\n",sizeof('a'));
 ```
 
-Khi chạy, kích thước `char` là 1 còn character literal là 4. Sự bất thường này là hệ quả thiết kế ngôn ngữ.
+Khi thực thi, kích thước của `char` sẽ là 1, còn kích thước của character literal sẽ là 4. Sự bất thường này là hệ quả của thiết kế ngôn ngữ.
 
 ### Khai báo string
 
-Có ba cách khai báo string: literal, array character hoặc pointer đến character. String literal là chuỗi character trong nháy kép, thường dùng để khởi tạo. Chúng nằm trong string literal pool bàn ở mục sau.
+Có ba cách khai báo string: dưới dạng literal, dưới dạng array gồm các character hoặc dùng pointer tới một character. String literal là một dãy character đặt trong dấu nháy kép. String literal thường được dùng để khởi tạo. Chúng nằm trong một string literal pool được thảo luận ở phần tiếp theo.
 
-Đừng nhầm string literal với character trong nháy đơn—đó là character literal. Như sẽ thấy, dùng character literal thay string literal có thể gây vấn đề. Ví dụ sau khai báo array header chứa tối đa 31 character. Vì string cần ký tự kết thúc `NUL`, array khai báo 32 character chỉ dùng 31 element cho văn bản thực. Vị trí string tùy nơi đặt declaration, sẽ tìm hiểu trong “Khởi tạo string” trang 110.
+Không được nhầm string literal với các character đặt trong dấu nháy đơn; những character đó là character literal. Như sẽ thấy trong các phần sau, dùng character literal thay cho string literal có thể gây vấn đề. Ví dụ array character dưới đây khai báo một array header có kích thước đủ chứa tối đa 31 character. Vì string cần character kết thúc `NUL`, array được khai báo chứa 32 character chỉ có thể dùng 31 phần tử cho văn bản thực sự của string. Vị trí của string phụ thuộc vào nơi đặt declaration. Chúng ta sẽ tìm hiểu vấn đề này trong phần “Khởi tạo string” ở trang 110.
 
 ```
 char header[32];
 ```
 
-Sau đây minh họa pointer đến character. Vì chưa khởi tạo, nó không tham chiếu string nào. Độ dài và vị trí string chưa được chỉ định.
+Ví dụ dưới đây minh họa một pointer tới character. Vì chưa được khởi tạo, nó không tham chiếu tới string nào. Lúc này, độ dài và vị trí của string chưa được chỉ định.
 
 ```
 char *header;
@@ -59,21 +59,21 @@ char *header;
 
 ### String literal pool
 
-Khi định nghĩa literal, chúng thường được đưa vào literal pool. Vùng memory này chứa các chuỗi character tạo thành string. Khi literal dùng nhiều lần, thường chỉ có một bản sao trong string literal pool, giảm không gian application. Vì literal thường được coi immutable, một bản sao không gây hại. Tuy nhiên, không nên giả định chỉ có một bản sao hay literal immutable. Phần lớn compiler có option tắt string pooling. Khi đó literal có thể bị nhân bản, mỗi bản có address riêng.
+Khi các literal được định nghĩa, chúng thường được đưa vào literal pool. Vùng memory này lưu các dãy character tạo thành string. Khi một literal được dùng nhiều lần, thông thường string literal pool chỉ có một bản sao của string. Điều này giảm lượng vùng lưu trữ cần thiết cho ứng dụng. Vì literal thường được xem là immutable, việc chỉ có một bản sao không gây hại. Tuy nhiên, không nên giả định rằng luôn chỉ có một bản sao hoặc literal luôn immutable. Phần lớn compiler cung cấp option tắt string pooling. Khi tắt tính năng này, literal có thể được nhân bản, với mỗi bản có address riêng.
 
 ![image](images/ch05/fig05-02.png)
 
-GCC dùng option `-fwritable-strings` tắt string pooling. Microsoft Visual Studio dùng `/GF` bật string pooling.
+GCC dùng option `-fwritable-strings` để tắt string pooling. Trong Microsoft Visual Studio, option `/GF` bật string pooling.
 
-Hình 5-1 minh họa memory có thể được cấp cho literal pool.
+Hình 5-1 minh họa cách memory có thể được cấp phát cho một literal pool.
 
 ![image](images/ch05/fig05-03.png)
 
-Hình 5-1. String literal pool String literal thường được cấp trong read-only memory, khiến chúng immutable. Không quan trọng literal dùng ở đâu, global, static hay local. Theo nghĩa này string literal không có scope.
+Hình 5-1. String literal pool. String literal thường được cấp phát trong read-only memory, khiến chúng trở thành immutable. Không quan trọng string literal được dùng ở đâu hoặc nó là global, static hay local. Theo nghĩa này, string literal không có scope.
 
 #### Khi string literal không phải constant
 
-Phần lớn compiler coi string literal là constant, không sửa được. Tuy nhiên, một số compiler như GCC cho phép sửa string literal. Xét ví dụ:
+Trong phần lớn compiler, string literal được xem là constant và không thể sửa đổi string. Tuy nhiên, một số compiler, chẳng hạn GCC, cho phép sửa đổi string literal. Hãy xét ví dụ sau:
 
 ```
 char *tabHeader  = "Sound";
@@ -81,7 +81,7 @@ char *tabHeader  = "Sound";
 printf("%s\n",tabHeader);   // Displays "Lound"
 ```
 
-Điều này đổi literal thành “Lound.” Thường không mong muốn và nên tránh. Đặt variable thành constant như sau cung cấp giải pháp một phần. Mọi nỗ lực sửa string sẽ gây compile-time error.
+Thao tác này sẽ đổi literal thành “Lound.” Thông thường điều này không mong muốn và nên tránh. Khai báo variable là constant như sau sẽ giải quyết một phần vấn đề. Mọi nỗ lực sửa string đều dẫn đến compile-time error.
 
 ```
 const char *tabHeader  = "Sound";
@@ -89,19 +89,19 @@ const char *tabHeader  = "Sound";
 
 ### Khởi tạo string
 
-Cách khởi tạo tùy variable được khai báo array character hay pointer đến character. Memory dùng cho string là array hoặc memory do pointer trỏ đến. Khi khởi tạo, có thể dùng string literal, chuỗi character hoặc lấy character từ nguồn khác như standard input. Chúng ta sẽ xét các cách này.
+Khi khởi tạo string, cách thực hiện phụ thuộc vào việc variable được khai báo là array character hay pointer tới character. Memory dùng cho string sẽ là một array hoặc vùng memory được pointer trỏ tới. Khi khởi tạo string, chúng ta có thể dùng string literal, một dãy character hoặc lấy character từ nguồn khác, chẳng hạn standard input. Chúng ta sẽ xem xét những cách này.
 
 #### Khởi tạo array char
 
-Có thể khởi tạo array `char` bằng initialization operator. Ví dụ sau khởi tạo array header bằng character trong string literal:
+Có thể khởi tạo array `char` bằng initialization operator. Trong ví dụ sau, array header được khởi tạo bằng các character chứa trong một string literal:
 
 ```
 char header[] = "Media Player";
 ```
 
-Literal “Media Player” dài 12 character nên cần 13 byte biểu diễn. Array được cấp 13 byte chứa string. Initialization copy character vào array với `NUL` kết thúc, như Hình 5-2, giả định declaration nằm trong function `main`.
+Vì literal “Media Player” dài 12 character, cần 13 byte để biểu diễn nó. Array được cấp phát 13 byte để lưu string. Quá trình khởi tạo copy các character này vào array và kết thúc bằng character `NUL`, như Hình 5-2 minh họa, giả sử declaration nằm trong function `main`.
 
-Cũng có thể khởi tạo array bằng `strcpy`, bàn kỹ trong “Copy string” trang 116. Chuỗi sau copy string literal vào array.
+Cũng có thể khởi tạo array bằng function `strcpy`, được thảo luận chi tiết trong phần “Copy string” ở trang 116. Trong đoạn lệnh sau, string literal được copy vào array.
 
 ```
 char header[13];
@@ -112,7 +112,7 @@ strcpy(header,"Media Player");
 
 Hình 5-2. Khởi tạo array char
 
-Cách tỉ mỉ hơn là gán từng character như sau:
+Một kỹ thuật tốn công hơn là gán từng character riêng lẻ như sau:
 
 ```
 header[0] = 'M';
@@ -123,7 +123,7 @@ header[12] = '\0';
 
 ![image](images/ch05/fig05-01.png)
 
-Assignment sau không hợp lệ. Không thể gán address string literal cho tên array.
+Phép gán sau không hợp lệ. Chúng ta không thể gán address của một string literal cho tên array.
 
 ```
 char header2[];
@@ -132,26 +132,26 @@ header2 = "Media Player";
 
 #### Khởi tạo pointer đến char
 
-Dynamic memory allocation linh hoạt và có thể cho memory tồn tại lâu hơn. Declaration sau dùng minh họa kỹ thuật:
+Sử dụng dynamic memory allocation đem lại sự linh hoạt và có thể cho phép memory tồn tại lâu hơn. Declaration sau sẽ được dùng để minh họa kỹ thuật này:
 
 ```
 char *header;
 ```
 
-Cách khởi tạo phổ biến là dùng `malloc` và `strcpy` để cấp memory rồi copy literal vào string:
+Một cách phổ biến để khởi tạo string này là dùng các function `malloc` và `strcpy` để cấp phát memory rồi copy một literal vào string, như minh họa dưới đây:
 
 ```
 char *header = (char*) malloc(strlen("Media Player")+1);
 strcpy(header,"Media Player");
 ```
 
-Giả định code nằm trong main function, Hình 5-3 cho trạng thái program stack.
+Giả sử code nằm trong function main, Hình 5-3 cho thấy trạng thái của program stack.
 
 ![image](images/ch05/fig05-05.png)
 
 Hình 5-3. Khởi tạo pointer đến char
 
-Trong cách dùng `malloc` trước, dùng `strlen` với argument string literal. Có thể khai báo kích thước tường minh như sau:
+Trong lần sử dụng function `malloc` trước đó, chúng ta dùng function `strlen` với một string literal làm argument. Chúng ta cũng có thể khai báo kích thước một cách tường minh như dưới đây:
 
 ```
 char *header = (char*) malloc(13);
@@ -163,9 +163,9 @@ Khi xác định độ dài string để dùng với `malloc`:
 
 - Luôn nhớ cộng một cho ký tự kết thúc `NUL`.
 
-- Đừng dùng `sizeof`. Hãy dùng `strlen` xác định độ dài string hiện có. Operator `sizeof` trả kích thước array hoặc pointer, không phải độ dài string.
+- Đừng dùng operator `sizeof`. Thay vào đó, hãy dùng function `strlen` để xác định độ dài một string hiện có. Operator `sizeof` trả về kích thước của array hoặc pointer, chứ không phải độ dài string.
 
-Thay vì string literal và `strcpy` để khởi tạo, có thể dùng:
+Thay vì dùng string literal và function `strcpy` để khởi tạo string, chúng ta có thể dùng cách sau:
 
 ```
 *(header + 0) = 'M';
@@ -174,7 +174,7 @@ Thay vì string literal và `strcpy` để khởi tạo, có thể dùng:
 *(header + 12) = '\0';
 ```
 
-Address string literal có thể gán trực tiếp cho character pointer như sau. Tuy nhiên, không tạo bản sao string mới, như Hình 5-4:
+Có thể gán trực tiếp address của một string literal cho character pointer như dưới đây. Tuy nhiên, thao tác này không tạo ra một bản sao mới của string, như Hình 5-4 minh họa:
 
 ```
 char *header = "Media Player";
@@ -186,7 +186,7 @@ Hình 5-4. Copy address string literal vào pointer
 
 ![image](images/ch05/fig05-01.png)
 
-Thử khởi tạo pointer đến char bằng character literal không hoạt động. Vì character literal có type `int`, đó là cố gán integer cho character pointer. Khi dereference, thường làm application kết thúc:
+Việc cố khởi tạo pointer tới char bằng character literal sẽ không hoạt động. Vì character literal có type `int`, chúng ta đang cố gán một integer cho character pointer. Điều này thường làm ứng dụng kết thúc khi pointer được dereference:
 
 ```
 char* prefix = '+';   // Illegal
@@ -202,7 +202,7 @@ prefix = (char*)malloc(2);
 
 #### Khởi tạo string từ standard input
 
-String cũng có thể khởi tạo từ nguồn ngoài như standard input. Tuy nhiên, có thể mắc initialization error khi đọc string như sau. Vấn đề là chưa cấp memory cho variable `command` trước khi dùng:
+String cũng có thể được khởi tạo từ một nguồn bên ngoài, chẳng hạn standard input. Tuy nhiên, khi đọc string từ standard input, có thể xảy ra các lỗi khởi tạo như dưới đây. Vấn đề là chúng ta chưa cấp memory cho variable `command` trước khi cố sử dụng nó:
 
 ```
 char *command;
@@ -210,11 +210,11 @@ printf("Enter a Command: ");
 scanf("%s",command);
 ```
 
-Để xử lý, trước tiên cấp memory cho pointer hoặc dùng array kích thước cố định thay pointer. Nhưng người dùng có thể nhập nhiều hơn lượng chứa được. Chương 4 minh họa cách vững chắc hơn.
+Để giải quyết vấn đề này, trước hết chúng ta phải cấp phát memory cho pointer hoặc dùng array có kích thước cố định thay cho pointer. Tuy nhiên, người dùng có thể nhập nhiều dữ liệu hơn khả năng lưu trữ của những cách này. Chương 4 minh họa một cách tiếp cận vững chắc hơn.
 
 #### Tóm tắt vị trí string
 
-String có thể được cấp ở một số vị trí. Ví dụ sau minh họa các biến thể, còn Hình 5-5 cho bố trí memory:
+String có thể được cấp phát tại một số vị trí khác nhau. Ví dụ sau minh họa những biến thể có thể có, còn Hình 5-5 minh họa cách bố trí các string này trong memory:
 
 ```
 char* globalHeader = "Chapter";
@@ -230,7 +230,7 @@ void displayHeader() {
 }
 ```
 
-Biết vị trí string hữu ích khi tìm hiểu chương trình và dùng pointer truy cập. Vị trí quyết định thời gian tồn tại và phần application có thể truy cập. Ví dụ string cấp trong global memory luôn có sẵn, nhiều function truy cập được. Static string luôn có sẵn nhưng chỉ function định nghĩa truy cập được. String trong heap tồn tại đến khi giải phóng, có thể dùng trong nhiều function. Hiểu điều này giúp quyết định có cơ sở.
+Biết string nằm ở đâu hữu ích khi tìm hiểu cách chương trình hoạt động và khi dùng pointer truy cập string. Vị trí string quyết định thời gian tồn tại và những phần nào của ứng dụng có thể truy cập nó. Chẳng hạn, string được cấp phát trong global memory luôn tồn tại và có thể được nhiều function truy cập. Static string luôn tồn tại nhưng chỉ function định nghĩa nó mới truy cập được. String được cấp phát trên heap tồn tại cho đến khi được giải phóng và có thể được dùng trong nhiều function. Hiểu những vấn đề này giúp bạn đưa ra quyết định có cơ sở.
 
 ![image](images/ch05/fig05-07.png)
 
@@ -238,19 +238,19 @@ Hình 5-5. Cấp phát string trong memory
 
 ## Standard string operation
 
-Phần này xem cách dùng pointer trong operation string phổ biến, gồm so sánh, copy và nối.
+Trong phần này, chúng ta sẽ xem xét việc sử dụng pointer trong những string operation phổ biến, gồm so sánh, copy và nối string.
 
 ### So sánh string
 
-So sánh string có thể là phần không thể thiếu của application. Chúng ta xét chi tiết vì so sánh sai có thể cho kết quả gây nhầm hoặc không hợp lệ. Hiểu cơ chế giúp tránh operation sai, đồng thời áp dụng được cho tình huống tương tự.
+So sánh string có thể là một phần không thể thiếu của ứng dụng. Chúng ta sẽ xem xét chi tiết cách thực hiện so sánh string, bởi so sánh sai có thể dẫn tới kết quả gây nhầm lẫn hoặc không hợp lệ. Hiểu cách các phép so sánh được thực hiện giúp bạn tránh những thao tác sai. Hiểu biết này cũng áp dụng được cho những tình huống tương tự.
 
-Cách standard so sánh string là dùng `strcmp`. Prototype như sau:
+Cách chuẩn để so sánh string là dùng function `strcmp`. Prototype của nó như sau:
 
 ```
 int strcmp(const char *s1, const char *s2);
 ```
 
-Hai string được truyền như pointer đến constant `char`, cho phép dùng function không sợ sửa string. Function trả một trong ba giá trị:
+Cả hai string cần so sánh đều được truyền dưới dạng pointer tới constant `char`. Nhờ vậy, chúng ta có thể dùng function mà không sợ nó sửa đổi các string được truyền vào. Function này trả về một trong ba giá trị:
 
 Âm
 
@@ -264,7 +264,7 @@ Dương
 
 Nếu `s1` đứng sau `s2` theo thứ tự từ điển
 
-Return value dương và âm hữu ích để sort string theo bảng chữ cái. Sau đây minh họa kiểm tra bằng nhau. Input người dùng lưu trong `command`, rồi so với string literal:
+Những giá trị trả về dương và âm hữu ích cho việc sắp xếp string theo thứ tự bảng chữ cái. Dưới đây minh họa việc dùng function này để kiểm tra hai string có bằng nhau không. Nội dung người dùng nhập được lưu trong `command`, rồi được so sánh với string literal:
 
 ```
 char command[16];
@@ -278,9 +278,9 @@ if (strcmp(command, "Quit") == 0) {
 }
 ```
 
-Hình 5-6 cho memory allocation.
+Memory cho ví dụ này được cấp phát như minh họa trong Hình 5-6.
 
-Có vài cách sai để so sánh hai string. Cách đầu sau thử dùng assignment operator để so sánh:
+Có một vài cách không đúng để so sánh hai string. Cách đầu tiên dưới đây cố dùng assignment operator để thực hiện phép so sánh:
 
 ```
 char command[16];
@@ -293,13 +293,13 @@ if(command = "Quit") {
    ...
 ```
 
-Thứ nhất, nó không so sánh; thứ hai, sinh syntax error báo type không tương thích. Không thể gán address của string
+Thứ nhất, thao tác này không thực hiện phép so sánh; thứ hai, nó dẫn đến một thông báo syntax error về các type không tương thích. Chúng ta không thể gán address của một string
 
 ![image](images/ch05/fig05-08.png)
 
 Hình 5-6. Ví dụ strcmp
 
-literal cho tên array. Ví dụ này cố gán address string literal, 600, cho `command`. Vì `command` là array, không thể gán giá trị cho variable mà không dùng array subscript.
+literal cho tên array. Trong ví dụ này, chúng ta đã cố gán address 600 của string literal cho `command`. Vì `command` là array, không thể gán giá trị cho variable này mà không dùng array subscript.
 
 Cách thứ hai dùng equality operator:
 
@@ -314,19 +314,19 @@ if(command == "Quit") {
    ...
 ```
 
-Kết quả phải false vì đang so address `command`, 300, với address string literal, 600. Equality operator so address chứ không so nội dung tại address. Dùng riêng tên array hoặc string literal trả address.
+Biểu thức này phải được đánh giá là false, vì chúng ta đang so sánh address 300 của `command` với address 600 của string literal. Equality operator so sánh các address, chứ không so sánh nội dung được lưu tại những address đó. Dùng riêng tên array hoặc string literal sẽ trả về address của chúng.
 
 ### Copy string
 
-Copy string là operation phổ biến, thường bằng `strcpy` có prototype:
+Copy string là một thao tác phổ biến và thường được thực hiện bằng function `strcpy`, có prototype như sau:
 
 ```
 char* strcpy(char *s1, const char *s2);
 ```
 
-Phần này trình bày quy trình copy cơ bản và lỗi hay gặp. Giả định cần copy string hiện có vào buffer mới cấp động, dù cũng có thể dùng array character.
+Trong phần này, chúng ta sẽ trình bày quá trình copy cơ bản và chỉ ra những lỗi thường gặp. Giả sử chúng ta cần copy một string hiện có sang một buffer mới được cấp phát động, dù cũng có thể dùng một array character.
 
-Ứng dụng phổ biến là đọc nhiều string rồi lưu từng string vào array với memory tối thiểu. Có thể tạo array đủ chứa string lớn nhất người dùng có thể nhập rồi đọc vào. Dựa trên string đọc được, cấp đúng lượng memory. Các bước cơ bản:
+Một ứng dụng thường gặp là đọc một chuỗi các string rồi lưu từng string trong một array, với lượng memory tối thiểu. Có thể thực hiện bằng cách tạo một array đủ lớn cho string dài nhất mà người dùng có thể nhập, rồi đọc string vào array đó. Dựa trên string vừa đọc, sau đó chúng ta cấp phát đúng lượng memory cần thiết. Cách thực hiện cơ bản là:
 
 1\. Đọc string bằng array `char` lớn
 
@@ -334,7 +334,7 @@ Phần này trình bày quy trình copy cơ bản và lỗi hay gặp. Giả đ�
 
 3\. Dùng `strcpy` copy string vào memory cấp động
 
-Chuỗi sau minh họa. Array `names` chứa pointer đến từng tên đọc vào. Variable `count` chỉ element trống tiếp theo. Array `name` giữ string đọc được, tái sử dụng cho mỗi tên. Function `malloc` cấp memory cần cho từng string và được gán cho element trống kế tiếp của `names`. Sau đó copy tên vào memory:
+Đoạn lệnh sau minh họa kỹ thuật này. Array `names` lưu pointer tới từng tên được đọc vào. Variable `count` chỉ phần tử array còn trống tiếp theo. Array `name` lưu string vừa đọc và được tái sử dụng cho mỗi tên được nhập. Function `malloc` cấp phát memory cần thiết cho từng string và kết quả được gán cho phần tử còn trống tiếp theo của `names`. Sau đó tên được copy vào memory vừa cấp phát:
 
 ```
 char name[32];
@@ -350,13 +350,13 @@ strcpy(names[count],name);
 count++;
 ```
 
-Có thể lặp operation trong loop, tăng count mỗi vòng. Hình 5-7 minh họa bố trí memory sau khi đọc một tên “Sam.”
+Chúng ta có thể lặp thao tác này trong một loop, tăng count sau mỗi lần lặp. Hình 5-7 minh họa cách bố trí memory cho quá trình này sau khi đọc một tên duy nhất: “Sam.”
 
 ![image](images/ch05/fig05-09.png)
 
 Hình 5-7. Copy string
 
-Hai pointer có thể tham chiếu cùng string. Hai pointer tham chiếu cùng vị trí gọi là aliasing, bàn trong Chương 8. Dù không nhất thiết gây vấn đề, cần biết gán pointer này cho pointer kia không copy string, chỉ copy address. Sau đây khai báo array pointer đến page header. Trang index 12 được gán address string literal. Sau đó pointer trong `pageHeaders[12]` được copy sang `pageHeaders[13]`. Cả hai nay cùng tham chiếu string literal. Pointer được copy, không phải string:
+Hai pointer có thể tham chiếu tới cùng một string. Khi hai pointer tham chiếu cùng vị trí, hiện tượng đó được gọi là aliasing, được trình bày trong Chương 8. Dù không nhất thiết gây vấn đề, hãy nhận thức rằng gán một pointer cho pointer khác không copy string. Thay vào đó, chúng ta chỉ copy address của string. Để minh họa, dưới đây khai báo một array pointer tới các page header. Trang có index 12 được gán address của một string literal. Tiếp theo, pointer trong `pageHeaders[12]` được copy sang `pageHeaders[13]`. Cả hai pointer lúc này tham chiếu cùng một string literal. Thứ được copy là pointer, chứ không phải string:
 
 ```
 char *pageHeaders[300];
@@ -375,13 +375,13 @@ Hình 5-8. Tác động của copy pointer
 
 ### Nối string
 
-Nối string là gộp hai string. Function `strcat` thường dùng cho operation này. Nó nhận pointer đến hai string cần nối và trả pointer đến kết quả. Prototype:
+Nối string là việc kết hợp hai string với nhau. Function `strcat` thường được sử dụng cho thao tác này. Function nhận pointer tới hai string cần nối và trả về một pointer tới kết quả đã nối. Prototype của function như sau:
 
 ```
 char *strcat(char *s1, const char *s2);
 ```
 
-Function nối string thứ hai vào cuối string đầu. String thứ hai được truyền như pointer đến constant `char`. Function không cấp memory. Vì vậy string đầu phải đủ lớn chứa kết quả, nếu không có thể ghi vượt cuối, gây hành vi khó dự đoán. Return value là cùng address với argument đầu, tiện trong tình huống như dùng function làm argument của `printf`. Để minh họa, nối hai string thông báo lỗi: đầu là prefix, sau là lỗi cụ thể. Như sau, đầu tiên cấp đủ memory cho cả hai trong buffer, copy string đầu vào buffer rồi nối string thứ hai:
+Function nối string thứ hai vào cuối string thứ nhất. String thứ hai được truyền dưới dạng pointer tới constant `char`. Function không cấp phát memory. Điều đó có nghĩa là string thứ nhất phải đủ lớn để lưu kết quả nối; nếu không, function có thể ghi vượt cuối string, gây hành vi khó dự đoán. Giá trị trả về của function là cùng address với argument thứ nhất. Điều này thuận tiện trong một số tình huống, chẳng hạn dùng function làm argument cho function `printf`. Để minh họa việc sử dụng function này, chúng ta sẽ kết hợp hai string thông báo lỗi: string đầu là một tiền tố và string thứ hai là thông báo lỗi cụ thể. Như dưới đây, trước hết phải cấp đủ memory cho cả hai string trong một buffer, sau đó copy string đầu vào buffer và cuối cùng nối string thứ hai vào buffer:
 
 ```
 char* error = "ERROR: ";
@@ -398,7 +398,7 @@ printf("%s\n", error);
 printf("%s\n", errorMessage);
 ```
 
-Cộng một vào argument `malloc` để chứa `NUL`. Giả định literal đầu nằm ngay trước literal thứ hai trong memory, output như sau. Hình 5-9 minh họa allocation:
+Chúng ta cộng thêm một vào argument của function `malloc` để dành chỗ cho character `NUL`. Nếu giả sử literal thứ nhất nằm ngay trước literal thứ hai trong memory, output của đoạn lệnh sẽ như sau. Hình 5-9 minh họa cách cấp phát memory:
 
 ```
 ERROR: Not enough memory
@@ -410,7 +410,7 @@ Not enough memory
 
 Hình 5-9. Copy operation đúng
 
-Nếu không cấp vị trí memory riêng cho string nối, sẽ ghi đè string đầu. Ví dụ sau không dùng buffer để minh họa. Cũng giả định literal đầu nằm ngay trước literal thứ hai:
+Nếu không cấp phát một vị trí memory riêng cho string kết quả nối, chúng ta sẽ ghi đè string đầu tiên. Ví dụ sau minh họa điều này mà không dùng buffer. Chúng ta cũng giả sử literal đầu tiên nằm ngay trước literal thứ hai trong memory:
 
 ```
 char* error = "ERROR: ";
@@ -430,26 +430,26 @@ ERROR: Not enough memory
 ot enough memory
 ```
 
-String `errorMessage` đã dịch một character sang trái vì string kết quả được ghi đè lên `errorMessage`. Literal “Not enough memory” theo sau literal đầu, nên literal thứ hai bị ghi đè. Hình 5-10 minh họa trạng thái literal pool trước và sau copy.
+String `errorMessage` đã bị dịch một character sang trái. Đó là vì string kết quả nối được ghi đè lên `errorMessage`. Vì literal “Not enough memory” nằm sau literal thứ nhất, literal thứ hai bị ghi đè. Hình 5-10 minh họa điều này bằng cách hiển thị trạng thái literal pool trước và sau thao tác copy.
 
 ![image](images/ch05/fig05-12.png)
 
 Hình 5-10. Copy string sai
 
-Có thể dùng array `char` thay pointer cho thông báo như sau, nhưng không phải luôn hoạt động:
+Chúng ta có thể dùng array `char` thay cho pointer đối với các thông báo như dưới đây. Tuy nhiên, cách này không phải lúc nào cũng hoạt động:
 
 ```
 char error[] = "ERROR: ";
 char errorMessage[] = "Not enough memory";
 ```
 
-Nếu dùng lời gọi `strcpy` sau, nhận syntax error vì cố gán pointer function trả về cho tên array. Operation này không hợp lệ:
+Nếu dùng lời gọi `strcpy` sau, chúng ta sẽ nhận syntax error. Đó là vì chúng ta đang cố gán pointer do function trả về cho tên array. Kiểu thao tác này không hợp lệ:
 
 ```
 error = strcat(error, errorMessage);
 ```
 
-Nếu bỏ assignment như sau, có thể gặp memory access violation vì copy ghi đè một phần stack frame. Giả định array declaration nằm trong function như Hình 5-11. Dù source string ở literal pool hay stack frame, không nên dùng trực tiếp để chứa kết quả nối. Luôn cấp memory riêng cho concatenation:
+Nếu bỏ phép gán như dưới đây, rất có thể chúng ta sẽ gặp memory access violation vì thao tác copy đang ghi đè một phần stack frame. Điều này giả định các array declaration nằm trong một function, như minh họa trong Hình 5-11. Dù source string được lưu trong string literal pool hay trên stack frame, cũng không nên dùng chúng để trực tiếp chứa kết quả nối. Luôn cấp phát memory riêng dành cho việc nối string:
 
 ```
 strcat(error, errorMessage);
@@ -459,7 +459,7 @@ strcat(error, errorMessage);
 
 Hình 5-11. Ghi đè stack frame
 
-Lỗi đơn giản khác khi nối là dùng character literal thay string literal. Ví dụ sau nối string vào path string và hoạt động như dự kiến:
+Một lỗi đơn giản khác khi nối string là dùng character literal thay cho string literal. Trong ví dụ sau, chúng ta nối một string vào path string. Thao tác này sẽ hoạt động đúng như mong đợi:
 
 ```
 char* path = "C:";
@@ -467,9 +467,9 @@ char* currentPath = (char*) malloc(strlen(path)+2);
 currentPath = strcat(currentPath,"\\");
 ```
 
-Cộng hai vào độ dài string trong lời gọi `malloc` vì cần chỗ cho character bổ sung và `NUL`. Chỉ nối một character, backslash, vì dùng escape sequence trong string literal.
+Chúng ta cộng hai vào độ dài string trong lời gọi `malloc` vì cần chỗ cho character bổ sung và character `NUL`. Chúng ta chỉ nối một character, là backslash, vì đã dùng escape sequence trong string literal.
 
-Tuy nhiên, dùng character literal như sau gây runtime error khi argument thứ hai bị diễn giải nhầm thành address của `char`:
+Tuy nhiên, nếu dùng character literal thay thế như dưới đây, chúng ta sẽ gặp runtime error khi argument thứ hai bị diễn giải nhầm thành address của một `char`:
 
 ```
 currentPath = strcat(path,'\\');
@@ -477,11 +477,11 @@ currentPath = strcat(path,'\\');
 
 ## Truyền string
 
-Truyền string khá đơn giản. Trong function call, dùng expression evaluate thành address của `char`. Trong parameter list, khai báo pointer đến `char`. Vấn đề thú vị xuất hiện khi dùng string trong function. Hai mục đầu xem truyền string đơn giản; mục thứ ba xem truyền string cần khởi tạo. Truyền string làm argument application được bàn trong “Truyền argument cho application” trang 125.
+Truyền string khá đơn giản. Trong function call, hãy dùng một biểu thức được đánh giá thành address của một `char`. Trong parameter list, hãy khai báo parameter là pointer tới một `char`. Những vấn đề đáng chú ý xuất hiện khi sử dụng string bên trong function. Trước hết, hai phần nhỏ đầu tiên sẽ xem xét cách truyền một string đơn giản, sau đó phần thứ ba xem xét cách truyền một string cần khởi tạo. Việc truyền string làm argument cho ứng dụng được trình bày trong phần “Truyền argument cho ứng dụng” ở trang 125.
 
 ### Truyền string đơn giản
 
-Có nhiều cách truyền address string cho function, tùy declaration. Phần này minh họa bằng function mô phỏng `strlen` như dưới. Dùng ngoặc buộc post increment operator thực thi trước, tăng pointer. Nếu không, character được `string` tham chiếu bị tăng, không đúng ý định:
+Có một số cách truyền address của string cho function, tùy cách string được khai báo. Trong phần này, chúng ta sẽ minh họa các kỹ thuật đó bằng một function mô phỏng function `strlen`, được triển khai dưới đây. Chúng ta dùng dấu ngoặc để buộc post increment operator được thực hiện trước, làm tăng pointer. Nếu không, character được `string` tham chiếu sẽ bị tăng, điều không đúng với mong muốn:
 
 ```
 size_t stringLength(char* string) {
@@ -511,7 +511,7 @@ strcpy(simplePtr, "simple string");
 printf("%d\n",stringLength(simplePtr));
 ```
 
-Để gọi với array, có ba lựa chọn sau. Câu đầu dùng tên array, trả address. Câu hai dùng address-of operator tường minh, dư thừa và không cần, thường còn sinh warning. Câu ba dùng address-of operator với element đầu; hoạt động nhưng hơi dài:
+Để gọi function bằng array, chúng ta có ba lựa chọn như dưới đây. Trong câu lệnh thứ nhất, dùng tên array sẽ trả về address của nó. Trong câu lệnh thứ hai, address-of operator được dùng tường minh. Điều này dư thừa, không cần thiết và thường còn tạo ra cảnh báo. Trong câu lệnh thứ ba, chúng ta dùng address-of operator với phần tử đầu tiên của array. Mặc dù hoạt động, cách này hơi dài dòng:
 
 ```
 printf("%d\n",stringLength(simpleArray));
@@ -523,17 +523,17 @@ Hình 5-12 minh họa memory cho function `stringLength`.
 
 ![image](images/ch05/fig05-14.png)
 
-Hình 5-12. Truyền string Giờ xem cách khai báo formal parameter. Trong implementation `stringLength` trước, parameter là pointer đến `char`. Cũng có thể dùng array notation như sau:
+Hình 5-12. Truyền string. Bây giờ hãy chuyển sang cách khai báo formal parameter. Trong implementation trước của `stringLength`, parameter được khai báo là pointer tới `char`. Chúng ta cũng có thể dùng array notation như sau:
 
 ```
 size_t stringLength(char string[]) { ... }
 ```
 
-Function body giữ nguyên. Thay đổi không ảnh hưởng lời gọi hoặc hành vi function.
+Phần thân function vẫn giữ nguyên. Thay đổi này không ảnh hưởng đến cách gọi function hoặc hành vi của nó.
 
 ### Truyền pointer đến constant char
 
-Truyền pointer đến string như constant `char` là kỹ thuật rất phổ biến và hữu ích. Nó truyền string bằng pointer, đồng thời ngăn sửa string. Implementation tốt hơn của `stringLength` trong “Truyền string” trang 121 dùng declaration như sau:
+Truyền pointer tới string dưới dạng constant `char` là một kỹ thuật rất phổ biến và hữu ích. Nó truyền string bằng pointer, đồng thời ngăn string được truyền vào bị sửa đổi. Implementation tốt hơn của function `stringLength`, đã phát triển trong phần “Truyền string” ở trang 121, dùng declaration này như sau:
 
 ```
 size_t stringLength(const char* string) {
@@ -545,7 +545,7 @@ size_t stringLength(const char* string) {
 }
 ```
 
-Nếu thử sửa string gốc như sau, sinh compile-time error:
+Nếu cố sửa string gốc như dưới đây, một thông báo compile-time error sẽ được tạo ra:
 
 ```
 size_t stringLength(const char* string) {
@@ -557,9 +557,9 @@ size_t stringLength(const char* string) {
 
 ### Truyền string để khởi tạo
 
-Có lúc muốn function trả string do chính nó khởi tạo. Ví dụ truyền thông tin linh kiện như tên, số lượng rồi nhận string đã định dạng biểu diễn thông tin. Giữ quy trình format trong function cho phép tái sử dụng ở nhiều phần chương trình.
+Có những tình huống chúng ta muốn function trả về một string do chính function khởi tạo. Chẳng hạn, chúng ta có thể muốn truyền thông tin về một linh kiện, như tên và số lượng, rồi nhận về một string đã định dạng biểu diễn thông tin đó. Giữ quá trình định dạng trong một function cho phép tái sử dụng nó ở những phần khác nhau của chương trình.
 
-Tuy nhiên, phải quyết định truyền buffer rỗng để function điền rồi trả, hay để function cấp động buffer rồi trả về.
+Tuy nhiên, chúng ta phải quyết định sẽ truyền cho function một buffer rỗng để nó điền và trả về, hay để function cấp phát động buffer rồi trả buffer đó cho chúng ta.
 
 Khi truyền buffer:
 
@@ -569,7 +569,7 @@ Khi truyền buffer:
 
 - Function thường trả pointer đến buffer này
 
-Cách này giữ trách nhiệm cấp và giải phóng buffer cho caller. Trả pointer đến buffer là phổ biến dù không cần, như `strcpy` và function tương tự. Function `format` sau minh họa:
+Cách này để trách nhiệm cấp phát và giải phóng buffer ở phía caller. Trả về một pointer tới buffer là điều phổ biến, dù không cần thiết, như ở `strcpy` và các function tương tự. Function `format` sau minh họa cách này:
 
 ```
 char* format(char *buffer, size_t size,
@@ -580,7 +580,7 @@ char* format(char *buffer, size_t size,
 }
 ```
 
-Function `snprintf` được dùng để format string đơn giản. Nó ghi vào buffer do parameter đầu cung cấp. Argument hai chỉ kích thước buffer. Function không ghi vượt cuối buffer; ngoài ra hành xử như `printf`.
+Function `snprintf` được dùng như một cách đơn giản để định dạng string. Function này ghi vào buffer do parameter thứ nhất cung cấp. Argument thứ hai chỉ định kích thước buffer. Function không ghi vượt cuối buffer. Ngoài điểm đó, nó hoạt động giống `printf`.
 
 Sau đây minh họa cách dùng:
 
@@ -596,7 +596,7 @@ Item: Axle  Quantity: 25  Weight: 45
 
 Trả pointer đến `buffer` cho phép dùng function làm parameter của `printf`.
 
-Cách khác là truyền NULL làm address buffer, ngụ ý caller không muốn cung cấp buffer hoặc không chắc kích thước. Có thể triển khai như sau. Khi tính length, subexpression `10 + 10` biểu diễn độ rộng lớn nhất dự kiến cho số lượng và trọng lượng. Số một dành cho ký tự kết thúc `NUL`:
+Một cách khác là truyền NULL làm address của buffer. Điều này ngụ ý caller không muốn cung cấp buffer hoặc không chắc buffer phải lớn bao nhiêu. Phiên bản function này có thể được triển khai như sau. Khi tính length, biểu thức con `10 + 10` biểu diễn độ rộng lớn nhất dự kiến dành cho số lượng và trọng lượng. Số một dành chỗ cho character kết thúc `NUL`:
 
 ```
 char* format(char *buffer, size_t size,
@@ -619,15 +619,15 @@ char* format(char *buffer, size_t size,
 }
 ```
 
-Chọn biến thể tùy nhu cầu application. Nhược điểm chính của cách thứ hai là caller chịu trách nhiệm giải phóng memory được cấp. Caller phải biết rõ cách dùng, nếu không dễ gây memory leak.
+Lựa chọn biến thể function phụ thuộc vào nhu cầu ứng dụng. Nhược điểm chính của cách thứ hai là caller lúc này chịu trách nhiệm giải phóng memory được cấp phát. Caller phải hiểu đầy đủ cách sử dụng function; nếu không, memory leak rất dễ xảy ra.
 
 ### Truyền argument cho application
 
-Function `main` thường chạy đầu tiên trong application. Chương trình console-based thường nhận thông tin để bật hoặc điều khiển hành vi application. Parameter có thể chỉ file cần xử lý hoặc cấu hình output. Ví dụ Linux command `ls` liệt kê file trong current directory theo parameter của command.
+Function `main` thường là function đầu tiên được thực thi trong ứng dụng. Với những chương trình console-based, người ta thường truyền thông tin cho chương trình để bật hoặc điều khiển hành vi ứng dụng theo cách khác. Các parameter này có thể chỉ định những file cần xử lý hoặc cấu hình output của ứng dụng. Chẳng hạn, Linux command `ls` liệt kê những file trong thư mục hiện tại dựa trên các parameter đi kèm lệnh.
 
-C hỗ trợ command line argument bằng parameter thường tên `argc` và `argv`. Parameter đầu, `argc`, là integer cho số parameter được truyền. Luôn có ít nhất một parameter: tên `executable`. Parameter thứ hai, `argv`, thường coi là array one-dimensional chứa string pointer. Mỗi pointer tham chiếu một command line argument.
+C hỗ trợ command line argument thông qua các parameter mang tên truyền thống là `argc` và `argv`. Parameter thứ nhất, `argc`, là một integer cho biết có bao nhiêu parameter được truyền vào. Luôn có ít nhất một parameter: tên của `executable`. Parameter thứ hai, `argv`, thường được xem là một array one-dimensional gồm các string pointer. Mỗi pointer tham chiếu tới một command line argument.
 
-Function `main` sau chỉ liệt kê argument mỗi dòng một cái. Ở đây `argv` khai báo pointer đến pointer đến `char`:
+Function `main` sau chỉ liệt kê các argument của nó, mỗi argument trên một dòng. Trong phiên bản này, `argv` được khai báo là pointer tới pointer tới `char`:
 
 ```
 int main(int argc, char** argv) {
@@ -654,7 +654,7 @@ argv[3] limit=12
 argv[4] -verbose
 ```
 
-Mỗi command line parameter được phân tách bằng khoảng trắng. Hình 5-13 minh họa memory.
+Mỗi command line parameter được phân tách bằng khoảng trắng. Memory được cấp phát cho chương trình được minh họa trong Hình 5-13.
 
 ![image](images/ch05/fig05-15.png)
 
@@ -666,11 +666,11 @@ Có thể đơn giản hóa declaration `argv` như sau:
 int main(int argc, char* argv[]) {
 ```
 
-Tương đương `char** argv`. “Nhiều mức indirection” trang 25 giải thích kỹ notation.
+Declaration này tương đương với `char** argv`. Phần “Nhiều mức indirection” ở trang 25 giải thích chi tiết hơn về notation này.
 
 ## Trả string
 
-Khi function trả string, nó trả address của string. Điều chính cần quan tâm là trả address hợp lệ. Có thể trả tham chiếu đến:
+Khi một function trả về string, nó trả về address của string. Điều quan trọng nhất là trả về một string address hợp lệ. Để làm vậy, chúng ta có thể trả về tham chiếu tới một trong những đối tượng sau:
 
 - Literal
 
@@ -680,7 +680,7 @@ Khi function trả string, nó trả address của string. Điều chính cần 
 
 ### Trả address của literal
 
-Ví dụ sau trả literal. Integer code chọn một trong bốn trung tâm xử lý. Function trả tên trung tâm dưới dạng string; ở đây chỉ trả address literal:
+Ví dụ trả về literal được trình bày dưới đây. Một integer code chọn một trong bốn trung tâm xử lý khác nhau. Mục đích của function là trả về tên trung tâm xử lý dưới dạng string. Trong ví dụ này, nó chỉ trả về address của literal:
 
 ```
 char* returnALiteral(int code) {
@@ -697,7 +697,7 @@ char* returnALiteral(int code) {
 }
 ```
 
-Cách này hoạt động tốt. Chỉ cần nhớ string literal không luôn được coi constant, như “Khi string literal không phải constant” trang 110. Cũng có thể khai báo static literal như ví dụ sau. Thêm field `subCode` để chọn giữa các trung tâm. Ưu điểm là không dùng cùng literal nhiều nơi, tránh lỗi gõ sai:
+Cách này hoạt động tốt. Chỉ cần nhớ rằng string literal không phải lúc nào cũng được xem là constant, như đã thảo luận trong phần “Khi string literal không phải constant” ở trang 110. Chúng ta cũng có thể khai báo các static literal như trong ví dụ sau. Một field `subCode` được thêm vào để lựa chọn giữa những trung tâm khác nhau. Ưu điểm của cách này là không phải dùng cùng một literal tại nhiều nơi, tránh nguy cơ gây lỗi do gõ nhầm literal:
 
 ```
 char* returnAStaticLiteral(int code, int subCode) {
@@ -727,7 +727,7 @@ char* returnAStaticLiteral(int code, int subCode) {
 }
 ```
 
-Trả pointer đến static string dùng cho nhiều mục đích có thể gây vấn đề. Xét biến thể `format` trong “Truyền string để khởi tạo” trang 123. Thông tin linh kiện được truyền vào rồi trả string đã format biểu diễn string:
+Trả về pointer tới một static string được dùng cho nhiều mục đích có thể gây vấn đề. Hãy xét biến thể sau của function `format`, đã phát triển trong phần “Truyền string để khởi tạo” ở trang 123. Thông tin về một linh kiện được truyền vào function và một string đã định dạng biểu diễn string đó được trả về:
 
 ```
 char* staticFormat(const char* name, size_t quantity, size_t weight) {
@@ -738,7 +738,7 @@ char* staticFormat(const char* name, size_t quantity, size_t weight) {
 }
 ```
 
-Buffer được cấp 64 byte, có thể đủ hoặc không. Ví dụ bỏ qua vấn đề tiềm tàng này. Vấn đề chính của cách này được minh họa bằng:
+Buffer được cấp phát 64 byte, có thể đủ hoặc không đủ. Trong ví dụ này, chúng ta sẽ bỏ qua vấn đề tiềm tàng đó. Vấn đề chính của cách tiếp cận này được minh họa bằng đoạn lệnh sau:
 
 ```
 char* part1 = staticFormat("Axle",25,45);
@@ -754,11 +754,11 @@ Item: Piston  Quantity: 55  Weight: 5
 Item: Piston  Quantity: 55  Weight: 5
 ```
 
-Vì method `staticFormat` dùng cùng static buffer cho hai lời gọi, lần cuối ghi đè kết quả lần đầu.
+Vì method `staticFormat` dùng cùng một static buffer cho cả hai lời gọi, lời gọi cuối đã ghi đè kết quả của lời gọi đầu.
 
 ### Trả address của memory cấp động
 
-Nếu cần trả string, có thể cấp memory từ heap rồi trả address. Chúng ta minh họa bằng function `blanks`, trả string chứa chuỗi khoảng trắng biểu diễn “tab” như sau. Function nhận integer chỉ độ dài chuỗi tab:
+Nếu cần trả về string từ một function, memory cho string có thể được cấp phát trên heap, rồi address của nó được trả về. Chúng ta sẽ minh họa kỹ thuật này bằng cách phát triển function `blanks`. Function trả về một string chứa một dãy khoảng trắng biểu diễn một “tab”, như dưới đây. Function nhận một integer chỉ định chiều dài của dãy tab:
 
 ```
 char* blanks(int number) {
@@ -775,9 +775,9 @@ char* blanks(int number) {
     char *tmp = blanks(5);
 ```
 
-Ký tự kết thúc `NUL` gán cho element cuối, index `number`. Hình 5-14 minh họa memory, cho trạng thái ngay trước và sau function `blanks` return.
+Character kết thúc `NUL` được gán cho phần tử cuối của array, có index là `number`. Hình 5-14 minh họa việc cấp phát memory cho ví dụ này và trạng thái ứng dụng ngay trước cũng như ngay sau khi function `blanks` trả về.
 
-Caller chịu trách nhiệm giải phóng memory trả về. Không giải phóng khi hết cần gây memory leak. Ví dụ sau cho trường hợp leak: string dùng trong `printf`, sau đó address mất vì không được lưu:
+Caller của function chịu trách nhiệm giải phóng memory được trả về. Không giải phóng khi memory không còn cần thiết sẽ gây memory leak. Ví dụ sau cho thấy một tình huống có thể xảy ra memory leak: string được dùng trong function `printf`, rồi address của nó bị mất vì không được lưu lại:
 
 ```
 printf("[%s]\n",blanks(5));
@@ -797,9 +797,9 @@ Hình 5-14. Trả string cấp động
 
 #### Trả address của local string
 
-Trả address local string gây vấn đề vì memory sẽ hỏng khi stack frame khác ghi đè. Nên tránh cách này; giải thích ở đây nhằm minh họa nguy cơ.
+Trả về address của local string sẽ gây vấn đề vì memory sẽ bị hỏng khi bị một stack frame khác ghi đè. Cần tránh cách này; nó được giải thích ở đây để minh họa những vấn đề tiềm tàng của lựa chọn đó.
 
-Viết lại function blanks trước như sau. Thay vì cấp memory động, khai báo array trong function, nên nó nằm trong stack frame. Function trả address array:
+Chúng ta viết lại function blanks trong phần trước như dưới đây. Thay vì cấp phát memory động, một array được khai báo bên trong function và do đó sẽ nằm trong một stack frame. Function trả về address của array:
 
 ```
 #define MAX_TAB_LENGTH 32
@@ -815,7 +815,7 @@ char* blanks(int number) {
 }
 ```
 
-Function trả address string, nhưng memory sau đó bị function tiếp theo ghi đè. Khi dereference pointer, nội dung có thể đã đổi. Hình 5-15 minh họa program stack.
+Khi thực thi, function trả về address của string, nhưng vùng memory đó sau đó sẽ bị function tiếp theo được gọi ghi đè. Khi pointer này được dereference, nội dung ở vị trí memory đó có thể đã thay đổi. Trạng thái program stack được minh họa trong Hình 5-15.
 
 ![image](images/ch05/fig05-17.png)
 
@@ -823,9 +823,9 @@ Hình 5-15. Trả address local string
 
 ## Function pointer và string
 
-Function pointer được bàn kỹ trong “Function pointer” trang 71, là cách linh hoạt điều khiển thực thi. Phần này minh họa bằng cách truyền comparison function cho sort function. Trong sort, so sánh element để quyết định swap. Comparison xác định sort tăng, giảm hay theo tiêu chí khác. Truyền function điều khiển comparison làm function linh hoạt hơn; các comparison function khác nhau cho cùng sort function hoạt động khác nhau.
+Function pointer được thảo luận sâu trong phần “Function pointer” ở trang 71. Chúng có thể là phương tiện linh hoạt để điều khiển cách chương trình thực thi. Trong phần này, chúng ta minh họa khả năng đó bằng cách truyền một comparison function cho một sort function. Bên trong sort function, các phần tử array được so sánh để quyết định có cần đổi chỗ chúng hay không. Phép so sánh quyết định array được sắp xếp tăng dần, giảm dần hay theo tiêu chí khác. Truyền một function để điều khiển phép so sánh giúp function linh hoạt hơn. Bằng cách truyền những comparison function khác nhau, chúng ta có thể khiến cùng một sort function hoạt động theo nhiều cách.
 
-Các comparison function dùng ở đây xác định thứ tự theo chữ hoa/thường của element. Hai function `compare` và `compareIgnoreCase` sau so sánh theo case. Function `compareIgnoreCase` chuyển string sang chữ thường trước khi dùng `strcmp` so sánh. Function `strcmp` đã bàn trong “So sánh string” trang 115. Function `stringToLower` trả pointer đến memory cấp động, nên phải giải phóng khi không cần:
+Những comparison function chúng ta sử dụng xác định thứ tự sắp xếp dựa trên chữ hoa và chữ thường của các phần tử array. Hai function `compare` và `compareIgnoreCase` sau so sánh hai string dựa trên chữ hoa và chữ thường của chúng. Function `compareIgnoreCase` chuyển các string thành chữ thường trước khi dùng function `strcmp` để so sánh. Function `strcmp` đã được trình bày trong phần “So sánh string” ở trang 115. Function `stringToLower` trả về pointer tới memory được cấp phát động. Điều đó có nghĩa là chúng ta phải giải phóng memory khi không còn cần:
 
 ```
 int compare(const char* s1, const char* s2) {
@@ -842,7 +842,7 @@ int compareIgnoreCase(const char* s1, const char* s2) {
 }
 ```
 
-Function `stringToLower` sau trả phiên bản chữ thường của string truyền vào:
+Function `stringToLower` được trình bày dưới đây. Nó trả về phiên bản chữ thường tương đương của string được truyền vào:
 
 ```
 char* stringToLower(const char* string) {
@@ -856,13 +856,13 @@ char* stringToLower(const char* string) {
 }
 ```
 
-Function pointer dùng được khai báo bằng type definition:
+Function pointer sẽ dùng được khai báo bằng một type definition như sau:
 
 ```
 typedef int (fptrOperation)(const char*, const char*);
 ```
 
-Implementation của `sort` sau dựa bubble sort algorithm. Nó nhận address array, kích thước và pointer đến function điều khiển sort. Trong câu `if`, function truyền vào được gọi với hai element, quyết định có swap không.
+Implementation của function `sort` sau dựa trên bubble sort algorithm. Nó nhận address của array, kích thước array và một pointer tới function điều khiển việc sắp xếp. Trong câu lệnh `if`, function được truyền vào được gọi với hai phần tử array. Nó quyết định liệu hai phần tử đó có được đổi chỗ hay không.
 
 ```
 void sort(char *array[], int size, fptrOperation operation) {
@@ -881,7 +881,7 @@ void sort(char *array[], int size, fptrOperation operation) {
 }
 ```
 
-Display function hiển thị nội dung array:
+Một display function sẽ hiển thị nội dung array:
 
 ```
 void displayNames(char* names[], int size) {
@@ -892,7 +892,7 @@ void displayNames(char* names[], int size) {
 }
 ```
 
-Có thể gọi `sort` bằng một trong hai comparison function. Sau đây dùng `compare` để sort case-sensitive:
+Chúng ta có thể gọi function `sort` bằng một trong hai comparison function. Ví dụ sau dùng function `compare` để thực hiện việc sắp xếp case-sensitive:
 
 ```
 char* names[] = {"Bob", "Ted", "Carol", "Alice", "alice"};
@@ -906,20 +906,20 @@ Output của chuỗi như sau:
 Alice   Bob   Carol   Ted   alice
 ```
 
-Nếu dùng `compareIgnoreCase` thay thế, output như sau:
+Nếu dùng function `compareIgnoreCase` thay thế, output sẽ như dưới đây:
 
 ```
 Alice   alice   Bob   Carol   Ted
 ```
 
-Điều này làm `sort` linh hoạt hơn nhiều. Có thể thiết kế và truyền operation đơn giản hoặc phức tạp tùy ý để điều khiển sort mà không viết các function `sort` khác nhau cho từng nhu cầu.
+Điều này làm function `sort` linh hoạt hơn nhiều. Bây giờ chúng ta có thể thiết kế và truyền một thao tác đơn giản hay phức tạp tùy ý để điều khiển việc sắp xếp, mà không phải viết những function `sort` khác nhau cho những nhu cầu sắp xếp khác nhau.
 
 ## Tóm tắt
 
-Chương này tập trung string operation và pointer. Cấu trúc string cùng vị trí trong memory ảnh hưởng cách dùng. Pointer là công cụ linh hoạt xử lý string nhưng cũng tạo nhiều cơ hội dùng sai.
+Trong chương này, chúng ta tập trung vào string operation và việc sử dụng pointer. Cấu trúc của string và vị trí của chúng trong memory ảnh hưởng đến cách sử dụng. Pointer cung cấp một công cụ linh hoạt để làm việc với string, nhưng cũng tạo ra nhiều cơ hội sử dụng string sai cách.
 
-Đã bàn string literal và literal pool. Hiểu literal giúp giải thích vì sao một số string assignment không luôn như dự kiến. Điều này liên quan chặt với string initialization, đã trình bày kỹ. Nhiều standard string operation được xem xét và vấn đề tiềm tàng được xác định.
+String literal và việc sử dụng literal pool đã được trình bày. Hiểu literal giúp giải thích tại sao một số string assignment operation không phải lúc nào cũng hoạt động như mong đợi. Điều này liên quan chặt chẽ đến việc khởi tạo string, đã được xem xét chi tiết. Một số standard string operation đã được nghiên cứu và những vấn đề tiềm tàng đã được chỉ ra.
 
-Truyền string vào và trả string từ function là operation phổ biến. Vấn đề và nguy cơ đã được nêu chi tiết, gồm trả local string. Cũng đã bàn pointer đến constant character.
+Truyền string vào function và trả string từ function là những thao tác phổ biến. Các vấn đề và nguy cơ của những loại thao tác này đã được trình bày chi tiết, gồm những vấn đề có thể xảy ra khi trả về một local string. Việc dùng pointer tới constant character cũng đã được thảo luận.
 
-Cuối cùng, function pointer minh họa cách mạnh mẽ để viết sort function. Cách này không chỉ giới hạn sort mà áp dụng được nơi khác.
+Cuối cùng, function pointer được sử dụng để minh họa một cách tiếp cận mạnh mẽ khi viết sort function. Cách tiếp cận này không chỉ giới hạn ở thao tác sắp xếp mà còn có thể áp dụng cho những lĩnh vực khác.

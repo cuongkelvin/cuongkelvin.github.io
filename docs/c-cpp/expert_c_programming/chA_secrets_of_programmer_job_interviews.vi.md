@@ -36,7 +36,7 @@ Uh-oh! Memory có giới hạn, không đủ chứa array với kích thước c
 
 Câu trả lời thứ ba thường gặp (nếu ứng viên tới được đây):
 
-Giữ một pointer ở đầu list. So pointer này với N - 1 element kế tiếp. Sau đó tiến pointer một element và so với N - 2 element kế tiếp. Tiếp tục đến khi tìm thấy trùng khớp hoặc toàn bộ N element đã được so với nhau.
+Giữ một pointer ở đầu list. So sánh pointer này với N - 1 element tiếp theo trong list để tìm sự trùng khớp. Sau đó, tiến pointer thêm một element và kiểm tra với N - 2 element tiếp theo. Tiếp tục cho đến khi tìm thấy sự trùng khớp hoặc toàn bộ N element đã được so sánh với nhau.
 
 Ràng buộc thứ tư:
 
@@ -262,13 +262,13 @@ Chúng tôi thấy những câu này vui đến mức tự đặt chúng trong b
 
 Một sinh viên trượt kỳ thi vì không chịu nhắc lại như vẹt những gì học trên lớp. Khi sinh viên phản đối, tôi được nhờ làm trọng tài. Tôi đến văn phòng giáo sư và đọc đề: "Hãy chỉ ra cách xác định chiều cao một tòa nhà cao với sự trợ giúp của khí áp kế."
 
-Sinh viên trả lời: "Mang khí áp kế lên đỉnh tòa nhà, buộc dây dài vào nó, hạ xuống mặt đường rồi kéo lên, đo chiều dài dây. Chiều dài dây là chiều cao tòa nhà."
+Sinh viên trả lời: “Mang khí áp kế lên đỉnh tòa nhà, buộc một sợi dây dài vào nó, hạ khí áp kế xuống mặt đường rồi kéo nó lên, đồng thời đo chiều dài sợi dây. Chiều dài sợi dây là chiều cao tòa nhà.”
 
 Điểm cao phải chứng nhận năng lực vật lý, nhưng câu trả lời chưa chứng tỏ điều đó. Tôi đề nghị cho sinh viên thử trả lời lại, dành sáu phút và nhắc rằng phải thể hiện chút kiến thức vật lý. Chỉ một phút sau anh viết xong: "Mang khí áp kế lên đỉnh tòa nhà và nghiêng người qua mép mái. Thả khí áp kế, dùng đồng hồ bấm giây đo thời gian rơi. Sau đó dùng công thức quãng đường vật rơi S = 1/2 a t<sup>2</sup> để tính chiều cao tòa nhà." Đến đây tôi cho điểm tối đa.
 
 Sinh viên tiếp tục đề xuất ba cách khác để đo chiều cao tòa nhà bằng khí áp kế:
 
-Mang khí áp kế ra vào ngày nắng, đo chiều cao khí áp kế, độ dài bóng nó và bóng tòa nhà. Dùng tỷ lệ đơn giản để xác định chiều cao tòa nhà.
+Mang khí áp kế ra ngoài vào một ngày nắng và đo chiều cao khí áp kế, chiều dài bóng của nó cùng chiều dài bóng tòa nhà. Dùng một tỷ lệ đơn giản để xác định chiều cao tòa nhà.
 
 Mang khí áp kế đi lên cầu thang. Khi leo, đánh dấu từng đoạn bằng chiều dài khí áp kế trên tường. Đếm số dấu để biết chiều cao tòa nhà tính bằng đơn vị khí áp kế.
 
@@ -278,7 +278,7 @@ Khi chuyện cũ này được nhắc lại ở Sun dưới dạng "câu đố k
 
 Phương pháp áp suất: đo áp suất không khí ở chân và đỉnh tòa nhà, rồi tính chiều cao từ chênh lệch áp suất. Đây là cách duy nhất thực sự dùng khí áp kế đúng mục đích thiết kế là đo áp suất không khí. Dù máy đo độ cao trên máy bay thường hoạt động theo nguyên lý này, nó lại là một trong những cách đo chiều cao tòa nhà kém chính xác nhất.
 
-Phương pháp con lắc: lên mái, dùng dây hạ khí áp kế đến gần mặt đất. Cho khí áp kế dao động và đo chu kỳ con lắc. Từ đó tính chiều dài con lắc, tức chiều cao tòa nhà.
+Phương pháp con lắc: lên mái tòa nhà và dùng một sợi dây hạ khí áp kế xuống cho đến khi gần chạm đất. Cho khí áp kế dao động và đo chu kỳ dao động của con lắc. Từ đó có thể tính chiều dài con lắc, và do đó là chiều cao tòa nhà.
 
 Phương pháp tham lam: cầm khí áp kế lấy vốn cho chiến dịch thư dây chuyền. Xếp số tiền thu được dọc tòa nhà, đo bằng đơn vị độ dày tờ tiền. Không bình luận về việc làm sao tránh cảnh sát đủ lâu để đo xong. Phương pháp Mafia: dùng khí áp kế làm vũ khí ép người quản lý khai chiều cao.
 
@@ -288,11 +288,11 @@ Phương pháp chặn giấy: dùng khí áp kế chặn giấy trong khi xem b�
 
 Phương pháp âm thanh: thả khí áp kế từ đỉnh, đo khoảng thời gian từ lúc nhìn thấy nó chạm đất đến khi nghe tiếng động. Với khoảng cách thực tế, hình ảnh tới gần như tức thời, còn âm thanh truyền với vận tốc âm (1150 feet/giây ở temperature-pressure tiêu chuẩn và mực nước biển trung bình), cho phép tính chiều cao.
 
-Phương pháp phản chiếu: dùng mặt kính khí áp kế làm gương và đo thời gian ánh sáng đi một vòng từ đỉnh xuống đất rồi trở lại. Vì đã biết vận tốc ánh sáng, có thể tính khoảng cách.
+Phương pháp phản chiếu: dùng mặt kính của khí áp kế làm gương và đo khoảng thời gian ánh sáng đi một vòng giữa đỉnh tòa nhà và mặt đất. Vì vận tốc ánh sáng là đại lượng đã biết, khoảng cách có thể được tính ra.
 
 Phương pháp thương mại: bán khí áp kế rồi mua thiết bị thích hợp.
 
-Phương pháp analog: buộc dây vào khí áp kế, quấn dây quanh trục máy phát điện nhỏ, đo điện năng sinh ra khi khí áp kế rơi từ đỉnh xuống đất. Năng lượng sinh ra tỷ lệ với số vòng quay của trục, do đó với khoảng cách xuống đất.
+Phương pháp analog: buộc khí áp kế vào một sợi dây, quấn dây quanh trục của một máy phát điện nhỏ và đo lượng điện năng được tạo ra khi khí áp kế rơi từ đỉnh tòa nhà xuống đất. Năng lượng tạo ra tỷ lệ với số vòng quay của trục, và do đó với khoảng cách xuống mặt đất.
 
 Phương pháp lượng giác: chọn điểm trên mặt đất có khoảng cách đã biết tới tòa nhà, mang khí áp kế và thước đo góc có cân bằng lên đỉnh, chờ mặt trời tới đường chân trời. Dùng khí áp kế làm gương chiếu một đốm nắng tới điểm đã chọn và đo góc của gương bằng thước. Dùng lượng giác tính chiều cao tòa nhà.
 

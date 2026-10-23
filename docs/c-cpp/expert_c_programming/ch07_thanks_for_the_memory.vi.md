@@ -1,50 +1,50 @@
 # Chương 7. Cảm ơn memory
 
-Một vị thầy đang giảng bản chất Đạo cho môn sinh mới.
+Một vị sư phụ đang giải thích bản chất của Đạo cho một đệ tử mới.
 
-"Đạo hiện thân trong mọi software — bất kể nhỏ bé thế nào," thầy nói.
+“Đạo hiện diện trong mọi software, dù software ấy nhỏ bé đến đâu,” sư phụ nói.
 
-"Đạo có trong máy tính hand-held không?" môn sinh hỏi. "Có," thầy đáp.
+“Đạo có trong một máy tính bỏ túi hand-held không?” đệ tử hỏi. “Có,” sư phụ đáp.
 
-"Đạo có trong video game?" môn sinh tiếp. "Ngay video game cũng có," thầy nói.
+“Đạo có trong một trò chơi điện tử không?” đệ tử hỏi tiếp. “Ngay cả trong trò chơi điện tử cũng có Đạo,” sư phụ nói.
 
-"Còn trong DOS của personal computer?"
+“Vậy Đạo có trong DOS của một máy tính cá nhân không?”
 
-Thầy ho, hơi đổi tư thế. "Cái đó ở stack frame, Bob, hôm nay học đến đây," thầy nói.
+Sư phụ ho một tiếng rồi hơi đổi tư thế. “Cái đó nằm trong stack frame, Bob ạ, và bài học hôm nay kết thúc ở đây,” ông nói.
 
 —Geoffrey James, The Tao of Programming
 
-họ Intel 80x86…memory model Intel 80x86 và nguồn gốc…virtual memory…cache memory…data segment, heap…memory leak…bus error — đi tàu đi…giải trí nhẹ nhàng — vua đồ vật và trò paging
+họ Intel 80x86… memory model của Intel 80x86 và quá trình hình thành… virtual memory… cache memory… data segment và heap… memory leak… bus error — hãy đi tàu… giải trí nhẹ nhàng — Vua đồ vật và trò paging
 
-Chương bắt đầu bằng kiến trúc memory họ processor Intel 80x86 (trái tim IBM PC), so memory PC với virtual memory hệ khác. Hiểu kiến trúc giúp hiểu quy ước, giới hạn C.
+Chương này bắt đầu bằng phần thảo luận về kiến trúc memory của họ processor Intel 80x86, loại processor nằm ở trung tâm của IBM PC. Chương đối chiếu memory trên PC với tính năng virtual memory có trên các hệ thống khác. Hiểu kiến trúc memory giúp lập trình viên nắm được một số quy ước và giới hạn của C.
 
 ## Họ Intel 80x86
 
-Processor Intel hiện đại có nguồn gốc tận chip đầu. Khách dùng chip tinh vi, đòi hỏi hơn, Intel luôn sẵn follow-on processor tương thích. Tương thích giúp chuyển chip mới dễ nhưng hạn chế sáng tạo nghiêm trọng. Pentium hậu duệ trực tiếp 8086 15 năm trước, mang bất thường kiến trúc để backwards compatible (program compile 8086 chạy Pentium). Về trade-off sáng tạo/tương thích, có người ác miệng "Intel đặt 'lùi' vào 'tương thích ngược'…" (Hình 7-1).
+Các processor Intel hiện đại có thể truy nguyên nguồn gốc về những chip Intel đầu tiên. Khi khách hàng sử dụng các chipset ngày càng tinh vi và đặt ra yêu cầu cao hơn, Intel luôn sẵn sàng cung cấp những processor follow-on tương thích. Tính tương thích giúp khách hàng dễ chuyển sang chip mới, nhưng cũng hạn chế nghiêm trọng khả năng đổi mới. Pentium hiện đại là hậu duệ trực tiếp của Intel 8086 ra đời trước đó 15 năm; kiến trúc của nó chứa những điểm bất quy tắc nhằm duy trì khả năng tương thích ngược, nghĩa là chương trình được compile cho 8086 vẫn chạy được trên Pentium. Nói về sự đánh đổi innovation/compatibility trade-off, một số người đã bình luận khá cay độc rằng “Intel đưa chữ backward vào backward compatible…” (xem Hình 7-1).
 
-Hình 7-1. Họ Intel 80x86: Đặt "lùi" vào "tương thích ngược"
+Hình 7-1. Họ Intel 80x86: Đưa “Backward” vào “Backward Compatible”
 
 ![image](images/ch07/img07-01.png)
 
-Intel 4004 là microcontroller 4-bit năm 1970 cho một khách Busicom, hãng calculator Nhật. Kỹ sư nghĩ chip lập trình general-purpose thay logic riêng mỗi khách như lệ lúc đó. Intel nghĩ bán vài trăm nhưng thiết kế general-purpose có ứng dụng rộng hơn rất nhiều. Bốn bit hạn chế nên tháng 4 năm 1972 ra 8008 8-bit. Hai năm sau sinh 8080, đầu đủ mạnh gọi microcomputer. Có toàn instruction set 8008, thêm 30 instruction, mở xu hướng đến nay. Nếu 4004 khởi đầu, 8080 làm Intel giàu, doanh thu hơn $1 tỷ mỗi năm, cao Fortune 500.
+Intel 4004 là một microcontroller 4-bit được xây dựng năm 1970 để đáp ứng nhu cầu cụ thể của một khách hàng duy nhất: Busicom, một công ty máy tính bỏ túi của Nhật Bản. Kỹ sư thiết kế Intel nảy ra ý tưởng sản xuất một chip lập trình được general-purpose, thay vì thiết kế logic riêng cho từng khách hàng như thông lệ lúc bấy giờ. Intel nghĩ rằng họ sẽ bán được vài trăm chiếc, nhưng thiết kế general-purpose hóa ra có phạm vi ứng dụng rộng hơn rất nhiều. Bốn bit quá hạn chế, nên tháng 4 năm 1972, phiên bản 8-bit mang tên 8008 được giới thiệu. Hai năm sau, phiên bản này lại sinh ra 8080, chip đầu tiên đủ mạnh để được gọi là microcomputer. Nó chứa toàn bộ instruction set của 8008 và bổ sung thêm 30 instruction riêng, mở đầu một xu hướng vẫn tiếp tục đến ngày nay. Nếu 4004 là chip giúp Intel khởi nghiệp thì 8080 là chip đem lại sự giàu có cho hãng: doanh thu hằng năm vượt 1 tỷ đô la và công ty vươn lên thứ hạng cao trong danh sách Fortune 500.
 
-8085 tận dụng integration ép ba chip thành một: 8080 cùng clock driver 8224, controller 8228. Internal data bus vẫn 8-bit, address bus 16-bit, định địa chỉ 2<sup>16</sup> hay 64 Kbyte.
+Processor 8085 tận dụng tiến bộ của công nghệ tích hợp để gộp tổ hợp ba chip vào một chip duy nhất. Về bản chất, nó kết hợp 8080 với clock driver 8224 và controller 8228 trên cùng một chip. Dù data bus bên trong vẫn là 8-bit, nó sử dụng address bus 16-bit, nhờ đó có thể đánh địa chỉ 2<sup>16</sup>, tức 64 Kbyte memory.
 
-Ra năm 1978, 8086 cải thiện data bus 16 bit, address 20 bit, memory 1 Mbyte khổng lồ lúc đó. Quyết định lạ: chồng hai word 16-bit thành address 20-bit thay nối thành 32-bit (Hình 7-2). Không 8085-compatible ở instruction-set nhưng assembler macro giúp chuyển dễ.
+Được giới thiệu năm 1978, 8086 cải tiến 8085 bằng cách cho phép data bus có 16 bit và address bus có 20 bit, hỗ trợ dung lượng memory tối đa 1 Mbyte, một con số khổng lồ lúc ấy. Trong một quyết định thiết kế khác thường, địa chỉ được tạo bằng cách cho hai word 16-bit chồng lên nhau để hình thành địa chỉ 20-bit, thay vì nối chúng thành địa chỉ 32-bit (xem Hình 7-2). 8086 không 8085-compatible ở cấp instruction-set, nhưng assembler macro giúp chuyển đổi chương trình sang kiến trúc mới một cách dễ dàng.
 
-Hình 7-2. Intel 8086 định địa chỉ memory thế nào
+Hình 7-2. Cách Intel 8086 đánh địa chỉ memory
 
 ![image](images/ch07/img07-02.png)
 
-Scheme bất thường cho chạy code 8085-ported đơn giản: nạp fixed value segment register rồi bỏ qua, dùng thẳng address 16-bit 8085. Nhóm bác nối segment word vì cho 32 bit, 4 Gbyte, lớn không thể lúc đó.
+Cách đánh địa chỉ bất quy tắc này giúp 8086 chạy code 8085-ported đơn giản hơn: khi segment register đã được nạp một giá trị cố định, có thể bỏ qua chúng và sử dụng trực tiếp các địa chỉ 16-bit của 8085. Nhóm thiết kế bác bỏ ý tưởng tạo địa chỉ bằng cách nối segment word, vì cách đó sẽ cung cấp địa chỉ 32 bit, tương ứng 4 Gbyte, một dung lượng memory lớn đến mức không tưởng vào thời điểm ấy.
 
-Model cơ bản đã định, mọi 80x86 sau phải theo hoặc bỏ tương thích. Nếu 8080 đưa lên danh, 8086 giữ. Chắc không biết chính xác vì sao IBM chọn Intel 8088 (anh em 8-bit 8086) năm 1979 giữa lựa chọn kỹ thuật hơn từ Motorola, National Semiconductor. IBM làm Intel giàu hai thập kỷ như chọn MS-DOS làm Microsoft giàu. Mỉa mai tháng 8 năm 1993 Intel vốn hóa $26.6 tỷ vượt IBM $24.5 tỷ, thành hãng điện tử giá trị nhất Mỹ. Intel, Microsoft thực chất IBM mới, hưởng lợi bất ngờ không xứng từ hệ đóng độc quyền. IBM cố giành lại bằng PowerPC thách hardware Intel, OS/2 thách software Microsoft. OS/2 có lẽ thua, PowerPC còn sớm xét.
+Một khi memory model cơ bản này đã được xác lập, mọi processor 80x86 tiếp theo đều phải tuân theo hoặc từ bỏ tính tương thích. Nếu 8080 là chip đưa Intel lên vị trí nổi bật thì 8086 là chip giúp hãng giữ vững vị trí ấy. Có lẽ chúng ta sẽ không bao giờ biết chính xác vì sao năm 1979 IBM chọn Intel 8088, người anh em 8-bit của 8086, làm CPU cho PC mới, dù có rất nhiều lựa chọn vượt trội về kỹ thuật từ Motorola hoặc National Semiconductor. Việc chọn chip Intel đã bảo đảm sự thịnh vượng của Intel trong hai thập niên tiếp theo, cũng như việc chọn MS-DOS làm hệ điều hành đã đem lại sự thịnh vượng cho Microsoft. Trớ trêu thay, tháng 8 năm 1993, giá trị cổ phiếu Intel đạt 26,6 tỷ đô la, vượt mức 24,5 tỷ của IBM; Intel thay IBM trở thành công ty điện tử có giá trị lớn nhất nước Mỹ. Trên thực tế, Intel và Microsoft đã trở thành IBM mới, thu những khoản lợi nhuận trời cho không xứng đáng từ các hệ thống độc quyền khép kín. IBM đang tuyệt vọng tìm lại vị thế cũ bằng PowerPC để thách thức thế độc quyền hardware của Intel và bằng OS/2 để thách thức thế độc quyền software của Microsoft. Thách thức từ OS/2 có lẽ đã thất bại, nhưng còn quá sớm để kết luận về PowerPC.
 
-8088 PC đầu chỉ bản 8-bit rẻ 8086, dùng nhiều support chip 8-bit sẵn. Mọi cải tiến sau "nhỏ, nhanh, đắt, thêm instruction". 80186 thêm 10 instruction not-very-important. 80286 là 80186 bỏ vài port built-in, lần đầu mở address space. Đưa memory controller off-chip, mode virtual tên tham vọng: segment register không cộng offset mà index table chứa address segment thật. Protected mode vẫn 16-bit-based. MS-Windows dùng 286 protected mode chuẩn.
+Processor 8088 được dùng trong IBM PC đầu tiên chỉ là phiên bản 8-bit giá rẻ của 8086, cho phép tận dụng vô số chip hỗ trợ 8-bit sẵn có. Mọi cải tiến 80x86 tiếp theo đều theo hướng “nhỏ hơn, nhanh hơn, đắt hơn và có thêm instruction”. 80186 đi theo con đường này, giới thiệu 10 instruction mới not-very-important. 80286 thực chất là 80186 bỏ đi một số peripheral port built-in, nhưng có nỗ lực đầu tiên nhằm mở rộng address space. Nó đưa memory controller off-chip và cung cấp một chế độ được đặt tên đầy tham vọng là virtual mode: thay vì cộng segment register với offset, nó dùng register này để đánh chỉ mục vào bảng chứa địa chỉ segment thực. Cách đánh địa chỉ này còn được gọi là protected mode và vẫn dựa trên 16-bit-based. MS-Windows sử dụng protected mode của 286 làm chế độ đánh địa chỉ tiêu chuẩn.
 
-80386 là 80286 thêm 32-bit protected mode, virtual 8086 mode. NT mới và MS-Windows enhanced dùng 32-bit protected, nên NT cần ít nhất 386. Virtual 8086 tạo máy ảo 1 Mbyte; chạy nhiều cùng lúc, mỗi MS-DOS session tưởng 8086 riêng. Hẳn bạn nghĩ xoay xở giới hạn scheme gốc thật kinh ngạc, đúng vậy. Viết compiler, application cho 80x86 khó, bực.
+80386 là 80286 được bổ sung hai chế độ đánh địa chỉ mới: protected mode 32-bit và virtual 8086 mode. Hệ điều hành đầu bảng mới của Microsoft là NT và MS-Windows ở enhanced mode đều sử dụng protected mode 32-bit. Vì vậy NT cần ít nhất một 386 để chạy. Chế độ còn lại, virtual 8086 mode, tạo ra một máy 8086 ảo có address space 1 Mbyte. Có thể chạy đồng thời nhiều máy như vậy để hỗ trợ nhiều phiên MS-DOS ảo; mỗi phiên đều tưởng rằng nó đang chạy trên 8086 riêng. Đến đây, có lẽ bạn đang nghĩ những động tác xoay xở để khắc phục giới hạn của cách đánh địa chỉ ban đầu thật khó tin; bạn nghĩ đúng đấy. 80x86 là một kiến trúc khó chịu và đầy trở ngại khi viết compiler cũng như chương trình ứng dụng.
 
-Mọi processor có thể coprocessor, thường floating point hardware. 8087, 80287 giống, trừ 287 định extended memory như 286. 387 cùng mode 386, thêm transcendental function built-in.
+Tất cả các processor này đều có thể có coprocessor, thường nhằm thực hiện phép toán floating point bằng hardware. Coprocessor 8087 và 80287 giống nhau, ngoại trừ 287 có thể đánh địa chỉ extended memory giống 286. 387 có thể đánh địa chỉ bằng các chế độ giống 386, đồng thời bổ sung một số hàm siêu việt built-in.
 
 ### Giáo điều software
 
@@ -52,37 +52,37 @@ Mọi processor có thể coprocessor, thường floating point hardware. 8087, 
 
 Chọn thành phần IBM PC
 
-Một số, có lẽ phần lớn quyết định IBM chắc non-technical. Trước MS-DOS, hẹn Gary Kildall Digital Research xét CP/M. Theo chuyện kể, trời đẹp nên Gary lái máy bay riêng. IBM có lẽ bực bị bỏ hẹn, ký Microsoft.
+Một số, thậm chí có lẽ là phần lớn, quyết định của IBM về PC rõ ràng dựa trên cơ sở non-technical. Trước khi chọn MS-DOS, IBM sắp xếp cuộc gặp Gary Kildall của Digital Research để cân nhắc CP/M. Theo câu chuyện được kể lại, ngày hôm ấy thời tiết đẹp đến mức Gary quyết định đi lái máy bay riêng. Các nhà quản lý IBM, có lẽ bực mình vì bị cho leo cây, chẳng bao lâu sau đã đạt thỏa thuận với Microsoft.
 
-Bill Gates mua QDOS Seattle Computer Product <sup>\[1\]</sup>, dọn chút, đổi "MS-DOS". Còn lại là lịch sử. IBM, Intel vui, Microsoft rất rất vui. Digital Research không, Seattle Computer Products càng buồn khi nhận gần cho không quyền program best-selling mọi thời. Giữ quyền bán MS-DOS cùng hardware, nên từng thấy bản MS-DOS từ họ kèm Intel board/chip vô dụng đáng ngại để đúng hợp đồng.
+Bill Gates đã mua quyền đối với QDOS của Seattle Computer Products, <sup>\[1\]</sup> chỉnh sửa nó đôi chút và đổi tên thành “MS-DOS”. Phần còn lại, như người ta thường nói, đã trở thành lịch sử. IBM vui, Intel vui, còn Microsoft thì rất, rất vui. Digital Research không vui; Seattle Computer Products thì ngày càng kém vui khi nhận ra họ gần như đã cho không quyền đối với chương trình máy tính best-selling nhất mọi thời đại. Họ vẫn giữ quyền bán MS-DOS nếu bán kèm hardware. Vì vậy trước kia bạn có thể thấy Seattle Computer Products bán MS-DOS đi kèm những board và chip Intel vô dụng đến đáng lo ngại, một sự kết hợp khó tin chỉ để đáp ứng đúng câu chữ trong hợp đồng với Microsoft.
 
-Đừng thương quá — QDOS dựa nhiều CP/M Gary, mà ông thích bay. Bill Gates mua Porsche 959 super-fast từ lợi nhuận. Giá three-quarters triệu đô, nhập bị Hải quan Mỹ cản. Không lái được Mỹ vì chưa qua government-mandated crash-worthiness test. Nằm kho Oakland đến nay — sản phẩm Gates chắc không crash.
+Đừng quá thương hại Seattle Computer Products: bản thân QDOS của họ dựa rất nhiều vào CP/M của Gary Kildall, còn ông thì thích đi lái máy bay hơn. Sau đó Bill Gates dùng phần lợi nhuận của mình mua một chiếc Porsche 959 super-fast. Chiếc xe có giá three-quarters triệu đô la, nhưng gặp rắc rối với Hải quan Mỹ khi nhập khẩu. Porsche 959 không được chạy tại Mỹ vì chưa vượt qua các cuộc thử nghiệm crash-worthiness government-mandated. Đến nay chiếc xe vẫn nằm không trong một nhà kho ở Oakland: một sản phẩm của Gates chắc chắn sẽ không bao giờ crash.
 
-<sup>\[1\]</sup> Nghĩa đen "Quick and Dirty Operating System".
+<sup>\[1\]</sup> Tên này có nghĩa đen là “Quick and Dirty Operating System”.
 
-80486 đóng gói lại 80386, nhanh chút vì bus bỏ trạng thái cho coprocessor. Coprocessor built-in hoặc cấm, gọi DX, SX. Thêm ít instruction, cache on-board, phần lớn cải thiện còn lại. Đến hiện tại Intel sáng tạo và cãi trademark, gọi chip mới Pentium thay 80586. Nhanh, đắt, hỗ trợ mọi instruction trước, thêm mới. Có thể đoán 80686 nhanh, đắt, thêm instruction. Khẩu hiệu nội bộ "nhanh hoặc chết", họ sống đúng. Như bà tôi nói bên guồng quay, "Ai không nhớ lịch sử sẽ gặp vấn đề backward compatibility nghiêm trọng, nhất là đổi addressing mode, wordsize."
+80486 là 80386 được đóng gói lại và nhanh hơn đôi chút vì bus không còn những trạng thái cho phép coprocessor hoạt động. Coprocessor của 486 hoặc được tích hợp, hoặc không được phép có, tương ứng với tên DX và SX. 486 bổ sung vài instruction nhỏ và có cache on-board, tức memory nhanh của processor; cache giải thích phần lớn mức tăng hiệu năng còn lại. Đến hiện tại, trong một đợt bùng nổ đổi mới và tranh chấp nhãn hiệu dữ dội, Intel đặt tên chip mới nhất là Pentium thay vì 80586. Nó nhanh hơn, đắt hơn, hỗ trợ toàn bộ instruction trước đó và bổ sung một số instruction mới. Có thể an tâm dự đoán rằng 80686 cũng được dự tính sẽ nhanh hơn, đắt hơn và cung cấp thêm instruction. Khẩu hiệu nội bộ của Intel khi liên tục ra chip mới là “nhanh lên hoặc chết”, và quả thực hãng sống theo khẩu hiệu ấy. Như bà tôi thường nói khi miệt mài bên guồng quay sợi: “Ai không nhớ lịch sử thì nhất định sẽ gặp những vấn đề tương thích ngược nghiêm trọng, nhất là khi thay đổi chế độ đánh địa chỉ hoặc wordsize của kiến trúc.”
 
 ## Memory model Intel 80x86 và nguồn gốc
 
-Chương trước segment ít nhất hai nghĩa (còn nghĩa OS memory-management-related thứ ba):
+Như đã thấy ở chương trước, thuật ngữ segment có ít nhất hai nghĩa khác nhau; ngoài ra còn nghĩa thứ ba memory-management-related trong hệ điều hành:
 
-Segment UNIX là phần nội dung liên quan binary.
+Một segment trên UNIX là một phần của binary chứa những thành phần có liên quan với nhau.
 
-Segment Intel x86 do thiết kế tương thích chia address space không đồng nhất thành dải 64-Kbyte.
+Một segment trong memory model Intel x86 là kết quả của thiết kế mà address space, vì lý do tương thích, không đồng nhất mà được chia thành các vùng 64-Kbyte gọi là segment.
 
-Ban đầu 8086 segment là vùng 64-Kbyte do segment register trỏ. Address lấy register dịch trái bốn chỗ (nhân 16), hay nối bốn zero thành 20-bit.
+Ở dạng cơ bản nhất trên 8086, segment ban đầu là một vùng memory 64-Kbyte được segment register trỏ tới. Địa chỉ được tạo bằng cách lấy giá trị trong segment register rồi dịch trái bốn vị trí, tương đương nhân với 16. Một cách nhìn thứ ba là giá trị segment register đã được biến thành đại lượng 20-bit bằng cách thêm bốn số không vào cuối.
 
-Offset 16-bit cho chỗ trong segment. Cộng nội dung segment register với offset được address cuối. Điểm lạ: như nhiều cặp số cộng 24, nhiều cặp segment + offset cùng address.
+Sau đó, offset 16-bit cho biết địa chỉ nằm ở đâu trong segment ấy. Cộng nội dung segment register với offset sẽ thu được địa chỉ cuối cùng. Có một điểm khác thường: giống như nhiều cặp số khác nhau có thể cùng có tổng là 24, nhiều cặp segment + offset khác nhau cũng có thể cùng trỏ tới một địa chỉ.
 
 ### Mẹo thực hành hữu ích
 
 ![image](images/ch07/img07-04.png)
 
-Pointer Different-Looking, cùng address
+Các pointer Different-Looking nhưng cùng địa chỉ
 
-Address 8086 kết hợp segment 16-bit, offset 16-bit. Dịch segment trái bốn rồi cộng, nên nhiều cặp cùng address.
+Địa chỉ trên Intel 8086 được tạo bằng cách kết hợp segment 16-bit với offset 16-bit. Segment được dịch trái bốn vị trí trước khi cộng offset. Vì vậy, nhiều cặp segment/offset khác nhau có thể trỏ đến cùng một địa chỉ.
 
-segment offset address kết quả
+segment offset địa chỉ kết quả
 
 (dịch trái 4 bit)
 
@@ -90,9 +90,9 @@ segment offset address kết quả
 
 `AFFF0` `+` `000F` `=` `AFFFF`
 
-Thường có 0x1000 (4096) tổ hợp cho cùng address.
+Nói chung, có 0x1000 (4096) tổ hợp segment/offset khác nhau cùng trỏ tới một địa chỉ.
 
-C compiler-writer phải so pointer canonical trên PC, nếu không bit pattern khác cùng address bị coi khác. Keyword "huge" làm, model "large" không. Microsoft C `far` giữ segment register và offset; `near` chỉ offset 16-bit, dùng data/stack segment register sẵn.
+Người viết compiler-writer C cần bảo đảm các pointer trên PC được so sánh ở dạng canonical; nếu không, hai pointer có bit pattern khác nhau nhưng cùng chỉ một địa chỉ có thể bị kết luận sai là không bằng nhau. Từ khóa “huge” sẽ thực hiện điều đó cho bạn, nhưng memory model “large” thì không. Từ khóa `far` trong Microsoft C cho biết pointer lưu nội dung segment register và offset. Từ khóa `near` có nghĩa pointer chỉ chứa offset 16-bit và sử dụng giá trị đã có trong data segment register hoặc stack segment register.
 
 #### Mẹo thực hành hữu ích
 
@@ -100,11 +100,11 @@ C compiler-writer phải so pointer canonical trên PC, nếu không bit pattern
 
 Hướng dẫn memory prefix
 
-Prefix Lũy thừa hai Ý nghĩa Số byte Kilo 2<sup>10</sup> Một nghìn byte 1,024 Mega 2<sup>20</sup> Một triệu byte 1,048,576 Giga 2<sup>30</sup> Một tỷ byte 1,073,741,824 Tera 2<sup>40</sup> Một nghìn tỷ byte 1,099,511,627,776 Bubba 2<sup>64</sup> Mười tám tỷ tỷ byte 18,446,744,073,709,551,616 Nhân tiện mọi hãng disk dùng thập phân thay nhị phân. Disk 2-Gbyte giữ 2,000,000,000 thay 2,147,483,648 byte.
+Tiền tố Lũy thừa của hai Ý nghĩa Số byte Kilo 2<sup>10</sup> Một nghìn byte 1,024 Mega 2<sup>20</sup> Một triệu byte 1,048,576 Giga 2<sup>30</sup> Một tỷ byte 1,073,741,824 Tera 2<sup>40</sup> Một nghìn tỷ byte 1,099,511,627,776 Bubba 2<sup>64</sup> Mười tám tỷ tỷ byte 18,446,744,073,709,551,616 Nhân nói về các con số này, hãy lưu ý rằng mọi nhà sản xuất đĩa đều dùng ký hiệu thập phân thay vì nhị phân để chỉ dung lượng đĩa. Vì vậy, đĩa 2-Gbyte chứa 2,000,000,000 byte chứ không phải 2,147,483,648 byte.
 
-Address space 64-bit thật lớn. Chứa cả phim TV high-definition trong memory. Chưa chốt đặc tả TV high-definition nhưng có lẽ gần SVGA 1024 x 768 pixel, mỗi pixel ba byte màu.
+Address space 64-bit thực sự rất lớn. Nó có thể chứa trọn một bộ phim truyền hình high-definition trong memory cùng lúc. Thông số truyền hình high-definition vẫn chưa được thống nhất, nhưng có lẽ sẽ gần với SVGA: 1024 x 768 pixel, mỗi pixel cần khoảng ba byte thông tin màu.
 
-30 frame/giây (NTSC hiện tại), phim two-hour cần:
+Ở tốc độ 30 frame mỗi giây, như chuẩn NTSC hiện tại, một bộ phim two-hour sẽ cần:
 
 120 phút= x 60 giây x 30 frame x 786,432 pixel x 3 byte màu
 
@@ -112,11 +112,11 @@ Address space 64-bit thật lớn. Chứa cả phim TV high-definition trong mem
 
 \= 500Gbyte memory
 
-Vậy không chỉ một mà 36 triệu phim TV high-definition (hơn mọi phim từng làm nhiều bậc) vào address space 64-bit. Còn chừa OS, không sao. SVID hiện <sup>\[1\]</sup> giới hạn UNIX kernel 512 Mbyte. Dĩ nhiên còn chuyện nhỏ physical disk backing virtual memory.
+Như vậy, một virtual address space 64-bit có thể chứa không chỉ một mà tới 36 triệu bộ phim truyền hình high-definition, nhiều hơn tổng số phim từng được sản xuất đến nhiều bậc độ lớn, và vẫn còn dư. Bạn vẫn phải chừa chỗ cho hệ điều hành, nhưng điều đó không sao. SVID <sup>\[1\]</sup> hiện tại giới hạn UNIX kernel ở 512 Mbyte. Dĩ nhiên vẫn còn vấn đề nhỏ là phải có đĩa vật lý để lưu phần virtual memory này.
 
-<sup>\[1\]</sup> SVID — System V Interface Definition — tài liệu dày mô tả System V API.
+<sup>\[1\]</sup> SVID — System V Interface Definition — là một tài liệu đồ sộ mô tả API của System V.
 
-Thách thức kiến trúc không capacity mà speed. Pentium đỏ mới không giúp nếu software nghẽn disk, memory latency. Khoảng cách hiệu năng memory, CPU rộng tăng. Thập kỷ qua CPU gấp tốc mỗi one-and-a-half đến hai năm. Memory gấp mật độ (64-Kb lên 128 Kb) nhưng access time chỉ cải thiện 10%. Main memory time càng quan trọng máy address lớn. Data lớn, latency di chuyển chi phối. Dự kiến cache, công nghệ liên quan nhiều hơn.
+Thách thức thực sự của kiến trúc máy tính ngày nay là tốc độ memory chứ không phải dung lượng. Chip Pentium mới tinh, đỏ bóng của bạn sẽ chẳng đem lại lợi ích gì nếu software thực sự bị giới hạn bởi latency của đĩa và memory, tức thời gian truy cập. Cụ thể, khoảng cách hiệu năng giữa memory và CPU vừa lớn vừa tiếp tục tăng. Trong thập niên qua, tốc độ CPU tăng gấp đôi sau mỗi one-and-a-half đến hai năm. Trong cùng thời gian, mật độ memory tăng gấp đôi, từ chip 64-Kb lên 128 Kb, nhưng thời gian truy cập chỉ cải thiện 10%. Thời gian truy cập main memory còn quan trọng hơn trên máy có address space khổng lồ. Khi truy cập lượng data rất lớn, latency để di chuyển data bắt đầu chi phối hiệu năng software. Hãy chờ đợi cache và các công nghệ liên quan được sử dụng nhiều hơn nữa trong tương lai.
 
 #### Mẹo thực hành hữu ích
 
@@ -124,17 +124,17 @@ Thách thức kiến trúc không capacity mà speed. Pentium đỏ mới không
 
 Giới hạn MS-DOS 640Kb từ đâu
 
-MS-DOS application giới hạn cứng 640Kbyte do address range 8086, máy DOS gốc. 20-bit chỉ 1 Mbyte, còn reserve segment 64Kbyte cho hệ:
+Ứng dụng chạy dưới MS-DOS chịu giới hạn cứng là chỉ có 640 Kbyte memory khả dụng. Giới hạn này xuất phát từ phạm vi địa chỉ tối đa của Intel 8086, máy DOS nguyên thủy. 8086 hỗ trợ địa chỉ 20-bit nên tổng memory bị giới hạn ở 1 Mbyte. Address space ấy còn bị thu hẹp do một số segment, mỗi segment 64 Kbyte, được dành cho hệ thống:
 
-segment dành cho `F0000` đến `FFFFF` 64 Kb ROM cố định BIOS, diagnostic, v.v. `D0000` đến `EFFFF` 128 Kb cartridge ROM `C0000` đến `CFFFF` 64 Kb BIOS extension (XT hard disk) `B0000` đến `BFFFF` 64 Kb conventional memory display `A0000` đến `AFFFF` 64 Kb display memory extension
+segment phần dành riêng `F0000` đến `FFFFF` 64 Kb cho vùng ROM thường trực: BIOS, chẩn đoán, v.v. `D0000` đến `EFFFF` 128 Kb cho vùng cartridge ROM `C0000` đến `CFFFF` 64 Kb cho BIOS extension (đĩa cứng XT) `B0000` đến `BFFFF` 64 Kb cho memory hiển thị thông thường `A0000` đến `AFFFF` 64 Kb cho phần mở rộng display memory
 
-còn
+chỉ còn lại
 
-`00000` đến `9FFFF` 640 Kb cho application.
+`00000` đến `9FFFF` 640 Kb dành cho chương trình ứng dụng.
 
-Billion, trillion khác Mỹ, Anh. Mỹ là nghìn triệu (10<sup>9</sup>), triệu triệu (10<sup>12</sup>); Anh triệu triệu (10<sup>12</sup>), triệu triệu triệu (10<sup>18)</sup>). Thích Mỹ vì tăng nhất quán nghìn (10<sup>3</sup>), triệu (10<sup>6</sup>), billion (10<sup>9</sup>), trillion (10<sup>12</sup>). Tỷ phú Anh giàu hơn Mỹ — đến khi £1,000 đổi $1.
+“Billion” và “trillion” có nghĩa khác nhau tại Mỹ và Anh. Ở Mỹ, chúng lần lượt là một nghìn triệu (10<sup>9</sup>) và một triệu triệu (10<sup>12</sup>). Ở Anh, chúng lớn hơn: lần lượt là một triệu triệu (10<sup>12</sup>) và một triệu triệu triệu (10<sup>18)</sup>). Chúng tôi thích cách dùng của Mỹ hơn vì các mức tăng độ lớn nhất quán từ thousand (10<sup>3</sup>) đến million (10<sup>6</sup>), billion (10<sup>9</sup>) rồi trillion (10<sup>12</sup>). Một billionaire ở Anh giàu hơn nhiều so với một billionaire ở Mỹ — ít nhất cho đến khi tỷ giá rơi xuống £1,000 đổi $1.
 
-Giới hạn 640 Kb MS-DOS từ tổng 1 Mbyte 8086. MS-DOS dành sáu segment, chỉ mười segment 64-Kbyte từ zero cho ứng dụng (địa chỉ thấp block 0 cũng buffer, working store MS-DOS). Bill Gates nói 1981 "640 K đủ cho mọi người". PC đầu 640Kb có vẻ lớn; thực tế chuẩn chỉ 16K RAM.
+Giới hạn 640 Kb trong MS-DOS bắt nguồn từ tổng address space 1 Mbyte của chip 8086. MS-DOS dành riêng trọn sáu segment để sử dụng, nên ứng dụng chỉ còn 10 segment 64-Kbyte bắt đầu từ địa chỉ 0; ngay cả những địa chỉ thấp nhất trong block 0 cũng dành cho buffer và vùng làm việc của MS-DOS. Bill Gates từng nói năm 1981: “640 K hẳn phải đủ cho bất kỳ ai.” Khi PC mới ra mắt, 640 Kb có vẻ là một lượng memory khổng lồ. Thực tế, cấu hình tiêu chuẩn của chiếc PC đầu tiên chỉ có 16 K RAM.
 
 #### Mẹo thực hành hữu ích
 
@@ -142,57 +142,57 @@ Giới hạn 640 Kb MS-DOS từ tổng 1 Mbyte 8086. MS-DOS dành sáu segment, 
 
 Memory model PC
 
-Microsoft C nhận:
+Microsoft C nhận biết những memory model sau:
 
-small Mọi pointer 16 bit, code, data mỗi thứ một segment,
+small Mọi pointer đều là 16 bit, nên code và data mỗi loại chỉ nằm trong một segment,
 
-tổng program 128 K.
+và tổng kích thước chương trình bị giới hạn ở 128 K.
 
-large Mọi pointer 32 bit, nhiều segment 64-K. medium Function pointer 32 bit, nhiều code segment. Data
+large Mọi pointer đều là 32 bit. Chương trình có thể chứa nhiều segment 64-K. medium Function pointer là 32 bit, nên có thể có nhiều code segment. Data
 
-pointer 16 bit, chỉ một data segment 64-K.
+pointer là 16 bit, nên chỉ có thể có một data segment 64-K.
 
-compact Ngược medium: function pointer 16 bit, nên
+compact Ngược lại với medium: function pointer là 16 bit, vì vậy
 
-code dưới 64K. Data pointer 32 bit, nhiều segment. Nhưng stack data vẫn một segment 64-K.
+code phải nhỏ hơn 64 K. Data pointer là 32 bit nên data có thể chiếm nhiều segment. Tuy nhiên, stack data vẫn bị giới hạn trong một segment 64-K.
 
-Microsoft C có keyword non-standard, áp object/function pointer ghi đè model riêng pointer đó.
+Microsoft C nhận biết những từ khóa non-standard sau; khi áp dụng cho object pointer hoặc function pointer, chúng chỉ ghi đè memory model của riêng pointer ấy.
 
-`__near` Pointer 16-bit `__far` Pointer 32-bit, object phải toàn trong một segment (không
+`__near` Pointer 16-bit `__far` Pointer 32-bit, nhưng toàn bộ object được trỏ tới phải nằm trong một segment (không
 
-object lớn hơn 64 K), nạp segment register rồi định địa chỉ toàn object được.
+object nào được lớn hơn 64 K), nghĩa là sau khi nạp segment register, bạn có thể dùng nó để đánh địa chỉ toàn bộ object.
 
-`__huge` Pointer 32-bit, bỏ hạn chế toàn trong segment
+`__huge` Pointer 32-bit, và giới hạn yêu cầu mọi thứ nằm trong một segment được
 
-đó.
+gỡ bỏ.
 
 Ví dụ: `char __huge * banana;`
 
-Keyword sửa item ngay phải, khác type qualifier `const`, `volatile` sửa pointer ngay trái.
+Lưu ý rằng các từ khóa này sửa đổi thành phần nằm ngay bên phải chúng, trái với các type qualifier `const` và `volatile`, vốn sửa đổi pointer nằm ngay bên trái.
 
-Ngoài mặc định, khai báo near, far, huge rõ trong mọi model được. Huge luôn compare, pointer arithmetic trên canonical <sup>\[1\]</sup> value. Canonical offset 0 đến 15, unsigned long comparison cho đúng.
+Ngoài các mặc định, bạn luôn có thể khai báo tường minh pointer near, far và huge trong bất kỳ memory model nào. Huge pointer luôn thực hiện phép so sánh và pointer arithmetic dựa trên giá trị canonical <sup>\[1\]</sup>. Ở dạng canonical, offset của pointer luôn nằm trong khoảng 0 đến 15. Nếu hai pointer đều ở dạng canonical, phép so sánh unsigned long sẽ cho kết quả chính xác.
 
-Compile tương tác array/struct size, pointer size, memory model, mode hardware 80x86 khó, error-prone.
+Việc compile các tương tác giữa kích thước array và struct, kích thước pointer, memory model và chế độ hoạt động hardware 80x86 vừa khó vừa error-prone.
 
-<sup>\[1\]</sup> Biết rồi. Dùng "canonical" theo cách canonical.
+<sup>\[1\]</sup> Biết rồi, biết rồi. Chúng tôi đang dùng “canonical” theo đúng nghĩa canonical của nó.
 
-Spreadsheet, word processor hữu ích dần đòi memory ever-increasing. Nhiều công đối phó address IBM PC hạn chế, nhiều expander/extender nhưng không portable solution thỏa đáng. MS-DOS 1.0 port CP/M sang 8086. Bản sau tương thích đầu, nên DOS 6.0 vẫn single-tasking, mode "real-address" 8086-compatible, giữ giới hạn user address. Hệ quả khác mọi program MS-DOS đặc quyền vô hạn, virus dễ tấn công. Gần như không virus PC nếu MS-DOS dùng memory, task protection hardware từ 80286.
+Khi spreadsheet và word processor dần chứng tỏ giá trị, chúng đặt ra yêu cầu ever-increasing đối với memory. Người ta đã bỏ ra vô số công sức để ứng phó với address space hạn chế của IBM PC. Nhiều bộ mở rộng và tăng cường memory đã được sản xuất, nhưng vẫn không có giải pháp portable thỏa đáng. MS-DOS 1.0 về cơ bản là bản port CP/M sang 8086. Mọi phiên bản sau đều giữ tương thích với phiên bản đầu. Đó là lý do DOS 6.0 vẫn single-tasking và vẫn dùng chế độ “real-address” (8086-compatible) của 80x86, duy trì các giới hạn address space của chương trình người dùng. Memory model 8086 còn có những tác động không mong muốn khác. Mọi chương trình trên MS-DOS đều chạy với đặc quyền không hạn chế, tạo điều kiện cho virus software dễ dàng tấn công. Virus PC hẳn gần như không tồn tại nếu MS-DOS sử dụng hardware bảo vệ memory và task đã được tích hợp trong mọi processor Intel x86 từ 80286 trở đi.
 
 ## Virtual memory
 
-Có đó, thấy được — real
+Nếu nó có ở đó và bạn nhìn thấy được — đó là thực.
 
-Không có, thấy được — virtual
+Nếu nó không ở đó mà bạn vẫn nhìn thấy được — đó là ảo.
 
-Có đó, không thấy — transparent
+Nếu nó có ở đó mà bạn không nhìn thấy được — đó là trong suốt.
 
-Không có, không thấy — bạn xóa rồi!
+Nếu nó không ở đó và bạn cũng không nhìn thấy được — bạn đã xóa nó rồi!
 
-—Poster IBM về virtual memory, khoảng 1978. Program bị main memory lắp hạn chế như MS-DOS rất bất tiện. Sớm phát triển virtual memory: dùng disk rẻ chậm mở main memory nhanh đắt. Vùng đang dùng đưa physical memory, vùng lâu không đụng lưu disk chừa chỗ. Mọi hệ hiện đại từ supercomputer lớn đến workstation nhỏ, riêng PC ngoại lệ, dùng virtual memory.
+—Áp phích IBM giải thích virtual memory, khoảng năm 1978. Việc chương trình bị giới hạn bởi lượng main memory lắp trên máy, như trong MS-DOS, rất bất tiện. Vì thế, khái niệm virtual memory được phát triển từ những ngày đầu của ngành máy tính để loại bỏ giới hạn này. Ý tưởng cơ bản là dùng dung lượng đĩa rẻ nhưng chậm để mở rộng main memory nhanh nhưng đắt. Những vùng memory mà chương trình thực sự sử dụng tại một thời điểm được đưa vào physical memory. Những vùng không được đụng đến trong một thời gian có thể được lưu ra đĩa để nhường chỗ cho các vùng đang được sử dụng. Mọi hệ thống máy tính hiện đại, từ supercomputer lớn nhất đến workstation nhỏ nhất, đều sử dụng virtual memory; PC là ngoại lệ duy nhất.
 
-Thời máy tính đầu khi rắn còn đi, programmer tự chuyển phần không dùng ra disk, tốn nhiều công theo dõi gì trong memory, đổi segment. COBOL cũ còn nhiều tính năng diễn memory overlay, hoàn toàn lỗi thời khó hiểu với thế hệ nay.
+Việc đưa các phần không dùng ra đĩa từng do lập trình viên thực hiện thủ công, vào thời xa xưa của ngành máy tính, khi rắn còn biết đi. Họ phải bỏ rất nhiều công sức theo dõi những gì đang có trong memory tại từng thời điểm và đưa segment vào, ra khi cần. Các ngôn ngữ lâu đời như COBOL vẫn chứa cả một hệ thống tính năng để diễn đạt memory overlaying, những thứ hoàn toàn lỗi thời và không thể giải thích nổi với thế hệ lập trình viên hiện nay.
 
-Multilevel store quen thuộc như register và main memory. Lý thuyết mọi location là register được, thực quá đắt nên đổi speed lấy rẻ. Virtual memory thêm một bước, dùng disk giữ image process thay main memory, thành dải liên tục.
+Lưu trữ nhiều cấp là khái niệm quen thuộc. Chúng ta gặp nó ở những nơi khác trong máy tính, chẳng hạn giữa register và main memory. Về lý thuyết, mọi vị trí memory đều có thể là register. Trong thực tế, chi phí như vậy cao đến mức không thể chấp nhận, nên phải đánh đổi tốc độ truy cập để có cách thực hiện rẻ hơn. Virtual memory chỉ mở rộng thêm một cấp, dùng đĩa thay cho main memory để chứa image của process đang chạy. Như vậy, ta có một dải liên tục các cấp lưu trữ.
 
 ### Mẹo thực hành hữu ích
 
@@ -200,29 +200,29 @@ Multilevel store quen thuộc như register và main memory. Lý thuyết mọi 
 
 ![image](images/ch07/img07-05.png)
 
-Process SunOS chạy address space 32-bit. OS cho mỗi process tưởng độc quyền toàn bộ. Ảo giác sus-tained bằng virtual memory chia sẻ physical memory, disk giữ data khi đầy. Data liên tục memory/disk khi chạy. Hardware dịch virtual sang physical, cho chạy bất kỳ real memory. Lập trình viên chỉ thấy virtual, không biết process ra disk về trừ elapsed time hoặc lệnh "`ps`". Hình 7-3 cơ bản.
+Process trên SunOS thực thi trong address space 32-bit. Hệ điều hành sắp xếp để mỗi process tưởng rằng nó có quyền sử dụng độc chiếm toàn bộ address space. Ảo giác này được sus-tained bởi “virtual memory”, cơ chế chia sẻ physical memory của máy và dùng đĩa lưu data khi memory đầy. Trong lúc process chạy, data liên tục được chuyển từ memory ra đĩa rồi trở lại. Hardware quản lý memory chuyển virtual address thành physical address và cho phép process chạy ở bất kỳ vị trí nào trong memory thực của hệ thống. Lập trình viên ứng dụng chỉ thấy virtual address và không có cách biết process đã chuyển ra đĩa rồi trở lại memory, trừ khi quan sát thời gian trôi qua hoặc xem các lệnh hệ thống như “`ps`”. Hình 7-3 minh họa những nguyên lý cơ bản của virtual memory.
 
-Hình 7-3. Cơ bản virtual memory
+Hình 7-3. Những nguyên lý cơ bản của virtual memory
 
 ![image](images/ch07/img07-06.png)
 
-Virtual memory thành page, đơn vị OS di chuyển, bảo vệ, thường vài Kbyte. Xem bằng `/usr/ucb/pagesize`. Đi memory gọi paged in, đi disk paged out.
+Virtual memory được tổ chức thành các “page”. Page là đơn vị mà hệ điều hành di chuyển và bảo vệ, thường có kích thước vài Kbyte. Bạn có thể xem pagesize của hệ thống bằng cách gõ `/usr/ucb/pagesize`. Khi memory image di chuyển giữa đĩa và physical memory, ta gọi là paged in nếu đi vào memory và paged out nếu đi ra đĩa.
 
-Hệ thống có thể cần mọi memory process. Nếu khó chạy sớm (low-priority, sleep), lấy mọi physical resource backup disk, gọi "swapped out". Swap area thường lớn vài lần physical, giữ memory paged/swapped. Chỉ user process page/swap, kernel SunOS luôn memory-resident.
+Hệ thống có thể cần sử dụng toàn bộ memory gắn với một process. Nếu process ít có khả năng sớm chạy lại, có thể do thuộc loại low-priority hoặc đang sleep, toàn bộ tài nguyên physical memory đã cấp cho nó có thể bị thu hồi và lưu ra đĩa. Khi ấy process được gọi là “swapped out”. Trên đĩa có một “swap area” đặc biệt để chứa memory đã được page hoặc swap. Swap area thường lớn gấp nhiều lần physical memory trên máy. Chỉ user process mới page và swap; SunOS kernel luôn memory-resident.
 
-Process chỉ thao tác page trong memory. Tham chiếu page vắng, MMU page fault, kernel xét valid. Invalid gửi "segmentation violation"; valid lấy disk. Page về, process unblock, chạy không biết đã chờ page-in.
+Process chỉ có thể thao tác trên page đang nằm trong memory. Khi process tham chiếu đến một page không có trong memory, MMU phát sinh page fault. Kernel đáp ứng sự kiện và quyết định tham chiếu đó hợp lệ hay không. Nếu không hợp lệ, kernel gửi signal “segmentation violation” cho process. Nếu hợp lệ, kernel lấy page từ đĩa vào. Khi page đã trở lại memory, process hết bị block và có thể tiếp tục chạy, hoàn toàn không biết mình từng bị giữ lại để chờ một sự kiện page-in.
 
-SunOS nhìn disk filesystem, memory thống nhất, dùng cùng vnode (virtual node). Mọi virtual operation theo map file region vào memory region, cải thiện hiệu năng, tái dùng code. "Hat layer" là software hardware address translation điều khiển MMU, rất hardware-dependent, phải viết lại mỗi kiến trúc.
+SunOS có cách nhìn thống nhất đối với disk filesystem và main memory. Hệ điều hành sử dụng cùng một data structure nền tảng, vnode hay “virtual node”, để thao tác với cả hai. Mọi thao tác virtual memory đều được tổ chức theo triết lý duy nhất: map một vùng file vào một vùng memory. Cách này cải thiện hiệu năng và cho phép tái sử dụng đáng kể code. Bạn cũng có thể nghe đến “hat layer”: đó là software “hardware address translation” điều khiển MMU. Nó phụ thuộc rất mạnh vào hardware, tức hardware-dependent, và phải được viết lại cho từng kiến trúc máy tính mới.
 
-Virtual memory thiết yếu, cho một quart process trong pint memory. Cuối chương thêm ngụ ngôn kinh điển.
+Virtual memory hiện là kỹ thuật không thể thiếu của công nghệ hệ điều hành: nó cho phép lượng process cỡ bình một quart chạy trong chiếc bình memory chỉ có một pint. Phần giải trí nhẹ nhàng cuối chương còn mô tả virtual memory bằng một truyện ngụ ngôn. Đó là một tác phẩm kinh điển.
 
 #### Thử thách lập trình
 
 ![image](images/ch07/img07-07.png)
 
-Allocation được bao nhiêu memory?
+Bạn có thể cấp phát bao nhiêu memory?
 
-Chạy chương trình xem process cấp được bao nhiêu.
+Chạy chương trình sau để xem bạn có thể cấp phát bao nhiêu memory trong process của mình.
 
 ```
 #include <stdio.h>
@@ -234,51 +234,51 @@ main() {
 }
 ```
 
-Tổng tùy swap, process limit cấu hình. Khối nhỏ hơn Mbyte có thêm được không, vì sao?
+Tổng dung lượng phụ thuộc vào swap space và process limit được cấu hình trên hệ thống. Nếu cấp phát từng block nhỏ hơn một Mbyte, bạn có lấy được nhiều memory hơn không? Vì sao?
 
-Trên MS-DOS memory-limited dùng khối 1-Kbyte thay 1-Mbyte.
+Để chạy chương trình trên MS-DOS memory-limited, hãy cấp phát từng block 1-Kbyte thay vì 1-Mbyte.
 
 ## Cache memory
 
-Mở rộng multi-level store, buffer nhỏ đắt cực nhanh giữa CPU, physical memory. Có thể phía CPU của MMU như SPARCstation 2, cache virtual address, flush mỗi context switch (Hình 7-4); hoặc phía physical như SPARCstation 10, dễ chia sẻ multiprocessor qua physical address.
+Cache memory mở rộng thêm khái niệm lưu trữ multi-level. Đó là một memory buffer nhỏ, đắt nhưng cực nhanh, nằm đâu đó giữa CPU và physical memory. Cache có thể nằm về phía CPU của memory management unit (MMU), như trên Sun SPARCstation 2. Khi ấy nó cache virtual address và phải được flush sau mỗi context switch. (Xem Hình 7-4.) Hoặc cache có thể nằm về phía physical memory của MMU, như trên SPARCstation 10. Nhờ cache physical address, cách này cho phép các CPU trong hệ multiprocessor chia sẻ cache dễ dàng.
 
-Hình 7-4. Cơ bản cache memory
+Hình 7-4. Những nguyên lý cơ bản của cache memory
 
 ![image](images/ch07/img07-08.png)
 
-Mọi processor hiện đại dùng cache. Đọc memory đưa cả line (16/32 byte) vào. Locality tốt (như đi dọc string), data cạnh lấy cache nhanh thay main chậm. Cache tốc độ system cycle, CPU 50 MHz thì 20 ns; main thường chậm bốn lần! Cache đắt, tốn space/power, nên phụ thay độc quyền.
+Mọi processor hiện đại đều sử dụng cache memory. Mỗi khi đọc data từ memory, cả một “line”, thường là 16 hoặc 32 byte, được đưa vào cache. Nếu chương trình có locality of reference tốt, chẳng hạn duyệt dọc một chuỗi ký tự, những tham chiếu sau đến data lân cận có thể lấy từ cache nhanh thay vì main memory chậm. Cache hoạt động với cùng chu kỳ của hệ thống, nên với processor 50 MHz, thời gian cache là 20 nanosecond. Main memory thường có thể chậm hơn bốn lần! Cache đắt hơn, chiếm nhiều diện tích và tiêu thụ nhiều điện hơn memory thông thường, nên ta dùng nó để bổ trợ thay vì làm hình thức memory duy nhất của hệ thống.
 
-Cache có address list, nội dung, liên tục đổi khi processor tham chiếu mới. Cả read/write qua cache. Xin address thì cache trước; có trả ngay, không chuyển main chậm, lấy line mới vào.
+Cache chứa danh sách địa chỉ cùng nội dung của chúng. Danh sách địa chỉ liên tục thay đổi khi processor tham chiếu các vị trí mới. Cả đọc lẫn ghi đều đi qua cache. Khi processor muốn lấy data từ một địa chỉ cụ thể, yêu cầu trước tiên được gửi tới cache. Nếu data đã có trong cache, nó được trả về ngay. Nếu không, cache chuyển tiếp yêu cầu và một lần truy cập main memory chậm hơn sẽ diễn ra. Một line mới được lấy về và chiếm chỗ trong cache.
 
-Nếu program quái, luôn vừa miss cache, còn chậm hơn không cache vì logic tìm vị trí không miễn phí.
+Nếu chương trình có hành vi khá trái khoáy và lần nào cũng vừa trượt cache, hiệu năng cuối cùng còn tệ hơn khi không có cache. Nguyên nhân là toàn bộ logic bổ sung để xác định thứ gì nằm ở đâu đều phải trả giá.
 
-Sun hiện hai loại:
+Hiện Sun sử dụng hai loại cache:
 
-- Write-through cache — luôn ghi main memory cùng lúc cache.
+- Write-through cache— Mỗi lần ghi vào cache, nó luôn đồng thời khởi động một lần ghi vào main memory.
 
-- Write-back cache — đầu chỉ cache, chuyển main khi line sắp ghi lại chưa save. Cũng chuyển khi context switch process khác hay kernel.
+- Write-back cache— Ban đầu, nó chỉ ghi vào cache. Data được chuyển tới main memory khi cache line sắp bị ghi lại mà chưa được lưu. Data cũng được chuyển đi khi context switch sang một process khác hoặc sang kernel.
 
-Cả hai instruction tiếp khi cache access xong, không chờ memory chậm.
+Trong cả hai trường hợp, instruction stream tiếp tục ngay khi truy cập cache hoàn tất, không chờ memory chậm hơn theo kịp.
 
-SPARCstation 2 cache write-through 64 Kbyte, line 32 byte. Cache lớn phổ biến: SPARCserver 1000 write-back 1-Mbyte. Có thể cache I/O bus với I/O memory-mapped, thường instruction/data riêng. Có nhiều level, cache giữa thiết bị nhanh chậm như disk/memory. PC main memory cache giúp disk chậm gọi "RAMdisk". UNIX cache inode trong memory, nên power-ing tắt chưa "sync" flush disk có thể hỏng filesystem.
+Cache trên SPARCstation 2 chứa 64 Kbyte data write-through và mỗi line có kích thước 32 byte. Cache lớn hơn nhiều đang trở nên phổ biến: SPARCserver 1000 có cache memory write-back 1-Mbyte. Có thể có cache riêng cho I/O bus nếu processor sử dụng memory-mapped I/O; instruction và data cũng thường có cache riêng. Ngoài ra còn có cache nhiều cấp, và cache có thể được áp dụng ở bất kỳ giao diện nào giữa thiết bị nhanh và chậm, chẳng hạn giữa đĩa và memory. PC thường dùng cache trong main memory để hỗ trợ đĩa chậm, gọi là “RAMdisk”. Trong UNIX, inode của đĩa được cache trong memory. Đó là lý do filesystem có thể hỏng nếu power-ing, tức tắt nguồn máy, mà chưa dùng lệnh “sync” flush cache ra đĩa.
 
-Cache, virtual memory vô hình với programmer nhưng cần hiểu lợi, cách ảnh hưởng lớn hiệu năng.
+Cache và virtual memory đều vô hình đối với lập trình viên ứng dụng, nhưng cần hiểu lợi ích mà chúng mang lại cũng như cách chúng có thể tác động mạnh đến hiệu năng.
 
-Bảng 7-1. Cache memory cấu thành thế này
+Bảng 7-1. Cache memory được cấu thành từ những gì
 
 | Thuật ngữ | Định nghĩa |
 |---|---|
-| Line | Đơn vị truy cập cache, hai phần: data và tag chỉ address biểu diễn. |
-| Block | Data của line gọi block, byte chuyển giữa line, main, thường 32 byte. <br> Nội dung line biểu diễn block memory, đáp khi processor truy cập dải đó, "giả" dải memory nhưng nhanh hơn nhiều. <br> "Block", "line" đa số ngành dùng lỏng, thay nhau. |
-| Cache | Tập line lớn, thường 64 Kbyte đến 1 Mbyte hơn. Đôi khi associative memory hardware tăng tốc tag. Cạnh CPU vì speed; system memory, bus tối ưu di chuyển khối cache-block-sized. |
+| Line | Line là đơn vị truy cập cache. Mỗi line có hai phần: phần data và tag chỉ định địa chỉ mà nó đại diện. |
+| Block | Nội dung data của một line được gọi là block. Block chứa các byte được chuyển giữa một line và main memory. Kích thước block điển hình là 32 byte. <br> Nội dung cache line đại diện cho một block memory cụ thể và sẽ đáp ứng nếu processor cố truy cập phạm vi địa chỉ đó. Cache line “giả làm” phạm vi địa chỉ ấy trong memory, nhưng nhanh hơn đáng kể. <br> Phần lớn người trong ngành máy tính sử dụng “block” và “line” một cách không chặt chẽ và thay thế cho nhau. |
+| Cache | Cache gồm một tập hợp lớn các line, thường từ 64 Kbyte đến 1 Mbyte hoặc hơn. Đôi khi associative memory hardware được dùng để tăng tốc truy cập tag. Cache nằm ngay cạnh CPU để đạt tốc độ cao; memory system và bus được tinh chỉnh rất kỹ để tối ưu việc di chuyển những khối data cache-block-sized. |
 
 ### Mẹo thực hành hữu ích
 
 ![image](images/ch07/img07-04.png)
 
-Trải nghiệm với cache
+Một trải nghiệm với cache
 
-Chạy program xem phát hiện cache effect không.
+Chạy chương trình sau để xem bạn có phát hiện được ảnh hưởng của cache trên hệ thống hay không.
 
 ```
 #define DUMBCOPY for (i = 0; i < 65536; i++) \
@@ -304,47 +304,47 @@ SMARTCOPY;
 7.0 seconds user time
 ```
 
-Compile đo hai cách: nguyên rồi đổi macro call `DUMBCOPY`. Trên SPARCstation 2 dumb copy chậm lớn nhất quán.
+Compile và đo thời gian chạy chương trình trên theo hai cách: trước tiên giữ nguyên, sau đó đổi lời gọi macro thành `DUMBCOPY`. Chúng tôi đo trên SPARCstation 2 và thấy hiệu năng liên tục suy giảm đáng kể với cách copy ngây ngô.
 
-Vì source, destination cách bội chính xác cache size. SS2 không điền line tuần tự, thuật toán điền cùng line cho address cách bội cache, do tối ưu tag chỉ giữ high-order bit.
+Sự chậm lại xảy ra vì khoảng cách giữa source và destination đúng bằng một bội số của kích thước cache. Cache line trên SS2 không được điền tuần tự: thuật toán cụ thể được sử dụng lại điền cùng một line cho những địa chỉ main memory cách nhau đúng các bội số kích thước cache. Điều này bắt nguồn từ cách tối ưu lưu trữ tag: trong thiết kế này, tag chỉ chứa các bit high-order của từng địa chỉ.
 
-Mọi máy cache, cả supercomputer, PC, ở giữa đều chịu trường hợp bệnh lý vậy. Mức tùy máy, implementation.
+Mọi máy sử dụng cache, bao gồm supercomputer, PC hiện đại và tất cả những loại ở giữa, đều có thể bị giảm hiệu năng do những trường hợp bất thường như thế này. Kết quả cụ thể sẽ khác tùy máy và cách triển khai cache.
 
-Cả source, destination cùng line, mọi reference miss, processor stall chờ memory. Library `memcpy()` đặc biệt tối ưu, unroll loop đọc một cache line rồi ghi, né. Smart copy cải thiện cực lớn, cũng cho thấy ngu ngốc kết luận từ benchmark simple-minded.
+Trong trường hợp cụ thể này, cả source và destination sử dụng cùng cache line, khiến mọi tham chiếu memory đều cache miss và làm processor dừng chờ memory thông thường cung cấp data. Routine thư viện `memcpy()` được tinh chỉnh đặc biệt để có hiệu năng cao. Nó unroll loop để đọc trọn một cache line rồi mới ghi, nhờ đó tránh được vấn đề. Với cách copy thông minh, chúng tôi đạt mức cải thiện hiệu năng rất lớn. Điều này cũng cho thấy sự ngớ ngẩn của việc rút ra kết luận từ các chương trình benchmark simple-minded.
 
 ## Data segment và heap
 
-Đã nền tảng memory system-related, quay layout trong process. Biết system thì process có nghĩa hơn. Bắt đầu xem kỹ data segment.
+Chúng ta đã xem xét nền tảng của các vấn đề memory system-related, nên giờ là lúc trở lại cách bố trí memory bên trong từng process. Khi đã hiểu các vấn đề ở cấp hệ thống, bạn sẽ thấy các vấn đề ở cấp process dễ hiểu hơn nhiều. Cụ thể, trước tiên ta sẽ xem kỹ hơn data segment trong process.
 
-Như stack tăng theo nhu cầu, data có heap làm được (Hình 7-5). Heap cho storage dynamic qua `malloc` (memory allocate), pointer truy cập. Mọi thứ anonymous, không tên trực tiếp. Library `malloc` và bạn calloc, realloc, v.v. là cách duy nhất lấy. `c` `alloc` giống malloc nhưng zero trước trả pointer. "`c` " trong `c` `alloc`() không liên quan C, nghĩa "cấp memory đã zero". `realloc()` đổi size block tăng/giảm, thường copy nơi khác, trả pointer mới. Hữu ích tăng table động, Chương 10.
+Giống như stack segment tăng trưởng động theo nhu cầu, data segment cũng chứa một thành phần có khả năng ấy: heap, được minh họa ở Hình 7-5. Heap dành cho storage được cấp phát động, tức storage lấy qua `malloc` (memory allocate) và truy cập qua pointer. Mọi thứ trong heap đều vô danh: bạn không thể truy cập trực tiếp bằng tên mà chỉ gián tiếp qua pointer. Lời gọi thư viện `malloc` và các hàm cùng họ như calloc, realloc, v.v. là cách duy nhất lấy storage từ heap. Hàm `c` `alloc` giống malloc, nhưng đặt memory về zero trước khi trả pointer. Đừng nghĩ chữ “`c` ” trong `c` `alloc`() liên quan đến lập trình C: nó có nghĩa là “cấp phát memory đã được đặt về zero”. Hàm `realloc()` thay đổi kích thước block memory được trỏ tới, làm nó lớn lên hoặc nhỏ đi, thường bằng cách copy nội dung sang nơi khác rồi trả pointer tới vị trí mới. Điều này hữu ích khi tăng kích thước bảng một cách động; Chương 10 sẽ nói thêm.
 
 Hình 7-5. Heap ở đâu
 
 ![image](images/ch07/img07-09.png)
 
-Heap không cần trả cùng thứ tự (không trả cũng được), malloc/free lộn xộn gây fragmentation. Heap theo vùng used/available. Cách là linked list block rảnh (free store), trước mỗi block giao malloc có size count. Có người gọi arena tập block allocator quản (SunOS giữa data end và break hiện). Memory malloc aligned cho atomic access lớn nhất, request có thể round lên lũy thừa hai tiện. Free về heap tái dùng, không cách tiện đưa khỏi process trả OS.
+Heap memory không phải được trả lại theo thứ tự đã lấy, thậm chí không bắt buộc trả lại, nên các thao tác malloc/free không theo thứ tự cuối cùng gây heap fragmentation. Heap phải theo dõi những vùng khác nhau và biết chúng đang được sử dụng hay sẵn sàng cho malloc. Một phương án là duy trì linked list của các block khả dụng, gọi là “free store”, và đặt trước mỗi block giao cho malloc một số đếm kích thước đi kèm. Một số người dùng thuật ngữ arena để chỉ tập block do memory allocator quản lý; trong SunOS, đó là vùng từ cuối data segment đến vị trí hiện tại của break. Memory do malloc cấp luôn được align phù hợp với kích thước atomic access lớn nhất của máy; kích thước yêu cầu malloc có thể được làm tròn lên một lũy thừa hai thuận tiện. Memory được free trở lại heap để tái sử dụng, nhưng không có cách thuận tiện để loại nó khỏi process và trả lại hệ điều hành.
 
-Cuối heap đánh pointer "break". <sup>\[2\]</sup> Cần thêm manager đẩy bằng system call `brk`, `sbrk`. Thường không tự brk, malloc đủ sẽ gọi. Call quản memory:
+Cuối heap được đánh dấu bằng một pointer gọi là “break”. <sup>\[2\]</sup> Khi heap manager cần thêm memory, nó có thể đẩy break ra xa hơn bằng system call `brk` và `sbrk`. Thông thường bạn không tự gọi brk tường minh, nhưng nếu malloc đủ nhiều memory thì cuối cùng brk sẽ được gọi thay bạn. Các lời gọi quản lý memory gồm:
 
-<sup>\[2\]</sup> Chương trình sẽ "break" nếu tham chiếu quá break...
+<sup>\[2\]</sup> Chương trình của bạn sẽ “break”, tức hỏng, nếu tham chiếu vượt quá break…
 
-`malloc`, `free` — lấy heap, trả heap
+`malloc` và `free`— lấy memory từ heap và trả lại heap
 
-`brk`, `sbrk` — chỉnh size data segment tuyệt đối/theo phần tăng
+`brk` và `sbrk`— điều chỉnh kích thước data segment tới một giá trị tuyệt đối hoặc theo một lượng tăng
 
-Cẩn thận không gọi cả `malloc()`, `brk()`. Malloc mong độc quyền brk, sbrk. Vì sbrk cách duy nhất trả data segment kernel, dùng malloc thực chất không thu nhỏ được. Muốn memory trả kernel sau, mmap file /dev/zero, trả bằng munmap.
+Một điều cần thận trọng: chương trình của bạn không được gọi cả `malloc()` lẫn `brk()`. Nếu dùng malloc, hàm này kỳ vọng có toàn quyền quyết định khi nào gọi brk và sbrk. Vì sbrk là cách duy nhất để process trả data segment memory cho kernel, sử dụng malloc trên thực tế khiến bạn không thể thu nhỏ data segment của chương trình. Để lấy memory có thể trả lại kernel sau này, hãy dùng system call mmap để map file /dev/zero. Muốn trả memory ấy, hãy dùng munmap.
 
 ## Memory leak
 
-Có program không cần quản dynamic, chỉ cấp cần, không free, như compiler và program chạy thời hạn cố định/hữu hạn rồi dừng. Xong tự trả mọi memory, ít cần công trả byte ngay hết dùng.
+Một số chương trình không cần quản lý việc sử dụng dynamic memory: chúng chỉ cấp phát những gì cần và chẳng bận tâm free. Nhóm này gồm compiler và các chương trình khác chạy trong khoảng thời gian cố định hoặc có giới hạn rồi kết thúc. Khi kết thúc, chương trình tự động trả toàn bộ memory, nên ít cần bỏ công trả từng byte ngay khi không còn sử dụng.
 
-Program khác long-lived như calendar manager, mailtool, OS chạy nhiều ngày/tuần phải quản allocation/free. C thường không garbage collection (tự nhận, free block hết dùng), nên cẩn thận `malloc()`, `free()`. Hai heap problem thường:
+Những chương trình khác thì long-lived hơn. Một số tiện ích như calendar manager, mailtool và chính hệ điều hành phải chạy liên tục nhiều ngày hoặc nhiều tuần, nên phải quản lý việc cấp phát và giải phóng dynamic memory. Vì C thường không có garbage collection, tức tự động nhận diện và giải phóng block memory không còn sử dụng, các chương trình C này phải hết sức thận trọng với `malloc()` và `free()`. Có hai loại vấn đề heap thường gặp:
 
-- Free hay ghi đè thứ còn dùng (memory corruption)
+- Free hoặc ghi đè một thứ vẫn đang được sử dụng: đây là “memory corruption”.
 
-- Không free thứ hết dùng (memory leak)
+- Không free một thứ không còn được sử dụng: đây là “memory leak”.
 
-Khó debug bậc nhất. Không free block malloc khi hết cần, process tích memory không trả phần hết dùng.
+Đây là những vấn đề khó debug bậc nhất. Nếu lập trình viên không free từng block do malloc cấp khi không còn cần đến, process sẽ lấy ngày càng nhiều memory mà không giải phóng những phần đã hết sử dụng.
 
 ### Mẹo thực hành hữu ích
 
@@ -352,19 +352,19 @@ Khó debug bậc nhất. Không free block malloc khi hết cần, process tích
 
 Tránh memory leak
 
-Viết `malloc` thì viết statement `free` tương ứng.
+Mỗi khi viết `malloc`, hãy viết một statement `free` tương ứng.
 
-Không biết đặt "free" của "malloc" đâu, có lẽ đã tạo leak!
+Nếu không biết đặt “free” tương ứng với “malloc” ở đâu, rất có thể bạn đã tạo ra memory leak!
 
-Cách đơn giản là `alloca()` khi được; routine `alloca()` cấp stack, rời function tự free.
+Một cách đơn giản để tránh điều này là dùng `alloca()` cho nhu cầu cấp phát động khi có thể. Routine `alloca()` cấp memory trên stack; khi rời function nơi bạn đã gọi nó, memory tự động được free.
 
-Không dùng cho structure sống lâu hơn invocation tạo, nhưng nếu phù hợp thì low-overhead. Có người phản đối không portable; `alloca()` khó hiệu quả trên processor không stack hardware.
+Rõ ràng không thể dùng cách này cho structure cần sống lâu hơn lần gọi function đã tạo nó. Nhưng với những thứ chấp nhận giới hạn ấy, cấp phát dynamic memory trên stack là lựa chọn low-overhead. Một số người không tán thành alloca vì nó không phải cấu trúc portable. Khó triển khai `alloca()` hiệu quả trên processor không hỗ trợ stack bằng hardware.
 
-Gọi "memory leak" vì tài nguyên hiếm rút cạn process. Triệu chứng user-visible chính chậm: process lớn dễ swap cho process khác, swap cũng lâu. Memory leak không tham chiếu theo định nghĩa nhưng thường chung page thứ được tham chiếu, tăng working set. Leak thường lớn hơn data structure quên vì `malloc()` round request lên power-of-two. Cuối cùng chậm cả máy, không chỉ user. Size limit lý thuyết tùy OS, SunOS hiện address tối đa 4 Gbyte, thực tế hết swap trước. Đọc sau năm năm khoảng giao thiên niên kỷ, có lẽ cười giới hạn long-obsolete này.
+Ta dùng thuật ngữ “memory leak” vì một tài nguyên khan hiếm đang rút dần khỏi process. Triệu chứng user-visible chính là process gây lỗi trở nên chậm hơn. Process lớn có khả năng phải bị swap out cao hơn để các process khác có cơ hội chạy, đồng thời mất nhiều thời gian swap in và swap out hơn. Theo định nghĩa, memory bị leak không còn được tham chiếu, nhưng nó có thể nằm chung page với data vẫn được tham chiếu, làm working set lớn lên và giảm hiệu năng. Cũng cần lưu ý rằng lượng leak thường lớn hơn kích thước data structure bị quên, vì `malloc()` thường làm tròn yêu cầu storage lên power-of-two kế tiếp. Trong trường hợp cực đoan, process có memory leak có thể làm chậm cả máy chứ không chỉ người dùng chương trình gây lỗi. Mỗi process có giới hạn kích thước lý thuyết khác nhau tùy hệ điều hành. Trên các bản SunOS hiện tại, address space của process có thể đạt 4 Gbyte; thực tế, swap space sẽ cạn từ lâu trước khi leak đủ để process lớn đến vậy. Nếu đọc cuốn sách sau năm năm, khoảng lúc bước sang thiên niên kỷ mới, có lẽ bạn sẽ bật cười trước giới hạn khi ấy đã long-obsolete này.
 
-### Kiểm memory leak thế nào
+### Cách kiểm tra memory leak
 
-Quy trình two-step. Đầu swap xem chỗ còn:
+Tìm memory leak là quy trình two-step. Trước tiên, dùng lệnh swap để xem còn bao nhiêu swap space:
 
 ```
 /usr/sbin/swap -s
@@ -373,7 +373,7 @@ total: 17228k bytes allocated + 5396k reserved = 22624k used,
 available
 ```
 
-Gõ ba bốn lần trong một hai phút, xem available swap giảm. Còn tool `/usr/bin/*stat`, `netstat,`, `vmstat`, v.v. Memory tăng không trả có thể leak.
+Gõ lệnh ba hoặc bốn lần trong một đến hai phút để xem swap space khả dụng có liên tục giảm không. Bạn cũng có thể dùng các công cụ `/usr/bin/*stat` khác như `netstat,` `vmstat`, v.v. Nếu memory sử dụng tăng lên mà không bao giờ được giải phóng, một cách giải thích có thể là process đang bị memory leak.
 
 #### Mẹo thực hành hữu ích
 
@@ -381,13 +381,13 @@ Gõ ba bốn lần trong một hai phút, xem available swap giảm. Còn tool `
 
 Nghe nhịp mạng: click để chỉnh
 
-Công cụ network tuyệt nhất `snoop.`
+Trong mọi công cụ điều tra network, đứng đầu tuyệt đối là `snoop.`
 
-Thay `etherfind` SVr4, `snoop` capture packet, hiển thị workstation. Cho tập trung một hai máy như máy bạn, server, giúp lỗi kết nối, biết byte có rời máy.
+Là công cụ thay `etherfind` trong SVr4, `snoop` bắt packet từ network và hiển thị trên workstation. Bạn có thể yêu cầu snoop chỉ tập trung vào một hoặc hai máy, chẳng hạn workstation của mình và server. Điều này hữu ích khi xử lý lỗi kết nối: snoop cho biết các byte có thực sự rời máy của bạn hay không.
 
-Tốt nhất option `-a`, mỗi packet click loa. Nghe traffic ether, length khác modulation khác. Dùng `snoop -a` nhiều nhận âm đặc trưng, troubleshooting, tinh chỉnh "bằng tai"!
+Tuy nhiên, tính năng tuyệt nhất của snoop là tùy chọn `-a`. Nó khiến snoop phát một tiếng click qua loa workstation cho mỗi packet. Nhờ đó bạn nghe được traffic trên mạng Ethernet; độ dài packet khác nhau tạo điều biến âm thanh khác nhau. Nếu dùng `snoop -a` thường xuyên, bạn sẽ giỏi nhận ra các âm thanh đặc trưng, từ đó xử lý sự cố và tinh chỉnh network “bằng tai” theo nghĩa đen!
 
-Bước hai nhận process nghi ngờ, xem leak. Có lẽ đã biết, không thì `ps -lu` `username` cho size mọi process:
+Bước thứ hai là xác định process đáng nghi và xem nó có thực sự gây memory leak không. Có thể bạn đã biết process nào gây vấn đề. Nếu chưa, lệnh `ps -lu` `username` hiển thị kích thước mọi process của bạn, như ví dụ dưới:
 
 ```
 F S UID PID PPID C PRI NI ADDR    SZ  WCHAN    TTY   TIME COMD
@@ -395,15 +395,15 @@ F S UID PID PPID C PRI NI ADDR    SZ  WCHAN    TTY   TIME COMD
 8 O 5303 921 226 29 1 20 ff38c000 143          pts/3 0:00 ps
 ```
 
-Cột `SZ` size bằng page (`pagesize` cho Kbyte nếu cần). Lặp vài lần, program dynamic sẽ lớn. Liên tục không ổn định thì nghi leak. Quản dynamic memory rất khó, có X-Window public domain leak nổi tiếng như hội đồng Apple Computer.
+Cột `SZ` là kích thước process tính bằng page. Nếu thật sự muốn biết dung lượng Kbyte, lệnh `pagesize` sẽ cho bạn biết kích thước mỗi page. Hãy lặp lại lệnh vài lần: bạn có thể quan sát bất kỳ chương trình cấp phát dynamic memory nào tăng kích thước. Nếu process có vẻ lớn lên liên tục mà không bao giờ ổn định, hãy nghi ngờ memory leak. Một sự thật đáng buồn là quản lý dynamic memory là nhiệm vụ lập trình rất khó. Một số ứng dụng X-Window thuộc public domain nổi tiếng vì rò rỉ hệt như hội đồng quản trị Apple Computer.
 
-Hệ thường nhiều malloc library tối ưu speed/space/debug. Nhập
+Hệ thống thường cung cấp nhiều thư viện malloc khác nhau: có thư viện tối ưu tốc độ, có thư viện tối ưu dung lượng và có thư viện hỗ trợ debug. Hãy nhập lệnh
 
 ```
 man -s 3c malloc
 ```
 
-xem manpage, mọi routine malloc. Link đúng library. SPARCWorks debugger Solaris 2.x phát hiện leak phong phú, thay malloc library riêng Solaris 1.x.
+để xem manpage và toàn bộ routine trong họ malloc. Hãy bảo đảm bạn link với thư viện thích hợp. Debugger SPARCWorks trên Solaris 2.x có nhiều tính năng phát hiện memory leak, thay thế các thư viện malloc chuyên biệt của Solaris 1.x.
 
 #### Giáo điều software
 
@@ -411,34 +411,34 @@ xem manpage, mọi routine malloc. Link đúng library. SPARCWorks debugger Sola
 
 Chủ tịch và printtool — Lỗi memory leak
 
-Dạng đơn giản nhất:
+Dạng memory leak đơn giản nhất là:
 
 ```
 for (i=0; i<10; i++)
      p = malloc(1024);
 ```
 
-Exxon Valdez software, rò mọi thứ cho.
+Đây là tàu Exxon Valdez của software: nó làm rò rỉ mọi thứ bạn đưa cho nó.
 
-Mỗi vòng ghi đè address p cũ, block Kbyte nó trỏ rò. Không gì trỏ nên không truy cập/free được. Phần lớn leak không rõ như ghi đè pointer duy nhất trước free, nên khó tìm.
+Qua mỗi lần lặp, địa chỉ trước đó giữ trong p bị ghi đè, và block memory một Kbyte mà nó trỏ tới “rò rỉ mất”. Vì không còn gì trỏ tới block, không có cách truy cập hoặc free memory ấy. Phần lớn memory leak không lộ liễu đến mức ghi đè pointer duy nhất tới block trước khi free, nên khó nhận diện và debug hơn.
 
-Printtool Sun có chuyện: OS test nội bộ cài desktop chủ tịch Scott McNealy. <sup>\[1\]</sup> Vài ngày máy chậm dần, reboot hết ngay. Ông báo, không gì tập trung đầu bằng bug report chủ tịch.
+Một trường hợp thú vị xảy ra với software printtool ở Sun. Một bản thử nghiệm nội bộ của hệ điều hành được cài trên máy desktop của Scott McNealy, chủ tịch công ty. <sup>\[1\]</sup> Ông sớm nhận thấy workstation chậm dần trong vài ngày. Reboot lập tức khắc phục vấn đề. Ông báo lỗi, và chẳng có gì khiến người ta tập trung bằng bug report do chủ tịch công ty gửi.
 
-Do "printtool", window interface print command, chủ tịch dùng nhiều, OS developer ít nên ẩn. Giết thì hết leak, nhưng `ps -lu scott` cho printtool chỉ kích, không tự lớn. Phải xem system call.
+Chúng tôi phát hiện “printtool”, giao diện cửa sổ bao quanh lệnh in, kích hoạt vấn đề. “Printtool” là loại software chủ tịch công ty hay dùng nhưng các nhà phát triển hệ điều hành ít dùng, vì vậy lỗi trước đó chưa bị phát hiện. Kill printtool khiến memory leak ngừng, nhưng `ps -lu scott` cho thấy printtool chỉ kích hoạt leak chứ bản thân không tăng kích thước. Cần xem xét các system call mà printtool sử dụng.
 
-Printtool tạo named pipe (file đặc biệt cho hai process không liên quan giao tiếp), nói line printer. Mỗi vài giây tạo pipe mới rồi hủy nếu không gì đáng nói. Leak thật ở pipe creation system call: cấp kernel memory vnode điều khiển nhưng reference count sai một.
+Theo thiết kế, printtool cấp phát một named pipe, loại file đặc biệt cho phép hai process không liên quan giao tiếp, rồi dùng nó để nói chuyện với process line printer. Cứ vài giây nó tạo pipe mới, rồi hủy nếu chẳng có gì đáng nói với printer. Memory leak thực sự nằm trong system call tạo pipe. Khi pipe được tạo, kernel memory được cấp để chứa vnode data structure điều khiển nó, nhưng code duy trì reference count của structure bị lệch một đơn vị.
 
-User pipe thật zero nhưng count 1, kernel tưởng dùng, không free vnode khi đóng. Mỗi pipe vài trăm byte leak, cộng megabyte/ngày đủ làm workstation entry-level cấp chủ tịch quỵ sau hai ba ngày.
+Do đó, khi số người dùng pipe thực sự giảm về zero, bộ đếm vẫn giữ giá trị 1, khiến kernel luôn tưởng pipe còn đang được sử dụng. Vnode struct vì thế không bao giờ được free như lẽ ra phải làm khi đóng pipe. Mỗi lần đóng pipe, vài trăm byte memory bị leak trong kernel. Tổng cộng mỗi ngày mất nhiều megabyte, đủ khiến chiếc workstation entry-level mà chúng tôi cấp cho chủ tịch quỵ xuống sau hai hoặc ba ngày.
 
-Sửa lỗi off-by-one count, routine free kernel chạy đúng. Đổi printtool thuật toán khôn thay liên tục hỏi printer. Leak vá, programmer thở, manager cười, chủ tịch dùng lại.
+Chúng tôi sửa bug off-by-one trong thuật toán reference count của vnode, và routine giải phóng kernel memory thông thường bắt đầu hoạt động đúng như dự kiến. Chúng tôi cũng sửa printtool để dùng thuật toán thông minh hơn thay vì cứ vài giây lại lải nhải hỏi printer. Memory leak được bịt lại, các lập trình viên thở phào, quản lý kỹ thuật lại mỉm cười và chủ tịch tiếp tục dùng printtool.
 
-<sup>\[1\]</sup> Ý hay: chủ tịch chạy early release, tham gia test giữ ai cũng cảnh giác. Quản lý hiểu sản phẩm, tốc độ cải thiện, engineering có động lực, tài nguyên gỡ lỗi cuối.
+<sup>\[1\]</sup> Thật ra đây là ý tưởng khá hay. Để chủ tịch chạy software phát hành sớm và tham gia thử nghiệm nội bộ khiến mọi người luôn cảnh giác. Việc đó bảo đảm quản lý cấp cao hiểu rõ sản phẩm đang phát triển và tốc độ cải thiện của nó, đồng thời cung cấp cho nhóm kỹ thuật cả động lực lẫn nguồn lực để loại bỏ những bug cuối cùng.
 
-Kernel cũng dynamic memory. Nhiều table cấp động không giới hạn cố định. Lỗi leak làm chậm, treo hay panic. Routine xin thường đợi đến có; leak hết, mọi người đợi, treo. Leak kernel lộ nhanh vì đa số path đi nhiều. Còn tool riêng kiểm thử memory management.
+Kernel của hệ điều hành cũng quản lý memory một cách động. Nhiều bảng data trong kernel được cấp phát động để không phải đặt trước giới hạn cố định. Nếu lỗi lập trình kernel gây memory leak, máy sẽ chậm lại; trường hợp cực đoan có thể hang, thậm chí panic. Khi routine kernel xin memory, chúng thường đợi đến lúc có memory khả dụng. Nếu memory cứ leak, cuối cùng chẳng còn gì và mọi bên đều chờ: máy bị hang. Memory leak trong kernel thường lộ ra nhanh vì phần lớn đường thực thi qua kernel được sử dụng rất nhiều. Chúng tôi cũng có các công cụ software chuyên biệt để thử nghiệm và kiểm tra hoạt động quản lý kernel memory.
 
 ## Bus error, đi tàu đi
 
-Bắt đầu UNIX cuối 1970, như nhiều người nhanh gặp hai runtime error:
+Khi mới lập trình UNIX vào cuối thập niên 1970, giống nhiều người khác, tôi nhanh chóng gặp hai runtime error phổ biến:
 
 ```
 bus error (core dumped)
@@ -450,13 +450,13 @@ và
 segmentation fault (core dumped)
 ```
 
-Rất bực: không giải đơn giản source error gây, message không chỗ tìm, khác biệt không rõ. Nay vẫn vậy.
+Khi ấy, những lỗi này rất khó chịu: không có lời giải thích đơn giản về loại lỗi source code gây ra chúng, thông báo không gợi ý nên tìm ở đâu trong code, và sự khác nhau giữa chúng hoàn toàn không rõ. Đến nay tình hình vẫn vậy.
 
-Vì lỗi là anomaly OS phát hiện, báo theo cách tiện OS. Nguyên nhân bus error, segmentation fault tùy OS. Đây SunOS trên SPARC, nghĩa và nguyên nhân.
+Phần lớn vấn đề nằm ở chỗ các lỗi đại diện cho bất thường mà hệ điều hành phát hiện, và bất thường ấy được thông báo theo cách thuận tiện nhất cho hệ điều hành. Vì thế, nguyên nhân chính xác của bus error và segmentation fault thay đổi giữa các phiên bản hệ điều hành. Ở đây, chúng tôi mô tả ý nghĩa và nguyên nhân của chúng trên SunOS chạy kiến trúc SPARC.
 
-Cả hai khi hardware báo memory reference có vấn đề. OS gửi signal process, event notification hay software-generated interrupt, dùng nhiều UNIX systems, ít application. Mặc định bus error/segmentation fault dump core, kết thúc, nhưng signal handler đổi action được.
+Cả hai lỗi xảy ra khi hardware báo cho hệ điều hành một tham chiếu memory có vấn đề. Hệ điều hành thông báo cho process gây lỗi bằng cách gửi signal. Signal là thông báo sự kiện hoặc interrupt software-generated, rất hay dùng trong lập trình UNIX system nhưng hầu như không dùng trong lập trình ứng dụng. Mặc định, khi nhận signal “bus error” hoặc “segmentation fault”, process sẽ dump core rồi kết thúc; tuy nhiên, bạn có thể thiết lập signal handler để thực hiện hành động khác.
 
-Signal theo hardware interrupt. Interrupt khó vì bất đồng bộ, lúc không đoán; signal programming/debug khó. Xem manpage signal, include file
+Signal được mô phỏng theo hardware interrupt. Lập trình interrupt khó vì mọi thứ xảy ra bất đồng bộ, vào thời điểm không dự đoán được; do đó lập trình và debug signal cũng khó. Bạn có thể tìm hiểu thêm bằng cách đọc manpage của signal và xem include file
 
 ```
 /usr/include/sys/signal.h.
@@ -466,25 +466,25 @@ Signal theo hardware interrupt. Interrupt khó vì bất đồng bộ, lúc khô
 
 ![image](images/ch07/img07-07.png)
 
-Bắt signal PC
+Bắt signal trên PC
 
-Signal handling nay thuộc ANSI C, cả PC/UNIX. PC dùng signal() bắt Ctrl-Break ngăn thoát.
+Các hàm xử lý signal nay thuộc ANSI C và áp dụng cho cả PC lẫn UNIX. Chẳng hạn, lập trình viên PC có thể dùng signal() để bắt Ctrl-Break và ngăn người dùng thoát khỏi chương trình.
 
-Viết handler INT 1B (Ctrl-Break), in user-friendly message, không thoát.
+Hãy viết signal handler bắt signal INT 1B (Ctrl-Break) trên PC. Cho nó in một thông báo user-friendly nhưng không thoát.
 
-UNIX viết handler nhận control-C (control-C truyền như `SIGINT`) thì restart thay quit. Typedef giúp ở Chương 3 declaration.
+Nếu dùng UNIX, hãy viết signal handler sao cho khi nhận control-C (control-C được chuyển tới UNIX process dưới dạng signal `SIGINT`), chương trình khởi động lại thay vì thoát. Các typedef giúp định nghĩa signal handler được trình bày trong Chương 3 về declaration.
 
-Source dùng signal cần `<signal.h>`.
+Mọi source file sử dụng signal đều cần include header file `<signal.h>`.
 
-"Core dump" di sản memory vòng ferrite, "core". Semiconductor chuẩn hơn 15 năm, core vẫn đồng nghĩa main memory.
+Phần “core dump” trong thông báo chỉ là di sản từ thời mọi memory đều làm bằng vòng ferrite, hay “core”. Semiconductor memory đã phổ biến suốt ít nhất 15 năm, nhưng “core” vẫn tồn tại như từ đồng nghĩa với “main memory”.
 
 ### Bus error
 
-Thực tế gần luôn read/write misaligned. Address bus nghẹn load/store misaligned nên tên. Alignment là chỉ lưu data tại address bội size. Kiến trúc hiện đại nhất RISC buộc vì logic alignment tùy ý làm memory system lớn chậm. Buộc access trong một cache line/page đơn giản, tăng tốc cache controller, MMU.
+Trong thực tế, bus error hầu như luôn do thao tác đọc hoặc ghi misaligned gây ra. Nó được gọi là bus error vì address bus là thành phần bị nghẽn khi có yêu cầu load hoặc store misaligned. Alignment nghĩa là data item chỉ được lưu tại địa chỉ là bội số của kích thước nó. Trên kiến trúc hiện đại, đặc biệt RISC, data alignment là bắt buộc vì logic bổ sung để hỗ trợ alignment tùy ý làm cả memory system lớn và chậm hơn nhiều. Buộc từng lần truy cập memory nằm trong một cache line hoặc một page giúp đơn giản hóa đáng kể, do đó tăng tốc, hardware như cache controller và memory management unit.
 
-Nói rule "không data vượt page/cache boundary" qua address alignment hơi gián tiếp nhưng cùng nghĩa. Double 8-byte chỉ address bội 8: 24, 8008, 32768, không 1006. Page, cache size thiết kế để rule bảo đảm atomic data không tràn.
+Cách diễn đạt quy tắc “không data item nào được vượt ranh giới page hoặc cache” hơi gián tiếp: ta nói theo address alignment thay vì cấm vượt ranh giới page, nhưng thực chất là một. Chẳng hạn, chỉ được truy cập double 8-byte tại địa chỉ chia hết cho 8 byte. Vì vậy có thể lưu double ở địa chỉ 24, 8008 hoặc 32768, nhưng không ở 1006 vì số này không chia hết cho 8. Kích thước page và cache được thiết kế cẩn thận để tuân thủ alignment sẽ bảo đảm không atomic data item nào tràn qua ranh giới page hoặc cache block.
 
-Gợi trò trẻ đi không giẫm khe gạch. "Giẫm khe, gãy lưng mẹ" thành "dereference lệch rồi chửi, bus lỗi". Có lẽ Freud: mẹ từng sợ kênh I/O Fortran tuổi nhạy cảm. Program nhỏ bus error:
+Yêu cầu lưu data đúng alignment luôn khiến chúng tôi nhớ trò trẻ con đi trên vỉa hè mà tránh giẫm lên khe giữa các viên lát. “Giẫm lên khe nứt, làm gãy lưng mẹ” đã biến thành “dereference lệch hàng rồi chửi, gây lỗi trên bus”. Có lẽ đó là chuyện kiểu Freud: mẹ từng bị một kênh I/O Fortran làm hoảng sợ ở tuổi dễ bị tác động. Một chương trình nhỏ gây bus error là:
 
 ```
 union { char a[10];
@@ -494,38 +494,38 @@ int *p= (int*) &(u.a[1]);
 *p = 17; /* the misaligned addr in p causes a bus error! */
 ```
 
-Array/int union bảo đảm character array "a" aligned integer, "a+1" chắc không. Ghi 4 byte vào address chỉ aligned single-byte. Compiler tốt cảnh báo nhưng không thấy hết.
+Chương trình gây bus error vì union array/int bảo đảm character array “a” cũng nằm tại địa chỉ align đủ cho integer, nên “a+1” chắc chắn không như vậy. Sau đó ta cố lưu 4 byte vào địa chỉ chỉ align cho truy cập single-byte. Compiler tốt sẽ cảnh báo misalignment nhưng không thể phát hiện mọi trường hợp.
 
-Compiler tự cấp, pad data alignment memory. Disk/tape không cần, nên không biết đến khi cast char pointer thành int pointer gây lỗi bí ẩn. Vài năm trước parity error cũng bus error. Nay chip tin, detection/correction tốt nên application gần không thấy. Memory không physical tồn tại cũng bus error, thường phải nhờ device driver nghịch mới sai vậy.
+Compiler tự động cấp phát và thêm padding cho data trong memory để đạt alignment. Dĩ nhiên đĩa hoặc băng từ không có yêu cầu alignment như vậy, nên lập trình viên có thể chẳng biết gì về nó cho đến khi cast char pointer thành int pointer và gặp bus error bí hiểm. Vài năm trước, phát hiện memory parity error cũng gây bus error. Ngày nay chip memory đáng tin cậy và được bảo vệ tốt bằng mạch phát hiện, sửa lỗi đến mức lập trình ứng dụng gần như không còn nghe đến parity error. Tham chiếu memory không tồn tại vật lý cũng có thể gây bus error; có lẽ bạn khó phá hỏng đến mức ấy nếu không có một device driver nghịch ngợm hỗ trợ.
 
 ### Segmentation fault
 
-Đã model segment thì rõ. Sun tạo từ exception MMU hỗ trợ virtual memory. Thường dereference (xem nội dung address chứa trong) pointer chưa khởi hay illegal. Tham chiếu segment ngoài address space, OS can thiệp. Program nhỏ:
+Với segment model đã giải thích trước đó, segmentation fault hay violation hẳn đã rõ. Trên hardware Sun, segmentation fault được tạo bởi exception trong memory management unit, hardware chịu trách nhiệm hỗ trợ virtual memory. Nguyên nhân thông thường là dereference, tức xem nội dung tại địa chỉ chứa trong pointer, một pointer có giá trị chưa khởi tạo hoặc bất hợp lệ. Pointer gây tham chiếu memory tới segment không thuộc address space của bạn, và hệ điều hành can thiệp. Một chương trình nhỏ gây segmentation fault là:
 
 ```
 int *p=0;
 *p = 17;     /* causes a segmentation fault */
 ```
 
-Tinh tế là lỗi lập trình khác khiến pointer invalid; khác bus error, segfault là triệu chứng gián tiếp thay nguyên nhân.
+Một điểm tinh tế là thường có một lỗi lập trình khác khiến pointer mang giá trị không hợp lệ. Khác bus error, segmentation fault vì vậy là triệu chứng gián tiếp chứ không phải nguyên nhân của lỗi.
 
-Tệ hơn pointer chưa khởi vô tình misaligned thì bus error thay segmentation. Đa số kiến trúc vì CPU thấy address trước MMU.
+Điểm tinh tế còn tệ hơn là nếu giá trị pointer chưa khởi tạo tình cờ misaligned đối với kích thước data truy cập, nó sẽ gây bus error thay vì segmentation violation. Điều này đúng trên phần lớn kiến trúc vì CPU thấy địa chỉ trước khi gửi nó tới MMU.
 
 #### Thử thách lập trình
 
 ![image](images/ch07/img07-07.png)
 
-Thử crash software
+Thử làm software của bạn crash
 
-Hoàn thành mảnh program trên.
+Hãy hoàn thiện các đoạn chương trình thử nghiệm ở trên.
 
-Chạy xem OS báo sao.
+Chạy thử để xem hệ điều hành báo những bug này như thế nào.
 
-Điểm thêm: handler bắt bus error, segmentation fault, in user-friendly message rồi thoát.
+Điểm thưởng: viết signal handler bắt signal bus error và segmentation fault. Cho chúng in thông báo user-friendly hơn rồi thoát.
 
-Chạy lại.
+Chạy lại chương trình của bạn.
 
-Dereference illegal pointer trực tiếp như trên hoặc library nếu truyền value xấu. Đổi code (compile debug, thêm statement) dễ đổi memory khiến lỗi chuyển/mất. Segfault khó, chỉ người mạnh sống. Biết bug khó khi đồng nghiệp nghiêm nghị mang logic analyz-ers, oscilloscope vào lab!
+Việc dereference giá trị pointer bất hợp lệ có thể xảy ra tường minh trong code như trên, hoặc trong routine thư viện nếu bạn truyền giá trị sai. Không may, thay đổi chương trình, chẳng hạn compile để debug hoặc thêm statement debug, dễ làm nội dung memory thay đổi đến mức vấn đề chuyển chỗ hay biến mất. Segmentation fault rất khó giải quyết, chỉ người mạnh mới sống sót. Bạn biết đó là bug thật sự khó khi thấy đồng nghiệp nghiêm nghị mang logic analyz-ers và oscilloscope vào phòng thử nghiệm!
 
 #### Giáo điều software
 
@@ -533,15 +533,15 @@ Dereference illegal pointer trực tiếp như trên hoặc library nếu truy�
 
 Lỗi segmentation violation SunOS
 
-Gần đây sửa ncheck segfault trên filesystem hỏng. Khổ vì chính khi nghi hỏng mới dùng ncheck.
+Gần đây chúng tôi phải giải quyết segmentation fault xảy ra khi chạy tiện ích ncheck trên filesystem hỏng. Bug này đặc biệt khó chịu vì bạn rất có thể dùng ncheck chính để điều tra filesystem nghi bị hỏng.
 
-ncheck thất bại printf, dereference null, segv. Statement sai:
+Triệu chứng là ncheck thất bại trong printf do dereference null pointer và gây segmentation violation. Statement sai là:
 
 ```
 (void) printf("%s", p->name);
 ```
 
-Lập trình viên trẻ Yoyodyne Software Corp. thường sửa long-winded:
+Phần lớn lập trình viên mới ở Yoyodyne Software Corp. sẽ sửa theo cách long-winded như sau:
 
 ```
 if (p->name != NULL)
@@ -550,13 +550,13 @@ else
         (void) printf("(null)");
 ```
 
-Nhưng conditional operator đơn giản, giữ locality:
+Tuy nhiên, trong những trường hợp như thế, có thể dùng conditional operator để đơn giản hóa code và giữ locality of reference:
 
 ```
 (void) printf("%s", p->name ? p->name : "(null)");
 ```
 
-Nhiều người không thích — ? — : — vì rối. So if thì rõ:
+Nhiều người không thích conditional operator — ? — : — vì thấy khó hiểu. Operator này dễ hiểu hơn nhiều khi so sánh với statement if:
 
 ```
 if (expression) statement-when-non-zero else statement-
@@ -565,23 +565,23 @@ when-zero
 when-zero
 ```
 
-Nhìn vậy trực giác, vui với one-liner thay tăng code thừa. Nhưng không lồng conditional operator, khó biết cái nào với cái nào.
+Nhìn theo cách ấy, conditional operator khá trực quan và cho phép ta hài lòng với one-liner thay vì tăng kích thước code không cần thiết. Nhưng đừng bao giờ lồng conditional operator này vào conditional operator khác vì sẽ nhanh chóng khó nhận ra thành phần nào đi với thành phần nào.
 
-Nguyên nhân trực tiếp thường:
+Các nguyên nhân trực tiếp thường gặp của segmentation fault:
 
-- Dereference pointer không value hợp lệ
+- Dereference pointer không chứa giá trị hợp lệ.
 
-- Dereference null, thường system routine trả mà không kiểm
+- Dereference null pointer, thường do system routine trả null pointer rồi chương trình dùng mà không kiểm tra.
 
-- Truy cập không permission, như ghi text segment read-only
+- Truy cập một thứ khi không có permission phù hợp; chẳng hạn cố lưu giá trị vào text segment read-only sẽ gây lỗi này.
 
-- Hết stack/heap, virtual memory lớn không vô hạn
+- Hết stack hoặc heap space: virtual memory rất lớn nhưng không vô hạn.
 
-Hơi đơn giản nhưng đa số kiến trúc bus error là CPU không thích memory reference, segv là MMU không thích.
+Dù có phần đơn giản hóa quá mức, trên phần lớn kiến trúc và trong phần lớn trường hợp, bus error nghĩa là CPU không chấp nhận một điều gì đó ở tham chiếu memory, còn segv nghĩa là MMU không chấp nhận nó.
 
-Lỗi thường cuối gây segfault theo tần suất:
+Theo thứ tự thường gặp, các lỗi lập trình cuối cùng dẫn tới segmentation fault gồm:
 
-1\. Bad pointer: dùng trước gán, truyền library pointer xấu. Đừng bị lừa debugger segv system routine không nghĩa hệ gây; vẫn có lẽ code bạn. Thứ ba là truy cập sau free. Có thể sửa free để xóa pointer sau:
+1\. Lỗi giá trị pointer: dùng pointer trước khi gán giá trị hoặc truyền pointer sai cho routine thư viện. Đừng để trường hợp sau đánh lừa bạn! Debugger cho thấy segv xảy ra trong system routine không có nghĩa hệ thống gây ra lỗi; vấn đề vẫn rất có thể nằm trong code của bạn. Cách phổ biến thứ ba tạo pointer sai là truy cập một thứ sau khi free. Bạn có thể sửa statement free để xóa pointer sau khi free thứ nó trỏ tới:
 
 `2.`
 
@@ -589,9 +589,9 @@ Lỗi thường cuối gây segfault theo tần suất:
 free(p); p = NULL;
 ```
 
-Ít nhất dùng sau free thì core dump ngay.
+Cách này bảo đảm rằng nếu dùng pointer sau khi đã free, ít nhất chương trình cũng dump core ngay lập tức.
 
-3\. Ghi đè: quá hai đầu array, block malloc, ghi heap management structure (rất dễ bằng ghi trước block malloc).
+3\. Lỗi ghi đè: ghi vượt một trong hai đầu array, ghi vượt một trong hai đầu block do malloc cấp, hoặc ghi đè các structure quản lý heap; điều cuối rất dễ xảy ra nếu ghi trước đầu block do malloc cấp.
 
 `4.`
 
@@ -599,9 +599,9 @@ free(p); p = NULL;
 p=malloc(256); p[-1]=0; p[256]=0;
 ```
 
-5\. Free: cùng block hai lần, thứ không malloc, memory còn dùng, pointer sai. Rất thường cdr <sup>\[3\]</sup> linked list với `for (p=start; p; p=p->next)`, trong body `free(p)`, vòng sau dereference freed pointer khó đoán.
+5\. Lỗi free: free cùng block hai lần, free thứ không do malloc cấp, free memory vẫn được sử dụng hoặc free pointer không hợp lệ. Một lỗi free rất phổ biến là cdr <sup>\[3\]</sup> dọc linked list bằng vòng lặp `for (p=start; p; p=p->next)`, rồi gọi `free(p)` trong thân vòng lặp. Điều này khiến lần lặp kế tiếp dereference pointer đã free, cho kết quả không dự đoán được.
 
-<sup>\[3\]</sup> Car, cdr LISP cho đầu, phần còn lại list. Cdr là lần lượt lấy phần tử đầu. Từ IBM 704, processor vacuum-tube 36-bit, address 15-bit. Core location gọi register. CAR "contents of address part of register", CDR "contents of decrement part of register". Routine ngắn, LISP 1.5 manual (MIT Press,1962) in đầy đủ. CAR:
+<sup>\[3\]</sup> Car và cdr là hai thuật ngữ LISP lần lượt chỉ phần đầu và phần còn lại của list. Cdr dọc list nghĩa là xử lý list bằng cách lần lượt lấy phần tử ở đầu. Car và cdr bắt nguồn từ IBM 704, processor vacuum-tube 36-bit có địa chỉ 15-bit. Các vị trí core memory được gọi là “register”. CAR là “contents of address part of register”, còn CDR là “contents of decrement part of register”. Đây là những routine ngắn; tài liệu LISP 1.5 (MIT Press, 1962) liệt kê toàn bộ chúng. Đây là CAR
 
 ```
 CAR   SXA CARX,4
@@ -613,15 +613,15 @@ CARX  AXT **,4
       TRA 1,4
 ```
 
-LISP 1.0 còn CTR, CXR cho tag part, index part register, ít hữu ích nên bỏ 1.5.
+LISP 1.0 ban đầu còn có CTR và CXR, tương ứng với contents of tag part of register và contents of index part of register. Chúng không hữu ích lắm nên bị loại khỏi LISP 1.5.
 
 #### Mẹo thực hành hữu ích
 
 ![image](images/ch07/img07-04.png)
 
-Free phần tử linked list thế nào
+Cách free phần tử trong linked list
 
-Đúng là dùng temporary variable lưu address phần tử sau, rồi free hiện tại an toàn bất kỳ lúc nào, khỏi tham chiếu lại lấy next. Code:
+Cách đúng để free phần tử khi duyệt linked list là dùng biến tạm lưu địa chỉ phần tử kế tiếp. Khi ấy bạn có thể an toàn free phần tử hiện tại bất cứ lúc nào mà không phải lo tham chiếu lại nó để lấy địa chỉ phần tử kế tiếp. Code như sau:
 
 ```
 struct node *p, *start, *tmp;
@@ -635,11 +635,11 @@ for (p=start; p; p=tmp) {
 
 ![image](images/ch07/img07-03.png)
 
-Program hết space?
+Chương trình của bạn có hết memory không?
 
-Cần hơn OS cho thì "segmentation fault" kết thúc. Phân biệt với bug-based như sau.
+Nếu chương trình cần nhiều memory hơn hệ điều hành có thể cấp, nó sẽ kết thúc với “segmentation fault”. Bạn có thể phân biệt loại này với các segmentation fault bug-based bằng phương pháp dưới đây.
 
-Xem hết stack bằng dbx:
+Để biết chương trình có chạy hết stack hay không, hãy chạy dưới dbx:
 
 ```
 % dbx a.out
@@ -652,112 +652,112 @@ at 0xeff57708
 (dbx) where
 ```
 
-Thấy call chain thì chưa hết stack.
+Nếu lúc này thấy call chain, chương trình chưa hết stack space.
 
-Nếu thay thấy:
+Ngược lại, nếu thấy dạng như sau:
 
 ```
 fetch at 0xeffe7a60 failed -- I/O error
 (dbx)
 ```
 
-có lẽ hết stack. Hex là stack address không map/lấy được. Chỉnh segment limit C-shell:
+thì có lẽ chương trình đã hết stack space. Số hex đó là địa chỉ stack không thể map hoặc lấy về. Bạn cũng có thể thử điều chỉnh segment limit trong C-shell:
 
 ```
 limit stacksize 10
 ```
 
-Chỉnh max stack/data trong C-shell. Dòng trên 10 Kbyte. Cho ít xem fail sớm, cho nhiều xem chạy. Tổng vẫn giới hạn swap, xem `swap -s`.
+Trong C-shell, bạn có thể điều chỉnh kích thước tối đa của stack và data segment. Dòng trên đặt nó thành 10 Kbyte. Hãy thử cấp ít stack space hơn để xem chương trình có thất bại sớm hơn không; sau đó cấp nhiều hơn để xem nó có chạy thành công không. Tổng thể, process vẫn bị giới hạn bởi kích thước swap space, có thể xem bằng lệnh `swap -s`.
 
-Bad pointer gì cũng có thể. "May" trỏ ngoài, dùng đầu core dump dừng. "Không may" trong, cor-rupt vùng trỏ, bug mờ khó tìm. Những năm gần nhiều tool xuất sắc giải.
+Với giá trị pointer sai, chuyện gì cũng có thể xảy ra. Người ta thường nói nếu “may mắn”, pointer trỏ ra ngoài address space nên lần dùng đầu tiên khiến chương trình dump core rồi dừng. Nếu “không may”, nó trỏ vào bên trong address space và cor-rupt, tức ghi đè, vùng memory ấy. Điều này dẫn tới bug mơ hồ rất khó tìm. Những năm gần đây đã xuất hiện nhiều công cụ software xuất sắc giúp giải quyết loại vấn đề này.
 
 ## Giải trí nhẹ nhàng — Vua đồ vật và trò paging
 
-Jeff Berryman viết 1972 khi ở project MAC, vận hành hệ virtual memory đầu. Hơi rue-fully nói trong mọi bài đây phổ biến nhất. Nay vẫn phù hợp như hai mươi năm trước.
+Phần tiếp theo do Jeff Berryman viết năm 1972, khi làm ở project MAC và vận hành một trong những hệ thống virtual memory đầu tiên. Jeff bình luận hơi rue-fully rằng trong mọi bài ông từng viết, đây là bài phổ biến và được đọc rộng rãi nhất. Ngày nay nó vẫn phù hợp như hai mươi năm trước.
 
 ### Trò paging
 
-Bài non-working chính thức Project MAC Computer Systems Research Division. Nên sao chép, phát nơi thiếu vui, trích ở ấn phẩm khác tự chịu rủi ro.
+Ghi chú này là tài liệu non-working chính thức của Project MAC Computer Systems Research Division. Hãy sao chép và phân phát nó ở bất cứ nơi nào thiếu tiếng cười; bạn có thể viện dẫn nó trong ấn phẩm khác nhưng phải tự chịu rủi ro.
 
 ### Luật
 
-1\. Mỗi người vài triệu đồ vật.
+1\. Mỗi người chơi nhận được vài triệu đồ vật.
 
-2\. Trong thùng, mỗi thùng 4096 thứ. Cùng thùng là crate-mates.
+2\. Đồ vật được giữ trong thùng, mỗi thùng chứa 4096 món. Những món cùng thùng được gọi là crate-mates.
 
-3\. Thùng ở xưởng hoặc kho. Xưởng gần luôn quá nhỏ chứa hết.
+3\. Thùng được cất trong xưởng hoặc kho. Xưởng gần như luôn quá nhỏ để chứa tất cả thùng.
 
-4\. Chỉ một xưởng, có thể nhiều kho, mọi người chung.
+4\. Chỉ có một xưởng nhưng có thể có nhiều kho. Mọi người dùng chung chúng.
 
-5\. Mỗi thứ có số riêng.
+5\. Mỗi đồ vật có số hiệu riêng.
 
-6\. Việc làm là zark. Mọi người lần lượt zark.
+6\. Thao tác bạn làm với đồ vật gọi là zark. Mọi người lần lượt zark.
 
-7\. Chỉ zark đồ mình, không người khác.
+7\. Bạn chỉ được zark đồ của mình, không được zark đồ của người khác.
 
-8\. Chỉ zark khi ở xưởng.
+8\. Đồ vật chỉ có thể được zark khi nằm trong xưởng.
 
-9\. Chỉ Vua đồ vật biết ở xưởng hay kho.
+9\. Chỉ Vua đồ vật biết một món nằm trong xưởng hay trong kho.
 
-10\. Càng lâu không zark càng bẩn.
+10\. Một món càng lâu không được zark thì được coi là càng bẩn.
 
-11\. Xin Vua để có. Chỉ cho bội tám để giảm overhead hoàng gia.
+11\. Muốn có đồ vật, bạn phải xin Vua đồ vật. Ông chỉ phát số lượng là bội của tám để giảm overhead hoàng gia.
 
-12\. Zark bằng số. Nếu ở xưởng làm ngay. Nếu kho, Vua mang thùng về xưởng. Hết chỗ thì tìm thùng bẩn nhất, của ai cũng vậy, gửi cả crate-mates ra kho, thay thùng bạn. Thứ được zark, không biết vốn chẳng ở xưởng.
+12\. Muốn zark một món, bạn đưa số hiệu của nó. Nếu món mang số đó tình cờ ở trong xưởng, nó được zark ngay. Nếu nó ở kho, Vua đồ vật đưa thùng chứa món ấy về xưởng. Nếu xưởng hết chỗ, trước tiên ông tìm thùng bẩn nhất trong xưởng, dù của bạn hay người khác, và gửi nó cùng toàn bộ crate-mates ra kho. Ông đặt thùng chứa món của bạn vào chỗ trống. Món ấy được zark, và bạn chẳng bao giờ biết nó không phải luôn ở trong xưởng.
 
-13\. Đồ mọi người cùng số nhau. Vua luôn biết ai sở hữu, lượt ai, nên không vô tình zark người khác dù cùng số.
+13\. Đồ vật của mỗi người có những số hiệu giống đồ của mọi người khác. Vua đồ vật luôn biết món nào thuộc về ai và đang đến lượt ai, nên bạn không bao giờ vô tình zark đồ của người khác dù nó cùng số hiệu với đồ của bạn.
 
 ### Ghi chú
 
-1\. Theo truyền thống Vua ngồi bàn chia segment lớn, có page (so-called "table pages") giúp nhớ đồ ở đâu, của ai.
+1\. Theo truyền thống, Vua đồ vật ngồi bên một chiếc bàn lớn chia thành nhiều segment và có các page hầu cận, so-called “table pages”, giúp ông nhớ mọi món nằm ở đâu và thuộc về ai.
 
-2\. Hệ quả Luật 13 là số mỗi người giống giữa trò bất kể số người.
+2\. Một hệ quả của Luật 13 là số hiệu đồ vật của mọi người tương tự nhau giữa các ván chơi, bất kể số người chơi.
 
-3\. Vua có đồ riêng, vài thứ qua lại xưởng/kho như người khác, vài quá nặng không ra.
+3\. Vua đồ vật có vài món riêng. Một số di chuyển qua lại giữa xưởng và kho giống đồ của người khác, nhưng một số quá nặng nên không thể đưa khỏi xưởng.
 
-4\. Theo luật, thứ oft-zarked thường xưởng, little-zarked thường kho, kiểm kho hiệu quả.
+4\. Với bộ luật đã nêu, đồ oft-zarked có xu hướng chủ yếu nằm trong xưởng, còn đồ little-zarked chủ yếu ở kho. Đây là cách kiểm soát hàng tồn hiệu quả.
 
 Vua đồ vật muôn năm!
 
-Thú vị hơn bản dịch non-allegorical dưới chứ?
+Chẳng phải cách kể ấy thú vị hơn nhiều so với phiên bản chuyển dịch non-allegorical dưới đây sao?
 
 ### Luật
 
-1\. Mỗi người vài triệu "byte".
+1\. Mỗi người chơi nhận được vài triệu “byte”.
 
-2\. Byte trong "page", 4096 mỗi page. Cùng page có "locality of reference".
+2\. Byte được giữ trong “page”, mỗi page chứa 4096 byte. Những byte cùng page có “locality of reference”.
 
-3\. Page ở memory hoặc disk. Memory gần luôn quá nhỏ chứa hết.
+3\. Page được lưu trong memory hoặc trên đĩa. Memory gần như luôn quá nhỏ để chứa tất cả page.
 
-4\. Chỉ một memory, nhiều disk, cùng chia sẻ.
+4\. Chỉ có một memory nhưng có thể có nhiều đĩa. Mọi người dùng chung chúng.
 
-5\. Byte có "virtual address" riêng.
+5\. Mỗi byte có “virtual address” riêng.
 
-6\. Làm với byte là "reference", mọi người lần lượt.
+6\. Thao tác bạn làm với byte gọi là “reference”. Mọi người lần lượt reference.
 
-7\. Chỉ reference byte mình.
+7\. Bạn chỉ được reference byte của mình, không được reference byte của người khác.
 
-8\. Chỉ reference trong memory.
+8\. Byte chỉ có thể được reference khi nằm trong memory.
 
-9\. Chỉ "VM manager" biết memory hay disk.
+9\. Chỉ “VM manager” biết một byte nằm trong memory hay trên đĩa.
 
-10\. Càng lâu không reference càng "già".
+10\. Một byte càng lâu không được reference thì được coi là càng “già”.
 
-11\. Xin VM manager, chỉ cho bội lũy thừa hai giảm overhead.
+11\. Muốn có byte, bạn phải xin VM manager. Nó chỉ cấp số byte là bội của lũy thừa hai để giảm overhead.
 
-12\. Reference bằng virtual address. Nếu memory làm ngay. Nếu disk, manager mang page về. Không chỗ thì page già nhất của ai cũng đưa disk, thay page bạn. Byte được reference, không biết vốn chẳng ở memory.
+12\. Muốn reference một byte, bạn đưa virtual address của nó. Nếu byte tại địa chỉ ấy tình cờ nằm trong memory, nó được reference ngay. Nếu ở đĩa, VM manager đưa page chứa byte ấy về memory. Nếu memory hết chỗ, trước tiên nó tìm page già nhất trong memory, dù của bạn hay người khác, rồi đưa page ấy cùng phần còn lại của page ra đĩa. Nó đặt page chứa byte của bạn vào chỗ trống. Byte ấy được reference, và bạn chẳng bao giờ biết nó không phải luôn ở trong memory.
 
-13\. Byte mọi người cùng virtual address. VM manager luôn biết ai sở hữu, lượt ai, nên không vô tình reference byte người khác dù cùng address.
+13\. Byte của mỗi người có những virtual address giống byte của mọi người khác. VM manager luôn biết byte nào thuộc về ai và đang đến lượt ai, nên bạn không bao giờ vô tình reference byte của người khác dù nó cùng virtual address với byte của bạn.
 
 ### Ghi chú
 
-1\. VM manager dùng bàn segment lớn và "page table" nhớ byte ở đâu, của ai.
+1\. Theo truyền thống, VM manager dùng một bảng lớn chia segment cùng các “page table” để nhớ tất cả byte nằm ở đâu và thuộc về ai.
 
-2\. Hệ quả Luật 13: virtual address giống giữa các lần chạy bất kể số process.
+2\. Một hệ quả của Luật 13 là virtual address của mọi người tương tự nhau giữa các lần chạy, bất kể số process.
 
-3\. VM manager có byte riêng, vài qua lại disk/memory như người khác, vài dùng quá nặng không rời memory.
+3\. VM manager có vài byte riêng. Một số di chuyển qua lại giữa memory và đĩa như byte của người khác, nhưng một số được sử dụng quá nhiều nên không thể đưa khỏi memory.
 
-4\. Theo luật byte oft-referenced thường memory, little-used thường disk, dùng memory hiệu quả.
+4\. Với bộ luật đã nêu, byte oft-referenced có xu hướng chủ yếu nằm trong memory, còn byte little-used chủ yếu ở đĩa. Đây là cách sử dụng memory hiệu quả.
 
 VM Manager muôn năm!
 
@@ -765,7 +765,7 @@ VM Manager muôn năm!
 
 ![image](images/ch07/img07-10.png)
 
-Signal handler bắt segv
+Signal handler bắt signal segv
 
 ```
 #include <signal.h>
@@ -791,7 +791,7 @@ main () {
 }
 ```
 
-Chạy ra:
+Chạy chương trình cho kết quả sau:
 
 ```
 % a.out
@@ -799,15 +799,15 @@ Chạy ra:
 now got a segmentation violation signal
 ```
 
-Lưu ý ví dụ giảng dạy. ANSI 7.7.1.1 nói trường hợp này handler gọi standard library như printf thì undefined.
+Lưu ý: đây là ví dụ phục vụ giảng dạy. Mục 7.7.1.1 của chuẩn ANSI chỉ rõ rằng trong hoàn cảnh ở đây, hành vi là undefined nếu signal handler gọi bất kỳ hàm thư viện tiêu chuẩn nào, chẳng hạn printf.
 
 #### Lời giải lập trình
 
 ![image](images/ch07/img07-10.png)
 
-Dùng setjmp/longjmp phục hồi signal
+Dùng setjmp/longjmp để phục hồi sau signal
 
-Program dùng `setjmp/longjmp`, signal handler, nhận control-C (truyền process UNIX như `SIGINT`) thì restart thay quit.
+Chương trình này sử dụng `setjmp/longjmp` và xử lý signal để khi nhận control-C, được chuyển tới UNIX process dưới dạng signal `SIGINT`, chương trình khởi động lại thay vì thoát.
 
 ```
 #include <setjmp.h>
@@ -834,9 +834,9 @@ loop:
 }
 ```
 
-Lưu ý handler không nên gọi library trừ hoàn cảnh chuẩn hạn chế. Signal trong printf "lần đầu", printf handler giữa chừng có thể rối. Đây gian lận vì I/O tương tác dễ thấy nhất. Code thực đừng gian, nhé?
+Lưu ý: signal handler không được gọi hàm thư viện, ngoại trừ những hoàn cảnh hạn chế được chuẩn quy định. Nếu signal phát sinh trong printf “lần đầu”, printf của signal handler chen vào giữa có thể bị rối. Ở đây chúng tôi gian lận vì I/O tương tác là cách dễ thấy điều đang xảy ra nhất. Đừng gian lận trong code thực tế, nhé?
 
-Chạy ra:
+Chạy chương trình cho kết quả sau:
 
 ```
 % a.out
@@ -846,4 +846,4 @@ first time through
 back in main
 ```
 
-Program dùng `setjmp/longjmp`, signal handler, nhận control-C (truyền process UNIX như `SIGINT`) thì restart thay quit.
+Chương trình này sử dụng `setjmp/longjmp` và xử lý signal để khi nhận control-C, được chuyển tới UNIX process dưới dạng signal `SIGINT`, chương trình khởi động lại thay vì thoát.

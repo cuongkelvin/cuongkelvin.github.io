@@ -1,10 +1,10 @@
 # Chương 3. Pointer và function
 
-Pointer đóng góp rất lớn vào khả năng của function. Chúng cho phép truyền data và để function sửa data. Data phức tạp cũng có thể được truyền và trả về dưới dạng pointer đến structure. Khi chứa address của function, pointer cho phép điều khiển execution flow của chương trình một cách động. Chương này tìm hiểu sức mạnh của pointer khi dùng với function và cách dùng chúng giải nhiều bài toán real-world.
+Pointer đóng góp rất lớn vào khả năng của function. Chúng cho phép truyền dữ liệu vào function và để function sửa đổi dữ liệu đó. Dữ liệu phức tạp cũng có thể được truyền vào và trả về từ function dưới dạng pointer tới structure. Khi chứa địa chỉ của function, pointer cung cấp cách điều khiển động luồng thực thi của chương trình. Trong chương này, chúng ta sẽ tìm hiểu sức mạnh của pointer khi kết hợp với function và học cách dùng chúng giải quyết nhiều bài toán real-world.
 
-Để hiểu function và cách dùng với pointer, cần nắm program stack. Phần lớn ngôn ngữ block-structured hiện đại như C dùng program stack hỗ trợ function execution. Khi gọi function, stack frame được tạo rồi push lên program stack. Khi function return, stack frame bị pop khỏi program stack.
+Để hiểu function và cách sử dụng chúng với pointer, bạn cần nắm vững program stack. Phần lớn ngôn ngữ block-structured hiện đại, chẳng hạn C, dùng program stack để hỗ trợ thực thi function. Khi một function được gọi, stack frame của nó được tạo rồi push lên program stack. Khi function trả về, stack frame của nó được pop khỏi program stack.
 
-Khi làm việc với function, pointer hữu ích trong hai lĩnh vực. Thứ nhất là truyền pointer cho function, cho phép function sửa data được tham chiếu và truyền block thông tin hiệu quả hơn.
+Khi làm việc với function, pointer hữu ích trong hai trường hợp. Trường hợp thứ nhất là truyền pointer vào function. Điều này cho phép function sửa đổi dữ liệu được pointer tham chiếu tới, đồng thời truyền các khối thông tin hiệu quả hơn.
 
 Thứ hai là khai báo pointer đến function. Về bản chất, function notation là pointer notation. Tên function được evaluate thành address của function, và các parameter được truyền cho function. Như sẽ thấy, function pointer bổ sung khả năng điều khiển execution flow của chương trình.
 
@@ -12,7 +12,7 @@ Phần này xây dựng nền tảng để hiểu và làm việc với function
 
 ## Program stack và heap
 
-Program stack và heap là runtime element quan trọng của C. Phần này xem kỹ cấu trúc và cách dùng cả hai, cùng cấu trúc stack frame chứa local variable.
+Program stack và heap là những thành phần runtime quan trọng của C. Trong phần này, chúng ta sẽ xem xét kỹ cấu trúc và cách sử dụng program stack cùng heap. Chúng ta cũng tìm hiểu cấu trúc của stack frame, nơi chứa local variable.
 
 ![image](images/ch03/fig03-01.png)
 
@@ -50,7 +50,7 @@ Khi gọi function, stack frame được push lên stack và stack tăng “lên
 
 Hình 3-1. Stack và heap
 
-Memory cấp phát động đến từ heap, thường tăng “xuống dưới”. Heap bị fragmentation khi memory được cấp rồi giải phóng. Dù thường tăng xuống dưới, đây chỉ là hướng tổng quát: memory có thể được cấp từ bất cứ đâu trong heap.
+Memory được cấp phát động lấy từ heap, vốn có xu hướng phát triển “xuống dưới”. Heap sẽ bị phân mảnh khi memory được cấp phát rồi giải phóng. Dù heap thường phát triển xuống dưới, đó chỉ là hướng tổng quát; memory có thể được cấp phát từ bất kỳ vị trí nào trong heap.
 
 ### Tổ chức stack frame
 
@@ -62,17 +62,17 @@ Address trong chương trình mà function trở về khi hoàn tất
 
 Vùng lưu local data
 
-Memory cấp cho local variable
+Memory được cấp phát cho local variable
 
 Vùng lưu parameter
 
-Memory cấp cho parameter của function
+Memory được cấp phát cho các parameter của function
 
 Stack pointer và base pointer
 
-Pointer mà runtime system dùng quản lý stack
+Các pointer được runtime system sử dụng để quản lý stack
 
-C programmer thông thường không quan tâm stack pointer và base pointer hỗ trợ stack frame. Tuy nhiên, hiểu chúng là gì và dùng thế nào đem lại hiểu biết in-depth về program stack.
+Lập trình viên C thông thường không cần quan tâm đến stack pointer và base pointer hỗ trợ stack frame. Tuy nhiên, hiểu chúng là gì và được sử dụng như thế nào sẽ giúp bạn có hiểu biết in-depth về program stack.
 
 Stack pointer thường trỏ đến đỉnh stack. Stack base pointer (frame pointer) cũng thường có và trỏ đến address trong stack frame, như return address. Nó hỗ trợ truy cập element của stack frame. Cả hai không phải C pointer, mà là address runtime system dùng quản lý program stack. Nếu runtime system viết bằng C, chúng có thể là C pointer thực. Xét việc tạo stack frame cho function sau, nhận array integer và integer biểu diễn kích thước array. Ba câu `printf` hiển thị address của parameter và local variable:
 
@@ -92,7 +92,7 @@ float average(int *arr, int size) {
 }
 ```
 
-Khi chạy, nhận output tương tự:
+Khi thực thi, bạn sẽ nhận được output tương tự như sau:
 
 ```
 arr: 0x500
@@ -100,17 +100,17 @@ size: 0x504
 sum: 0x480
 ```
 
-Khoảng cách address giữa parameter và local variable là do các element stack frame khác mà runtime system dùng quản lý stack.
+Khoảng cách địa chỉ giữa parameter và local variable xuất phát từ những thành phần khác của stack frame mà runtime system sử dụng để quản lý stack.
 
-Khi tạo stack frame, parameter được push theo thứ tự ngược declaration, rồi đến local variable. Hình 3-2 minh họa. Ở đây `size` được push trước `arr`. Thường return address của function call được push tiếp, rồi local variable, theo thứ tự ngược danh sách khai báo.
+Khi stack frame được tạo, các parameter được push vào frame theo thứ tự ngược với thứ tự khai báo, tiếp theo là local variable. Điều này được minh họa trong Hình 3-2. Trong trường hợp này, `size` được push trước, rồi đến `arr`. Thông thường, return address của lời gọi function được push tiếp theo, sau đó là local variable. Chúng được push theo thứ tự ngược với thứ tự được liệt kê.
 
 Về khái niệm stack trong ví dụ tăng “lên”. Tuy nhiên, parameter, local variable và stack frame mới được thêm ở memory address thấp hơn. Hướng stack thực sự tăng là implementation-specific.
 
 Variable `i` dùng trong câu `for` không thuộc stack frame này. C coi block statement là function “mini”, push và pop khi thích hợp. Ở đây block được push lên program stack phía trên stack frame `average` khi chạy rồi pop khi hoàn tất.
 
-Dù address chính xác thay đổi, thứ tự thường không đổi. Hiểu điều này quan trọng vì giúp giải thích cách cấp memory và xác lập thứ tự tương đối của parameter và variable, hữu ích khi debug pointer. Nếu không biết cách cấp stack frame, việc gán address có thể khó hiểu.
+Dù các địa chỉ cụ thể có thể thay đổi, thứ tự thường không đổi. Hiểu điều này rất quan trọng vì nó giải thích cách memory được cấp phát và xác lập thứ tự tương đối của parameter với variable. Điều đó có thể hữu ích khi debug vấn đề liên quan đến pointer. Nếu không biết stack frame được cấp phát như thế nào, bạn có thể thấy việc gán địa chỉ thật khó hiểu.
 
-Khi stack frame được push lên program stack, hệ thống có thể hết memory. Tình trạng này gọi stack overflow và thường khiến chương trình kết thúc bất thường. Nhớ rằng mỗi thread thường được cấp program stack riêng.
+Khi các stack frame được push lên program stack, hệ thống có thể hết memory. Tình trạng này gọi là stack overflow và thường khiến chương trình kết thúc bất thường. Hãy nhớ rằng mỗi thread thường được cấp program stack riêng.
 
 ![image](images/ch03/fig03-03.png)
 
@@ -120,15 +120,15 @@ Hình 3-2. Ví dụ stack frame
 
 ## Truyền và trả về bằng pointer
 
-Phần này xét ảnh hưởng của việc truyền pointer vào và trả pointer từ function. Truyền pointer cho phép nhiều function truy cập object được tham chiếu mà không biến nó thành global. Nghĩa là chỉ function cần truy cập mới được quyền đó, và không cần sao chép object.
+Trong phần này, chúng ta xem xét tác động của việc truyền pointer vào function và trả pointer về từ function. Truyền pointer cho phép nhiều function truy cập object được tham chiếu mà không cần biến object thành global. Điều đó có nghĩa chỉ những function cần truy cập object mới nhận quyền truy cập, đồng thời object không cần được sao chép.
 
-Nếu function cần sửa data, phải truyền bằng pointer. Có thể truyền bằng pointer nhưng cấm sửa bằng cách dùng pointer đến constant, như mục “Truyền pointer đến constant” trang 63. Khi data là pointer cần sửa, truyền pointer đến pointer. Chủ đề này nằm trong “Truyền pointer đến pointer” trang 68.
+Nếu cần sửa đổi dữ liệu trong function, dữ liệu phải được truyền bằng pointer. Chúng ta có thể truyền dữ liệu bằng pointer nhưng ngăn sửa đổi bằng cách truyền pointer tới constant, như sẽ minh họa trong mục “Truyền pointer tới constant” ở trang 63. Khi dữ liệu là một pointer cần được sửa đổi, chúng ta truyền nó dưới dạng pointer tới pointer. Chủ đề này được trình bày trong mục “Truyền pointer tới pointer” ở trang 68.
 
-Parameter, gồm pointer, được truyền by value: một bản sao argument được truyền cho function. Truyền pointer đến argument hiệu quả với data structure lớn. Ví dụ, structure lớn biểu diễn nhân viên: nếu truyền cả structure, phải sao chép từng byte, làm chương trình chậm và tốn chỗ trong stack frame. Truyền pointer đến object nghĩa là object phải được sao chép, và có thể truy cập object qua pointer.
+Các parameter, bao gồm pointer, được truyền by value. Nghĩa là một bản sao của argument được truyền cho function. Truyền pointer đến argument có thể hiệu quả khi xử lý data structure lớn. Chẳng hạn, hãy xét một structure lớn biểu diễn nhân viên. Nếu truyền toàn bộ structure cho function, từng byte của structure phải được copy, khiến chương trình chậm hơn và dùng nhiều storage hơn trong stack frame. Truyền pointer đến object có nghĩa object phải được copy, và chúng ta có thể truy cập object qua pointer.
 
 ### Truyền data bằng pointer
 
-Một lý do chính để truyền data bằng pointer là cho phép function sửa data. Chuỗi sau triển khai function swap hoán đổi các giá trị được parameter tham chiếu, operation phổ biến trong nhiều sorting algorithm. Ở đây dùng integer pointer và dereference để thực hiện swap:
+Một trong những lý do chính để truyền dữ liệu bằng pointer là cho phép function sửa đổi dữ liệu. Đoạn code sau triển khai function swap để hoán đổi các giá trị mà parameter tham chiếu tới. Đây là thao tác phổ biến trong nhiều thuật toán sắp xếp. Ở đây, chúng ta dùng integer pointer và dereference chúng để thực hiện thao tác swap:
 
 ```
 void swapWithPointers(int* pnum1, int* pnum2) {
@@ -139,7 +139,7 @@ void swapWithPointers(int* pnum1, int* pnum2) {
 }
 ```
 
-Chuỗi code sau minh họa function:
+Đoạn code sau minh họa cách sử dụng function này:
 
 ```
 int main() {
@@ -150,7 +150,7 @@ int main() {
 }
 ```
 
-Các pointer `pnum1` và `pnum2` được dereference trong swap, khiến giá trị `n1` và `n2` được sửa. Hình 3-3 minh họa tổ chức memory. `Before image` là program stack lúc bắt đầu function swap; `After image` là ngay trước khi return.
+Các pointer `pnum1` và `pnum2` được dereference trong swap operation. Điều này khiến các giá trị `n1` và `n2` được sửa đổi. Hình 3-3 minh họa cách memory được tổ chức. `Before image` cho thấy program stack khi function swap bắt đầu, còn `After image` cho thấy nó ngay trước khi function trả về.
 
 ![image](images/ch03/fig03-04.png)
 
@@ -158,7 +158,7 @@ Hình 3-3. Swap bằng pointer
 
 ### Truyền data by value
 
-Nếu không truyền bằng pointer, swap không xảy ra. Function sau nhận hai integer by value:
+Nếu không truyền bằng pointer, thao tác swap sẽ không xảy ra. Trong function sau, hai integer được truyền by value:
 
 ```
 void swap(int num1, int num2) {
@@ -169,7 +169,7 @@ void swap(int num1, int num2) {
 }
 ```
 
-Chuỗi code sau truyền hai integer cho function:
+Trong đoạn code sau, hai integer được truyền vào function:
 
 ```
 int main() {
@@ -180,7 +180,7 @@ int main() {
 }
 ```
 
-Tuy nhiên, cách này không hoạt động vì integer được truyền by value thay vì pointer. Chỉ bản sao argument lưu trong `num1` và `num2`. Sửa `num1` không đổi argument `n1`. Khi sửa parameter, không sửa argument gốc. Hình 3-4 minh họa cấp memory cho parameter.
+Tuy nhiên, cách này không hoạt động vì các integer được truyền by value thay vì bằng pointer. Chỉ bản sao của argument được lưu trong `num1` và `num2`. Nếu sửa `num1`, argument `n1` không thay đổi. Khi sửa parameter, chúng ta không sửa argument gốc. Hình 3-4 minh họa cách memory được cấp phát cho các parameter.
 
 ![image](images/ch03/fig03-05.png)
 
@@ -188,9 +188,9 @@ Hình 3-4. Truyền by value
 
 ### Truyền pointer đến constant
 
-Truyền pointer đến constant là kỹ thuật phổ biến trong C. Nó hiệu quả vì chỉ truyền address của data, đôi khi tránh sao chép lượng memory lớn. Tuy nhiên, pointer thông thường cho phép sửa data. Khi không muốn vậy, giải pháp là truyền pointer đến constant.
+Truyền pointer tới constant là kỹ thuật phổ biến trong C. Kỹ thuật này hiệu quả vì chỉ truyền địa chỉ dữ liệu và trong một số trường hợp có thể tránh sao chép lượng lớn memory. Tuy nhiên, với pointer thông thường, dữ liệu có thể bị sửa đổi. Khi không muốn điều đó, giải pháp là truyền pointer tới constant.
 
-Ví dụ này truyền pointer đến constant integer và pointer đến integer. Bên trong function, không thể sửa giá trị truyền bằng pointer đến constant:
+Trong ví dụ này, chúng ta truyền một pointer tới constant integer và một pointer tới integer. Bên trong function, không thể sửa giá trị được truyền dưới dạng pointer tới constant:
 
 ```
 void passingAddressOfConstants(const int* num1, int* num2) {
@@ -204,7 +204,7 @@ int main() {
 }
 ```
 
-Không sinh syntax error và function gán 100 cho variable `result`. Phiên bản sau thử sửa cả hai integer được tham chiếu:
+Không có syntax error nào được tạo, và function sẽ gán 100 cho variable `result`. Trong phiên bản function sau, chúng ta cố sửa cả hai integer được tham chiếu:
 
 ```
 void passingAddressOfConstants(const int* num1, int* num2) {
@@ -220,9 +220,9 @@ const int limit = 100;
 passingAddressOfConstants(&limit, &limit);
 ```
 
-Nó sinh syntax error báo type mismatch giữa parameter thứ hai và argument. Ngoài ra, báo đang cố sửa constant được cho là do parameter đầu tham chiếu.
+Điều này tạo ra các syntax error báo rằng type của parameter thứ hai không khớp với argument. Ngoài ra, compiler còn báo rằng chúng ta đang cố sửa giá trị được giả định là constant mà parameter thứ nhất tham chiếu tới.
 
-Function mong pointer đến integer, nhưng lại nhận pointer đến integer constant. Không thể truyền address của integer constant cho pointer đến constant, vì như vậy cho phép sửa constant value. Chi tiết ở “Constant và pointer” trang 27.
+Function yêu cầu pointer tới integer, nhưng lại nhận pointer tới integer constant. Chúng ta không thể truyền địa chỉ của integer constant cho pointer tới constant, vì điều đó sẽ cho phép sửa giá trị constant. Nội dung này được trình bày chi tiết trong mục “Constant và pointer” ở trang 27.
 
 Thử truyền address của integer literal như sau cũng sinh syntax error:
 
@@ -234,15 +234,15 @@ Thông báo cho biết cần `lvalue` làm operand của address-of operator. Kh
 
 ### Trả về pointer
 
-Trả pointer dễ thực hiện: chỉ cần khai báo return type là pointer đến data type thích hợp. Nếu cần trả object từ function, thường dùng hai kỹ thuật:
+Trả về pointer rất dễ thực hiện. Chỉ cần khai báo return type là pointer tới data type phù hợp. Nếu cần trả về object từ một function, hai kỹ thuật sau thường được sử dụng:
 
-- Cấp memory bên trong function bằng `malloc` rồi trả address. Caller chịu trách nhiệm giải phóng memory trả về.
+- Cấp phát memory bên trong function bằng `malloc` rồi trả về địa chỉ của nó. Caller chịu trách nhiệm giải phóng memory nhận được.
 
-- Truyền object cho function để sửa. Khi đó caller chịu trách nhiệm cấp và giải phóng memory của object.
+- Truyền object vào function để sửa đổi tại đó. Cách này đặt trách nhiệm cấp phát và giải phóng memory của object lên caller.
 
-Trước tiên minh họa dùng function kiểu `malloc` cấp memory trả về. Tiếp theo là ví dụ trả pointer đến local object, cách không được khuyến nghị. Cách ở bullet thứ hai được minh họa trong “Truyền null pointer” trang 67.
+Trước hết, chúng ta minh họa việc dùng các function thuộc loại `malloc` để cấp phát memory được trả về. Tiếp theo là ví dụ trả về pointer tới local object; cách này không được khuyến nghị. Cách nêu ở gạch đầu dòng thứ hai sau đó được minh họa trong mục “Truyền null pointer” ở trang 67.
 
-Ví dụ sau định nghĩa function nhận kích thước array integer và giá trị khởi tạo từng element. Function cấp memory cho array integer, khởi tạo bằng giá trị truyền vào rồi trả address của array:
+Trong ví dụ sau, chúng ta định nghĩa function nhận kích thước của một integer array và một giá trị để khởi tạo từng phần tử. Function cấp phát memory cho integer array, khởi tạo array bằng giá trị đã truyền, rồi trả về địa chỉ của array:
 
 ```
 int* allocateArray(int size, int value) {
@@ -263,9 +263,9 @@ for(int i=0; i<5; i++) {
 }
 ```
 
-Hình 3-5 minh họa cấp memory cho function. Ảnh `Before` là trạng thái ngay trước return statement. Ảnh `After` là sau khi function return. Variable `vector` nay chứa address memory được cấp trong function. Dù variable `arr` biến mất khi function kết thúc, memory pointer tham chiếu vẫn tồn tại và cuối cùng cần giải phóng.
+Hình 3-5 minh họa cách memory được cấp phát cho function này. Hình `Before` cho thấy trạng thái chương trình ngay trước khi return statement thực thi. Hình `After` cho thấy trạng thái sau khi function trả về. Variable `vector` lúc này chứa địa chỉ của memory được cấp phát bên trong function. Dù variable `arr` không còn khi function kết thúc, memory mà pointer tham chiếu tới vẫn tồn tại. Cuối cùng, memory này cần được giải phóng.
 
-Dù ví dụ trước hoạt động đúng, trả pointer từ function có thể gặp các vấn đề:
+Dù ví dụ trước hoạt động đúng, việc trả về pointer từ function có thể dẫn đến một số vấn đề sau:
 
 - Trả pointer chưa khởi tạo
 
@@ -275,7 +275,7 @@ Dù ví dụ trước hoạt động đúng, trả pointer từ function có th�
 
 - Trả pointer nhưng không giải phóng
 
-Function `allocateArray` là ví dụ điển hình cho vấn đề cuối. Trả memory cấp động nghĩa là caller chịu trách nhiệm giải phóng. Xét ví dụ:
+Vấn đề cuối được minh họa điển hình bằng function `allocateArray`. Trả về memory được cấp phát động từ function có nghĩa caller của function chịu trách nhiệm giải phóng nó. Hãy xem ví dụ sau:
 
 ```
 int* vector = allocateArray(5,45);
@@ -287,11 +287,11 @@ free(vector);
 
 Hình 3-5. Trả pointer
 
-Cuối cùng phải giải phóng khi dùng xong. Nếu không, sẽ có memory leak.
+Khi dùng xong, cuối cùng chúng ta phải giải phóng nó. Nếu không, sẽ xuất hiện memory leak.
 
 ### Pointer đến local data
 
-Trả pointer đến local data là lỗi dễ mắc nếu không hiểu program stack. Ví dụ sau sửa lại function `allocateAr` `ray` trong “Trả về pointer” trang 64. Thay vì cấp động memory cho array, dùng local array:
+Nếu không hiểu program stack hoạt động như thế nào, bạn rất dễ mắc lỗi trả về pointer tới local data. Trong ví dụ sau, chúng ta viết lại function `allocateAr` `ray` đã dùng trong mục “Trả về pointer” ở trang 64. Thay vì cấp phát động memory cho array, chúng ta dùng local array:
 
 ```
 int* allocateArray(int size, int value) {
@@ -303,7 +303,7 @@ int* allocateArray(int size, int value) {
 }
 ```
 
-Đáng tiếc, address array trả về không còn hợp lệ sau khi function return vì stack frame bị pop. Dù từng element có thể còn chứa 45, giá trị có thể bị ghi đè khi gọi function khác. Chuỗi sau minh họa: gọi `printf` liên tục khiến array bị hỏng:
+Đáng tiếc là địa chỉ array được trả về không còn hợp lệ khi function trả về, vì stack frame của function đã bị pop khỏi stack. Dù từng phần tử array có thể vẫn chứa 45, các giá trị này có thể bị ghi đè nếu function khác được gọi. Đoạn code sau minh họa điều đó: function `printf` được gọi nhiều lần, làm hỏng nội dung array:
 
 ```
 int* vector = allocateArray(5,45);
@@ -312,13 +312,13 @@ for(int i=0; i<5; i++) {
 }
 ```
 
-Hình 3-6 minh họa cấp memory khi điều này xảy ra. Ô nét đứt cho biết nơi có thể push stack frame khác, như của function `printf`, làm hỏng memory của array. Nội dung thực của stack frame đó là implementation-dependent.
+Hình 3-6 minh họa việc cấp phát memory khi điều này xảy ra. Khung nét đứt cho biết nơi các stack frame khác, chẳng hạn stack frame của function `printf`, có thể được push lên program stack và do đó làm hỏng memory mà array chiếm giữ. Nội dung thực tế của stack frame ấy là implementation-dependent.
 
 ![image](images/ch03/fig03-07.png)
 
 Hình 3-6. Trả pointer đến local data
 
-Cách thay thế là khai báo variable `arr` static. Scope vẫn giới hạn trong function nhưng memory cấp ngoài stack frame, loại bỏ khả năng function khác ghi đè giá trị:
+Một cách khác là khai báo variable `arr` là static. Điều này giới hạn scope của variable trong function nhưng cấp phát nó ngoài stack frame, loại bỏ khả năng function khác ghi đè giá trị của variable:
 
 ```
 int* allocateArray(int size, int value) {
@@ -327,13 +327,13 @@ int* allocateArray(int size, int value) {
 }
 ```
 
-Tuy nhiên, không phải lúc nào cũng hoạt động. Mỗi lần gọi `allocateArray` sẽ tái sử dụng array, thực tế làm mất hiệu lực các lời gọi trước. Ngoài ra, static array phải có kích thước cố định, hạn chế khả năng xử lý kích thước array khác nhau.
+Tuy nhiên, cách này không phải lúc nào cũng hoạt động. Mỗi lần function `allocateArray` được gọi, nó sẽ tái sử dụng array. Điều đó thực chất khiến kết quả của mọi lời gọi trước không còn hiệu lực. Ngoài ra, static array phải được khai báo với kích thước cố định, hạn chế khả năng xử lý nhiều kích thước array khác nhau của function.
 
-Nếu function chỉ trả vài giá trị có thể có và chia sẻ không gây hại, nó có thể giữ danh sách các giá trị rồi trả giá trị thích hợp. Cách này hữu ích khi trả thông báo trạng thái, như mã lỗi ít khả năng bị sửa. Mục “Trả string” trang 126 minh họa dùng global và static value.
+Nếu function chỉ trả về một vài giá trị có thể có và việc chia sẻ chúng không gây vấn đề, function có thể duy trì danh sách các giá trị ấy rồi trả về giá trị thích hợp. Cách này hữu ích khi trả về thông báo trạng thái, chẳng hạn mã lỗi ít có khả năng bị sửa đổi. Mục “Trả về string” ở trang 126 minh họa cách dùng global value và static value.
 
 ### Truyền null pointer
 
-Phiên bản `allocateArray` sau nhận pointer đến array cùng kích thước và giá trị khởi tạo từng element. Pointer được trả về cho tiện. Dù phiên bản này không cấp memory, các phiên bản sau sẽ cấp:
+Trong phiên bản function `allocateArray` sau, chúng ta truyền pointer tới array cùng kích thước và giá trị dùng để khởi tạo từng phần tử của array. Pointer được trả về để thuận tiện sử dụng. Dù phiên bản này không cấp phát memory, các phiên bản sau sẽ làm việc đó:
 
 ```
 int* allocateArray(int *arr, int size, int value) {
@@ -346,7 +346,7 @@ int* allocateArray(int *arr, int size, int value) {
 }
 ```
 
-Khi truyền pointer cho function, nên luôn xác nhận không null trước khi dùng.
+Khi truyền pointer vào function, luôn nên kiểm tra nó không phải null trước khi sử dụng.
 
 Có thể gọi function như sau:
 
@@ -355,11 +355,11 @@ int* vector = (int*)malloc(5 * sizeof(int));
 allocateArray(vector,5,45);
 ```
 
-Nếu pointer là NULL, không làm gì và chương trình chạy mà không kết thúc bất thường.
+Nếu pointer là NULL, function không thực hiện thao tác nào và chương trình tiếp tục chạy mà không kết thúc bất thường.
 
 ### Truyền pointer đến pointer
 
-Pointer truyền cho function được truyền by value. Muốn sửa pointer gốc thay vì bản sao, phải truyền pointer đến pointer. Ví dụ sau truyền pointer đến array integer để được cấp memory và khởi tạo. Function trả memory đã cấp qua parameter đầu. Trong function, trước tiên cấp memory rồi khởi tạo. Address memory được dự định gán cho pointer đến `int`. Để sửa pointer trong calling function, phải truyền address của pointer. Vì vậy parameter khai báo pointer đến pointer đến `int`. Calling function cần truyền address pointer:
+Khi truyền pointer vào function, pointer được truyền by value. Nếu muốn sửa pointer gốc thay vì bản sao của pointer, chúng ta cần truyền nó dưới dạng pointer tới pointer. Trong ví dụ sau, một pointer tới integer array được truyền vào để nhận memory được cấp phát và khởi tạo. Function trả memory đã cấp phát qua parameter thứ nhất. Bên trong function, trước hết chúng ta cấp phát memory rồi khởi tạo nó. Địa chỉ của memory này được dự định gán cho pointer tới `int`. Để sửa pointer ấy trong function gọi, chúng ta cần truyền địa chỉ của pointer. Vì vậy, parameter được khai báo là pointer tới pointer tới `int`. Trong function gọi, chúng ta cần truyền địa chỉ của pointer:
 
 ```
 void allocateArray(int **arr, int size, int value) {
@@ -379,13 +379,13 @@ int *vector = NULL;
 allocateArray(&vector,5,45);
 ```
 
-Parameter đầu của `allocateArray` được truyền như pointer đến pointer đến integer. Khi gọi, cần truyền giá trị type này bằng cách truyền address của `vector`. Address do `malloc` trả được gán cho `arr`. Dereference pointer đến pointer đến integer cho pointer đến integer. Vì đây là address của `vector`, chúng ta sửa `vector`.
+Parameter thứ nhất của `allocateArray` được truyền dưới dạng pointer tới pointer tới integer. Khi gọi function, chúng ta cần truyền một giá trị thuộc type này bằng cách truyền địa chỉ của `vector`. Địa chỉ do `malloc` trả về được gán cho `arr`. Dereference pointer tới pointer tới integer cho kết quả là pointer tới integer. Vì đó là địa chỉ của `vector`, chúng ta sửa được `vector`.
 
-Memory allocation được minh họa trong Hình 3-7. Ảnh `Before` là stack sau khi `malloc` return và array được khởi tạo. Tương tự, ảnh `After` là stack sau khi function return.
+Việc cấp phát memory được minh họa trong Hình 3-7. Hình `Before` cho thấy trạng thái stack sau khi `malloc` trả về và array được khởi tạo. Tương tự, hình `After` cho thấy trạng thái stack sau khi function trả về.
 
 ![image](images/ch03/fig03-01.png)
 
-Để dễ phát hiện vấn đề như memory leak, hãy vẽ sơ đồ memory allocation.
+Để dễ nhận ra những vấn đề như memory leak, hãy vẽ sơ đồ cấp phát memory.
 
 ![image](images/ch03/fig03-08.png)
 
@@ -412,7 +412,7 @@ allocateArray(&vector,5,45);
 printf("%p\n",vector);
 ```
 
-Khi chạy, thấy 0x0 vì lúc `vector` được truyền cho function, giá trị được sao chép vào parameter `arr`. Sửa `arr` không ảnh hưởng `vector`. Khi function return, giá trị trong `arr` không được sao chép sang `vec` `tor`. Hình 3-8 minh họa memory. Ảnh `Before malloc` là ngay trước khi gán giá trị mới cho `arr`, khi nó chứa 500 do `vector` truyền vào. Ảnh `After malloc` là sau khi function `malloc` chạy trong `allocateArray` và array được khởi tạo. Variable `arr` được sửa để trỏ đến chỗ mới trong heap. Ảnh `After return` là program stack sau function return. Ngoài ra có memory leak vì mất quyền truy cập block ở address 600.
+Khi thực thi chương trình, bạn sẽ thấy 0x0 được hiển thị vì khi `vector` được truyền vào function, giá trị của nó được sao chép vào parameter `arr`. Sửa `arr` không ảnh hưởng đến `vector`. Khi function trả về, giá trị trong `arr` không được sao chép sang `vec` `tor`. Hình 3-8 minh họa việc cấp phát memory. Hình `Before malloc` cho thấy trạng thái memory ngay trước khi `arr` được gán giá trị mới. Nó chứa giá trị 500 được truyền từ `vector`. Hình `After malloc` cho thấy trạng thái memory sau khi function `malloc` thực thi bên trong function `allocateArray` và array được khởi tạo. Variable `arr` đã thay đổi để trỏ tới vị trí mới trong heap. Hình `After return` cho thấy trạng thái program stack sau khi function trả về. Ngoài ra, chúng ta có memory leak vì đã mất quyền truy cập khối memory ở địa chỉ 600.
 
 ![image](images/ch03/fig03-09.png)
 
@@ -420,9 +420,9 @@ Hình 3-8. Truyền pointer
 
 #### Tự viết function free
 
-Một số vấn đề quanh `free` khiến programmer tạo phiên bản riêng. Function `free` không kiểm tra pointer truyền vào có `NULL` không và không đặt pointer thành `NULL` trước return. Đặt pointer bằng `NULL` sau giải phóng là thói quen tốt.
+Một số vấn đề quanh function `free` khiến một số lập trình viên muốn tự tạo phiên bản của riêng mình. Function `free` không kiểm tra pointer được truyền vào có phải `NULL` hay không và không đặt pointer thành `NULL` trước khi trả về. Đặt pointer thành `NULL` sau khi giải phóng là cách làm tốt.
 
-Dựa trên nền tảng “Truyền và trả về bằng pointer” trang 61, sau đây là cách triển khai function `free` riêng gán NULL cho pointer. Nó đòi hỏi pointer đến pointer:
+Dựa trên nền tảng trong mục “Truyền và trả về bằng pointer” ở trang 61, ví dụ sau minh họa một cách triển khai function `free` riêng để gán NULL cho pointer. Cách này đòi hỏi sử dụng pointer tới pointer:
 
 ```
 void saferFree(void **pp) {
@@ -433,9 +433,9 @@ void saferFree(void **pp) {
 }
 ```
 
-Function `saferFree` gọi `free` để thực sự giải phóng memory. Parameter là pointer đến pointer đến `void`. Pointer đến pointer cho phép sửa pointer truyền vào. Type `void` cho phép truyền mọi pointer type. Tuy nhiên, nếu không cast tường minh pointer type thành void khi gọi, nhận warning. Cast tường minh sẽ loại warning.
+Function `saferFree` gọi function `free` để thực sự giải phóng memory. Parameter của nó được khai báo là pointer tới pointer tới `void`. Dùng pointer tới pointer cho phép sửa pointer được truyền vào. Dùng type `void` cho phép truyền mọi loại pointer. Tuy nhiên, nếu không cast tường minh pointer type sang void khi gọi function, chúng ta sẽ nhận cảnh báo. Khi thực hiện cast tường minh, cảnh báo sẽ biến mất.
 
-Macro `safeFree` sau gọi `saferFree` với cast này và dùng address-of operator, giúp người dùng function không phải tự cast và truyền address pointer.
+Macro `safeFree` dưới đây gọi function `saferFree` với phép cast này và dùng address-of operator, nhờ đó người dùng function không cần tự cast và truyền địa chỉ của pointer.
 
 ```
 #define safeFree(p) saferFree((void**)&(p))
@@ -456,25 +456,25 @@ int main() {
 }
 ```
 
-Giả định `malloc` trả memory ở address 1000, output sẽ là 1000 rồi 0. Lần dùng macro `safeFree` thứ hai với giá trị `NULL` không kết thúc application, vì function phát hiện rồi bỏ qua.
+Giả sử `malloc` trả về memory từ địa chỉ 1000, output của đoạn code này là 1000 rồi đến 0. Lần dùng macro `safeFree` thứ hai với giá trị `NULL` không làm ứng dụng kết thúc, vì function phát hiện và bỏ qua giá trị đó.
 
 ## Function pointer
 
-Function pointer chứa address của function. Khả năng trỏ đến function là feature quan trọng và hữu ích của C, cho một cách khác thực thi function theo thứ tự có thể chưa biết tại compile time mà không cần conditional statement.
+Function pointer là pointer chứa địa chỉ của một function. Khả năng trỏ tới function hóa ra là một tính năng quan trọng và hữu ích của C. Nó cung cấp cách khác để thực thi các function theo thứ tự có thể chưa biết tại compile time mà không cần conditional statement.
 
-Một lo ngại là function pointer có thể làm chương trình chậm. Processor có thể không dùng được branch prediction kết hợp pipelining. Branch prediction là kỹ thuật processor đoán chuỗi thực thi nào sẽ chạy. Pipelining là công nghệ hardware thường dùng tăng performance bằng cách chồng lấp instruction execution. Processor bắt đầu xử lý branch nó cho là sẽ chạy. Nếu dự đoán đúng, các instruction đang trong pipeline không phải bị bỏ đi.
+Một mối lo khi dùng function pointer là chương trình có thể chạy chậm hơn. Processor có thể không dùng được branch prediction kết hợp với pipelining. Branch prediction là kỹ thuật processor đoán xem trong nhiều chuỗi thực thi, chuỗi nào sẽ được thực hiện. Pipelining là công nghệ hardware thường dùng để cải thiện hiệu năng processor bằng cách chồng lấp việc thực thi instruction. Trong cơ chế này, processor bắt đầu xử lý nhánh mà nó cho rằng sẽ được thực thi. Nếu dự đoán đúng nhánh, các instruction đang nằm trong pipeline sẽ không phải bị loại bỏ.
 
-Sự chậm lại có thể có hoặc không. Dùng function pointer trong tình huống như table lookup có thể giảm vấn đề performance. Phần này học cách khai báo, dùng để hỗ trợ execution path thay thế và khám phá kỹ thuật tận dụng tiềm năng.
+Sự chậm lại này có thể xảy ra hoặc không. Dùng function pointer trong những tình huống như tra bảng có thể giảm bớt vấn đề hiệu năng. Trong phần này, chúng ta sẽ học cách khai báo function pointer, tìm hiểu cách dùng chúng để hỗ trợ các luồng thực thi thay thế và khám phá kỹ thuật khai thác tiềm năng của chúng.
 
 ### Khai báo function pointer
 
-Syntax khai báo pointer đến function có thể gây bối rối ban đầu. Như nhiều khía cạnh C, khi quen notation, mọi thứ dần rõ. Bắt đầu bằng declaration đơn giản: pointer đến function nhận void và trả void:
+Syntax khai báo pointer tới function có thể gây bối rối khi mới nhìn thấy. Cũng như nhiều khía cạnh khác của C, khi quen notation, mọi thứ sẽ dần rõ ràng. Hãy bắt đầu bằng declaration đơn giản. Dưới đây, chúng ta khai báo pointer tới function nhận void và trả về void:
 
 ```
 void (*foo)();
 ```
 
-Declaration trông giống function prototype. Nếu bỏ cặp ngoặc đầu, nó sẽ là prototype function `foo`, nhận void và trả pointer đến void. Tuy nhiên, cặp ngoặc làm nó thành function pointer tên `foo`. Dấu sao cho biết là pointer. Hình 3-9 đánh dấu các phần declaration.
+Declaration này rất giống function prototype. Nếu bỏ cặp ngoặc đơn thứ nhất, nó trông như prototype của function `foo` nhận void và trả về pointer tới void. Tuy nhiên, cặp ngoặc khiến nó trở thành function pointer có tên `foo`. Dấu sao cho biết đây là pointer. Hình 3-9 đánh dấu các phần của declaration function pointer.
 
 ![image](images/ch03/fig03-10.png)
 
@@ -482,7 +482,7 @@ Hình 3-9. Declaration function pointer
 
 ![image](images/ch03/fig03-01.png)
 
-Khi dùng function pointer, programmer phải bảo đảm dùng đúng vì C không kiểm tra các parameter truyền vào có đúng không.
+Khi sử dụng function pointer, lập trình viên phải cẩn thận bảo đảm dùng đúng, vì C không kiểm tra xem các parameter được truyền có chính xác hay không.
 
 Các ví dụ declaration function pointer khác như sau:
 
@@ -497,9 +497,9 @@ double* (*f3)(int, int); // Passed two integers and
 
 ![image](images/ch03/fig03-01.png)
 
-Một naming convention được đề xuất là luôn bắt đầu tên function pointer bằng prefix `fptr`.
+Một quy ước đặt tên được đề xuất cho function pointer là luôn bắt đầu tên bằng prefix `fptr`.
 
-Đừng nhầm function trả pointer với function pointer. Sau đây `f4` là function trả pointer đến integer; `f5` là function pointer trả integer. Variable `f6` là function pointer trả pointer đến integer:
+Đừng nhầm function trả về pointer với function pointer. Declaration sau khai báo `f4` là function trả về pointer tới integer, còn `f5` là function pointer trả về integer. Variable `f6` là function pointer trả về pointer tới integer:
 
 ```
 int  *f4();
@@ -514,11 +514,11 @@ int*  f4();
 int (*f5)();
 ```
 
-Rõ ràng `f4` là function trả pointer đến integer. Nhưng ngoặc với `f5` buộc dấu sao “pointer” gắn với tên function, tạo function pointer.
+Rõ ràng `f4` là function trả về pointer tới integer. Tuy nhiên, cặp ngoặc đơn với `f5` gắn rõ dấu sao “pointer” với tên function, khiến nó trở thành function pointer.
 
 ### Dùng function pointer
 
-Ví dụ đơn giản sau dùng function pointer cho function nhận integer và trả integer. Cũng định nghĩa function `square` tính bình phương integer rồi trả kết quả. Để đơn giản, bỏ qua khả năng integer overflow.
+Dưới đây là ví dụ đơn giản dùng function pointer trỏ tới function nhận một integer và trả về một integer. Chúng ta cũng định nghĩa function `square` để tính bình phương integer rồi trả kết quả. Để đơn giản hóa ví dụ, chúng ta bỏ qua khả năng integer overflow.
 
 ```
 int (*fptr1)(int);
@@ -528,7 +528,7 @@ int square(int num) {
 }
 ```
 
-Để dùng function pointer chạy `square`, cần gán address của function `square` cho function pointer như sau. Như tên array, dùng riêng tên function sẽ trả address function. Cũng khai báo integer để truyền cho function:
+Để dùng function pointer thực thi function `square`, chúng ta cần gán địa chỉ của function `square` cho function pointer như dưới đây. Cũng như tên array, khi chỉ dùng tên function, nó trả về địa chỉ của function. Chúng ta cũng khai báo một integer sẽ được truyền vào function:
 
 ```
 int n = 5;
@@ -536,19 +536,19 @@ fptr1 = square;
 printf("%d squared is %d\n",n, fptr1(n));
 ```
 
-Khi chạy sẽ hiển thị “5 squared is 25.” Có thể dùng address-of operator với tên function như sau, nhưng không cần và dư thừa. Compiler thực tế bỏ qua address-of operator trong ngữ cảnh này.
+Khi thực thi, chương trình hiển thị “5 squared is 25.” Chúng ta có thể dùng address-of operator với tên function như sau, nhưng điều đó không cần thiết và là dư thừa. Trong ngữ cảnh này, compiler thực chất sẽ bỏ qua address-of operator.
 
 ```
 fptr1 = &square;
 ```
 
-Hình 3-10 minh họa cấp memory. Function `square` đặt dưới program stack chỉ để minh họa. Function được cấp trong segment khác program stack. Thông thường vị trí thực của function không đáng quan tâm.
+Hình 3-10 minh họa cách memory được cấp phát trong ví dụ này. Chúng ta đặt function `square` bên dưới program stack chỉ nhằm mục đích minh họa. Function được cấp phát trong segment khác với segment của program stack. Vị trí thực tế của function thường không phải điều cần quan tâm.
 
 ![image](images/ch03/fig03-11.png)
 
 Hình 3-10. Vị trí function
 
-Khai báo type definition cho function pointer rất tiện. Đoạn sau minh họa với function pointer trước. Type definition trông hơi lạ; thông thường tên type definition là element cuối declaration:
+Khai báo type definition cho function pointer rất thuận tiện. Dưới đây là ví dụ áp dụng cho function pointer vừa dùng. Type definition trông hơi lạ: thông thường tên của type definition là thành phần cuối cùng trong declaration.
 
 ```
 typedef int (*funcptr)(int);
@@ -564,7 +564,7 @@ printf("%d squared is %d\n",n, fptr2(n));
 
 ### Truyền function pointer
 
-Truyền function pointer khá dễ: chỉ dùng declaration function pointer làm parameter của function. Chúng ta minh họa bằng các function `add`, `sub` và `compute` khai báo sau:
+Truyền function pointer khá dễ thực hiện. Chỉ cần dùng declaration function pointer làm parameter của function. Chúng ta sẽ minh họa bằng các function `add`, `sub` và `compute` được khai báo dưới đây:
 
 ```
 int add(int num1, int num2) {
@@ -589,13 +589,13 @@ printf("%d\n",compute(add,5,6));
 printf("%d\n",compute(sub,5,6));
 ```
 
-Output là 11 và –1. Address của `add` và `sub` được truyền cho `compute`, rồi dùng gọi operation tương ứng. Ví dụ cũng cho thấy function pointer giúp code linh hoạt hơn.
+Output sẽ là 11 và –1. Địa chỉ của các function `add` và `sub` được truyền vào function `compute`, rồi được dùng để gọi thao tác tương ứng. Ví dụ này cũng cho thấy dùng function pointer có thể khiến code linh hoạt hơn.
 
 ### Trả function pointer
 
-Trả function pointer đòi hỏi khai báo return type là function pointer. Để minh họa, tái sử dụng function `add` và `sub` cùng type definition trong mục “Truyền function pointer” trang 74.
+Để trả về function pointer, cần khai báo return type của function là function pointer. Nhằm minh họa, chúng ta dùng lại function `add` và `sub` cùng type definition đã xây dựng trong mục “Truyền function pointer” ở trang 74.
 
-Dùng function `select` sau trả function pointer đến operation theo character input. Nó trả pointer đến `add` hoặc `subtract` tùy `opcode` truyền vào:
+Chúng ta dùng function `select` sau để trả về function pointer tới một thao tác dựa trên ký tự đầu vào. Nó trả về pointer tới function `add` hoặc function `subtract`, tùy `opcode` được truyền:
 
 ```
 fptrOperation select(char opcode) {
@@ -606,7 +606,7 @@ fptrOperation select(char opcode) {
 }
 ```
 
-Function `evaluate` kết hợp các function này. Nó nhận hai integer và character biểu diễn operation. Nó truyền `opcode` cho `select`, nhận pointer đến function cần chạy. Trong return statement, nó chạy function đó và trả kết quả:
+Function `evaluate` liên kết các function này lại với nhau. Nó nhận hai integer và một ký tự biểu thị thao tác cần thực hiện. Nó truyền `opcode` cho function `select`, function này trả về pointer tới function cần thực thi. Trong return statement, nó thực thi function ấy rồi trả về kết quả:
 
 ```
 int evaluate(char opcode, int num1, int num2) {
@@ -615,7 +615,7 @@ int evaluate(char opcode, int num1, int num2) {
 }
 ```
 
-Các câu `printf` sau minh họa function:
+Các statement `printf` sau minh họa việc sử dụng function này:
 
 ```
 printf("%d\n",evaluate('+', 5, 6));
@@ -626,7 +626,7 @@ Output là 11 và –1.
 
 ### Dùng array function pointer
 
-Array function pointer có thể chọn function evaluate theo tiêu chí nào đó. Khai báo khá đơn giản: dùng declaration function pointer làm type array như sau. Array cũng được khởi tạo toàn `NULL`. Khi dùng block giá trị khởi tạo, chúng được gán vào element liên tiếp. Nếu số giá trị ít hơn kích thước array như ở đây, giá trị được dùng khởi tạo mọi element:
+Array chứa function pointer có thể dùng để chọn function cần đánh giá dựa trên một số tiêu chí. Khai báo array như vậy khá đơn giản: chỉ cần dùng declaration function pointer làm type của array như dưới đây. Array cũng được khởi tạo với mọi phần tử là `NULL`. Khi một khối giá trị khởi tạo được dùng với array, các giá trị được gán cho các phần tử liên tiếp. Nếu số giá trị ít hơn kích thước array, như trong ví dụ này, giá trị được dùng để khởi tạo mọi phần tử của array:
 
 ```
 typedef int (*operation)(int, int);
@@ -639,9 +639,9 @@ Hoặc khai báo array mà không dùng `typedef` như sau:
 int (*operations[128])(int, int) = {NULL};
 ```
 
-Array này cho phép character index chọn function tương ứng để chạy. Ví dụ ký tự '\*' xác định multiplication function nếu có. Dùng character index được vì character literal là integer. 128 element tương ứng 128 ASCII character đầu. Chúng ta dùng định nghĩa cùng function `add` và `subtract` trong “Trả function pointer” trang 75.
+Mục đích của array này là dùng một character index để chọn function tương ứng cần thực thi. Chẳng hạn, ký tự '\*' xác định function nhân nếu function ấy tồn tại. Chúng ta dùng được character index vì character literal là integer. 128 phần tử tương ứng với 128 ký tự ASCII đầu tiên. Chúng ta sẽ kết hợp definition này với các function `add` và `subtract` đã xây dựng trong mục “Trả về function pointer” ở trang 75.
 
-Sau khi khởi tạo array toàn `NULL`, gán function `add` và `subtract` cho element tương ứng dấu cộng và trừ:
+Sau khi khởi tạo mọi phần tử của array thành `NULL`, chúng ta gán các function `add` và `subtract` cho phần tử tương ứng với dấu cộng và dấu trừ:
 
 ```
 void initializeOperationsArray() {
@@ -650,7 +650,7 @@ void initializeOperationsArray() {
 }
 ```
 
-Function `evaluate` trước được viết lại thành `evaluateArray`. Thay vì gọi `select` lấy function pointer, dùng `operations` với operation character làm index:
+Function `evaluate` trước đó được viết lại thành `evaluateArray`. Thay vì gọi function `select` để lấy function pointer, chúng ta dùng `operations` với ký tự thao tác làm index:
 
 ```
 int evaluateArray(char opcode, int num1, int num2) {
@@ -668,11 +668,11 @@ printf("%d\n",evaluateArray('+', 5, 6));
 printf("%d\n",evaluateArray('-', 5, 6));
 ```
 
-Kết quả là 11 và –1. Phiên bản `evaluateArray` vững chắc hơn sẽ kiểm tra null function pointer trước khi chạy function.
+Kết quả thực thi đoạn code này là 11 và –1. Phiên bản chắc chắn hơn của function `evaluateArray` sẽ kiểm tra null function pointer trước khi cố thực thi function.
 
 ### So sánh function pointer
 
-Có thể so sánh function pointer bằng equality và inequality operator. Ví dụ sau dùng type definition `fptrOperator` và function `add` trong “Truyền function pointer” trang 74. Function `add` được gán cho function pointer `fptr1` rồi so với address của `add`:
+Các function pointer có thể được so sánh với nhau bằng equality operator và inequality operator. Trong ví dụ sau, chúng ta dùng type definition `fptrOperator` và function `add` từ mục “Truyền function pointer” ở trang 74. Function `add` được gán cho function pointer `fptr1`, rồi pointer này được so sánh với địa chỉ của function `add`:
 
 ```
 fptrOperation fptr1 = add;
@@ -686,11 +686,11 @@ if(fptr1 == add) {
 
 Khi chạy, output xác nhận pointer thực sự trỏ đến function `add`.
 
-Ví dụ thực tế hơn cho comparison là array function pointer biểu diễn các bước của task. Chẳng hạn có chuỗi function thao tác array linh kiện tồn kho. Một nhóm operation sort linh kiện, tính tổng cộng dồn số lượng, rồi hiển thị array và tổng. Nhóm khác hiển thị array, tìm linh kiện đắt nhất và rẻ nhất rồi hiển thị chênh lệch. Mỗi operation có thể định nghĩa bằng array pointer đến từng function. Operation log có thể có trong cả hai danh sách. So sánh function pointer cho phép sửa động operation bằng cách tìm rồi xóa function như logging khỏi danh sách.
+Một ví dụ thực tế hơn về lợi ích của so sánh function pointer là array chứa function pointer biểu diễn các bước của một nhiệm vụ. Chẳng hạn, ta có thể có một chuỗi function thao tác trên array các mặt hàng tồn kho. Một nhóm thao tác có thể sắp xếp các mặt hàng, tính tổng tích lũy số lượng của chúng, rồi hiển thị array và tổng. Nhóm thứ hai có thể hiển thị array, tìm mặt hàng đắt nhất và rẻ nhất, rồi hiển thị chênh lệch giá. Mỗi nhóm thao tác có thể được định nghĩa bằng array chứa pointer tới từng function. Thao tác ghi log có thể xuất hiện trong cả hai danh sách. Khả năng so sánh hai function pointer cho phép thay đổi động một nhóm thao tác bằng cách tìm rồi loại function, chẳng hạn ghi log, khỏi danh sách.
 
 ### Cast function pointer
 
-Pointer đến function này có thể cast sang type khác. Phải cẩn thận vì runtime system không xác nhận parameter function pointer dùng có đúng không. Cũng có thể cast function pointer sang function pointer khác rồi trở lại; pointer kết quả bằng pointer ban đầu. Kích thước các function pointer dùng không nhất thiết giống nhau. Chuỗi sau minh họa:
+Pointer tới một function có thể được cast sang type khác. Cần cẩn thận vì runtime system không xác minh các parameter dùng với function pointer có đúng hay không. Cũng có thể cast function pointer sang function pointer khác rồi cast ngược lại; pointer thu được sẽ bằng pointer ban đầu. Kích thước của các function pointer được sử dụng không nhất thiết giống nhau. Đoạn code sau minh họa thao tác này:
 
 ```
 typedef int (*fptrToSingleInt)(int);
@@ -705,25 +705,25 @@ fptrFirst = (fptrToTwoInts)fptrSecond;
 printf("%d\n",fptrFirst(5,6));
 ```
 
-Khi chạy, output là 11.
+Khi thực thi, đoạn lệnh này sẽ hiển thị output là 11.
 
 ![image](images/ch03/fig03-12.png)
 
-Không bảo đảm chuyển đổi giữa function pointer và pointer đến data hoạt động.
+Việc chuyển đổi giữa function pointer và pointer tới dữ liệu không được bảo đảm sẽ hoạt động.
 
-Không bảo đảm `void*` hoạt động với function pointer. Nghĩa là không nên gán function pointer cho `void*` như sau:
+Việc sử dụng `void*` với function pointer không được bảo đảm sẽ hoạt động. Nghĩa là chúng ta không nên gán function pointer cho `void*` như dưới đây:
 
 ```
 void* pv = add;
 ```
 
-Tuy nhiên, khi trao đổi function pointer, thường thấy function pointer type “base” như sau. Nó khai báo `fptrBase` là function pointer đến function nhận void và trả void:
+Tuy nhiên, khi trao đổi các function pointer, người ta thường dùng một function pointer type “cơ sở” như khai báo dưới đây. Declaration này khai báo `fptrBase` là function pointer tới function nhận void và trả về void:
 
 ```
 typedef void (*fptrBase)();
 ```
 
-Chuỗi sau minh họa dùng base pointer, lặp lại ví dụ trước:
+Đoạn lệnh sau minh họa việc sử dụng base pointer này, tái hiện ví dụ trước:
 
 ```
 fptrBase basePointer;
@@ -733,16 +733,16 @@ fptrFirst = (fptrToTwoInts)basePointer;
 printf("%d\n",fptrFirst(5,6));
 ```
 
-Base pointer dùng làm placeholder để trao đổi function pointer value.
+Base pointer được dùng làm chỗ giữ tạm để trao đổi các giá trị function pointer.
 
 ![image](images/ch03/fig03-12.png)
 
-Luôn bảo đảm dùng argument list đúng cho function pointer. Nếu không sẽ gây indeterminate behavior.
+Luôn bảo đảm dùng đúng argument list cho function pointer. Nếu không, chương trình sẽ có hành vi không xác định.
 
 ## Tóm tắt
 
-Hiểu cấu trúc program stack và heap giúp hiểu kỹ và đầy đủ hơn cách chương trình và pointer hoạt động. Chương này xem stack, heap và stack frame. Những khái niệm này giúp giải thích cơ chế truyền pointer vào và trả pointer từ function.
+Hiểu cấu trúc program stack và heap giúp bạn hiểu chi tiết và thấu đáo hơn cách chương trình hoạt động cũng như hành vi của pointer. Trong chương này, chúng ta đã xem xét stack, heap và stack frame. Các khái niệm ấy giúp giải thích cơ chế truyền pointer vào function và trả pointer về từ function.
 
-Ví dụ, trả pointer đến local variable là không tốt vì memory của local variable sẽ bị function call sau ghi đè. Truyền pointer đến constant data hiệu quả và ngăn function sửa data truyền vào. Truyền pointer đến pointer cho phép gán lại argument pointer đến vị trí memory khác. Stack và heap giúp mô tả chi tiết và minh họa khả năng này.
+Chẳng hạn, trả về pointer tới local variable là cách làm không tốt vì memory cấp cho local variable sẽ bị ghi đè bởi các lời gọi function sau đó. Truyền pointer tới constant data vừa hiệu quả vừa ngăn function sửa dữ liệu được truyền. Truyền pointer tới pointer cho phép gán lại argument pointer để nó trỏ tới vị trí khác trong memory. Stack và heap đã giúp trình bày chi tiết và minh họa khả năng này.
 
-Function pointer cũng đã được giới thiệu và giải thích. Loại pointer này hữu ích để điều khiển thứ tự thực thi trong application, cho phép chạy function thay thế theo nhu cầu application.
+Chương cũng đã giới thiệu và giải thích function pointer. Loại pointer này hữu ích để điều khiển thứ tự thực thi trong ứng dụng bằng cách cho phép thực thi các function thay thế tùy nhu cầu của ứng dụng.

@@ -2,15 +2,15 @@
 
 "Tên bài hát được gọi là 'Mắt cá tuyết.'"
 
-"Ồ, đó là tên bài hát phải không?" Alice cố tỏ ra hứng thú.
+“Ồ, đó là tên bài hát phải không?” Alice nói, cố tỏ ra hứng thú.
 
-"Không, cô không hiểu," Hiệp sĩ hơi bực.
+“Không, cô chưa hiểu,” Hiệp sĩ nói với vẻ hơi bực bội.
 
 "Đó là cách gọi cái tên. Tên thật là 'Ông già già nua.'"
 
 "Vậy tôi nên nói 'Đó là cách gọi bài hát'?" Alice sửa lời. "Không, không nên: đó là chuyện hoàn toàn khác! Bài hát được gọi 'Cách thức và phương tiện': nhưng chỉ là cách gọi thôi, cô biết đấy!"
 
-"Vậy bài hát là gì?" Alice hỏi, giờ hoàn toàn rối.
+“Vậy bài hát là gì?” Alice hỏi, lúc này đã hoàn toàn bối rối.
 
 "Tôi đang đến chỗ đó," Hiệp sĩ nói. "Bài hát thật sự là 'A-sitting On A Gate': giai điệu do tôi nghĩ ra."
 
@@ -18,53 +18,53 @@
 
 syntax chỉ compiler yêu nổi…declaration hình thành thế nào…đôi lời về struct…đôi lời về union…đôi lời về enum…quy tắc precedence…gỡ declaration C bằng sơ đồ…typedef có thể là bạn…khác biệt typedef và #define…"typedef struct foo { ... foo } foo;" nghĩa gì…đoạn code hiểu mọi parsing…giải trí nhẹ nhàng — software cắn nòng nọc sáp
 
-Có chuyện Nữ hoàng Victoria ấn tượng Alice in Wonderland đến mức xin các sách khác Lewis Carroll. Bà không biết Lewis Carroll là pen-name giáo sư toán Oxford Charles Dodgson. Bà chẳng vui khi cận thần cười thầm mang nhiều tập nặng gồm The Condensation (Factoring) of Determinants. Chuyện được kể nhiều thời Victoria, Dodgson cố bác bỏ:
+Có câu chuyện rằng Nữ hoàng Victoria ấn tượng với Alice in Wonderland đến mức yêu cầu các bản sách khác của Lewis Carroll. Nữ hoàng không biết Lewis Carroll là pen-name của giáo sư toán Oxford Charles Dodgson. Bà không vui khi các cận thần cười khúc khích mang đến một số tập sách dày, trong đó có The Condensation (Factoring) of Determinants. Câu chuyện được kể nhiều vào thời Victoria, và Dodgson cố hết sức bác bỏ nó:
 
-"Tôi nhân cơ hội công khai hết mức có thể lời bác bỏ chuyện ngớ ngẩn báo chí truyền quanh, rằng tôi đã tặng vài sách cho Nữ hoàng. Chuyện lặp liên tục, hoàn toàn hư cấu, nên đáng khẳng định một lần dứt khoát rằng sai ở mọi chi tiết: chưa bao giờ có gì dù chỉ giống vậy."
+“Tôi nhân cơ hội này để công khai hết mức có thể lời bác bỏ một câu chuyện ngớ ngẩn đang được báo chí truyền đi, rằng tôi đã tặng một số cuốn sách cho Nữ hoàng. Nó được lặp lại liên tục và hoàn toàn là chuyện hư cấu, nên tôi nghĩ đáng để tuyên bố một lần cho dứt khoát rằng câu chuyện sai hoàn toàn trong từng chi tiết: chưa từng xảy ra bất cứ điều gì dù chỉ tương tự.”
 
 —Charles Dodgson, Symbolic Logic, ấn bản thứ hai
 
-Vì vậy, theo nguyên tắc "ông phản đối quá mức", có thể khá chắc chuyện xảy ra đúng như kể. Dù sao Dodgson hẳn hợp C, Nữ hoàng Victoria thì không. Đưa trích dẫn đầu chương vào bảng, có:
+Vì vậy, theo nguyên tắc “ông ấy phản đối quá mức”, chúng ta có thể khá chắc rằng sự việc thực sự xảy ra đúng như được mô tả. Dù sao, Dodgson hẳn sẽ rất hợp với C, còn Nữ hoàng Victoria thì không. Đưa trích dẫn ở đầu chương vào một bảng, chúng ta có:
 
 được gọi là là
 
 tên bài hát "Mắt cá tuyết" "Ông già già nua" bài hát "Cách thức và phương tiện" "A-sitting On A Gate"
 
-Đúng, Dodgson hẳn rất thoải mái với computer science, đặc biệt thích type model ngôn ngữ lập trình. Ví dụ với declaration C:
+Đúng vậy, Dodgson hẳn sẽ rất thoải mái với computer science. Và ông đặc biệt sẽ đánh giá cao các type model trong ngôn ngữ lập trình. Chẳng hạn, với các declaration C:
 
 ```
 typedef char * string;
 string punchline = "I'm a frayed knot";
 ```
 
-thấy mô hình Hiệp sĩ áp dụng ra sao:
+chúng ta có thể thấy mô hình của Hiệp sĩ được áp dụng như thế nào:
 
 được gọi là là
 
-type của variable `string` `char *` variable `punchline` `"I'm a frayed knot"` Còn gì trực giác hơn? Thật ra khá nhiều thứ, và sẽ rõ hơn sau khi đọc chương.
+type của variable `string` `char *` variable `punchline` `"I'm a frayed knot"` Còn điều gì có thể trực quan hơn thế? Thực ra là khá nhiều điều, và chúng sẽ còn rõ ràng hơn sau khi bạn đọc chương này.
 
 ## Syntax chỉ compiler yêu nổi
 
-Như Kernighan, Ritchie thừa nhận, "đôi khi C bị chỉ trích vì syntax declaration" (K\&R, ấn bản 2, tr.122). Syntax declaration C dễ cho compiler (hay compiler-writer) xử lý, khó cho lập trình viên trung bình. Người thiết kế cũng là con người, sẽ sai. Ví dụ Ada reference manual có grammar mơ hồ trong phụ lục. Ambiguity rất không mong muốn trong grammar, vì com-plicates đáng kể việc compiler-writer. Nhưng syntax declaration C thật sự hỗn độn kinh khủng, thấm vào toàn ngôn ngữ. Không quá lời rằng C phức tạp đáng kể, không cần thiết vì cách kết hợp type vụng về.
+Như Kernighan và Ritchie thừa nhận, “C đôi khi bị chỉ trích vì cú pháp declaration” (K\&R, ấn bản 2, trang 122). Declaration syntax của C rất dễ cho compiler hoặc compiler-writer xử lý, nhưng khó đối với lập trình viên thông thường. Người thiết kế ngôn ngữ cũng chỉ là con người, và sai lầm sẽ xảy ra. Chẳng hạn, Ada language reference manual đưa ra một grammar mơ hồ trong phụ lục cuối sách. Ambiguity là đặc tính rất không mong muốn của grammar ngôn ngữ lập trình, vì nó làm com-plicates đáng kể công việc của compiler-writer. Nhưng cú pháp declaration C thực sự là một mớ hỗn độn kinh khủng, thấm vào việc sử dụng toàn bộ ngôn ngữ. Không quá lời khi nói C phức tạp đáng kể và không cần thiết vì cách kết hợp type vụng về.
 
-Có vài lý do declaration model C khó. Cuối thập niên 1960 khi thiết kế, "type model" chưa hiểu rõ trong lý thuyết ngôn ngữ. BCPL (ông nội C) type-poor, chỉ có binary word, nên C dựa nền thiếu sót. Rồi triết lý declaration object nên giống cách dùng. Array pointers-to-integers khai báo `int * p[3];`, integer được tham chiếu trong expression bằng `*p[i]`, nên declaration giống sử dụng. Lợi là precedence operator trong "declaration" giống "use". Hại là operator precedence (15 mức trở lên tùy đếm) cũng phức tạp quá mức. Phải nhớ rule riêng để biết `int *p[3]` là array pointers-to-int hay pointer tới array int.
+Có một số lý do khiến declaration model của C khó hiểu. Vào cuối thập niên 1960, khi phần này của C được thiết kế, “type model” chưa phải lĩnh vực được hiểu rõ trong lý thuyết ngôn ngữ lập trình. BCPL, ngôn ngữ ông nội của C, là type-poor, chỉ có binary word làm data type duy nhất, nên C dựa trên một nền tảng thiếu sót. Ngoài ra còn có triết lý C rằng declaration của object nên giống cách sử dụng nó. Một array gồm các pointers-to-integers được khai báo bằng `int * p[3];`, và một integer được tham chiếu hoặc dùng trong expression bằng cách viết `*p[i]`, nên declaration giống cách dùng. Ưu điểm là precedence của các operator trong “declaration” giống như trong “use”. Nhược điểm là operator precedence, với 15 mức trở lên tùy cách đếm, lại là một phần phức tạp quá mức khác của C. Lập trình viên phải nhớ các rule đặc biệt để xác định `int *p[3]` là array gồm các pointers-to-int hay pointer đến array gồm các int.
 
-Ý tưởng declaration giống sử dụng dường như riêng C, không ngôn ngữ khác theo. Có lẽ không tuyệt như từng nghĩ. Hai thứ khác nhau làm giống có gì hay? Người Bell Labs nhận phê bình nhưng vẫn bảo vệ đến cùng. Tốt hơn là khai báo pointer như
+Ý tưởng declaration nên giống cách sử dụng dường như bắt nguồn từ C và chưa được ngôn ngữ nào khác áp dụng. Nhưng cũng có thể “declaration giống cách dùng” không tuyệt vời như người ta tưởng lúc đó. Có gì hay khi làm hai thứ khác nhau trông giống nhau? Những người ở Bell Labs thừa nhận lời phê bình, nhưng đến nay vẫn bảo vệ quyết định này đến cùng. Ý tưởng tốt hơn có lẽ là khai báo pointer như
 
 ```
 int &p;
 ```
 
-ít nhất gợi `p` là address integer. Cú pháp nay C++ dùng chỉ call by reference parameter.
+ít nhất gợi ý rằng `p` là address của một integer. Cú pháp này hiện đã được C++ dùng để chỉ một parameter được truyền theo call by reference.
 
-Vấn đề lớn nhất là không còn đọc declaration từ trái sang phải tự nhiên được. Tệ hơn khi ANSI C thêm keyword `volatile`, `const`; vì chỉ xuất hiện trong declaration, không trong sử dụng, ít trường hợp cách dùng variable mô phỏng declaration hơn. Thứ kiểu declaration mà không identifier (như formal parameter declaration, cast) trông lạ. Muốn cast sang type pointer-to-array phải diễn đạt:
+Vấn đề lớn nhất là bạn không còn có thể đọc declaration từ trái sang phải, cách mà mọi người thấy tự nhiên nhất. Tình hình tệ hơn khi ANSI C đưa vào các keyword `volatile` và `const`; vì chúng chỉ xuất hiện trong declaration, không xuất hiện trong cách sử dụng, giờ có ít trường hợp hơn mà cách dùng variable mô phỏng declaration của nó. Bất kỳ thứ gì có dạng declaration nhưng không có identifier, chẳng hạn formal parameter declaration hoặc cast, đều trông kỳ lạ. Nếu muốn cast một thứ sang type pointer-to-array, bạn phải diễn đạt cast như sau:
 
 ```
 char (*j)[20]; /* j is a pointer to an array of 20 char */
 j = (char (*)[20]) malloc( 20 );
 ```
 
-Bỏ ngoặc đơn có vẻ thừa quanh asterisk thành không hợp lệ. Declaration có pointer, `const` có vài thứ tự:
+Nếu bỏ các dấu ngoặc đơn có vẻ thừa quanh dấu sao, declaration trở nên không hợp lệ. Declaration có pointer và `const` có một số cách sắp xếp khả dĩ:
 
 ```
 const int * grape;
@@ -72,82 +72,82 @@ int const * grape;
 int * const grape_jelly;
 ```
 
-Trường hợp cuối làm pointer read-only, hai trường hợp trước làm object được trỏ read-only; dĩ nhiên cả object và thứ nó trỏ có thể constant. Một trong hai declaration tương đương sau làm vậy:
+Trường hợp cuối làm pointer trở thành read-only, trong khi hai trường hợp kia làm object mà nó trỏ đến trở thành read-only; dĩ nhiên, cả object lẫn thứ nó trỏ đến đều có thể là constant. Một trong hai declaration tương đương sau sẽ thực hiện điều này:
 
 ```
 const int * const grape_jam;
 int const * const grape_jam;
 ```
 
-Chuẩn ANSI ngầm nhận vấn đề khác khi nói typedef specifier chỉ gọi "storage-class specifier" cho tiện syntax. Ngay người C giàu kinh nghiệm cũng khó. Nếu syntax cho array pointer thẳng thắn còn xấu, hãy xem thứ hơi phức tạp. Chính xác declaration sau (phỏng từ `telnet`) khai báo gì?
+Tiêu chuẩn ANSI ngầm thừa nhận những vấn đề khác khi nói typedef specifier chỉ được gọi là “storage-class specifier” để tiện về cú pháp. Đây là lĩnh vực mà ngay cả lập trình viên C giàu kinh nghiệm cũng thấy khó xử lý. Nếu declaration syntax đã khó coi với thứ đơn giản như array gồm các pointer, hãy xem nó trông thế nào với thứ chỉ phức tạp hơn một chút. Chẳng hạn, declaration sau, được phỏng theo chương trình `telnet`, chính xác khai báo điều gì?
 
 ```
 char* const *(*next)();
 ```
 
-Sẽ trả lời bằng ví dụ này sau trong chương. Qua nhiều năm, lập trình viên, sinh viên, giáo viên cố tìm mẹo nhớ, thuật toán đơn giản để hiểu syntax kinh khủng. Chương đưa thuật toán tiếp cận step-by-step. Làm vài ví dụ sẽ không phải lo declaration C nữa!
+Chúng ta sẽ trả lời câu hỏi bằng cách dùng declaration này làm ví dụ ở phần sau của chương. Qua nhiều năm, lập trình viên, sinh viên và giáo viên đã vất vả tìm các mẹo ghi nhớ và thuật toán đơn giản giúp hiểu được cú pháp C kinh khủng. Chương này trình bày một thuật toán tiếp cận step-by-step để giải quyết vấn đề. Hãy thực hiện nó với vài ví dụ, và bạn sẽ không bao giờ phải lo về declaration C nữa!
 
 ## Declaration hình thành thế nào
 
-Đầu tiên xem thuật ngữ C và phần tạo declaration. Thành phần quan trọng là declarator — trái tim mọi declaration; đại khái identifier cùng pointer, function bracket, array indica-tions kèm theo, như Hình 3-1. Cho tiện, cũng nhóm initializer ở đây.
+Trước tiên, hãy xem một số thuật ngữ C và những thành phần riêng lẻ có thể tạo nên declaration. Một thành phần quan trọng là declarator, trái tim của mọi declaration; đại khái, declarator là identifier cùng mọi pointer, function bracket hoặc array indica-tions đi kèm, như trong Hình 3-1. Để tiện, chúng ta cũng nhóm mọi initializer vào đây.
 
 Hình 3-1. Declarator trong C
 
 ![image](images/ch03/img03-01.png)
 
-Declaration gồm phần trong Hình 3-2 Hình 3-2 (không mọi tổ hợp hợp lệ, nhưng bảng cho từ vựng thảo luận). Declaration cho basic type bên dưới variable và initial value nếu có.
+Declaration gồm những phần được trình bày trong Hình 3-2 Hình 3-2 (không phải mọi tổ hợp đều hợp lệ, nhưng bảng này cung cấp từ vựng cho phần thảo luận tiếp theo). Declaration cho biết basic type bên dưới của variable và mọi initial value.
 
 Hình 3-2. Declaration trong C
 
 ![image](images/ch03/img03-02.png)
 
-Bắt đầu thấy declaration phức tạp khi kết hợp type. Nhớ có hạn chế declaration hợp lệ. Không có những thứ sau:
+Chúng ta bắt đầu thấy declaration có thể phức tạp đến mức nào khi kết hợp các type. Cũng hãy nhớ có những hạn chế đối với declaration hợp lệ. Bạn không thể có bất kỳ dạng nào sau đây:
 
-- Function không trả function, nên không bao giờ thấy `foo()()`
+- Function không thể trả về function, nên bạn sẽ không bao giờ thấy `foo()()`
 
-- Function không trả array, nên không bao giờ thấy `foo()[]`
+- Function không thể trả về array, nên bạn sẽ không bao giờ thấy `foo()[]`
 
-- Array không giữ function, nên không bao giờ thấy `foo[]()`
+- Array không thể chứa function, nên bạn sẽ không bao giờ thấy `foo[]()`
 
 Có thể có những thứ sau:
 
-- Cho phép function trả pointer tới function: `int (* fun())();`
+- Function được phép trả về pointer tới function: `int (* fun())();`
 
-- Cho phép function trả pointer tới array: `int (* foo())[]`
+- Function được phép trả về pointer tới array: `int (* foo())[]`
 
-- Cho phép array giữ pointer tới function: `int (*foo[])()`
+- Array được phép chứa pointer tới function: `int (*foo[])()`
 
-- Array giữ array khác được, nên thường thấy `int foo[][]`
+- Array có thể chứa array khác, vì vậy bạn sẽ thường thấy `int foo[][]`
 
-Trước kết hợp type, ôn cách kết hợp variable trong struct, union và xem enum.
+Trước khi xử lý việc kết hợp type, chúng ta sẽ ôn lại cách kết hợp variable trong struct và union, đồng thời xem xét enum.
 
 ### Đôi lời về `structs`
 
-Struct chỉ là tập data item nhóm lại. Ngôn ngữ khác gọi "record". Syntax dễ nhớ: cách nhóm thông thường C là ngoặc nhọn: { thứ... } Keyword `struct` trước để compiler phân biệt block:
+Struct chỉ là một nhóm data item được gom lại. Các ngôn ngữ khác gọi nó là “record”. Cú pháp struct dễ nhớ: cách thông thường để gom các thứ trong C là đặt chúng trong ngoặc nhọn: { các thứ... } Keyword `struct` đứng ở đầu để compiler có thể phân biệt nó với một block:
 
 ```
 struct {stuff... }
 ```
 
-Trong struct có thể là data declaration khác: data item riêng, array, struct khác, pointer, v.v. Sau struct definition có thể thêm variable name để khai báo variable kiểu struct, ví dụ:
+Nội dung trong struct có thể là bất kỳ data declaration nào khác: data item riêng lẻ, array, struct khác, pointer, v.v. Sau struct definition, chúng ta có thể đặt một số variable name để khai báo các variable thuộc type struct này, chẳng hạn:
 
 ```
 struct {stuff... } plum, pomegranate, pear;
 ```
 
-Điểm khác cần chú ý là có thể viết "structure tag" tùy chọn sau "struct":
+Điểm duy nhất khác cần chú ý là chúng ta có thể viết một “structure tag” tùy chọn sau keyword “struct”:
 
 ```
 struct fruit_tag {stuff... } plum, pomegranate, pear;
 ```
 
-Nay dùng `struct fruit_tag` viết tắt cho
+Bây giờ có thể dùng cụm `struct fruit_tag` làm cách viết tắt cho
 
 ```
 struct {stuff... }
 ```
 
-trong declaration sau.
+trong các declaration về sau.
 
 Vậy `struct` có dạng chung:
 
@@ -167,7 +167,7 @@ struct date_tag { short dd,mm,yy; } my_birthday, xmas;
 struct date_tag easter, groundhog_day;
 ```
 
-variable `my_birthday,` `xmas,` `easter,` `groundhog_day` cùng type. Struct còn có bit field, unnamed field, field word-aligned. Có được bằng thêm dấu hai chấm, số chỉ field length bằng bit sau field declaration.
+Các variable `my_birthday,` `xmas,` `easter,` và `groundhog_day` đều có type giống hệt nhau. Struct cũng có thể có bit field, unnamed field và field word-aligned. Chúng được tạo bằng cách đặt dấu hai chấm và một số biểu thị độ dài field tính bằng bit sau field declaration.
 
 ```
 /* process ID info */
@@ -183,9 +183,9 @@ struct pid_tag *link;
 };
 ```
 
-Thường dùng "lập trình sát silicon", gặp trong systems program. Cũng dùng lưu Boolean flag trong bit thay char. Bit field phải type int, unsigned int, signed int (hoặc phiên bản có qualifier). Bit field int có âm được không là implementation-dependent.
+Điều này thường được dùng để “lập trình sát đến silicon”, và bạn sẽ gặp trong các chương trình hệ thống. Nó cũng có thể dùng để lưu Boolean flag trong một bit thay vì một char. Bit field phải có type int, unsigned int hoặc signed int, hoặc phiên bản có qualifier của một trong các type này. Việc bit field có type int có thể mang giá trị âm hay không là implementation-dependent.
 
-Chúng tôi thích không trộn struct declaration với variable definition. Thích
+Chúng tôi không thích trộn struct declaration với variable definition. Chúng tôi thích
 
 ```
 struct veg { int weight, price_per_lb; };
@@ -198,16 +198,16 @@ hơn
 struct veg { int weight, price_per_lb; } onion, radish, turnip;
 ```
 
-Đúng, bản thứ hai đỡ gõ vài character code, nhưng nên quan tâm dễ đọc hơn dễ viết. Viết một lần, đọc nhiều lần khi bảo trì. Dòng chỉ làm một thứ dễ đọc hơn chút. Vì vậy variable declaration nên riêng type declaration.
+Đúng là phiên bản thứ hai giúp bạn đỡ gõ vài ký tự code, nhưng chúng ta nên quan tâm nhiều hơn đến việc code dễ đọc chứ không phải dễ viết. Chúng ta viết code một lần, nhưng nó được đọc nhiều lần trong quá trình bảo trì chương trình sau này. Một dòng chỉ làm một việc sẽ dễ đọc hơn một chút. Vì lý do đó, variable declaration nên tách riêng khỏi type declaration.
 
-Cuối cùng hai vấn đề truyền parameter với struct. Có sách C nói "parameter truyền bằng đẩy stack từ phải sang trái". Quá đơn giản hóa — có sách vậy hãy xé trang đốt. Có compiler vậy hãy xé byte đó. Parameter truyền register khi được (vì tốc độ). Lưu ý int "i" có thể truyền hoàn toàn khác struct "s" chỉ chứa int. Giả sử int parameter thường trong register, có thể struct lại trên stack. Điểm thứ hai là đặt array trong struct như:
+Cuối cùng, có hai vấn đề truyền parameter liên quan đến struct. Một số sách C nói những câu như “parameter được truyền cho function được gọi bằng cách đẩy lên stack từ phải sang trái”. Đây là sự đơn giản hóa quá mức: nếu có cuốn sách như vậy, hãy xé trang đó ra và đốt đi. Nếu có compiler như vậy, hãy xé những byte đó ra. Khi có thể, parameter được truyền trong register để tăng tốc. Hãy lưu ý rằng int “i” rất có thể được truyền theo cách hoàn toàn khác với struct “s” chỉ có một member là int. Giả sử int parameter thường được truyền trong register, bạn có thể thấy struct lại được truyền trên stack. Điểm thứ hai cần lưu ý là bằng cách đặt array trong struct như sau:
 
 ```
 /* array inside a struct */
 struct s_tag { int a[100]; };
 ```
 
-nay coi array first-class type được. Có thể copy toàn array bằng assignment, truyền function by value, làm return type function.
+giờ bạn có thể coi array là một first-class type. Bạn có thể copy toàn bộ array bằng assignment statement, truyền nó cho function theo by value và dùng nó làm return type của function.
 
 ```
 struct s_tag { int a[100]; };
@@ -226,7 +226,7 @@ main() {
 }
 ```
 
-Thường không muốn gán toàn array quá thường, nhưng làm được bằng chôn trong struct. Kết bằng cách struct chứa pointer tới chính type, cần cho list, tree, nhiều dynamic data structure.
+Thông thường, bạn không muốn gán toàn bộ array quá thường xuyên, nhưng có thể thực hiện bằng cách đặt nó trong struct. Hãy kết thúc bằng một cách làm cho struct chứa pointer đến chính type của nó, như cần thiết với list, tree và nhiều dynamic data structure.
 
 ```
 /* struct that points to the next struct */
@@ -240,9 +240,9 @@ a.next->next=NULL;
 
 ### Đôi lời về `unions`
 
-Union là variant part của variant record trong nhiều ngôn ngữ khác. Trông như struct nhưng memory layout có khác biệt then chốt. Thay mỗi member lưu sau member trước, mọi member offset zero. Storage member chồng nhau: chỉ lưu một member mỗi thời điểm.
+Trong nhiều ngôn ngữ khác, union được biết đến như variant part của variant record. Chúng có hình thức tương tự struct, nhưng memory layout có một khác biệt then chốt. Thay vì mỗi member được lưu sau điểm kết thúc của member trước, mọi member đều có offset bằng 0. Vì vậy, storage của các member riêng lẻ chồng lên nhau: chỉ một member có thể được lưu ở đó tại một thời điểm.
 
-Có tin tốt, xấu về union. Tin xấu là tin tốt chẳng tốt mấy. Tin tốt là dạng chung giống hệt struct, thay keyword `struct` bằng `union`. Quen mọi biến thể, khả năng struct là biết union. Dạng chung:
+Có cả tin tốt và tin xấu liên quan đến union. Tin xấu là tin tốt không tốt đến thế. Tin tốt là union có hình thức tổng quát giống hệt struct, chỉ thay keyword `struct` bằng `union`. Vì vậy, nếu đã quen với mọi biến thể và khả năng của struct, bạn cũng đã biết union. Union có dạng tổng quát:
 
 ```
 union optional_tag {
@@ -253,9 +253,9 @@ union optional_tag {
 } optional_variable_definitions;
 ```
 
-Union thường trong struct lớn hơn, có thông tin ngầm hoặc rõ về type data hiện có. Rõ ràng thiếu type safety khi lưu kiểu này lấy kiểu khác. Ada buộc discriminant field lưu rõ trong record. C bảo tự lo, dựa lập trình viên nhớ đã đặt gì.
+Union thường xuất hiện như một phần của struct lớn hơn, vốn có thông tin ngầm hoặc tường minh về type dữ liệu thực sự đang hiện diện. Ở đây có sự thiếu an toàn type rõ ràng khi lưu dữ liệu bằng một type và lấy ra bằng type khác. Ada giải quyết bằng cách yêu cầu discriminant field phải được lưu tường minh trong record. C thì bảo bạn tự lo và dựa vào lập trình viên để nhớ thứ đã được đặt vào đó.
 
-Union thường tiết kiệm space bằng không lưu mọi khả năng data item không cùng xuất hiện. Ví dụ lưu thông tin động vật học về loài, data record thử đầu:
+Union thường được dùng để tiết kiệm dung lượng, bằng cách không lưu mọi khả năng của những data item không thể cùng xuất hiện. Chẳng hạn, nếu đang lưu thông tin động vật học về một số loài, lần thử đầu với data record có thể là:
 
 ```
 struct creature {
@@ -265,7 +265,7 @@ struct creature {
 };
 ```
 
-Nhưng mọi sinh vật có hoặc không xương sống. Chỉ động vật có xương sống có lông, chỉ không xương sống có hơn bốn chân. Không thứ gì vừa hơn bốn chân vừa có lông, nên tiết kiệm bằng lưu hai field loại trừ nhau thành union:
+Tuy nhiên, chúng ta biết mọi sinh vật đều có xương sống hoặc không có xương sống. Chúng ta cũng biết chỉ động vật có xương sống mới có lông, và chỉ sinh vật không xương sống mới có nhiều hơn bốn chân. Không sinh vật nào vừa có hơn bốn chân vừa có lông, nên có thể tiết kiệm dung lượng bằng cách lưu hai field loại trừ nhau này trong một union:
 
 ```
 union secondary_characteristics {
@@ -278,9 +278,9 @@ struct creature {
 };
 ```
 
-Thường chồng space vậy để tiết kiệm backing store. Datafile 20 triệu con vật có thể tiết kiệm đến 20 Mb disk.
+Thông thường, chúng ta chồng các vùng lưu trữ như vậy để tiết kiệm backing store. Nếu có data file chứa 20 triệu con vật, cách này có thể tiết kiệm đến 20 Mb dung lượng disk.
 
-Nhưng union còn cách dùng khác. Không phải một diễn giải cho hai data khác, mà hai diễn giải cho cùng data. Thú vị là giống hệt REDEFINES clause COBOL. Ví dụ:
+Tuy nhiên, union còn có một cách dùng khác. Union cũng có thể được dùng không phải để có một cách diễn giải cho hai phần dữ liệu khác nhau, mà để có hai cách diễn giải khác nhau cho cùng dữ liệu. Điều thú vị là nó thực hiện đúng công việc của REDEFINES clause trong COBOL. Một ví dụ là:
 
 ```
 union bits32_tag {
@@ -291,37 +291,37 @@ union bits32_tag {
 } value;
 ```
 
-Union cho lấy đầy đủ 32-bit value hoặc byte field riêng `value.byte.c0`, v.v. Có cách khác, nhưng union không cần assignment hay type cast thêm. Cho vui tôi xem khoảng 150.000 dòng source operating system machine-independent (ôi, mỏi tay quá). Struct phổ biến gấp khoảng trăm lần union, chỉ tần suất gặp struct nhiều hơn thực tế.
+Union này cho phép lập trình viên lấy toàn bộ giá trị 32-bit hoặc các byte field riêng lẻ như `value.byte.c0`, v.v. Có những cách khác để thực hiện, nhưng union làm được mà không cần thêm assignment hay type cast. Chỉ để cho vui, tôi xem qua khoảng 150.000 dòng operating system source code machine-independent, và ôi, tay tôi mỏi thật đấy. Kết quả cho thấy struct phổ biến hơn union khoảng một trăm lần. Đó là chỉ dấu cho thấy trong thực tế bạn sẽ gặp struct thường xuyên hơn union đến mức nào.
 
 ### Đôi lời về `enums`
 
-Enum (enumerated type) chỉ là cách gắn chuỗi tên với chuỗi integer value. Trong ngôn ngữ weakly typed như C, thêm rất ít thứ không làm bằng `#define` được, nên bị bỏ trong phần lớn K\&R C đầu. Nhưng ngôn ngữ khác đều có nên cuối cùng C cũng có. Dạng chung giờ quen:
+Enum, hay enumerated type, đơn giản là một cách liên kết một chuỗi tên với một chuỗi integer value. Trong ngôn ngữ weakly typed như C, chúng cung cấp rất ít điều không thể thực hiện bằng `#define`, nên bị bỏ khỏi phần lớn implementation K\&R C ban đầu. Nhưng phần lớn ngôn ngữ khác có chúng, nên cuối cùng C cũng có. Đến đây, dạng tổng quát của enum hẳn trông quen thuộc:
 
 ```
 enum optional_tag {stuff... } optional_variable_definitions;
 ```
 
-Thứ... ở đây là identifier list, có thể gán integer value. Ví dụ enumerated type:
+“Các thứ…” trong trường hợp này là một danh sách identifier, có thể kèm integer value được gán cho chúng. Ví dụ về enumerated type là:
 
 ```
 enum sizes { small=7, medium, large=10, humungous };
 ```
 
-Mặc định integer value từ zero. Gán value trong list thì value sau lớn hơn một, v.v. Ưu điểm enum: khác tên #defined thường bị bỏ khi compile, enum name thường đến debugger, dùng khi debug code được.
+Mặc định, các integer value bắt đầu từ 0. Nếu bạn gán một giá trị trong danh sách, giá trị tiếp theo lớn hơn một đơn vị, và cứ thế. Enum có một ưu điểm: khác với các tên #defined thường bị loại bỏ khi compile, tên enum thường tồn tại đến debugger và có thể được dùng khi debug code.
 
 ## Quy tắc precedence
 
-Đã ôn thành phần declaration. Phần này đưa cách phân giải thành giải thích tiếng Anh. Quy tắc precedence hiểu declaration C được language lawyer thích nhất. Rất ngắn nhưng rất ít trực giác.
+Đến đây, chúng ta đã ôn lại các thành phần tạo nên declaration. Phần này mô tả một phương pháp phân tách chúng thành lời giải thích bằng tiếng Anh. Precedence rule để hiểu declaration C là rule mà các “luật sư ngôn ngữ” thích nhất. Nó rất ngắn gọn nhưng rất thiếu trực giác.
 
 Quy tắc precedence hiểu declaration C
 
-A Đọc declaration bắt đầu tên rồi theo precedence. B Precedence từ cao xuống thấp: B.1 ngoặc đơn nhóm phần declaration B.2 postfix operator: ngoặc đơn `()` chỉ function và
+A Declaration được đọc bằng cách bắt đầu từ tên rồi đọc theo thứ tự precedence. B Precedence, từ cao xuống thấp, là: B.1 các dấu ngoặc đơn nhóm những phần của declaration với nhau B.2 các postfix operator: dấu ngoặc đơn `()` chỉ function, và
 
 ngoặc vuông `[]` chỉ array.
 
 B.3 prefix operator: asterisk nghĩa "pointer tới". C Nếu keyword `const` và/hoặc `volatile` sát type specifier (như `int, long`, v.v.) thì
 
-áp dụng cho type specifier. Nếu không, keyword `const` và/hoặc `volatile` áp dụng pointer asterisk ngay bên trái.
+áp dụng cho type specifier. Nếu không, keyword `const` và/hoặc `volatile` áp dụng cho dấu sao pointer nằm ngay bên trái nó.
 
 Ví dụ giải declaration bằng quy tắc precedence:
 
@@ -333,10 +333,10 @@ Bảng 3-1. Giải declaration bằng quy tắc precedence
 
 | Rule áp dụng | Giải thích |
 |---|---|
-| A | Trước tiên đến variable name "`next`", thấy được ngoặc đơn bao trực tiếp. |
-| B.1 | Nhóm với phần khác trong ngoặc, được "`next` là pointer tới...". |
-| B | Ra ngoài ngoặc, có lựa chọn prefix asterisk hoặc cặp postfix ngoặc đơn. |
-| B.2 | Rule B.2 nói precedence cao nhất là ngoặc function bên phải, vậy "`next` là pointer tới function trả…" |
+| A | Trước tiên, đến tên variable “`next`” và lưu ý rằng nó được ngoặc đơn bao trực tiếp. |
+| B.1 | Vì vậy, chúng ta nhóm nó với phần còn lại trong ngoặc đơn, được “`next` là một pointer đến...”. |
+| B | Sau đó, ra ngoài ngoặc đơn, chúng ta có lựa chọn giữa một prefix asterisk hoặc một cặp ngoặc đơn postfix. |
+| B.2 | Rule B.2 cho biết thành phần có precedence cao nhất là ngoặc đơn function bên phải, nên chúng ta có “`next` là pointer đến một function trả về…”. |
 | B.3 | Xử lý prefix "`*`" để được "pointer tới". |
 | C | Cuối cùng lấy "`char * const`" như constant pointer tới character. |
 
@@ -344,7 +344,7 @@ Ghép lại thành:
 
 "`next` là pointer tới function trả pointer tới const pointer-to-char"
 
-và xong. Mọi rule quy về precedence rule, nhưng muốn trực giác hơn, dùng Hình 3-3.
+và chúng ta đã xong. Mọi rule đều quy về precedence rule, nhưng nếu muốn cách trực quan hơn một chút, hãy dùng Hình 3-3.
 
 Hình 3-3. Parse declaration C thế nào
 
@@ -352,19 +352,19 @@ Hình 3-3. Parse declaration C thế nào
 
 ## Gỡ declaration C bằng sơ đồ
 
-Phần này đưa sơ đồ có bước đánh số (Hình 3-3). Theo từng bước từ một, theo mũi tên, nhanh chóng dịch declaration C phức tạp tùy ý thành tiếng Anh (cũng phức tạp tùy ý). Đơn giản bằng bỏ typedef khỏi sơ đồ. Đọc typedef thì dịch declaration bỏ từ "typedef". Nếu ra "p là…", nay dùng tên "p" khi muốn khai báo thứ có type đã dịch.
+Trong phần này, chúng ta trình bày một sơ đồ với các bước được đánh số, xem Hình 3-3. Nếu thực hiện từng bước, bắt đầu từ một và đi theo các mũi tên hướng dẫn, bạn có thể nhanh chóng dịch một declaration C có độ phức tạp tùy ý thành tiếng Anh, cũng có độ phức tạp tùy ý. Chúng ta đơn giản hóa declaration bằng cách bỏ qua typedef trong sơ đồ. Để đọc typedef, hãy dịch declaration mà bỏ từ “typedef”. Nếu kết quả là “p là một…”, giờ bạn có thể dùng tên “p” mỗi khi muốn khai báo một thứ thuộc type được dịch ra đó.
 
 Vòng giải mã thần kỳ cho declaration C
 
-Declaration C đọc kiểu boustrophedon, tức luân phiên right-to-left với left-to right. Ai ngờ có từ riêng mô tả vậy! Bắt đầu identifier đầu khi đọc từ trái. Khi khớp token declaration với sơ đồ, xóa khỏi phần cần xét. Mỗi điểm xem token bên phải trước rồi trái. Xóa hết là xong. Thử vài ví dụ gỡ bằng sơ đồ. Giả sử muốn hiểu ví dụ code đầu:
+Declaration trong C được đọc theo kiểu boustrophedon, tức luân phiên right-to-left với left-to right. Ai ngờ lại có một từ đặc biệt để mô tả điều đó! Hãy bắt đầu ở identifier đầu tiên tìm thấy khi đọc từ trái. Khi đối chiếu một token trong declaration với sơ đồ, chúng ta xóa nó khỏi phần còn phải xem xét. Tại mỗi điểm, chúng ta xem token bên phải trước, rồi mới đến bên trái. Khi mọi thứ đã bị xóa, công việc hoàn tất. Hãy thử vài ví dụ gỡ declaration bằng sơ đồ. Giả sử chúng ta muốn tìm hiểu ví dụ code đầu tiên có nghĩa gì:
 
 ```
 char* const *(*next)();
 ```
 
-Khi gỡ declaration, dần "tẩy trắng" phần đã xử lý để thấy chính xác còn bao nhiêu. Nhớ `const` nghĩa "read-only". Chỉ vì ghi constant không nhất thiết nghĩa constant.
+Khi gỡ declaration này, chúng ta dần “tẩy trắng” những phần đã xử lý để thấy chính xác còn bao nhiêu. Một lần nữa, hãy nhớ `const` có nghĩa là “read-only”. Chỉ vì nó ghi constant không có nghĩa nó nhất thiết là constant.
 
-Quá trình trong Bảng 3-2. Mỗi bước in đậm phần đang xử lý. Bắt đầu bước một, đi qua các bước.
+Quá trình được trình bày trong Bảng 3-2. Trong mỗi bước, phần declaration mà chúng ta đang xử lý được in đậm. Bắt đầu từ bước một, chúng ta sẽ thực hiện các bước sau.
 
 Bảng 3-2. Các bước gỡ declaration C
 
@@ -395,35 +395,35 @@ Giờ thử ví dụ phức tạp hơn.
 char *(*c[10])(int **p);
 ```
 
-Thử theo bước như ví dụ trước. Các bước ở cuối chương để bạn tự thử, so đáp án.
+Hãy thử thực hiện các bước theo cùng cách như ví dụ trước. Các bước được cung cấp ở cuối chương để bạn có cơ hội tự thử và so sánh đáp án.
 
 ## `typedef` có thể là bạn
 
-Typedef là declaration thú vị: đưa tên mới cho type thay vì dành storage variable. Theo cách nào đó giống macro text replacement — không thêm type mới, chỉ tên mới, nhưng khác biệt then chốt giải thích sau.
+Typedef là một loại declaration thú vị: chúng đưa vào tên mới cho type thay vì dành storage cho variable. Theo một số khía cạnh, typedef giống macro text replacement: nó không đưa vào type mới mà chỉ một tên mới cho type, nhưng có một khác biệt then chốt được giải thích ở phần sau.
 
-Xem lại phần declaration hình thành, thấy keyword `typedef` có thể thuộc declaration thường, gần đầu. Thực tế format giống hệt variable declaration, chỉ thêm keyword để báo.
+Nếu xem lại phần cách declaration được hình thành, bạn sẽ thấy keyword `typedef` có thể là một phần của declaration thông thường, xuất hiện đâu đó gần đầu. Thực tế, typedef có định dạng giống hệt variable declaration, chỉ thêm keyword này để báo cho bạn biết.
 
-Vì giống variable declaration, đọc hệt. Kỹ thuật phần trước áp dụng. Thay declaration nói "tên tham chiếu variable type đã nêu", keyword `typedef` không tạo variable, khiến declaration nói "tên đồng nghĩa type đã nêu".
+Vì typedef trông giống hệt variable declaration, nó cũng được đọc giống hệt. Các kỹ thuật ở những phần trước đều áp dụng được. Thay vì declaration nói “tên này tham chiếu đến một variable có type đã nêu”, keyword `typedef` không tạo variable mà khiến declaration nói “tên này là từ đồng nghĩa cho type đã nêu”.
 
-Thường dùng trường hợp khó pointer tới thứ gì. Ví dụ kinh điển declaration prototype `signal()`. Signal là system call bảo runtime gọi routine cụ thể khi "software interrupt" chỉ định đến. Đáng ra gọi "Call\_that\_routine\_when\_this\_interrupt\_comes\_in". Gọi `signal()` truyền argument chỉ interrupt nào, routine nào xử lý. Chuẩn ANSI khai báo:
+Thông thường, cách này được dùng cho những trường hợp khó liên quan đến pointer trỏ đến một thứ gì đó. Ví dụ kinh điển là declaration của prototype `signal()`. Signal là một system call yêu cầu runtime system gọi một routine cụ thể mỗi khi một “software interrupt” được chỉ định xuất hiện. Thực ra, nó nên được gọi là “Call\_that\_routine\_when\_this\_interrupt\_comes\_in”. Bạn gọi `signal()` và truyền argument để chỉ ra đang nói đến interrupt nào và routine nào cần được gọi để xử lý nó. Tiêu chuẩn ANSI cho thấy signal được khai báo như sau:
 
 ```
 void (*signal(int sig, void (*func)(int)) ) (int);
 ```
 
-Luyện kỹ năng new-found đọc declaration, thấy nghĩa:
+Vận dụng kỹ năng new-found về đọc declaration, chúng ta có thể xác định ý nghĩa của nó như sau:
 
 ```
 void (*signal(                          ) ) (int);
 ```
 
-`signal` là function (argument hơi kỳ) trả pointer tới function (nhận int, trả void). Một argument kỳ là:
+`signal` là một function (với một số argument kỳ lạ) trả về pointer đến một function (nhận một int argument và trả về void). Bản thân một trong những argument kỳ lạ đó là:
 
 ```
 void (*func)(int) ;
 ```
 
-pointer tới function nhận int, trả void. Có thể đơn giản bằng typedef "tách" phần chung:
+một pointer đến function nhận một int argument và trả về void. Sau đây là cách đơn giản hóa bằng một typedef “tách ra” phần chung.
 
 ```
 typedef void (*ptr_to_func) (int);
@@ -439,7 +439,7 @@ ptr_to_func signal(int, ptr_to_func);
  */
 ```
 
-Nhưng typedef có nhược điểm. Cùng syntax rối của declaration khác, cùng nhồi nhiều declarator trong declaration. Gần như không thêm gì cho struct trừ khả năng không hữu ích bỏ keyword `struct`. Trong mọi `typedef`, thậm chí không cần đặt `typedef` đầu declaration!
+Tuy nhiên, typedef không phải không có nhược điểm. Nó có cùng cú pháp gây nhầm lẫn với các declaration khác, và cùng khả năng nhồi nhiều declarator vào một declaration. Về cơ bản, nó không cung cấp gì cho struct ngoài khả năng không hữu ích là bỏ keyword `struct`. Và trong bất kỳ `typedef` nào, bạn thậm chí không phải đặt `typedef` ở đầu declaration!
 
 ### Mẹo thực hành hữu ích
 
@@ -463,19 +463,19 @@ Và tuyệt đối đừng chôn typedef giữa declaration như:
 unsigned const long typedef int volatile *kumquat;
 ```
 
-Typedef tạo alias data type thay vì data type mới. Có thể typedef mọi type.
+Typedef tạo alias cho data type thay vì tạo data type mới. Bạn có thể typedef bất kỳ type nào.
 
 ```
 typedef int (*array_ptr)[100];
 ```
 
-Chỉ viết declaration variable type mong muốn. Tên variable là tên muốn cho alias. Viết keyword 'typedef' đầu như trên. Typedef name không trùng identifier khác cùng block.
+Chỉ cần viết declaration cho một variable có type bạn muốn. Hãy để tên variable là tên bạn muốn dùng làm alias. Viết keyword “typedef” ở đầu, như đã minh họa. Typedef name không được trùng với một identifier khác trong cùng block.
 
 ## Khác biệt giữa `typedef int x[10]` và `#define x int[10]`
 
-Như trên, khác biệt then chốt giữa typedef và macro text replacement. Nên xem typedef là type "đóng gói" hoàn chỉnh — không thêm sau khi khai báo. Khác macro thể hiện hai cách.
+Như đã đề cập, có một khác biệt then chốt giữa typedef và macro text replacement. Cách hiểu đúng là xem typedef như một type được “đóng gói” hoàn chỉnh: bạn không thể thêm vào nó sau khi đã khai báo. Sự khác biệt giữa điều này và macro thể hiện theo hai cách.
 
-Có thể mở rộng macro typename bằng type specifier khác, không với typename typedef. Tức:
+Bạn có thể mở rộng một macro typename bằng các type specifier khác, nhưng không thể làm như vậy với typename được định nghĩa bằng typedef. Nghĩa là,
 
 ```
 #define peach int
@@ -498,14 +498,14 @@ Sau macro expansion, dòng hai thực sự thành:
 int * chalk, cheese;
 ```
 
-Điều này làm chalk, cheese khác như chutney, chives: chalk là pointer-to-an-integer, cheese là integer. Ngược lại typedef:
+Điều này làm chalk và cheese khác nhau như chutney và chives: chalk là pointer-to-an-integer, còn cheese là integer. Ngược lại, một typedef như sau:
 
 ```
 typedef char * char_ptr;
 char_ptr Bentley, Rolls_Royce;
 ```
 
-khai báo Bentley, Rolls\_Royce giống nhau. Tên mặt trước khác nhưng cả hai pointer tới char.
+khai báo cả Bentley và Rolls\_Royce giống nhau. Tên ở phía trước khác nhau, nhưng cả hai đều là pointer đến char.
 
 ## `typedef struct foo { ... foo; } foo;` nghĩa gì
 
@@ -517,7 +517,7 @@ C có nhiều namespace:
 
 \* member name (mỗi struct, union có namespace riêng)
 
-\* mọi thứ khác. Mọi thứ trong namespace phải duy nhất, nhưng tên giống áp cho thứ ở namespace khác được. Vì mỗi struct, union có namespace riêng, cùng member name tái dùng trong nhiều struct. Compiler rất cũ không vậy, một lý do code kernel BSD 4.2 thêm prefix đầu riêng vào field name như:
+\* mọi thứ khác. Mọi thứ trong một namespace phải là duy nhất, nhưng có thể dùng cùng tên cho những thứ thuộc các namespace khác nhau. Vì mỗi struct hoặc union có namespace riêng, các member name giống nhau có thể được tái sử dụng trong nhiều struct khác nhau. Điều này không đúng với các compiler rất cũ, và là một lý do người ta thêm một ký tự đầu duy nhất làm prefix cho field name trong kernel code BSD 4.2, như sau:
 
 ```
 struct vnode {
@@ -528,13 +528,13 @@ struct vnode {
 };
 ```
 
-Vì tên giống ở namespace khác hợp lệ, đôi khi thấy code:
+Vì việc dùng cùng tên trong các namespace khác nhau là hợp lệ, đôi khi bạn thấy code như sau.
 
 ```
 struct foo {int foo;} foo;
 ```
 
-Chắc chắn làm rối, nản người sau bảo trì. `sizeof( foo );` tham chiếu gì?
+Điều này chắc chắn sẽ gây nhầm lẫn và nản lòng cho các lập trình viên sau này phải bảo trì code của bạn. Và `sizeof( foo );` sẽ tham chiếu đến điều gì?
 
 Còn đáng sợ hơn. Declaration sau hoàn toàn hợp lệ:
 
@@ -544,7 +544,7 @@ typedef struct baz {int baz;} baz;
                baz variable_2;
 ```
 
-Quá nhiều "baz"! Thử lại tên sáng sủa hơn để xem:
+Quá nhiều “baz”! Hãy thử lại với những tên dễ hiểu hơn để xem điều gì đang xảy ra:
 
 ```
 typedef struct my_tag {int i;} my_type;
@@ -552,7 +552,7 @@ typedef struct my_tag {int i;} my_type;
 my_type variable_2;
 ```
 
-Typedef thêm tên `my_type` viết tắt "`struct` `my_tag` `{int i}`", nhưng cũng thêm structure tag `my_tag` dùng được với keyword `struct`. Dùng cùng identifier cho type, tag trong typedef khiến keyword "`struct`" tùy chọn, tạo mental model hoàn toàn sai. Tiếc syntax struct typedef này giống hệt kết hợp struct type với variable declaration. Nên dù hai declaration hình thức tương tự,
+Typedef đưa vào tên `my_type` làm cách viết tắt cho “`struct` `my_tag` `{int i}`”, nhưng đồng thời cũng đưa vào structure tag `my_tag`, có thể được dùng cùng keyword `struct`. Nếu dùng cùng identifier cho type và tag trong một typedef, nó có tác dụng làm keyword “`struct`” trở thành tùy chọn, tạo ra một mô hình tư duy hoàn toàn sai về điều đang diễn ra. Đáng tiếc là cú pháp cho kiểu struct typedef này giống hệt cú pháp kết hợp struct type với variable declaration. Vì vậy, mặc dù hai declaration sau có hình thức tương tự,
 
 ```
 typedef struct fruit {int weight, price_per_lb } fruit; /*
@@ -561,20 +561,20 @@ statement 1 */
 statement 2 */
 ```
 
-việc rất khác đang xảy ra. Statement 1 khai báo structure tag "fruit", structure typedef "fruit", dùng như:
+những điều rất khác nhau đang diễn ra. Statement 1 khai báo một structure tag “fruit” và một structure typedef “fruit”, có thể được dùng như sau:
 
 ```
 struct fruit mandarin; /* uses structure tag "fruit" */
        fruit tangerine; /* uses structure type "fruit" */
 ```
 
-Statement 2 khai báo structure tag "veg" và variable veg. Chỉ structure tag dùng trong declaration sau như:
+Statement 2 khai báo một structure tag “veg” và một variable veg. Chỉ structure tag có thể được dùng trong các declaration tiếp theo, như sau:
 
 ```
 struct veg potato;
 ```
 
-Thử khai báo `veg cabbage` là lỗi, như viết:
+Thử khai báo `veg cabbage` sẽ là lỗi. Điều đó giống như viết:
 
 ```
 int i;
@@ -589,15 +589,15 @@ Mẹo làm việc với typedef
 
 Đừng mất công `typedefs` cho `structs`.
 
-Chỉ tiết kiệm viết "struct", vốn là gợi ý không nên giấu.
+Tất cả những gì chúng làm là giúp bạn khỏi viết từ “struct”, vốn là một gợi ý mà có lẽ bạn không nên che giấu.
 
 Dùng typedef cho:
 
-- Type kết hợp array, struct, pointer, function.
+- Các type kết hợp array, struct, pointer hoặc function.
 
-- Type portable. Cần type ít nhất, chẳng hạn 20-bits, làm typedef. Port sang platform khác, chọn type đúng `short,` `int,` `long,` chỉ sửa typedef thay mọi declaration.
+- Type portable. Khi cần một type có độ rộng ít nhất, chẳng hạn, 20-bits, hãy tạo typedef cho nó. Sau đó, khi port code sang platform khác, hãy chọn type thích hợp, `short,` `int,` `long,` và chỉ sửa typedef thay vì mọi declaration.
 
-- Cast. Typedef đặt tên đơn giản cho type cast phức tạp. Ví dụ
+- Cast. Typedef có thể cung cấp một tên đơn giản cho type cast phức tạp. Ví dụ:
 
 - `typedef int (*ptr_to_int_fun)(void);`
 
@@ -607,13 +607,13 @@ Dùng typedef cho:
                 = (ptr_to_int_fun) p;
 ```
 
-Luôn dùng tag trong structure definition, dù chưa cần. Sau sẽ cần.
+Hãy luôn dùng tag trong structure definition, ngay cả khi chưa cần. Về sau sẽ cần đến nó.
 
-Nguyên tắc khá tốt trong computer science: hai thứ khác nhau thì dùng hai tên khác. Giảm cơ hội nhầm (luôn tốt trong software). Bí tên structure tag thì đặt kết thúc "\_tag". Dễ phát hiện tên cụ thể là gì. Thế hệ sau sẽ chúc phúc tên bạn thay nguyền tác phẩm.
+Một nguyên tắc khá tốt trong computer science là khi có hai thứ khác nhau, hãy dùng hai tên khác nhau để chỉ chúng. Điều đó giảm cơ hội nhầm lẫn, luôn là cách làm tốt trong software. Nếu bí tên cho structure tag, cứ đặt tên kết thúc bằng “\_tag”. Điều này giúp dễ nhận ra một tên cụ thể là gì. Khi đó, các thế hệ sau sẽ chúc phúc cho tên bạn thay vì nguyền rủa công trình của bạn.
 
 ## Đoạn code hiểu mọi parsing
 
-Dễ viết chương trình parse declaration C, dịch sang tiếng Anh. Sao không tự viết? Dạng cơ bản đã mô tả. Chỉ cần code hiểu dạng, gỡ như Hình 3-4. Để đơn giản, gần như bỏ error handling, xử lý struct, enum, union bằng rút về một từ "struct", "enum", "union". Cuối cùng, chương trình mong function có ngoặc trống (không argument list).
+Bạn có thể dễ dàng viết một chương trình parse declaration C và dịch chúng sang tiếng Anh. Thực ra, sao bạn không tự viết? Dạng cơ bản của declaration C đã được mô tả. Chúng ta chỉ cần viết một đoạn code hiểu dạng đó và gỡ nó theo cùng cách như Hình 3-4. Để đơn giản, chúng ta gần như bỏ qua error handling và xử lý struct, enum, union bằng cách rút chúng về một từ duy nhất “struct”, “enum” hoặc “union”. Cuối cùng, chương trình này yêu cầu function có ngoặc đơn rỗng, tức không có argument list.
 
 ### Thử thách lập trình
 
@@ -621,7 +621,7 @@ Dễ viết chương trình parse declaration C, dịch sang tiếng Anh. Sao kh
 
 Viết chương trình dịch declaration C sang tiếng Anh
 
-Thiết kế như sau. Data structure chính là stack, lưu token đã đọc khi đọc tới identifier. Token bên phải xem bằng đọc, bên trái bằng pop stack. Data structure là:
+Sau đây là thiết kế. Data structure chính là một stack, nơi chúng ta lưu các token đã đọc trong lúc đọc tiến đến identifier. Sau đó, có thể xem token tiếp theo bên phải bằng cách đọc nó, và token tiếp theo bên trái bằng cách pop nó khỏi stack. Data structure có dạng:
 
 ```
 struct token { char type;
@@ -687,35 +687,35 @@ main
     deal_with_declarator
 ```
 
-Chương trình nhỏ này được viết nhiều lần qua năm tháng, thường tên "cdecl". <sup>\[1\]</sup> Bản chưa đầy đủ trong The C Programming Language. Bản đặc tả ở đây đầy đủ hơn, hỗ trợ type qualifier "const", "volatile". Cũng biết struct, enum, union dù chưa tổng quát; dễ mở rộng xử lý argument declaration trong function. Khoảng 150 dòng C triển khai được. Thêm error handling, declaration tổng quát làm lớn hơn nhiều. Dù sao, viết parser này là triển khai một subsystem chính compiler — thành tựu lập trình đáng kể, giúp hiểu sâu lĩnh vực.
+Đây là một chương trình nhỏ đã được viết nhiều lần qua nhiều năm, thường dưới tên “cdecl”. <sup>\[1\]</sup> Một phiên bản chưa đầy đủ của cdecl xuất hiện trong The C Programming Language. Phiên bản cdecl được đặc tả ở đây đầy đủ hơn; nó hỗ trợ các type qualifier “const” và “volatile”. Nó cũng biết struct, enum và union, dù chưa xử lý tổng quát hoàn toàn; có thể dễ dàng mở rộng phiên bản này để xử lý argument declaration trong function. Chương trình có thể được triển khai bằng khoảng 150 dòng code C. Thêm error handling và hỗ trợ đầy đủ mọi declaration sẽ làm nó lớn hơn nhiều. Dù sao, khi lập trình parser này, bạn đang triển khai một trong các subsystem chính của compiler: đó là thành tựu lập trình đáng kể, thực sự giúp bạn hiểu sâu lĩnh vực này.
 
-<sup>\[1\]</sup> Đừng lẫn với modifier cdecl trong Turbo C trên PC, chỉ code tạo ra không dùng convention gọi function mặc định Turbo Pascal. Modifier cdecl cho link Borland C với Turbo language khác có calling convention khác.
+<sup>\[1\]</sup> Đừng nhầm điều này với cdecl modifier dùng trong Turbo C trên PC để chỉ rằng code được tạo không nên dùng calling convention mặc định của Turbo Pascal. Cdecl modifier cho phép code Borland C được link với các ngôn ngữ Turbo khác được triển khai với calling convention khác.
 
 #### Đọc thêm
 
-Đã nắm cách xây data structure trong C, có thể muốn sách general-purpose tốt. Một cuốn là Data Structures with Abstract Data Types của Daniel F. Stubbs, Neil W. Webre, ấn bản 2, Pacific Grove, CA, Brooks/Cole, 1989. Bao phủ string, list, stack, queue, tree, heap, set, graph. Rất đáng đọc.
+Giờ đã nắm vững cách xây dựng data structure trong C, bạn có thể muốn đọc một cuốn sách general-purpose hay về data structure. Một cuốn như vậy là Data Structures with Abstract Data Types của Daniel F. Stubbs và Neil W. Webre, ấn bản 2, Pacific Grove, CA, Brooks/Cole, 1989. Các tác giả trình bày nhiều loại data structure, bao gồm string, list, stack, queue, tree, heap, set và graph. Rất đáng đọc.
 
 ## Giải trí nhẹ nhàng — Software cắn nòng nọc sáp…
 
-Niềm vui lớn lập trình là software điều khiển vật thật (như tay robot, disk head). Chạy chương trình làm thứ ngoài đời chuyển động đem thỏa mãn lớn. Nghiên cứu sinh Artificial Intelligence Laboratory MIT được thúc đẩy khi nối computer khoa với nút gọi thang máy tầng chín. Gọi thang bằng lệnh từ LISP machine! Chương trình kiểm terminal thực sự trong lab rồi mới gọi, ngăn hacker đối thủ dùng mặt tối thần lực chiếm thang.
+Một niềm vui lớn của lập trình máy tính là viết software điều khiển một vật thể thực, chẳng hạn cánh tay robot hoặc disk head. Có một cảm giác thỏa mãn rất lớn khi bạn chạy chương trình và một thứ gì đó chuyển động ngoài đời thực. Các nghiên cứu sinh tại Artificial Intelligence Laboratory của MIT được điều này thúc đẩy khi nối máy tính của khoa với nút gọi thang máy ở tầng chín. Nhờ đó, bạn có thể gọi thang máy bằng cách gõ lệnh từ máy LISP! Trước khi gọi thang, chương trình kiểm tra để bảo đảm terminal của bạn thực sự nằm trong phòng thí nghiệm, ngăn các hacker đối thủ dùng mặt tối của Thần lực để chiếm dụng thang máy.
 
-Niềm vui lớn khác là ăn junk food khi hack-ing. Còn gì tự nhiên hơn kết hợp hai thú vui? Nghiên cứu sinh Carnegie-Mellon University phát triển junk-food/com-puter interface giải quyết vấn đề long-standing: máy Coke<sup>®</sup> khoa computer science tầng ba, xa văn phòng nghiên cứu sinh. Họ chán đi xa chỉ thấy máy trống hoặc tệ hơn mới nạp nên chai ấm. John Zsarney, Lawrence Butcher nhận ra máy lưu hàng trong sáu col-umns làm lạnh, mỗi cột có đèn "empty" nháy khi nhả chai, sáng liên tục khi hết. Dễ nối đèn với serial interface, truyền "chai đã nhả" về mainframe PDP10 khoa. Từ PDP10, interface như telnet connection! Mike Kazar, Dave Nichols viết software đáp query, theo dõi cột chứa chai lạnh nhất.
+Niềm vui lớn khác của lập trình máy tính là nhai đồ ăn vặt trong lúc hack-ing. Vậy còn gì tự nhiên hơn việc kết hợp hai thú vui? Một số nghiên cứu sinh computer science tại Carnegie-Mellon University phát triển một junk-food/com-puter interface để giải quyết vấn đề long-standing: máy Coke<sup>®</sup> của khoa computer science nằm ở tầng ba, xa văn phòng nghiên cứu sinh. Sinh viên chán việc đi một quãng xa chỉ để thấy máy hết Coke, hoặc tệ hơn, mới được nạp đến mức nhả ra những chai còn ấm. John Zsarney và Lawrence Butcher nhận ra máy Coke lưu sản phẩm trong sáu col-umns được làm lạnh, mỗi cột có một đèn “empty” nhấp nháy khi nhả chai và sáng liên tục khi cột đã bán hết. Việc nối các đèn này với serial interface khá đơn giản, nhờ đó truyền dữ liệu “đã nhả chai” đến mainframe PDP10 của khoa. Từ PDP10, interface của máy Coke trông hệt một telnet connection! Mike Kazar và Dave Nichols viết software trả lời truy vấn và theo dõi cột nào chứa những chai được làm lạnh lâu nhất.
 
-Mike, Dave dĩ nhiên chưa dừng. Còn thiết kế network protocol cho mainframe trả query trạng thái từ mọi máy local ethernet, rồi Internet. Ivor Durham triển khai software và kiểm trạng thái từ máy khác. Tiết kiệm công đáng khen, Ivor tái dùng "finger" chuẩn — thường kiểm từ máy này user chỉ định có login máy khác không. Sửa finger server chạy Coke status khi ai finger user không tồn tại "coke". Vì finger request thuộc Internet protocol chuẩn, mọi máy CMU kiểm được. Thực ra chạy lệnh
+Dĩ nhiên, Mike và Dave không dừng ở đó. Họ còn thiết kế một network protocol cho phép mainframe trả lời truy vấn trạng thái máy Coke từ bất kỳ máy nào trên mạng ethernet cục bộ, rồi cuối cùng từ chính Internet. Ivor Durham triển khai software thực hiện việc này và kiểm tra trạng thái máy Coke từ máy khác. Với khả năng tiết kiệm công sức đáng ngưỡng mộ, Ivor tái sử dụng tiện ích “finger” tiêu chuẩn, vốn thường được dùng từ một máy để kiểm tra xem một user được chỉ định có đăng nhập trên máy khác không. Anh sửa “finger” server để chạy chương trình trạng thái Coke bất cứ khi nào có người finger user không tồn tại tên “coke”. Vì finger request là một phần của các Internet protocol tiêu chuẩn, mọi người có thể kiểm tra máy Coke từ bất kỳ máy tính CMU nào. Thực tế, bằng cách chạy lệnh
 
 ```
 finger coke@g.gp.cs.cmu.edu
 ```
 
-biết trạng thái từ mọi máy mọi nơi Internet, dù xa hàng nghìn dặm! Người khác tham gia gồm Steve Berman, Eddie Caplan, Mark Wilkins, Mark Zaremsky <sup>\[2\]</sup>. Chương trình dùng hơn thập kỷ, thậm chí viết lại cho UNIX Vaxen khi PDP-10 nghỉ đầu 1980. Kết thúc vài năm trước khi nhà đóng chai Coke địa phương bỏ chai hoàn trả Coke-bottle-shaped. Máy cũ không xử lý hình chai mới, thay máy bán hàng cần interface mới. Một thời gian chẳng ai làm, nhưng caffeine cuối cùng thúc Greg Nelson thiết kế lại. Nghiên cứu sinh CMU còn nối máy kẹo, trường khác có dự án tương tự.
+bạn có thể biết trạng thái máy Coke từ bất kỳ máy nào ở bất cứ đâu trên Internet, dù cách hàng nghìn dặm! Những người khác tham gia dự án gồm Steve Berman, Eddie Caplan, Mark Wilkins và Mark Zaremsky <sup>\[2\]</sup>. Các chương trình máy Coke được dùng hơn một thập kỷ, thậm chí được viết lại cho UNIX Vaxen khi PDP-10 ngừng hoạt động đầu thập niên 1980. Kết thúc đến vào vài năm trước, khi nhà đóng chai Coke địa phương ngừng cung cấp các chai có thể hoàn trả mang hình Coke-bottle-shaped. Máy cũ không xử lý được hình dạng chai mới, nên được thay bằng máy bán hàng mới cần interface mới. Một thời gian không ai buồn làm, nhưng sức hấp dẫn của caffeine cuối cùng thúc đẩy Greg Nelson thiết kế lại hệ thống cho máy mới. Nghiên cứu sinh CMU cũng nối máy bán kẹo, và các trường khác cũng hoàn thành những dự án tương tự.
 
 <sup>\[2\]</sup> Craig Everhart, Eddie Caplan, Robert Frederking, "Serious Coke Addiction," 25th Anniversary Sym-posium, Computer Science at CMU: A Commemorative Review, 1990, tr.70. Reed and Witting Company.
 
-Computer club University of Western Australia có máy Coke nối CPU 68000, memory 80K, ethernet interface (mạnh hơn đa số PC thập kỷ trước). Computer Science House tại Rochester Institute of Technology, Rochester, NY, cũng có máy Coke Internet, mở rộng đồ uống tín dụng, billing tài khoản máy tính. Một sinh viên thích login từ nhà cách hàng trăm dặm mùa hè, ngẫu nhiên phát vài đồ uống miễn phí cho người đi qua. Sắp đến mức "máy Coke" là hardware phổ biến nhất Internet.
+Câu lạc bộ máy tính tại University of Western Australia có một máy Coke kết nối với CPU 68000, memory 80K và ethernet interface, mạnh hơn phần lớn PC của một thập kỷ trước. Computer Science House tại Rochester Institute of Technology, Rochester, NY, cũng có một máy Coke trên Internet và đã mở rộng nó để cung cấp đồ uống theo tín dụng cùng việc tính tiền tài khoản bằng máy tính. Một sinh viên thích đăng nhập từ xa tại nhà cách hàng trăm dặm trong kỳ nghỉ hè và ngẫu nhiên phát vài đồ uống miễn phí cho người tiếp theo đi ngang qua. Mọi chuyện đang tiến đến mức “máy Coke” sớm trở thành loại hardware phổ biến nhất trên Internet.
 
-Sao dừng ở cola? Giáng sinh trước, lập trình viên Cygnus Support nối đồ trang trí cây thông văn phòng vào ethernet. Họ giải trí bằng tog-gling đèn từ workstation. Vậy mà người ta lo Nhật vượt Mỹ công nghệ! Trong Sun Microsystems, có e-mail address gate-wayed tới fax modem. Gửi e-mail đến, nó parse phone number rồi gửi fax. Lập trình viên tài năng Don Hopkins viết pizzatool tận dụng. Cho custom-select topping pizza qua GUI (đa số thêm phô mai GUI), gửi đơn fax tới Tony \& Alba's Pizza gần đó, nhận đơn fax và giao hàng.
+Tại sao chỉ dừng ở cola? Giáng sinh vừa rồi, lập trình viên tại Cygnus Support nối đồ trang trí cây thông Giáng sinh trong văn phòng vào ethernet. Họ có thể giải trí bằng cách tog-gling các đèn khác nhau từ workstation. Vậy mà người ta lo Nhật Bản đang vượt Mỹ về công nghệ! Bên trong Sun Microsystems có một e-mail address được gate-wayed đến fax modem. Khi gửi e-mail đến đó, nội dung được parse để lấy thông tin số điện thoại rồi gửi tiếp dưới dạng fax. Lập trình viên tài ba Don Hopkins viết pizzatool để tận dụng nó. Pizzatool cho phép bạn custom-select topping pizza bằng GUI interface (phần lớn user yêu cầu thêm phô mai GUI), rồi gửi đơn hàng qua fax đến nhà hàng Tony \& Alba's Pizza gần đó, nơi nhận đơn fax và giao hàng.
 
-Không nghĩ tiết lộ bí mật thương mại nếu nói đã dùng rất nhiều dịch vụ khi làm lab late-night phát triển Sun SPARCserver 600MP. Chúc ngon miệng!
+Tôi không nghĩ mình tiết lộ bí mật thương mại khi nói rằng dịch vụ này được dùng rất nhiều trong các buổi làm việc tại lab late-night để phát triển dòng máy SPARCserver 600MP của Sun. Chúc ngon miệng!
 
 ### Lời giải lập trình
 
@@ -873,25 +873,25 @@ to identifier */
 
 Làm string comparison tự nhiên hơn
 
-Vấn đề routine `strcmp ()` so hai string là trả zero khi giống. Code rắc rối khi comparison trong conditional statement:
+Một vấn đề của routine `strcmp ()` dùng để so sánh hai string là nó trả về 0 nếu các string giống hệt nhau. Điều này dẫn đến code rắc rối khi phép so sánh là một phần của conditional statement:
 
 ```
 if (!strcmp(s,"volatile")) return QUALIFIER;
 ```
 
-zero chỉ false, phải negate để được ý muốn. Cách tốt hơn: định nghĩa:
+kết quả 0 biểu thị false, nên chúng ta phải phủ định nó để nhận điều mình muốn. Sau đây là cách tốt hơn. Hãy thiết lập định nghĩa:
 
 ```
 #define STRCMP(a,R,b) (strcmp(a,b) R 0)
 ```
 
-Nay viết string theo style tự nhiên
+Bây giờ bạn có thể viết string theo cách tự nhiên hơn
 
 ```
 if ( STRCMP(s, ==, "volatile"))
 ```
 
-Định nghĩa giúp code diễn đạt tự nhiên. Thử viết lại cdecl dùng cách so string này xem có thích không.
+Với định nghĩa này, code diễn đạt điều đang xảy ra theo cách tự nhiên hơn. Hãy thử viết lại chương trình cdecl để dùng cách so sánh string này và xem bạn có thích nó hơn không.
 
 #### Lời giải lập trình
 
@@ -899,7 +899,7 @@ if ( STRCMP(s, ==, "volatile"))
 
 Gỡ declaration C (thêm lần nữa)
 
-Đây là lời giải "Declaration này là gì?" trang 78. Mỗi bước in đậm phần xử lý. Từ bước một, qua các bước:
+Sau đây là lời giải cho câu hỏi “Declaration này là gì?” ở trang 78. Trong mỗi bước, phần declaration mà chúng ta đang xử lý được in đậm. Bắt đầu từ bước một, chúng ta sẽ thực hiện các bước sau:
 
 Declaration còn lại Bước tiếp Kết quả
 
@@ -925,4 +925,4 @@ Ghép lại thành:
 
 "c là array\[0..9\] gồm pointer tới function trả pointer-to-char"
 
-và xong. Lưu ý function được array trỏ tới nhận pointer tới pointer làm parameter duy nhất.
+và chúng ta đã xong. Lưu ý: các function được trỏ đến trong array nhận một pointer đến pointer làm parameter duy nhất của chúng.

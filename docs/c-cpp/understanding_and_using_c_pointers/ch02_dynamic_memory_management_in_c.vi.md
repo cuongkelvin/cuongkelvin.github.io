@@ -1,14 +1,14 @@
 # Chương 2. Dynamic memory management trong C
 
-Phần lớn sức mạnh của pointer bắt nguồn từ khả năng theo dõi memory được cấp phát động. Quản lý memory qua pointer là nền tảng của nhiều operation, gồm thao tác trên data structure phức tạp. Để tận dụng đầy đủ khả năng này, cần hiểu dynamic memory management diễn ra thế nào trong C.
+Phần lớn sức mạnh của pointer bắt nguồn từ khả năng theo dõi memory được cấp phát động. Việc quản lý memory này thông qua pointer tạo nền tảng cho nhiều operation, bao gồm các operation dùng để thao tác data structure phức tạp. Để tận dụng đầy đủ những khả năng này, chúng ta cần hiểu dynamic memory management diễn ra như thế nào trong C.
 
 Chương trình C thực thi bên trong runtime system, thường là môi trường do operating system cung cấp. Runtime system hỗ trợ stack, heap và các hành vi khác của chương trình.
 
 Memory management là trọng tâm của mọi chương trình. Đôi khi runtime system quản lý memory ngầm, như khi cấp phát cho automatic variable. Khi ấy variable được cấp phát trong stack frame của function bao quanh. Với static và global variable, memory nằm trong data segment của application và được đặt toàn zero. Đây là vùng tách biệt executable code và các data khác mà runtime system quản lý.
 
-Khả năng cấp phát rồi giải phóng memory cho phép application quản lý memory hiệu quả và linh hoạt hơn. Thay vì cấp phát đủ cho kích thước lớn nhất có thể của data structure, chỉ cần cấp phát đúng lượng thực sự cần.
+Khả năng cấp phát rồi giải phóng memory cho phép ứng dụng quản lý memory hiệu quả hơn và linh hoạt hơn. Thay vì phải cấp phát memory đủ cho kích thước lớn nhất có thể của data structure, chỉ cần cấp phát lượng thực sự được yêu cầu.
 
-Ví dụ, array có kích thước cố định trong các phiên bản C trước C99. Nếu cần chứa số element biến đổi, như employee record, phải khai báo array đủ lớn cho số nhân viên tối đa dự kiến. Nếu ước lượng thiếu, buộc phải recompile application với kích thước lớn hơn hoặc chọn cách khác. Nếu ước lượng thừa, sẽ lãng phí không gian. Khả năng cấp phát động cũng hữu ích với data structure có số element biến đổi như linked list hoặc queue.
+Chẳng hạn, array có kích thước cố định trong các phiên bản C trước C99. Nếu cần chứa số element thay đổi, chẳng hạn employee record, chúng ta buộc phải khai báo array đủ lớn cho số nhân viên tối đa mà mình dự kiến sẽ cần. Nếu ước lượng thiếu, chúng ta phải compile lại ứng dụng với kích thước lớn hơn hoặc chọn cách khác. Nếu ước lượng thừa, chúng ta lãng phí dung lượng. Khả năng cấp phát memory động cũng hữu ích khi xử lý data structure có số element thay đổi, chẳng hạn linked list hoặc queue.
 
 ![image](images/ch02/fig02-01.png)
 
@@ -18,7 +18,7 @@ Những ngôn ngữ như C cũng hỗ trợ dynamic memory management, trong đ�
 
 Chúng ta bắt đầu bằng tổng quan nhanh cách cấp phát và giải phóng memory. Tiếp theo là các allocation function cơ bản như `malloc` và `realloc`. Function `free` được bàn cùng cách dùng NULL và các vấn đề như double free.
 
-Dangling pointer là vấn đề phổ biến. Chúng ta sẽ dùng ví dụ minh họa khi nào nó xảy ra và các kỹ thuật xử lý. Phần cuối trình bày kỹ thuật quản lý memory thay thế. Dùng pointer sai có thể gây hành vi khó dự đoán: chương trình sinh kết quả không hợp lệ, làm hỏng data hoặc có thể kết thúc.
+Chương này tập trung vào dynamic memory management bằng pointer. Trước tiên, chúng ta xem xét kỹ các memory allocation function, bao gồm malloc và các function liên quan. Sau đó, chúng ta thảo luận cách dangling pointer xuất hiện và các kỹ thuật xử lý vấn đề. Phần cuối trình bày những kỹ thuật quản lý memory thay thế. Dùng pointer không đúng có thể dẫn đến hành vi không thể dự đoán. Nghĩa là chương trình có thể tạo kết quả sai, làm hỏng dữ liệu hoặc có thể kết thúc chương trình.
 
 ## Dynamic memory allocation
 
@@ -30,7 +30,7 @@ Các bước cơ bản để thực hiện dynamic memory allocation trong C là
 
 3\. Giải phóng memory bằng function `free`
 
-Dù có vài biến thể nhỏ, đây là kỹ thuật phổ biến nhất. Ví dụ sau cấp phát memory cho integer bằng `malloc`. Pointer gán năm cho memory đã cấp phát, rồi memory được giải phóng bằng `free`:
+Dù cách tiếp cận này có một số biến thể nhỏ, đây là kỹ thuật phổ biến nhất. Trong ví dụ sau, chúng ta cấp phát memory cho một integer bằng function `malloc`. Pointer được dùng để gán 5 vào memory đã cấp phát, rồi memory được giải phóng bằng function `free`:
 
 ```
 int *pi = (int*) malloc(sizeof(int));
@@ -39,7 +39,7 @@ printf("*pi: %d\n", *pi);
 free(pi);
 ```
 
-Khi chạy, chuỗi lệnh hiển thị số 5. Hình 2-1 minh họa memory ngay trước khi function `free` thực thi. Trong chương này, trừ khi nói khác, giả định code ví dụ nằm trong function `main`.
+Khi chuỗi này được thực thi, nó hiển thị số 5. Hình 2-1 minh họa cách memory được cấp phát ngay trước khi function `free` thực thi. Trong chương này, trừ khi được lưu ý khác, chúng ta giả định code ví dụ nằm trong function `main`.
 
 ![image](images/ch02/fig02-02.png)
 
@@ -53,7 +53,7 @@ Ví dụ này cố cấp phát đủ memory cho integer. Nếu giả định kí
 int *pi = (int*) malloc(4));
 ```
 
-Tuy nhiên, kích thước integer có thể khác tùy memory model. Cách portable là dùng operator `sizeof`, trả kích thước đúng bất kể chương trình thực thi ở đâu.
+Tuy nhiên, kích thước integer có thể thay đổi tùy memory model được dùng. Một cách portable là sử dụng operator `sizeof`. Nó trả về kích thước chính xác bất kể chương trình đang thực thi ở đâu.
 
 ![image](images/ch02/fig02-01.png)
 
@@ -64,7 +64,7 @@ int *pi;
 *pi = (int*) malloc(sizeof(int));
 ```
 
-Vấn đề nằm ở vế trái assignment. Chúng ta đang dereference pointer. Điều này gán address do `malloc` trả về vào address lưu trong `pi`. Nếu đây là lần đầu gán cho pointer, address trong nó có lẽ không hợp lệ. Cách đúng như sau:
+Vấn đề nằm ở vế trái của assignment operation. Chúng ta đang dereference pointer. Điều này sẽ gán address do `malloc` trả về vào address được lưu trong `pi`. Nếu đây là lần đầu thực hiện assignment cho pointer, address trong pointer có lẽ không hợp lệ. Cách tiếp cận đúng được trình bày dưới đây:
 
 ```
 pi = (int*) malloc(sizeof(int));
@@ -76,13 +76,13 @@ Function `free`, sẽ được bàn kỹ sau, phối hợp với `malloc` để 
 
 ![image](images/ch02/fig02-01.png)
 
-Mỗi lần gọi function `malloc` (hoặc tương tự), phải có lời gọi `free` tương ứng khi application dùng xong memory, nhằm tránh memory leak.
+Mỗi lần function `malloc`, hoặc function tương tự, được gọi, phải có một lời gọi tương ứng đến function `free` khi ứng dụng dùng xong memory đó để tránh memory leak.
 
-Một khi đã giải phóng, không nên truy cập memory nữa. Thường bạn không cố ý làm vậy, nhưng có thể vô tình xảy ra, như mục “Dangling pointer” trang 51 minh họa. Khi đó hệ thống hành xử theo cách implementation-dependent. Thông lệ là luôn gán `NULL` cho pointer đã giải phóng, như mục “Gán NULL cho pointer đã giải phóng” trang 48.
+Sau khi memory được giải phóng, không nên truy cập lại. Thông thường, bạn không cố ý truy cập nó sau khi giải phóng. Tuy nhiên, điều này có thể vô tình xảy ra, như minh họa trong mục “Dangling pointer” ở trang 51. Khi đó, hệ thống hoạt động theo cách implementation-dependent. Một cách làm phổ biến là luôn gán `NULL` cho pointer đã được giải phóng, như thảo luận trong “Gán NULL cho pointer đã giải phóng” ở trang 48.
 
-Khi cấp phát memory, thông tin bổ sung được lưu trong data structure do heap manager duy trì. Trong đó có kích thước block và thông tin thường nằm sát block đã cấp phát. Nếu application ghi ra ngoài block, data structure có thể bị hỏng. Điều này dẫn đến hành vi lạ hoặc heap corruption, như Chương 7 sẽ trình bày.
+Khi memory được cấp phát, thông tin bổ sung được lưu như một phần của data structure do heap manager duy trì. Trong số những thông tin đó có kích thước block, và chúng thường được đặt sát ngay block đã cấp phát. Nếu ứng dụng ghi ra ngoài block memory này, data structure có thể bị hỏng. Điều này có thể gây hành vi chương trình kỳ lạ hoặc làm hỏng heap, như chúng ta sẽ thấy trong Chương 7.
 
-Xét chuỗi code sau. Memory cấp phát cho string đủ chứa tối đa năm character và byte cho ký tự kết thúc `NUL`. Loop `for` ghi zero vào từng vị trí nhưng không dừng sau sáu byte. Điều kiện kết thúc của câu `for` khiến nó ghi tám byte. Zero được ghi là binary zero, không phải ASCII value của ký tự zero:
+Hãy xem chuỗi code sau. Memory được cấp phát cho một string, cho phép chứa tối đa năm ký tự cùng byte dành cho ký tự kết thúc `NUL`. Loop `for` ghi số 0 vào từng vị trí nhưng không dừng sau khi ghi sáu byte. Điều kiện kết thúc của statement `for` yêu cầu nó ghi tám byte. Những số 0 được ghi là binary zero, không phải giá trị ASCII của ký tự 0:
 
 ```
 char *pc = (char*) malloc(6);
@@ -91,7 +91,7 @@ for(int i=0; i<8; i++) {
 }
 ```
 
-Trong Hình 2-2, có memory bổ sung ở cuối string six-byte. Đây là memory mà heap manager dùng theo dõi allocation. Nếu ghi vượt cuối string, vùng này bị hỏng. Ví dụ vẽ memory bổ sung sau string, nhưng vị trí thực và nội dung ban đầu tùy compiler.
+Trong Hình 2-2, memory bổ sung đã được cấp phát ở cuối string six-byte. Đây là memory thêm mà heap manager dùng để theo dõi việc cấp phát. Nếu ghi vượt quá cuối string, memory bổ sung này sẽ bị hỏng. Trong ví dụ, memory bổ sung được vẽ sau string. Tuy nhiên, vị trí thực và nội dung ban đầu của nó phụ thuộc vào compiler.
 
 ![image](images/ch02/fig02-03.png)
 
@@ -105,7 +105,7 @@ Memory leak xảy ra khi memory đã cấp phát không bao giờ dùng lại nh
 
 - Không gọi function `free` dù đáng ra phải gọi (đôi khi gọi hidden leak)
 
-Vấn đề của memory leak là không thể thu hồi memory để dùng sau. Lượng memory sẵn có cho heap manager giảm. Nếu liên tục cấp phát rồi làm mất memory, chương trình có thể kết thúc khi cần thêm nhưng `malloc` không cấp phát được vì hết memory. Trường hợp nghiêm trọng có thể làm operating system crash.
+Một vấn đề của memory leak là memory không thể được thu hồi và sử dụng về sau. Lượng memory mà heap manager có thể dùng bị giảm. Nếu memory liên tục được cấp phát rồi bị mất, chương trình có thể kết thúc khi cần thêm memory nhưng `malloc` không thể cấp vì đã hết memory. Trong trường hợp nghiêm trọng, operating system có thể crash.
 
 Ví dụ đơn giản sau minh họa điều này:
 
@@ -121,7 +121,7 @@ Variable `chunk` được gán memory từ heap. Tuy nhiên, memory này không 
 
 #### Làm mất address
 
-Chuỗi code sau minh họa làm mất address khi `pi` được gán address mới. Address của allocation đầu bị mất khi cấp phát memory cho `pi` lần thứ hai.
+Một ví dụ về mất address của memory được minh họa trong chuỗi code sau, nơi `pi` được gán lại một address mới. Address của lần cấp phát đầu tiên bị mất khi `pi` được cấp memory lần thứ hai.
 
 ```
 int *pi = (int*) malloc(sizeof(int));
@@ -130,7 +130,7 @@ int *pi = (int*) malloc(sizeof(int));
 pi = (int*) malloc(sizeof(int));
 ```
 
-Hình 2-3 minh họa: ảnh trước và sau tương ứng trạng thái chương trình trước và sau lần `malloc` thứ hai. Memory ở address 500 chưa được giải phóng, nhưng chương trình không còn lưu address này ở đâu.
+Điều này được minh họa trong Hình 2-3, nơi các hình trước và sau tương ứng với trạng thái chương trình trước và sau lần thực thi `malloc` thứ hai. Memory tại address 500 chưa được giải phóng, và chương trình không còn giữ address này ở bất kỳ đâu.
 
 ![image](images/ch02/fig02-04.png)
 
@@ -147,7 +147,7 @@ while(*name != 0) {
 }
 ```
 
-Tuy nhiên, mỗi vòng lặp tăng `name` một đơn vị. Cuối cùng `name` trỏ đến ký tự kết thúc `NUL` của string như Hình 2-4. Address bắt đầu của memory đã cấp phát bị mất.
+Tuy nhiên, nó tăng `name` thêm 1 sau mỗi lần lặp. Cuối cùng, `name` còn trỏ đến ký tự kết thúc `NUL` của string, như minh họa trong Hình 2-4. Address bắt đầu của memory đã cấp phát bị mất.
 
 ![image](images/ch02/fig02-05.png)
 
@@ -155,13 +155,13 @@ Hình 2-4. Làm mất address của memory cấp phát động
 
 #### Hidden memory leak
 
-Memory leak cũng xảy ra khi chương trình nên giải phóng memory nhưng không làm. Hidden memory leak xảy ra khi object vẫn được giữ trong heap dù không còn cần, thường do programmer sơ suất. Vấn đề chính là object chiếm memory không cần nữa và lẽ ra phải trả cho heap. Tệ nhất, heap manager không cấp phát được memory khi yêu cầu, có thể buộc chương trình kết thúc. Tốt nhất thì vẫn đang giữ memory không cần.
+Memory leak cũng có thể xảy ra khi chương trình nên giải phóng memory nhưng không làm. Memory leak ẩn xuất hiện khi một object được giữ trong heap dù không còn cần thiết. Đây thường là kết quả của việc lập trình viên bỏ sót. Vấn đề chính là object đang dùng memory không còn cần và lẽ ra phải được trả lại heap. Trong trường hợp xấu nhất, heap manager có thể không cấp được memory khi được yêu cầu, có thể buộc chương trình kết thúc. Tốt nhất thì chúng ta cũng đang giữ memory không cần thiết.
 
 Memory leak cũng có thể xảy ra khi giải phóng structure tạo bằng keyword `struct`. Nếu structure chứa pointer đến memory cấp phát động, có thể phải giải phóng các pointer này trước khi giải phóng structure. Chương 6 có ví dụ.
 
 ## Dynamic memory allocation function
 
-Có nhiều allocation function để quản lý dynamic memory. Tuy các function sẵn có tùy hệ thống, các function sau nằm trong header file stdlib.h trên phần lớn hệ thống:
+Có một số memory allocation function để quản lý dynamic memory. Dù những function có sẵn có thể phụ thuộc hệ thống, các function sau được tìm thấy trên phần lớn hệ thống trong header file stdlib.h:
 
 - `malloc`
 
@@ -182,21 +182,21 @@ Bảng 2-1. Dynamic memory allocation function
 | `calloc` | Cấp phát memory từ heap và đặt toàn zero |
 | `free` | Trả block memory về heap |
 
-Dynamic memory được cấp phát từ heap. Các lời gọi liên tiếp không bảo đảm thứ tự hay tính liên tục của memory được cấp phát. Tuy nhiên, memory được align theo data type của pointer. Ví dụ integer four-byte được cấp phát trên ranh giới address chia hết cho bốn. Address heap manager trả về là address của byte thấp nhất.
+Dynamic memory được cấp phát từ heap. Với các lời gọi cấp phát memory liên tiếp, không có bảo đảm về thứ tự hoặc tính liên tục của memory được cấp. Tuy nhiên, memory sẽ được align theo data type của pointer. Chẳng hạn, một integer four-byte sẽ được cấp phát tại ranh giới address chia hết cho bốn. Address do heap manager trả về chứa address của byte thấp nhất.
 
-Trong Hình 2-3, function `malloc` cấp bốn byte ở address 500. Lần `malloc` thứ hai cấp memory ở address 600. Cả hai trên ranh giới address four-byte và không cấp phát tại vị trí liên tiếp.
+Trong Hình 2-3, function `malloc` cấp bốn byte tại address 500. Lần dùng function `malloc` thứ hai cấp memory tại address 600. Cả hai đều nằm trên ranh giới address four-byte, và chúng không cấp phát memory từ các vị trí liên tiếp.
 
 ### Dùng function malloc
 
-Function `malloc` cấp một block memory từ heap. Argument duy nhất chỉ số byte cấp phát. Return type là pointer đến void. Nếu không có memory, trả `NULL`. Function không xóa hay sửa memory, nên phải xem nội dung là garbage. Prototype như sau:
+Function `malloc` cấp phát một block memory từ heap. Số byte được cấp phát do argument duy nhất của nó chỉ định. Return type là pointer đến void. Nếu không có memory, `NULL` được trả về. Function không xóa hoặc sửa memory theo cách khác, nên nội dung memory phải được xem như chứa dữ liệu rác. Prototype của function như sau:
 
 ```
 void*  malloc(size_t);
 ```
 
-Function có argument duy nhất type `size_t`, đã bàn trong Chương 1. Cẩn thận khi truyền variable, vì argument âm có thể gây vấn đề. Trên một số hệ thống, argument âm khiến trả NULL.
+Function có một argument duy nhất thuộc type `size_t`. Type này được thảo luận trong Chương 1. Bạn cần cẩn thận khi truyền variable cho function này, vì vấn đề có thể phát sinh nếu argument là số âm. Trên một số hệ thống, giá trị NULL được trả về nếu argument âm.
 
-Khi argument bằng zero, hành vi `malloc` là implementation-specific. Nó có thể trả pointer đến `NULL`, hoặc pointer đến vùng có zero byte được cấp phát. Nếu dùng `malloc` với argument `NULL`, thường sinh warning và chạy với kết quả trả về zero byte.
+Khi `malloc` được dùng với argument bằng 0, hành vi của nó là implementation-specific. Nó có thể trả về pointer đến `NULL` hoặc pointer đến một vùng được cấp phát 0 byte. Nếu function `malloc` được dùng với argument `NULL`, thông thường nó tạo cảnh báo và thực thi với kết quả trả về 0 byte.
 
 Sau đây là cách dùng điển hình của `malloc`:
 
@@ -227,7 +227,7 @@ if(pi != NULL) {
 
 #### Cast hay không cast
 
-Trước khi pointer đến void được đưa vào C, cần cast tường minh với `malloc` để tránh warning khi assignment giữa các pointer type không tương thích. Vì có thể gán pointer đến void cho mọi pointer type khác, không còn bắt buộc cast tường minh. Một số developer coi cast tường minh là thói quen tốt vì:
+Trước khi pointer đến void được đưa vào C, cần có cast tường minh với `malloc` để ngăn cảnh báo khi thực hiện assignment giữa các pointer type không tương thích. Vì pointer đến void có thể được gán cho bất kỳ pointer type nào khác, cast tường minh không còn bắt buộc. Một số developer xem cast tường minh là cách làm tốt vì:
 
 - Nó thể hiện ý định dùng function `malloc`
 
@@ -237,7 +237,7 @@ Dùng cast sẽ có vấn đề nếu quên include header file của `malloc`. 
 
 #### Không cấp phát memory
 
-Nếu khai báo pointer nhưng không cấp memory tại address nó trỏ đến trước khi dùng, memory thường chứa garbage, thường dẫn tới invalid memory reference. Xét chuỗi code:
+Nếu khai báo pointer nhưng không cấp phát memory tại address mà nó trỏ đến trước khi sử dụng, memory đó thường chứa dữ liệu rác, thường dẫn đến một memory reference không hợp lệ. Hãy xem chuỗi code sau:
 
 ```
 int *pi;
@@ -259,11 +259,11 @@ printf("Enter a name: ");
 scanf("%s",name);
 ```
 
-Dù có vẻ sẽ chạy đúng, chúng ta đang dùng memory do `name` tham chiếu nhưng chưa cấp phát nó. Có thể minh họa vấn đề bằng cách đổi variable `pi` trong Hình 2-5 thành `name`.
+Dù có vẻ đoạn này sẽ thực thi đúng, chúng ta đang dùng memory được `name` tham chiếu. Tuy nhiên, memory này chưa được cấp phát. Có thể minh họa vấn đề bằng hình ảnh bằng cách đổi variable `pi` trong Hình 2-5 thành `name`.
 
 #### Dùng sai kích thước cho function malloc
 
-Function `malloc` cấp số byte theo argument. Phải thận trọng cấp đúng số byte. Ví dụ, muốn chỗ cho 10 double thì cần 80 byte, như sau:
+Function `malloc` cấp phát số byte do argument chỉ định. Bạn cần cẩn thận để cấp đúng số byte khi dùng function. Chẳng hạn, nếu muốn cấp storage cho 10 double, chúng ta cần cấp 80 byte. Điều này được thực hiện như dưới đây:
 
 ```
 double *pd = (double*)malloc(NUMBER_OF_DOUBLES * sizeof(double));
@@ -273,7 +273,7 @@ double *pd = (double*)malloc(NUMBER_OF_DOUBLES * sizeof(double));
 
 Dùng operator `sizeof` khi chỉ số byte cần cấp cho data type bất cứ khi nào có thể.
 
-Ví dụ sau thử cấp memory cho 10 double:
+Trong ví dụ sau, chúng ta thử cấp phát memory cho 10 double:
 
 ```
 const int NUMBER_OF_DOUBLES = 10;
@@ -284,23 +284,23 @@ Tuy nhiên, code chỉ cấp 10 byte.
 
 #### Xác định lượng memory đã cấp phát
 
-Không có cách standard xác định tổng memory heap đã cấp. Tuy nhiên, một số compiler cung cấp extension cho mục đích này. Cũng không có cách standard xác định kích thước block do heap manager cấp.
+Không có cách tiêu chuẩn để xác định tổng lượng memory do heap cấp phát. Tuy nhiên, một số compiler cung cấp extension cho mục đích này. Ngoài ra, không có cách tiêu chuẩn để xác định kích thước một memory block do heap manager cấp phát.
 
-Ví dụ, nếu cấp 64 byte cho string, heap manager cấp thêm memory để quản lý block. Tổng kích thước cấp phát và lượng heap manager dùng là tổng hai lượng này, như đã minh họa ở Hình 2-2.
+Chẳng hạn, nếu cấp 64 byte cho một string, heap manager sẽ cấp thêm memory để quản lý block này. Tổng kích thước được cấp phát, tính cả lượng mà heap manager dùng, là tổng của hai lượng đó. Điều này được minh họa trong Hình 2-2.
 
-Kích thước tối đa cấp bằng `malloc` tùy hệ thống. Có vẻ nên bị giới hạn bởi `size_t`, nhưng lượng physical memory và các ràng buộc operating system khác có thể áp giới hạn.
+Kích thước tối đa có thể cấp phát bằng `malloc` phụ thuộc hệ thống. Có vẻ kích thước này phải bị giới hạn bởi `size_t`. Tuy nhiên, giới hạn có thể đến từ lượng physical memory hiện có và các constraint khác của operating system.
 
-Khi `malloc` chạy, nó phải cấp lượng memory được yêu cầu rồi trả address. Nếu operating system nền dùng “lazy initialization”, chưa thật sự cấp memory cho đến khi truy cập thì sao? Lúc đó có thể có vấn đề nếu không đủ memory. Câu trả lời tùy runtime và operating system. Developer thông thường không cần xử lý câu hỏi này vì kiểu initialization như vậy khá hiếm.
+Khi `malloc` thực thi, nó phải cấp lượng memory được yêu cầu rồi trả về address của memory đó. Điều gì xảy ra nếu operating system bên dưới dùng “lazy initialization”, không thực sự cấp memory cho đến khi memory được truy cập? Lúc này có thể phát sinh vấn đề nếu không đủ memory để cấp phát. Câu trả lời phụ thuộc runtime system và operating system. Developer thông thường thường không cần xử lý câu hỏi này vì những cơ chế khởi tạo như vậy khá hiếm.
 
 #### Dùng malloc với static và global pointer
 
-Không thể dùng function call khi khởi tạo static hoặc global variable. Chuỗi sau khai báo static variable rồi thử khởi tạo bằng `malloc`:
+Bạn không thể dùng function call khi khởi tạo static variable hoặc global variable. Trong chuỗi code sau, chúng ta khai báo một static variable rồi cố khởi tạo nó bằng `malloc`:
 
 ```
 static int *pi = malloc(sizeof(int));
 ```
 
-Điều này sinh compile-time error. Global variable cũng vậy, nhưng với static variable có thể tránh bằng câu lệnh riêng để cấp memory như sau. Không thể dùng assignment riêng với global variable vì chúng được khai báo ngoài function, còn executable code như assignment phải nằm trong function:
+Điều này tạo một thông báo lỗi compile-time. Điều tương tự xảy ra với global variable, nhưng với static variable có thể tránh bằng một statement riêng để cấp memory cho variable như dưới đây. Chúng ta không thể dùng assignment statement riêng với global variable vì global variable được khai báo ngoài function, còn executable code như assignment statement phải nằm bên trong function:
 
 ```
 static int *pi;
@@ -309,7 +309,7 @@ pi = malloc(sizeof(int));
 
 ![image](images/ch02/fig02-01.png)
 
-Theo compiler, dùng initialization operator = khác với dùng assignment operator =.
+Từ góc nhìn của compiler, có sự khác nhau giữa việc dùng initialization operator = và dùng assignment operator =.
 
 ### Dùng function calloc
 
@@ -323,7 +323,7 @@ void *calloc(size_t numElements, size_t elementSize);
 
 Xóa memory nghĩa là đặt toàn bộ nội dung thành binary zero.
 
-Function cấp memory theo tích parameter `numElements` và `elementSize`. Nó trả pointer đến byte đầu. Nếu không cấp được, trả `NULL`. Ban đầu function này dùng hỗ trợ cấp memory cho array.
+Function sẽ cấp lượng memory được xác định bằng tích của các parameter `numElements` và `elementSize`. Nó trả về pointer đến byte đầu tiên của memory. Nếu function không thể cấp memory, `NULL` được trả về. Ban đầu, function này được dùng để hỗ trợ cấp memory cho array.
 
 Nếu `numElements` hoặc `elementSize` bằng zero, có thể trả null pointer. Nếu `calloc` không cấp được memory, trả null pointer và đặt global variable `errno` thành `ENOMEM` (hết memory). Đây là error code `POSIX`, có thể không có trên mọi hệ thống.
 
@@ -333,7 +333,7 @@ Xét ví dụ sau, `pi` được cấp tổng cộng 20 byte, tất cả chứa 
 int *pi = calloc(5,sizeof(int));
 ```
 
-Thay vì `calloc`, có thể dùng `malloc` cùng `memset` để đạt kết quả tương tự:
+Thay vì dùng `calloc`, có thể dùng function `malloc` cùng function `memset` để đạt kết quả tương tự, như minh họa dưới đây:
 
 ```
 int *pi = malloc(5 * sizeof(int));
@@ -342,7 +342,7 @@ memset(pi, 0, 5* sizeof(int));
 
 ![image](images/ch02/fig02-01.png)
 
-Function `memset` điền một giá trị vào block. Argument đầu là pointer đến buffer cần điền. Argument thứ hai là giá trị, cuối cùng là số byte cần đặt.
+Function `memset` điền một giá trị vào block. Argument đầu là pointer đến buffer cần điền. Argument thứ hai là giá trị dùng để điền buffer, và argument cuối là số byte cần được đặt.
 
 Dùng `calloc` khi cần đặt memory toàn zero. Tuy nhiên, chạy `calloc` có thể lâu hơn `malloc`.
 
@@ -352,17 +352,17 @@ Function `cfree` không còn cần. Thời C ban đầu, nó dùng giải phóng
 
 ### Dùng function realloc
 
-Đôi khi cần tăng hoặc giảm lượng memory cấp cho pointer. Điều này đặc biệt hữu ích khi cần array có kích thước biến đổi, như Chương 4 sẽ minh họa. Function `realloc` cấp phát lại memory. Prototype như sau:
+Đôi khi cần tăng hoặc giảm lượng memory được cấp cho một pointer. Điều này đặc biệt hữu ích khi cần array có kích thước biến đổi, như sẽ minh họa trong Chương 4. Function `realloc` sẽ cấp phát lại memory. Prototype như sau:
 
 ```
 void *realloc(void *ptr, size_t size);
 ```
 
-Function `realloc` trả pointer đến block memory. Nó nhận hai argument: pointer đến block ban đầu và kích thước yêu cầu. Kích thước block cấp lại khác block mà argument đầu tham chiếu. Return value là pointer đến memory cấp lại.
+Function `realloc` trả về pointer đến một block memory. Function nhận hai argument. Argument đầu là pointer đến block ban đầu, còn argument thứ hai là kích thước yêu cầu. Kích thước block được cấp lại sẽ khác với kích thước block mà argument đầu tham chiếu. Return value là pointer đến memory được cấp phát lại.
 
-Kích thước yêu cầu có thể nhỏ hoặc lớn hơn lượng hiện có. Nếu nhỏ hơn, memory dư được trả về heap, nhưng không bảo đảm được xóa. Nếu lớn hơn, khi có thể, memory được cấp ngay sau vùng hiện tại. Nếu không, cấp từ vùng heap khác và sao chép memory cũ sang vùng mới.
+Kích thước yêu cầu có thể nhỏ hơn hoặc lớn hơn lượng hiện đã cấp phát. Nếu nhỏ hơn, memory dư được trả về heap. Không có bảo đảm memory dư sẽ được xóa. Nếu lớn hơn, memory sẽ được cấp từ vùng ngay sau allocation hiện tại nếu có thể. Nếu không, memory được cấp từ một vùng khác của heap và memory cũ được copy sang vùng mới.
 
-Nếu kích thước zero và pointer không null, pointer được giải phóng. Nếu không cấp được không gian, block ban đầu được giữ nguyên. Tuy nhiên, pointer trả về là null pointer và `errno` được đặt `ENOMEM`.
+Nếu kích thước bằng 0 và pointer không phải null, pointer sẽ được free. Nếu không thể cấp storage, block memory ban đầu được giữ lại và không thay đổi. Tuy nhiên, pointer được trả về là null pointer và `errno` được đặt thành `ENOMEM`.
 
 Hành vi function được tóm tắt trong Bảng 2-2.
 
@@ -375,7 +375,7 @@ Bảng 2-2. Hành vi function realloc
 | Not null | Nhỏ hơn kích thước block ban đầu | Cấp block nhỏ hơn bằng block hiện tại |
 | Not null | Lớn hơn kích thước block ban đầu | Cấp block lớn hơn tại vị trí hiện tại hoặc vùng heap khác |
 
-Ví dụ sau dùng hai variable cấp memory cho string. Ban đầu cấp 16 byte nhưng chỉ dùng 13 byte đầu (12 chữ số hexadecimal và ký tự kết thúc null (0)):
+Trong ví dụ sau, chúng ta dùng hai variable để cấp memory cho một string. Ban đầu, chúng ta cấp 16 byte nhưng chỉ dùng 13 byte đầu: 12 chữ số hexadecimal và ký tự kết thúc null (0):
 
 ```
 char *string1;
@@ -405,7 +405,7 @@ Memory allocation được minh họa trong Hình 2-6.
 
 Hình 2-6. Ví dụ realloc
 
-Heap manager tái sử dụng được block ban đầu mà không sửa nội dung. Tuy nhiên, chương trình tiếp tục dùng hơn tám byte yêu cầu; tức chưa sửa string để vừa block eight-byte. Trong ví dụ này, nên điều chỉnh độ dài string để vừa tám byte cấp lại. Cách đơn giản nhất là gán character `NUL` vào address 507. Dùng quá không gian cấp phát là thói quen xấu nên tránh, như Chương 7 sẽ trình bày kỹ.
+Heap manager có thể tái sử dụng block ban đầu và không sửa nội dung của nó. Tuy nhiên, chương trình tiếp tục dùng nhiều hơn tám byte được yêu cầu. Nghĩa là chúng ta không thay đổi string để vừa block eight-byte. Trong ví dụ này, lẽ ra cần điều chỉnh độ dài string để vừa tám byte được cấp lại. Cách đơn giản nhất là gán một ký tự `NUL` cho address 507. Dùng nhiều storage hơn lượng được cấp không phải cách làm tốt và nên tránh, như trình bày chi tiết trong Chương 7.
 
 Trong ví dụ tiếp theo, chúng ta cấp phát lại để có thêm memory:
 
@@ -432,9 +432,9 @@ Hình 2-7. Cấp thêm memory
 
 ### Function alloca và Variable Length Array
 
-Function `alloca` (`malloca` của Microsoft) cấp memory trong stack frame của function. Khi function return, memory tự giải phóng. Function này khó triển khai nếu runtime system không stack-based. Vì vậy nó không standard và nên tránh nếu application cần portable.
+Function `alloca`, hay `malloca` của Microsoft, cấp memory bằng cách đặt nó trong stack frame của function. Khi function trả về, memory tự động được giải phóng. Function này có thể khó triển khai nếu runtime system bên dưới không phải stack-based. Vì vậy, đây là function không tiêu chuẩn và nên tránh nếu ứng dụng cần portable.
 
-C99 giới thiệu Variable Length Array (VLA), cho phép khai báo và tạo array trong function với kích thước dựa trên variable. Ví dụ sau cấp array `char` để dùng trong function:
+Trong C99, Variable Length Array (VLA) được đưa vào, cho phép khai báo và tạo array trong function với kích thước dựa trên một variable. Trong ví dụ sau, một array `char` được cấp phát để dùng trong function:
 
 ```
 void compute(int size) {
@@ -443,23 +443,23 @@ void compute(int size) {
 }
 ```
 
-Nghĩa là allocation diễn ra tại runtime, memory là một phần stack frame. Đồng thời, khi dùng operator `sizeof` với array, nó chạy tại runtime thay vì compile time.
+Điều này có nghĩa việc cấp memory được thực hiện tại runtime và memory được cấp như một phần của stack frame. Ngoài ra, khi operator `sizeof` được dùng với array, nó được thực thi tại runtime thay vì compile time.
 
-Có một chút chi phí runtime. Ngoài ra, khi thoát function, memory thực tế được giải phóng. Vì không dùng function kiểu `malloc` để tạo, không nên dùng `free` để giải phóng. Function cũng không nên trả pointer đến memory này. Chương 5 bàn vấn đề đó.
+Điều này gây một chi phí runtime nhỏ. Ngoài ra, khi function thoát, memory được giải phóng về mặt hiệu dụng. Vì chúng ta không dùng function kiểu `malloc` để tạo nó, không nên dùng function `free` để giải phóng. Function cũng không nên trả về pointer đến memory này. Vấn đề được trình bày trong Chương 5.
 
 ![image](images/ch02/fig02-01.png)
 
-VLA không đổi kích thước. Kích thước cố định sau khi cấp phát. Nếu cần array thực sự thay đổi kích thước, phải dùng cách như function `realloc`, đã bàn trong “Dùng function realloc” trang 44.
+VLA không thay đổi kích thước. Kích thước của chúng được cố định khi cấp phát. Nếu cần array có kích thước thực sự thay đổi, bạn cần cách tiếp cận như dùng function `realloc`, được thảo luận trong mục “Dùng function realloc” ở trang 44.
 
 ## Giải phóng memory bằng function free
 
-Với dynamic memory allocation, programmer có thể trả memory khi không dùng nữa, dành cho mục đích khác. Thường làm bằng function `free`, có prototype sau:
+Với dynamic memory allocation, lập trình viên có thể trả lại memory khi không còn dùng, nhờ đó giải phóng nó cho mục đích khác. Thông thường, việc này được thực hiện bằng function `free`, có prototype dưới đây:
 
 ```
 void free(void *ptr);
 ```
 
-Argument pointer phải chứa address memory cấp bởi function kiểu `malloc`. Memory này được trả về heap. Dù pointer có thể vẫn trỏ vào vùng đó, luôn giả định nó trỏ đến garbage. Vùng này có thể được cấp lại sau và chứa data khác.
+Pointer argument phải chứa address của memory được cấp bằng một function kiểu `malloc`. Memory này được trả về heap. Dù pointer vẫn có thể trỏ đến vùng đó, hãy luôn giả định nó trỏ đến dữ liệu rác. Vùng này có thể được cấp lại về sau và chứa dữ liệu khác.
 
 Ví dụ đơn giản sau cấp memory cho `pi` rồi cuối cùng giải phóng:
 
@@ -469,13 +469,13 @@ int *pi = (int*) malloc(sizeof(int));
 free(pi);
 ```
 
-Hình 2-8 minh họa memory ngay trước và sau khi `free` thực thi. Ô nét đứt ở address 500 cho biết memory đã giải phóng nhưng vẫn có thể giữ giá trị. Variable `pi` vẫn chứa address 500. Đây là dangling pointer, được bàn kỹ trong “Dangling pointer” trang 51.
+Hình 2-8 minh họa việc cấp phát memory ngay trước và ngay sau khi function `free` thực thi. Ô nét đứt tại address 500 cho biết memory đã được giải phóng nhưng vẫn có thể chứa giá trị của nó. Variable `pi` vẫn chứa address 500. Đây được gọi là dangling pointer và được thảo luận chi tiết trong mục “Dangling pointer” ở trang 51.
 
 ![image](images/ch02/fig02-09.png)
 
 Hình 2-8. Giải phóng memory bằng free
 
-Nếu truyền null pointer cho `free`, thường không làm gì. Nếu pointer không được cấp bởi function kiểu `malloc`, hành vi function là undefined. Ví dụ sau gán cho `pi` address của `num`, nhưng đây không phải heap address hợp lệ:
+Nếu function `free` nhận một null pointer, thông thường nó không làm gì. Nếu pointer được truyền vào đã được cấp phát bằng thứ khác ngoài function kiểu `malloc`, hành vi của function là undefined. Trong ví dụ sau, `pi` được gán address của `num`. Tuy nhiên, đây không phải heap address hợp lệ:
 
 ```
 int num;
@@ -506,7 +506,7 @@ Memory allocation được minh họa trong Hình 2-9.
 
 Hình 2-9. Gán NULL sau khi dùng free
 
-Kỹ thuật này cố xử lý vấn đề như dangling pointer. Tuy nhiên, tốt hơn nên dành thời gian giải quyết điều kiện gây vấn đề, thay vì bắt lỗi thô bằng null pointer. Ngoài ra, không thể gán `NULL` cho constant pointer trừ lúc khởi tạo.
+Kỹ thuật này cố xử lý những vấn đề như dangling pointer. Tuy nhiên, tốt hơn nên dành thời gian xử lý các điều kiện gây ra vấn đề thay vì bắt chúng một cách thô sơ bằng null pointer. Ngoài ra, bạn không thể gán `NULL` cho constant pointer ngoài lúc khởi tạo nó.
 
 ### Double free
 
@@ -520,7 +520,7 @@ free(pi);
 free(pi);
 ```
 
-Lần `free` thứ hai gây runtime exception. Ví dụ ít rõ hơn là hai pointer cùng trỏ một block. Như sau, vô tình giải phóng cùng memory lần thứ hai cũng gây runtime exception tương tự:
+Việc thực thi function `free` thứ hai sẽ gây runtime exception. Một ví dụ ít rõ hơn dùng hai pointer cùng trỏ đến một memory block. Như dưới đây, runtime exception tương tự xảy ra khi chúng ta vô tình cố free cùng memory lần thứ hai:
 
 ```
 p1 = (int*) malloc(sizeof(int));
@@ -540,19 +540,19 @@ Hai pointer tham chiếu cùng vị trí được gọi là aliasing. Chương 8
 
 Hình 2-10. Double free
 
-Đáng tiếc, heap manager khó xác định block đã được giải phóng chưa. Vì vậy chúng không cố phát hiện cùng memory bị giải phóng hai lần. Điều này thường làm hỏng heap và kết thúc chương trình. Ngay cả khi không kết thúc, logic giải quyết vấn đề cũng đáng nghi. Không có lý do giải phóng cùng memory hai lần.
+Đáng tiếc là heap manager khó xác định một block đã được giải phóng hay chưa. Vì vậy, chúng không cố phát hiện việc cùng memory bị free hai lần. Điều này thường làm hỏng heap và kết thúc chương trình. Ngay cả khi chương trình không kết thúc, nó vẫn thể hiện logic giải quyết vấn đề đáng ngờ. Không có lý do gì để free cùng memory hai lần.
 
-Có đề xuất rằng `free` nên gán `NULL` hoặc giá trị đặc biệt khác cho argument khi return. Tuy nhiên, do pointer được truyền by value, `free` không thể gán tường minh `NULL` cho pointer. Mục “Truyền pointer đến pointer” trang 68 giải thích kỹ hơn.
+Có đề xuất rằng function `free` nên gán `NULL` hoặc một giá trị đặc biệt khác cho argument khi trả về. Tuy nhiên, vì pointer được truyền by value, function `free` không thể gán tường minh `NULL` cho pointer. Điều này được giải thích kỹ hơn trong mục “Truyền pointer đến pointer” ở trang 68.
 
 ### Heap và system memory
 
-Heap thường dùng operating system function để quản lý memory. Kích thước heap có thể cố định lúc tạo chương trình hoặc được phép tăng. Tuy nhiên, heap manager không nhất thiết trả memory về operating system khi gọi `free`. Memory giải phóng chỉ trở nên sẵn có để application dùng tiếp. Vì vậy, khi chương trình cấp rồi giải phóng memory, việc giải phóng thường không thể hiện trong mức memory usage của application nhìn từ operating system.
+Heap thường dùng các operating system function để quản lý memory. Kích thước heap có thể được cố định khi chương trình được tạo hoặc được phép tăng lên. Tuy nhiên, heap manager không nhất thiết trả memory về operating system khi function `free` được gọi. Memory được giải phóng chỉ đơn giản trở nên sẵn có cho ứng dụng dùng tiếp. Vì vậy, khi chương trình cấp phát rồi giải phóng memory, việc giải phóng thường không được phản ánh trong mức sử dụng memory của ứng dụng từ góc nhìn operating system.
 
 ### Giải phóng memory khi chương trình kết thúc
 
-Operating system chịu trách nhiệm duy trì tài nguyên application, gồm memory. Khi application kết thúc, operating system chịu trách nhiệm cấp lại memory này cho application khác. Memory của application đã kết thúc có hỏng hay không không thành vấn đề. Thực tế, một nguyên nhân application kết thúc có thể là memory bị hỏng. Với kết thúc bất thường, có thể không cleanup được. Vì vậy không có lý do phải giải phóng memory đã cấp trước khi application kết thúc.
+Operating system chịu trách nhiệm duy trì tài nguyên của ứng dụng, bao gồm memory. Khi ứng dụng kết thúc, operating system có trách nhiệm phân bổ lại memory này cho các ứng dụng khác. Trạng thái memory của ứng dụng đã kết thúc, bị hỏng hay không, không phải vấn đề. Thực tế, một lý do ứng dụng có thể kết thúc là memory bị hỏng. Khi chương trình kết thúc bất thường, việc dọn dẹp có thể không khả thi. Vì vậy, không có lý do để free memory đã cấp trước khi ứng dụng kết thúc.
 
-Tuy vậy, vẫn có lý do khác để giải phóng. Programmer có trách nhiệm có thể muốn giải phóng vì chất lượng. Giải phóng memory khi không cần nữa luôn là thói quen tốt, dù application đang kết thúc. Nếu dùng tool phát hiện memory leak hoặc tương tự, giải phóng sẽ làm output tool sạch hơn. Trong một số operating system ít phức tạp, memory có thể không được tự thu hồi, và chương trình phải làm trước khi kết thúc. Ngoài ra, phiên bản application sau có thể thêm code ở cuối. Nếu memory trước chưa giải phóng, có thể phát sinh vấn đề.
+Tuy vậy, có thể có các lý do khác để free memory này. Lập trình viên có trách nhiệm có thể muốn free memory vì chất lượng. Free memory sau khi không còn cần luôn là thói quen tốt, ngay cả khi ứng dụng đang kết thúc. Nếu dùng công cụ phát hiện memory leak hoặc vấn đề tương tự, giải phóng memory sẽ làm sạch output của công cụ. Trong một số operating system ít phức tạp hơn, operating system có thể không tự thu hồi memory và chương trình có thể phải thu hồi trước khi kết thúc. Ngoài ra, phiên bản ứng dụng sau có thể thêm code gần cuối chương trình. Nếu memory trước đó chưa được free, vấn đề có thể phát sinh.
 
 Vì vậy, bảo đảm mọi memory được giải phóng trước khi kết thúc:
 
@@ -570,9 +570,9 @@ Có nên giải phóng memory trước khi kết thúc hay không là applicatio
 
 ## Dangling pointer
 
-Nếu pointer vẫn tham chiếu memory ban đầu sau khi memory được giải phóng, nó là dangling pointer. Pointer không trỏ đến object hợp lệ. Đôi khi gọi là premature free.
+Nếu pointer vẫn tham chiếu memory ban đầu sau khi memory được giải phóng, nó được gọi là dangling pointer. Pointer không trỏ đến một object hợp lệ. Điều này đôi khi được gọi là premature free.
 
-Dùng dangling pointer có thể dẫn tới nhiều vấn đề, gồm:
+Việc sử dụng dangling pointer có thể gây ra nhiều loại vấn đề khác nhau, bao gồm:
 
 - Hành vi khó dự đoán nếu truy cập memory
 
@@ -588,7 +588,7 @@ Các vấn đề này có thể xảy ra khi:
 
 ### Ví dụ dangling pointer
 
-Ví dụ đơn giản sau cấp memory cho integer bằng `malloc`, rồi giải phóng bằng `free`:
+Dưới đây là ví dụ đơn giản: chúng ta cấp phát memory cho integer bằng function `malloc`. Tiếp theo, memory được giải phóng bằng function `free`:
 
 ```
 int *pi = (int*) malloc(sizeof(int));
@@ -597,9 +597,9 @@ printf("*pi: %d\n", *pi);
 free(pi);
 ```
 
-Variable `pi` vẫn giữ address integer. Tuy nhiên heap manager có thể tái sử dụng memory này, chứa data khác integer. Hình 2-11 minh họa trạng thái ngay trước và sau khi `free` chạy. Giả định `pi` thuộc function `main`, ở address 100. Memory cấp bởi `malloc` nằm ở address 500.
+Variable `pi` vẫn chứa address của integer. Tuy nhiên, heap manager có thể tái sử dụng memory này và nó có thể chứa dữ liệu khác integer. Hình 2-11 minh họa trạng thái chương trình ngay trước và sau khi function `free` được thực thi. Variable `pi` được giả định thuộc function `main` và nằm tại address 100. Memory được cấp bằng `malloc` nằm tại address 500.
 
-Khi `free` chạy, memory ở address 500 đã giải phóng, không nên dùng. Tuy nhiên, phần lớn runtime system không ngăn truy cập hay sửa sau đó. Vẫn có thể thử ghi vào vị trí như sau, với kết quả không dự đoán được.
+Khi function `free` được thực thi, memory tại address 500 đã được giải phóng và không nên sử dụng. Tuy nhiên, phần lớn runtime system không ngăn việc truy cập hoặc sửa đổi về sau. Chúng ta vẫn có thể thử ghi vào vị trí đó như dưới đây. Kết quả của hành động này không thể dự đoán.
 
 ```
 free(pi);
@@ -630,7 +630,7 @@ Hình 2-12 minh họa allocation, ô nét chấm biểu diễn memory đã giả
 
 Hình 2-12. Dangling pointer với aliased pointer
 
-Một vấn đề tinh vi có thể xảy ra khi dùng block statement như sau. Ở đây `pi` được gán address của `tmp`; `pi` có thể global hoặc local variable. Tuy nhiên, khi block chứa `tmp` bị pop khỏi program stack, address không còn hợp lệ:
+Một vấn đề khó nhận thấy có thể xảy ra khi dùng block statement như dưới đây. Ở đây, `pi` được gán address của `tmp`. Variable `pi` có thể là global variable hoặc local variable. Tuy nhiên, khi block chứa `tmp` được pop khỏi program stack, address không còn hợp lệ:
 
 ```
 int *pi;
@@ -643,7 +643,7 @@ int *pi;
 foo();
 ```
 
-Phần lớn compiler coi block statement như stack frame. Variable `tmp` được cấp trên stack frame, rồi bị pop khỏi stack khi thoát block. Pointer `pi` còn trỏ đến vùng memory cuối cùng có thể bị activation record khác ghi đè, như function `foo`. Hình 2-13 minh họa.
+Phần lớn compiler xem block statement như một stack frame. Variable `tmp` được cấp trên stack frame và sau đó bị pop khỏi stack khi thoát block statement. Pointer `pi` lúc này còn trỏ đến một vùng memory có thể cuối cùng bị activation record khác ghi đè, chẳng hạn function `foo`. Tình trạng này được minh họa trong Hình 2-13.
 
 ![image](images/ch02/fig02-14.png)
 
@@ -651,9 +651,9 @@ Hình 2-13. Vấn đề block statement
 
 ### Xử lý dangling pointer
 
-Debug vấn đề pointer-induced đôi khi khó. Có nhiều cách xử lý dangling pointer, gồm:
+Đôi khi, việc debug và giải quyết những vấn đề pointer-induced có thể khó khăn. Có một số cách tiếp cận để xử lý dangling pointer, bao gồm:
 
-- Đặt pointer bằng `NULL` sau khi giải phóng. Dùng tiếp sẽ kết thúc application. Tuy nhiên, nếu có nhiều bản sao pointer thì vấn đề vẫn có thể tồn tại, vì assignment chỉ ảnh hưởng một bản sao, như “Double free” trang 48 minh họa.
+- Đặt pointer thành `NULL` sau khi free. Việc sử dụng nó sau đó sẽ kết thúc ứng dụng. Tuy nhiên, vấn đề vẫn có thể tồn tại nếu có nhiều bản sao pointer. Lý do là assignment chỉ ảnh hưởng một bản sao, như minh họa trong mục “Double free” ở trang 48.
 
 - Viết function đặc biệt thay `free` (xem “Tự viết function free” trang 70).
 
@@ -661,11 +661,11 @@ Debug vấn đề pointer-induced đôi khi khó. Có nhiều cách xử lý dan
 
 - Dùng tool third-party phát hiện dangling pointer và vấn đề khác.
 
-Hiển thị pointer value hữu ích khi debug dangling pointer, nhưng phải cẩn thận cách hiển thị. Đã bàn trong “Hiển thị giá trị pointer” trang 9. Bảo đảm hiển thị nhất quán để tránh nhầm khi so sánh. Macro `assert` cũng hữu ích, như “Xử lý pointer chưa khởi tạo” trang 162 minh họa.
+Hiển thị pointer value có thể hữu ích khi debug dangling pointer, nhưng bạn cần cẩn thận với cách hiển thị. Chúng ta đã thảo luận cách hiển thị pointer value trong “Hiển thị giá trị pointer” ở trang 9. Hãy bảo đảm hiển thị nhất quán để tránh nhầm lẫn khi so sánh pointer value. Macro `assert` cũng có thể hữu ích, như minh họa trong “Xử lý pointer chưa khởi tạo” ở trang 162.
 
 ### Hỗ trợ phát hiện memory leak trong debug version
 
-Microsoft cung cấp kỹ thuật xử lý ghi đè memory cấp phát động và memory leak. Cách này dùng kỹ thuật memory management đặc biệt trong debug version để:
+Microsoft cung cấp các kỹ thuật xử lý việc ghi đè memory được cấp động và memory leak. Cách tiếp cận này dùng các kỹ thuật quản lý memory đặc biệt trong bản debug của chương trình để:
 
 - Kiểm tra tính toàn vẹn heap
 
@@ -673,13 +673,13 @@ Microsoft cung cấp kỹ thuật xử lý ghi đè memory cấp phát động v
 
 - Mô phỏng tình huống heap ít memory
 
-Microsoft dùng data structure đặc biệt quản lý allocation. Nó giữ debug information như tên file và số dòng gọi `malloc`. Ngoài ra, cấp buffer trước và sau memory thực để phát hiện ghi đè. Có thêm thông tin tại Microsoft Developer Network.
+Microsoft thực hiện điều này bằng một data structure đặc biệt để quản lý cấp phát memory. Structure này duy trì debug information, chẳng hạn filename và số dòng nơi `malloc` được gọi. Ngoài ra, các buffer được cấp trước và sau memory thực để phát hiện việc ghi đè memory thực. Có thể tìm thêm thông tin về kỹ thuật này tại Microsoft Developer Network.
 
-Mudflap Libraries cung cấp khả năng tương tự cho GCC compiler. Runtime library hỗ trợ phát hiện memory leak và nhiều thứ khác, bằng cách instrument các operation dereference pointer.
+Mudflap Libraries cung cấp khả năng tương tự cho GCC compiler. Runtime library của nó hỗ trợ phát hiện memory leak cùng những vấn đề khác. Việc phát hiện được thực hiện bằng cách instrument các thao tác dereference pointer.
 
 ## Công nghệ dynamic memory allocation
 
-Đến đây đã nói về heap manager cấp phát và giải phóng memory. Tuy nhiên, implementation có thể khác theo compiler. Phần lớn dùng heap hoặc data segment làm nguồn memory. Cách này có thể bị fragmentation và va chạm program stack. Dù vậy, đây vẫn là cách triển khai heap phổ biến nhất.
+Đến đây, chúng ta đã nói về việc heap manager cấp phát và giải phóng memory. Tuy nhiên, cách triển khai công nghệ này có thể khác nhau tùy compiler. Phần lớn heap manager dùng heap hoặc data segment làm nguồn memory. Tuy nhiên, cách này chịu fragmentation và có thể va chạm với program stack. Dù vậy, đây là cách triển khai heap phổ biến nhất.
 
 Heap manager phải xử lý nhiều vấn đề, như cấp heap theo process và/hoặc thread, và bảo vệ heap khỏi vi phạm security.
 
@@ -689,9 +689,9 @@ Kỹ thuật thủ công quản lý memory cho structure được trình bày tr
 
 ### Garbage collection trong C
 
-Các function `malloc` và `free` cho phép cấp phát và giải phóng thủ công. Tuy nhiên, manual memory management trong C có nhiều vấn đề như performance, đạt locality of reference tốt, threading và cleanup memory hợp lý.
+Các function `malloc` và `free` cung cấp cách cấp phát và giải phóng memory thủ công. Tuy nhiên, có nhiều vấn đề khi dùng quản lý memory thủ công trong C, chẳng hạn hiệu năng, đạt locality of reference tốt, vấn đề threading và dọn memory hợp lý.
 
-Có thể dùng một số kỹ thuật không standard để xử lý; phần này xem xét vài kỹ thuật. Đặc điểm chính là tự động giải phóng memory. Khi không còn cần, memory được thu gom để dùng lại sau trong chương trình. Memory được giải phóng gọi là garbage, nên garbage collection chỉ quá trình xử lý memory đó.
+Một số kỹ thuật không tiêu chuẩn có thể xử lý một phần những vấn đề này, và phần này tìm hiểu một số kỹ thuật đó. Đặc điểm chính là tự động giải phóng memory. Khi memory không còn cần, nó được thu gom và trở nên sẵn có để dùng sau trong chương trình. Memory được giải phóng được gọi là garbage. Vì vậy, thuật ngữ garbage collection chỉ quá trình xử lý memory này.
 
 Garbage collection hữu ích vì nhiều lý do, gồm:
 
@@ -703,9 +703,9 @@ Một lựa chọn thay manual memory management là Boehm-Weiser Collector, nh�
 
 ### Resource Acquisition Is Initialization
 
-Resource Acquisition Is Initialization (RAII) do Bjarne Stroustrup phát minh, xử lý cấp phát và giải phóng tài nguyên trong C++. Kỹ thuật hữu ích để bảo đảm cấp phát rồi giải phóng tài nguyên khi có exception. Tài nguyên được cấp cuối cùng sẽ được giải phóng.
+Resource Acquisition Is Initialization (RAII) là kỹ thuật do Bjarne Stroustrup phát minh. Nó xử lý việc cấp phát và giải phóng resource trong C++. Kỹ thuật hữu ích để bảo đảm cấp phát rồi giải phóng resource khi có exception. Resource đã cấp cuối cùng sẽ được giải phóng.
 
-Có một số cách dùng RAII trong C. GNU compiler cung cấp extension không standard hỗ trợ. Chúng ta sẽ minh họa extension bằng cách cấp rồi giải phóng memory trong function. Khi variable ra khỏi scope, deallocation tự động diễn ra.
+Có một số cách tiếp cận để dùng RAII trong C. GNU compiler cung cấp một extension không tiêu chuẩn để hỗ trợ điều này. Chúng ta sẽ minh họa extension bằng cách cho thấy memory được cấp rồi free trong function như thế nào. Khi variable ra khỏi scope, quá trình giải phóng tự động xảy ra.
 
 GNU extension dùng macro `RAII_VARIABLE`. Nó khai báo variable và liên kết với variable:
 
@@ -723,7 +723,7 @@ Macro như sau:
     vartype varname __attribute__((cleanup(_dtor_ ## varname))) = (initval)
 ```
 
-Ví dụ sau khai báo variable `name` là pointer đến `char`. Khi tạo, function `malloc` thực thi, cấp 32 byte. Khi function kết thúc, `name` ra khỏi scope và function `free` thực thi:
+Trong ví dụ sau, chúng ta khai báo variable tên `name` là pointer đến `char`. Khi nó được tạo, function `malloc` được thực thi và cấp cho nó 32 byte. Khi function kết thúc, `name` ra khỏi scope và function `free` được thực thi:
 
 ```
 void raiiExample() {
@@ -739,9 +739,9 @@ Có thể đạt kết quả tương tự không cần GNU extension.
 
 ### Dùng exception handler
 
-Cách khác để giải phóng memory là exception handling. Dù không thuộc standard C, nó hữu ích nếu có sẵn và portability không phải mối lo. Ví dụ sau minh họa bằng phiên bản C của Microsoft Visual Studio.
+Một cách khác để xử lý việc giải phóng memory là dùng exception handling. Dù exception handling không phải phần tiêu chuẩn của C, nó có thể hữu ích nếu có sẵn và những vấn đề portability có thể có không đáng lo. Ví dụ sau minh họa cách này bằng phiên bản ngôn ngữ C của Microsoft Visual Studio.
 
-Try block bao các câu lệnh có thể throw exception tại runtime. Finally block chạy bất kể exception có được throw không. Function `free` được bảo đảm thực thi.
+Ở đây, try block bao quanh mọi statement có thể gây throw exception tại runtime. Finally block được thực thi bất kể có exception được throw hay không. Function `free` được bảo đảm sẽ được thực thi.
 
 ```
 void exceptionExample() {
@@ -761,6 +761,6 @@ Có thể triển khai exception handling trong C bằng nhiều cách khác.
 
 ## Tóm tắt
 
-Dynamic memory allocation là feature quan trọng của C. Chương này tập trung cấp memory thủ công bằng `malloc` và `free`. Đã xem nhiều vấn đề phổ biến liên quan, gồm không cấp phát memory và dangling pointer.
+Dynamic memory allocation là tính năng quan trọng của ngôn ngữ C. Trong chương này, chúng ta tập trung vào cấp phát memory thủ công bằng các function `malloc` và `free`. Chúng ta đã xử lý một số vấn đề phổ biến liên quan đến các function này, bao gồm không cấp phát memory và dangling pointer.
 
 Có những kỹ thuật không standard khác để quản lý dynamic memory trong C. Chúng ta đã đề cập một vài kỹ thuật garbage collection, gồm RAII và exception handling.

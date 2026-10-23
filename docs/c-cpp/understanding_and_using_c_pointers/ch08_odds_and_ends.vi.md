@@ -1,6 +1,6 @@
 # Chương 8. Các chủ đề khác
 
-Pointer thiết yếu với gần như mọi khía cạnh C. Nhiều lĩnh vực đã được xác định khá rõ như array và function. Chương này xem một số chủ đề không thật sự phù hợp các chương trước. Chúng sẽ hoàn thiện kiến thức về cách pointer hoạt động.
+Pointer thiết yếu với gần như mọi khía cạnh của C. Nhiều lĩnh vực trong số này được xác định khá rõ, chẳng hạn array và function. Chương này xem xét một số chủ đề không phù hợp hoàn toàn với các chương trước. Nội dung này sẽ hoàn thiện kiến thức của bạn về cách pointer hoạt động.
 
 Chương này xem các chủ đề liên quan pointer:
 
@@ -16,13 +16,13 @@ Chương này xem các chủ đề liên quan pointer:
 
 - Kỹ thuật Object-oriented
 
-Với thread, có hai lĩnh vực quan tâm. Đầu là vấn đề cơ bản chia sẻ data giữa thread bằng pointer. Thứ hai là dùng pointer hỗ trợ callback. Operation có thể gọi function thực hiện task. Khi function thực tế được gọi thay đổi, đó là callback function. Ví dụ sort function trong Chương 5 là callback function. Callback cũng dùng giao tiếp giữa thread.
+Về thread, có hai lĩnh vực đáng quan tâm. Thứ nhất là vấn đề cơ bản về chia sẻ data giữa các thread bằng pointer. Thứ hai thảo luận cách dùng pointer để hỗ trợ callback. Một operation có thể gọi function để thực hiện một công việc. Khi function thực tế được gọi thay đổi, nó được gọi là callback function. Chẳng hạn sort function dùng trong Chương 5 là một ví dụ về callback function. Callback cũng được dùng để giao tiếp giữa các thread.
 
-Chúng ta trình bày hai cách hỗ trợ kiểu object-oriented trong C. Đầu dùng opaque pointer, giấu chi tiết implementation data structure khỏi người dùng. Kỹ thuật thứ hai minh họa tạo hành vi polymorphic type trong C.
+Chúng ta sẽ trình bày hai cách cung cấp hỗ trợ kiểu object-oriented trong C. Cách thứ nhất dùng opaque pointer. Kỹ thuật này giấu những chi tiết implementation của data structure khỏi user. Kỹ thuật thứ hai minh họa cách tạo hành vi polymorphic type trong C.
 
 ## Cast pointer
 
-Cast là operator cơ bản rất hữu ích với pointer. Cast pointer có ích vì nhiều lý do:
+Casting là operator cơ bản có thể rất hữu ích khi dùng với pointer. Cast pointer hữu ích vì một số lý do, bao gồm:
 
 - Truy cập address cho mục đích đặc biệt
 
@@ -43,11 +43,11 @@ int num = 8;
 int *pi = (int*)num;
 ```
 
-Tuy nhiên, thường không tốt vì cho phép truy cập address tùy ý, có thể là vị trí chương trình không có quyền. Hình 8-1 minh họa address 8 ngoài address space application. Dereference pointer thường làm application kết thúc.
+Tuy nhiên, đây thường là thực hành không tốt vì nó cho phép truy cập address tùy ý, có thể là vị trí chương trình không được phép truy cập. Hình 8-1 minh họa điều này: address 8 nằm ngoài address space của application. Nếu dereference pointer, thông thường application sẽ kết thúc.
 
 ![image](images/ch08/fig08-02.png)
 
-Hình 8-1. Cast integer thành vị trí sai Trong một số tình huống như cần truy cập memory location zero, có thể phải cast pointer sang integer rồi trở lại pointer. Điều này phổ biến hơn ở hệ thống cũ có pointer cùng kích thước integer, nhưng không phải luôn hoạt động. Sau đây minh họa với output implementation-dependent:
+Hình 8-1. Cast integer đến vị trí không hợp lệ Trong một số tình huống, chẳng hạn khi cần truy cập memory location zero, chúng ta có thể cần cast pointer sang integer rồi cast lại thành pointer. Điều này phổ biến hơn trên hệ thống cũ, nơi kích thước pointer bằng kích thước integer. Tuy nhiên, cách này không phải luôn hoạt động. Sau đây minh họa cách tiếp cận đó, với output implementation-dependent:
 
 ```
 pi = &num;
@@ -57,17 +57,17 @@ pi = (int*)tmp;
 printf("After: %p\n",pi);
 ```
 
-Cast pointer sang integer rồi trở lại chưa bao giờ là thực hành tốt. Nếu phải làm, cân nhắc union như mục “Dùng union biểu diễn giá trị theo nhiều cách” trang 182.
+Cast pointer sang integer rồi trở lại pointer chưa bao giờ được coi là thực hành tốt. Nếu cần làm vậy, hãy cân nhắc union, như thảo luận trong phần “Dùng union biểu diễn giá trị theo nhiều cách” ở trang 182.
 
 Nhớ rằng cast sang và từ integer khác cast sang và từ void, như “Pointer đến void” trang 14 minh họa.
 
 ![image](images/ch08/fig08-01.png)
 
-Handle đôi khi bị nhầm với pointer. Handle là tham chiếu đến system resource. Nó cho phép truy cập resource, nhưng thường không trực tiếp. Ngược lại, pointer chứa address resource.
+Thuật ngữ handle đôi khi bị nhầm với pointer. Handle là tham chiếu đến system resource. Việc truy cập resource được cung cấp thông qua handle. Tuy nhiên, handle thường không cung cấp truy cập trực tiếp đến resource. Ngược lại, pointer chứa address của resource.
 
 ### Truy cập address cho mục đích đặc biệt
 
-Nhu cầu này thường xảy ra trên embedded system với operating system can thiệp tối thiểu. Ví dụ trong một số OS kernel low-level, address video RAM của PC là 0xB8000, chứa character hiển thị tại row đầu, column đầu trong text mode. Có thể gán address cho pointer rồi gán character vào đó như sau. Hình 8-2 cho memory layout:
+Nhu cầu truy cập address cho mục đích đặc biệt thường xuất hiện trên embedded system, nơi operating system làm trung gian rất ít. Ví dụ, trong một số OS kernel low-level, address video RAM của PC là 0xB8000. Address này chứa character cần hiển thị ở hàng đầu tiên và cột đầu tiên trong text mode. Có thể gán address ấy cho pointer rồi gán character vào vị trí đó như minh họa dưới đây. Hình 8-2 trình bày memory layout:
 
 ```
 #define VIDEO_BASE 0xB8000
@@ -77,7 +77,7 @@ int *video = (int *) VIDEO_BASE;
 
 Nếu thích hợp, cũng có thể đọc address này. Thường không làm vậy với video memory.
 
-Khi cần truy cập memory tại zero, đôi khi compiler coi đó là pointer value `NULL`. Truy cập zero thường cần trong kernel program low-level. Một số kỹ thuật xử lý:
+Khi cần truy cập memory tại vị trí zero, đôi khi compiler sẽ coi đó là giá trị pointer `NULL`. Chương trình kernel low-level thường cần truy cập vị trí zero. Sau đây là một số kỹ thuật xử lý tình huống này:
 
 - Đặt pointer bằng zero (không phải luôn hoạt động)
 
@@ -101,7 +101,7 @@ Trên hệ thống cần truy cập vị trí zero, nhà cung cấp thường c�
 
 ### Truy cập port
 
-Port là khái niệm hardware lẫn software. Server dùng software port để chỉ việc nhận một số message gửi tới máy. Hardware port thường là thành phần input/output vật lý nối external device. Đọc hoặc ghi hardware port cho phép chương trình xử lý thông tin và command.
+Port vừa là khái niệm hardware vừa là khái niệm software. Server dùng software port để chỉ ra rằng nó phải nhận một số message gửi tới máy. Hardware port thường là component input/output vật lý của hệ thống được nối với external device. Bằng cách đọc hoặc ghi hardware port, chương trình có thể xử lý thông tin và command.
 
 Software truy cập port thường thuộc OS. Sau đây minh họa pointer truy cập port:
 
@@ -110,11 +110,11 @@ Software truy cập port thường thuộc OS. Sau đây minh họa pointer truy
 unsigned int volatile * const port = (unsigned int *) PORT;
 ```
 
-Máy dùng hexadecimal address chỉ port. Data được xem là unsigned integer. Qualifier keyword `volatile` chỉ variable có thể thay đổi ngoài chương trình. Ví dụ external device ghi data vào port độc lập với processor máy tính. Đôi khi compiler dùng tạm cache hoặc register giữ giá trị tại memory location để tối ưu. Nếu external write sửa memory location, thay đổi không phản ánh trong giá trị cache hoặc register.
+Máy dùng address dạng hexadecimal để chỉ định port. Data được coi là unsigned integer. Qualifier keyword `volatile` cho biết variable có thể bị thay đổi từ bên ngoài chương trình. Ví dụ, external device có thể ghi data vào port. Write operation này diễn ra độc lập với processor của máy tính. Đôi khi compiler tạm dùng cache hoặc register để giữ giá trị tại một memory location nhằm tối ưu. Nếu thao tác ghi bên ngoài sửa memory location, thay đổi đó sẽ không được phản ánh trong giá trị đã cache hoặc lưu trong register.
 
-Dùng volatile ngăn runtime system dùng register tạm lưu port value. Mỗi truy cập buộc hệ thống đọc hoặc ghi port thay vì đọc giá trị có thể lỗi thời trong register. Không nên khai báo mọi variable volatile vì ngăn compiler thực hiện một số optimization.
+Dùng keyword volatile ngăn runtime system dùng register để lưu tạm giá trị port. Mỗi lần truy cập port đòi hỏi hệ thống đọc hoặc ghi port thay vì đọc giá trị có thể đã cũ trong register. Chúng ta không muốn khai báo mọi variable là volatile, vì điều đó ngăn compiler thực hiện một số loại optimization.
 
-Application có thể đọc/ghi port bằng dereference port pointer như sau. Hình 8-3 minh họa memory, External Device có thể đọc/ghi tại 0xB0000000:
+Sau đó, application có thể đọc hoặc ghi port bằng cách dereference port pointer như sau. Hình 8-3 trình bày memory layout, trong đó External Device có thể đọc/ghi memory tại 0xB0000000:
 
 ```
 *port = 0x0BF4; // write to the port
@@ -131,13 +131,13 @@ Không nên truy cập volatile memory bằng nonvolatile variable. Có thể d�
 
 ### Truy cập memory bằng DMA
 
-Direct Memory Access (DMA) là operation low-level hỗ trợ truyền data giữa main memory và device. Không thuộc ANSI C specification nhưng operating system thường hỗ trợ. DMA thường chạy song song CPU, giải phóng CPU xử lý việc khác và có thể tăng performance.
+Direct Memory Access (DMA) là operation low-level hỗ trợ truyền data giữa main memory và một device. Nó không thuộc ANSI C specification, nhưng operating system thường cung cấp hỗ trợ cho operation này. DMA operation thường được thực hiện song song với CPU. Điều này giải phóng CPU để xử lý việc khác và có thể cho performance tốt hơn.
 
-Programmer gọi DMA function rồi đợi hoàn tất. Thường programmer cung cấp callback function. Khi hoàn tất, operating system gọi callback. Callback được chỉ định bằng function pointer, sẽ bàn thêm trong “Dùng function pointer hỗ trợ callback” trang 188.
+Programmer sẽ gọi một DMA function rồi chờ operation hoàn tất. Programmer thường cung cấp callback function. Khi operation hoàn tất, operating system gọi callback function. Callback được chỉ định bằng function pointer và sẽ được thảo luận thêm trong phần “Dùng function pointer hỗ trợ callback” ở trang 188.
 
 ### Xác định endianness của máy
 
-Cast operator cũng xác định endianness architecture. Endian chỉ thứ tự byte trong một đơn vị memory, thường little endian hoặc big endian. Ví dụ integer four-byte theo little endian lưu least significant byte ở address thấp nhất trong bốn byte.
+Cast operator còn có thể dùng để xác định endianness của architecture. Endian chỉ thứ tự byte trong một đơn vị memory. Endianness thường được gọi là little endian hoặc big endian. Ví dụ, với cách biểu diễn integer four-byte theo little endian, least significant byte của integer được lưu tại address thấp nhất trong bốn byte.
 
 Ví dụ sau cast address integer thành pointer đến `char`, rồi hiển thị từng byte:
 
@@ -149,7 +149,7 @@ for (int i = 0; i < 4; i++) {
 }
 ```
 
-Output chạy trên Intel PC phản ánh architecture little-endian như sau. Hình 8-4 minh họa các giá trị trong memory:
+Output của đoạn code này khi thực thi trên Intel PC phản ánh architecture little-endian như dưới đây. Hình 8-4 minh họa cách các giá trị được cấp phát trong memory:
 
 ```
 100: 78
@@ -164,7 +164,7 @@ Hình 8-4. Ví dụ endian
 
 ## Aliasing, strict aliasing và keyword restrict
 
-Pointer này được gọi là alias pointer kia nếu cùng tham chiếu một memory location. Không hiếm, và có thể gây nhiều vấn đề. Chuỗi sau khai báo hai pointer rồi gán cùng address:
+Một pointer được gọi là alias của pointer khác nếu cả hai cùng tham chiếu một memory location. Điều này không hiếm và có thể gây một số vấn đề. Trong đoạn code sau, hai pointer được khai báo và cùng được gán một address:
 
 ```
 int num = 5;
@@ -172,9 +172,9 @@ int* p1 = &num;
 int* p2 = &num;
 ```
 
-Khi sinh code cho pointer, compiler phải giả định có aliasing trừ khi được thông báo khác. Aliasing đặt hạn chế lên code compiler-generated. Nếu hai pointer trỏ cùng vị trí, cả hai có thể sửa nó. Khi sinh code đọc/ghi, compiler không phải luôn tối ưu bằng lưu register được. Nó buộc thực hiện operation load/store machine-level mỗi tham chiếu. Lặp load/store có thể không hiệu quả. Trong một số tình huống còn phải quan tâm thứ tự operation.
+Khi compiler sinh code cho pointer, nó phải giả định aliasing có thể xảy ra trừ khi được thông báo khác. Aliasing đặt những hạn chế lên code compiler-generated. Nếu hai pointer tham chiếu cùng vị trí, cả hai đều có thể sửa vị trí ấy. Khi compiler sinh code để đọc hoặc ghi vị trí đó, không phải lúc nào nó cũng tối ưu code bằng cách lưu giá trị trong register được. Nó buộc phải thực hiện các operation load và store ở machine-level với mỗi lần tham chiếu. Chuỗi load/store lặp lại có thể không hiệu quả. Trong một số tình huống, compiler còn phải quan tâm thứ tự thực hiện operation.
 
-Strict aliasing là dạng aliasing khác: không cho pointer của data type này alias pointer của data type khác. Chuỗi sau pointer integer alias pointer float, vi phạm strict aliasing rule. Chuỗi xác định số âm không. Thay vì so argument với zero để xem có dương không, cách này chạy nhanh hơn:
+Strict aliasing là một dạng aliasing khác. Strict aliasing không cho pointer thuộc data type này alias pointer thuộc data type khác. Trong đoạn code sau, pointer tới integer alias pointer tới float. Điều này vi phạm quy tắc strict aliasing. Đoạn lệnh xác định số có âm hay không. Thay vì so sánh argument với zero để xem nó có dương không, cách tiếp cận này thực thi nhanh hơn:
 
 ```
 float number = 3.25f;
@@ -201,7 +201,7 @@ Tuy nhiên, có lúc dùng nhiều biểu diễn của cùng data hữu ích. C�
 
 - Dùng pointer đến `char`
 
-Union của hai data type có thể tránh strict aliasing problem, như “Dùng union biểu diễn giá trị theo nhiều cách” trang 182. Nếu compiler có option tắt strict aliasing, có thể tắt. GCC có option:
+Union gồm hai data type có thể tránh vấn đề strict aliasing. Điều này được thảo luận trong phần “Dùng union biểu diễn giá trị theo nhiều cách” ở trang 182. Nếu compiler có option vô hiệu hóa strict aliasing, có thể dùng nó để tắt. GCC compiler có những compiler option sau:
 
 - `-fno-strict-aliasing` để tắt
 
@@ -213,13 +213,13 @@ Code đòi tắt strict aliasing có lẽ phản ánh cách truy cập memory ch
 
 ![image](images/ch08/fig08-01.png)
 
-Compiler không phải luôn báo alias-related warning tốt. Đôi lúc bỏ sót alias hoặc báo khi không có vấn đề. Cuối cùng programmer chịu trách nhiệm xác định alias condition.
+Compiler không phải lúc nào cũng làm tốt việc báo các warning alias-related. Đôi khi chúng bỏ sót alias và đôi khi báo vấn đề alias tại nơi không có. Cuối cùng, programmer phải chịu trách nhiệm xác định các tình huống alias.
 
 Pointer đến `char` luôn được giả định có thể alias mọi object, nên dùng an toàn trong phần lớn tình huống. Nhưng cast pointer của data type này sang pointer đến `char`, rồi cast pointer đến `char` thành pointer data type thứ hai gây undefined behavior, nên tránh.
 
 ### Dùng union biểu diễn giá trị theo nhiều cách
 
-C là typed language. Khi khai báo variable, gán type cho nó. Nhiều variable có thể có type khác nhau. Đôi khi muốn chuyển type này sang type khác, thường bằng cast nhưng cũng có thể dùng union. Type punning chỉ kỹ thuật phá rào type system.
+C là typed language. Khi variable được khai báo, nó được gán một type. Có thể tồn tại nhiều variable với type khác nhau. Đôi khi, chúng ta muốn chuyển một type sang type khác. Điều này thường được thực hiện bằng casting, nhưng cũng có thể dùng union. Thuật ngữ type punning mô tả kỹ thuật dùng để vượt qua type system.
 
 Khi chuyển đổi liên quan pointer, có thể gây vấn đề nghiêm trọng. Để minh họa dùng ba function xác định floating point number có dương không.
 
@@ -237,7 +237,7 @@ int isPositive1(float number) {
 }
 ```
 
-Cách này đúng và không có aliasing vì không có pointer. Phiên bản tiếp dùng union chứa pointer đến hai data type. Address floating point number được gán cho pointer đầu, rồi dereference integer pointer để kiểm tra. Điều này vi phạm strict aliasing rule:
+Cách này hoạt động đúng và không liên quan aliasing vì không dùng pointer. Phiên bản tiếp theo dùng union chứa pointer tới hai data type. Address của floating point number được gán cho pointer đầu tiên. Sau đó integer pointer được dereference để thực hiện phép kiểm tra. Điều này vi phạm quy tắc strict aliasing:
 
 ```
 typedef union _conversion2 {
@@ -273,7 +273,7 @@ Các giả định không phải luôn đúng. Dù tối ưu operation được,
 
 ### Strict aliasing
 
-Compiler không cưỡng chế strict aliasing, chỉ sinh warning. Nó giả định hai hay nhiều pointer khác type không bao giờ tham chiếu cùng object, kể cả pointer đến structure khác tên nhưng phần khác giống hệt. Strict aliasing cho phép một số optimization. Nếu giả định sai, có thể có kết quả ngoài dự kiến.
+Compiler không cưỡng chế strict aliasing; nó chỉ sinh warning. Compiler giả định hai hoặc nhiều pointer khác type sẽ không bao giờ tham chiếu cùng object. Điều này gồm pointer tới các structure khác tên nhưng giống hệt về mọi mặt khác. Với strict aliasing, compiler có thể thực hiện một số optimization. Nếu giả định sai, có thể xảy ra kết quả ngoài dự kiến.
 
 Ngay cả nếu hai structure có cùng field nhưng khác tên, hai pointer đến chúng không nên tham chiếu cùng object. Ví dụ sau giả định pointer `person` và `employee` không bao giờ tham chiếu cùng object:
 
@@ -311,7 +311,7 @@ Employee* employee;
 
 ### Dùng keyword restrict
 
-C compiler mặc định giả định pointer có alias. Keyword `restrict` trong declaration thông báo pointer không alias, cho phép sinh code hiệu quả hơn, thường bằng caching pointer. Nhớ đây chỉ là khuyến nghị, compiler có thể không tối ưu. Nếu dùng alias thì code gây undefined behavior; compiler không cảnh báo khi vi phạm giả định.
+C compiler mặc định giả định pointer có alias. Dùng keyword `restrict` khi khai báo pointer cho compiler biết pointer không có alias. Điều này cho phép compiler sinh code hiệu quả hơn, thường bằng cách cache pointer. Hãy nhớ đây chỉ là khuyến nghị: compiler có thể quyết định không tối ưu code. Nếu alias được dùng, việc thực thi code sẽ gây undefined behavior. Compiler không đưa ra warning khi giả định bị vi phạm.
 
 ![image](images/ch08/fig08-01.png)
 
@@ -327,7 +327,7 @@ void add(int size, double * restrict arr1, const double * restrict arr2) {
 }
 ```
 
-Keyword `restrict` dùng với cả hai array parameter, nhưng chúng không nên cùng tham chiếu một block. Cách đúng:
+Keyword `restrict` được dùng với cả hai array parameter, nhưng chúng không được cùng tham chiếu một block memory. Sau đây trình bày cách dùng function đúng:
 
 ```
 double vector1[] = {1.1, 2.2, 3.3, 4.4};
@@ -338,7 +338,7 @@ double vector2[] = {1.1, 2.2, 3.3, 4.4};
 add(4,vector1,vector2);
 ```
 
-Chuỗi sau gọi sai khi cùng vector được truyền cho cả hai parameter. Câu đầu dùng alias, câu hai dùng cùng vector hai lần:
+Trong đoạn lệnh sau, function được gọi sai vì cùng vector được truyền làm cả hai parameter. Statement đầu dùng alias, còn statement thứ hai dùng cùng vector hai lần:
 
 ```
 double vector1[] = {1.1, 2.2, 3.3, 4.4};
@@ -376,17 +376,17 @@ kết quả operation là undefined.
 
 ## Thread và pointer
 
-Nhiều vấn đề có thể xảy ra khi thread chia sẻ data, phổ biến là data corruption. Một thread có thể ghi object rồi bị tạm suspend, để object ở trạng thái không nhất quán. Thread thứ hai đọc object trước khi thread đầu resume, nên dùng object không hợp lệ hoặc đã hỏng.
+Khi các thread chia sẻ data, nhiều vấn đề có thể xảy ra. Một vấn đề phổ biến là data corruption. Một thread có thể ghi vào object nhưng bị tạm dừng trong chốc lát, để object ở trạng thái không nhất quán. Sau đó, thread thứ hai có thể đọc object ấy trước khi thread đầu được tiếp tục. Khi đó, thread thứ hai đang dùng object không hợp lệ hoặc bị hỏng.
 
-Vì pointer thường tham chiếu data trong thread khác, sẽ xét vấn đề ảnh hưởng xấu multithreaded application. Như các ví dụ sẽ cho thấy, mutex thường dùng bảo vệ data.
+Vì pointer là cách phổ biến để tham chiếu data trong thread khác, chúng ta sẽ xem xét những vấn đề có thể ảnh hưởng bất lợi đến multithreaded application. Như các ví dụ trong phần này sẽ cho thấy, mutex thường được dùng để bảo vệ data.
 
 Chuẩn C11 triển khai threading nhưng hiện chưa hỗ trợ rộng. Có nhiều library hỗ trợ thread trong C. Dùng Portable Operating System Interface (POSIX) thread vì sẵn có. Bất kể library, kỹ thuật ở đây vẫn áp dụng được. Dùng pointer hỗ trợ multithreaded application và callback. Thread là chủ đề phức tạp; giả định bạn quen khái niệm, thuật ngữ cơ bản, nên không đi sâu cách POSIX thread function hoạt động. Hãy xem PThreads Programming của O’Reilly để có thảo luận chi tiết hơn.
 
 ### Chia sẻ pointer giữa các thread
 
-Khi hai hoặc nhiều thread chia sẻ data, data có thể hỏng. Để minh họa, triển khai function multi-threaded tính dot product hai vector. Nhiều thread đồng thời truy cập hai vector và field sum. Khi hoàn tất, sum chứa dot product.
+Khi hai hoặc nhiều thread chia sẻ data, data có thể bị hỏng. Để minh họa vấn đề, chúng ta sẽ triển khai một function multi-threaded tính dot product của hai vector. Nhiều thread đồng thời truy cập hai vector và một sum field. Khi các thread hoàn tất, sum field sẽ giữ giá trị dot product.
 
-Dot product được tính bằng tổng tích element tương ứng mỗi vector. Dùng hai data structure hỗ trợ. Đầu là `VectorInfo`, chứa thông tin hai vector, có pointer đến chúng, field `sum` giữ dot product và field `length` chỉ kích thước đoạn vector dot product function dùng. Field `length` biểu diễn phần thread xử lý, không phải toàn độ dài:
+Dot product của hai vector được tính bằng cách cộng các tích của những element tương ứng của mỗi vector. Chúng ta dùng hai data structure để hỗ trợ operation này. Structure đầu tiên, `VectorInfo`, chứa thông tin về hai vector đang được thao tác. Nó có pointer tới hai vector, field `sum` giữ dot product và field `length` chỉ kích thước đoạn vector được dot product function dùng. Field `length` biểu diễn phần vector mà một thread sẽ xử lý, không phải toàn bộ độ dài vector:
 
 ```
 typedef struct {
@@ -406,15 +406,15 @@ typedef struct {
 } Product;
 ```
 
-Dù mỗi thread đồng thời thao tác cả hai vector, chúng truy cập phần khác nhau nên không xung đột. Mỗi thread tính tổng phần mình. Nhưng tổng phải thêm vào field `sum` của structure `VectorInfo`. Vì nhiều thread có thể truy cập `sum` đồng thời, cần mutex bảo vệ như dưới. Mutex chỉ cho một thread truy cập variable được bảo vệ tại một thời điểm. Sau đây khai báo mutex bảo vệ variable `sum`, ở global level để nhiều thread truy cập:
+Dù mỗi thread thao tác cả hai vector cùng lúc, chúng truy cập những phần khác nhau của vector nên không có xung đột tại đó. Mỗi thread tính tổng cho phần vector của mình. Tuy nhiên, tổng này phải được cộng vào field `sum` của structure `VectorInfo`. Vì nhiều thread có thể truy cập field `sum` cùng lúc, cần bảo vệ data này bằng mutex được khai báo dưới đây. Mutex chỉ cho phép một thread truy cập variable được bảo vệ tại một thời điểm. Sau đây khai báo mutex bảo vệ variable `sum`; nó được khai báo ở global level để nhiều thread có thể truy cập:
 
 ```
 pthread_mutex_t mutexSum;
 ```
 
-Function `dotProduct` như sau. Khi tạo thread, function này được gọi. Vì dùng POSIX, cần khai báo trả void và nhận pointer đến void. Pointer truyền thông tin cho function; chúng ta truyền instance structure `Product`.
+Function `dotProduct` được trình bày dưới đây. Khi thread được tạo, function này sẽ được gọi. Vì dùng POSIX, cần khai báo function trả void và nhận pointer tới void. Pointer này truyền thông tin cho function. Chúng ta sẽ truyền một instance của structure `Product`.
 
-Trong function, khai báo variable giữ starting/ending index. For loop thực hiện phép nhân, giữ tổng cộng dồn trong `total`. Phần cuối lock mutex, thêm `total` vào `sum`, rồi unlock. Khi mutex lock, không thread khác truy cập variable `sum` được:
+Bên trong function, các variable được khai báo để giữ index bắt đầu và kết thúc. For loop thực hiện phép nhân thực tế và giữ tổng cộng dồn trong variable `total`. Phần cuối function lock mutex, cộng `total` vào `sum` rồi unlock mutex. Trong khi mutex bị lock, không thread nào khác có thể truy cập variable `sum`:
 
 ```
 void dotProduct(void *prod) {
@@ -471,7 +471,7 @@ int returnValue;
 int threadNumber;
 ```
 
-Mỗi vòng for tạo instance structure `Product`, gán address `vectorInfo` và index riêng theo `threadNumber`. Sau đó tạo thread:
+Với mỗi lần lặp for loop, một instance mới của structure `Product` được tạo. Nó được gán address của `vectorInfo` và một index riêng dựa trên `threadNumber`. Sau đó các thread được tạo:
 
 ```
 for (threadNumber = 0; threadNumber < NUM_THREADS; threadNumber++) {
@@ -509,7 +509,7 @@ Như vậy field `sum` được bảo vệ.
 
 Trước đó đã dùng callback trong sort function ở Chương 5. Vì sort không dùng nhiều thread, một số programmer không gọi đây là callback. Định nghĩa được chấp nhận rộng hơn là event trong thread này dẫn đến gọi, hay callback, function trong thread khác. Một thread được truyền function pointer đến callback. Event trong function có thể kích hoạt lời gọi callback. Cách này hữu ích trong GUI application xử lý user thread event.
 
-Minh họa bằng function tính factorial của một số. Khi tính xong, function callback function thứ hai. Thông tin factorial được encapsulate trong structure `FactorialData`, truyền giữa các function. Structure và factorial function như dưới. Data gồm số cần tính, kết quả, function pointer callback. Function `factorial` dùng data tính factorial, lưu vào field `result`, gọi callback rồi kết thúc thread:
+Chúng ta minh họa cách này bằng function tính factorial của một số. Function sẽ callback function thứ hai sau khi tính xong factorial. Thông tin về factorial được encapsulate trong structure `FactorialData` và truyền giữa các function. Structure này và factorial function được trình bày dưới đây. Data gồm số cần tính factorial, kết quả và function pointer cho callback. Function `factorial` dùng data này để tính factorial, lưu đáp án vào field `result`, gọi callback function rồi kết thúc thread:
 
 ```
 typedef struct _factorialData {
@@ -554,7 +554,7 @@ void callBackFunction(FactorialData *factorialData) {
 }
 ```
 
-Khởi tạo factorial data rồi gọi `startThread` như sau. Function `Sleep` dành thời gian để mọi thread kết thúc đúng:
+Factorial data được khởi tạo rồi function `startThread` được gọi như dưới đây. Function `Sleep` dành thời gian cho tất cả thread kết thúc đúng cách:
 
 ```
 FactorialData *data =
@@ -585,13 +585,13 @@ Thay vì sleep, chương trình có thể làm task khác. Không phải đợi 
 
 C không nổi tiếng về hỗ trợ object-oriented programming. Nhưng có thể dùng opaque pointer encapsulate data và hỗ trợ một mức polymorphic behavior. Giấu implementation data structure cùng supporting function khiến người dùng không cần biết cách triển khai. Giấu thông tin giảm điều cần biết, từ đó giảm độ phức tạp application. Người dùng cũng không bị hấp dẫn khai thác chi tiết nội bộ, có thể gây vấn đề sau khi implementation đổi.
 
-Polymorphic behavior giúp application dễ bảo trì. Hành vi polymorphic function phụ thuộc object nó thao tác. Nghĩa là dễ thêm chức năng hơn.
+Polymorphic behavior giúp application dễ bảo trì hơn. Hành vi của polymorphic function phụ thuộc object mà nó đang thao tác. Điều này nghĩa là chúng ta có thể thêm chức năng vào application dễ hơn.
 
 ### Tạo và dùng opaque pointer
 
-Opaque pointer thực hiện data encapsulation trong C. Một cách khai báo structure không chi tiết implementation trong header file, rồi định nghĩa function làm việc với implementation cụ thể trong implementation file. Người dùng thấy declaration và function prototype, còn implementation ẩn trong .c/.obj file. Chỉ thông tin cần dùng data structure được công khai. Nếu lộ quá nhiều, người dùng có thể dùng và phụ thuộc. Khi cấu trúc nội bộ đổi, code người dùng có thể hỏng.
+Opaque pointer có thể dùng để thực hiện data encapsulation trong C. Một cách là khai báo structure trong header file mà không có chi tiết implementation. Sau đó, function được định nghĩa trong implementation file để làm việc với một implementation cụ thể của data structure. User của data structure sẽ thấy declaration và prototype của các function. Tuy nhiên, implementation được giấu trong file .c/.obj. Chỉ thông tin cần thiết để sử dụng data structure được công khai cho user. Nếu cung cấp quá nhiều thông tin nội bộ, user có thể đưa nó vào code và trở nên phụ thuộc. Khi cấu trúc nội bộ thay đổi, code user có thể bị hỏng.
 
-Phát triển linked list minh họa opaque pointer. Người dùng gọi một function lấy pointer đến list, rồi dùng thêm/xóa thông tin. Chi tiết cấu trúc nội bộ và supporting function không được cung cấp. Các khía cạnh duy nhất được cung cấp qua header file như sau:
+Chúng ta sẽ phát triển linked list để minh họa opaque pointer. User dùng một function để lấy pointer tới linked list. Sau đó pointer này được dùng để thêm và xóa thông tin khỏi linked list. Chi tiết cấu trúc nội bộ của linked list và supporting function không được cung cấp cho user. Những khía cạnh duy nhất được cung cấp về structure này nằm trong header file như sau:
 
 ```
 //link.h
@@ -607,11 +607,11 @@ Data removeNode(LinkedList*);
 
 Data khai báo pointer đến void, cho implementation xử lý mọi data type. Type definition `LinkedList` xác định structure `_linkedList`. Định nghĩa structure bị giấu trong implementation file.
 
-Có bốn method để dùng list. Đầu tiên lấy instance `LinkedList` bằng `getLinkedListInstance`. Khi không cần, gọi `removeLinkedListInstance`. Truyền pointer linked list cho phép function làm việc với một hoặc nhiều list.
+Bốn method được cung cấp để sử dụng linked list. User bắt đầu bằng việc lấy instance của `LinkedList` qua function `getLinkedListInstance`. Khi không còn cần linked list, phải gọi function `removeLinkedListInstance`. Truyền linked list pointer cho phép function làm việc với một hoặc nhiều linked list.
 
-Để thêm data dùng `addNode`, nhận list cần dùng và pointer đến data. Method `removeNode` trả data ở head.
+Để thêm data vào linked list, dùng function `addNode`. Nó được truyền linked list cần dùng và pointer tới data cần thêm vào linked list. Method `removeNode` trả data ở head của linked list.
 
-Implementation nằm trong file link.c riêng. Phần đầu dưới khai báo variable giữ data người dùng và nối node kế. Tiếp theo định nghĩa structure `_linkedList`. Linked list đơn giản này chỉ dùng head pointer:
+Implementation của linked list nằm trong file riêng tên link.c. Phần đầu implementation, trình bày dưới đây, khai báo các variable để giữ data của user và nối tới node tiếp theo trong linked list. Tiếp theo là định nghĩa structure `_linkedList`. Linked list đơn giản này chỉ dùng head pointer:
 
 ```
 // link.c
@@ -628,7 +628,7 @@ struct _linkedList {
 };
 ```
 
-Phần hai implementation file triển khai bốn supporting function. Function đầu trả instance linked list:
+Phần thứ hai của implementation file chứa implementation của bốn supporting function cho linked list. Function đầu tiên trả một instance của linked list:
 
 ```
 LinkedList* getLinkedListInstance() {
@@ -638,7 +638,7 @@ LinkedList* getLinkedListInstance() {
 }
 ```
 
-Implementation `removeLinkedListInstance` sau giải phóng từng node nếu có, rồi free chính list. Có thể gây memory leak nếu data do node tham chiếu chứa pointer. Một giải pháp là truyền function giải phóng member của data:
+Implementation của function `removeLinkedListInstance` như sau. Nó giải phóng từng node trong linked list, nếu có, rồi giải phóng chính list. Implementation này có thể gây memory leak nếu data được node tham chiếu chứa pointer. Một giải pháp là truyền function để deallocate các member của data:
 
 ```
 void removeLinkedListInstance(LinkedList* list) {
@@ -653,7 +653,7 @@ void removeLinkedListInstance(LinkedList* list) {
 }
 ```
 
-Function `addNode` thêm data ở parameter hai vào list ở parameter đầu. Cấp memory node rồi liên kết data người dùng. Implementation này luôn thêm node vào head:
+Function `addNode` thêm data truyền qua parameter thứ hai vào linked list được parameter đầu chỉ định. Memory được cấp phát cho node, và data user được liên kết với node. Trong implementation này, node của linked list luôn được thêm vào head:
 
 ```
 void addNode(LinkedList* list, Data data) {
@@ -669,11 +669,11 @@ void addNode(LinkedList* list, Data data) {
 }
 ```
 
-Function `removeNode` trả data của node đầu. Điều chỉnh head pointer sang node kế. Trả data và free head cũ về heap.
+Function `removeNode` trả data gắn với node đầu tiên trong linked list. Head pointer được điều chỉnh để trỏ tới node tiếp theo. Data được trả về và head node cũ được giải phóng, trả nó về heap.
 
 ![image](images/ch08/fig08-01.png)
 
-Cách này loại nhu cầu nhớ free node, tránh memory leak. Đây là lợi thế đáng kể của giấu implementation detail:
+Cách tiếp cận này khiến user không cần nhớ giải phóng các node của linked list, nhờ đó tránh memory leak. Đây là lợi thế đáng kể của việc giấu chi tiết implementation:
 
 ```
 Data removeNode(LinkedList* list) {
@@ -690,7 +690,7 @@ Data removeNode(LinkedList* list) {
 }
 ```
 
-Để minh họa, tái sử dụng structure `Person` và function trong “Giới thiệu” trang 133. Chuỗi sau thêm hai người vào list rồi xóa. Đầu gọi `getLinkedListInstance` lấy list. Tiếp theo tạo instance `Person` bằng `initializePerson`, thêm vào bằng `addNode`. Function `displayPerson` hiển thị người mà function `remove` `Node` trả. Cuối cùng free list:
+Để minh họa việc sử dụng data structure này, chúng ta tái sử dụng structure `Person` và những function được phát triển trong “Giới thiệu” ở trang 133. Đoạn lệnh sau thêm hai người vào linked list rồi xóa họ. Trước tiên, function `getLinkedListInstance` được gọi để lấy linked list. Tiếp theo, các instance `Person` được tạo bằng function `initializePerson` rồi thêm vào linked list bằng function `addNode`. Function `displayPerson` hiển thị những người được các function `remove` `Node` trả về. Sau đó linked list được giải phóng:
 
 ```
 #include "link.h";
@@ -717,7 +717,7 @@ displayPerson(*person);
 removeLinkedListInstance(list);
 ```
 
-Có vài điểm thú vị. Phải tạo instance structure `_linkedList` trong list.c, vì operator `sizeof` không dùng được nếu chưa có complete structure declaration. Ví dụ cố cấp memory trong main như sau sẽ syntax error:
+Có một vài điểm thú vị trong cách tiếp cận này. Chúng ta phải tạo instance của structure `_linkedList` trong file list.c. Nó cần được tạo ở đó vì không thể dùng operator `sizeof` nếu chưa có structure declaration đầy đủ. Ví dụ, nếu cố cấp phát memory cho structure này trong main function như sau, chúng ta sẽ nhận syntax error:
 
 ```
 LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
@@ -729,23 +729,23 @@ Syntax error tương tự:
 error: invalid application of ‘sizeof’ to incomplete type ‘LinkedList’
 ```
 
-Type incomplete vì compiler không thấy định nghĩa thực trong list.c. Nó chỉ thấy type definition của structure `_linkedList`, không thấy chi tiết implementation.
+Type là incomplete vì compiler không nhìn thấy định nghĩa thực nằm trong file list.c. Tất cả những gì nó thấy là type definition của structure `_linkedList`. Nó không thấy chi tiết implementation của structure.
 
 Khả năng xem và khai thác cấu trúc nội bộ list của người dùng bị hạn chế. Mọi thay đổi structure được giấu.
 
-Chỉ signature bốn supporting function hiển thị. Ngoài ra, người dùng không dùng kiến thức implementation hoặc sửa chúng được. Structure và function được encapsulate, giảm gánh nặng người dùng.
+Chỉ signature của bốn supporting function được công khai cho user. Ngoài ra, user không thể tận dụng hiểu biết về implementation của chúng hoặc sửa chúng. Linked list structure và supporting function được encapsulate, giảm gánh nặng cho user.
 
 ### Polymorphism trong C
 
-Polymorphism trong ngôn ngữ object-oriented như C++ dựa inheritance giữa base và derived class. Vì C không hỗ trợ inheritance, cần mô phỏng giữa structure. Định nghĩa và dùng hai structure minh họa. `Shape` biểu diễn base “class”; structure `Rectangle` dẫn xuất từ base `Shape`.
+Polymorphism trong ngôn ngữ object-oriented như C++ dựa trên inheritance giữa base class và derived class. Vì C không hỗ trợ inheritance, chúng ta cần mô phỏng inheritance giữa các structure. Chúng ta sẽ định nghĩa và sử dụng hai structure để minh họa polymorphic behavior. Structure `Shape` biểu diễn base “class”, còn structure `Rectangle` được dẫn xuất từ base `Shape`.
 
-Thứ tự cấp variable của structure ảnh hưởng lớn kỹ thuật. Khi tạo instance derived class/structure, variable base được cấp trước, rồi variable derived. Như sẽ thấy, cũng cần tính các function định override.
+Thứ tự cấp phát variable của structure ảnh hưởng lớn đến cách kỹ thuật này hoạt động. Khi tạo instance của derived class/structure, các variable của base class/structure được cấp phát trước, tiếp theo là các variable của derived class/structure. Như sẽ thấy, chúng ta còn phải tính đến những function dự định override.
 
 ![image](images/ch08/fig08-01.png)
 
 Hiểu cấp memory cho object tạo từ class là chìa khóa hiểu inheritance và polymorphism trong ngôn ngữ object-oriented. Tương tự khi dùng kỹ thuật này trong C.
 
-Bắt đầu định nghĩa `Shape` như sau. Trước tiên cấp structure chứa function pointer. Tiếp theo khai báo integer cho vị trí `x` và `y`:
+Hãy bắt đầu với định nghĩa structure `Shape` như dưới đây. Trước tiên, chúng ta cấp phát một structure để giữ function pointer cho structure. Tiếp theo, các integer được khai báo cho vị trí `x` và `y`:
 
 ```
 typedef struct _shape {
@@ -756,7 +756,7 @@ typedef struct _shape {
 } Shape;
 ```
 
-Structure `vFunction` và supporting declaration như sau. Khi function thao tác class/structure, hành vi tùy đối tượng. Display trên `Shape` phải hiển thị `Shape`; trên `Rectangle` phải hiển thị `Rectangle`. Ngôn ngữ object-oriented thường dùng Virtual Table hay VTable. Structure `vFunction` phục vụ vai trò này:
+Structure `vFunction` và những declaration hỗ trợ được định nghĩa dưới đây. Khi function thực thi trên class/structure, hành vi phụ thuộc vào đối tượng nó thao tác. Ví dụ, khi display function thực thi trên `Shape`, một `Shape` phải được hiển thị. Khi nó thực thi trên `Rectangle`, một `Rectangle` phải được hiển thị. Trong ngôn ngữ object-oriented, điều này thường đạt được bằng Virtual Table hay VTable. Structure `vFunction` được thiết kế để đảm nhận vai trò này:
 
 ```
 typedef void (*fptrSet)(void*,int);
@@ -773,9 +773,9 @@ typedef struct _functions {
 } vFunctions;
 ```
 
-Structure gồm nhiều function pointer. `fptrSet` và `fptrGet` định nghĩa getter/setter thông thường cho integer data. Ở đây dùng lấy/đặt giá trị `x`, `y` cho `Shape` hoặc `Rectangle`. Function pointer `fptrDisplay` định nghĩa function nhận `void` và trả `void`. Dùng display minh họa polymorphic behavior.
+Structure này gồm một loạt function pointer. Các function pointer `fptrSet` và `fptrGet` định nghĩa những getter function và setter function thông thường cho data thuộc integer type. Trong trường hợp này, chúng dùng để lấy và đặt giá trị `x` và `y` cho `Shape` hoặc `Rectangle`. Function pointer `fptrDisplay` định nghĩa function được truyền `void` và trả `void`. Chúng ta sẽ dùng display function để minh họa polymorphic behavior.
 
-Structure `Shape` có bốn function làm việc với nó như dưới. Implementation đơn giản. Để ví dụ gọn, function `display` chỉ in string “Shape.” Truyền instance `Shape` làm argument đầu, cho phép function làm việc với nhiều instance `Shape`:
+Structure `Shape` có bốn function được thiết kế để làm việc với nó, như dưới đây. Implementation của chúng khá đơn giản. Để giữ ví dụ đơn giản, trong function `display` chúng ta chỉ in string “Shape.” Instance `Shape` được truyền cho những function này làm argument đầu tiên. Điều đó cho phép chúng làm việc với nhiều instance của `Shape`:
 
 ```
 void shapeDisplay(Shape *shape) { printf("Shape\n");}
@@ -785,7 +785,7 @@ int shapeGetX(Shape *shape) { return shape->x;}
 int shapeGetY(Shape *shape) { return shape->y;}
 ```
 
-Để hỗ trợ tạo instance `Shape`, có function `getShapeInstance`, cấp memory object rồi gán các function:
+Để hỗ trợ tạo instance của `Shape`, chúng ta cung cấp function `getShapeInstance`. Nó cấp phát memory cho object rồi gán các function của object:
 
 ```
 Shape* getShapeInstance() {
@@ -817,7 +817,7 @@ Shape
 35
 ```
 
-Có vẻ tốn nhiều công chỉ để làm việc với `Shape`. Sức mạnh thực hiện ra khi tạo structure dẫn xuất từ `Shape`: `Rectangle`, như sau:
+Điều này có vẻ tốn nhiều công sức chỉ để làm việc với structure `Shape`. Chúng ta sẽ thấy sức mạnh thực sự của cách tiếp cận khi tạo structure dẫn xuất từ `Shape`: `Rectangle`. Structure này như sau:
 
 ```
 typedef struct _rectangle {
@@ -827,7 +827,7 @@ typedef struct _rectangle {
 } Rectangle;
 ```
 
-Memory cấp cho field đầu structure `Rectangle` giống memory cho structure `Shape`, như Hình 8-5. Ngoài ra thêm field `width` và `height` biểu diễn đặc tính hình chữ nhật.
+Memory được cấp phát cho field đầu tiên của structure `Rectangle` giống memory được cấp phát cho structure `Shape`. Hình 8-5 minh họa điều này. Ngoài ra, chúng ta thêm hai field mới, `width` và `height`, để biểu diễn các đặc trưng của hình chữ nhật.
 
 ![image](images/ch08/fig08-07.png)
 
@@ -923,14 +923,14 @@ Vì truy cập dưới dạng `Shape`, không nên cố truy cập width hoặc 
 
 Nay có thể thêm structure thứ hai dẫn xuất `Shape` như `Circle`, thêm vào array mà không sửa code nhiều. Cũng cần tạo function cho structure.
 
-Nếu thêm function vào base structure `Shape`, như `getArea`, có thể triển khai `getArea` riêng từng class. Trong loop dễ tính tổng mọi `Shape` và structure dẫn xuất `Shape` mà không xác định trước type `Shape` đang làm việc. Nếu `Shape` có implementation `getArea` đủ dùng, không cần thêm cho structure khác. Điều này giúp bảo trì và mở rộng application dễ hơn.
+Nếu thêm function vào base structure `Shape`, chẳng hạn `getArea`, chúng ta có thể triển khai một function `getArea` riêng cho mỗi class. Trong loop, có thể dễ dàng tính tổng của mọi `Shape` và structure `Shape`-derived mà không cần xác định trước type `Shape` đang làm việc. Nếu `Shape` có implementation `getArea` đã đủ dùng, không cần thêm function cho các structure khác. Điều này giúp dễ bảo trì và mở rộng application.
 
 ## Tóm tắt
 
-Chương này khám phá nhiều khía cạnh pointer, bắt đầu bằng cast. Ví dụ minh họa pointer truy cập memory và hardware port, cũng như xác định endianness máy.
+Trong chương này, chúng ta khám phá một số khía cạnh của pointer. Chúng ta bắt đầu bằng thảo luận về casting pointer. Các ví dụ minh họa cách dùng pointer để truy cập memory và hardware port. Chúng ta cũng thấy cách dùng pointer để xác định endianness của máy.
 
 Đã giới thiệu aliasing và keyword `restrict`. Aliasing xảy ra khi hai pointer tham chiếu cùng object. Compiler giả định có thể alias, nhưng khiến code generation kém hiệu quả. Keyword `restrict` cho phép tối ưu tốt hơn.
 
-Đã thấy pointer dùng với thread và sự cần thiết bảo vệ data chia sẻ qua pointer. Ngoài ra, đã xét callback giữa thread bằng function pointer.
+Chúng ta đã thấy cách dùng pointer với thread và tìm hiểu sự cần thiết của việc bảo vệ data được chia sẻ qua pointer. Ngoài ra, chúng ta xem xét những kỹ thuật thực hiện callback giữa các thread bằng function pointer.
 
 Phần cuối xét opaque pointer và polymorphic behavior. Opaque pointer cho phép C giấu data khỏi người dùng. Có thể đưa polymorphism vào chương trình để dễ bảo trì hơn.

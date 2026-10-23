@@ -1,28 +1,28 @@
 # Chương 4. Pointer và array
 
-Array là data structure căn bản được tích hợp trong C. Hiểu kỹ array và cách dùng là cần thiết để phát triển application hiệu quả. Hiểu nhầm cách dùng array và pointer có thể gây lỗi hard-to-find và performance chưa tối ưu. Array notation và pointer notation liên quan chặt chẽ, thường có thể thay thế nhau trong ngữ cảnh phù hợp.
+Array là data structure cơ bản được tích hợp trong C. Hiểu thấu đáo array và cách dùng chúng là điều cần thiết để phát triển ứng dụng hiệu quả. Hiểu nhầm cách dùng array và pointer có thể dẫn đến lỗi hard-to-find và hiệu năng ứng dụng chưa tối ưu. Array notation và pointer notation có quan hệ chặt chẽ và thường có thể dùng thay nhau trong context phù hợp.
 
-Một ngộ nhận phổ biến là array và pointer hoàn toàn thay thế được nhau. Tên array không phải pointer. Dù đôi lúc có thể coi tên array như pointer và dùng array notation với pointer, chúng khác biệt và không phải luôn thay nhau được. Hiểu khác biệt giúp tránh dùng sai notation. Ví dụ, dùng riêng tên array trả address của array, nhưng không thể dùng riêng tên làm đích của assignment.
+Một ngộ nhận phổ biến là array và pointer hoàn toàn có thể thay thế nhau. Array name không phải pointer. Dù đôi khi có thể xem array name như pointer và dùng array notation với pointer, chúng là những thứ riêng biệt và không phải lúc nào cũng thay thế được nhau. Hiểu khác biệt này giúp bạn tránh dùng sai notation. Chẳng hạn, dù dùng riêng tên array trả về address của array, chúng ta không thể dùng riêng tên đó làm đích của assignment.
 
-Array hỗ trợ nhiều phần application, có thể một hoặc nhiều chiều. Chương này xét những khía cạnh cơ bản liên quan pointer để hiểu sâu array và nhiều cách thao tác bằng pointer. Bạn sẽ gặp chúng trong ngữ cảnh nâng cao hơn suốt sách.
+Array hỗ trợ nhiều phần của ứng dụng và có thể có một hoặc nhiều chiều. Trong chương này, chúng ta sẽ xử lý các khía cạnh cơ bản của array trong mối liên hệ với pointer để giúp bạn hiểu sâu array và nhiều cách thao tác chúng bằng pointer. Bạn sẽ thấy chúng được dùng trong các context nâng cao hơn xuyên suốt sách.
 
-Bắt đầu bằng ôn nhanh array, rồi xét điểm giống và khác giữa array notation và pointer notation. Có thể tạo array bằng function kiểu `malloc`, linh hoạt hơn declaration array truyền thống. Chúng ta sẽ thấy cách `realloc` đổi lượng memory cấp cho array.
+Chúng ta bắt đầu bằng việc ôn nhanh array, rồi xem xét điểm giống và khác giữa array notation và pointer notation. Array có thể được tạo bằng các function kiểu `malloc`. Những function này linh hoạt hơn cách khai báo array truyền thống. Chúng ta sẽ thấy cách dùng function `realloc` để thay đổi lượng memory được cấp cho array.
 
-Cấp động memory cho array có thể khó, nhất là array từ hai chiều trở lên, vì phải bảo đảm cấp trong memory liên tục. Cũng sẽ tìm hiểu vấn đề khi truyền và trả array. Trong phần lớn tình huống phải truyền kích thước để function xử lý đúng. Biểu diễn nội bộ array không có gì vốn xác định độ dài. Nếu không truyền độ dài, function không có cách standard biết array kết thúc đâu. Cũng xem cách tạo jagged array trong C, dù ít dùng. Jagged array là array two-dimensional mà mỗi row có thể có số column khác nhau.
+Cấp phát memory động cho array có thể đặt ra thách thức, đặc biệt khi xử lý array từ hai chiều trở lên, vì phải bảo đảm array được cấp trong memory liên tục. Chúng ta cũng tìm hiểu các vấn đề có thể xảy ra khi truyền và trả về array. Trong phần lớn tình huống, kích thước array phải được truyền để function xử lý đúng. Biểu diễn nội bộ của array không có thông tin vốn có nào xác định độ dài của nó. Nếu không truyền độ dài, function không có cách tiêu chuẩn để biết array kết thúc ở đâu. Chúng ta cũng xem cách tạo jagged array trong C, dù chúng ít được dùng. Jagged array là array two-dimensional mà mỗi row có thể có số column khác nhau.
 
 Để minh họa, dùng vector cho array single-dimensional và matrix cho array two-dimensional. Vector và matrix được dùng rộng trong nhiều lĩnh vực, gồm phân tích trường điện từ, dự báo thời tiết và toán học.
 
 ## Ôn nhanh array
 
-Array là tập hợp liên tục các element đồng nhất, truy cập bằng index. Liên tục nghĩa là các element nằm kề nhau trong memory không có khoảng trống. Đồng nhất nghĩa là cùng type. Array declaration dùng cặp ngoặc vuông và có thể có nhiều chiều.
+Array là một tập hợp liên tục các element đồng nhất, có thể được truy cập bằng index. Liên tục nghĩa là các element của array nằm sát nhau trong memory, không có khoảng trống. Đồng nhất nghĩa là tất cả đều có cùng type. Array declaration dùng các cặp ngoặc vuông và có thể có nhiều chiều.
 
-Array Two-dimensional phổ biến; thường dùng row và column để mô tả vị trí element. Array từ ba chiều ít phổ biến hơn nhưng hữu ích trong một số application. Đừng nhầm array two-dimensional với array pointer. Chúng tương tự nhưng hành xử hơi khác, như mục “Dùng array One-Dimensional chứa pointer” trang 92 sẽ cho thấy.
+Array Two-dimensional rất phổ biến, và chúng ta thường dùng các thuật ngữ row và column để mô tả vị trí element của array. Array có ba chiều trở lên ít phổ biến hơn nhưng có thể rất hữu ích trong một số ứng dụng. Không nên nhầm array two-dimensional với array gồm các pointer. Chúng tương tự nhưng hoạt động hơi khác, như sẽ thấy trong mục “Dùng array One-Dimensional gồm các pointer” ở trang 92.
 
 Variable length array xuất hiện trong C99. Trước đó dùng kỹ thuật với `realloc` hỗ trợ array có kích thước thay đổi. Function `realloc` được minh họa trong “Dùng function realloc đổi kích thước array” trang 87.
 
 ![image](images/ch04/fig04-01.png)
 
-Array có kích thước cố định. Khi khai báo, cần quyết định lớn bao nhiêu. Quá nhiều element gây lãng phí, quá ít giới hạn số element xử lý được. Function `realloc` và variable length array cung cấp kỹ thuật xử lý array cần đổi kích thước. Với chút công sức, có thể resize array để dùng đúng lượng memory.
+Array có kích thước cố định. Khi khai báo array, chúng ta cần quyết định nó lớn đến đâu. Nếu chỉ định quá nhiều element, chúng ta lãng phí storage. Nếu quá ít, chúng ta giới hạn số element có thể xử lý. Function `realloc` và variable length array cung cấp các kỹ thuật xử lý array cần thay đổi kích thước. Với một chút công sức, chúng ta có thể resize array và dùng đúng lượng memory cần thiết.
 
 ### Array One-Dimensional
 
@@ -38,7 +38,7 @@ Array index bắt đầu 0, kết thúc ở kích thước khai báo trừ một
 
 Hình 4-1. Memory allocation cho array
 
-Biểu diễn nội bộ array không có thông tin số element. Tên array chỉ tham chiếu block memory. Operator `sizeof` với array trả số byte được cấp. Muốn xác định số element, chia kích thước array cho kích thước element như sau. Kết quả hiển thị 5:
+Biểu diễn nội bộ của array không có thông tin về số element mà nó chứa. Array name chỉ tham chiếu một block memory. Dùng operator `sizeof` với array trả về số byte được cấp cho array. Để xác định số element, chúng ta chia kích thước array cho kích thước element như minh họa dưới đây. Đoạn này sẽ hiển thị 5:
 
 ```
 printf("%d\n", sizeof(vector)/sizeof(int));
@@ -52,9 +52,9 @@ int vector[5] = {1, 2, 3, 4, 5};
 
 ### Array Two-Dimensional
 
-Array Two-dimensional dùng row và column xác định element. Cần ánh xạ array vào address space one-dimension của main memory. Trong C, dùng thứ tự row-column: row đầu nằm trong memory, tiếp theo row thứ hai, thứ ba, tiếp tục đến row cuối.
+Array Two-dimensional dùng row và column để xác định element. Loại array này cần được map vào address space one-dimension của main memory. Trong C, điều này được thực hiện theo thứ tự row-column. Row đầu của array được đặt vào memory, tiếp theo là row thứ hai, rồi row thứ ba, và tiếp tục đến khi row cuối được đặt vào memory.
 
-Sau đây khai báo array two-dimensional với hai row và ba column, khởi tạo bằng block statement. Hình 4-2 minh họa cấp memory. Sơ đồ trái là ánh xạ memory; sơ đồ phải là cách nhìn khái niệm:
+Đoạn sau khai báo một array two-dimensional với hai row và ba column. Array được khởi tạo bằng block statement. Hình 4-2 minh họa cách memory được cấp cho array này. Sơ đồ bên trái cho thấy cách memory được map. Sơ đồ bên phải cho thấy cách hình dung về mặt khái niệm:
 
 ```
 int matrix[2][3] = {{1,2,3},{4,5,6}};
@@ -64,7 +64,7 @@ int matrix[2][3] = {{1,2,3},{4,5,6}};
 
 Hình 4-2. Array Two-dimensional
 
-Array two-dimensional được xem là array của các array. Khi truy cập bằng một subscript, nhận pointer đến row tương ứng. Chuỗi code sau hiển thị address và kích thước từng row:
+Array two-dimensional được xem là array của các array. Nghĩa là khi truy cập array bằng chỉ một subscript, chúng ta nhận pointer đến row tương ứng. Điều này được minh họa trong chuỗi code sau, nơi address và kích thước của từng row được hiển thị:
 
 ```
 for (int i = 0; i < 2; i++) {
@@ -113,16 +113,16 @@ int vector[5] = {1, 2, 3, 4, 5};
 int *pv = vector;
 ```
 
-Variable `pv` trỏ đến element đầu, không phải bản thân array. Khi gán giá trị đầu tiên cho `pv`, chúng ta gán address element đầu.
+Variable `pv` là pointer đến element đầu của array, không phải chính array. Khi lần đầu gán giá trị cho `pv`, chúng ta gán address của element đầu tiên trong array.
 
-Có thể dùng riêng tên array hoặc address-of operator với element đầu như sau. Hai cách tương đương và trả address của `vector`. Dùng address-of operator dài hơn nhưng tường minh hơn:
+Chúng ta có thể dùng riêng array name hoặc dùng address-of operator với element đầu của array như minh họa dưới đây. Hai cách tương đương và trả về address của `vector`. Dùng address-of operator dài dòng hơn nhưng cũng tường minh hơn:
 
 ```
 printf("%p\n",vector);
 printf("%p\n",&vector[0]);
 ```
 
-Expression `&vector` đôi khi được dùng lấy address array. Nó khác notation kia vì trả pointer đến toàn array. Hai cách kia trả pointer đến integer. Thay vì pointer đến integer, nó trả pointer đến array integer. Cách dùng type này sẽ được minh họa trong “Truyền multidimensional array” trang 96.
+Expression `&vector` đôi khi được dùng để lấy address của array. Nó khác các notation kia ở chỗ trả về pointer đến toàn bộ array. Hai cách tiếp cận kia tạo pointer đến integer. Thay vì trả về pointer đến integer, nó trả về pointer đến array gồm các integer. Cách dùng type này sẽ được minh họa trong mục “Truyền multidimensional array” ở trang 96.
 
 Cũng có thể dùng array subscript với pointer. Thực tế notation `pv[i]` được evaluate như sau:
 
@@ -132,7 +132,7 @@ Cũng có thể dùng array subscript với pointer. Thực tế notation `pv[i]
 
 Pointer `pv` chứa address block memory. Notation ngoặc vuông lấy address trong `pv` rồi cộng giá trị index `i` bằng pointer arithmetic. Address mới sau đó được dereference để trả nội dung.
 
-Như “Pointer arithmetic” trang 20 đã bàn, cộng integer vào pointer tăng address bằng tích integer với kích thước data type. Cộng integer vào tên array cũng vậy. Hai câu sau tương đương:
+Như đã thảo luận trong mục “Pointer arithmetic” ở trang 20, cộng một integer vào pointer sẽ tăng address mà nó chứa thêm tích của integer và kích thước data type. Điều tương tự đúng khi cộng integer vào array name. Hai statement sau tương đương:
 
 ```
 *(pv + i)
@@ -155,11 +155,11 @@ Bảng 4-1. Array/pointer notation
 
 Hình 4-4. Array/pointer notation
 
-Cộng 1 vào array address thực tế cộng 4, kích thước integer, vì đây là array integer. Operation đầu và cuối truy cập vị trí ngoài giới hạn array. Dù không tốt, nó nhấn mạnh phải thận trọng khi dùng index hoặc pointer truy cập element.
+Khi cộng 1 vào address của array, thực tế chúng ta cộng 4, kích thước integer, vì đây là array gồm các integer. Với thao tác đầu và cuối, chúng ta truy cập các vị trí ngoài giới hạn array. Dù đây không phải cách làm tốt, nó nhấn mạnh sự cần thiết phải cẩn thận khi dùng index hoặc pointer để truy cập element của array.
 
 Có thể coi array notation là operation “dịch và dereference”. Expression `vector[2]` bắt đầu ở vector, pointer đến đầu array, dịch hai vị trí sang phải rồi dereference lấy giá trị. Dùng address-of operator với array notation như `&vector[2]` thực chất triệt tiêu dereferencing. Có thể diễn giải là đi sang trái hai vị trí rồi trả address đó.
 
-Sau đây minh họa pointer khi triển khai scalar addition operation. Operation này nhận giá trị rồi nhân với từng element của vector:
+Đoạn sau minh họa cách dùng pointer để triển khai scalar addition operation. Operation này nhận một giá trị và nhân nó với từng element của vector:
 
 ```
 pv = vector;
@@ -180,7 +180,7 @@ int *pv = vector;
 
 Code sinh bởi `vector[i]` khác code sinh bởi `vector+i`. Notation `vector[i]` sinh machine code bắt đầu tại `vector`, di chuyển `i` vị trí rồi dùng nội dung. Notation `vector+i` sinh machine code bắt đầu tại `vector`, cộng `i` vào address rồi dùng nội dung tại address đó. Dù kết quả giống nhau, machine code khác nhau. Khác biệt hiếm khi quan trọng với phần lớn programmer.
 
-Có khác biệt khi áp operator `sizeof` cho array và pointer đến cùng array. Áp `sizeof` cho `vector` trả 20, số byte cấp cho array. Áp `sizeof` cho `pv` trả 4, kích thước pointer.
+Có sự khác biệt khi áp dụng operator `sizeof` cho array và cho pointer đến cùng array đó. Áp dụng operator `sizeof` cho `vector` trả về 20, số byte được cấp cho array. Áp dụng operator `sizeof` cho `pv` trả về 4, kích thước pointer.
 
 Pointer `pv` là `lvalue`. `lvalue` chỉ thành phần bên trái assignment operator. `lvalue` phải sửa được. Tên array như `vector` không phải `lvalue`, không sửa được. Address gán cho array không thể thay đổi. Pointer có thể nhận giá trị mới và tham chiếu vùng memory khác.
 
@@ -199,7 +199,7 @@ pv = vector + 1;
 
 ## Dùng malloc tạo array One-Dimensional
 
-Nếu cấp memory từ heap rồi gán address cho pointer, không có lý do không dùng array subscript với pointer và coi memory như array. Chuỗi sau sao chép nội dung array `vector` dùng trước:
+Nếu cấp memory từ heap và gán address cho pointer, không có lý do gì chúng ta không thể dùng array subscript với pointer và xem memory này như array. Trong chuỗi sau, chúng ta sao chép nội dung array `vector` đã dùng trước đó:
 
 ```
 int *pv = (int*) malloc(5 * sizeof(int));
@@ -216,23 +216,23 @@ for(int i=0; i<5; i++) {
 }
 ```
 
-Hình 4-5 minh họa memory allocation.
+Hình 4-5 minh họa cách memory được cấp phát cho ví dụ này.
 
 ![image](images/ch04/fig04-06.png)
 
 Hình 4-5. Array cấp từ heap
 
-Kỹ thuật tạo vùng memory rồi coi như array. Kích thước xác định tại runtime. Tuy nhiên, phải nhớ giải phóng khi dùng xong.
+Kỹ thuật này tạo một vùng memory và xem nó như array. Kích thước được xác định tại runtime. Tuy nhiên, chúng ta cần nhớ giải phóng memory khi dùng xong.
 
 ![image](images/ch04/fig04-07.png)
 
-Ví dụ trước dùng `*(pv+i)` thay vì `*pv+1`. Vì dereference operator ưu tiên cao hơn plus operator, pointer trong expression thứ hai bị dereference, cho giá trị được tham chiếu. Sau đó cộng `i` vào integer value này, không đúng ý định. Ngoài ra, dùng expression này làm `lvalue` khiến compiler phàn nàn. Vì vậy phải buộc cộng trước rồi dereference để hoạt động đúng.
+Trong ví dụ trước, chúng ta dùng `*(pv+i)` thay vì `*pv+1`. Vì dereference operator có precedence cao hơn plus operator, pointer trong expression thứ hai được dereference, cho chúng ta giá trị mà pointer tham chiếu. Sau đó, chúng ta cộng `i` vào integer value này. Đó không phải điều dự định. Ngoài ra, khi dùng expression này làm `lvalue`, compiler sẽ phàn nàn. Vì vậy, để hoạt động đúng, chúng ta cần buộc phép cộng được thực hiện trước, rồi mới đến dereference operation.
 
 ## Dùng function realloc đổi kích thước array
 
-Có thể resize array tạo bằng `malloc` với `realloc`. Các điểm chính của `realloc` đã nêu ở Chương 2. Chuẩn C99 hỗ trợ variable length array; đôi khi là giải pháp tốt hơn dùng `realloc`. Nếu không dùng C99 thì cần `realloc`. Ngoài ra, variable length array chỉ được khai báo làm thành viên function. Nếu cần array tồn tại lâu hơn function, phải dùng `realloc`.
+Chúng ta có thể resize array hiện có được tạo bằng `malloc` bằng function `realloc`. Các điểm cơ bản của function `realloc` được trình bày chi tiết trong Chương 2. Tiêu chuẩn C99 hỗ trợ variable length array. Trong một số tình huống, đây có thể là giải pháp tốt hơn dùng function `realloc`. Nếu không dùng C99, bạn phải dùng function `realloc`. Ngoài ra, variable length array chỉ có thể được khai báo bên trong function. Nếu array cần tồn tại lâu hơn thời gian hoạt động của function, bạn phải dùng `realloc`.
 
-Để minh họa `realloc`, chúng ta triển khai function đọc character từ standard input rồi gán vào buffer. Buffer chứa mọi character đọc được trừ ký tự return kết thúc. Vì không biết người dùng nhập bao nhiêu, không biết buffer cần dài đến đâu. Dùng `realloc` cấp thêm theo lượng tăng cố định. Code như sau:
+Để minh họa function `realloc`, chúng ta sẽ triển khai một function đọc ký tự từ standard input và gán chúng vào buffer. Buffer chứa mọi ký tự đã đọc trừ ký tự return kết thúc. Vì không biết user sẽ nhập bao nhiêu ký tự, chúng ta không biết buffer cần dài bao nhiêu. Chúng ta sẽ dùng function `realloc` để cấp thêm storage theo một mức tăng cố định. Code triển khai function như sau:
 
 ```
 char* getLine(void) {
@@ -273,7 +273,7 @@ Bắt đầu bằng một số declaration tóm tắt trong Bảng 4-2.
 
 Bảng 4-2. Variable của getLine
 
-| sizeIncrement | Kích thước buffer ban đầu và lượng tăng khi cần mở rộng |
+| sizeIncrement | Kích thước buffer ban đầu và lượng tăng mỗi khi buffer cần được mở rộng |
 |---|---|
 | buffer | Pointer đến các character đọc vào |
 | currentPosition | Pointer đến vị trí trống kế tiếp trong buffer |
@@ -281,15 +281,15 @@ Bảng 4-2. Variable của getLine
 | length | Số character đã đọc |
 | character | Character cuối được đọc |
 
-Buffer được tạo với kích thước `sizeIncrement`. Nếu `malloc` không cấp được memory, câu `if` đầu buộc function trả `NULL`. Sau đó vào loop vô hạn xử lý từng character. Khi thoát loop, thêm NUL kết thúc string và trả address buffer.
+Buffer được tạo với kích thước `sizeIncrement`. Nếu function `malloc` không thể cấp memory, statement `if` đầu buộc function trả về `NULL`. Chương trình đi vào loop vô hạn, nơi từng ký tự được xử lý. Khi loop kết thúc, một NUL được thêm để kết thúc string và address của buffer được trả về.
 
-Trong loop `while`, đọc character. Nếu là carriage return thì thoát loop. Sau đó câu `if` xác định đã vượt kích thước buffer chưa. Nếu chưa, thêm character vào vị trí hiện tại.
+Bên trong loop `while`, một ký tự được đọc. Nếu đó là carriage return, loop kết thúc. Tiếp theo, statement `if` xác định liệu chúng ta đã vượt kích thước buffer chưa. Nếu chưa, ký tự được thêm vào vị trí hiện tại trong buffer.
 
-Nếu vượt kích thước buffer, `realloc` tạo block memory mới lớn hơn block cũ `sizeIncrement` byte. Nếu không cấp được, giải phóng memory hiện có rồi buộc trả `NULL`. Nếu được, điều chỉnh `currentPosition` trỏ đúng vị trí trong buffer mới, và gán variable buffer trỏ đến buffer mới cấp. Function `realloc` không nhất thiết giữ memory tại chỗ cũ, nên phải dùng pointer trả về để biết block resize mới nằm đâu.
+Nếu đã vượt kích thước buffer, function `realloc` tạo một block memory mới. Block này lớn hơn block cũ `sizeIncrement` byte. Nếu không thể cấp memory, chúng ta free memory đã cấp hiện có và buộc function trả về `NULL`. Nếu được, `currentPosition` được điều chỉnh để trỏ đúng vị trí trong buffer mới và chúng ta gán variable buffer trỏ đến buffer vừa cấp. Function `realloc` không nhất thiết giữ memory hiện có ở nguyên vị trí, nên bạn phải dùng pointer nó trả về để biết block memory mới đã resize nằm ở đâu.
 
-Variable `newBuffer` giữ address memory cấp phát. Cần variable riêng thay vì `buffer` phòng trường hợp `realloc` không cấp được memory, để phát hiện và xử lý.
+Variable `newBuffer` giữ address của memory được cấp phát. Chúng ta cần một variable riêng, thay vì dùng `buffer`, phòng trường hợp `realloc` không thể cấp phát memory. Điều này cho phép phát hiện và xử lý tình huống ấy.
 
-Không giải phóng `buffer` nếu `realloc` thành công vì `realloc` sao chép buffer cũ sang mới rồi giải phóng buffer cũ. Nếu thử giải phóng `buffer`, thường làm chương trình kết thúc vì giải phóng cùng block hai lần.
+Chúng ta không free `buffer` nếu `realloc` thành công, vì `realloc` sẽ copy buffer ban đầu sang buffer mới và free buffer cũ. Nếu cố free `buffer`, chương trình thông thường sẽ kết thúc vì chúng ta cố free cùng một block memory hai lần.
 
 Hình 4-6 minh họa memory cho `getLine` với input string “Once upon a time there was a giant pumpkin.” Program stack được đơn giản hóa, bỏ qua local variable ngoài `buffer` và `currentPosition`. Buffer đã được mở rộng bốn lần, thể hiện bằng hình chữ nhật chứa input string.
 
@@ -297,7 +297,7 @@ Hình 4-6 minh họa memory cho `getLine` với input string “Once upon a time
 
 Hình 4-6. Memory allocation cho function getLine
 
-Function `realloc` cũng giảm lượng không gian pointer dùng. Để minh họa, function `trim` sau xóa khoảng trắng đầu string:
+Function `realloc` cũng có thể được dùng để giảm lượng storage mà pointer sử dụng. Để minh họa, function `trim` dưới đây sẽ bỏ các dấu cách ở đầu string:
 
 ```
 char* trim(char* phrase) {
@@ -326,9 +326,9 @@ int main() {
 }
 ```
 
-Loop `while` đầu dùng variable `tmp` bỏ qua khoảng trắng đầu. Loop `while` thứ hai sao chép character còn lại về đầu string. Nó evaluate true đến khi gặp `NUL`, được evaluate false. Sau đó thêm zero kết thúc string. Function `realloc` cấp lại memory dựa trên độ dài mới.
+Loop `while` đầu dùng variable `tmp` để bỏ qua mọi dấu cách ở đầu. Loop `while` thứ hai copy các ký tự còn lại trong string về đầu string. Nó được đánh giá là true cho đến khi gặp `NUL`, vốn được đánh giá là false. Sau đó, số 0 được thêm để kết thúc string. Function `realloc` tiếp theo được dùng để cấp lại memory dựa trên độ dài mới của string.
 
-Hình 4-7 minh họa dùng function với string ban đầu “cat.” Trạng thái trước và sau khi `trim` thực thi được hiển thị. Memory đỏ là memory cũ, không nên truy cập.
+Hình 4-7 minh họa việc sử dụng function với string ban đầu là “cat.” Trạng thái string trước và sau khi function `trim` thực thi được trình bày. Memory màu đỏ là memory cũ và không nên được truy cập.
 
 ![image](images/ch04/fig04-09.png)
 
@@ -336,9 +336,9 @@ Hình 4-7. Ví dụ realloc
 
 ## Truyền array One-Dimensional
 
-Khi truyền array one-dimensional cho function, address được truyền by value. Truyền thông tin hiệu quả hơn vì không truyền toàn array và phải cấp memory trên stack cho nó. Thông thường phải truyền kích thước array; nếu không, từ góc nhìn function chỉ có address mà không có dấu hiệu kích thước.
+Khi array one-dimensional được truyền cho function, address của array được truyền by value. Điều này giúp việc truyền thông tin hiệu quả hơn vì không truyền toàn bộ array và không phải cấp memory trên stack cho nó. Thông thường, điều này có nghĩa phải truyền kích thước array. Nếu không, từ góc nhìn function, tất cả những gì có là address của array mà không có chỉ dấu về kích thước.
 
-Trừ khi array có gì đó cho biết giới hạn, cần truyền thông tin kích thước. Với string trong array, có thể dựa ký tự kết thúc `NUL` để biết khi nào dừng xử lý; Chương 5 sẽ bàn. Nói chung, không biết kích thước thì không thể xử lý element đúng, có thể làm quá ít hoặc coi memory ngoài array như thuộc array. Thường dẫn tới kết thúc bất thường.
+Trừ khi trong array có thứ gì cho biết giới hạn của nó, chúng ta cần truyền thông tin kích thước khi truyền array. Với string lưu trong array, có thể dựa vào ký tự kết thúc `NUL` để biết lúc nào dừng xử lý array. Chúng ta sẽ tìm hiểu điều này trong Chương 5. Nói chung, nếu không biết kích thước array, chúng ta không thể xử lý element đúng cách và có thể chỉ xử lý quá ít element hoặc xem memory ngoài array như một phần của array. Điều này thường khiến chương trình kết thúc bất thường.
 
 Có thể khai báo array trong function declaration bằng array notation hoặc pointer notation.
 
@@ -357,7 +357,7 @@ void displayArray(int arr[], int size) {
     displayArray(vector, 5);
 ```
 
-Output là các số 1 đến 5. Số 5 truyền vào cho biết kích thước. Có thể truyền bất kỳ số dương nào; function sẽ cố hiển thị số element tương ứng dù kích thước đúng hay không. Truy cập memory ngoài array có thể làm chương trình kết thúc. Hình 4-8 cho memory allocation.
+Output của chuỗi này là các số từ 1 đến 5. Chúng ta truyền số 5 cho function để chỉ kích thước. Có thể truyền bất kỳ số dương nào và function sẽ cố hiển thị số element tương ứng, bất kể kích thước có đúng không. Chương trình có thể kết thúc nếu cố truy cập memory ngoài giới hạn array. Memory allocation cho ví dụ được trình bày trong Hình 4-8.
 
 ![image](images/ch04/fig04-10.png)
 
@@ -365,13 +365,13 @@ Hình 4-8. Dùng array notation
 
 ![image](images/ch04/fig04-07.png)
 
-Lỗi phổ biến là dùng `sizeof` với array để xác định số element như sau. Tuy nhiên, như “Array One-Dimensional” trang 80 giải thích, đây không phải cách đúng xác định kích thước. Ở đây sẽ truyền giá trị 20 cho array.
+Một lỗi phổ biến là dùng operator `sizeof` với array để xác định số element, như dưới đây. Tuy nhiên, như giải thích trong mục “Array One-Dimensional” ở trang 80, đây không phải cách đúng để xác định kích thước. Trong trường hợp này, chúng ta sẽ truyền giá trị 20 cho array.
 
 ```
 displayArray(arr, sizeof(arr));
 ```
 
-Truyền kích thước nhỏ hơn số element thực là thông lệ để chỉ xử lý một phần array. Ví dụ đọc một loạt tuổi vào array nhưng chưa đầy. Nếu gọi function `sort`, chỉ muốn sort tuổi hợp lệ chứ không mọi element.
+Truyền kích thước nhỏ hơn số element thực của array là cách làm phổ biến. Mục đích là chỉ xử lý một phần array. Chẳng hạn, giả sử chúng ta đọc một chuỗi độ tuổi vào array nhưng không lấp đầy nó. Nếu gọi function `sort` để sắp xếp, chúng ta chỉ muốn sắp xếp các độ tuổi hợp lệ, không phải mọi element.
 
 ### Dùng pointer notation
 
@@ -419,7 +419,7 @@ pointer;
 
 - “Truyền argument cho application” trang 125, nơi xử lý array `argv`.
 
-Mục đích là chuẩn bị cho ví dụ sau bằng cách minh họa bản chất. Chuỗi sau khai báo array integer pointer, cấp memory cho từng element và khởi tạo memory bằng index:
+Mục đích phần này là chuẩn bị cho các ví dụ sau bằng cách minh họa bản chất của cách tiếp cận. Chuỗi sau khai báo một array gồm các integer pointer, cấp memory cho từng element và khởi tạo memory này bằng index của array:
 
 ```
 int* arr[5];
@@ -429,7 +429,7 @@ for(int i=0; i<5; i++) {
 }
 ```
 
-Nếu hiển thị array, in các số 0 đến 4. Dùng `arr[i]` tham chiếu pointer, `*arr[i]` gán giá trị cho vị trí tham chiếu. Đừng để array notation gây nhầm. Vì `arr` khai báo array pointer, `arr[i]` trả address. Dereference pointer như `*arr[i]` cho nội dung tại address.
+Nếu hiển thị array này, các số 0 đến 4 sẽ được in. Chúng ta dùng `arr[i]` để tham chiếu pointer và `*arr[i]` để gán giá trị cho vị trí mà pointer tham chiếu. Đừng để array notation gây nhầm lẫn. Vì `arr` được khai báo là array gồm các pointer, `arr[i]` trả về address. Khi dereference pointer như `*arr[i]`, chúng ta nhận nội dung tại address đó.
 
 Có thể dùng pointer notation tương đương sau cho loop body:
 
@@ -438,11 +438,11 @@ Có thể dùng pointer notation tương đương sau cho loop body:
 **(arr+i) = i;
 ```
 
-Notation khó theo dõi hơn, nhưng hiểu nó sẽ nâng kỹ năng C. Câu thứ hai dùng hai mức indirection. Thành thạo notation này phân biệt bạn với C programmer ít kinh nghiệm.
+Notation này khó theo dõi hơn, nhưng hiểu nó sẽ nâng cao trình độ C của bạn. Chúng ta dùng hai mức indirection trong statement thứ hai. Thành thạo notation kiểu này sẽ phân biệt bạn với các lập trình viên C ít kinh nghiệm hơn.
 
-Subexpression `(arr+i)` biểu diễn address element thứ i<sup>th</sup>. Cần sửa nội dung address nên dùng `*(arr+i)`. Câu đầu gán memory đã cấp cho vị trí này. Dereference subexpression lần thứ hai, như câu hai, trả vị trí memory cấp phát. Sau đó gán variable `i` vào đó. Hình 4-9 minh họa cấp memory.
+Subexpression `(arr+i)` biểu thị address của element thứ i<sup>th</sup> trong array. Chúng ta cần sửa nội dung tại address này nên dùng subexpression `*(arr+i)`. Memory được cấp được gán cho vị trí này trong statement đầu. Dereference subexpression lần thứ hai, như trong statement thứ hai, trả về vị trí memory đã cấp. Sau đó, chúng ta gán variable `i` cho nó. Hình 4-9 minh họa cách memory được cấp phát.
 
-Ví dụ `arr[1]` nằm ở address 104. Expression `(arr+1)` cho 104; `*(arr+1)` cho nội dung. Ở đây đó là pointer 504. Dereference lần hai bằng `**(arr+1)` cho nội dung 504, là 1.
+Chẳng hạn, `arr[1]` nằm tại address 104. Expression `(arr+1)` cho chúng ta 104. Dùng `*(arr+1)` cho nội dung của nó. Trong ví dụ này, đó là pointer 504. Dereference lần thứ hai bằng `**(arr+1)` cho nội dung của 504, là 1.
 
 ![image](images/ch04/fig04-11.png)
 
@@ -468,7 +468,7 @@ Expression `arr[3][0]` chỉ element thứ tư của arr rồi element đầu c�
 
 ## Pointer và multidimensional array
 
-Có thể coi phần của multidimensional array là subarray. Ví dụ mỗi row của array two-dimensional là array one-dimensional. Hành vi ảnh hưởng cách dùng pointer với multidimensional array.
+Các phần của multidimensional array có thể được coi là subarray. Ví dụ, mỗi row của array two-dimensional có thể được coi là array one-dimensional. Hành vi này ảnh hưởng cách chúng ta dùng pointer khi làm việc với multidimensional array.
 
 Để minh họa, tạo và khởi tạo array two-dimensional như sau:
 
@@ -530,13 +530,13 @@ Output như sau:
 120
 ```
 
-Address trả bởi `matrix+1` không cách đầu array 4. Thay vào đó cách bằng kích thước row đầu, 20 byte. Dùng riêng `matrix` trả address element đầu. Vì array two-dimensional là array của array, nhận address của array integer five-element, kích thước 20. Có thể xác nhận bằng câu sau, hiển thị 20:
+Address do `matrix+1` trả về không cách đầu array 4 byte. Thay vào đó, nó cách một lượng bằng kích thước row đầu, 20 byte. Dùng riêng `matrix` trả về address của element đầu trong array. Vì array two-dimensional là array của các array, chúng ta nhận address của một integer array five-element. Kích thước của nó là 20. Có thể xác minh bằng statement sau, sẽ hiển thị 20:
 
 ```
 printf("%d\n",sizeof(matrix[0]));  // Displays 20
 ```
 
-Để truy cập element thứ hai, cộng 1 vào row đầu như sau: `*(matrix[0] + 1)`. Expression `matrix[0]` trả address element đầu row đầu. Đây là address array integer. Do đó cộng một làm tăng bằng kích thước một integer, cho element thứ hai. Output là 104 và 2.
+Để truy cập element thứ hai của array, chúng ta cần cộng 1 vào row đầu như sau: `*(matrix[0] + 1)`. Expression `matrix[0]` trả về address của element đầu trong row đầu. Address này là address của một array integer. Vì vậy, khi cộng 1, kích thước một integer được cộng vào, cho chúng ta element thứ hai. Output là 104 và 2.
 
 ```
 printf("%p  %d\n", matrix[0] + 1, *(matrix[0] + 1));
@@ -556,7 +556,7 @@ Hình 4-12. Notation array Two-dimensional
 
 ## Truyền multidimensional array
 
-Truyền multidimensional array cho function có thể khó hiểu, nhất là dùng pointer notation. Cần quyết định array notation hay pointer notation trong function signature. Cũng cần cân nhắc cách truyền hình dạng array, tức số và kích thước các chiều. Muốn dùng array notation trong function, bắt buộc chỉ hình dạng; nếu không compiler không dùng được subscript.
+Truyền multidimensional array cho function có thể gây nhầm lẫn, đặc biệt khi dùng pointer notation. Khi truyền multidimensional array, chúng ta cần quyết định dùng array notation hay pointer notation trong function signature. Một điều khác cần cân nhắc là cách truyền hình dạng array. Hình dạng ở đây là số chiều và kích thước các chiều. Nếu muốn dùng array notation trong function, bắt buộc phải chỉ định hình dạng array. Nếu không, compiler không thể dùng subscript.
 
 Để truyền array `matrix`, dùng:
 
@@ -570,9 +570,9 @@ hoặc:
 void display2DArray(int (*arr)[5], int rows) {
 ```
 
-Cả hai phiên bản đều chỉ số column. Điều này cần vì compiler phải biết số element mỗi row. Không truyền thông tin thì không evaluate được expression như `arr[0][3]`, như “Pointer và multidimensional array” trang 94 giải thích.
+Trong cả hai phiên bản, số column đều được chỉ định. Điều này cần thiết vì compiler cần biết số element trong mỗi row. Nếu không truyền thông tin này, nó không thể đánh giá expression như `arr[0][3]`, như giải thích trong mục “Pointer và multidimensional array” ở trang 94.
 
-Phiên bản đầu, expression `arr[]` là declaration ngầm của pointer đến array. Phiên bản thứ hai, expression `(*arr)` khai báo tường minh pointer.
+Trong phiên bản đầu, expression `arr[]` là declaration ngầm của pointer tới array. Trong phiên bản thứ hai, expression `(*arr)` là declaration tường minh của pointer.
 
 ![image](images/ch04/fig04-07.png)
 
@@ -624,7 +624,7 @@ void display2DArrayUnknownSize(int *arr, int rows, int cols) {
 }
 ```
 
-Câu `printf` tính address từng element bằng cách cộng vào `arr` số element của các row trước, `(i*cols)`, rồi cộng `j` để chỉ column. Có thể gọi như sau:
+Statement `printf` tính address của từng element bằng cách cộng vào `arr` số element trong các row trước, `(i*cols)`, rồi cộng `j` để chỉ định column. Để gọi function, chúng ta có thể dùng:
 
 ```
 display2DArrayUnknownSize(&matrix[0][0], 2, 5);
@@ -636,7 +636,7 @@ Trong function không thể dùng array subscript như sau:
 printf("%d ", arr[i][j]);
 ```
 
-Không thể vì pointer không được khai báo là array two-dimensional. Tuy nhiên, dùng array notation sau được. Có thể dùng một subscript, được diễn giải đơn giản là offset trong array; không dùng hai subscript vì compiler không biết kích thước các chiều:
+Không thể làm vậy vì pointer không được khai báo là array two-dimensional. Tuy nhiên, có thể dùng array notation như dưới đây. Chúng ta có thể dùng một subscript vì nó đơn giản được diễn giải là offset trong array; không thể dùng hai subscript vì compiler không biết kích thước các chiều:
 
 ```
 printf("%d ", (arr+i)[j]);
@@ -644,7 +644,7 @@ printf("%d ", (arr+i)[j]);
 
 Address element đầu được truyền bằng `&matrix[0][0]` thay vì `matrix`. Dùng `matrix` vẫn chạy đúng nhưng sinh warning về pointer type không tương thích. Expression `&matrix[0][0]` là pointer đến integer, còn `matrix` là pointer đến array integer.
 
-Khi truyền array hơn hai chiều, phải chỉ kích thước mọi chiều trừ chiều đầu. Sau đây minh họa function hiển thị array three-dimensional. Hai chiều cuối được chỉ trong declaration:
+Khi truyền array nhiều hơn hai chiều, cần chỉ định kích thước mọi chiều trừ chiều đầu. Đoạn sau minh họa một function được viết để hiển thị array three-dimensional. Hai chiều cuối được chỉ định trong declaration:
 
 ```
 void display3DArray(int (*arr)[2][4], int rows) {
@@ -711,7 +711,7 @@ Liên tục hay không ảnh hưởng operation khác như copy block memory. N�
 
 ### Cấp memory có thể không liên tục
 
-Sau đây là cách cấp array two-dimensional không bảo đảm memory liên tục. Trước tiên cấp array “bên ngoài”, rồi từng row bằng câu `malloc` riêng:
+Đoạn sau minh họa một cách cấp phát array two-dimensional mà memory được cấp không được bảo đảm liên tục. Trước tiên, array “bên ngoài” được cấp phát, rồi từng row được cấp bằng các statement `malloc` riêng:
 
 ```
 int rows = 2;
@@ -738,9 +738,9 @@ Allocation thực tùy heap manager và trạng thái heap. Nó vẫn có thể 
 
 ### Cấp memory liên tục
 
-Trình bày hai cách cấp memory liên tục cho array two-dimensional. Cách đầu cấp array “bên ngoài”, rồi toàn bộ memory cho các row. Cách hai cấp toàn bộ memory một lần.
+Chúng ta sẽ trình bày hai cách cấp memory liên tục cho array two-dimensional. Kỹ thuật đầu cấp array “bên ngoài” trước, rồi toàn bộ memory cho các row. Kỹ thuật thứ hai cấp tất cả memory trong một lần.
 
-Chuỗi sau minh họa cách đầu. `malloc` thứ nhất cấp array pointer đến integer, mỗi element giữ pointer đến row. Đây là block ở address 500 trong Hình 4-16. `malloc` thứ hai cấp memory cho toàn element tại 600. Trong loop `for`, mỗi element array đầu được gán một phần memory do `malloc` thứ hai cấp:
+Kỹ thuật đầu được minh họa trong chuỗi sau. Lệnh `malloc` đầu cấp một array gồm các pointer đến integer. Mỗi element sẽ chứa pointer đến một row. Đây là block được cấp tại address 500 trong Hình 4-16. Lệnh `malloc` thứ hai cấp memory cho toàn bộ element của array tại vị trí 600. Trong loop `for`, mỗi element của array đầu được gán một phần memory được cấp bởi `malloc` thứ hai:
 
 ```
 int rows = 2;
@@ -757,7 +757,7 @@ Hình 4-16. Cấp liên tục bằng hai lời gọi malloc
 
 Về kỹ thuật, memory cho array đầu có thể tách khỏi memory cho “thân” array. Tuy nhiên thân được cấp một vùng liên tục.
 
-Cách hai sau cấp toàn memory cho array cùng lúc:
+Trong kỹ thuật thứ hai dưới đây, toàn bộ memory cho array được cấp phát trong một lần:
 
 ```
 int *matrix = (int *)malloc(rows * columns * sizeof(int));
@@ -769,7 +769,7 @@ Hình 4-17 minh họa allocation.
 
 Hình 4-17. Cấp liên tục bằng một lời gọi malloc
 
-Khi tham chiếu array sau đó, không dùng được array subscript. Thay vào đó phải tính index thủ công như chuỗi sau. Mỗi element được khởi tạo bằng tích các index:
+Khi array được tham chiếu về sau trong code, không thể dùng array subscript. Thay vào đó, index vào array phải được tính thủ công, như minh họa trong chuỗi code sau. Mỗi element được khởi tạo bằng tích các index của nó:
 
 ```
 for (int i = 0; i < rows; i++) {
@@ -779,21 +779,21 @@ for (int i = 0; i < rows; i++) {
 }
 ```
 
-Không dùng subscript được vì đã mất thông tin hình dạng compiler cần. Khái niệm được giải thích trong “Truyền multidimensional array” trang 96.
+Không thể dùng array subscript vì chúng ta đã mất thông tin hình dạng mà compiler cần để cho phép subscript. Khái niệm này được giải thích trong mục “Truyền multidimensional array” ở trang 96.
 
 Cách này ít dùng thực tế, nhưng minh họa quan hệ giữa khái niệm array two-dimensional và tính one-dimensional của main memory. Notation array two-dimensional thuận tiện hơn làm ánh xạ trong suốt và dễ dùng.
 
-Đã minh họa hai cách tổng quát cấp memory liên tục cho array two-dimensional. Chọn cách tùy nhu cầu application. Tuy nhiên, cách cuối tạo một block duy nhất cho “toàn bộ” array.
+Chúng ta đã minh họa hai cách tiếp cận tổng quát để cấp memory liên tục cho array two-dimensional. Cách nào được dùng phụ thuộc nhu cầu ứng dụng. Tuy nhiên, cách cuối tạo một block memory duy nhất cho “toàn bộ” array.
 
 ## Jagged array và pointer
 
-Jagged array là array two-dimensional có số column khác nhau mỗi row. Hình 4-18 minh họa về khái niệm: ba row với số column thay đổi.
+Jagged array là array two-dimensional có số column khác nhau ở mỗi row. Về khái niệm, điều này được minh họa trong Hình 4-18, nơi array có ba row với số column mỗi row khác nhau.
 
 ![image](images/ch04/fig04-19.png)
 
 Hình 4-18. Jagged array
 
-Trước khi học tạo array như vậy, xét array two-dimensional tạo bằng compound literal. Compound literal là cấu trúc C trông như cast operator theo sau là initializer list trong ngoặc nhọn. Sau đây là ví dụ cho constant integer và array integer, dùng như phần declaration:
+Trước khi học cách tạo array như vậy, hãy xem một array two-dimensional được tạo bằng compound literal. Compound literal là một cấu trúc C gồm thứ trông như cast operator theo sau bởi initializer list trong ngoặc nhọn. Sau đây là ví dụ compound literal cho cả constant integer và array integer. Chúng được dùng như một phần của declaration:
 
 ```
 (const int) {100}
@@ -809,7 +809,7 @@ int (*(arr1[])) = {
     (int[]) {6, 7, 8}};
 ```
 
-Array có ba row và ba column. Element khởi tạo từ 0 đến 8 theo thứ tự row column. Hình 4-19 mô tả bố trí memory.
+Array này có ba row và ba column. Các element được khởi tạo bằng giá trị từ 0 đến 8 theo thứ tự row column. Hình 4-19 mô tả cách bố trí memory cho array này.
 
 ![image](images/ch04/fig04-20.png)
 
@@ -852,7 +852,7 @@ int (*(arr2[])) = {
     (int[]) {6, 7, 8}};
 ```
 
-Dùng ba compound literal khai báo jagged array. Element được khởi tạo theo row-column từ zero. Chuỗi tiếp hiển thị array để xác nhận đã tạo. Cần ba loop `for` vì mỗi row có số column khác nhau:
+Chúng ta dùng ba compound literal để khai báo jagged array. Các element được khởi tạo theo thứ tự row-column bắt đầu bằng 0. Chuỗi tiếp theo hiển thị array để xác minh việc tạo nó. Chuỗi cần ba loop `for` vì mỗi row có số column khác nhau:
 
 ```
 int row = 0;
@@ -893,20 +893,20 @@ arr2[2][1]  Address: 0x000128  Value: 7
 arr2[2][2]  Address: 0x000132  Value: 8
 ```
 
-Hình 4-20 mô tả bố trí memory.
+Hình 4-20 mô tả cách memory được bố trí cho array này.
 
 ![image](images/ch04/fig04-21.png)
 
 Hình 4-20. Memory allocation của jagged array
 
-Các ví dụ dùng array notation thay pointer notation khi truy cập nội dung, giúp dễ nhìn và hiểu hơn phần nào. Tuy nhiên, pointer notation cũng hoạt động.
+Trong các ví dụ này, chúng ta dùng array notation thay vì pointer notation khi truy cập nội dung array. Điều này giúp dễ nhìn và hiểu hơn một chút. Tuy nhiên, pointer notation cũng có thể hoạt động.
 
-Compound literal hữu ích để tạo jagged array. Tuy nhiên, truy cập element có thể vụng về, như ba for loop trước. Có thể đơn giản hóa bằng array riêng giữ kích thước từng column. Dù tạo jagged array trong C được, công sức có thể không đáng.
+Compound literal hữu ích để tạo jagged array. Tuy nhiên, truy cập element của jagged array có thể bất tiện, như minh họa qua ba for loop trước. Ví dụ này có thể đơn giản hóa nếu dùng một array riêng để duy trì kích thước của từng column. Dù có thể tạo jagged array trong C, công sức bỏ ra có thể không đáng.
 
 ## Tóm tắt
 
-Chúng ta ôn nhanh array rồi xét giống và khác giữa array notation và pointer notation. Có thể tạo array bằng function kiểu `malloc`, linh hoạt hơn declaration truyền thống. Đã thấy cách dùng `realloc` thay đổi lượng memory cấp cho array.
+Chúng ta bắt đầu bằng việc ôn nhanh array, rồi xem điểm giống và khác giữa array notation và pointer notation. Array có thể được tạo bằng các function kiểu `malloc`. Những function này linh hoạt hơn array declaration truyền thống. Chúng ta đã thấy cách dùng function `realloc` để thay đổi lượng memory được cấp cho array.
 
-Cấp memory động cho array có thể khó. Với array từ hai chiều, phải cẩn thận bảo đảm cấp trong memory liên tục.
+Cấp phát memory động cho array có thể đặt ra thách thức. Với array từ hai chiều trở lên, phải cẩn thận để bảo đảm array được cấp trong memory liên tục.
 
-Cũng đã tìm hiểu vấn đề khi truyền và trả array. Thường phải truyền kích thước cho function để xử lý đúng. Ngoài ra, đã xem cách tạo jagged array trong C.
+Chúng ta cũng tìm hiểu các vấn đề có thể xảy ra khi truyền và trả array. Thông thường, phải truyền kích thước array cho function để nó có thể xử lý đúng. Chúng ta cũng xem cách tạo jagged array trong C.

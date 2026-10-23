@@ -1,18 +1,18 @@
-# Chương 7. Vấn đề security và dùng pointer sai
+# Chương 7. Những vấn đề security và việc sử dụng pointer không đúng cách
 
 Hiếm có application nào mà security và reliability không quan trọng. Mối lo càng tăng bởi các báo cáo thường xuyên về vi phạm security và application failure. Trách nhiệm bảo vệ application phần lớn thuộc developer. Chương này xem các thực hành làm application an toàn và đáng tin cậy hơn.
 
 Viết application an toàn bằng C có thể khó vì những đặc điểm vốn có của ngôn ngữ. Ví dụ C không ngăn programmer ghi ngoài giới hạn array, có thể làm hỏng memory và tạo nguy cơ security. Ngoài ra, dùng pointer sai thường là gốc rễ nhiều vấn đề security.
 
-Application hành xử khó dự đoán có vẻ không phải vấn đề security, ít nhất xét truy cập trái phép. Tuy nhiên, đôi khi có thể khai thác hành vi này gây denial of service, làm tổn hại application. Hành vi khó dự đoán do dùng pointer sai đã được minh họa ở các phần khác. Chương này xác định thêm các cách dùng sai.
+Khi application hành xử khó dự đoán, điều đó có thể không có vẻ là vấn đề security, ít nhất xét về truy cập trái phép. Tuy nhiên, đôi khi có thể lợi dụng hành vi ấy, gây denial of service và làm application bị tổn hại. Hành vi khó dự đoán do sử dụng pointer sai đã được minh họa ở những phần khác trong sách. Trong chương này, chúng ta sẽ xác định thêm những cách sử dụng pointer không đúng.
 
 CERT là nguồn tốt để tìm hiểu toàn diện hơn vấn đề security trong C và ngôn ngữ khác. Tổ chức này nghiên cứu Internet security vulnerability. Chúng ta tập trung vấn đề liên quan pointer. Nhiều mối lo security của CERT bắt nguồn từ dùng pointer sai. Hiểu pointer và cách dùng đúng là công cụ quan trọng phát triển application an toàn, đáng tin. Một số chủ đề đã bàn trước, không nhất thiết theo góc security mà theo thực hành lập trình. Operating system (OS) đã có cải tiến security; một số thể hiện ở cách dùng memory. Dù thường ngoài tầm kiểm soát developer, cải tiến vẫn ảnh hưởng chương trình. Hiểu chúng giúp giải thích hành vi application. Chúng ta tập trung Address Space Layout Randomization và Data Execution Prevention.
 
-Address Space Layout Randomization (ASLR) bố trí ngẫu nhiên data region của application trong memory, gồm code, stack, heap. Ngẫu nhiên hóa vị trí khiến attacker khó đoán memory sẽ nằm đâu, từ đó khó khai thác. Một số attack như return-to-libc ghi đè phần stack rồi chuyển control đến vùng này, thường là shared C library `libc`. Nếu không biết vị trí stack và `libc`, attack ít có khả năng thành công.
+Quá trình Address Space Layout Randomization (ASLR) bố trí ngẫu nhiên các data region của application trong memory. Các vùng này gồm code, stack và heap. Ngẫu nhiên hóa vị trí khiến attacker khó đoán memory được đặt ở đâu, do đó khó khai thác hơn. Một số kiểu tấn công, như return-to-libc, ghi đè một phần stack rồi chuyển control đến vùng này. Vùng đó thường là shared C library, `libc`. Nếu không biết vị trí stack và `libc`, những cuộc tấn công như vậy ít có khả năng thành công hơn.
 
 Data Execution Prevention (DEP) ngăn thực thi code nằm trong vùng memory nonexecutable. Trong một số attack, memory bị ghi đè bằng malicious code rồi control chuyển đến đó. Nếu vùng code này nonexecutable, như stack hoặc heap, nó bị ngăn thực thi. Kỹ thuật có thể triển khai bằng hardware hoặc software.
 
-Chương này xét security theo các góc:
+Trong chương này, chúng ta xem xét các vấn đề security từ một số góc độ:
 
 - Declaration và initialization của pointer
 
@@ -22,7 +22,7 @@ Chương này xét security theo các góc:
 
 ## Declaration và initialization của pointer
 
-Vấn đề có thể phát sinh khi khai báo, khởi tạo pointer, hoặc đúng hơn là không khởi tạo. Phần này xem các tình huống có thể xảy ra.
+Vấn đề có thể phát sinh khi khai báo và khởi tạo pointer, hay chính xác hơn là khi không khởi tạo pointer. Phần này sẽ xem xét những tình huống có thể xảy ra các loại vấn đề ấy.
 
 ### Declaration pointer sai
 
@@ -42,7 +42,7 @@ int *ptr1, *ptr2;
 
 Tốt hơn nữa là khai báo mỗi variable một dòng.
 
-Thói quen tốt khác là dùng type definition thay macro definition. Chúng cho compiler kiểm tra scoping rule, điều không luôn đúng với macro.
+Một thực hành tốt khác là sử dụng type definition thay cho macro definition. Type definition cho phép compiler kiểm tra các quy tắc scope, điều không phải lúc nào cũng đúng với macro definition.
 
 Có thể khai báo variable với hỗ trợ directive như sau. Pointer đến integer được gói trong directive `define` rồi dùng khai báo variable:
 
@@ -62,7 +62,7 @@ Cả hai variable đều là pointer đến integer.
 
 ### Không khởi tạo pointer trước khi dùng
 
-Dùng pointer trước khi khởi tạo có thể gây run-time error, đôi khi gọi wild pointer. Ví dụ sau khai báo pointer đến integer nhưng chưa gán giá trị trước khi dùng:
+Dùng pointer trước khi khởi tạo có thể gây run-time error. Pointer như vậy đôi khi được gọi là wild pointer. Ví dụ đơn giản sau khai báo pointer tới integer nhưng không gán giá trị cho nó trước khi sử dụng:
 
 ```
 int *pi;
@@ -70,13 +70,13 @@ int *pi;
 printf(“%d\n”,*pi);
 ```
 
-Hình 7-1 minh họa memory lúc này.
+Hình 7-1 minh họa cách memory được cấp phát tại thời điểm này.
 
 ![image](images/ch07/fig07-02.png)
 
 Hình 7-1. Wild pointer
 
-Variable `pi` chưa khởi tạo, chứa garbage biểu thị bằng dấu chấm. Chuỗi có khả năng kết thúc khi chạy nếu memory address trong `pi` ngoài address space hợp lệ của application. Nếu không, giá trị hiển thị là thứ tình cờ ở address đó, diễn giải như integer. Nếu dùng pointer đến string, thường thấy loạt ký tự lạ cho tới terminating zero.
+Variable `pi` chưa được khởi tạo và chứa giá trị rác, được biểu thị bằng dấu ba chấm. Đoạn lệnh này rất có thể sẽ kết thúc trong khi thực thi nếu memory address lưu trong `pi` nằm ngoài address space hợp lệ của application. Nếu không, giá trị được hiển thị sẽ là bất cứ thứ gì tình cờ có ở address đó, được diễn giải như integer. Nếu thay bằng pointer tới string, chúng ta thường thấy một chuỗi ký tự lạ được hiển thị cho đến khi gặp số zero kết thúc.
 
 ### Xử lý pointer chưa khởi tạo
 
@@ -106,7 +106,7 @@ Function `assert` cũng kiểm tra null pointer value. Ví dụ sau kiểm tra v
 assert(pi != NULL);
 ```
 
-Cách này có thể chấp nhận với debug version. Nếu pointer null, output tương tự:
+Với debug version của application, cách tiếp cận này có thể chấp nhận được. Nếu pointer là null, output sẽ tương tự như sau:
 
 ```
 Assertion failed: pi != NULL
@@ -114,11 +114,11 @@ Assertion failed: pi != NULL
 
 Function `assert` nằm trong header file assert.h.
 
-Tool Third-party cũng hỗ trợ phát hiện. Ngoài ra, compiler option có thể hữu ích, như “Dùng static analysis tool” trang 173 đề cập.
+Các công cụ Third-party cũng có thể hỗ trợ phát hiện những loại vấn đề này. Ngoài ra, một số compiler option có thể hữu ích, như được đề cập trong phần “Sử dụng công cụ static analysis” ở trang 173.
 
 ## Vấn đề sử dụng pointer
 
-Phần này xem dùng sai dereference operator và array subscript, cùng vấn đề string, structure, function pointer. Nhiều vấn đề security xoay quanh buffer overflow: ghi đè memory ngoài giới hạn object. Memory có thể thuộc address space chương trình hoặc process khác. Khi ngoài program address space, phần lớn operating system phát segmentation fault rồi kết thúc chương trình. Nếu cố ý gây ra, đây là denial of service attack. Nó không cố truy cập trái phép mà làm application và có thể server ngừng hoạt động.
+Phần này xem xét việc dùng sai dereference operator và array subscript. Chúng ta cũng xem xét những vấn đề liên quan đến string, structure và function pointer. Nhiều vấn đề security xoay quanh khái niệm buffer overflow. Buffer overflow xảy ra khi memory bên ngoài giới hạn object bị ghi đè. Memory này có thể thuộc address space của chương trình hoặc của process khác. Khi memory nằm ngoài address space của chương trình, phần lớn operating system phát sinh segmentation fault và kết thúc chương trình. Nếu được gây ra với ý đồ xấu, việc kết thúc vì lý do này cấu thành denial of service attack. Kiểu tấn công này không cố giành truy cập trái phép mà nhằm làm application, và có thể cả server, ngừng hoạt động.
 
 Nếu buffer overflow nằm trong address space application, có thể dẫn tới truy cập data trái phép và/hoặc chuyển control sang code segment khác, nguy cơ làm hệ thống bị xâm phạm. Đặc biệt đáng lo nếu application chạy với supervisor privilege.
 
@@ -136,7 +136,7 @@ Khi buffer overflow xảy ra với element stack frame, có thể ghi đè retur
 
 ### Kiểm tra NULL
 
-Luôn kiểm tra return value khi dùng function kiểu `malloc`. Không làm có thể gây kết thúc bất thường. Cách tổng quát:
+Luôn kiểm tra return value khi dùng function thuộc kiểu `malloc`. Không làm vậy có thể khiến chương trình kết thúc bất thường. Sau đây minh họa cách tiếp cận tổng quát:
 
 ```
 float *vector = malloc(20 * sizeof(float));
@@ -164,7 +164,7 @@ int *pi;
 *pi = &num;
 ```
 
-Tuy nhiên không đúng. Chú ý dereference operator ở dòng cuối. Chúng ta cố gán address của `num` không phải cho `pi` mà vào vị trí memory do nội dung `pi` chỉ. Pointer `pi` chưa khởi tạo. Đây là lỗi đơn giản dùng sai dereference operator. Chuỗi đúng:
+Tuy nhiên, cách này không đúng. Hãy chú ý dereference operator ở dòng cuối. Chúng ta đang cố gán address của `num` vào vị trí memory được nội dung `pi` chỉ định, thay vì gán cho `pi`. Pointer `pi` vẫn chưa được khởi tạo. Chúng ta đã mắc lỗi đơn giản là dùng sai dereference operator. Đoạn lệnh đúng như sau:
 
 ```
 int num;
@@ -176,13 +176,13 @@ Trong declaration gốc `int *pi = &num`, dấu sao khai báo variable là point
 
 ### Dangling pointer
 
-Dangling pointer xảy ra khi pointer được giải phóng nhưng còn tham chiếu memory đó. “Dangling pointer” trang 51 mô tả kỹ. Nếu truy cập sau, nội dung có thể đã đổi. Ghi có thể làm hỏng memory; đọc có thể trả data không hợp lệ. Cả hai đều có thể kết thúc chương trình.
+Dangling pointer xảy ra khi pointer được giải phóng nhưng vẫn tham chiếu memory đó. Vấn đề này được mô tả chi tiết trong “Dangling pointer” ở trang 51. Nếu cố truy cập memory ấy về sau, nội dung của nó rất có thể đã thay đổi. Write operation trên memory này có thể làm hỏng memory; read operation có thể trả về data không hợp lệ. Cả hai đều có nguy cơ khiến chương trình kết thúc.
 
 Cho đến gần đây, điều này chưa được xem là mối lo security. Như Dangling Pointer giải thích, có khả năng khai thác dangling pointer. Tuy nhiên cách này dựa trên khai thác VTable (Virtual Table) trong C++. VTable là array function pointer hỗ trợ virtual method C++. Trừ khi dùng cách tương tự với function pointer, đây không phải mối lo trong C.
 
 ### Truy cập memory ngoài giới hạn array
 
-Không có gì ngăn chương trình truy cập memory ngoài vùng cấp cho array. Ví dụ này khai báo, khởi tạo ba array để minh họa. Giả định chúng được cấp ở vị trí memory liên tiếp.
+Không có gì ngăn chương trình truy cập memory ngoài vùng được cấp phát cho array. Ví dụ này khai báo và khởi tạo ba array để minh họa hành vi ấy. Giả định rằng các array được cấp phát tại những vị trí memory liên tiếp.
 
 ```
 char firstName[8] = "1234567";
@@ -198,7 +198,7 @@ printf("%p  %s\n",middleName,middleName);
 printf("%p  %s\n",lastName,lastName);
 ```
 
-Để minh họa ghi đè, ba array được khởi tạo bằng chuỗi số đơn giản. Dù hành vi tùy compiler và máy, thường code chạy và ghi đè character trong `firstName` và `lastName`. Output dưới đây. Hình 7-2 cho allocation:
+Để minh họa cách memory bị ghi đè, ba array được khởi tạo bằng một dãy số đơn giản. Dù hành vi chương trình thay đổi tùy compiler và máy, đoạn này thường vẫn thực thi và ghi đè các character trong `firstName` và `lastName`. Output được trình bày dưới đây. Hình 7-2 minh họa cách memory được cấp phát:
 
 ```
 116  12X4567
@@ -214,7 +214,7 @@ Như Chương 4 giải thích, tính address bằng subscript không kiểm tra 
 
 ### Tính sai kích thước array
 
-Khi truyền array cho function, luôn truyền cùng kích thước. Thông tin giúp tránh vượt giới hạn. Function `replace` sau nhận address string cùng replacement character và kích thước buffer. Nó thay mọi character trước `NUL` bằng replacement character. Argument kích thước ngăn ghi vượt buffer:
+Khi truyền array cho function, luôn truyền cả kích thước array cùng lúc. Thông tin này giúp function tránh vượt giới hạn array. Trong function `replace` dưới đây, address của string được truyền cùng replacement character và kích thước buffer. Mục đích function là thay mọi character trong string cho đến character `NUL` bằng replacement character. Size argument ngăn function ghi quá cuối buffer:
 
 ```
 void replace(char buffer[], char replacement, size_t size) {
@@ -226,7 +226,7 @@ void replace(char buffer[], char replacement, size_t size) {
 }
 ```
 
-Trong chuỗi sau, array `name` chỉ chứa bảy character cộng ký tự kết thúc `NUL`. Nhưng cố ý ghi vượt cuối để minh họa `replace`. Function `replace` nhận name và replacement character `+`:
+Trong đoạn lệnh sau, array `name` chỉ chứa tối đa bảy character cộng character kết thúc `NUL`. Tuy nhiên, chúng ta cố ý ghi quá cuối array để minh họa function `replace`. Trong đoạn này, function `replace` được truyền name và replacement character là `+`:
 
 ```
 char name[8];
@@ -245,7 +245,7 @@ Chỉ tám character plus-sign được thêm vào array. Dù `strcpy` cho phép
 
 ### Dùng sai sizeof operator
 
-Ví dụ dùng sai `sizeof` là cố kiểm tra giới hạn pointer nhưng làm sai. Ví dụ sau cấp memory cho array integer rồi khởi tạo từng element bằng 0.
+Một ví dụ dùng sai operator `sizeof` xảy ra khi chúng ta cố kiểm tra giới hạn pointer nhưng làm không đúng. Trong ví dụ sau, memory được cấp phát cho integer array rồi từng element được khởi tạo bằng 0.
 
 ```
 int buffer[20];
@@ -259,7 +259,7 @@ Tuy nhiên, `sizeof(buffer)` trả 80 vì buffer có 80 byte (20 nhân 4 byte m�
 
 ### Luôn dùng pointer type khớp
 
-Nên luôn dùng pointer type thích hợp cho data. Để minh họa nguy cơ, xét chuỗi sau: pointer đến integer được gán cho pointer đến `short`:
+Luôn dùng pointer type thích hợp với data là một ý tưởng tốt. Để minh họa một nguy cơ có thể xảy ra, hãy xét đoạn lệnh sau. Pointer tới integer được gán cho pointer tới `short`:
 
 ```
 int  num = 2147483647;
@@ -277,17 +277,17 @@ pi: 100  Value(16): 7fffffff  Value(10): 2147483647
 ps: 100  Value(16): ffff  Value(10): -1
 ```
 
-Chú ý có vẻ chữ số hexadecimal đầu ở address 100 là `7` hoặc `f` tùy hiển thị integer hay short. Mâu thuẫn bề ngoài là hệ quả chạy trên máy little endian. Hình 7-3 minh họa bố trí memory của constant tại address 100.
+Lưu ý rằng chữ số hexadecimal đầu tiên lưu tại address 100 có vẻ là `7` hoặc `f`, tùy nó được hiển thị như integer hay short. Sự mâu thuẫn bề ngoài này là hệ quả của việc thực thi đoạn lệnh trên máy little endian. Hình 7-3 minh họa cách bố trí memory của constant tại address 100.
 
 ![image](images/ch07/fig07-04.png)
 
 Hình 7-3. Pointer type không khớp
 
-Nếu coi là short và chỉ dùng hai byte đầu, nhận –1. Nếu coi integer và dùng cả bốn byte, nhận 2,147,483,647. Vấn đề tinh vi như vậy khiến C và pointer thành chủ đề đầy thách thức.
+Nếu coi đây là số short và chỉ dùng hai byte đầu, chúng ta nhận giá trị short là –1. Nếu coi là integer và dùng cả bốn byte, chúng ta nhận 2,147,483,647. Những vấn đề tinh vi như vậy khiến C và pointer trở thành chủ đề đầy thách thức.
 
 ### Bounded pointer
 
-Bounded pointer chỉ pointer bị giới hạn ở vùng hợp lệ. Ví dụ array khai báo 32 element, pointer dùng với nó bị ngăn truy cập memory trước hoặc sau array.
+Thuật ngữ bounded pointer mô tả những pointer có việc sử dụng bị giới hạn trong các vùng hợp lệ. Ví dụ, với array được khai báo có 32 element, pointer dùng với array này sẽ bị ngăn truy cập bất kỳ memory nào trước hoặc sau array.
 
 C không hỗ trợ trực tiếp, nhưng programmer có thể cưỡng chế tường minh như sau:
 
@@ -313,15 +313,15 @@ Cách khác dùng Bounded Model Checking for ANSI-C and C++ (CBMC). Application 
 
 ![image](images/ch07/fig07-01.png)
 
-Smart pointer trong C++ mô phỏng pointer và hỗ trợ bounds checking. Đáng tiếc không có trong C.
+Smart pointer, có trong C++, cung cấp cách mô phỏng pointer và hỗ trợ bounds checking. Đáng tiếc, chúng không có trong C.
 
 ### Vấn đề string security
 
-Vấn đề security của string thường xảy ra khi ghi vượt cuối. Phần này tập trung các function “standard” góp phần gây vấn đề.
+Vấn đề security liên quan đến string thường xảy ra khi chúng ta ghi quá cuối string. Phần này tập trung vào những function “standard” góp phần gây ra vấn đề ấy.
 
-Dùng string function như `strcpy` và `strcat` thiếu thận trọng có thể gây buffer overflow. Đã có đề xuất thay các method nhưng chưa cách nào được chấp nhận rộng. Function `strncpy` và `strncat` hỗ trợ phần nào, với parameter `size_t` chỉ số character tối đa cần copy. Tuy nhiên chúng cũng dễ sai nếu tính số character không đúng.
+Dùng những string function như `strcpy` và `strcat` có thể gây buffer overflow nếu không thận trọng. Đã có một số cách được đề xuất để thay thế các method này, nhưng chưa cách nào được chấp nhận rộng rãi. Function `strncpy` và `strncat` có thể hỗ trợ phần nào, với parameter `size_t` chỉ định số character tối đa cần sao chép. Tuy nhiên, chúng cũng dễ gây lỗi nếu số character không được tính đúng.
 
-C11 (Annex K) thêm `strcat_s` và `strcpy_s`, trả error nếu buffer overflow. Hiện chỉ Microsoft Visual C++ hỗ trợ. Ví dụ sau minh họa `strcpy_s`, nhận destination buffer, kích thước destination buffer và source buffer. Return value zero nghĩa không lỗi. Ở đây có lỗi vì source quá lớn cho destination:
+Trong C11 (Annex K), các function `strcat_s` và `strcpy_s` đã được bổ sung. Chúng trả về lỗi nếu xảy ra buffer overflow. Hiện tại chỉ Microsoft Visual C++ hỗ trợ chúng. Ví dụ sau minh họa function `strcpy_s`. Nó nhận ba parameter: destination buffer, kích thước destination buffer và source buffer. Return value bằng zero nghĩa là không có lỗi. Tuy nhiên, trong ví dụ này sẽ xảy ra lỗi vì source quá lớn để vừa destination buffer:
 
 ```
 char firstName [8];
@@ -335,7 +335,7 @@ Function `gets` đọc string từ standard input rồi lưu character vào buff
 
 Một số Linux system cũng hỗ trợ `strlcpy` và `srtlcat`, nhưng GNU C library không hỗ trợ. Có người cho rằng chúng gây nhiều vấn đề hơn giải quyết và tài liệu chưa tốt.
 
-Một số function cho attacker truy cập memory bằng format string attack. Format string user-supplied như dưới được thiết kế để truy cập memory và có thể inject code. Trong chương trình đơn giản này, command line argument thứ hai làm parameter đầu của `printf`:
+Việc sử dụng một số function có thể cho phép attacker truy cập memory bằng kỹ thuật gọi là format string attack. Trong những cuộc tấn công này, user-supplied format string, minh họa dưới đây, được chế tạo để cho phép truy cập memory và có thể inject code. Trong chương trình đơn giản này, command line argument thứ hai được dùng làm parameter đầu tiên của function `printf`:
 
 ```
 int main(int argc, char** argv) {
@@ -356,15 +356,15 @@ Output như sau:
 User Supplied Input
 ```
 
-Dù chương trình vô hại, attack tinh vi hơn có thể gây hại thực. Không trình bày toàn diện ở đây; chi tiết cách thực hiện có tại hackerproof.org.
+Dù chương trình này vô hại, một cuộc tấn công tinh vi hơn có thể gây thiệt hại thực sự. Ở đây không trình bày toàn diện chủ đề này; tuy nhiên, có thể tìm thêm chi tiết về cách thực hiện kiểu tấn công ấy tại hackerproof.org.
 
 Các function `printf`, `fprintf`, `snprintf`, `syslog` đều nhận format string argument. Phòng thủ đơn giản nhất là không bao giờ dùng format string user-supplied với chúng.
 
 ### Pointer arithmetic và structure
 
-Chỉ nên dùng pointer arithmetic với array. Array bảo đảm cấp trong block liên tục, nên arithmetic cho offset hợp lệ. Không nên dùng trong structure vì field có thể không nằm ở vùng liên tiếp.
+Chỉ nên dùng pointer arithmetic với array. Vì array được bảo đảm cấp phát trong block memory liên tục, pointer arithmetic sẽ cho offset hợp lệ. Tuy nhiên, không nên dùng nó bên trong structure, vì các field của structure có thể không được cấp phát trong những vùng memory liên tiếp.
 
-Structure sau minh họa. Field `name` được cấp 10 byte, sau là integer. Nhưng integer align theo ranh giới four-byte nên có khoảng trống giữa hai field. “Memory được cấp cho structure thế nào” trang 135 giải thích khoảng trống.
+Structure sau minh họa điều này. Field `name` được cấp phát 10 byte, tiếp theo là một integer. Tuy nhiên, vì integer được align theo ranh giới four-byte, giữa hai field sẽ có khoảng trống. Những khoảng trống kiểu này được giải thích trong phần “Memory được cấp phát cho structure như thế nào” ở trang 135.
 
 ```
 typedef struct _employee {
@@ -382,7 +382,7 @@ char *ptr = employee.name;
 ptr += sizeof(employee.name);
 ```
 
-Pointer chứa address 110, address hai byte giữa field. Dereference diễn giải bốn byte tại 110 thành integer. Hình 7-4 minh họa.
+Pointer sẽ chứa address 110, là address của hai byte nằm giữa hai field. Dereference pointer sẽ diễn giải bốn byte tại address 110 như một integer. Hình 7-4 minh họa điều này.
 
 ![image](images/ch07/fig07-05.png)
 
@@ -390,9 +390,9 @@ Hình 7-4. Ví dụ padding structure
 
 ![image](images/ch07/fig07-06.png)
 
-Pointer align sai có thể gây kết thúc bất thường hoặc lấy data sai. Truy cập cũng có thể chậm hơn nếu compiler phải sinh thêm machine code bù alignment sai.
+Pointer được align không đúng có thể khiến chương trình kết thúc bất thường hoặc lấy được data sai. Ngoài ra, truy cập pointer có thể chậm hơn nếu compiler phải sinh thêm machine code để bù cho alignment không đúng.
 
-Ngay cả nếu memory trong structure liên tục, dùng pointer arithmetic với field vẫn không tốt. Structure sau định nghĩa `Item` gồm ba integer. Dù thường được cấp tại vị trí liên tiếp, không có bảo đảm:
+Ngay cả khi memory trong structure liên tục, dùng pointer arithmetic với field của structure vẫn không phải thực hành tốt. Structure sau định nghĩa một `Item` gồm ba integer. Dù ba integer field thường được cấp phát tại những vị trí memory liên tiếp, không có bảo đảm chúng sẽ như vậy:
 
 ```
 typedef struct _item {
@@ -435,7 +435,7 @@ printf("Bin number: %d\n",part.binNumber);
 
 ### Vấn đề function pointer
 
-Function và function pointer điều khiển thứ tự thực thi nhưng có thể dùng sai, gây hành vi khó dự đoán. Xét function `getSystemStatus`, trả integer biểu thị trạng thái hệ thống:
+Function và function pointer được dùng để điều khiển thứ tự thực thi chương trình, nhưng có thể bị sử dụng sai, gây hành vi khó dự đoán. Hãy xét function `getSystemStatus`. Function này trả integer value phản ánh trạng thái hệ thống:
 
 ```
 int getSystemStatus() {
@@ -445,7 +445,7 @@ int getSystemStatus() {
 }
 ```
 
-Cách tốt nhất xác định status zero:
+Cách tốt nhất để xác định trạng thái hệ thống có bằng zero hay không như sau:
 
 ```
 if(getSystemStatus() == 0) {
@@ -455,7 +455,7 @@ if(getSystemStatus() == 0) {
 }
 ```
 
-Ví dụ tiếp quên cặp ngoặc mở và đóng, code không thực thi đúng:
+Trong ví dụ tiếp theo, chúng ta quên dùng dấu ngoặc mở và đóng. Code sẽ không thực thi đúng:
 
 ```
 if(getSystemStatus == 0) {
@@ -465,9 +465,9 @@ if(getSystemStatus == 0) {
 }
 ```
 
-Mệnh đề `else` luôn chạy. Logical expression so address function với 0 thay vì gọi rồi so return value với 0. Nhớ rằng dùng riêng tên function trả address.
+Mệnh đề `else` sẽ luôn được thực thi. Trong logical expression, chúng ta so sánh address của function với 0 thay vì gọi function rồi so sánh return value của nó với 0. Hãy nhớ rằng khi tên function được dùng riêng, nó trả về address của function.
 
-Lỗi tương tự là dùng trực tiếp return value của function mà không so kết quả với giá trị khác. Address chỉ được trả và evaluate true hoặc false. Address function khó bằng zero, nên được evaluate true vì C coi mọi nonzero value là true:
+Một lỗi tương tự là dùng trực tiếp return value của function mà không so sánh kết quả với giá trị khác. Address chỉ được trả về và đánh giá là true hoặc false. Address của function khó có thể bằng zero. Vì vậy, address được trả về sẽ được đánh giá là true, do C coi mọi giá trị khác zero là true:
 
 ```
 if(getSystemStatus) {
@@ -481,7 +481,7 @@ if(getSystemStatus) {
 if(getSystemStatus()) {
 ```
 
-Đừng gán function cho function pointer có signature khác. Có thể gây undefined behavior. Ví dụ dùng sai:
+Đừng gán function cho function pointer khi signature của chúng khác nhau. Việc này có thể gây undefined behavior. Ví dụ về cách dùng sai ấy như sau:
 
 ```
 int (*fptrCompute)(int,int);
@@ -495,14 +495,14 @@ fptrCompute(2,5);
 
 Chúng ta cố gọi `add` với hai argument trong khi cần ba. Code compile được nhưng output indeterminate.
 
-Function pointer thực thi function khác nhau tùy address gán. Ví dụ muốn dùng `printf` bình thường nhưng đổi sang function khác để logging chuyên biệt. Declaration và cách dùng như sau:
+Function pointer thực thi các function khác nhau tùy address được gán cho nó. Ví dụ, chúng ta có thể muốn dùng function `printf` cho hoạt động thông thường nhưng đổi sang function khác để logging chuyên biệt. Sau đây minh họa việc khai báo và sử dụng function pointer như vậy:
 
 ```
 int (*fptrIndirect)(const char *, ...) = printf;
 fptrIndirect("Executing printf indirectly");
 ```
 
-Attacker có thể dùng buffer overflow ghi đè address function pointer, chuyển control đến vị trí memory tùy ý.
+Attacker có thể dùng buffer overflow để ghi đè address của function pointer. Khi điều này xảy ra, control có thể được chuyển đến một vị trí tùy ý trong memory.
 
 ## Vấn đề memory deallocation
 
@@ -510,7 +510,7 @@ Ngay cả khi memory đã giải phóng, chưa chắc đã xong với pointer ho
 
 ### Double free
 
-Giải phóng block hai lần gọi double free, như “Double free” trang 48. Sau đây minh họa:
+Giải phóng một block memory hai lần được gọi là double free, như giải thích trong “Double free” ở trang 48. Sau đây minh họa cách điều đó xảy ra:
 
 ```
 char *name = (char*)malloc(...);
@@ -520,9 +520,9 @@ free(name);     // First free
 free(name);     // Double free
 ```
 
-Trong phiên bản zlib compression library cũ, operation double-free có thể gây denial of service hoặc chèn code vào chương trình. Tuy nhiên rất ít khả năng và vulnerability đã được xử lý trong bản mới. Có thêm thông tin tại cert.org.
+Trong một phiên bản cũ của zlib compression library, operation double-free có thể gây denial of service attack hoặc chèn code vào chương trình. Tuy nhiên, khả năng này cực kỳ thấp và vulnerability đã được xử lý trong những bản phát hành mới hơn của library. Có thể tìm thêm thông tin về vulnerability này tại cert.org.
 
-Kỹ thuật đơn giản tránh loại vulnerability này là luôn gán NULL cho pointer sau free. Phần lớn heap manager bỏ qua lần free null pointer sau đó.
+Một kỹ thuật đơn giản để tránh loại vulnerability này là luôn gán NULL cho pointer sau khi giải phóng. Phần lớn heap manager sẽ bỏ qua những lần cố giải phóng null pointer tiếp theo.
 
 ```
 char *name = (char*)malloc(...);
@@ -535,7 +535,7 @@ Trong “Tự viết function free” trang 70, đã phát triển function làm
 
 ### Xóa sensitive data
 
-Nên ghi đè sensitive data trong memory khi không còn cần. Khi application kết thúc, phần lớn operating system không đặt zero hay sửa memory đã dùng. Vùng cũ có thể cấp cho chương trình khác, cho phép truy cập nội dung. Ghi đè khiến chương trình khác khó lấy thông tin hữu ích từ address space từng chứa sensitive data. Chuỗi sau minh họa đặt sensitive data toàn zero:
+Nên ghi đè sensitive data trong memory khi không còn cần đến. Khi application kết thúc, phần lớn operating system không đặt memory mà application đã dùng về zero hoặc thao tác nó theo cách khác. Vùng memory cũ có thể được cấp cho chương trình khác, chương trình ấy sẽ truy cập được nội dung. Ghi đè sensitive data khiến chương trình khác khó trích xuất thông tin hữu ích từ program address space trước đó dùng để giữ sensitive data. Đoạn lệnh sau minh họa việc đặt sensitive data trong chương trình về zero:
 
 ```
 char name[32];
@@ -566,9 +566,9 @@ free(name);
 
 ## Dùng static analysis tool
 
-Có nhiều static analysis tool phát hiện dùng pointer sai. Ngoài ra, phần lớn compiler có option phát hiện nhiều vấn đề chương này. Ví dụ option `-Wall` của GCC bật báo mọi compiler warning.
+Có nhiều công cụ static analysis để phát hiện việc dùng pointer sai. Ngoài ra, phần lớn compiler có option để phát hiện nhiều vấn đề được đề cập trong chương này. Ví dụ, option `-Wall` của GCC compiler bật việc báo tất cả compiler warning.
 
-Sau đây là warning của một số ví dụ. Ở đây quên cặp ngoặc function call:
+Sau đây minh họa warning sinh ra từ một số ví dụ trong chương. Ở đây chúng ta quên dùng dấu ngoặc mở và đóng cho function call:
 
 ```
 if(getSystemStatus == 0) {
@@ -623,12 +623,12 @@ Warning sinh ra rõ ràng đến ngạc nhiên:
 warning: 'securityQuestion' is used uninitialized in this function
 ```
 
-Cũng có nhiều static analysis tool khác: một số miễn phí, số khác trả phí. Thường chúng chẩn đoán tốt hơn phần lớn compiler. Vì phức tạp, ví dụ ngoài phạm vi sách.
+Cũng có nhiều công cụ static analysis. Một số miễn phí, số khác thu phí. Nhìn chung, chúng cung cấp khả năng chẩn đoán nâng cao hơn phần lớn compiler. Do tính chất phức tạp của chúng, các ví dụ nằm ngoài phạm vi sách.
 
 ## Tóm tắt
 
-Chương này khảo sát pointer ảnh hưởng security và reliability của application thế nào. Các vấn đề chia theo declaration/initialization, sử dụng pointer và memory deallocation. Ví dụ, quan trọng là khởi tạo trước khi dùng, và có thể cần xóa memory string khi hết cần. Đặt pointer bằng `NULL` có thể hiệu quả trong nhiều tình huống.
+Trong chương này, chúng ta khảo sát pointer có thể ảnh hưởng security và reliability của application ra sao. Các vấn đề được tổ chức quanh việc khai báo và khởi tạo pointer, sử dụng pointer và memory deallocation. Ví dụ, điều quan trọng là khởi tạo pointer trước khi dùng, và có thể cần dọn memory string đã sử dụng khi không còn cần nó. Đặt pointer thành `NULL` có thể là kỹ thuật hiệu quả trong nhiều tình huống này.
 
-Có nhiều cách dùng pointer sai. Nhiều cách ghi đè memory ngoài string, một dạng buffer overflow. Dùng sai gây undefined behavior ở nhiều nơi, gồm pointer type không khớp và pointer arithmetic sai.
+Pointer có thể được sử dụng sai theo nhiều cách. Nhiều cách liên quan đến việc ghi đè memory ngoài string, một dạng buffer overflow. Dùng pointer sai có thể gây undefined behavior trong nhiều trường hợp, kể cả pointer type không khớp và pointer arithmetic không đúng.
 
-Đã minh họa các kỹ thuật tránh vấn đề. Nhiều kỹ thuật chỉ đòi hiểu cách dùng pointer và string đúng. Cũng đề cập compiler và static analysis tool phát hiện vùng có nguy cơ.
+Chúng ta đã minh họa nhiều kỹ thuật tránh những loại vấn đề này. Nhiều kỹ thuật đơn giản chỉ liên quan đến việc hiểu pointer và string phải được sử dụng thế nào. Chúng ta cũng đề cập cách dùng compiler và công cụ static analysis để xác định các vùng có nguy cơ gặp vấn đề.

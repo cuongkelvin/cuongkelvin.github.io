@@ -10,7 +10,7 @@ Chương này giới thiệu pointer, các operator của chúng và cách chún
 
 Phần thứ hai xem xét kỹ hơn các memory model mà chắc chắn bạn sẽ gặp khi làm việc với C. Model được dùng với một compiler và môi trường operating system cụ thể ảnh hưởng đến cách sử dụng pointer. Ngoài ra, chúng ta xem xét kỹ các predefined type liên quan đến pointer và memory model. Phần tiếp theo đi sâu vào pointer operator, gồm pointer arithmetic và pointer comparison. Phần cuối xem xét constant và pointer. Nhiều tổ hợp declaration đem lại những khả năng thú vị và thường rất hữu ích.
 
-Dù là C programmer mới hay nhiều kinh nghiệm, sách này sẽ giúp bạn hiểu vững pointer và lấp đầy những khoảng trống trong kiến thức. Programmer có kinh nghiệm sẽ muốn chọn các chủ đề mình quan tâm. Người mới có lẽ nên tiếp cận tuần tự, thận trọng hơn.
+Dù bạn là lập trình viên C mới vào nghề hay đã có kinh nghiệm, cuốn sách này sẽ giúp bạn hiểu vững pointer và lấp đầy những khoảng trống trong kiến thức. Lập trình viên có kinh nghiệm sẽ muốn lựa chọn những chủ đề mình quan tâm. Người mới có lẽ nên tiếp cận một cách có chủ đích và thận trọng hơn.
 
 ## Pointer và memory
 
@@ -57,15 +57,15 @@ Pointer có nhiều công dụng, bao gồm:
 
 - Bảo vệ data được truyền làm parameter cho function
 
-Có thể viết code nhanh và hiệu quả hơn vì pointer gần hardware hơn. Nghĩa là compiler dễ chuyển operation thành machine code hơn. Pointer không có nhiều overhead như một số operator khác.
+Có thể viết code nhanh và hiệu quả hơn vì pointer gần hardware hơn. Nghĩa là compiler có thể dễ dàng chuyển operation thành machine code hơn. Pointer không có nhiều overhead như những gì có thể xuất hiện với các operator khác.
 
 Nhiều data structure dễ triển khai bằng pointer hơn. Ví dụ, linked list có thể dùng array hoặc pointer. Tuy nhiên, pointer dễ dùng hơn và ánh xạ trực tiếp tới liên kết kế tiếp hoặc trước đó. Triển khai bằng array đòi hỏi array index, vốn không trực quan hoặc linh hoạt bằng pointer.
 
-Hình 1-1 minh họa cách biểu diễn linked list nhân viên bằng array và pointer. Bên trái hình dùng array. Variable head cho biết element đầu của linked list nằm ở index 10 của array. Mỗi element chứa structure biểu diễn một nhân viên. Field `next` chứa index trong array của nhân viên kế tiếp. Các element tô bóng biểu thị element chưa sử dụng.
+Hình 1-1 minh họa cách hình dung điều này bằng array và pointer cho một linked list nhân viên. Phía bên trái của hình dùng array. Variable head cho biết element đầu tiên của linked list nằm tại index 10 của array. Mỗi element của array chứa một structure biểu diễn nhân viên. Field `next` của structure chứa index trong array của nhân viên tiếp theo. Các element được tô bóng biểu thị những element chưa được sử dụng.
 
 Bên phải là biểu diễn tương đương bằng pointer. Variable head chứa pointer đến node của nhân viên đầu tiên. Mỗi node chứa data nhân viên và pointer đến node kế tiếp trong linked list.
 
-Biểu diễn bằng pointer vừa rõ ràng vừa linh hoạt hơn. Kích thước array thường phải biết khi tạo, hạn chế số element có thể chứa. Biểu diễn bằng pointer không gặp giới hạn này vì có thể cấp phát động node mới khi cần.
+Biểu diễn bằng pointer không chỉ rõ ràng hơn mà còn linh hoạt hơn. Kích thước array thông thường phải được biết khi tạo nó. Điều này giới hạn số element mà array có thể chứa. Biểu diễn bằng pointer không gặp giới hạn này vì node mới có thể được cấp phát động khi cần.
 
 ![image](images/ch01/fig01-01.png)
 
@@ -111,7 +111,7 @@ Không có yêu cầu nào được áp đặt, nên bất cứ điều gì cũn
 
 ### Khai báo pointer
 
-Pointer variable được khai báo bằng data type, theo sau là dấu sao rồi tên pointer variable. Ví dụ sau khai báo một integer và một pointer đến integer:
+Pointer variable được khai báo bằng một data type, tiếp theo là dấu sao, rồi đến tên pointer variable. Trong ví dụ sau, một integer và một pointer đến integer được khai báo:
 
 ```
 int num;
@@ -133,7 +133,7 @@ Cách dùng khoảng trắng tùy sở thích người dùng.
 
 Dấu sao khai báo variable là pointer. Đây là symbol overloaded vì cũng dùng cho phép nhân và dereference pointer.
 
-Hình 1-2 minh họa cách memory thường được cấp phát cho declaration trên. Ba hình chữ nhật biểu diễn ba vị trí memory. Số bên trái mỗi hình là address. Tên bên cạnh address là variable được gán vào vị trí đó. Address 100 chỉ dùng để minh họa. Address thực của pointer, hay bất kỳ variable nào, thường không được biết trước và phần lớn application cũng không quan tâm giá trị cụ thể. Ba dấu chấm biểu thị memory chưa khởi tạo.
+Hình 1-2 minh họa cách memory thường được cấp phát cho declaration trên. Ba vị trí memory được biểu diễn bằng ba hình chữ nhật. Số bên trái mỗi hình chữ nhật là address của nó. Tên bên cạnh address là variable được gán cho vị trí này. Address 100 được dùng ở đây để minh họa. Address thực của pointer, hay của bất kỳ variable nào, thông thường không được biết, và giá trị của nó cũng không đáng quan tâm trong phần lớn ứng dụng. Ba dấu chấm biểu thị memory chưa được khởi tạo.
 
 Pointer đến memory chưa khởi tạo có thể gây vấn đề. Nếu dereference, nội dung pointer có lẽ không phải address hợp lệ; ngay cả nếu hợp lệ, memory cũng có thể không chứa data hợp lệ. Address không hợp lệ là address chương trình không được phép truy cập. Trên phần lớn platform, điều này khiến chương trình kết thúc, một hậu quả nghiêm trọng có thể dẫn tới nhiều vấn đề như Chương 7 sẽ bàn.
 
@@ -141,7 +141,7 @@ Pointer đến memory chưa khởi tạo có thể gây vấn đề. Nếu deref
 
 Hình 1-2. Sơ đồ memory
 
-Các variable `num` và `pi` lần lượt ở address 100 và 104. Giả định mỗi variable chiếm bốn byte. Cả hai kích thước có thể khác tùy cấu hình hệ thống, như mục “Kích thước và type của pointer” ở trang 15 sẽ đề cập. Trừ khi nói khác, mọi ví dụ dùng integer four-byte.
+Các variable `num` và `pi` lần lượt nằm tại address 100 và 104. Cả hai được giả định chiếm bốn byte. Cả hai kích thước này sẽ khác nhau tùy cấu hình hệ thống, như trình bày trong mục “Kích thước và type của pointer” ở trang 15. Trừ khi được lưu ý khác, chúng ta sẽ dùng integer four-byte trong mọi ví dụ.
 
 ![image](images/ch01/fig01-02.png)
 
@@ -165,13 +165,13 @@ Dù có thể sử dụng pointer chưa khởi tạo, nó không phải lúc nà
 
 ### Cách đọc declaration
 
-Đây là lúc thích hợp để giới thiệu cách đọc pointer declaration cho dễ hiểu hơn. Mẹo là đọc ngược. Dù chưa bàn pointer đến constant, hãy xét declaration sau:
+Đây là lúc thích hợp để đề xuất một cách đọc pointer declaration giúp chúng dễ hiểu hơn. Mẹo là đọc ngược. Dù chưa thảo luận về pointer đến constant, hãy xem declaration sau:
 
 ```
 const int *pci;
 ```
 
-Đọc ngược giúp hiểu declaration từng bước (Hình 1-3).
+Đọc declaration theo chiều ngược cho phép chúng ta từng bước hiểu declaration đó (Hình 1-3).
 
 ![image](images/ch01/fig01-04.png)
 
@@ -291,7 +291,7 @@ Address of pi: 0044FB78  Value: 0044FB84
 
 Specifier `%p` khác `%x` ở chỗ thường hiển thị số hexadecimal bằng chữ hoa. Trừ khi nói khác, chúng ta dùng specifier `%p` cho address.
 
-Hiển thị pointer value nhất quán trên các platform có thể khó. Một cách là cast pointer thành pointer đến void rồi hiển thị bằng format specifier `%p`, như sau:
+Hiển thị pointer value một cách nhất quán trên các platform khác nhau có thể là thách thức. Một cách là cast pointer thành pointer đến void rồi hiển thị nó bằng format specifier `%p` như sau:
 
 ```
 printf("Value of pi: %p\n", (void*)pi);
@@ -311,7 +311,7 @@ Operating system xử lý tất cả việc này; programmer không kiểm soát
 
 ### Dereference pointer bằng indirection operator
 
-Indirection operator, \*, trả về giá trị mà pointer variable trỏ đến. Thao tác này thường được gọi là dereferencing pointer. Ví dụ sau khai báo và khởi tạo `num` và `pi`:
+Indirection operator, \*, trả về giá trị mà pointer variable trỏ đến. Thao tác này thường được gọi là dereference pointer. Trong ví dụ sau, `num` và `pi` được khai báo và khởi tạo:
 
 ```
 int num = 5;
@@ -324,9 +324,9 @@ Sau đó indirection operator được dùng trong câu lệnh sau để hiển 
 printf("%p\n",*pi);   // Displays 5
 ```
 
-Cũng có thể dùng kết quả dereference operator làm lvalue. Thuật ngữ lvalue chỉ operand bên trái assignment operator. Mọi `lvalues` phải có thể sửa đổi vì chúng được gán giá trị.
+Chúng ta cũng có thể dùng kết quả của dereference operator làm lvalue. Thuật ngữ lvalue chỉ operand nằm bên trái assignment operator. Mọi `lvalues` phải có thể sửa đổi vì chúng đang được gán giá trị.
 
-Đoạn sau gán 200 cho integer mà `pi` trỏ đến. Vì nó trỏ đến variable `num`, 200 được gán cho `num`. Hình 1-5 minh họa ảnh hưởng lên memory:
+Đoạn sau sẽ gán 200 cho integer mà `pi` trỏ đến. Vì nó đang trỏ đến variable `num`, 200 sẽ được gán cho `num`. Hình 1-5 minh họa memory bị tác động như thế nào:
 
 ```
 *pi = 200;
@@ -339,7 +339,7 @@ Hình 1-5. Gán memory bằng dereference operator
 
 ### Pointer đến function
 
-Có thể khai báo pointer trỏ đến function. Declaration notation hơi khó hiểu. Đoạn sau minh họa khai báo pointer đến function. Function nhận void và trả về void. Tên pointer là `foo`:
+Pointer có thể được khai báo để trỏ đến function. Ký hiệu declaration hơi khó hiểu. Đoạn sau minh họa cách khai báo pointer đến function. Function nhận void và trả về void. Tên pointer là `foo`:
 
 ```
 void (*foo)();
@@ -363,7 +363,7 @@ Khái niệm null thú vị và đôi khi bị hiểu nhầm. Sự nhầm lẫn 
 
 - Null statement
 
-Khi `NULL` được gán cho pointer, nó nghĩa là pointer không trỏ đến gì. Khái niệm null nói đến việc pointer có thể chứa giá trị đặc biệt không bằng pointer khác. Nó không trỏ đến bất kỳ vùng memory nào. Hai null pointer luôn bằng nhau. Có thể có null pointer type cho mỗi pointer type, như pointer đến character hoặc integer, dù điều này không phổ biến.
+Khi `NULL` được gán cho pointer, điều đó có nghĩa pointer không trỏ đến bất kỳ thứ gì. Khái niệm null đề cập đến việc pointer có thể chứa một giá trị đặc biệt không bằng một pointer khác. Nó không trỏ đến bất kỳ vùng memory nào. Hai null pointer luôn bằng nhau. Có thể có một null pointer type cho mỗi pointer type, chẳng hạn pointer đến character hoặc pointer đến integer, dù điều này không phổ biến.
 
 Khái niệm null là abstraction được hỗ trợ bởi null pointer constant. Constant này có thể là hoặc không là constant zero. C programmer không cần quan tâm biểu diễn nội bộ thực tế.
 
@@ -431,7 +431,7 @@ Cách nào tốt hơn khi làm việc với pointer: dùng `NULL` hay dùng 0? C
 
 Tuy nhiên, không nên dùng `NULL` ngoài pointer context. Đôi lúc có thể hoạt động nhưng không được thiết kế cho mục đích đó. Dùng thay ASCII `NUL` chắc chắn có thể gây vấn đề. Character này không được định nghĩa trong standard C header file nào. Nó tương đương character literal `'\0'`, được evaluate thành giá trị decimal zero.
 
-Ý nghĩa của zero thay đổi theo ngữ cảnh. Trong ngữ cảnh này có thể là integer zero, còn ở ngữ cảnh khác có thể là null pointer. Xét ví dụ sau:
+Ý nghĩa của zero thay đổi tùy context. Trong một số context, nó có thể biểu thị integer 0, còn trong context khác có thể biểu thị null pointer. Hãy xem ví dụ sau:
 
 ```
 int num;
@@ -440,7 +440,7 @@ pi = &num;
 *pi = 0;        // Zero refers to the integer zero
 ```
 
-Chúng ta quen với overloaded operator, như dấu sao dùng khai báo pointer, dereference pointer hoặc nhân. Zero cũng overloaded. Điều này có thể khiến khó chịu vì chúng ta chưa quen overload operand.
+Chúng ta quen với operator được overload, chẳng hạn dấu sao được dùng để khai báo pointer, dereference pointer hoặc thực hiện phép nhân. Zero cũng được overload. Điều này có thể khiến chúng ta thấy không thoải mái vì chưa quen với việc overload operand.
 
 #### Pointer đến void
 
@@ -456,7 +456,7 @@ Nó có hai đặc tính thú vị:
 
 - Pointer đến void không bao giờ bằng pointer khác. Tuy nhiên, hai void pointer được gán giá trị `NULL` sẽ bằng nhau.
 
-Có thể gán mọi pointer cho pointer đến void, rồi cast lại về pointer type ban đầu. Khi đó giá trị bằng pointer value ban đầu. Chuỗi lệnh sau minh họa: pointer đến `int` được gán cho pointer đến void, rồi trở lại pointer đến `int`:
+Bất kỳ pointer nào cũng có thể được gán cho pointer đến void. Sau đó, nó có thể được cast trở lại pointer type ban đầu. Khi đó, giá trị sẽ bằng pointer value ban đầu. Điều này được minh họa trong chuỗi sau, nơi pointer đến `int` được gán cho pointer đến void rồi trở lại pointer đến `int`:
 
 ```
 int num;
@@ -516,7 +516,7 @@ Hình 1-6. Cấp phát memory cho global và static pointer
 
 Kích thước pointer là vấn đề khi quan tâm compatibility và portability của application. Trên phần lớn platform hiện đại, pointer đến data thường có cùng kích thước bất kể pointer type. Pointer đến `char` có cùng kích thước với pointer đến structure. Dù chuẩn C không bắt buộc kích thước giống nhau cho mọi data type, thực tế thường như vậy. Tuy nhiên, pointer đến function có thể khác kích thước pointer đến data.
 
-Kích thước pointer phụ thuộc máy và compiler. Ví dụ, trên Windows hiện đại pointer dài 32 hoặc 64 bit. Với DOS và Windows 3.1, pointer dài 16 hoặc 32 bit.
+Kích thước pointer phụ thuộc vào máy đang dùng và compiler. Chẳng hạn, trên các phiên bản Windows hiện đại, pointer dài 32 hoặc 64 bit. Với operating system DOS và Windows 3.1, pointer dài 16 hoặc 32 bit.
 
 ### Memory model
 
@@ -526,7 +526,7 @@ Sự xuất hiện của máy 64-bit làm rõ hơn những khác biệt về lư
 I In L Ln LL LLn P Pn
 ```
 
-Mỗi chữ hoa tương ứng integer, long hoặc pointer. Chữ thường biểu diễn số bit cấp phát cho data type. Bảng 1-3[^1] tóm tắt các model, trong đó số là kích thước theo bit:
+Mỗi chữ hoa tương ứng với integer, long hoặc pointer. Các chữ thường biểu thị số bit được cấp cho data type. Bảng 1-3[^1] tóm tắt những model này, trong đó con số là kích thước tính bằng bit:
 
 Bảng 1-3. Memory model của máy
 
@@ -556,7 +556,7 @@ Bốn predefined type thường dùng khi làm việc với pointer gồm: `size
 
 Dùng để lưu pointer address
 
-Các mục tiếp theo minh họa từng type, trừ `ptrdiff_t` sẽ bàn trong mục “Trừ hai pointer” ở trang 24.
+Trong các phần tiếp theo, chúng ta sẽ minh họa việc sử dụng từng type, ngoại trừ `ptrdiff_t`, sẽ được thảo luận trong phần “Trừ hai pointer” ở trang 24.
 
 #### Hiểu size\_t
 
@@ -564,7 +564,7 @@ Type `size_t` biểu diễn kích thước tối đa mà object trong C có th�
 
 ![image](images/ch01/fig01-02.png)
 
-Nên dùng `size_t` khi khai báo variable kích thước như số character và array index. Nên dùng nó cho loop counter, index vào array, và đôi khi cho pointer arithmetic.
+Dùng `size_t` khi khai báo variable cho các kích thước, chẳng hạn số ký tự và array index, là cách làm tốt. Nó nên được dùng cho loop counter, index vào array, và đôi khi cho pointer arithmetic.
 
 Declaration của `size_t` là implementation-specific. Nó nằm trong một hoặc nhiều standard header như stdio.h, stdlib.h, và thường được định nghĩa như sau:
 
@@ -591,14 +591,14 @@ printf("%d\n",sizet);
 printf("%zu\n",sizet);
 ```
 
-Vì variable type `size_t` dành cho integer dương, dùng giá trị âm có thể gây vấn đề. Khi gán số âm rồi dùng format specifier `%d` và `%zu`, nhận output sau:
+Vì variable có type `size_t` được dự định dùng với integer dương, việc dùng giá trị âm có thể gây vấn đề. Khi gán cho nó một số âm rồi lần lượt dùng các format specifier `%d` và `%zu`, chúng ta nhận output sau:
 
 ```
 -5
 4294967291
 ```
 
-Field `%d` diễn giải `size_t` là signed integer. Nó hiển thị –5 vì chứa –5. Field `%zu` định dạng `size_t` là unsigned integer. Khi –5 được diễn giải là signed integer, high-order bit được đặt bằng một để chỉ integer âm. Khi diễn giải là unsigned number, high-order bit được xem là lũy thừa lớn của 2. Đó là lý do thấy integer lớn khi dùng field specifier `%zu`.
+Field `%d` diễn giải `size_t` thành signed integer. Nó hiển thị –5 vì chứa –5. Field `%zu` định dạng `size_t` thành unsigned integer. Khi –5 được diễn giải là signed integer, high-order bit được đặt thành 1, cho biết integer là số âm. Khi được diễn giải là unsigned number, high-order bit được hiểu thành một lũy thừa lớn của 2. Đây là lý do chúng ta thấy integer lớn khi dùng field specifier `%zu`.
 
 Số dương được hiển thị đúng như sau:
 
@@ -634,7 +634,7 @@ Trên Harvard architecture, code và data được lưu trong physical memory kh
 
 #### Dùng intptr\_t và uintptr\_t
 
-Type `intptr_t` và `uintptr_t` dùng lưu pointer address. Chúng cung cấp cách khai báo pointer portable và an toàn, có cùng kích thước với pointer nền tảng hệ thống dùng. Chúng hữu ích để chuyển pointer sang biểu diễn integer.
+Các type `intptr_t` và `uintptr_t` được dùng để lưu pointer address. Chúng cung cấp cách khai báo pointer portable và an toàn, đồng thời có cùng kích thước với pointer bên dưới mà hệ thống sử dụng. Chúng hữu ích để chuyển pointer sang dạng biểu diễn integer.
 
 Type `uintptr_t` là phiên bản unsigned của `intptr_`t. Với phần lớn operation, nên dùng `intptr_t`. Type `uintptr_t` không linh hoạt bằng `intptr_t`. Đoạn sau minh họa cách dùng `intptr_t`:
 
@@ -682,7 +682,7 @@ Intel processor đời đầu dùng segmented architecture 16-bit, nơi near và
 
 ## Pointer operator
 
-Có một số operator dùng với pointer. Đến đây đã xét dereference và address-of operator. Phần này xem kỹ pointer arithmetic và comparison. Bảng 1-4 tóm tắt các pointer operator.
+Có một số operator có thể dùng với pointer. Đến đây, chúng ta đã xem xét dereference và address-of operator. Trong phần này, chúng ta sẽ tìm hiểu kỹ pointer arithmetic và phép so sánh. Bảng 1-4 tóm tắt các pointer operator.
 
 Bảng 1-4. Pointer operator
 
@@ -729,7 +729,7 @@ Bảng 1-5. Kích thước data type
 | float | 4 |
 | double | 8 |
 
-Để minh họa việc cộng integer vào pointer, dùng array integer như sau. Mỗi lần cộng một vào `pi`, address tăng bốn. Memory cấp phát cho các variable được minh họa trong Hình 1-7. Pointer được khai báo với data type để thực hiện được những arithmetic operation này. Biết kích thước data type cho phép tự động điều chỉnh pointer value theo cách portable:
+Để minh họa tác động của việc cộng integer vào pointer, chúng ta dùng một array integer như dưới đây. Mỗi lần cộng 1 vào `pi`, address được cộng thêm 4. Memory được cấp cho các variable này được minh họa trong Hình 1-7. Pointer được khai báo với data type để những arithmetic operation như vậy có thể thực hiện được. Biết kích thước data type cho phép tự động điều chỉnh pointer value theo cách portable:
 
 ```
 int vector[] = {28, 41, 7};
@@ -759,7 +759,7 @@ pi = vector;
 pi += 3;
 ```
 
-Pointer đang trỏ đến chính nó. Điều này không hữu ích lắm nhưng minh họa sự cần thiết phải thận trọng với pointer arithmetic. Truy cập memory vượt cuối array nguy hiểm và nên tránh. Không có bảo đảm vùng memory truy cập là variable hợp lệ. Rất dễ tính ra address không hợp lệ hoặc vô dụng.
+Pointer đang trỏ đến chính nó. Điều này không hữu ích lắm nhưng minh họa việc phải cẩn thận khi thực hiện pointer arithmetic. Truy cập memory vượt quá cuối array là việc nguy hiểm và nên tránh. Không có gì bảo đảm memory được truy cập sẽ là một variable hợp lệ. Việc tính ra một address không hợp lệ hoặc vô dụng rất dễ xảy ra.
 
 Các declaration sau minh họa addition operation với data type `short`, rồi `char`:
 
@@ -820,7 +820,7 @@ Vì đây không phải standard C, compiler phát warning. Tuy nhiên, address 
 
 #### Trừ integer khỏi pointer
 
-Có thể trừ integer khỏi pointer như cách cộng. Kích thước data type nhân giá trị integer dùng làm bước được trừ khỏi address. Để minh họa, dùng array integer như sau. Memory tạo cho các variable được minh họa trong Hình 1-7.
+Có thể trừ integer value khỏi pointer theo cùng cách như cộng chúng. Tích của kích thước data type với integer value dùng làm bước sẽ được trừ khỏi address. Để minh họa tác động của việc trừ integer khỏi pointer, chúng ta dùng một array integer như dưới đây. Memory được tạo cho các variable này được minh họa trong Hình 1-7.
 
 ```
 int vector[] = {28, 41, 7};
@@ -835,13 +835,13 @@ pi--;                  // pi: 100
 printf("%d\n",*pi);    // Displays 28
 ```
 
-Mỗi lần trừ một khỏi `pi`, address giảm bốn.
+Mỗi lần trừ một khỏi `pi`, bốn được trừ khỏi address.
 
 #### Trừ hai pointer
 
-Khi trừ pointer này khỏi pointer kia, nhận chênh lệch giữa các address. Chênh lệch thường không hữu ích lắm, trừ khi xác định thứ tự element trong array.
+Khi trừ một pointer khỏi pointer khác, chúng ta nhận chênh lệch giữa các address của chúng. Chênh lệch này thông thường không hữu ích lắm, ngoại trừ để xác định thứ tự các element trong array.
 
-Chênh lệch giữa pointer là số “đơn vị” cách nhau. Dấu phụ thuộc thứ tự operand. Điều này nhất quán với phép cộng pointer, nơi lượng cộng là kích thước data type của pointer. Chúng ta dùng “đơn vị” làm operand. Ví dụ sau khai báo array và pointer đến các element, rồi lấy hiệu:
+Hiệu giữa các pointer là số “đơn vị” mà chúng cách nhau. Dấu của hiệu phụ thuộc vào thứ tự các operand. Điều này nhất quán với phép cộng pointer, nơi lượng được cộng là kích thước data type của pointer. Chúng ta dùng “đơn vị” làm operand. Trong ví dụ sau, chúng ta khai báo một array và các pointer đến element của array. Sau đó, chúng ta lấy hiệu của chúng:
 
 ```
 int vector[] = {28, 41, 7};
@@ -856,15 +856,15 @@ printf("p2-p1:  %d\n",p2-p1);    // p2-p1:  1
 printf("p0-p1:  %d\n",p0-p1);    // p0-p1:  -1
 ```
 
-Trong câu `printf` đầu, chênh lệch vị trí giữa element cuối và đầu array là 2, tức index cách nhau 2. Trong câu `printf` cuối, chênh lệch –1 cho biết `p0` nằm ngay trước element mà `p1` trỏ đến. Hình 1-9 minh họa memory cấp phát cho ví dụ.
+Trong statement `printf` đầu tiên, chúng ta thấy hiệu giữa vị trí element cuối và element đầu của array là 2. Nghĩa là index của chúng chênh nhau 2. Trong statement `printf` cuối, hiệu là –1, cho biết `p0` nằm ngay trước element mà `p1` trỏ đến. Hình 1-9 minh họa cách memory được cấp phát cho ví dụ này.
 
 ![image](images/ch01/fig01-11.png)
 
 Hình 1-9. Trừ hai pointer
 
-Type `ptrdiff_t` là cách portable để biểu diễn chênh lệch giữa hai pointer. Trong ví dụ trước, kết quả trừ hai pointer trả về type `ptrdiff_t`. Vì kích thước pointer có thể khác nhau, type này đơn giản hóa việc xử lý chênh lệch.
+Type `ptrdiff_t` là một cách portable để biểu diễn hiệu giữa hai pointer. Trong ví dụ trước, kết quả trừ hai pointer được trả về dưới type `ptrdiff_t`. Vì kích thước pointer có thể khác nhau, type này đơn giản hóa việc làm việc với hiệu giữa chúng.
 
-Đừng nhầm kỹ thuật này với dùng dereference operator để trừ hai số. Ví dụ sau dùng pointer xác định hiệu các giá trị lưu trong element đầu và thứ hai của array:
+Đừng nhầm kỹ thuật này với việc dùng dereference operator để trừ hai số. Trong ví dụ sau, chúng ta dùng pointer để xác định hiệu giữa các giá trị lưu trong element đầu và element thứ hai của array:
 
 ```
 printf("*p0-*p1:  %d\n",*p0-*p1);  //  *p0-*p1:  -13
@@ -872,9 +872,9 @@ printf("*p0-*p1:  %d\n",*p0-*p1);  //  *p0-*p1:  -13
 
 ### So sánh pointer
 
-Có thể so sánh pointer bằng standard comparison operator. Thông thường so sánh pointer không hữu ích lắm. Tuy nhiên, khi so pointer đến element của array, có thể dùng kết quả xác định thứ tự tương đối của các element.
+Pointer có thể được so sánh bằng các comparison operator tiêu chuẩn. Thông thường, việc so sánh pointer không hữu ích lắm. Tuy nhiên, khi so sánh các pointer đến element của array, kết quả so sánh có thể được dùng để xác định thứ tự tương đối của các element trong array.
 
-Dùng ví dụ vector trong mục “Trừ hai pointer” trang 24 để minh họa comparison. Nhiều comparison operator được áp dụng cho các pointer, và kết quả hiển thị 1 cho true, 0 cho false:
+Chúng ta sẽ dùng ví dụ vector được xây dựng trong mục “Trừ hai pointer” ở trang 24 để minh họa việc so sánh pointer. Một số comparison operator được áp dụng cho các pointer, và kết quả của chúng được hiển thị là 1 cho true và 0 cho false:
 
 ```
 int vector[] = {28, 41, 7};
@@ -891,7 +891,7 @@ printf("p0>p1:  %d\n",p0>p1);    // p0>p1:  0
 
 ## Các cách dùng pointer phổ biến
 
-Pointer có thể dùng theo nhiều cách. Phần này xét các cách khác nhau, gồm:
+Pointer có thể được dùng theo nhiều cách. Phần này xem xét những cách sử dụng pointer khác nhau, bao gồm:
 
 - Nhiều mức indirection
 
@@ -899,7 +899,7 @@ Pointer có thể dùng theo nhiều cách. Phần này xét các cách khác nh
 
 ### Nhiều mức indirection
 
-Pointer có thể dùng nhiều mức indirection. Khai báo variable là pointer đến pointer, đôi khi gọi double pointer, không hiếm. Ví dụ điển hình là truyền program argument cho function `main` bằng parameter thường có tên `argc` và `argv`. Chương 5 sẽ bàn kỹ hơn.
+Pointer có thể sử dụng nhiều mức indirection. Việc thấy một variable được khai báo là pointer đến pointer, đôi khi gọi là double pointer, không hiếm. Ví dụ điển hình là khi program argument được truyền cho function `main` bằng các parameter có tên truyền thống là `argc` và `argv`. Điều này được thảo luận chi tiết hơn trong Chương 5.
 
 Ví dụ sau dùng ba array. Array đầu là array string chứa danh sách tên sách:
 
@@ -910,7 +910,7 @@ char *titles[] = {"A Tale of Two Cities",
        "Gulliver's Travels"};
 ```
 
-Hai array bổ sung duy trì danh sách “sách hay nhất” và sách tiếng Anh. Thay vì chứa bản sao tên sách, chúng chứa address của tên sách trong array `titles`. Cả hai phải được khai báo là pointer đến pointer đến `char`. Element của array chứa address của element trong array `titles`. Cách này tránh nhân đôi memory cho từng tên sách và chỉ có một vị trí lưu tên. Nếu cần sửa tên, chỉ phải sửa ở một chỗ.
+Hai array bổ sung được cung cấp để duy trì danh sách “sách hay nhất” và sách tiếng Anh. Thay vì chứa bản sao của tên sách, chúng chứa address của tên sách trong array `titles`. Cả hai array cần được khai báo là pointer đến pointer đến `char`. Các element của array sẽ chứa address của các element trong array `titles`. Cách này tránh phải nhân đôi memory cho từng tên sách và tạo ra một vị trí duy nhất để lưu tên sách. Nếu cần thay đổi tên sách, thay đổi chỉ phải được thực hiện ở một vị trí.
 
 Hai array được khai báo sau. Mỗi element chứa pointer trỏ đến pointer thứ hai đến `char`:
 
@@ -919,7 +919,7 @@ char **bestBooks[3];
 char **englishBooks[4];
 ```
 
-Hai array được khởi tạo rồi hiển thị một element như sau. Trong các assignment statement, giá trị vế phải được tính bằng subscript trước, rồi address-of operator. Ví dụ, câu thứ hai gán address của element thứ tư trong `titles` cho element thứ hai trong `bestBooks`:
+Hai array được khởi tạo và một element của chúng được hiển thị như dưới đây. Trong các assignment statement, giá trị vế phải được tính bằng cách áp dụng subscript trước, sau đó đến address-of operator. Chẳng hạn, statement thứ hai gán address của element thứ tư trong `titles` cho element thứ hai của `bestBooks`:
 
 ```
 bestBooks[0] = &titles[0];
@@ -944,7 +944,7 @@ Memory cho ví dụ được cấp phát như Hình 1-10.
 
 Hình 1-10. Pointer đến pointer
 
-Nhiều mức indirection đem lại sự linh hoạt bổ sung khi viết và sử dụng code. Nếu không, một số operation sẽ khó hơn. Trong ví dụ này, nếu address của tên sách thay đổi, chỉ cần sửa array `title`, không phải sửa các array khác.
+Sử dụng nhiều mức indirection đem lại thêm tính linh hoạt trong cách viết và dùng code. Nếu không, một số loại operation sẽ khó thực hiện hơn. Trong ví dụ này, nếu address của một tên sách thay đổi, chỉ cần sửa array `title`. Chúng ta không phải sửa các array khác.
 
 Không có giới hạn vốn có về số mức indirection. Tất nhiên, quá nhiều mức có thể gây khó hiểu và khó bảo trì.
 
@@ -1018,9 +1018,9 @@ Xét assignment sau:
 'pci' : you cannot assign to a variable that is const
 ```
 
-Pointer cho rằng nó trỏ đến constant integer; do đó nó cho phép sửa integer bằng pointer. Vẫn có thể sửa `num` qua tên, nhưng không thể dùng `pci` sửa nó.
+Pointer cho rằng nó đang trỏ đến một constant integer; do đó, nó cho phép sửa integer bằng pointer. Chúng ta vẫn có thể sửa `num` bằng tên của nó. Chỉ không thể dùng `pci` để sửa nó.
 
-Về khái niệm, constant pointer cũng có thể biểu diễn như Hình 1-12. Ô trong biểu diễn variable có thể thay đổi; ô tô bóng biểu diễn variable không thể thay đổi. Ô tô bóng mà `pci` trỏ đến không thể sửa bằng `pci`. Đường nét đứt cho biết pointer có thể tham chiếu data type đó. Trong ví dụ trước, `pci` trỏ đến `limit`.
+Về khái niệm, constant pointer cũng có thể được hình dung như Hình 1-12. Các ô không tô biểu diễn variable có thể thay đổi. Các ô tô bóng biểu diễn variable không thể thay đổi. Ô tô bóng mà `pci` trỏ đến không thể được thay đổi bằng `pci`. Đường nét đứt cho biết pointer có thể tham chiếu data type đó. Trong ví dụ trước, `pci` trỏ đến `limit`.
 
 ![image](images/ch01/fig01-14.png)
 
@@ -1047,7 +1047,7 @@ int const *pci;
 
 #### Constant pointer đến nonconstant
 
-Cũng có thể khai báo constant pointer đến nonconstant. Khi đó, pointer không thể thay đổi nhưng data được trỏ đến có thể sửa. Ví dụ:
+Chúng ta cũng có thể khai báo constant pointer đến một nonconstant. Khi làm vậy, pointer không thể thay đổi, nhưng dữ liệu mà nó trỏ đến có thể được sửa. Sau đây là ví dụ về pointer như vậy:
 
 ```
 int num;
@@ -1171,7 +1171,7 @@ Constant pointer đến constant hiếm gặp.
 
 #### Pointer đến (constant pointer đến constant)
 
-Pointer đến constant cũng có thể có nhiều mức indirection. Ví dụ sau khai báo pointer đến pointer `cpci` đã giải thích ở mục trước. Đọc declaration phức tạp từ phải sang trái giúp làm rõ các declaration này:
+Pointer đến constant cũng có thể có nhiều mức indirection. Trong ví dụ sau, chúng ta khai báo một pointer đến pointer `cpci` được giải thích trong phần trước. Đọc declaration phức tạp từ phải sang trái giúp làm rõ những loại declaration này:
 
 ```
 const int * const cpci = &limit;
@@ -1205,8 +1205,8 @@ Bảng sau tóm tắt bốn pointer type đầu tiên đã bàn ở các mục t
 
 Chương này đề cập các khía cạnh thiết yếu của pointer, gồm cách khai báo và dùng trong tình huống phổ biến. Khái niệm null thú vị cùng các biến thể đã được trình bày, bên cạnh một số pointer operator.
 
-Chúng ta thấy kích thước pointer có thể khác nhau tùy memory model mà target system và compiler hỗ trợ. Cũng đã tìm hiểu keyword `const` với pointer.
+Chúng ta đã thấy kích thước pointer có thể thay đổi tùy memory model mà target system và compiler hỗ trợ. Chúng ta cũng đã tìm hiểu cách dùng keyword `const` với pointer.
 
-Với nền tảng này, chúng ta sẵn sàng tìm hiểu các lĩnh vực khác mà pointer đã chứng minh sự hữu ích: làm parameter cho function, hỗ trợ data structure và dynamic memory allocation. Ngoài ra, sẽ thấy tác động của pointer trong việc làm application an toàn hơn.
+Với nền tảng này, chúng ta sẵn sàng tìm hiểu những lĩnh vực khác mà pointer đã chứng tỏ rất hữu ích. Trong đó có việc dùng pointer làm parameter cho function, hỗ trợ data structure và cấp phát memory động. Ngoài ra, chúng ta sẽ thấy tác động của việc dùng chúng để làm ứng dụng an toàn hơn.
 
 [^1]: Phỏng theo http://en.wikipedia.org/wiki/64-bit.
