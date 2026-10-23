@@ -424,7 +424,7 @@ Hơn nữa, giá trị `errno` là chỉ mục vào bảng global chứa thông 
 
 Nhân tiện, bạn có thể tra toàn bộ error code (errno) trong các header thuộc kernel source tree: `include/uapi/asm-generic/errno-base.h` và `include/uapi/asm-generic/errno.h`.
 
-Ví dụ nhanh cách trả về từ hàm `init` của kernel module sẽ làm rõ điểm then chốt: giả sử `init` đang cố cấp phát động kernel memory (tất nhiên chi tiết API `kmalloc()` và tương tự ở các chương sau; lúc này hãy bỏ qua). Khi đó có thể viết:
+Một ví dụ ngắn về cách return từ function `init` của kernel module sẽ giúp làm rõ điểm then chốt này. Giả sử function `init` của kernel module đang cố cấp phát động một vùng kernel memory. Chi tiết về API `kmalloc()` và những API liên quan sẽ được trình bày trong các chương sau; tạm thời hãy bỏ qua. Khi đó, chúng ta có thể viết code như sau:
 
 ```
 [...]
@@ -612,7 +612,7 @@ May là để kernel hoặc kernel module phát thông báo qua `printk()` thì 
 printk(KERN_INFO "Hello, world\n");
 ```
 
-Dù thoạt nhìn rất giống `printf`, API `printk` trong kernel thực sự khá khác. Về điểm giống, API nhận format string làm tham số. Format string gần như giống hệt `printf`.
+Mặc dù thoạt nhìn rất giống `printf`, API `printk` trong kernel thực sự khá khác biệt. Về những điểm giống nhau, API nhận một format string làm tham số. Format string này gần như giống hệt format string của `printf`.
 
 Nhưng điểm giống dừng ở đó. Khác biệt then chốt giữa `printf` và `printk`: library API `printf()` trong user space định dạng chuỗi theo yêu cầu rồi gọi system call `write()`, đến lượt nó thực sự ghi vào thiết bị `stdout`, mặc định là cửa sổ Terminal hay console device.
 
@@ -704,7 +704,7 @@ $ dmesg | tail -n2
  $
 ```
 
-Tham số `rmmod` là tên kernel module như cột đầu `lsmod`, không phải pathname. Rõ ràng giống `insmod`, cần chạy `rmmod` bằng root để thành công hoặc có capability `CAP_SYS_MODULE`.
+Tham số của `rmmod` là tên kernel module, như được hiển thị trong cột đầu tiên của `lsmod`, chứ không phải pathname. Rõ ràng, giống `insmod`, chúng ta cần chạy tiện ích `rmmod` bằng root user để thành công, hoặc có capability `CAP_SYS_MODULE`.
 
 Ở đây còn thấy do `rmmod`, framework LKM trước hết gọi exit routine hay “destructor”, hàm `helloworld_lkm_exit()` của kernel module sắp gỡ. Hàm này gọi `printk`, phát thông báo Goodbye, world... mà ta tra bằng `dmesg`.
 
@@ -907,7 +907,7 @@ Show a live log display from a system service apache.service:
     journalctl -f -u apache
 ```
 
-Hơn nữa, `journalctl` giúp tìm log time-based theo cách human-friendly, ví dụ xem mọi kernel log được ghi trong nửa giờ qua:
+Hơn nữa, `journalctl` giúp dễ dàng tìm log theo thời gian, tức time-based, theo cách thân thiện với người dùng, hay human-friendly. Ví dụ, để xem tất cả các kernel log đã được ghi trong nửa giờ vừa qua:
 
 ```
 journalctl -k --since="30 min ago"
@@ -1077,7 +1077,7 @@ Thông thường ta bảo đảm chỉ `pr_cont()` cuối có ký tự newline.
 
 Từ đây, thông thường ta chỉ dùng macro kiểu `pr_foo() (or pr_*())` khi phát thông báo `printk` vào kernel log.
 
-Hơn nữa, rất quan trọng: tác giả driver phải dùng macro `dev_*()`. Điều này đòi truyền thêm tham số đầu, pointer đến thiết bị liên quan (`struct device *`). Chúng được định nghĩa tại `https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/dev_printk.h#L137`. Lý do là driver core auto-prefixes chi tiết hữu ích trước driver `printk`, giúp log tốt hơn và nhanh nhận ra chi tiết. Ví dụ khi viết I2C driver, thông báo `dev_*()` gồm tên driver, số I2C bus và địa chỉ chip! Đây là ví dụ từ I2C RTC driver được làm lại:
+Hơn nữa, có một điểm rất quan trọng: người viết driver phải sử dụng các macro `dev_*()`. Điều này đòi hỏi truyền thêm tham số đầu tiên là pointer đến device liên quan (`struct device *`). Bạn sẽ thấy tất cả được định nghĩa tại `https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/dev_printk.h#L137`. Lý do sử dụng chúng là driver core tự động thêm các chi tiết hữu ích vào đầu driver `printk` theo cơ chế auto-prefixes, giúp log tốt hơn và dễ nhận ra các chi tiết nhanh chóng. Ví dụ, khi viết một I2C driver, thông báo `dev_*()` sẽ gồm tên driver, số I2C bus và địa chỉ của chip! Dưới đây là một ví dụ từ I2C RTC driver đã được chỉnh sửa:
 
 ```
 ks3231 1-0068: IRQ! #5
@@ -1232,7 +1232,7 @@ rpi # dmesg
 rpi #
 ```
 
-Mọi `printk` trừ `KERN_DEBUG` đều thấy vì đang xem kernel log qua `dmesg`. Vậy làm sao hiện debug message? Phần sau trình bày.
+Tất cả các chỗ sử dụng `printk`, ngoại trừ những chỗ dùng `KERN_DEBUG`, đều nhìn thấy được vì chúng ta đang xem kernel log qua tiện ích `dmesg`. Vậy làm thế nào để hiển thị một debug message? Phần tiếp theo trình bày điều đó.
 
 #### Bật kernel message ở debug-level
 
@@ -1285,7 +1285,7 @@ sudo bash -c "echo Y > /sys/module/printk/parameters/ignore_loglevel"
 
 Ngược lại, có thể tắt lúc runtime bằng cách echo `N` vào cùng pseudofile. Hữu ích!
 
-Cũng có thể dùng `dmesg` để kiểm soát bật/tắt kernel message ra console và console logging level, tức mức mà thông báo có số nhỏ hơn sẽ hiện trên console, qua các option switch, đặc biệt `--console-level`. Tôi để bạn tự xem man page `dmesg`(1) để biết chi tiết.
+Tiện ích `dmesg` cũng có thể được sử dụng để điều khiển việc bật hoặc tắt kernel message trên console device, cũng như console logging level, tức mức mà các message có giá trị số nhỏ hơn sẽ hiển thị trên console. Việc này thực hiện qua nhiều tùy chọn, đặc biệt là `--console-level`. Tôi để bạn tự đọc man page của `dmesg`(1) để biết chi tiết.
 
 Lưu ý quan trọng: Dùng API/macro `printk` và liên quan với mục đích cụ thể debugging được trình bày sâu trong cuốn Linux Kernel Debugging của tôi, cụ thể Chương 3, Debug via Instrumentation – printk and Friends. Nó đề cập nội dung `printk` thông thường đã trình bày ở đây, mẹo dùng `printk` debug, rate-limiting và quan trọng là framework dynamic debug kernel mạnh mẽ. Hãy xem thử.
 
@@ -1343,7 +1343,7 @@ $ head -n1 /proc/dynamic_debug/control
 
 Dòng đầu cho biết định dạng. Mọi field đều self-explanatory trừ field then chốt `flags`; điều kỳ diệu nằm ở đây!
 
-Tóm tắt về `flags`: nếu giá trị `=_`, debug print tắt, thường là mặc định; ví dụ tra vài debug print call site cho module driver e1000:
+Tóm tắt ngắn gọn về `flags` như sau: nếu giá trị là `=_`, debug print bị tắt, thường là thiết lập mặc định. Ví dụ, chúng ta hãy tra một vài debug print call site của driver e1000 được triển khai dưới dạng module:
 
 ```
 # grep "e1000" /proc/dynamic_debug/control | head -n3
@@ -1547,7 +1547,7 @@ pr_info("%s:%s:%s():%d: mywork XY failed!\n", OURMODNAME, __FILE__, __func__,
 __LINE__);
 ```
 
-Bản thân cách này ổn; vấn đề là nếu dự án có nhiều `printk`, sẽ vất vả bảo đảm mọi người luôn theo nhất quán, chính xác định dạng `printk` chuẩn, ví dụ hiện tên module trước, tiếp đến tên tệp, tên hàm và có thể số dòng như ở đây.
+Bản thân cách này là ổn; vấn đề là nếu dự án có nhiều chỗ sử dụng `printk`, việc bảo đảm mọi người trong dự án luôn tuân theo định dạng `printk` chuẩn một cách nhất quán và chính xác có thể rất vất vả. Ví dụ, định dạng chuẩn có thể hiển thị tên module trước, tiếp theo là filename, rồi tên function và có thể cả số dòng, như thấy ở đây.
 
 Đó là lúc dùng `pr_fmt()`; định nghĩa macro này ngay đầu code, phải trước cả `#include` đầu tiên, bảo đảm từng `printk` sau đó được thêm tiền tố theo định dạng macro chỉ định.
 
@@ -1692,7 +1692,7 @@ Các `rule(s)` luôn bắt đầu bằng ký tự `[Tab]`, không phải khoản
 
 Hãy nắm cơ bản cách Makefile module này hoạt động. Trước tiên điểm then chốt: hệ thống `Kbuild` của kernel mà ta đã nhắc và dùng từ Chương 2, Build Linux kernel 6.x từ source code – Phần 1, chủ yếu dùng hai chuỗi biến của phần mềm cần build, nối trong hai biến `obj-y` và `obj-m`.
 
-Chuỗi `obj-y` chứa danh sách nối mọi object cần build và merge vào kernel image cuối – `vmlinux` không nén và `[b][z]Image` nén boot-able. Nghĩ thì hợp lý: `y` trong `obj-y` là Yes. Mọi kernel built-in và tùy chọn `Kconfig` đặt `Y` khi cấu hình hoặc mặc định `Y` được nối qua mục này, build và cuối cùng kết hợp thành kernel image bởi hệ thống `Kbuild`.
+Chuỗi `obj-y` chứa danh sách nối tất cả các object cần build và merge vào các file kernel image cuối cùng: `vmlinux` không nén và các image `[b][z]Image` nén có thể boot, tức boot-able. Hãy nghĩ xem, điều này hợp lý: chữ `y` trong `obj-y` viết tắt của Yes. Tất cả các thành phần kernel built-in và tùy chọn `Kconfig` được đặt thành `Y` trong quá trình kernel configuration, hoặc mặc định là `Y`, được nối với nhau qua mục này, được build và cuối cùng được hệ thống build `Kbuild` kết hợp thành các file kernel image cuối cùng.
 
 Mặt khác, giờ dễ thấy `obj-m` là danh sách nối mọi kernel object cần build riêng thành kernel module! Đó chính xác là lý do Makefile có dòng all-important sau, dòng 4:
 

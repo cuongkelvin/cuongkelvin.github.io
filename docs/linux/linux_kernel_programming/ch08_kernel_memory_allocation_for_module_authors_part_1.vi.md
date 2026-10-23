@@ -1192,7 +1192,7 @@ Chúng ta sẽ trình bày nhiều hơn về cgroup, với các ví dụ tận d
 
 Trong nhiều resource controller thuộc cgroups framework có một controller để kiểm soát memory bandwidth. Bằng cách cấu hình cẩn thận, sysadmin có thể điều tiết hiệu quả việc phân phối memory trên hệ thống. Có thể thực hiện memory protection, cả dạng gọi là hard protection lẫn best-effort protection, qua một số pseudofile `memcg` (memory cgroup) (đặc biệt các file `memory.min` và `memory.low`). Tương tự, trong một cgroup, các pseudofile `memory.high` và `memory.max` là cơ chế chính để kiểm soát mức sử dụng memory của cgroup. Tất nhiên, vì còn nhiều điều hơn những gì đề cập ở đây, tôi đề nghị bạn tham khảo tài liệu kernel về cgroups mới (v2) tại đây: `https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html`.
 
-Được rồi, giờ đã học cách dùng slab allocator API tốt hơn, hãy đi sâu thêm một chút. Thực tế vẫn còn vài lưu ý quan trọng về kích thước memory chunk do slab allocator API cấp phát. Hãy đọc tiếp để biết đó là gì!
+Được rồi, bây giờ bạn đã học cách sử dụng các slab allocator API tốt hơn, chúng ta hãy tìm hiểu sâu thêm một chút nữa. Thực tế, vẫn còn một vài lưu ý quan trọng về kích thước của các memory chunk được cấp phát bởi slab allocator API. Hãy đọc tiếp để biết những lưu ý đó là gì!
 
 ## Những lưu ý khi dùng slab allocator
 

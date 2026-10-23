@@ -230,7 +230,7 @@ config FRAME_WARN:
 
   - Với lần chạy mẫu script `ch6/countem.sh` ở phần Chạy script nhỏ xem số process và thread tồn tại:
 
-  - Vì tổng 514 thread user và kernel tồn tại, nghĩa tổng 514 task metadata structure trong kernel memory, trong code là `struct task_struct`, với:
+  - Vì có tổng cộng 514 thread, cả user lẫn kernel, đang tồn tại trên hệ thống, điều này có nghĩa có tổng cộng 514 task structure chứa metadata trong kernel memory, trong code là `struct task_struct`. Trong số đó, chúng ta có thể nói như sau:
 
   - 398 task structure biểu diễn user thread.
 
@@ -262,7 +262,7 @@ config FRAME_WARN:
 
 Như đã đề cập ngắn, nhiều kiến trúc gồm x86/ARM64 hỗ trợ per-CPU stack riêng cho interrupt handling, gọi IRQ stack. Khi external hardware interrupt xảy ra, CPU control unit lập tức re-vectors cuối cùng đến interrupt handling code, có thể trong device driver. per-CPU interrupt stack riêng dùng giữ stack frame cho interrupt code path; giúp tránh áp lực quá lớn lên kernel-mode stack nhỏ hiện có của process/thread bị interrupt. IRQ stack size giống kernel-mode stack size của kiến trúc. (Ngoài ra x86\_64 hỗ trợ nhiều loại stack hơn, nhưng không đi sâu.)
 
-Giờ hiểu tổ chức tổng thể user/kernel space theo process/thread và stack, hãy xem cách thực sự xem nội dung kernel-space stack và user-space stack. Ngoài hữu ích cho học tập, kiến thức này giúp rất nhiều khi debug.
+Được rồi, bây giờ bạn đã hiểu tổ chức tổng thể của user space và kernel space xét theo process, thread và các stack của chúng. Chúng ta hãy chuyển sang cách thực sự xem nội dung của cả kernel-space stack lẫn user-space stack. Ngoài việc hữu ích cho học tập, kiến thức này có thể hỗ trợ rất nhiều trong các tình huống debug.
 
 ### Xem user stack và kernel stack
 
@@ -280,7 +280,7 @@ Tin tốt: rất dễ. Linux kernel cho thấy kernel stack của thread qua cơ
 
 Ví dụ luôn hữu ích, nên tra kernel-mode stack của Bash process. Giả sử trên Ubuntu khách x86\_64, Bash PID là `2459`:
 
-Trên kernel hiện đại, để tránh information leakage, xem kernel-mode stack của process/thread đòi root access như yêu cầu bảo mật.
+Trên các kernel hiện đại, để tránh information leakage, việc xem kernel-mode stack của một process hoặc thread đòi hỏi root access như một yêu cầu bảo mật.
 
 ```
 $ sudo cat /proc/2549/stack
@@ -305,7 +305,7 @@ Trong output trên, mỗi dòng biểu diễn call frame hay stack frame trên s
 
 - Như đã nói, trên Linux system call `foo()` bất kỳ thường thành function `sys_foo()` trong kernel. Thường nhưng không luôn, `sys_foo()` là wrapper gọi code “thực” `do_[*]_foo()`.
 
-Giờ xem lại output. Hẳn rõ: Bash process hiện chạy function `do_wait()` trong kernel; call graph cho thấy đến đó qua system call `wait4()`! Hoàn toàn đúng; shell fork child process rồi chờ kết thúc bằng `wait4(2)`.
+Bây giờ, hãy xem lại output trước đó. Điều này khá rõ: Bash process của chúng ta đang thực thi function `do_wait()` bên trong kernel; call graph cho thấy rõ nó đến đó thông qua một system call, chính là `wait4()`! Điều này hoàn toàn đúng: shell hoạt động bằng cách fork một child process rồi chờ process đó kết thúc thông qua system call `wait4(2)`.
 
 Độc giả tò mò, chính bạn, nên chú ý `[<0>]` ở cột ngoài cùng trái mỗi stack frame trong output trên là placeholder cho text/code address của function. Một lần nữa vì bảo mật, ngăn information leakage, kernel hiện đại đặt về không. (Biện pháp bảo mật khác về kernel/process layout ở Chương 7, Memory Management Internals – Essentials, các phần Randomizing the memory layout – KASLR và User-mode ASLR.)
 
@@ -357,7 +357,7 @@ Và đây rồi! User-mode stack của Bash cùng mọi call frame hiện ra, đ
 
 Một lần nữa bỏ qua call frame có label/tiền tố `??`. (Nhân tiện gstack hoạt động tốt trên máy ảo khách Fedora 38/39 x86\_64 của tôi.)
 
-Xem được kernel/user-space stack như các đoạn trên, cùng dùng strace và ltrace để trace lần lượt system call/library call của process/thread, hỗ trợ debug rất lớn! Đừng bỏ qua.
+Khả năng xem bên trong kernel stack và user-space stack như các snippet trước, cùng việc sử dụng strace và ltrace để trace lần lượt system call và library call của một process hoặc thread, có thể hỗ trợ rất nhiều khi debug! Đừng bỏ qua những công cụ này.
 
 Nhân tiện có thể bạn hỏi chuỗi `... at ../sysdeps/unix/sysv/linux/wait4.c:27` ở frame 0 nghĩa gì. Debug information trong library `libthread_db` cho GDB biết chính xác source code line nơi function `__GI___wait4()` được gọi! Tất nhiên cần source code đúng glibc version để tra.
 
@@ -369,9 +369,9 @@ Giờ thú vị hơn: học kiến thức rất cơ bản dùng cách hiện đ�
 
 Dùng trực tiếp kernel-level BPF bytecode technology bên dưới cực kỳ khó; tin tốt là có nhiều frontend easy-to-use, tool và script. Trong số frontend, BPF Compiler Collection (BCC) và bpftrace được coi rất hữu ích. (Sơ đồ BCC performance analysis tool hiện tại ở `https://github.com/iovisor/bcc/blob/master/images/bcc_tracing_tools_2019.png`; danh sách eBPF frontend tại `http://www.brendangregg.com/ebpf.html#frontends`.)
 
-Ở đây chỉ demo nhanh BCC tool `stackcount`; ít nhất trên Ubuntu, tool eBPF có hậu tố `-bpfcc`, nên tên `stackcount-bpfcc`. Lợi thế khác là tool cho xem cả kernel stack và user-mode stack cùng lúc, không cần tool riêng.
+Ở đây, chúng ta chỉ minh họa nhanh bằng một công cụ BCC có tên `stackcount`. Ít nhất trên Ubuntu, các công cụ eBPF này có hậu tố `-bpfcc`, nên công cụ này có tên `stackcount-bpfcc`. Một ưu điểm khác là công cụ cho phép xem đồng thời cả kernel stack lẫn user-mode stack mà không cần các công cụ riêng.
 
-Cài BCC tool cho host distro bằng hướng dẫn tại `https://github.com/iovisor/bcc/blob/master/INSTALL.md`. Còn cài trên Linux VM khách chạy custom kernel 6.1? Có thể, dù kernel trước đây có thể gây vấn đề và đòi chạy distro kernel như Fedora-supplied.
+Bạn có thể cài các công cụ BCC cho Linux distro trên host bằng cách đọc hướng dẫn cài đặt tại `https://github.com/iovisor/bcc/blob/master/INSTALL.md`. Còn việc cài chúng trên Linux VM khách đang chạy custom kernel 6.1 của chúng ta thì sao? Bạn có thể làm được, mặc dù với các phiên bản kernel trước đây, việc này có thể gây vấn đề và đòi hỏi chạy một distro kernel như kernel Ubuntu- hoặc Fedora-supplied.
 
 Hình 6.6 là ảnh màn hình help ngắn gọn tiện ích hiện khi chạy với parameter `–h`:
 
@@ -537,7 +537,7 @@ Giờ biết rõ hơn member task structure, chính xác truy cập nó và memb
 
 ### Truy cập task structure bằng current
 
-Bạn nhớ lần chạy mẫu script `countem.sh` trước, trong phần Chạy script nhỏ xem số process và thread tồn tại, tìm thấy tổng 514 thread cả user/kernel. Nghĩa là tổng 514 task structure object trong kernel memory.
+Bạn còn nhớ trong lần chạy mẫu script `countem.sh` trước đó, ở phần Chạy script nhỏ để xem số process và thread đang tồn tại, chúng ta thấy tổng cộng 514 thread, cả user lẫn kernel, đang tồn tại trên hệ thống. Điều này có nghĩa có tổng cộng 514 task structure object trong kernel memory.
 
 Chúng cần tổ chức để kernel dễ truy cập khi cần. Vì thế mọi task structure object trong kernel memory được nối trên circular doubly linked list gọi task list. Cách tổ chức này cần để các kernel code path duyệt, thường có `procfs` code cùng nhiều code khác. Dù vậy hãy nghĩ: khi process/thread chạy kernel code trong process context, làm sao biết `task_struct` nào thuộc mình giữa có thể hàng trăm, nghìn structure trong kernel memory? Hóa ra non-trivial. Kernel developer phát triển cách bảo đảm tìm được task structure cụ thể biểu diễn thread hiện chạy kernel code một cách hiệu quả. Đạt qua macro `current`. Hãy nghĩ như sau:
 
@@ -590,7 +590,7 @@ Nhưng chờ! Có thể hơi rắc rối: `in_task()` trả `True` đúng là ng
 
 Cũng cẩn thận: theo định nghĩa, dùng macro `current` chỉ coi hợp lệ khi chạy process context.
 
-Được rồi, giờ đã học nền tảng hữu ích về task structure, truy cập qua `current` và xác định context kernel/driver code hiện chạy. Vậy hãy viết kernel module code xem một ít kernel task structure!
+Được rồi, giờ bạn đã học những kiến thức nền hữu ích về task structure, cách truy cập nó qua macro `current` và cách xác định context mà kernel code hoặc driver code đang chạy. Vì vậy, bây giờ chúng ta hãy viết một ít code kernel module để xem xét một phần kernel task structure!
 
 ## Làm việc với task structure qua ‘current’
 
@@ -655,7 +655,7 @@ Trong code ví dụ trước, dùng vài helper/accessor method built-in kernel 
 
 Vì sao vậy? Sao không chỉ truy cập trực tiếp task structure member qua `current-><member-name>`? Có nhiều lý do thực tế: thứ nhất có thể truy cập cần lấy lock, sẽ nói chi tiết locking/synchronization ở hai chương cuối. Thứ hai có thể có cách tối ưu hơn; thứ ba có thể không nên truy cập trực tiếp vì chỉ có nghĩa trong namespace task thuộc về, v.v... Thực tế khái niệm then chốt kernel namespace và control group/cgroup là nền tảng container technology; ta bàn cgroup chi tiết, namespace một ít ở Chương 11, The CPU Scheduler – Phần 2, phần An introduction to cgroups.
 
-Cũng như code trên, dễ biết kernel code module chạy process hay interrupt context qua `in_task()` – trả `True` nếu process/task context, `False` nếu không.
+Ngoài ra, như trong code trước đó, chúng ta có thể dễ dàng xác định kernel code của kernel module đang chạy trong process context hay interrupt context bằng macro `in_task()`: nó trả về `True` nếu đang trong process context, hay task context, và `False` trong trường hợp ngược lại.
 
 Bạn có nhận thấy dùng macro thú vị `likely()` bao quanh conditional; nghĩa gì? Như thường lệ liên quan performance; macro trở thành compiler attribute `__builtin_expect`. Nó gợi ý branch prediction của compiler, tối ưu instruction sequence đưa vào CPU pipeline, giữ code trên “fast path”; thêm micro-optimization qua `likely()/unlikely()` ở Đọc thêm chương này. Bạn khá thường thấy kernel code dùng `likely()/unlikely()` nơi developer “biết” code path lần lượt likely hay unlikely.
 
@@ -710,7 +710,7 @@ Khá thú vị, ở đây `%pK` có vẻ không tác dụng – hai address in c
 
 Trên production system, nhúng hay loại khác, hãy an toàn: đặt `kernel.kptr_restrict` `1`, tốt hơn `2` để sanitize pointer, và `kernel.dmesg_restrict` `1` để chỉ privileged user đọc kernel log.
 
-Giờ chuyển điều khá thú vị: phần sau học duyệt task list Linux kernel, thực chất học lấy kernel-level information của từng process và/hoặc thread tồn tại trên hệ thống.
+Bây giờ, chúng ta chuyển sang một phần khá thú vị: trong phần tiếp theo, bạn sẽ học cách duyệt các task list của Linux kernel, qua đó thực chất học cách lấy thông tin kernel-level về từng process hoặc thread đang tồn tại trên hệ thống.
 
 ## Duyệt các task list của kernel
 
@@ -762,7 +762,7 @@ Chúng tôi để bạn nghiên cứu, thử sample module `ch6/foreach/prcs_sho
 
 Để duyệt từng thread đang tồn tại bình thường, dùng cặp helper macro `do_each_thread() { ... }` `while_each_thread()`; viết sample module làm chính việc này tại `ch6/foreach/thrd_showall/`.
 
-Trước khi vào code, xem một phần output qua `dmesg)`; build và `insmod` trên Ubuntu 22.04 LTS guest x86\_64. Vì không thể hiện toàn output quá lớn, tôi chỉ hiện phần dưới trong Hình 6.12. Cũng chép lại header để hiểu mỗi cột:
+Trước khi tìm hiểu sâu code, chúng ta hãy xem một phần output mà nó tạo ra qua `dmesg)`. Vì vậy, chúng ta build và `insmod` nó trên Ubuntu 22.04 LTS guest x86\_64. Do không thể hiển thị toàn bộ output của module ở đây vì quá lớn, tôi chỉ trình bày phần dưới của output trong ảnh chụp màn hình tiếp theo, Hình 6.12. Chúng tôi cũng chép lại header để bạn hiểu mỗi cột biểu diễn điều gì:
 
 ```
 Timestamp     TGID    PID   current          stack pointer   name      #threads
@@ -774,7 +774,7 @@ Hình 6.12: Output module thrd\_showall.ko; process multithreaded dhclient đư�
 
 Ngoài lề thú vị, trong Hình 6.12 chú ý mọi kernel-mode stack start address ở cột năm kết thúc bằng không, `0xffff .... .... .000`, nghĩa stack region luôn page-aligned vì `0x1000` là `4096` thập phân. Đúng như vậy vì kernel-mode stack luôn fixed size, bội của system page size, thường 4 KB.
 
-Theo quy ước output `ps aux`, trong module sắp xếp nếu thread là kernel thread thì tên hiện trong ngoặc vuông.
+Theo quy ước thể hiện trong output của `ps aux`, trong kernel module của chúng ta, nếu thread là kernel thread thì tên của nó được hiển thị trong dấu ngoặc vuông.
 
 Diễn giải tên `kthread` khá lạ như “\[ kworker/u12:2 \]” ở Hình 6.12 thế nào? Liên kết trả lời: `https://unix.stackexchange.com/a/152865`.
 
@@ -786,7 +786,7 @@ Hãy nghĩ: vì Linux kernel dùng task structure riêng (`struct task_struct`) 
 
 Để sửa vấn đề user-space standard khó chịu, Ingo Molnar của Red Hat đề xuất và đưa vào mainline một patch từ dòng kernel 2.5. Member mới Thread Group IDentifier hay TGID được thêm vào task structure.
 
-Hoạt động như sau: nếu process single-threaded, `tgid` và `pid` giống nhau. Nếu multithreaded, `tgid` thread `main` bằng `pid` thread `main`; các thread khác kế thừa `tgid` của `main` nhưng giữ `pid` riêng. Tóm tắt như sau:
+Cơ chế hoạt động như sau: nếu process là single-threaded, các giá trị `tgid` và `pid` giống nhau. Nếu là process multithreaded, giá trị `tgid` của thread `main` bằng giá trị `pid` của thread `main`; các thread khác của process kế thừa giá trị `tgid` của thread `main`, nhưng vẫn giữ các giá trị `pid` riêng và duy nhất. Có thể tóm tắt điều này như sau:
 
 - Single-threaded process: thread `main()` hay T0: một PID riêng và TGID == PID
 
@@ -796,9 +796,9 @@ Hoạt động như sau: nếu process single-threaded, `tgid` và `pid` giống
 
   - Các thread không phải `main()`: nhiều PID riêng: TGID == PID của `main()`
 
-Để hiểu rõ, lấy ví dụ thực từ ảnh trước. Trong Hình 6.12, nếu số nguyên dương hiện ở cột cuối bên phải, nó biểu diễn số thread của multithreaded process ngay bên trái.
+Để hiểu rõ hơn, chúng ta hãy lấy một ví dụ thực tế từ ảnh chụp màn hình trước. Trong Hình 6.12, lưu ý rằng nếu một số nguyên dương xuất hiện ở cột cuối cùng bên phải, nó biểu diễn số thread trong multithreaded process ngay bên trái.
 
-Vậy xem process `dhclient` khoanh chữ nhật bo góc ở Hình 6.12; TGID/PID bằng 2301 biểu diễn thread `main()` (T0), tổng bốn thread. Bốn thread nào? Đầu tiên tất nhiên thread `main()` là `dhclient`, ba bên dưới tên `isc-worker0000, isc-socket` và `isc-timer`. Làm sao biết chắc? Dễ: xem kỹ cột hai, ba Hình 6.12, lần lượt TGID/PID. Nếu bằng nhau là main thread; nếu TGID lặp, process multithreaded và PID biểu diễn PID riêng của worker/peer thread.
+Hãy xem process `dhclient` được đánh dấu bằng hình chữ nhật bo góc trong Hình 6.12: TGID và PID đều có giá trị 2301, biểu diễn thread `main()` (T0), và process có tổng cộng bốn thread. Bốn thread đó là gì? Đầu tiên, dĩ nhiên thread `main()` là `dhclient`, và ba thread được hiển thị bên dưới có tên `isc-worker0000, isc-socket` và `isc-timer`. Làm sao biết chắc? Rất đơn giản: xem kỹ cột thứ hai và thứ ba trong Hình 6.12; chúng lần lượt biểu diễn TGID và PID. Nếu hai giá trị giống nhau, đó là main thread của process; nếu TGID lặp lại, process là multithreaded và giá trị PID biểu diễn các PID riêng biệt của những worker thread hoặc peer thread.
 
 Thực ra hoàn toàn có thể thấy cách biểu diễn TGID/PID của kernel ở user space qua lệnh GNU `ps` phổ biến, dùng `-LA`, ngoài các cách khác:
 
@@ -910,7 +910,7 @@ Tham chiếu code block trước, cặp macro `do_each_thread() { ... } while_ea
 
 - Khi hoàn tất, trả tổng số thread đã duyệt.
 
-Code block sau trình bày phần chủ động bỏ khỏi block trước. Lấy tên thread và in trong ngoặc vuông nếu kernel thread. Cũng truy vấn số thread trong process. Giải thích sau code:
+Trong code block tiếp theo, chúng ta trình bày phần code đã chủ động bỏ khỏi block trước. Chúng ta lấy tên thread và in nó trong dấu ngoặc vuông nếu là kernel thread. Chúng ta cũng truy vấn số lượng thread trong process. Phần giải thích nằm sau code:
 
 ```
         if (!p->mm)         // kernel thread?

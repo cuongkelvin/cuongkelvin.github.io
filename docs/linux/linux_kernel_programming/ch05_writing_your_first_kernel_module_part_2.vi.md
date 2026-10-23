@@ -256,7 +256,7 @@ $
 
 (Chú ý lần này biến môi trường `ARCH` và `CROSS_COMPILE` được định nghĩa đúng.) Vì sao thất bại?
 
-Manh mối cross-compilation thất bại nằm ở việc nó cố dùng, build cho, kernel source tree của host hiện tại, không phải target. Vì vậy cần sửa Makefile trỏ đúng kernel source tree của target. Khá dễ thực hiện. Trong code sau, ta thấy cách viết Makefile code đã sửa điển hình:
+Manh mối giải thích vì sao lần cross-compilation trước thất bại nằm ở việc nó đang cố sử dụng, hay build dựa trên, kernel source tree của hệ thống host hiện tại thay vì kernel source tree của target. Vì vậy, chúng ta cần sửa Makefile để trỏ đến đúng kernel source tree, tức source tree của target. Việc này khá đơn giản. Trong code tiếp theo, chúng ta thấy cách viết code Makefile đã được sửa một cách điển hình:
 
 ```
 # ch5/cross/Makefile:
@@ -375,7 +375,7 @@ $ sudo insmod ./lkm_template.ko
 insmod: ERROR: could not insert module ./lkm_template.ko: Invalid module format
 ```
 
-Rõ ràng `insmod` thất bại! Cần hiểu vì sao. Do không khớp giữa kernel version đang thử load module và kernel version đã dùng biên dịch module.
+Rõ ràng `insmod` đã thất bại! Điều quan trọng là hiểu lý do. Nguyên nhân là sự không khớp giữa phiên bản kernel mà chúng ta đang cố load module vào và phiên bản kernel được sử dụng để biên dịch module đó.
 
 Khi đăng nhập Raspberry Pi, hãy in Raspberry Pi kernel version hiện chạy và dùng `modinfo` in chi tiết bản thân kernel module:
 
@@ -616,7 +616,7 @@ min_sysinfo.c:138:  [1] (buffer) strncat:
 [ ... ]
 ```
 
-Nhìn kỹ cảnh báo trên do `flawfinder` phát về hàm `strncat()`, trong nhiều cảnh báo! Theo lời khuyên, dùng `strlcat()` thay, viết lại code hàm `llkd_sysinfo()` thành `llkd_sysinfo2()` (vì sao chính xác? Nó an toàn, bảo mật hơn; tra chi tiết man page `https://linux.die.net/man/3/strlcat`). Tương tự, thực sự tận dụng sức mạnh API `snprintf()` đòi kiểm tra return value xem có khả năng buffer overflow không, nguyên nhân nhiều vulnerability! Vì vậy như đã nói, tôi viết wrapper đơn giản `my_snprintf_lkp()`.
+Hãy xem kỹ cảnh báo ở trên mà `flawfinder` đưa ra về function `strncat()`, một trong rất nhiều cảnh báo mà nó tạo ra! Theo lời khuyên đó, chúng ta sử dụng `strlcat()` thay thế và viết lại code của function `llkd_sysinfo()` thành `llkd_sysinfo2()`. Nhưng chính xác vì sao? Function thay thế được viết để an toàn và bảo mật hơn; hãy tra chi tiết trong man page tại `https://linux.die.net/man/3/strlcat`. Tương tự, để thực sự tận dụng sức mạnh của API `snprintf()`, phải kiểm tra return value để biết liệu có xảy ra buffer overflow hay không, vốn là nguyên nhân gốc của nhiều vulnerability! Vì vậy, như đã đề cập, tôi viết một wrapper đơn giản cho nó là `my_snprintf_lkp()`.
 
 Output `flawfinder` thường đề cập CWE number, ở đây CWE-119/120, của nhóm vấn đề bảo mật tổng quát đang thấy (hãy Google để xem chi tiết). Trường hợp này CWE-120 biểu thị ‘Buffer Copy without Checking Size of Input (‘Classic Buffer Overflow’): `https://cwe.mitre.org/data/definitions/120.html`. Như sẽ nhận ra, Buffer Overflow defect là một trong những nhóm vulnerability lớn nhất thường bị nhắm trong tấn công hacking, đúng, ngay cả kernel!
 
@@ -688,7 +688,7 @@ $ ls <...>/linux-6.1.25/LICENSES/
 deprecated/ dual/ exceptions/ preferred/
 ```
 
-Chúng tôi để bạn tự xem và dừng thảo luận giấy phép ở đây; thực tế đó là chủ đề phức tạp đòi kiến thức pháp lý. Nên tham khảo chuyên viên pháp lý, luật sư trong công ty hoặc thuê, để xử lý đúng khía cạnh pháp lý cho sản phẩm/dịch vụ.
+Chúng tôi để bạn tự tìm hiểu và kết thúc phần thảo luận về licensing tại đây; thực tế, đây là một chủ đề phức tạp đòi hỏi kiến thức pháp lý. Bạn nên tham khảo đội ngũ pháp lý chuyên môn, tức các luật sư trong công ty hoặc thuê ngoài, để xử lý đúng các khía cạnh pháp lý của sản phẩm hoặc dịch vụ.
 
 Một số câu trả lời FAQ về GPL tại `https://www.gnu.org/licenses/gpl-faq.html`.
 
@@ -837,7 +837,7 @@ vboxnetflt             28672   1
 vboxdrv                614400  3 vboxnetadp,vboxnetflt
 ```
 
-Nhớ từ thảo luận trước, trong bốn cột, cột ba là usage count. Nó `0` ở hàng đầu nhưng `3` ở hàng ba. Không chỉ vậy, kernel module `vboxdrv` có hai module liệt kê bên phải sau usage count. Nếu module xuất hiện sau cột ba, đó là module dependency; đọc như sau: module bên phải phụ thuộc module bên trái.
+Hãy nhớ lại từ phần thảo luận trước rằng trong bốn cột được hiển thị, cột thứ ba là usage count. Giá trị là `0` ở hàng đầu tiên nhưng bằng `3` ở hàng thứ ba. Không chỉ vậy, kernel module `vboxdrv` có hai kernel module được liệt kê bên phải nó, sau cột usage count. Nếu có kernel module xuất hiện sau cột thứ ba, chúng biểu diễn các module dependency; hãy đọc như sau: các kernel module hiển thị bên phải phụ thuộc vào kernel module bên trái.
 
 Vì vậy trong ví dụ, `vboxnetadp` và `vboxnetflt` phụ thuộc `vboxdrv`. Phụ thuộc thế nào? Tất nhiên gọi function/API và/hoặc dùng data structure trong core module `vboxdrv`! Nói chung module xuất hiện bên phải cột ba nghĩa là gọi một hay nhiều function và/hoặc dùng data structure của module bên trái, tăng usage count; usage count là ví dụ reference counter tốt, ở đây thực chất atomic variable 32 bit, điều đi sâu trong chương cuối. Thực chất `vboxdrv` giống “library” theo nghĩa giới hạn, không mang hàm ý library user-mode thông thường trong user space trừ cung cấp modular functionality. Trong snapshot này thấy usage count `3`, các module phụ thuộc được stack trên nó – đúng nghĩa đen! Bạn thấy ở hai dòng `lsmod` phía trên. Cũng chú ý `vboxnetflt` có usage count dương (`1`) nhưng không module nào bên phải; vẫn nghĩa là thứ gì đang dùng, thường process/thread.
 
@@ -855,13 +855,13 @@ Hình 5.5: Module “hid” của kernel có nhiều driver HID-related khác ph
 lsmod | awk '$3 > 0 {print $0}' | sort -k3n
 ```
 
-Hệ quả module stacking: chỉ `rmmod` thành công nếu usage count `0`, tức không được dùng. Vì vậy với ví dụ đầu, chỉ gỡ `vboxdrv` sau khi gỡ hai dependent module stack trên nó, đưa usage count xuống `0`.
+Một hệ quả của module stacking là bạn chỉ có thể `rmmod` thành công một kernel module khi usage count của nó bằng `0`, tức không được sử dụng. Vì vậy, với ví dụ đầu tiên trước đó, chúng ta chỉ có thể gỡ kernel module `vboxdrv` sau khi gỡ hai kernel module phụ thuộc được stack lên nó, đưa usage count xuống `0`.
 
 #### Thử module stacking
 
 Hãy thiết kế proof-of-concept code rất đơn giản cho module stacking. Để thực hiện build hai module:
 
-- Đầu tên `core_lkm`; nhiệm vụ như một ‘library’, cung cấp cho kernel và module khác vài function, ta coi là API của ‘core’ module.
+- Module đầu tiên được gọi là `core_lkm`; nhiệm vụ của nó là hoạt động như một dạng “library”, cung cấp cho kernel và các module khác một vài function. Chúng ta xem chúng là các API do module “core” này cung cấp.
 
 - Module thứ hai `user_lkm` là ‘người dùng’, consumer/client của ‘library’. Nó chỉ gọi function và dùng data trong module đầu.
 
@@ -869,7 +869,7 @@ Hãy thiết kế proof-of-concept code rất đơn giản cho module stacking. 
 
 - ‘Core’ module phải dùng `EXPORT_SYMBOL()` đánh dấu data/function được export; cũng dùng `EXPORT_SYMBOL_GPL()` nếu muốn.
 
-- ‘User’ module phải khai báo data/function dự định dùng là external qua từ khóa C `extern` (nhớ export chỉ thiết lập linkage phù hợp; compiler vẫn cần biết data/function được gọi).
+- Kernel module “user” phải khai báo các data hoặc function mà nó muốn sử dụng là external đối với nó, thông qua từ khóa C `extern`. Hãy nhớ rằng export data hoặc chức năng chỉ thiết lập linkage phù hợp; compiler vẫn cần biết các data hoặc function được sử dụng.
 
 - Với toolchain gần đây, đánh dấu function/data exported là `static` được phép. Vì gây compiler warning nên không dùng `static` cho exported symbol.
 
@@ -959,7 +959,7 @@ module_exit(user_lkm_exit);
 
 ##### Thử chạy
 
-Makefile phần lớn giống các module trước, trừ lần này cần build hai kernel module object trong cùng thư mục như sau:
+Makefile phần lớn vẫn giống Makefile của các kernel module trước, ngoại trừ lần này chúng ta cần build hai kernel module object nằm trong cùng một folder, như sau:
 
 ```
 obj-m     := core_lkm.o
@@ -991,7 +991,7 @@ $ ls *.ko
 core_lkm.ko  user_lkm.ko
 ```
 
-2\. Giờ thực hiện nhanh chuỗi kiểm thử minh họa module-stacking proof of concept. Trước tiên làm sai: thử insert `user_lkm` trước `core_lkm`.
+2\. Bây giờ, chúng ta hãy thực hiện một chuỗi kiểm thử ngắn để minh họa module-stacking proof of concept. Trước tiên, hãy cố tình làm sai: chúng ta sẽ thử insert kernel module `user_lkm` trước khi insert module `core_lkm`.
 
 Sẽ thất bại – vì sao? Bạn nhận ra exported functionality và data mà `user_lkm` phụ thuộc chưa có trong kernel. Chính xác hơn, symbol không có trong kernel symbol table vì `core_lkm` chứa chúng chưa insert:
 
@@ -1016,9 +1016,9 @@ Hình 5.6: Chạy module-stacking proof-of-concept demo: cửa sổ trên là sh
 
 Nghiên cứu Hình 5.6; đúng, giờ hoạt động như mong đợi!
 
-Chú ý với `core_lkm`, usage count tăng lên `1`, giờ thấy `user_lkm` bên phải, chỉ phụ thuộc `core_lkm`. (Nhớ module ở các cột extreme-right output `lsmod` phụ thuộc module cột extreme-left.)
+Lưu ý rằng đối với kernel module `core_lkm`, cột usage count đã tăng lên `1`, và bây giờ chúng ta thấy kernel module `user_lkm` xuất hiện ở bên phải, cho biết nó phụ thuộc vào `core_lkm`. Hãy nhớ rằng các kernel module ở những cột extreme-right trong output của `lsmod` phụ thuộc vào module ở cột extreme-left.
 
-4\. Giờ gỡ module. Việc gỡ cũng có ordering dependency như insert. Cố gỡ `core_lkm` trước thất bại vì hiển nhiên còn module khác trong kernel memory dựa vào code/data của nó; tức vẫn được dùng:
+4\. Bây giờ, chúng ta hãy gỡ các kernel module. Việc gỡ module cũng có dependency về thứ tự, giống như khi insert. Cố gỡ `core_lkm` trước sẽ thất bại vì rõ ràng vẫn có một module khác trong kernel memory dựa vào code hoặc data của nó; nói cách khác, nó vẫn đang được sử dụng:
 
 ```
 $ sudo rmmod core_lkm
@@ -1226,7 +1226,7 @@ Ngoài lề: trong câu lệnh `static int mp_debug_level;` trên, đổi thành
 
 - Thứ ba: permission, thực chất visibility qua `sysfs`, giải thích ngay sau.
 
-Tiếp theo, macro `MODULE_PARM_DESC()` cho “mô tả” parameter biểu thị gì. Hãy nghĩ: đây là cách báo người dùng module/driver các parameter thực sự sẵn có. Tra bằng `modinfo(8)`. Hơn nữa, có thể chỉ in thông tin parameter bằng tùy chọn `-p` như:
+Tiếp theo, macro `MODULE_PARM_DESC()` cho phép chúng ta “mô tả” parameter biểu diễn điều gì. Hãy nghĩ xem: đây là cách thông báo cho người dùng cuối của kernel module hoặc driver những parameter thực sự có sẵn. Việc tra cứu được thực hiện qua tiện ích `modinfo(8)`. Hơn nữa, bạn có thể chỉ in riêng thông tin về các parameter của module bằng tùy chọn `-p`, như sau:
 
 ```
 $ cd <booksrc>/ch5/modparams/modparams1 ; make
@@ -1250,7 +1250,7 @@ $ sudo dmesg
 debug_level=0 mp_strparam=My string param
 ```
 
-Từ `dmesg` thấy vì không chủ động truyền module parameter, variable hiển nhiên giữ mặc định ban đầu. Làm lại, lần này truyền rõ giá trị:
+Ở đây, từ output của `dmesg`, chúng ta thấy rằng vì không truyền tường minh bất kỳ kernel module parameter nào, các biến của module hiển nhiên giữ nguyên giá trị mặc định ban đầu. Hãy thực hiện lại, lần này truyền các giá trị tường minh cho module parameter:
 
 ```
 sudo rmmod modparams1
@@ -1507,7 +1507,7 @@ Dòng then chốt là `Please remove unsupported %f in format string`.
 
 Dù không thấy trong Hình 5.7, phía dưới, section bắt đầu `Call Trace:` tất nhiên cho xem state hiện tại kernel-mode stack của process/thread bị “bắt” trong code path `WARN_ONCE()` trên (hãy chờ, bạn học chi tiết then chốt user-/kernel-mode stack và hơn nữa ở Chương 6, Kernel Internals Essentials – Processes and Threads).
 
-Có thể diễn giải kernel stack bottom-up, giúp rất nhiều debug. Đây là phần rút gọn output `Call Trace:`, tiếp nối Hình 5.7:
+Có thể diễn giải kernel stack bằng cách đọc theo hướng bottom-up, hỗ trợ rất nhiều cho việc debug. Để bạn tham khảo, dưới đây là một phần đã được rút gọn của output `Call Trace:`, tiếp nối output trong Hình 5.7:
 
 ```
 [ … ]
@@ -1533,7 +1533,7 @@ Có thể diễn giải kernel stack bottom-up, giúp rất nhiều debug. Đây
 [ … ]
 ```
 
-Đọc từ dưới lên, thấy `do_one_initcall()` gọi `fp_in_lkm_init()`, thuộc module trong ngoặc vuông `[fp_in_lkm_init]`, tất nhiên module chúng ta; rồi gọi `[_]printk()`, cuối cùng gây đủ phiền toái khi cố in FP quantity! (Nhân tiện bỏ qua call frame bắt đầu `?`.)
+Ở đây, khi lần theo và đọc từ dưới lên, chúng ta thấy function `do_one_initcall()` gọi `fp_in_lkm_init()`, thuộc kernel module ghi trong dấu ngoặc vuông `[fp_in_lkm_init]`, dĩ nhiên là kernel module của chúng ta. Sau đó, nó gọi `[_]printk()`, cuối cùng gây ra đủ loại rắc rối khi cố in một đại lượng FP! Nhân tiện, chỉ cần bỏ qua mọi call frame bắt đầu bằng ký hiệu `?`.
 
 Bài học rõ: tránh floating-point math trong kernel space nhiều nhất có thể.
 
@@ -1545,7 +1545,7 @@ Giờ chuyển sang thực hành cách cài và auto-load module lúc startup.
 
 Đến nay ta viết out-of-tree module đơn giản trong thư mục riêng và phải load thủ công, thường qua `insmod` hay `modprobe(8)`. Với phần lớn dự án/sản phẩm real-world, cần out-of-tree module auto-loaded lúc boot. Phần này trình bày cách đạt được.
 
-Giả sử module `foo.ko`. Giả định có source code và Makefile. Để auto-load lúc boot, trước tiên cần cài module vào vị trí quy định trên hệ thống. Để làm vậy, kỳ vọng Makefile có target `install`, thường:
+Giả sử chúng ta có một kernel module tên `foo.ko` và có quyền truy cập source code cùng Makefile của nó. Để module auto-load khi system boot, trước tiên bạn cần cài kernel module vào một vị trí đã biết trên hệ thống. Để làm vậy, chúng ta kỳ vọng Makefile của module chứa một target `install`, thường có dạng:
 
 ```
 install:
@@ -1681,11 +1681,11 @@ ${KMODDIR}/extra/${FNAME_C}.ko]"
 
 Nó bảo đảm build trước, sau là install và chủ động `depmod`. (Makefile cũng đủ thông minh strip debug symbol nếu build release binary và module signing sắp trình bày không bật.)
 
-Cách khác auto-load là “thủ công” load qua startup script gọi `modprobe(8)`, bản thông minh hơn insmod, nói thêm phần sau.
+Một cách khác để auto-load module của bạn khi boot là load nó “thủ công” qua một startup script gọi tiện ích `modprobe(8)`, một phiên bản thông minh hơn của insmod; phần tiếp theo sẽ trình bày thêm về điều này.
 
 Nếu module auto-loaded cần parameter truyền lúc load thì sao? Có hai cách: so-called modprobe config file dưới `/etc/modprobe.d/`, hoặc nếu module built-in trong kernel, qua kernel command line.
 
-Ở đây chỉ cách đầu: thiết lập config file `modprobe`, ví dụ dùng tên LKM `mykmod`; lần nữa cần root tạo file `/etc/modprobe.d/mykmod.conf`; truyền parameter bên trong như:
+Ở đây, chúng ta trình bày cách thứ nhất: chỉ cần thiết lập configuration file cho `modprobe`. Trong ví dụ này, chúng ta sử dụng `mykmod` làm tên LKM; một lần nữa, cần root access để tạo file `/etc/modprobe.d/mykmod.conf`. Trong file đó, bạn có thể truyền parameter như sau:
 
 ```
 options <module-name> <parameter-name>=<value>
@@ -1702,15 +1702,15 @@ options snd-cmipci mpu_port=0x330 fm_port=0x388
 
 ### Module auto-loading – chi tiết bổ sung
 
-Khi module đã cài qua `sudo make install` như trên, cũng insert tương tác hay qua script được chỉ bằng bản “thông minh hơn” của `insmod`, tên `modprobe(8)`. Với ví dụ ta có thể `rmmod` trước rồi:
+Sau khi kernel module được cài lên hệ thống qua `sudo make install` như đã trình bày, bạn cũng có thể insert nó vào kernel một cách tương tác hoặc qua script, chỉ bằng phiên bản “thông minh hơn” của tiện ích `insmod`, có tên `modprobe(8)`. Với ví dụ của chúng ta, trước tiên có thể `rmmod` module rồi thực hiện như sau:
 
 ```
 sudo modprobe min_sysinfo
 ```
 
-Ngoài lề thú vị, xét trường hợp có nhiều kernel module object cần load, ví dụ thiết kế module-stacking; modprobe đủ thông minh load đúng thứ tự (đã nói cần ở phần Tìm hiểu module stacking), đáp ứng dependency và mọi thứ hoạt động!
+Một điểm ngoài lề thú vị: hãy xét trường hợp có nhiều kernel module object cần load, chẳng hạn trong thiết kế module-stacking. Tiện ích modprobe đủ thông minh để load chúng theo đúng thứ tự, như chúng ta đã giải thích sự cần thiết trong phần Tìm hiểu module stacking, để các module dependency được đáp ứng và mọi thứ hoạt động đúng!
 
-`modprobe` biết thứ tự đúng thế nào? Khi build local, quá trình sinh `modules.order`. Nó cho tiện ích như `modprobe` biết thứ tự load để resolve mọi dependency. Khi module cài vào kernel, tức `/lib/modules/$(uname -r)/extra/` hay vị trí tương tự, `depmod` sinh `/lib/modules/$(uname -r)/modules.dep`. Chứa dependency information, chỉ module có phụ thuộc module khác không. Dùng thông tin, modprobe load đúng thứ tự. Để cụ thể, hãy cài các module ví dụ module-stacking:
+Làm thế nào `modprobe` biết đúng thứ tự load các kernel module? Khi build cục bộ, quá trình build tạo file `modules.order`. File này cho các tiện ích như `modprobe` biết thứ tự load kernel module để giải quyết tất cả các dependency. Khi các kernel module được cài vào kernel, tức vào `/lib/modules/$(uname -r)/extra/` hoặc vị trí tương tự, tiện ích `depmod` tạo file `/lib/modules/$(uname -r)/modules.dep`. File này chứa thông tin dependency, chỉ định một kernel module có phụ thuộc vào module khác hay không. Sử dụng thông tin này, modprobe load chúng theo thứ tự cần thiết. Để minh họa cụ thể, chúng ta hãy cài các module trong ví dụ module-stacking:
 
 ```
 $ cd <...>/ch5/modstacking
@@ -1778,7 +1778,7 @@ Fastboot! Ngoài ra kernel parameter `initcall_debug` giúp xác định chức 
 
 Như đã nói đầu chương, có framework thay thế auto-rebuilding third-party module, tên Dynamic Kernel Module Support (DKMS). Tài liệu Đọc thêm chương cũng cung cấp liên kết hữu ích. Kết lại, auto-loading module vào bộ nhớ lúc startup là chức năng hữu ích, thường bắt buộc trong sản phẩm.
 
-Build sản phẩm high-quality đòi hiểu kỹ bảo mật và kiến thức tích hợp nó; đó là trọng tâm phần sau.
+Build sản phẩm high-quality đòi hỏi hiểu biết sâu sắc về bảo mật cũng như kiến thức để tích hợp bảo mật vào sản phẩm; đó là trọng tâm của phần tiếp theo.
 
 ## Kernel module và bảo mật – tổng quan
 
@@ -1955,7 +1955,7 @@ CONFIG_MODULE_SIG_ALL=y
 [ ... ]
 ```
 
-`CONFIG_MODULE_SIG_ALL` bằng `y` bảo đảm mọi module khi cài đều ký! (Dùng module signing đòi cài OpenSSL developer package vì chứa tool ký.) Đặt mặc định như vậy có vẻ tốt cho bảo mật. Tuy nhiên chính vì bảo mật, chắc chắn nên dùng keypair public/private khác mặc định kernel; cấu hình qua `certs/x509.genkey`, được sinh khi cần. Vì vậy khuyến nghị chủ động thiết lập file này, không dùng mặc định kernel.
+Việc đặt `CONFIG_MODULE_SIG_ALL` thành `y` bảo đảm rằng tất cả các kernel module đều được ký khi cài đặt! (Sử dụng module signing cũng có nghĩa là phải cài các OpenSSL developer package trên hệ thống vì chúng chứa công cụ thực hiện việc ký.) Thiết lập này được dùng làm mặc định có vẻ tốt cho bảo mật. Tuy nhiên, cũng chính vì bảo mật, chắc chắn nên sử dụng một keypair public/private khác với keypair mặc định của kernel. Có thể cấu hình chúng qua `certs/x509.genkey`, được tạo ra khi cần. Vì vậy, bạn nên chủ động thiết lập file này và không sử dụng các giá trị mặc định của kernel.
 
 Cũng có thể ký thủ công module bằng chương trình `scripts/sign-file`, được build từ C source file. Tất cả và hơn nữa được ghi chép rất tốt trong tài liệu kernel chính thức `https://www.kernel.org/doc/html/v6.1/admin-guide/module-signing.html`; hãy tham khảo. (Ubuntu có tool module-signing riêng kmodsign.)
 

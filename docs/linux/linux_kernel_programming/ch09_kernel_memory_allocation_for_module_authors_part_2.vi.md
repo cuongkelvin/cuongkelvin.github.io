@@ -795,7 +795,7 @@ $ sudo grep "^0x00000000bd7bc75a" /proc/vmallocinfo
 vmalloc vpages
 ```
 
-Nó đây! Có thể thấy rõ dùng API `kvmalloc()` cho lượng memory lớn (5 MB) dẫn đến API `vmalloc()` được gọi bên trong (API `kmalloc()` sẽ thất bại và không xuất warning hay retry), do đó như thấy, nó nằm dưới `/proc/vmallocinfo`.
+Nó đây! Chúng ta có thể thấy rõ việc sử dụng API `kvmalloc()` cho một lượng memory lớn, 5 MB, dẫn đến API `vmalloc()` được gọi bên trong. API `kmalloc()` đã thất bại mà không đưa ra warning hay thử lại. Vì vậy, như bạn có thể thấy, allocation này xuất hiện trong `/proc/vmallocinfo`.
 
 Để diễn giải các field phía trên của `/proc/vmallocinfo`, tham khảo tài liệu kernel tại đây: `https://www.kernel.org/doc/Documentation/filesystems/proc.txt`.
 
@@ -1533,7 +1533,7 @@ Mem:           1.8Gi        74Mi        27Mi      1.0Mi   1.7Gi          1.7Gi
 Swap:           99Mi          0B        99Mi
 ```
 
-Chú ý vì hệ thống thực hiện nhiều file I/O (đọc và ghi file), một tỷ lệ RAM rất đáng kể (1,7GB trong 1,8GB có sẵn!) bị page cache chiếm (cột nhãn buff/cache; chủ yếu là page cache data).
+Lưu ý rằng vì hệ thống đã thực hiện nhiều file I/O, tức đọc và ghi file, page cache chiếm một tỷ lệ RAM rất đáng kể: 1.7GB trong tổng số 1.8GB có sẵn! Đây là cột mang nhãn buff/cache; phần lớn data trong cột đó là page cache data.
 
 Đến giờ bạn sẽ hiểu điều này ổn và bình thường; khi memory pressure tăng, cơ chế page reclamation của kernel hoạt động, giải phóng cache theo yêu cầu. Cột cuối, available, gợi đúng thực tế này (cột available đã xuống dòng; giá trị là 1.7Gi, cho thấy phần lớn RAM thực sự có sẵn khi thật sự cần).
 

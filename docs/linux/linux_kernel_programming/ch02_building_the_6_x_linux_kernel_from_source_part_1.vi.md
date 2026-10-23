@@ -1,10 +1,10 @@
-# Chương 2. Build Linux kernel 6.x từ mã nguồn – Phần 1
+# Chương 2. Build Linux kernel 6.x từ source code – Phần 1
 
-Build Linux kernel từ mã nguồn là một cách thú vị để bắt đầu hành trình phát triển kernel của bạn! Hãy tin rằng hành trình này dài và gian nan, nhưng chính điều đó mới thú vị, phải không? Bản thân chủ đề build kernel đã đủ rộng để xứng đáng chia thành hai chương, chương này và chương tiếp theo.
+Build Linux kernel từ source code là một cách thú vị để bắt đầu hành trình phát triển kernel của bạn! Hãy tin rằng hành trình này dài và gian nan, nhưng chính điều đó mới thú vị, phải không? Bản thân chủ đề build kernel đã đủ rộng để xứng đáng chia thành hai chương, chương này và chương tiếp theo.
 
 Hãy nhớ lại những gì chúng ta đã học đến đây trong chương đầu tiên mở rộng được xuất bản trực tuyến (`http://www.packtpub.com/sites/default/files/downloads/9781803232225_Online_Chapter.pdf`): chủ yếu là cách thiết lập workspace để lập trình Linux kernel. Bạn cũng đã được giới thiệu các nguồn tài liệu người dùng và tài liệu kernel, cùng một số dự án hữu ích hand-in-hand với phát triển kernel/driver. Đến đây, tôi giả định bạn đã hoàn thành chương được xuất bản trực tuyến, và theo đó là thiết lập môi trường workspace; nếu chưa, hãy thực hiện trước khi tiếp tục.
 
-Mục đích chính của chương này và chương tiếp theo là mô tả chi tiết chính xác cách bạn có thể build một Linux kernel hiện đại từ đầu bằng mã nguồn. Trong chương này, trước tiên bạn sẽ học các kiến thức cơ bản cần thiết: quy ước đặt phiên bản kernel, quy trình phát triển và các loại cây mã nguồn khác nhau. Sau đó, chúng ta sẽ hands-on: bạn sẽ học cách tải một cây mã nguồn vanilla Linux kernel ổn định về máy ảo (Virtual Machine – VM) khách Linux. Khi nói “vanilla kernel”, chúng tôi muốn nói đến mã nguồn kernel mặc định, thông thường và nguyên bản mà cộng đồng Linux kernel phát hành trên kho `https://www.kernel.org`. Sau đó, bạn sẽ tìm hiểu một ít về bố cục mã nguồn kernel – thực chất là có cái nhìn từ độ cao 10.000 foot về cơ sở mã kernel. Tiếp đến là quy trình build kernel thực tế.
+Mục đích chính của chương này và chương tiếp theo là mô tả chi tiết chính xác cách bạn có thể build một Linux kernel hiện đại từ đầu bằng source code. Trong chương này, trước tiên bạn sẽ học các kiến thức cơ bản cần thiết: quy ước đặt phiên bản kernel, quy trình phát triển và các loại source tree khác nhau. Sau đó, chúng ta sẽ hands-on: bạn sẽ học cách tải một source tree vanilla Linux kernel ổn định về máy ảo (Virtual Machine – VM) khách Linux. Khi nói “vanilla kernel”, chúng tôi muốn nói đến kernel source code mặc định, thông thường và nguyên bản mà cộng đồng Linux kernel phát hành trên kho `https://www.kernel.org`. Sau đó, bạn sẽ tìm hiểu một ít về bố cục kernel source code – thực chất là có cái nhìn từ độ cao 10.000 foot về code base kernel. Tiếp đến là quy trình build kernel thực tế.
 
 Trước khi tiếp tục, có một thông tin then chốt: mọi hệ thống Linux hiện đại, dù là siêu máy tính hay thiết bị nhúng nhỏ bé, đều có ba thành phần bắt buộc:
 
@@ -18,7 +18,7 @@ Trước khi tiếp tục, có một thông tin then chốt: mọi hệ thống 
 
 - Một tệp ảnh `initramfs` (hoặc `initrd`)
 
-Trong hai chương này, chúng ta chỉ tập trung build kernel hệ điều hành Linux từ mã nguồn. Chúng ta không đi sâu vào chi tiết root filesystem. Trong chương tiếp theo, chúng ta sẽ học cách cấu hình tối thiểu bootloader GNU GRUB dành riêng cho x86.
+Trong hai chương này, chúng ta chỉ tập trung build kernel hệ điều hành Linux từ source code. Chúng ta không đi sâu vào chi tiết root filesystem. Trong chương tiếp theo, chúng ta sẽ học cách cấu hình tối thiểu bootloader GNU GRUB dành riêng cho x86.
 
 Quy trình build kernel hoàn chỉnh – ít nhất với x86\[\_64\] – cần tổng cộng sáu hoặc bảy bước. Ngoài các kiến thức chuẩn bị cần thiết, chúng ta trình bày ba bước đầu ở đây và các bước còn lại trong chương tiếp theo.
 
@@ -26,11 +26,11 @@ Trong chương này, chúng ta sẽ đề cập các chủ đề sau:
 
 - Chuẩn bị cho việc build kernel
 
-- Các bước build kernel từ mã nguồn
+- Các bước build kernel từ source code
 
-- Bước 1 – Lấy cây mã nguồn Linux kernel
+- Bước 1 – Lấy source tree Linux kernel
 
-- Bước 2 – Giải nén cây mã nguồn kernel
+- Bước 2 – Giải nén kernel source tree
 
 - Bước 3 – Cấu hình Linux kernel
 
@@ -42,7 +42,7 @@ Bạn có thể thắc mắc: còn build Linux kernel cho kiến trúc CPU khác
 
 Tôi giả định bạn đã đọc chương trực tuyến Kernel Workspace Setup, chuẩn bị phù hợp một máy ảo khách x86\_64 chạy Ubuntu 22.04 LTS (hoặc tương đương) và cài tất cả các gói cần thiết. Nếu chưa, tôi rất khuyến khích bạn thực hiện việc này trước.
 
-Để tận dụng tối đa cuốn sách, tôi cũng rất khuyến khích bạn clone kho GitHub của sách (`https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`) để lấy mã nguồn và hands-on với nó.
+Để tận dụng tối đa cuốn sách, tôi cũng rất khuyến khích bạn clone kho GitHub của sách (`https://github.com/PacktPublishing/Linux-Kernel-Programming_2E`) để lấy source code và hands-on với nó.
 
 ## Chuẩn bị cho việc build kernel
 
@@ -50,7 +50,7 @@ Tôi giả định bạn đã đọc chương trực tuyến Kernel Workspace Se
 
 Bạn có biết? Các điều khoản của giấy phép GNU GPLv2 – giấy phép mà Linux kernel được phát hành theo và sẽ tiếp tục được giữ theo trong tương lai có thể dự đoán được – hoàn toàn không ngăn các nhà phát triển gốc thu phí cho công việc của mình! Chỉ là Linus Torvalds, và hiện nay là Linux Foundation, cung cấp phần mềm Linux kernel miễn phí cho mọi người. Điều này không ngăn các tổ chức thương mại bổ sung giá trị cho kernel (và các sản phẩm đi kèm nó) rồi thu phí, dù bằng khoản trả trước ban đầu hay mô hình thuê bao SaaS/IaaS điển hình ngày nay.
 
-Vì vậy, mã nguồn mở chắc chắn khả thi trong kinh doanh, như đã và đang tiếp tục được chứng minh mỗi ngày. Khách hàng có hoạt động kinh doanh cốt lõi ở lĩnh vực khác chỉ muốn nhận giá trị tương xứng với tiền bỏ ra; doanh nghiệp xây dựng quanh Linux có thể đáp ứng bằng hỗ trợ expert-level, SLA chi tiết và các bản nâng cấp.
+Vì vậy, source code mở chắc chắn khả thi trong kinh doanh, như đã và đang tiếp tục được chứng minh mỗi ngày. Khách hàng có hoạt động kinh doanh cốt lõi ở lĩnh vực khác chỉ muốn nhận giá trị tương xứng với tiền bỏ ra; doanh nghiệp xây dựng quanh Linux có thể đáp ứng bằng hỗ trợ expert-level, SLA chi tiết và các bản nâng cấp.
 
 Một số điểm then chốt chúng ta sẽ thảo luận trong phần này gồm:
 
@@ -58,7 +58,7 @@ Một số điểm then chốt chúng ta sẽ thảo luận trong phần này g�
 
 - Quy trình phát triển kernel điển hình
 
-- Sự tồn tại của các loại cây mã nguồn kernel khác nhau trong kho lưu trữ
+- Sự tồn tại của các loại kernel source tree khác nhau trong kho lưu trữ
 
 Với những thông tin này, bạn sẽ được trang bị tốt hơn để thực hiện quy trình build kernel. Được rồi, hãy lần lượt xem từng điểm trên.
 
@@ -136,7 +136,7 @@ Một hiểu lầm phổ biến, đặc biệt trong những năm đầu, là Li
 
 Để xem một chu kỳ phát triển điển hình, hãy giả định chúng ta đã clone cây Git Linux kernel mainline mới nhất về hệ thống.
 
-Chi tiết sử dụng công cụ quản lý mã nguồn (Source Code Management – SCM) Git mạnh mẽ nằm ngoài phạm vi cuốn sách. Hãy xem phần Đọc thêm để có các liên kết hữu ích học cách dùng Git. Tất nhiên, tôi rất khuyến khích bạn ít nhất làm quen với cách sử dụng Git cơ bản.
+Chi tiết sử dụng công cụ quản lý source code (Source Code Management – SCM) Git mạnh mẽ nằm ngoài phạm vi cuốn sách. Hãy xem phần Đọc thêm để có các liên kết hữu ích học cách dùng Git. Tất nhiên, tôi rất khuyến khích bạn ít nhất làm quen với cách sử dụng Git cơ bản.
 
 Như đã đề cập, tại thời điểm viết sách, kernel 6.1 là phiên bản Long-Term Stable (LTS) có ngày EOL dự kiến xa nhất tính từ hiện tại (tháng 12 năm 2026), nên chúng ta sẽ sử dụng nó trong nội dung tiếp theo.
 
@@ -146,7 +146,7 @@ Vậy nó ra đời như thế nào? Tất nhiên, nó phát triển từ các r
 
 Chúng ta dùng lệnh `git log` như sau để lấy nhật ký human-readable về các tag trong cây Git kernel, sắp xếp theo ngày. Ở đây, vì chủ yếu quan tâm đến bản phát hành kernel 6.1 LTS, chúng tôi chủ động rút gọn kết quả sau để làm nổi bật phần đó:
 
-Lệnh `git log` (dùng trong khối mã sau, và thực tế cả mọi sub-commands `git` khác) chỉ hoạt động trên cây Git. Chúng ta dùng ví dụ sau thuần túy để minh họa sự phát triển của kernel. Một lát nữa, chúng tôi sẽ chỉ cách clone cây mã nguồn kernel Git.
+Lệnh `git log` (dùng trong khối mã sau, và thực tế cả mọi sub-commands `git` khác) chỉ hoạt động trên cây Git. Chúng ta dùng ví dụ sau thuần túy để minh họa sự phát triển của kernel. Một lát nữa, chúng tôi sẽ chỉ cách clone kernel source tree Git.
 
 ```
 $ git log --date-order --tags --simplify-by-decoration \
@@ -237,11 +237,11 @@ Giả sử bạn đang cố gửi một patch nhưng bỏ lỡ merge window. Kh�
 
 Hãy thực hiện những gì chúng ta đã làm – theo dõi sự phát triển của kernel – với stable kernel mới nhất hiện tại. (Mẹo nhanh: thêm một cách xem lịch sử phát hành kernel: `https://en.wikipedia.org/wiki/Linux_kernel_version_history`).
 
-Vậy giờ khi gặp các bản phát hành Linux kernel, bạn sẽ hiểu tên gọi và quy trình liên quan. Bây giờ hãy chuyển sang xem các loại cây mã nguồn kernel hiện có.
+Vậy giờ khi gặp các bản phát hành Linux kernel, bạn sẽ hiểu tên gọi và quy trình liên quan. Bây giờ hãy chuyển sang xem các loại kernel source tree hiện có.
 
-### Khám phá các loại cây mã nguồn kernel
+### Khám phá các loại kernel source tree
 
-Có một số loại cây mã nguồn Linux kernel. Một loại then chốt là kernel Long Term Support (LTS). Nó đơn giản là bản phát hành “đặc biệt” theo nghĩa các kernel maintainer tiếp tục backport những bản sửa bug quan trọng và vá bảo mật cho đến ngày EOL xác định. Theo thông lệ, kernel tiếp theo được “đánh dấu” LTS là bản cuối cùng phát hành mỗi năm, thường vào tháng 12.
+Có một số loại source tree Linux kernel. Một loại then chốt là kernel Long Term Support (LTS). Nó đơn giản là bản phát hành “đặc biệt” theo nghĩa các kernel maintainer tiếp tục backport những bản sửa bug quan trọng và vá bảo mật cho đến ngày EOL xác định. Theo thông lệ, kernel tiếp theo được “đánh dấu” LTS là bản cuối cùng phát hành mỗi năm, thường vào tháng 12.
 
 “Tuổi thọ” của LTS kernel thường tối thiểu 2 năm và có thể được gia hạn thêm vài năm. Kernel 6.1.y LTS mà chúng ta dùng xuyên suốt sách là LTS kernel thứ 23, có tuổi thọ dự kiến 4 năm – từ tháng 12 năm 2022 đến tháng 12 năm 2026.
 
@@ -269,9 +269,9 @@ Trong toàn bộ sách, chúng ta sẽ làm việc với một trong những LTS
 
 Tại thời điểm viết sách, đó là kernel 6.1.x LTS với EOL dự kiến tháng 12 năm 2026, nhờ đó giữ nội dung sách phù hợp và có giá trị trong nhiều năm!
 
-Cần nhắc thêm hai loại cây mã nguồn kernel: Super LTS (SLTS) và kernel của nhà cung cấp chip (SoC). SLTS kernel được Civil Infrastructure Platform (`https://www.cip-project.org/`), một dự án của Linux Foundation, bảo trì lâu hơn cả LTS kernel. Trích từ trang của họ:
+Cần nhắc thêm hai loại kernel source tree: Super LTS (SLTS) và kernel của nhà cung cấp chip (SoC). SLTS kernel được Civil Infrastructure Platform (`https://www.cip-project.org/`), một dự án của Linux Foundation, bảo trì lâu hơn cả LTS kernel. Trích từ trang của họ:
 
-“... Dự án CIP tập trung thiết lập một ‘lớp nền’ phần mềm mã nguồn mở chất lượng công nghiệp, cho phép sử dụng và triển khai các khối phần mềm trong dự án hạ tầng dân dụng. Hiện nay, các hệ thống hạ tầng dân dụng được xây dựng từ đầu, ít re-use các khối phần mềm hiện có. Dự án CIP dự định tạo ra các khối có thể tái sử dụng, đáp ứng yêu cầu an toàn, độ tin cậy và những yêu cầu khác của hạ tầng công nghiệp, dân dụng.”
+“... Dự án CIP tập trung thiết lập một ‘lớp nền’ phần mềm source code mở chất lượng công nghiệp, cho phép sử dụng và triển khai các khối phần mềm trong dự án hạ tầng dân dụng. Hiện nay, các hệ thống hạ tầng dân dụng được xây dựng từ đầu, ít re-use các khối phần mềm hiện có. Dự án CIP dự định tạo ra các khối có thể tái sử dụng, đáp ứng yêu cầu an toàn, độ tin cậy và những yêu cầu khác của hạ tầng công nghiệp, dân dụng.”
 
 Thực tế, tại thời điểm viết sách, các CIP kernel mới nhất – SLTS v6.1 và SLTS v6.1-rt – dựa trên kernel 6.1 LTS, có EOL dự kiến tháng 8 năm 2033 (10 năm)! Đồng thời, các kernel SLTS 5.10 và SLTS 5.10-rt có EOL dự kiến tháng 1 năm 2031. Xem wiki tại đây để biết thông tin mới nhất: `https://wiki.linuxfoundation.org/civilinfrastructureplatform/start#kernel_maintainership`.
 
@@ -293,11 +293,11 @@ Dưới đây là một số tài liệu nếu bạn muốn tự tìm hiểu:
 
 Tại thời điểm này, có vẻ kernel chúng ta làm việc ở đây – 6.1 LTS – sẽ được bảo trì theo thời hạn thông thường, đến tháng 12 năm 2026.
 
-Tiếp tục, hãy thảo luận ngắn về loại cây mã nguồn kernel thứ hai vừa nêu: nhà cung cấp silicon/chipset SoC thường duy trì kernel riêng cho các bo mạch/chip họ hỗ trợ. Họ thường dựa trên vanilla LTS kernel hiện có (không nhất thiết mới nhất!) rồi phát triển tiếp, thêm patch vendor-specific, các thành phần Board Support Package (BSP), driver, v.v. Tất nhiên, theo thời gian, khác biệt giữa kernel của họ và stable kernel mới nhất có thể khá lớn, dẫn đến vấn đề bảo trì khó khăn như phải liên tục backport các patch bảo mật/sửa bug nghiêm trọng.
+Tiếp tục, hãy thảo luận ngắn về loại kernel source tree thứ hai vừa nêu: nhà cung cấp silicon/chipset SoC thường duy trì kernel riêng cho các bo mạch/chip họ hỗ trợ. Họ thường dựa trên vanilla LTS kernel hiện có (không nhất thiết mới nhất!) rồi phát triển tiếp, thêm patch vendor-specific, các thành phần Board Support Package (BSP), driver, v.v. Tất nhiên, theo thời gian, khác biệt giữa kernel của họ và stable kernel mới nhất có thể khá lớn, dẫn đến vấn đề bảo trì khó khăn như phải liên tục backport các patch bảo mật/sửa bug nghiêm trọng.
 
 Khi làm dự án dùng những chip như vậy, perhaps-best là dựa trên giải pháp industry-strength hiện có như Yocto Project (`https://www.yoctoproject.org/`), vốn làm rất tốt việc bảo trì LTS kernel gần đây với vendor layer được áp dụng đồng bộ cùng các patch bảo mật/sửa bug then chốt. Ví dụ, tại thời điểm viết, bản Yocto ổn định mới nhất – Nanbield 4.3 – hỗ trợ cả kernel 6.1 LTS lẫn kernel 6.5 non-LTS mới hơn; tất nhiên phiên bản cụ thể có thể khác theo kiến trúc (họ bộ xử lý).
 
-Vậy có rất nhiều loại cây mã nguồn kernel. Tuy nhiên, tôi đề nghị bạn xem trang Releases của kernel.org để biết chi tiết các loại kernel phát hành: `https://www.kernel.org/releases.html`. Một lần nữa, để biết sâu hơn, xem How the development process works (`https://www.kernel.org/doc/html/latest/process/2.Process.html#how-the-development-process-works`).
+Vậy có rất nhiều loại kernel source tree. Tuy nhiên, tôi đề nghị bạn xem trang Releases của kernel.org để biết chi tiết các loại kernel phát hành: `https://www.kernel.org/releases.html`. Một lần nữa, để biết sâu hơn, xem How the development process works (`https://www.kernel.org/doc/html/latest/process/2.Process.html#how-the-development-process-works`).
 
 Có thể dùng `curl` để truy vấn kho `https://www.kernel.org/` theo cách non-interactive, dùng được trong script. Kết quả sau là tình trạng Linux ngày 6 tháng 12 năm 2023:
 
@@ -339,19 +339,19 @@ Bạn phải áp dụng tất cả các bản phát hành stable/LTS để có h
 
 Bài blog thực tế What Stable Kernel Should I Use (Tôi nên dùng stable kernel nào), tháng 8 năm 2018, của Greg Kroah-Hartman (`http://kroah.com/log/blog/2018/08/24/what-stable-kernel-should-i-use/`) cũng thể hiện các suy nghĩ này.
 
-Được rồi, giờ đã có kiến thức về quy ước phiên bản kernel và các loại cây mã nguồn kernel, chắc chắn đã đến lúc bắt đầu hành trình build kernel của chúng ta.
+Được rồi, giờ đã có kiến thức về quy ước phiên bản kernel và các loại kernel source tree, chắc chắn đã đến lúc bắt đầu hành trình build kernel của chúng ta.
 
-## Các bước build kernel từ mã nguồn
+## Các bước build kernel từ source code
 
-Để tiện tra cứu nhanh, dưới đây là các bước chính, then chốt để build Linux kernel từ mã nguồn. Vì phần giải thích từng bước khá chi tiết, bạn có thể quay lại bản tóm tắt này để nắm bức tranh tổng thể. Các bước như sau:
+Để tiện tra cứu nhanh, dưới đây là các bước chính, then chốt để build Linux kernel từ source code. Vì phần giải thích từng bước khá chi tiết, bạn có thể quay lại bản tóm tắt này để nắm bức tranh tổng thể. Các bước như sau:
 
-1\. Lấy cây mã nguồn Linux kernel bằng một trong các lựa chọn:
+1\. Lấy source tree Linux kernel bằng một trong các lựa chọn:
 
-  - Tải một cây mã nguồn kernel cụ thể dưới dạng tệp nén
+  - Tải một kernel source tree cụ thể dưới dạng tệp nén
 
   - Clone cây Git (kernel)
 
-2\. Giải nén cây mã nguồn kernel vào một vị trí trong thư mục cá nhân (bỏ qua bước này nếu lấy kernel bằng cách clone cây Git).
+2\. Giải nén kernel source tree vào một vị trí trong thư mục cá nhân (bỏ qua bước này nếu lấy kernel bằng cách clone cây Git).
 
 3\. Cấu hình: Chọn điểm khởi đầu cho cấu hình kernel (có nhiều cách tiếp cận). Sau đó sửa, chọn các tùy chọn hỗ trợ theo yêu cầu của kernel mới. Cách được khuyến nghị là dùng `make menuconfig`.
 
@@ -369,23 +369,23 @@ Bài blog thực tế What Stable Kernel Should I Use (Tôi nên dùng stable ke
 
 Chương này là chương đầu trong hai chương về build kernel, trình bày bước 1 đến 3 và nhiều kiến thức nền cần thiết. Chương tiếp theo trình bày các bước còn lại, từ 4 đến 7. Vì vậy, hãy bắt đầu với bước 1.
 
-## Bước 1 – Lấy cây mã nguồn Linux kernel
+## Bước 1 – Lấy source tree Linux kernel
 
-Trong phần này, chúng ta sẽ xem hai cách chính để lấy cây mã nguồn Linux kernel:
+Trong phần này, chúng ta sẽ xem hai cách chính để lấy source tree Linux kernel:
 
-- Tải và giải nén cây mã nguồn kernel cụ thể từ kho công khai Linux kernel: `https://www.kernel.org`.
+- Tải và giải nén kernel source tree cụ thể từ kho công khai Linux kernel: `https://www.kernel.org`.
 
-- Clone cây mã nguồn của Linus Torvalds (hoặc người khác) – ví dụ cây Git `linux-next`.
+- Clone source tree của Linus Torvalds (hoặc người khác) – ví dụ cây Git `linux-next`.
 
-Bạn quyết định dùng cách nào? Với hầu hết nhà phát triển làm dự án hoặc sản phẩm, quyết định đã được đưa ra – dự án dùng một phiên bản Linux kernel rất cụ thể. Vì vậy, bạn tải cây mã nguồn kernel đó, rất có thể áp dụng patch project-specific theo yêu cầu, rồi dùng nó.
+Bạn quyết định dùng cách nào? Với hầu hết nhà phát triển làm dự án hoặc sản phẩm, quyết định đã được đưa ra – dự án dùng một phiên bản Linux kernel rất cụ thể. Vì vậy, bạn tải kernel source tree đó, rất có thể áp dụng patch project-specific theo yêu cầu, rồi dùng nó.
 
-Với người định đóng góp hay upstream mã vào mainline kernel, cách thứ hai – clone cây Git – là lựa chọn phù hợp. Tất nhiên còn nhiều điều khác; chúng tôi đã mô tả một số chi tiết trong phần Khám phá các loại cây mã nguồn kernel.
+Với người định đóng góp hay upstream mã vào mainline kernel, cách thứ hai – clone cây Git – là lựa chọn phù hợp. Tất nhiên còn nhiều điều khác; chúng tôi đã mô tả một số chi tiết trong phần Khám phá các loại kernel source tree.
 
-Trong phần sau, chúng tôi minh họa cả hai cách lấy cây mã nguồn kernel. Trước tiên là cách tải một cây mã nguồn kernel cụ thể (không phải cây Git) từ kho kernel. Chúng ta chọn Linux kernel 6.1.25 LTS cho mục đích này. Vì vậy, trong các bài thực hành của sách, đây là cách cần dùng. Ở cách thứ hai, chúng ta clone cây Git.
+Trong phần sau, chúng tôi minh họa cả hai cách lấy kernel source tree. Trước tiên là cách tải một kernel source tree cụ thể (không phải cây Git) từ kho kernel. Chúng ta chọn Linux kernel 6.1.25 LTS cho mục đích này. Vì vậy, trong các bài thực hành của sách, đây là cách cần dùng. Ở cách thứ hai, chúng ta clone cây Git.
 
-### Tải cây mã nguồn kernel cụ thể
+### Tải kernel source tree cụ thể
 
-Trước hết, mã nguồn kernel ở đâu? Câu trả lời ngắn gọn là trên máy chủ kho kernel công khai tại `https://www.kernel.org`. Trang chủ hiển thị phiên bản Linux kernel stable mới nhất cùng các bản `longterm` và `linux-next` mới nhất. Ảnh sau cho thấy website ngày 25 tháng 4 năm 2023. Ngày được hiển thị theo định dạng `yyyy-mm-dd`:
+Trước hết, kernel source code ở đâu? Câu trả lời ngắn gọn là trên máy chủ kho kernel công khai tại `https://www.kernel.org`. Trang chủ hiển thị phiên bản Linux kernel stable mới nhất cùng các bản `longterm` và `linux-next` mới nhất. Ảnh sau cho thấy website ngày 25 tháng 4 năm 2023. Ngày được hiển thị theo định dạng `yyyy-mm-dd`:
 
 ![Hình 2.5](images/ch02/fig02-05.jpg)
 
@@ -393,32 +393,32 @@ Hình 2.5: Website kernel.org (ngày 25 tháng 4 năm 2023), làm nổi bật ke
 
 Nhắc nhanh: chúng tôi cũng cung cấp tệp PDF chứa ảnh full-color của các ảnh chụp/sơ đồ trong sách. Bạn có thể tải tại: `https://packt.link/gbp/9781803232225`.
 
-Có nhiều cách tải tệp mã nguồn kernel nén từ máy chủ này và/hoặc các mirror của nó. Hãy xem hai cách:
+Có nhiều cách tải tệp kernel source code nén từ máy chủ này và/hoặc các mirror của nó. Hãy xem hai cách:
 
 - Cách tương tác, có lẽ đơn giản nhất, là vào website trên rồi nhấn liên kết `tarball` phù hợp trong web client. Trình duyệt sẽ tải tệp ảnh định dạng `.tar.xz` về hệ thống.
 
-- Bạn cũng có thể tải bất kỳ cây mã nguồn kernel dạng nén nào bằng cách truy cập `https://mirrors.edge.kernel.org/pub/linux/kernel/` rồi chọn major version; cụ thể, với kernel major # 6, URL là `https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/`; duyệt hoặc tìm trên trang này kernel mong muốn. Ví dụ, xem ảnh sau:
+- Bạn cũng có thể tải bất kỳ kernel source tree dạng nén nào bằng cách truy cập `https://mirrors.edge.kernel.org/pub/linux/kernel/` rồi chọn major version; cụ thể, với kernel major # 6, URL là `https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/`; duyệt hoặc tìm trên trang này kernel mong muốn. Ví dụ, xem ảnh sau:
 
 ![Hình 2.6](images/ch02/fig02-06.jpg)
 
 Hình 2.6: Một phần ảnh chụp kernel.org, làm nổi bật kernel (6.1.25 LTS) chúng ta sẽ tải và làm việc
 
-Các tệp `tar.gz` và `tar.xz` có nội dung giống hệt; chỉ khác loại nén. Bạn thấy tải `.tar.xz` thường nhanh hơn vì chúng nhỏ hơn.
+Các file `tar.gz` và `tar.xz` có nội dung giống hệt nhau; chỉ khác kiểu nén. Bạn có thể thấy tải các file `.tar.xz` thường nhanh hơn vì chúng có kích thước nhỏ hơn.
 
-- Hoặc bạn có thể tải cây mã nguồn kernel từ dòng lệnh bằng tiện ích `wget`. Chúng ta cũng có thể dùng tiện ích mạnh mẽ `curl` để làm việc này. Ví dụ, để tải tệp mã nguồn nén của stable kernel 6.1.25 LTS, gõ lệnh sau trên một dòng:
+- Hoặc bạn có thể tải kernel source tree từ dòng lệnh bằng tiện ích `wget`. Chúng ta cũng có thể dùng tiện ích mạnh mẽ `curl` để làm việc này. Ví dụ, để tải tệp source code nén của stable kernel 6.1.25 LTS, gõ lệnh sau trên một dòng:
 
 ```
 wget –https-only -O ~/Downloads/linux-6.1.25.tar.xz  https://mirrors.
 edge.kernel.org/pub/linux/kernel/v6.x/linux-6.1.25.tar.xz
 ```
 
-Lệnh này tải an toàn cây mã nguồn kernel 6.1.25 dạng nén vào thư mục `~/Downloads` của máy. Vì vậy, hãy thực hiện để đưa mã nguồn kernel 6.1.25 (LTS) về hệ thống!
+Lệnh này tải an toàn kernel source tree 6.1.25 dạng nén vào thư mục `~/Downloads` của máy. Vì vậy, hãy thực hiện để đưa kernel source code 6.1.25 (LTS) về hệ thống!
 
 ### Clone cây Git
 
-Với nhà phát triển đang làm việc và muốn đóng góp mã upstream, bạn phải làm việc trên phiên bản mới nhất của cơ sở mã Linux kernel. Tuy nhiên, trong cộng đồng kernel, có những mức độ tinh tế về chính xác điều gì được coi là phiên bản mới nhất. Như đã đề cập, cây `linux-next`, cùng một branch hoặc tag cụ thể trong đó, là nơi cần làm việc cho mục đích này.
+Với nhà phát triển đang làm việc và muốn đóng góp mã upstream, bạn phải làm việc trên phiên bản mới nhất của code base Linux kernel. Tuy nhiên, trong cộng đồng kernel, có những mức độ tinh tế về chính xác điều gì được coi là phiên bản mới nhất. Như đã đề cập, cây `linux-next`, cùng một branch hoặc tag cụ thể trong đó, là nơi cần làm việc cho mục đích này.
 
-Tuy nhiên, sách không định đi sâu vào các chi tiết phức tạp khi thiết lập cây `linux-next`. Quy trình này đã được ghi chép rất đầy đủ; xem phần Đọc thêm của chương để có các liên kết chi tiết. Trang hướng dẫn chính xác cách clone cây `linux-next` nằm tại Working with linux-next, `https://www.kernel.org/doc/man-pages/linux-next.html`; như được nêu ở đó, cây linux-next, `http://git.kernel.org/cgit/linux/kernel/git/next/linux-next.git`, là nơi tập hợp patch hướng đến merge window kernel tiếp theo. Nếu đang phát triển kernel bleeding-edge, có lẽ bạn muốn làm việc từ cây đó thay vì cây mainline của Linus Torvalds hoặc cây mã nguồn từ kho kernel chung tại `https://www.kernel.org`.
+Tuy nhiên, sách không định đi sâu vào các chi tiết phức tạp khi thiết lập cây `linux-next`. Quy trình này đã được ghi chép rất đầy đủ; xem phần Đọc thêm của chương để có các liên kết chi tiết. Trang hướng dẫn chính xác cách clone cây `linux-next` nằm tại Working with linux-next, `https://www.kernel.org/doc/man-pages/linux-next.html`; như được nêu ở đó, cây linux-next, `http://git.kernel.org/cgit/linux/kernel/git/next/linux-next.git`, là nơi tập hợp patch hướng đến merge window kernel tiếp theo. Nếu đang phát triển kernel bleeding-edge, có lẽ bạn muốn làm việc từ cây đó thay vì cây mainline của Linus Torvalds hoặc source tree từ kho kernel chung tại `https://www.kernel.org`.
 
 Với mục đích của chúng ta, clone kho Git Linux mainline (thực chất là cây Git của Linus Torvalds) là quá đủ. Thực hiện như sau:
 
@@ -443,21 +443,21 @@ Giờ chuyển đến thư mục mà cây đã được giải ra:
 cd linux-stable
 ```
 
-Một lần nữa, nếu định làm việc trên cây Git này, hãy bỏ qua phần Bước 2 – Giải nén cây mã nguồn kernel vì thao tác `git clone` dù sao cũng giải ra cây mã nguồn. Thay vào đó, tiếp tục phần Bước 3 – Cấu hình Linux kernel ngay sau đó. Tuy nhiên, điều này có nghĩa phiên bản cây mã nguồn kernel bạn dùng sẽ rất khác 6.1.25 trong sách. Vì vậy, tôi đề nghị bạn chỉ coi phần này là minh họa cách lấy cây Git ổn định mới nhất qua `git`, rồi dừng ở đó.
+Một lần nữa, nếu định làm việc trên cây Git này, hãy bỏ qua phần Bước 2 – Giải nén kernel source tree vì thao tác `git clone` dù sao cũng giải ra source tree. Thay vào đó, tiếp tục phần Bước 3 – Cấu hình Linux kernel ngay sau đó. Tuy nhiên, điều này có nghĩa phiên bản kernel source tree bạn dùng sẽ rất khác 6.1.25 trong sách. Vì vậy, tôi đề nghị bạn chỉ coi phần này là minh họa cách lấy cây Git ổn định mới nhất qua `git`, rồi dừng ở đó.
 
-Cuối cùng, kernel maintainer còn cung cấp một cách tải kernel khác: script tải an toàn cây mã nguồn Linux kernel chỉ định, có xác minh chữ ký PGP. Script nằm tại: `https://git.kernel.org/pub/scm/linux/kernel/git/mricon/korg-helpers.git/tree/get-verified-tarball`.
+Cuối cùng, kernel maintainer còn cung cấp một cách tải kernel khác: script tải an toàn source tree Linux kernel chỉ định, có xác minh chữ ký PGP. Script nằm tại: `https://git.kernel.org/pub/scm/linux/kernel/git/mricon/korg-helpers.git/tree/get-verified-tarball`.
 
-## Bước 2 – Giải nén cây mã nguồn kernel
+## Bước 2 – Giải nén kernel source tree
 
-Trong phần trước, ở bước 1, bạn đã học chính xác cách lấy cây mã nguồn Linux kernel. Một cách – cũng là cách chúng ta theo trong sách – đơn giản là tải tệp mã nguồn nén từ kernel.org hoặc một mirror của nó. Cách khác là dùng Git clone cây mã nguồn kernel gần đây.
+Trong phần trước, ở bước 1, bạn đã học chính xác cách lấy source tree Linux kernel. Một cách – cũng là cách chúng ta theo trong sách – đơn giản là tải tệp source code nén từ kernel.org hoặc một mirror của nó. Cách khác là dùng Git clone kernel source tree gần đây.
 
-Vì vậy, tôi giả định đến đây bạn đã lấy cây mã nguồn kernel 6.1.25 (LTS) dạng nén về máy Linux. Khi đã có, hãy tiếp tục bước 2, một bước đơn giản để học cách giải nén nó.
+Vì vậy, tôi giả định đến đây bạn đã lấy kernel source tree 6.1.25 (LTS) dạng nén về máy Linux. Khi đã có, hãy tiếp tục bước 2, một bước đơn giản để học cách giải nén nó.
 
-Như đã đề cập, phần này dành cho bạn đã tải một cây mã nguồn Linux kernel cụ thể dạng nén từ kho `https://www.kernel.org` và muốn build nó. Trong sách, chúng ta chủ yếu làm việc với dòng kernel 6.1 longterm, cụ thể là kernel 6.1.25 LTS.
+Như đã đề cập, phần này dành cho bạn đã tải một source tree Linux kernel cụ thể dạng nén từ kho `https://www.kernel.org` và muốn build nó. Trong sách, chúng ta chủ yếu làm việc với dòng kernel 6.1 longterm, cụ thể là kernel 6.1.25 LTS.
 
 Ngược lại, nếu đã thực hiện `git clone` cây Git Linux mainline như phần ngay trước, bạn có thể yên tâm bỏ qua phần này và chuyển đến phần tiếp theo – Bước 3 – Cấu hình Linux kernel.
 
-Được rồi, tải xuống đã xong, hãy tiếp tục. Bước tiếp theo là giải nén cây mã nguồn kernel – nhớ rằng đây là tệp tar-ed rồi nén, thường là `.tar.xz`. Dù có thể lặp lại, chúng tôi giả định đến đây bạn đã tải cơ sở mã Linux kernel 6.1.25 dưới dạng tệp nén vào `~/Downloads`:
+Được rồi, tải xuống đã xong, hãy tiếp tục. Bước tiếp theo là giải nén kernel source tree – nhớ rằng đây là tệp tar-ed rồi nén, thường là `.tar.xz`. Dù có thể lặp lại, chúng tôi giả định đến đây bạn đã tải code base Linux kernel 6.1.25 dưới dạng tệp nén vào `~/Downloads`:
 
 ```
 $ cd ~/Downloads ; ls -lh linux-6.1.25.tar.xz
@@ -470,7 +470,7 @@ Cách đơn giản để giải nén và trích xuất tệp này là dùng ti�
 tar xf ~/Downloads/linux-6.1.25.tar.xz
 ```
 
-Thao tác này giải cây mã nguồn kernel vào thư mục tên `linux-6.1.25` trong `~/Downloads`. Nhưng nếu muốn giải vào thư mục khác, chẳng hạn `~/kernels?` thì sao? Khi đó làm như sau:
+Thao tác này giải kernel source tree vào thư mục tên `linux-6.1.25` trong `~/Downloads`. Nhưng nếu muốn giải vào thư mục khác, chẳng hạn `~/kernels?` thì sao? Khi đó làm như sau:
 
 ```
 mkdir -p ~/kernels
@@ -478,35 +478,35 @@ tar xf ~/Downloads/linux-6.1.25.tar.xz \
  --directory=~/kernels/
 ```
 
-Thao tác này giải mã nguồn kernel vào `~/kernels/linux-6.1.25/`. Để thuận tiện và theo thông lệ tốt, hãy thiết lập biến môi trường trỏ đến vị trí gốc cây mã nguồn kernel mới của chúng ta:
+Thao tác này giải kernel source code vào `~/kernels/linux-6.1.25/`. Để thuận tiện và theo thông lệ tốt, hãy thiết lập biến môi trường trỏ đến vị trí gốc kernel source tree mới của chúng ta:
 
 ```
 export LKP_KSRC=~/kernels/linux-6.1.25
 ```
 
-Lưu ý từ đây trở đi, chúng tôi giả định biến `LKP_KSRC` chứa vị trí cây mã nguồn kernel 6.1.25 LTS.
+Lưu ý từ đây trở đi, chúng tôi giả định biến `LKP_KSRC` chứa vị trí kernel source tree 6.1.25 LTS.
 
 Dù luôn có thể dùng ứng dụng quản lý tệp GUI như Nautilus để giải tệp nén, tôi rất khuyến khích bạn làm quen với Linux CLI để thực hiện các thao tác này.
 
 Đừng quên `tldr` khi cần tra nhanh các tùy chọn được dùng nhiều nhất của lệnh thông thường! Ví dụ với `tar`, chỉ cần chạy `tldr tar` để xem các lệnh tar phổ biến, hoặc tra tại: `https://tldr.inbrowser.app/pages/common/tar`.
 
-Bạn có nhận thấy không? Chúng ta có thể giải cây mã nguồn kernel vào bất kỳ thư mục nào dưới thư mục cá nhân hoặc nơi khác. Khác với ngày trước, khi cây luôn được giải vào vị trí root-writeable, thường là `/usr/src/`.
+Bạn có nhận thấy không? Chúng ta có thể giải kernel source tree vào bất kỳ thư mục nào dưới thư mục cá nhân hoặc nơi khác. Khác với ngày trước, khi cây luôn được giải vào vị trí root-writeable, thường là `/usr/src/`.
 
-Nếu điều duy nhất bạn muốn lúc này là tiếp tục quy trình build kernel, hãy bỏ qua phần sau và đi tiếp. Nếu quan tâm (tôi chắc chắn hy vọng vậy!), phần tiếp theo là một đoạn tìm hiểu ngắn nhưng quan trọng về cấu trúc và bố cục cây mã nguồn kernel.
+Nếu điều duy nhất bạn muốn lúc này là tiếp tục quy trình build kernel, hãy bỏ qua phần sau và đi tiếp. Nếu quan tâm (tôi chắc chắn hy vọng vậy!), phần tiếp theo là một đoạn tìm hiểu ngắn nhưng quan trọng về cấu trúc và bố cục kernel source tree.
 
-### Tham quan ngắn cây mã nguồn kernel
+### Tham quan ngắn kernel source tree
 
-Hãy tưởng tượng! Toàn bộ mã nguồn Linux kernel giờ đã có trên hệ thống của bạn! Tuyệt vời – hãy xem nhanh:
+Hãy tưởng tượng! Toàn bộ source code Linux kernel giờ đã có trên hệ thống của bạn! Tuyệt vời – hãy xem nhanh:
 
 ![Hình 2.7](images/ch02/fig02-07.jpg)
 
-Hình 2.7: Gốc cây mã nguồn Linux kernel 6.1.25 nguyên bản
+Hình 2.7: Gốc source tree Linux kernel 6.1.25 nguyên bản
 
-Tuyệt! Nó lớn thế nào? Chạy nhanh `du -h .` ở gốc cây mã nguồn kernel đã giải nén cho thấy cây này (nhớ rằng phiên bản là 6.1.25) có kích thước khoảng 1,5 gigabyte!
+Tuyệt! Nó lớn thế nào? Chạy nhanh `du -h .` ở gốc kernel source tree đã giải nén cho thấy cây này (nhớ rằng phiên bản là 6.1.25) có kích thước khoảng 1,5 gigabyte!
 
-Để bạn biết, Linux kernel đã phát triển lớn và tiếp tục lớn hơn về số dòng mã nguồn (Source Lines of Code – SLOC). Ước tính hiện tại gần 30 triệu SLOC. Tất nhiên, cần hiểu rằng không phải tất cả mã này đều được biên dịch khi build một kernel.
+Để bạn biết, Linux kernel đã phát triển lớn và tiếp tục lớn hơn về số dòng source code (Source Lines of Code – SLOC). Ước tính hiện tại gần 30 triệu SLOC. Tất nhiên, cần hiểu rằng không phải tất cả mã này đều được biên dịch khi build một kernel.
 
-Chỉ nhìn mã nguồn, làm sao biết chính xác đây là phiên bản Linux kernel nào? Rất dễ: một cách nhanh là xem vài dòng đầu `Makefile` của dự án. Nhân tiện, kernel dùng `Makefiles` ở khắp nơi; hầu hết thư mục có một tệp. Chúng ta sẽ gọi `Makefile` này, tệp ở gốc cây mã nguồn kernel, là Makefile top-level:
+Chỉ nhìn source code, làm sao biết chính xác đây là phiên bản Linux kernel nào? Rất dễ: một cách nhanh là xem vài dòng đầu `Makefile` của dự án. Nhân tiện, kernel dùng `Makefiles` ở khắp nơi; hầu hết thư mục có một tệp. Chúng ta sẽ gọi `Makefile` này, tệp ở gốc kernel source tree, là Makefile top-level:
 
 ```
 $ head Makefile
@@ -521,15 +521,15 @@ NAME = Hurr durr I'ma ninja sloth
 # More info can be located in ./README
 ```
 
-Rõ ràng đây là mã nguồn kernel 6.1.25. Chúng ta đã trình bày ý nghĩa các nhãn `VERSION`, `PATCHLEVEL`, `SUBLEVEL` và `EXTRAVERSION` – tương ứng trực tiếp quy ước `w.x.y.z` – trong phần Tìm hiểu quy ước đặt bản phát hành Linux kernel. Nhãn `NAME` đơn giản là biệt danh đặt cho bản phát hành (nhìn vào đây thì tôi còn biết nói gì: đó là kiểu hài hước của giới kernel. Cá nhân tôi thích `NAME` của kernel 5.x hơn – đó là “Dare mighty things”!).
+Rõ ràng đây là kernel source code 6.1.25. Chúng ta đã trình bày ý nghĩa các nhãn `VERSION`, `PATCHLEVEL`, `SUBLEVEL` và `EXTRAVERSION` – tương ứng trực tiếp quy ước `w.x.y.z` – trong phần Tìm hiểu quy ước đặt bản phát hành Linux kernel. Nhãn `NAME` đơn giản là biệt danh đặt cho bản phát hành (nhìn vào đây thì tôi còn biết nói gì: đó là kiểu hài hước của giới kernel. Cá nhân tôi thích `NAME` của kernel 5.x hơn – đó là “Dare mighty things”!).
 
-Được rồi, giờ hãy có cái nhìn zoomed-out từ độ cao 10.000 foot về cây mã nguồn kernel này. Bảng sau tóm tắt phân loại chung và mục đích các tệp, thư mục quan trọng hơn ở gốc cây mã nguồn Linux kernel. Hãy Cross-reference với Hình 2.7:
+Được rồi, giờ hãy có cái nhìn zoomed-out từ độ cao 10.000 foot về kernel source tree này. Bảng sau tóm tắt phân loại chung và mục đích các tệp, thư mục quan trọng hơn ở gốc source tree Linux kernel. Hãy Cross-reference với Hình 2.7:
 
 | Tên tệp hoặc thư mục | Mục đích |
 |---|---|
 | Top-level files |  |
 | `README` | Tệp `README` của dự án. Nó cho biết tài liệu kernel chính thức nằm ở đâu – bật mí: trong thư mục tên `Documentation` `–` và cách bắt đầu dùng tài liệu. Tài liệu kernel hiện đại cũng có trực tuyến, được thực hiện rất tốt: `https://www.kernel.org/doc/html/latest/`. Tài liệu thực sự quan trọng; đây là nguồn chính thống do chính nhà phát triển kernel viết. Hãy đọc tệp `README` ngắn này trước! Xem thêm mục \[1\] bên dưới. |
-| `COPYING` | Tệp này trình bày chi tiết các điều khoản giấy phép phát hành mã nguồn kernel. Phần lớn tệp mã nguồn kernel phát hành theo giấy phép GNU GPL v2 well-known (viết là GPL-2.0). Xu hướng hiện đại là dùng định danh giấy phép SPDX industry-aligned, grep-pable. Danh sách đầy đủ tại `https://spdx.org/licenses/`. Xem thêm mục \[2\] bên dưới. |
+| `COPYING` | Tệp này trình bày chi tiết các điều khoản giấy phép phát hành kernel source code. Phần lớn tệp kernel source code phát hành theo giấy phép GNU GPL v2 well-known (viết là GPL-2.0). Xu hướng hiện đại là dùng định danh giấy phép SPDX industry-aligned, grep-pable. Danh sách đầy đủ tại `https://spdx.org/licenses/`. Xem thêm mục \[2\] bên dưới. |
 | `MAINTAINERS` | Câu hỏi thường gặp: thành phần kernel (hoặc tệp) XYZ có vấn đề – liên hệ ai để được hỗ trợ? Đó chính là nội dung tệp này cung cấp: danh sách mọi kernel subsystem cùng maintainer tương ứng. Chi tiết đến từng thành phần riêng như một driver hay tệp cụ thể, cùng trạng thái, người hiện bảo trì, mailing list, website, v.v. Rất hữu ích! Thậm chí có helper script tìm người hoặc nhóm cần trao đổi: `scripts/get_maintainer.pl` . Xem thêm mục \[3\]. |
 | `Makefile` | Đây là Makefile top-level của kernel; hệ thống build Kbuild của kernel cũng như kernel module dùng `Makefile` này để build. |
 | Major subsystem directories |  |
@@ -537,7 +537,7 @@ Rõ ràng đây là mã nguồn kernel 6.1.25. Chúng ta đã trình bày ý ngh
 | `mm/` | Phần lớn mã memory management (mm) nằm ở đây. Chúng ta sẽ đề cập một ít ở Chương 6, Kernel Internals Essentials – Processes and Threads, cùng một số nội dung liên quan trong Chương 7, Memory Management Internals – Essentials, và Chương 8, Kernel Memory Allocation for Module Authors – Phần 1. |
 | `fs/` | Mã ở đây triển khai hai tính năng filesystem then chốt: abstraction layer – Virtual Filesystem Switch (VFS) của kernel – và các filesystem driver riêng (ví dụ `ext[2\|4]`, `btrfs`, `nfs`, `ntfs`, `overlayfs`, `squashfs`, `jffs2`, `fat`, `f2fs`, `isofs`, v.v.). |
 | `block/` | Code path block I/O bên dưới VFS/FS. Gồm mã triển khai page cache, generic block I/O layer, I/O scheduler, các tính năng blk-mq new-ish, v.v. |
-| `net/` | Triển khai đầy đủ network protocol stack, tuân thủ sát Request For Comments (RFC) – `https://whatis.techtarget.com/definition/Request-for-Comments-RFC`. Bao gồm triển khai high-quality của TCP, UDP, IP và rất nhiều giao thức mạng khác. Muốn xem triển khai TCP/IP cho IPv4 code-level? Nó ở đây: net/ipv4/, hãy xem mã nguồn `tcp*.c`, `ip*.c` và các tệp khác. |
+| `net/` | Triển khai đầy đủ network protocol stack, tuân thủ sát Request For Comments (RFC) – `https://whatis.techtarget.com/definition/Request-for-Comments-RFC`. Bao gồm triển khai high-quality của TCP, UDP, IP và rất nhiều giao thức mạng khác. Muốn xem triển khai TCP/IP cho IPv4 code-level? Nó ở đây: net/ipv4/, hãy xem source code `tcp*.c`, `ip*.c` và các tệp khác. |
 | `ipc/` | Mã subsystem Inter-Process Communication (IPC); triển khai các cơ chế IPC như message queue SysV và POSIX, shared memory, semaphore, v.v. |
 | `sound/` | Mã audio subsystem, còn gọi là lớp Advanced Linux Sound Architecture (ALSA). |
 | `virt/` | Mã virtualization (hypervisor); Kernel Virtual Machine (KVM) phổ biến và mạnh mẽ được triển khai ở đây. |
@@ -547,29 +547,29 @@ Rõ ràng đây là mã nguồn kernel 6.1.25. Chúng ta đã trình bày ý ngh
 | `arch/` | Mã arch-specific nằm ở đây (arch ở đây nghĩa là CPU). Linux khởi đầu là dự án sở thích nhỏ cho i386. Nay rất có thể nó là hệ điều hành được port nhiều nhất từ trước đến nay. Xem các bản port kiến trúc ở mục \[4\] của danh sách sau bảng. |
 | `certs/` | Mã hỗ trợ tạo signed module; đây là tính năng bảo mật mạnh, khi dùng đúng bảo đảm ngay cả rootkit độc hại cũng không thể tùy tiện nạp bất kỳ kernel module nào chúng muốn. |
 | `crypto/` | Thư mục chứa triển khai kernel-level của cipher (thuật toán mã hóa/giải mã hoặc transformation) và kernel API phục vụ các thành phần cần cryptographic service. |
-| `drivers/` | Mã device driver kernel-level nằm ở đây. Đây được coi là vùng non-core; được phân thành nhiều loại driver. Đây thường là vùng nhận đóng góp thường xuyên nhất; đồng thời mã ở đây chiếm nhiều dung lượng đĩa nhất trong cây mã nguồn. |
+| `drivers/` | Mã device driver kernel-level nằm ở đây. Đây được coi là vùng non-core; được phân thành nhiều loại driver. Đây thường là vùng nhận đóng góp thường xuyên nhất; đồng thời mã ở đây chiếm nhiều dung lượng đĩa nhất trong source tree. |
 | `include/` | Thư mục chứa kernel header arch-independent. Cũng có một số header arch-specific dưới `arch/<cpu>/include/....` |
-| `init/` | Mã kernel initialization arch-independent; có lẽ nơi gần với hàm `main` của kernel nhất là `init/main.c:start_kernel()`, với hàm `start_kernel()` được coi là early C entry point trong kernel initialization. (Hãy dùng công cụ duyệt mã web tuyệt vời của Bootlin để xem cho 6.1.25 tại `https://elixir.bootlin.com/linux/v6.1.25/source/init/main.c#L936`.) |
+| `init/` | Kernel code initialization arch-independent; có lẽ nơi gần với hàm `main` của kernel nhất là `init/main.c:start_kernel()`, với hàm `start_kernel()` được coi là early C entry point trong kernel initialization. (Hãy dùng công cụ duyệt code web tuyệt vời của Bootlin để xem cho 6.1.25 tại `https://elixir.bootlin.com/linux/v6.1.25/source/init/main.c#L936`.) |
 | `io_uring/` | Hạ tầng kernel triển khai fast I/O framework `io_uring` new-ish; xem mục \[5\]. |
 | `lib/` | Thành phần gần tương đương thư viện nhất cho kernel. Cần hiểu rằng kernel không hỗ trợ shared library như ứng dụng user space. Một số mã ở đây được auto-linked vào kernel image, nên có sẵn cho kernel lúc runtime. Trong `lib/:` có nhiều thành phần hữu ích: nén/giải nén, checksum, bitmap, toán học, string routine, thuật toán cây, v.v. |
 | `rust/` | Hạ tầng kernel hỗ trợ ngôn ngữ lập trình Rust; xem mục \[6\]. |
 | `samples/` | Mã mẫu cho nhiều tính năng và cơ chế kernel; hữu ích để học hỏi! |
 | `scripts/` | Nhiều script nằm ở đây, một số dùng trong kernel build, nhiều script cho mục đích khác như static/dynamic analysis, debugging, v.v. Chủ yếu là Bash và Perl script. (Để bạn biết, đặc biệt cho mục đích debug, tôi đã trình bày nhiều script này trong Linux Kernel Debugging, 2022.) |
 | `security/` | Chứa Linux Security Module (LSM) của kernel, một framework Mandatory Access Control (MAC) nhằm áp đặt kiểm soát chặt hơn việc user app truy cập kernel space so với kernel mặc định. Mô hình mặc định gọi là Discretionary Access Control (DAC). Hiện Linux hỗ trợ nhiều LSM; well-known có SELinux, AppArmor, Smack, Tomoyo, Integrity và Yama. Lưu ý LSM mặc định “tắt”. |
-| `tools/` | Mã nguồn các công cụ user mode nằm ở đây, chủ yếu ứng dụng hoặc script “gắn chặt” với kernel nên cần nằm trong cơ sở mã kernel cụ thể. Perf, công cụ CPU profiling hiện đại, các công cụ eBPF và một số tracing tool là ví dụ rất tốt. |
-| `usr/` | Mã hỗ trợ tạo và nạp ảnh initramfs; cho phép kernel thực thi mã user space trong kernel init. Điều này thường cần thiết; chúng ta trình bày initramfs ở Chương 3, Build Linux kernel 6.x từ mã nguồn – Phần 2, mục Tìm hiểu framework initramfs. |
+| `tools/` | Source code các công cụ user mode nằm ở đây, chủ yếu ứng dụng hoặc script “gắn chặt” với kernel nên cần nằm trong code base kernel cụ thể. Perf, công cụ CPU profiling hiện đại, các công cụ eBPF và một số tracing tool là ví dụ rất tốt. |
+| `usr/` | Mã hỗ trợ tạo và nạp ảnh initramfs; cho phép kernel thực thi mã user space trong kernel init. Điều này thường cần thiết; chúng ta trình bày initramfs ở Chương 3, Build Linux kernel 6.x từ source code – Phần 2, mục Tìm hiểu framework initramfs. |
 
-Bảng 2.2: Bố cục cây mã nguồn Linux kernel
+Bảng 2.2: Bố cục source tree Linux kernel
 
 Sau đây là một số giải thích quan trọng từ bảng:
 
 1\. README: Tệp này còn đề cập tài liệu cần xem để biết phiên bản phần mềm tối thiểu chấp nhận được cho build và chạy kernel: `Documentation/process/changes.rst`. Điều thú vị là kernel cung cấp Awk script (`scripts/ver_linux`) in phiên bản phần mềm hiện có trên hệ thống chạy nó, giúp kiểm tra các phiên bản đã cài có đáp ứng yêu cầu hay không.
 
-2\. Giấy phép kernel: Không sa vào chi tiết pháp lý (không cần nói cũng biết, tôi không phải luật sư), bản chất thực tế là như sau. Vì kernel phát hành theo GNU GPL-2.0 (GNU GPL là GNU General Public License), mọi dự án trực tiếp dùng cơ sở mã kernel tự động chịu giấy phép này. Đây là thuộc tính “tác phẩm phái sinh” của GPL-2.0. Về pháp lý, các dự án hoặc sản phẩm đó phải phát hành phần mềm kernel theo cùng điều khoản giấy phép. Nói thực tế, tình hình lại mơ hồ hơn nhiều; nhiều sản phẩm thương mại chạy trên Linux kernel có mã độc quyền ở user space và/hoặc kernel-space. Họ thường làm vậy bằng cách tái cấu trúc công việc kernel (thường nhất là device driver) thành dạng Loadable Kernel Module (LKM). Có thể phát hành kernel module (LKM) theo mô hình dual-license. LKM là chủ đề Chương 4, Viết kernel module đầu tiên – Phần 1, và Chương 5, Viết kernel module đầu tiên – Phần 2; chúng ta trình bày một số thông tin giấy phép kernel module ở đó.
+2\. Giấy phép kernel: Không sa vào chi tiết pháp lý (không cần nói cũng biết, tôi không phải luật sư), bản chất thực tế là như sau. Vì kernel phát hành theo GNU GPL-2.0 (GNU GPL là GNU General Public License), mọi dự án trực tiếp dùng code base kernel tự động chịu giấy phép này. Đây là thuộc tính “tác phẩm phái sinh” của GPL-2.0. Về pháp lý, các dự án hoặc sản phẩm đó phải phát hành phần mềm kernel theo cùng điều khoản giấy phép. Nói thực tế, tình hình lại mơ hồ hơn nhiều; nhiều sản phẩm thương mại chạy trên Linux kernel có mã độc quyền ở user space và/hoặc kernel-space. Họ thường làm vậy bằng cách tái cấu trúc công việc kernel (thường nhất là device driver) thành dạng Loadable Kernel Module (LKM). Có thể phát hành kernel module (LKM) theo mô hình dual-license. LKM là chủ đề Chương 4, Viết kernel module đầu tiên – Phần 1, và Chương 5, Viết kernel module đầu tiên – Phần 2; chúng ta trình bày một số thông tin giấy phép kernel module ở đó.
 
-Một số người thích giấy phép độc quyền tìm cách phát hành mã kernel trong kernel module không theo điều khoản GPL-2.0; về kỹ thuật có lẽ làm được, nhưng ít nhất bị coi là rất anti-social, thậm chí có thể vượt sang phạm pháp. Bạn nào quan tâm có thể tìm thêm liên kết giấy phép trong tài liệu Đọc thêm của chương.
+Một số người thích giấy phép độc quyền tìm cách phát hành kernel code trong kernel module không theo điều khoản GPL-2.0; về kỹ thuật có lẽ làm được, nhưng ít nhất bị coi là rất anti-social, thậm chí có thể vượt sang phạm pháp. Bạn nào quan tâm có thể tìm thêm liên kết giấy phép trong tài liệu Đọc thêm của chương.
 
-3\. MAINTAINERS: Hãy xem tệp này ở gốc cây mã nguồn kernel! Những điều thú vị... Để minh họa ích lợi, chạy helper Perl script `scripts/get_maintainer.pl`. Lưu ý nói chính xác thì nó chỉ được thiết kế để chạy trên cây Git. Ở đây, chúng ta yêu cầu script hiển thị maintainer của cơ sở mã CPU task scheduling trong kernel, bằng cách chỉ định tệp hoặc thư mục qua tùy chọn `-f`:
+3\. MAINTAINERS: Hãy xem tệp này ở gốc kernel source tree! Những điều thú vị... Để minh họa ích lợi, chạy helper Perl script `scripts/get_maintainer.pl`. Lưu ý nói chính xác thì nó chỉ được thiết kế để chạy trên cây Git. Ở đây, chúng ta yêu cầu script hiển thị maintainer của code base CPU task scheduling trong kernel, bằng cách chỉ định tệp hoặc thư mục qua tùy chọn `-f`:
 
 ```
 $ scripts/get_maintainer.pl --nogit -f kernel/sched
@@ -598,17 +598,17 @@ loongarch/    mips/      parisc/    s390/       um/           xtensa/
 
 Thực tế, khi cross-compiling, biến môi trường `ARCH` được đặt bằng tên một trong các thư mục này để biên dịch kernel cho kiến trúc đó. Ví dụ, khi build target “foo” cho AArch64, thường làm tương tự `make ARCH=arm64 CROSS_COMPILE=<...> foo`.
 
-Là nhà phát triển kernel hoặc driver, bạn phải khá quen với duyệt cây mã nguồn kernel (và thậm chí dần thích nó!). Tuy nhiên, tìm một hàm hay biến cụ thể có thể rất khó khi cơ sở mã khoảng 30 triệu SLOC! Hãy học công cụ code-browsing hiệu quả. Tôi đề nghị các công cụ phần mềm tự do và mã nguồn mở (FOSS) `ctags` và `cscope`. Thực tế, `Makefile` top-level có target dành chính xác cho chúng: `make [ARCH=<cpu>] tags ; make [ARCH=<cpu>] cscope`. must-do! (Với `cscope`, khi `ARCH` đặt bằng null theo mặc định, nó tạo chỉ mục cho x86\[\_64\]. Ví dụ, để sinh tag liên quan AArch64, chạy `make ARCH=arm64 cscope`.) Ngoài ra, tất nhiên còn nhiều công cụ duyệt mã khác; một công cụ tốt nữa là opengrok.
+Là nhà phát triển kernel hoặc driver, bạn phải khá quen với duyệt kernel source tree (và thậm chí dần thích nó!). Tuy nhiên, tìm một hàm hay biến cụ thể có thể rất khó khi code base khoảng 30 triệu SLOC! Hãy học công cụ code-browsing hiệu quả. Tôi đề nghị các công cụ phần mềm tự do và source code mở (FOSS) `ctags` và `cscope`. Thực tế, `Makefile` top-level có target dành chính xác cho chúng: `make [ARCH=<cpu>] tags ; make [ARCH=<cpu>] cscope`. must-do! (Với `cscope`, khi `ARCH` đặt bằng null theo mặc định, nó tạo chỉ mục cho x86\[\_64\]. Ví dụ, để sinh tag liên quan AArch64, chạy `make ARCH=arm64 cscope`.) Ngoài ra, tất nhiên còn nhiều công cụ duyệt code khác; một công cụ tốt nữa là opengrok.
 
 5\. io\_uring: Không quá lời khi nói `io_uring` và eBPF được coi là hai “tính năng kỳ diệu” tương đối mới mà Linux hiện đại cung cấp (thư mục `io_uring` ở đây là phần hỗ trợ kernel cho tính năng này)! Lý do giới cơ sở dữ liệu/mạng ga-ga với `io_uring` rất đơn giản: hiệu năng. Framework này cải thiện mạnh các số liệu hiệu năng trong tình huống I/O cao real-world, cho cả disk workload và network workload. Kiến trúc ring buffer chia sẻ giữa user space và kernel-space, cơ chế zero-copy và khả năng dùng ít system call hơn nhiều so với AIO framework cũ điển hình, bao gồm cả hoạt động polled mode, khiến nó thành tính năng đáng ao ước. Vì vậy, để ứng dụng user space đi vào I/O path thật nhanh đó, hãy tìm hiểu `io_uring`. Phần Đọc thêm của chương có các liên kết hữu ích.
 
-6\. Rust trong kernel: Đúng vậy, việc hỗ trợ cơ bản ngôn ngữ Rust được đưa vào Linux kernel (đầu tiên là 6.0) đã gây nhiều chú ý. Vì sao? Rust có ưu điểm well-advertised so với cả ngôn ngữ C lâu đời của chúng ta: memory safety. Thực tế, ngay cả hôm nay, một trong những vấn đề bảo mật programing-related lớn nhất của mã C/C++ – cả hệ điều hành/driver và ứng dụng user space – bắt nguồn từ memory-safety issue (như lỗi BoF – Buffer Overflow – well-known). Chúng có thể xảy ra khi lập trình viên tạo lỗi memory corruption (bug!) trong mã C/C++. Điều này dẫn đến lỗ hổng phần mềm mà tin tặc tinh ranh luôn tìm kiếm và khai thác! Dù đã nói vậy, ít nhất hiện tại Rust mới chỉ bước vào kernel ở mức rất nhỏ – chưa có mã core nào dùng. Hỗ trợ Rust hiện tại trong kernel nhằm hỗ trợ viết module bằng Rust trong tương lai. (Tất nhiên có một ít mã Rust mẫu tại `samples/rust/`.) Việc dùng Rust trong kernel chắc chắn sẽ tăng theo thời gian.... Phần Đọc thêm có vài liên kết về chủ đề này – hãy xem nếu quan tâm.
+6\. Rust trong kernel: Đúng vậy, việc hỗ trợ cơ bản ngôn ngữ Rust được đưa vào Linux kernel (đầu tiên là 6.0) đã gây nhiều chú ý. Vì sao? Rust có ưu điểm well-advertised so với cả ngôn ngữ C lâu đời của chúng ta: memory safety. Thực tế, ngay cả hôm nay, một trong những vấn đề bảo mật programing-related lớn nhất của code C/C++ – cả hệ điều hành/driver và ứng dụng user space – bắt nguồn từ memory-safety issue (như lỗi BoF – Buffer Overflow – well-known). Chúng có thể xảy ra khi lập trình viên tạo lỗi memory corruption (bug!) trong code C/C++. Điều này dẫn đến lỗ hổng phần mềm mà tin tặc tinh ranh luôn tìm kiếm và khai thác! Dù đã nói vậy, ít nhất hiện tại Rust mới chỉ bước vào kernel ở mức rất nhỏ – chưa có mã core nào dùng. Hỗ trợ Rust hiện tại trong kernel nhằm hỗ trợ viết module bằng Rust trong tương lai. (Tất nhiên có một ít mã Rust mẫu tại `samples/rust/`.) Việc dùng Rust trong kernel chắc chắn sẽ tăng theo thời gian.... Phần Đọc thêm có vài liên kết về chủ đề này – hãy xem nếu quan tâm.
 
-Chúng ta đã hoàn thành bước 2, giải nén cây mã nguồn kernel! Ngoài ra, bạn còn học các kiến thức cơ bản về bố cục mã nguồn kernel. Giờ hãy chuyển sang bước 3 và học cách cấu hình Linux kernel trước khi build.
+Chúng ta đã hoàn thành bước 2, giải nén kernel source tree! Ngoài ra, bạn còn học các kiến thức cơ bản về bố cục kernel source code. Giờ hãy chuyển sang bước 3 và học cách cấu hình Linux kernel trước khi build.
 
 ## Bước 3 – Cấu hình Linux kernel
 
-Cấu hình kernel có lẽ là bước quan trọng nhất trong quy trình build kernel. Một trong nhiều lý do Linux là hệ điều hành được đánh giá cao là tính linh hoạt. Cho rằng có cơ sở mã Linux kernel riêng cho server enterprise-class, data center, workstation và thiết bị Linux nhúng nhỏ bé là hiểu lầm phổ biến – không, tất cả dùng chính cùng một mã nguồn Linux kernel thống nhất! Vì thế, cấu hình cẩn thận kernel cho tình huống cụ thể (server, desktop, embedded hoặc kết hợp/tùy chỉnh) vừa là tính năng mạnh vừa là yêu cầu. Đây chính là nội dung chúng ta đi sâu ở đây.
+Cấu hình kernel có lẽ là bước quan trọng nhất trong quy trình build kernel. Một trong nhiều lý do Linux là hệ điều hành được đánh giá cao là tính linh hoạt. Cho rằng có code base Linux kernel riêng cho server enterprise-class, data center, workstation và thiết bị Linux nhúng nhỏ bé là hiểu lầm phổ biến – không, tất cả dùng chính cùng một source code Linux kernel thống nhất! Vì thế, cấu hình cẩn thận kernel cho tình huống cụ thể (server, desktop, embedded hoặc kết hợp/tùy chỉnh) vừa là tính năng mạnh vừa là yêu cầu. Đây chính là nội dung chúng ta đi sâu ở đây.
 
 Có lẽ bạn sẽ thấy chủ đề này – đạt được cấu hình kernel hoạt động – thường là thảo luận dài và quanh co, nhưng cuối cùng xứng đáng; hãy dành thời gian và công sức đọc hết.
 
@@ -628,7 +628,7 @@ Hạ tầng Linux kernel dùng để cấu hình kernel được gọi là hệ 
 
   - Kconfig parser: công cụ phân tích thông minh các tệp `Kconfig[.*]`, xác định dependency và auto-selections, tạo hệ thống menu. Trong đó có `make menuconfig` thường dùng, bên trong gọi công cụ `mconf` (mã dưới `scripts/kconfig`).
 
-- Kbuild – hạ tầng hỗ trợ build mã nguồn thành các thành phần nhị phân kernel. Chủ yếu dùng kiểu build recursive make, bắt đầu tại Makefile top-level của kernel, rồi phân tích đệ quy nội dung hàng trăm Makefile trong các sub-directories của mã nguồn theo yêu cầu.
+- Kbuild – hạ tầng hỗ trợ build source code thành các thành phần nhị phân kernel. Chủ yếu dùng kiểu build recursive make, bắt đầu tại Makefile top-level của kernel, rồi phân tích đệ quy nội dung hàng trăm Makefile trong các sub-directories của source code theo yêu cầu.
 
 Hình 2.8 là sơ đồ cố gắng truyền đạt thông tin về hệ thống Kconfig/Kbuild theo cách đơn giản hóa. Một số chi tiết chưa được trình bày; tuy vậy, bạn có thể ghi nhớ sơ đồ khi đọc nội dung tiếp theo.
 
@@ -648,8 +648,8 @@ Mục đích các thành phần được tóm tắt như sau:
 |---|---|
 | `Kconfig`: Config symbol: `CONFIG_FOO` | Mỗi thành phần kernel cấu hình được `FOO` biểu diễn bằng macro `CONFIG_FOO`. Tùy lựa chọn người dùng, macro nhận một trong các giá trị `y`, `m` hoặc `n`: • `y=yes`: build cấu hình hay tính năng `FOO` vào chính kernel image • `m=module`: build thành object riêng, một kernel module (tệp `.ko`) • `n=no`: không build tính năng. Lưu ý `CONFIG_FOO` là chuỗi chữ và số. Chúng ta sẽ sớm xem cách tra chính xác tên tùy chọn qua giao diện `make` `menuconfig`. |
 | `Kconfig:` `Kconfig.*` files | Nơi định nghĩa symbol `CONFIG_FOO`. Cú pháp Kconfig quy định kiểu (Boolean, tristate, chữ/số, v.v.) và dependency tree. Hơn nữa, với giao diện cấu hình menu-based (gọi bằng một trong các lệnh `make [menu\|g\|x]config`), nó còn chỉ định chính các mục menu. Tất nhiên, chúng ta sẽ dùng tính năng này ở phần sau. |
-| `Kbuild: Makefile(s)` | Kbuild dùng cách tiếp cận Makefile với recursive make. `Makefile` ở gốc cây mã nguồn kernel gọi là Makefile top-level, thường có thêm `Makefile` trong mỗi sub-folder để build mã tại đó. Mã nguồn kernel 6.1 có tổng cộng hơn 2.700 Makefile! |
-| The `.config` file | Cuối cùng, cấu hình kernel được tập hợp về tệp này; `.config` là tệp cấu hình kernel cuối cùng. Nó được sinh và lưu trong thư mục gốc cây mã nguồn kernel dưới dạng văn bản ASCII thuần. Hãy giữ an toàn vì đây là phần then chốt của sản phẩm. Lưu ý có thể ghi đè tên tệp cấu hình qua biến môi trường `KCONFIG_CONFIG`. |
+| `Kbuild: Makefile(s)` | Kbuild dùng cách tiếp cận Makefile với recursive make. `Makefile` ở gốc kernel source tree gọi là Makefile top-level, thường có thêm `Makefile` trong mỗi sub-folder để build mã tại đó. Kernel source code 6.1 có tổng cộng hơn 2.700 Makefile! |
+| The `.config` file | Cuối cùng, cấu hình kernel được tập hợp về tệp này; `.config` là tệp cấu hình kernel cuối cùng. Nó được sinh và lưu trong thư mục gốc kernel source tree dưới dạng văn bản ASCII thuần. Hãy giữ an toàn vì đây là phần then chốt của sản phẩm. Lưu ý có thể ghi đè tên tệp cấu hình qua biến môi trường `KCONFIG_CONFIG`. |
 
 Bảng 2.3: Các thành phần chính của hệ thống build Kconfig+Kbuild
 
@@ -676,7 +676,7 @@ obj-m += FOO.o     # build the feature FOO as a discrete kernel module (a
 <if CONFIG_FOO is null>        # do NOT build feature FOO
 ```
 
-Để xem ví dụ thực tế, hãy mở tệp Kbuild ở gốc cây mã nguồn kernel (chi tiết thêm về tệp Kconfig nằm trong phần Tìm hiểu các tệp Kconfig\*):
+Để xem ví dụ thực tế, hãy mở tệp Kbuild ở gốc kernel source tree (chi tiết thêm về tệp Kconfig nằm trong phần Tìm hiểu các tệp Kconfig\*):
 
 ```
 $ cat Kconfig
@@ -731,7 +731,7 @@ Cách đầu có lợi thế đơn giản. Kernel xử lý chi tiết, cho bạn
 
 - `arch/${ARCH}/defconfig`
 
-Từ danh sách, bạn thấy Kconfig trước tiên kiểm tra sự hiện diện của `.config` ở gốc cây mã nguồn kernel; nếu thấy, nó lấy mọi giá trị cấu hình từ đó. Nếu không tồn tại, tiếp theo tìm đường dẫn `/lib/modules/$(uname -r)/.config`. Nếu thấy, các giá trị trong tệp được dùng làm mặc định. Nếu không thấy, nó kiểm tra mục kế tiếp trong danh sách ưu tiên trên, và cứ thế… Bạn thấy điều này được minh họa trong Hình 2.8.
+Từ danh sách, bạn thấy Kconfig trước tiên kiểm tra sự hiện diện của `.config` ở gốc kernel source tree; nếu thấy, nó lấy mọi giá trị cấu hình từ đó. Nếu không tồn tại, tiếp theo tìm đường dẫn `/lib/modules/$(uname -r)/.config`. Nếu thấy, các giá trị trong tệp được dùng làm mặc định. Nếu không thấy, nó kiểm tra mục kế tiếp trong danh sách ưu tiên trên, và cứ thế… Bạn thấy điều này được minh họa trong Hình 2.8.
 
 Để xem chi tiết hơn hạ tầng Kconfig và Kbuild của kernel, chúng tôi đề nghị tham khảo các tài liệu tuyệt vời sau:
 
@@ -803,7 +803,7 @@ Nếu không có tệp `defconfig` cho kiến trúc của bạn dưới `arch/${
 cp /boot/config-$(uname -r) ${LKP_KSRC}/.config
 ```
 
-Ở đây, chúng ta chỉ chép tệp cấu hình của bản phân phối Linux hiện có (máy ảo khách Ubuntu 22.04 LTS) vào `.config` ở gốc cây mã nguồn kernel, qua đó lấy cấu hình bản phân phối làm điểm khởi đầu để chỉnh sửa thêm. Như đã nói, nhược điểm của cách nhanh này là cấu hình thường lớn, dẫn đến kernel image large-footprint.
+Ở đây, chúng ta chỉ chép tệp cấu hình của bản phân phối Linux hiện có (máy ảo khách Ubuntu 22.04 LTS) vào `.config` ở gốc kernel source tree, qua đó lấy cấu hình bản phân phối làm điểm khởi đầu để chỉnh sửa thêm. Như đã nói, nhược điểm của cách nhanh này là cấu hình thường lớn, dẫn đến kernel image large-footprint.
 
 Ngoài ra, để bạn biết, khi cấu hình kernel được sinh bằng bất kỳ cách nào (như `make defconfig`), mỗi cấu hình kernel `FOO` được biểu diễn bằng một tệp rỗng trong `include/config`.
 
@@ -831,11 +831,11 @@ Hệ thống đích điển hình của phương pháp này thường là hệ t
 
 Trước khi tiếp tục, tôi muốn nói rõ: phần thảo luận ban đầu ở đây sẽ trình bày cách cũ để cấu hình Linux nhúng trên kiến trúc AArch32 hay ARM-32; sau đó chúng ta sẽ xem cách “đúng” và hiện đại cho nền tảng hiện đại.
 
-Điều thú vị là, ít nhất với AArch32, bản thân cơ sở mã kernel chứa các tệp cấu hình kernel đã biết, đã kiểm thử và hoạt động cho nhiều nền tảng phần cứng well-known.
+Điều thú vị là, ít nhất với AArch32, bản thân code base kernel chứa các tệp cấu hình kernel đã biết, đã kiểm thử và hoạt động cho nhiều nền tảng phần cứng well-known.
 
-Giả sử đích dựa trên ARM-32, chúng ta chỉ cần chọn cấu hình khớp hoặc gần khớp nhất với bo mạch nhúng đích. Các tệp cấu hình kernel này nằm trong thư mục `arch/<arch>/configs/` của cây mã nguồn kernel. Chúng có định dạng `<platform-name>_defconfig`.
+Giả sử đích dựa trên ARM-32, chúng ta chỉ cần chọn cấu hình khớp hoặc gần khớp nhất với bo mạch nhúng đích. Các tệp cấu hình kernel này nằm trong thư mục `arch/<arch>/configs/` của kernel source tree. Chúng có định dạng `<platform-name>_defconfig`.
 
-Nên xem nhanh; ảnh sau hiển thị mã kernel board-specific ARM-32 hiện có dưới `arch/arm/mach-<foo>` và tệp cấu hình nền tảng dưới `arch/arm/configs` trong cơ sở mã Linux kernel v6.1.25:
+Nên xem nhanh; ảnh sau hiển thị kernel code board-specific ARM-32 hiện có dưới `arch/arm/mach-<foo>` và tệp cấu hình nền tảng dưới `arch/arm/configs` trong code base Linux kernel v6.1.25:
 
 ![Hình 2.9](images/ch02/fig02-09.jpg)
 
@@ -845,19 +845,19 @@ Hình 2.9: Nội dung arch/arm và arch/arm/configs trong Linux kernel 6.1.25
 
 Tương tự, họ cũng đóng góp tệp cấu hình kernel mặc định hoạt động cho các nền tảng này, nằm dưới `arch/arm/configs` với dạng `<foo>_defconfig`, như thấy rõ ở phần dưới Hình 2.9.
 
-Vì vậy, ví dụ nếu cấu hình Linux kernel cho nền tảng phần cứng có SoC i.MX 7 của NXP, đừng bắt đầu bằng tệp cấu hình kernel x86\_64 làm mặc định. Nó sẽ không hoạt động. Dù xoay xở được, kernel cũng không build/chạy trơn tru. Hãy chọn tệp cấu hình phù hợp: với ví dụ này, có lẽ `imx_v6_v7_defconfig` là điểm khởi đầu tốt. Bạn có thể chép tệp này thành `.config` ở gốc cây mã nguồn kernel rồi fine-tune theo nhu cầu project-specific.
+Vì vậy, ví dụ nếu cấu hình Linux kernel cho nền tảng phần cứng có SoC i.MX 7 của NXP, đừng bắt đầu bằng tệp cấu hình kernel x86\_64 làm mặc định. Nó sẽ không hoạt động. Dù xoay xở được, kernel cũng không build/chạy trơn tru. Hãy chọn tệp cấu hình phù hợp: với ví dụ này, có lẽ `imx_v6_v7_defconfig` là điểm khởi đầu tốt. Bạn có thể chép tệp này thành `.config` ở gốc kernel source tree rồi fine-tune theo nhu cầu project-specific.
 
-Ví dụ khác, Raspberry Pi (`https://www.raspberrypi.org/`) là nền tảng rất phổ biến cho người yêu thích và production. Tệp cấu hình kernel trong cây mã nguồn của nó được dùng làm nền là `arch/arm/configs/bcm2835_defconfig`. Tên tệp phản ánh việc bo Raspberry Pi dùng SoC dựa trên Broadcom 2835. Bạn có thể tìm chi tiết biên dịch kernel cho Raspberry Pi tại `https://www.raspberrypi.org/documentation/linux/kernel/building.md`. Nhưng hãy chờ, chúng ta sẽ trình bày ít nhất một phần nội dung này ở Chương 3, Build Linux kernel 6.x từ mã nguồn – Phần 2, trong phần Build kernel cho Raspberry Pi.
+Ví dụ khác, Raspberry Pi (`https://www.raspberrypi.org/`) là nền tảng rất phổ biến cho người yêu thích và production. Tệp cấu hình kernel trong source tree của nó được dùng làm nền là `arch/arm/configs/bcm2835_defconfig`. Tên tệp phản ánh việc bo Raspberry Pi dùng SoC dựa trên Broadcom 2835. Bạn có thể tìm chi tiết biên dịch kernel cho Raspberry Pi tại `https://www.raspberrypi.org/documentation/linux/kernel/building.md`. Nhưng hãy chờ, chúng ta sẽ trình bày ít nhất một phần nội dung này ở Chương 3, Build Linux kernel 6.x từ source code – Phần 2, trong phần Build kernel cho Raspberry Pi.
 
 ##### Cách hiện đại – dùng Device Tree
 
-Được rồi, có một lời lưu ý! Với AArch32, như đã thấy, tệp cấu hình platform-specific ở `arch/arm/configs` và mã kernel board-specific ở `arch/arm/mach-<foo>`, với `foo` là tên nền tảng. Thực tế, cách giữ cấu hình và tệp mã nguồn kernel board-specific trong cơ sở mã hệ điều hành Linux này bị coi là cách làm hoàn toàn sai đối với một hệ điều hành! Linus đã nói rất rõ: các “sai lầm” ở Linux cũ, khi ARM-32 là kiến trúc phổ biến, tuyệt đối không được lặp lại với kiến trúc khác. Vậy giải quyết thế nào? Với ARM và PPC hiện đại, cả 32 và 64 bit, câu trả lời là dùng Device Tree (DT) hiện đại.
+Được rồi, có một lời lưu ý! Với AArch32, như đã thấy, tệp cấu hình platform-specific ở `arch/arm/configs` và kernel code board-specific ở `arch/arm/mach-<foo>`, với `foo` là tên nền tảng. Thực tế, cách giữ cấu hình và tệp kernel source code board-specific trong code base hệ điều hành Linux này bị coi là cách làm hoàn toàn sai đối với một hệ điều hành! Linus đã nói rất rõ: các “sai lầm” ở Linux cũ, khi ARM-32 là kiến trúc phổ biến, tuyệt đối không được lặp lại với kiến trúc khác. Vậy giải quyết thế nào? Với ARM và PPC hiện đại, cả 32 và 64 bit, câu trả lời là dùng Device Tree (DT) hiện đại.
 
-Về cơ bản, DT giữ mọi chi tiết hardware topology của nền tảng. Thực chất đó là bố cục bo mạch hay nền tảng; không phải mã chương trình mà là mô tả nền tảng phần cứng, tương tự VHDL. Vẫn cần viết mã BSP-specific và driver, nhưng giờ có cách gọn gàng để kernel “phát hiện” hoặc enumerate chúng lúc boot khi phân tích DTB (Device Tree Blob) được bootloader truyền vào. DTB được sinh trong quy trình build bằng cách gọi DTC (Device Tree Compiler) trên các tệp nguồn DT của nền tảng.
+Về cơ bản, DT giữ mọi chi tiết hardware topology của nền tảng. Thực chất đó là bố cục bo mạch hay nền tảng; không phải mã chương trình mà là mô tả nền tảng phần cứng, tương tự VHDL. Vẫn cần viết code BSP-specific và driver, nhưng giờ có cách gọn gàng để kernel “phát hiện” hoặc enumerate chúng lúc boot khi phân tích DTB (Device Tree Blob) được bootloader truyền vào. DTB được sinh trong quy trình build bằng cách gọi DTC (Device Tree Compiler) trên các tệp nguồn DT của nền tảng.
 
 Vì vậy, ngày nay bạn thấy phần lớn dự án nhúng, ít nhất với ARM và PPC, dùng DT hiệu quả. DT còn giúp OEM và ODM/nhà cung cấp bằng cách cho phép dùng về cơ bản cùng một kernel với tùy chỉnh riêng theo nền tảng/mẫu máy được đưa vào DT. Hãy nghĩ đến hàng chục mẫu điện thoại Android từ OEM phổ biến, phần lớn giống nhau nhưng chỉ khác vài chi tiết phần cứng; thường một kernel là đủ! Điều này giảm mạnh gánh nặng bảo trì. Nếu tò mò, nguồn DT – các tệp `.dts` – nằm tại `arch/<arch>/boot/dts`.
 
-Bài học giữ các thành phần board-specific ngoài cơ sở mã kernel nhiều nhất có thể dường như đã được tiếp thu tốt với AArch64 (ARM-64). Hãy so các thư mục cấu hình và DTS sạch, ngăn nắp, gọn gàng của nó (`arch/arm64/configs/` chỉ có một tệp `defconfig`) với AArch32. Ngay cả tệp DTS (xem dưới `arch/arm64/boot/dts/`) cũng well-organized so với AArch32:
+Bài học về việc giữ các thành phần board-specific bên ngoài kernel code base nhiều nhất có thể dường như đã được tiếp thu tốt đối với AArch64 (ARM-64). Hãy so sánh các folder config và DTS sạch sẽ, well-organized và gọn gàng của nó với AArch32 (`arch/arm64/configs/` chỉ có một file `defconfig`). Ngay cả các file DTS, xem trong `arch/arm64/boot/dts/`, cũng được tổ chức tốt hơn so với AArch32:
 
 ```
 6.1.25 $ ls arch/arm64/configs/
@@ -889,7 +889,7 @@ Tất nhiên, giải pháp là kiến trúc loosely coupled, với thành phần
 
 #### Xem mọi tùy chọn cấu hình sẵn có
 
-Thực ra, về cấu hình kernel, chúng ta mới chỉ chạm bề mặt. Nhiều kỹ thuật khác để chủ động sinh cấu hình kernel theo cách cụ thể đã được mã hóa ngay trong Kconfig! Bằng cách nào? Qua configuration target cho `make`. Xem chúng bằng cách chạy `make help` ở gốc mã nguồn kernel; chúng nằm dưới tiêu đề `Configuration targets`:
+Thực ra, về cấu hình kernel, chúng ta mới chỉ chạm bề mặt. Nhiều kỹ thuật khác để chủ động sinh cấu hình kernel theo cách cụ thể đã được mã hóa ngay trong Kconfig! Bằng cách nào? Qua configuration target cho `make`. Xem chúng bằng cách chạy `make help` ở gốc kernel source code; chúng nằm dưới tiêu đề `Configuration targets`:
 
 ![Hình 2.10](images/ch02/fig02-10.jpg)
 
@@ -1036,7 +1036,7 @@ Giờ (cuối cùng cũng đến!) hãy hands-on và tạo cấu hình kernel n�
 
 Đừng quên: cấu hình kernel đang thực hiện lúc này phù hợp với hệ thống desktop/server x86\_64 điển hình để học tập. Cách này chỉ cung cấp điểm khởi đầu, thậm chí điểm khởi đầu đó có thể chưa phù hợp. Với dự án thực tế, bạn phải kiểm tra và tinh chỉnh cẩn thận mọi khía cạnh cấu hình kernel; việc kiểm kê chính xác phần cứng và phần mềm cần hỗ trợ là then chốt. Một lần nữa, với thiết bị nhúng đích, cách tiếp cận khác đi (như đã thảo luận trong phần Cấu hình kernel cho hệ thống Linux nhúng điển hình).
 
-Trước khi tiếp tục, nên dọn cây mã nguồn, đặc biệt nếu đã chạy những thử nghiệm trước. Cẩn thận: lệnh này dọn sạch mọi thứ, kể cả `.config`:
+Trước khi tiếp tục, nên dọn sạch source tree, đặc biệt nếu bạn đã chạy các thử nghiệm mà chúng ta thực hiện trước đó. Hãy cẩn thận: lệnh này sẽ xóa sạch mọi thứ, bao gồm cả `.config`:
 
 ```
 make mrproper
@@ -1104,11 +1104,11 @@ Sau khi nhấn Enter (↵) nhiều lần – chúng tôi làm nổi bật điề
 
 Các bước trên đảm nhiệm việc sinh `.config` bằng phương pháp `localmodconfig`. Trước khi kết thúc phần này, có vài điểm bổ sung cần lưu ý:
 
-- Để bảo đảm bắt đầu hoàn toàn sạch, chạy `make mrproper` hoặc `make distclean` ở gốc cây mã nguồn kernel, hữu ích khi muốn làm lại quy trình build kernel từ đầu; hãy tin rằng một ngày bạn sẽ cần! Lưu ý thao tác này cũng xóa các tệp cấu hình kernel. Hãy sao lưu trước khi bắt đầu nếu cần.
+- Để bảo đảm bắt đầu hoàn toàn sạch, chạy `make mrproper` hoặc `make distclean` ở gốc kernel source tree, hữu ích khi muốn làm lại quy trình build kernel từ đầu; hãy tin rằng một ngày bạn sẽ cần! Lưu ý thao tác này cũng xóa các tệp cấu hình kernel. Hãy sao lưu trước khi bắt đầu nếu cần.
 
 - Trong chương này, mọi bước cấu hình kernel và ảnh chụp liên quan đều thực hiện trên máy ảo khách Ubuntu 22.04 LTS x86\_64, dùng làm host để cuối cùng build một Linux kernel 6.1 LTS brand-spanking-new. Tên chính xác, sự hiện diện, nội dung mục menu và hình thức, cách hoạt động giao diện menu có thể và thực sự thay đổi theo (a) kiến trúc CPU và (b) phiên bản kernel.
 
-- Như đã đề cập, với hệ thống hoặc dự án production, nhóm platform/BSP hoặc công ty cung cấp BSP Linux nhúng nếu bạn có đối tác sẽ cung cấp tệp cấu hình kernel đã biết, hoạt động tốt và được kiểm thử. Dùng nó làm điểm khởi đầu bằng cách chép thành `.config` ở gốc cây mã nguồn kernel. Hoặc có thể dùng phần mềm builder như Yocto hay Buildroot.
+- Như đã đề cập, với hệ thống hoặc dự án production, nhóm platform/BSP hoặc công ty cung cấp BSP Linux nhúng nếu bạn có đối tác sẽ cung cấp tệp cấu hình kernel đã biết, hoạt động tốt và được kiểm thử. Dùng nó làm điểm khởi đầu bằng cách chép thành `.config` ở gốc kernel source tree. Hoặc có thể dùng phần mềm builder như Yocto hay Buildroot.
 
 Khi có kinh nghiệm build kernel, bạn sẽ nhận ra công sức thiết lập cấu hình kernel đúng ở lần đầu lớn hơn; tất nhiên lần build đầu tiên cũng mất nhiều thời gian. Tuy nhiên, khi đã thực hiện đúng, quy trình thường đơn giản hơn nhiều – một công thức chạy lặp lại.
 
@@ -1116,7 +1116,7 @@ Giờ hãy học cách dùng giao diện hữu ích và trực quan để fine-t
 
 ### Tinh chỉnh cấu hình kernel qua giao diện make menuconfig
 
-Được rồi, rất tốt, chúng ta đã có tệp cấu hình kernel ban đầu (`.config`) được sinh qua Makefile target `localmodconfig`, như trình bày chi tiết ở phần trước, một điểm khởi đầu tốt. Thông thường, giờ chúng ta fine-tune cấu hình kernel thêm. Một cách – thực ra là cách được khuyến nghị – là qua Makefile target `menuconfig`. Target này yêu cầu Kbuild sinh một chương trình thực thi C-based khá tinh vi (`scripts/kconfig/mconf`), cung cấp menu-based gọn gàng cho người dùng cuối. Đây là bước 2 trong Hình 2.8. Trong khối kết quả sau, khi gọi lệnh lần đầu tại gốc cây mã nguồn kernel, Kbuild build tệp thực thi `mconf` rồi gọi nó:
+Được rồi, rất tốt, chúng ta đã có tệp cấu hình kernel ban đầu (`.config`) được sinh qua Makefile target `localmodconfig`, như trình bày chi tiết ở phần trước, một điểm khởi đầu tốt. Thông thường, giờ chúng ta fine-tune cấu hình kernel thêm. Một cách – thực ra là cách được khuyến nghị – là qua Makefile target `menuconfig`. Target này yêu cầu Kbuild sinh một chương trình thực thi C-based khá tinh vi (`scripts/kconfig/mconf`), cung cấp menu-based gọn gàng cho người dùng cuối. Đây là bước 2 trong Hình 2.8. Trong khối kết quả sau, khi gọi lệnh lần đầu tại gốc kernel source tree, Kbuild build tệp thực thi `mconf` rồi gọi nó:
 
 ```
 $ make menuconfig
@@ -1245,7 +1245,7 @@ Hình 2.14: Ảnh rút gọn cho thấy cách chúng ta bật khả năng xem c�
 
 Hình 2.15: Lời nhắc lưu cấu hình kernel đã sửa
 
-9\. Cấu hình kernel mới giờ được lưu trong `.config`. Hãy xác minh nhanh. Tôi hy vọng bạn nhận thấy tên chính xác các cấu hình đã sửa – chính là macro mà mã nguồn kernel thấy – là:
+9\. Cấu hình kernel mới giờ được lưu trong `.config`. Hãy xác minh nhanh. Tôi hy vọng bạn nhận thấy tên chính xác các cấu hình đã sửa – chính là macro mà kernel source code thấy – là:
 
 a. `CONFIG_IKCONFIG` cho tùy chọn Kernel .config support. b. `CONFIG_IKCONFIG_PROC` cho tùy chọn Enable access to .config through /proc/config.gz.
 
@@ -1305,9 +1305,9 @@ Tra các màn hình Help của từng cấu hình kernel khi làm việc với c
 
 ##### Kiểm tra cấu hình kernel trong tệp cấu hình
 
-Nhưng cấu hình kernel mới lưu ở đâu? Xin nhắc lại vì quan trọng: cấu hình kernel được ghi vào tệp văn bản ASCII đơn giản ở gốc cây mã nguồn kernel tên `.config`. Tức được lưu tại `${LKP_KSRC}/.config`.
+Nhưng cấu hình kernel mới lưu ở đâu? Xin nhắc lại vì quan trọng: cấu hình kernel được ghi vào tệp văn bản ASCII đơn giản ở gốc kernel source tree tên `.config`. Tức được lưu tại `${LKP_KSRC}/.config`.
 
-Như đã nói, từng tùy chọn cấu hình kernel đều gắn với biến cấu hình dạng `CONFIG_<FOO>`, trong đó tất nhiên `<FOO>` được thay bằng tên phù hợp. Bên trong, chúng trở thành macro mà hệ thống build và chính mã nguồn kernel sử dụng.
+Như đã nói, từng tùy chọn cấu hình kernel đều gắn với biến cấu hình dạng `CONFIG_<FOO>`, trong đó tất nhiên `<FOO>` được thay bằng tên phù hợp. Bên trong, chúng trở thành macro mà hệ thống build và chính kernel source code sử dụng.
 
 Vì vậy, để xác minh các cấu hình vừa sửa có hiệu lực hay không, hãy dùng `grep` thích hợp trên tệp cấu hình kernel:
 
@@ -1333,9 +1333,9 @@ Trong hành trình nhanh với Kconfig/Kbuild đến đây, khá nhiều việc 
 
 ### Cấu hình kernel – tìm hiểu thêm
 
-Việc tạo hoặc sửa `.config` ở gốc cây mã nguồn kernel qua giao diện `make` `menuconfig` hay phương pháp khác chưa phải bước cuối trong cách Kconfig làm việc với cấu hình. Không, giờ nó tiếp tục gọi nội bộ một target ẩn tên `syncconfig`, trước đây được đặt tên chưa đúng là `silentoldconfig`. Target này yêu cầu Kconfig sinh vài header được dùng tiếp để chuẩn bị build kernel.
+Việc tạo hoặc sửa `.config` ở gốc kernel source tree qua giao diện `make` `menuconfig` hay phương pháp khác chưa phải bước cuối trong cách Kconfig làm việc với cấu hình. Không, giờ nó tiếp tục gọi nội bộ một target ẩn tên `syncconfig`, trước đây được đặt tên chưa đúng là `silentoldconfig`. Target này yêu cầu Kconfig sinh vài header được dùng tiếp để chuẩn bị build kernel.
 
-Các tệp gồm một số meta-headers dưới `include/config`, cùng header `include/generated/autoconf.h` lưu cấu hình kernel dưới dạng C macro, nhờ đó cả Makefile và mã kernel quyết định dựa trên việc tính năng kernel có sẵn hay không.
+Các tệp gồm một số meta-headers dưới `include/config`, cùng header `include/generated/autoconf.h` lưu cấu hình kernel dưới dạng C macro, nhờ đó cả Makefile và kernel code quyết định dựa trên việc tính năng kernel có sẵn hay không.
 
 Giờ đã trình bày đủ kiến thức nền, hãy xem lại Hình 2.8, sơ đồ high-level lấy cảm hứng từ các bài của Cao Jin, cố gắng truyền đạt hệ thống Kconfig/Kbuild của kernel. Trong phần Kconfig, sơ đồ chỉ thể hiện giao diện phổ biến `make menuconfig`; lưu ý có một số cách giao diện khác là `make config` và `make {x|g|n}config`. Những cách đó không được thể hiện ở đây.
 
@@ -1375,7 +1375,7 @@ Mọi thông tin điều khiển hiển thị và lựa chọn menu nằm trong 
 
 #### Tra khác biệt cấu hình
 
-Ngay khi sắp ghi vào tệp cấu hình kernel `.config`, Kconfig kiểm tra tệp đã tồn tại chưa; nếu có, nó sao lưu với tên `.config.old`. Biết vậy, ta luôn có thể so sánh hai tệp để thấy thay đổi vừa thực hiện. Tuy nhiên, dùng tiện ích `diff` thông thường khiến khác biệt khá khó diễn giải. Kernel hữu ích cung cấp cách tốt hơn, một script console-based chuyên làm chính việc này. Script `scripts/diffconfig` trong cây mã nguồn kernel hữu ích cho mục đích đó. Truyền tham số `--help` để xem màn hình hướng dẫn.
+Ngay khi sắp ghi vào tệp cấu hình kernel `.config`, Kconfig kiểm tra tệp đã tồn tại chưa; nếu có, nó sao lưu với tên `.config.old`. Biết vậy, ta luôn có thể so sánh hai tệp để thấy thay đổi vừa thực hiện. Tuy nhiên, dùng tiện ích `diff` thông thường khiến khác biệt khá khó diễn giải. Kernel hữu ích cung cấp cách tốt hơn, một script console-based chuyên làm chính việc này. Script `scripts/diffconfig` trong kernel source tree hữu ích cho mục đích đó. Truyền tham số `--help` để xem màn hình hướng dẫn.
 
 Hãy thử:
 
@@ -1392,7 +1392,7 @@ Nếu thay đổi cấu hình kernel như phần trước, bạn sẽ thấy k�
 
 #### Dùng config script của kernel để xem/sửa cấu hình kernel
 
-Đôi khi cần trực tiếp chỉnh sửa hoặc truy vấn cấu hình kernel, kiểm tra hay đổi một cấu hình cụ thể. Chúng ta đã học làm vậy qua giao diện `make menuconfig` tuyệt vời. Ở đây ta biết thêm một cách có lẽ dễ hơn và quan trọng hơn là non-interactive, do đó dùng được trong script, để đạt điều tương tự: Bash script `scripts/config` trong mã nguồn kernel.
+Đôi khi cần trực tiếp chỉnh sửa hoặc truy vấn cấu hình kernel, kiểm tra hay đổi một cấu hình cụ thể. Chúng ta đã học làm vậy qua giao diện `make menuconfig` tuyệt vời. Ở đây ta biết thêm một cách có lẽ dễ hơn và quan trọng hơn là non-interactive, do đó dùng được trong script, để đạt điều tương tự: Bash script `scripts/config` trong kernel source code.
 
 Chạy không tham số sẽ hiển thị màn hình trợ giúp hữu ích; hãy xem thử. Một ví dụ sẽ giúp hiểu cách sử dụng.
 
@@ -1488,7 +1488,7 @@ Giả sử bạn đã phát triển device driver, một modular scheduling clas
 
 Các tệp `Kconfig*` chứa metadata được hệ thống cấu hình và build kernel – Kconfig/Kbuild – diễn giải, cho phép tạo và hiển thị có điều kiện các menu bạn thấy khi chạy giao diện `menuconfig`, tiếp nhận lựa chọn, v.v.
 
-Ví dụ, tệp `Kconfig` ở gốc cây mã nguồn kernel được dùng điền nội dung màn hình ban đầu của `menuconfig`. Hãy xem nó; nó hoạt động bằng cách nạp nhiều tệp `Kconfig` khác ở các thư mục khác nhau trong cây mã nguồn kernel. Có nhiều tệp `Kconfig*` trong cây mã nguồn kernel (hơn 1.700 với 6.1.25)! Mỗi tệp thường định nghĩa một menu, giúp ta nhận ra hệ thống build thực sự phức tạp đến đâu.
+Ví dụ, tệp `Kconfig` ở gốc kernel source tree được dùng điền nội dung màn hình ban đầu của `menuconfig`. Hãy xem nó; nó hoạt động bằng cách nạp nhiều tệp `Kconfig` khác ở các thư mục khác nhau trong kernel source tree. Có nhiều tệp `Kconfig*` trong kernel source tree (hơn 1.700 với 6.1.25)! Mỗi tệp thường định nghĩa một menu, giúp ta nhận ra hệ thống build thực sự phức tạp đến đâu.
 
 Ví dụ thực tế, hãy tra mục `Kconfig` định nghĩa các mục menu Google Devices \| Google Virtual NIC (gVNIC) support. Google Cloud dùng một Network Interface Card (NIC) ảo; nó được gọi là Google Virtual NIC. Có khả năng các cloud server Linux-based của họ sử dụng nó. Vị trí trong giao diện `menuconfig` tại đây:
 
@@ -1557,7 +1557,7 @@ Thông thường một tệp `Kconfig` điều khiển một menu, dù có thể
 
 Ví dụ đơn giản, hãy thêm tùy chọn cấu hình Boolean giả lập riêng trong General Setup. Chúng ta muốn tên cấu hình là, chẳng hạn, `CONFIG_LKP_OPTION1`. Như thấy từ bảng trên, tệp `Kconfig` cần sửa là `init/Kconfig`, vì đây là meta-file định nghĩa menu General Setup.
 
-Hãy thực hiện (giả định bạn ở gốc cây mã nguồn kernel):
+Hãy thực hiện (giả định bạn ở gốc kernel source tree):
 
 1\. Tùy chọn: để an toàn, luôn tạo bản sao lưu tệp `Kconfig` đang sửa:
 
@@ -1577,7 +1577,7 @@ Cuộn đến vị trí phù hợp trong tệp; ở đây ta chọn chèn mục 
 
 Hình 2.20: Sửa 6.1.25:init/Kconfig và chèn mục menu riêng (được làm nổi bật)
 
-Để bạn biết, tôi cung cấp thử nghiệm trên dưới dạng patch cho tệp `init/Kconfig` 6.1.25 gốc trong cây mã nguồn GitHub của sách. Tìm patch tại `ch2/Kconfig.patch`.
+Để bạn biết, tôi cung cấp thử nghiệm trên dưới dạng patch cho tệp `init/Kconfig` 6.1.25 gốc trong source tree GitHub của sách. Tìm patch tại `ch2/Kconfig.patch`.
 
 Mục mới bắt đầu bằng từ khóa `config`, tiếp đến phần `FOO` của biến cấu hình mới `CONFIG_LKP_OPTION1`. Lúc này, chỉ cần đọc các câu lệnh chúng ta viết trong `Kconfig` cho mục này. Chi tiết thêm về ngôn ngữ/cú pháp `Kconfig` nằm trong phần Một vài chi tiết về ngôn ngữ Kconfig bên dưới.
 
@@ -1625,7 +1625,7 @@ $ scripts/config -e LKP_OPTION1 ; scripts/config -s LKP_OPTION1
 y
 ```
 
-7\. Build kernel. Đừng lo; chi tiết đầy đủ về build kernel nằm trong chương tiếp theo. Có thể tạm bỏ qua, hoặc đọc Chương 3, Build Linux kernel 6.x từ mã nguồn – Phần 2, rồi quay lại điểm này.
+7\. Build kernel. Đừng lo; chi tiết đầy đủ về build kernel nằm trong chương tiếp theo. Có thể tạm bỏ qua, hoặc đọc Chương 3, Build Linux kernel 6.x từ source code – Phần 2, rồi quay lại điểm này.
 
 ```
 make -j4
@@ -1650,7 +1650,7 @@ include/generated/rustc_cfg:--cfg=CONFIG_LKP_OPTION1="y"
 
 Đã hoạt động (từ 6.0 ngay cả Rust cũng biết đến nó!). Đúng vậy; tuy nhiên, khi làm dự án hay sản phẩm thực tế, để tận dụng cấu hình kernel mới này, thường cần thêm bước thiết lập mục cấu hình trong `Makefile` liên quan mã dùng tùy chọn này.
 
-Đây là ví dụ nhanh về hình thức có thể có. Giả sử ta viết mã kernel trong tệp C tên `lkp_options.c`. Giờ cần bảo đảm nó được biên dịch và build vào kernel image! Bằng cách nào? Một cách là trong `Makefile` top-level của kernel hoặc Makefile riêng, dòng sau bảo đảm mã được biên dịch vào kernel lúc build; hãy thêm vào cuối Makefile liên quan:
+Đây là ví dụ nhanh về hình thức có thể có. Giả sử ta viết kernel code trong tệp C tên `lkp_options.c`. Giờ cần bảo đảm nó được biên dịch và build vào kernel image! Bằng cách nào? Một cách là trong `Makefile` top-level của kernel hoặc Makefile riêng, dòng sau bảo đảm mã được biên dịch vào kernel lúc build; hãy thêm vào cuối Makefile liên quan:
 
 ```
 obj-${CONFIG_LKP_OPTION1}  +=  lkp_option1.o
@@ -1658,7 +1658,7 @@ obj-${CONFIG_LKP_OPTION1}  +=  lkp_option1.o
 
 Lúc này đừng quá lo cú pháp Makefile kernel khá kỳ lạ. Vài chương tới chắc chắn sẽ làm rõ. Ngoài ra, chúng ta đã trình bày chính cú pháp này trong phần Cách hệ thống Kconfig+Kbuild hoạt động – mô tả tối giản.
 
-Hơn nữa, bạn cần nhận ra cùng cấu hình đó có thể dùng như C macro thông thường trong một đoạn mã kernel; ví dụ ta có thể làm như sau trong mã C kernel hoặc module in-tree:
+Hơn nữa, bạn cần nhận ra cùng cấu hình đó có thể dùng như C macro thông thường trong một đoạn code kernel; ví dụ ta có thể làm như sau trong code C kernel hoặc module in-tree:
 
 ```
 #ifdef CONFIG_LKP_OPTION1
@@ -1762,7 +1762,7 @@ Nhìn kỹ dòng Depends on:; nó hiển thị các dependency cùng giá trị 
 
 ## Tổng kết
 
-Trong chương này, trước tiên bạn học quy ước đặt bản phát hành hay phiên bản Linux kernel (nhớ rằng bản phát hành Linux kernel dựa trên thời gian, không feature-based!), các loại Linux kernel (cây `(-next`, cây `-rc/mainline`, stable, LTS, SLTS, distribution, custom embedded) và quy trình phát triển kernel cơ bản. Sau đó, bạn học cách tự lấy cây mã nguồn Linux kernel và giải nén cây mã nguồn kernel nén xuống đĩa. Trong quá trình đó, bạn còn có cái nhìn nhanh từ độ cao 10.000 foot về cây mã nguồn kernel để hiểu bố cục rõ hơn.
+Trong chương này, trước tiên bạn học quy ước đặt bản phát hành hay phiên bản Linux kernel (nhớ rằng bản phát hành Linux kernel dựa trên thời gian, không feature-based!), các loại Linux kernel (cây `(-next`, cây `-rc/mainline`, stable, LTS, SLTS, distribution, custom embedded) và quy trình phát triển kernel cơ bản. Sau đó, bạn học cách tự lấy source tree Linux kernel và giải nén kernel source tree nén xuống đĩa. Trong quá trình đó, bạn còn có cái nhìn nhanh từ độ cao 10.000 foot về kernel source tree để hiểu bố cục rõ hơn.
 
 Sau đó, quan trọng là bạn học cách tiếp cận và thực hiện bước cấu hình kernel – một bước then chốt trong quy trình build kernel! Hơn nữa, bạn học cách tùy chỉnh menu kernel, thêm mục riêng và một ít về hệ thống Kconfig/Kbuild cùng các tệp `Kconfig` liên quan mà nó dùng, bên cạnh những nội dung khác.
 
@@ -1774,7 +1774,7 @@ Chúng ta đã đi nửa đường để build kernel tùy chỉnh; tôi đề n
 
 Làm gần như chính xác các bước đã học trong chương này, tôi muốn giờ bạn thực hiện tương tự với một kernel khác, chẳng hạn Linux kernel 6.0.y, với y là số cao nhất (lúc viết là 19)! Tất nhiên nếu muốn, cứ thoải mái làm việc với bất kỳ kernel khác:
 
-1\. Truy cập `https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/` và tra các bản 6.0.y. 2. Tải cây mã nguồn Linux kernel v6.0.y mới nhất. 3. Giải nén xuống đĩa. 4. Cấu hình kernel (bắt đầu bằng `localmodconfig`, rồi điều chỉnh cấu hình theo yêu cầu. Để làm thêm bài tập, cũng có thể chạy script `streamline_config.pl`). 5. Hiển thị “delta” – khác biệt giữa tệp cấu hình kernel gốc và mới (mẹo: dùng script `diffconfig` của kernel để thực hiện).
+1\. Truy cập `https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/` và tra các bản 6.0.y. 2. Tải source tree Linux kernel v6.0.y mới nhất. 3. Giải nén xuống đĩa. 4. Cấu hình kernel (bắt đầu bằng `localmodconfig`, rồi điều chỉnh cấu hình theo yêu cầu. Để làm thêm bài tập, cũng có thể chạy script `streamline_config.pl`). 5. Hiển thị “delta” – khác biệt giữa tệp cấu hình kernel gốc và mới (mẹo: dùng script `diffconfig` của kernel để thực hiện).
 
 ## Câu hỏi
 

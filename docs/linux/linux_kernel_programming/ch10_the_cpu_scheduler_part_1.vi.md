@@ -298,7 +298,7 @@ Chúng ta vừa dùng `perf` để có “góc nhìn” dựa trên command-line
 
 #### Thử nghiệm – cách tiếp cận đồ họa
 
-Các bước thực hiện vẫn giống phần trước trừ command cuối (command `sudo perf sched map > mymap.txt`); thay vào đó tạo biểu diễn đồ họa CPU scheduling bằng command `perf` sau:
+Các bước cần thực hiện ở đây vẫn giống hệt phần trước, ngoại trừ lệnh cuối cùng là `sudo perf sched map > mymap.txt`. Thay vào đó, chúng ta tạo một biểu diễn đồ họa về CPU scheduling bằng lệnh `perf` sau:
 
 ```
 sudo perf timechart -i ./perf.data
@@ -939,7 +939,7 @@ Cũng cần nhấn mạnh trong trường hợp điển hình (nhiều khả nă
 
 Một mặt của vấn đề, phần timer interrupt (softirq) của scheduling housekeeping just-described, nơi có thể đặt bit `thread_info:TIF_NEED_RESCHED` để “báo” kernel rằng schedule code nên được gọi sớm nhất có thể, được thực hiện liên tục khi hệ thống chạy.
 
-Mặt còn lại là kiểm tra hay nhận biết bit có được đặt và nếu có thì gọi `schedule()`; phần sau này – gọi `schedule()` – lưu ý kỹ:
+Mặt còn lại là kiểm tra hoặc nhận biết liệu bit này đã được đặt hay chưa và gọi `schedule()` nếu có. Với phần sau, tức việc gọi `schedule()`, hãy lưu ý kỹ:
 
 - chỉ được thực hiện trong process context, và
 

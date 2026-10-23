@@ -1,6 +1,6 @@
-# Chương 3. Biên dịch Linux kernel 6.x từ mã nguồn – Phần 2
+# Chương 3. Biên dịch Linux kernel 6.x từ source code – Phần 2
 
-Chương này tiếp nối chương trước. Trong phần Các bước biên dịch kernel từ mã nguồn, chúng ta đã thực hiện ba bước đầu: tải và giải nén cây mã nguồn, hoặc dùng `git clone` để lấy mã nguồn (bước 1 và 2). Sau đó, chúng ta tìm hiểu bố cục cây mã nguồn và quan trọng hơn là các cách chọn điểm khởi đầu phù hợp để cấu hình kernel (bước 3). Chúng ta còn thêm mục riêng vào menu cấu hình kernel.
+Chương này tiếp nối chương trước. Trong phần Các bước biên dịch kernel từ source code, chúng ta đã thực hiện ba bước đầu: tải và giải nén source tree, hoặc dùng `git clone` để lấy source code (bước 1 và 2). Sau đó, chúng ta tìm hiểu bố cục source tree và quan trọng hơn là các cách chọn điểm khởi đầu phù hợp để cấu hình kernel (bước 3). Chúng ta còn thêm mục riêng vào menu cấu hình kernel.
 
 Trong chương này, chúng ta tiếp tục với bốn bước còn lại. Đầu tiên là build kernel (bước 4). Sau đó, bạn học cách cài đúng các kernel module được tạo trong quá trình build (bước 5). Tiếp theo, chúng ta chạy một lệnh đơn giản để thiết lập bootloader GRUB (Grand Unified Bootloader) và tạo ảnh `initramfs` (hoặc `initrd`) (bước 6). Lý do sử dụng ảnh `initramfs` và cách tạo nó cũng được giải thích. Cuối cùng là một số chi tiết cấu hình bootloader GRUB cho x86 (bước 7).
 
@@ -26,13 +26,13 @@ Tóm lại, chương này bao gồm:
 
 ## Yêu cầu kỹ thuật
 
-Trước khi bắt đầu, tôi giả định bạn đã tải, giải nén (nếu cần) và cấu hình kernel, tức đã có tệp `.config`. Nếu chưa, xem Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1, để biết cách thực hiện chi tiết. Giờ chúng ta có thể build.
+Trước khi bắt đầu, tôi giả định bạn đã tải, giải nén (nếu cần) và cấu hình kernel, tức đã có tệp `.config`. Nếu chưa, xem Chương 2, Biên dịch Linux kernel 6.x từ source code – Phần 1, để biết cách thực hiện chi tiết. Giờ chúng ta có thể build.
 
 ## Bước 4 – build kernel image và module
 
-Từ góc nhìn người dùng, thao tác build rất đơn giản. Ở dạng đơn giản nhất, chỉ cần đứng tại gốc cây mã nguồn kernel đã cấu hình rồi gõ `make`. Vậy là kernel image, các kernel module và trên hệ nhúng có thể cả tệp nhị phân Device Tree Blob (DTB) sẽ được build. Hãy pha cà phê! Lần đầu có thể mất khá lâu.
+Từ góc nhìn người dùng, thao tác build rất đơn giản. Ở dạng đơn giản nhất, chỉ cần đứng tại gốc kernel source tree đã cấu hình rồi gõ `make`. Vậy là kernel image, các kernel module và trên hệ nhúng có thể cả tệp nhị phân Device Tree Blob (DTB) sẽ được build. Hãy pha cà phê! Lần đầu có thể mất khá lâu.
 
-Tất nhiên, có nhiều `Makefile` target để truyền cho `make`. Chạy nhanh `make help` trên dòng lệnh sẽ thấy nhiều thông tin. Chúng ta đã dùng lệnh này để xem các configuration target (có thể xem lại phần Xem mọi tùy chọn cấu hình sẵn có trong Chương 2, Biên dịch kernel 6.x từ mã nguồn – Phần 1). Ở đây, dùng nó để xem mặc định target `all` build những gì:
+Tất nhiên, có nhiều `Makefile` target để truyền cho `make`. Chạy nhanh `make help` trên dòng lệnh sẽ thấy nhiều thông tin. Chúng ta đã dùng lệnh này để xem các configuration target (có thể xem lại phần Xem mọi tùy chọn cấu hình sẵn có trong Chương 2, Biên dịch kernel 6.x từ source code – Phần 1). Ở đây, dùng nó để xem mặc định target `all` build những gì:
 
 ```
 $ cd ${LKP_KSRC}     # recall that the env var LKP_KSRC holds the pathname to
@@ -54,7 +54,7 @@ $
 
 - `vmlinux` chính là tên tệp kernel image không nén.
 
-- Target `modules` build tất cả tùy chọn cấu hình được đánh dấu `m` (module) thành kernel module (tệp `.ko`) trong cây mã nguồn. Kernel module là gì và cách lập trình chúng là chủ đề của hai chương tiếp theo.
+- Target `modules` build tất cả tùy chọn cấu hình được đánh dấu `m` (module) thành kernel module (tệp `.ko`) trong source tree. Kernel module là gì và cách lập trình chúng là chủ đề của hai chương tiếp theo.
 
 - `bzImage` là tệp kernel image architecture-specific. Trên x86\[\_64\], đây là kernel image nén mà bootloader thực sự nạp vào RAM, giải nén trong bộ nhớ rồi khởi động; về thực chất, đó là tệp kernel image nén.
 
@@ -62,7 +62,7 @@ Câu hỏi thường gặp: nếu `bzImage` là tệp thực sự dùng để bo
 
 Với hệ thống `kbuild` mà kernel sử dụng, chỉ chạy `make` tương đương `make all`.
 
-Cơ sở mã Linux kernel hiện đại rất lớn. Ước tính các kernel gần đây có khoảng 25–30 triệu dòng mã nguồn (SLOC)! Vì thế, build kernel là công việc tiêu tốn nhiều bộ nhớ và CPU-intensive. Một số người còn dùng nó làm stress test! (Không phải mọi dòng mã đều được biên dịch trong một lần build.) Tiện ích `make` hiện đại mạnh mẽ và hỗ trợ multi-process. Ta có thể yêu cầu tạo nhiều process để xử lý song song các phần độc lập, tăng thông lượng và rút ngắn thời gian build. Tùy chọn là `-jn`, với `n` là giới hạn số task được tạo và chạy song song. Quy tắc kinh nghiệm để xác định là:
+Code base Linux kernel hiện đại rất lớn. Ước tính các kernel gần đây có khoảng 25–30 triệu dòng source code (SLOC)! Vì thế, build kernel là công việc tiêu tốn nhiều bộ nhớ và CPU-intensive. Một số người còn dùng nó làm stress test! (Không phải mọi dòng mã đều được biên dịch trong một lần build.) Tiện ích `make` hiện đại mạnh mẽ và hỗ trợ multi-process. Ta có thể yêu cầu tạo nhiều process để xử lý song song các phần độc lập, tăng thông lượng và rút ngắn thời gian build. Tùy chọn là `-jn`, với `n` là giới hạn số task được tạo và chạy song song. Quy tắc kinh nghiệm để xác định là:
 
 ```
 n = number-of-CPU-cores * factor;
@@ -87,7 +87,7 @@ Tiện ích lscpu cũng cho biết số core và các thông tin CPU hữu ích 
 
 Máy ảo khách của tôi có bốn CPU core, nên đặt `n=4*2=8`. Hãy build kernel. Kết quả sau từ máy khách Ubuntu 22.04 LTS x86\_64 quen thuộc, được cấu hình 2 GB RAM và bốn CPU core.
 
-Nhớ rằng kernel phải được cấu hình đúng trước khi build. Xem chi tiết ở Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1.
+Nhớ rằng kernel phải được cấu hình đúng trước khi build. Xem chi tiết ở Chương 2, Biên dịch Linux kernel 6.x từ source code – Phần 1.
 
 Khi bắt đầu, quá trình build có thể phát cảnh báo, dù trường hợp này non-fatal:
 
@@ -198,7 +198,7 @@ Kernel: arch/x86/boot/bzImage is ready  (#3)
 
 Ngoài lề: nói chung cần kiểm tra gì khi build thất bại?
 
-- Kiểm tra kỹ, rồi kiểm tra lại xem đã làm đúng mọi thứ chưa; hãy xem lại mình trước khi trách cộng đồng hay mã kernel!
+- Kiểm tra kỹ, rồi kiểm tra lại xem đã làm đúng mọi thứ chưa; hãy xem lại mình trước khi trách cộng đồng hay kernel code!
 
 - Đã cài đủ gói cần thiết, với phiên bản up-to-date chưa? Ví dụ, nếu cấu hình có `CONFIG_DEBUG_INFO_BTF=y` (của tôi có), cần cài `pahole` 1.16 trở lên.
 
@@ -206,13 +206,13 @@ Ngoài lề: nói chung cần kiểm tra gì khi build thất bại?
 
 - Có phải vấn đề phần cứng? Lỗi như internal compiler error: Segmentation fault thường chỉ điều này; đã cấp đủ RAM và swap space chưa? Thử build trên máy ảo khác, tốt hơn là Linux chạy trực tiếp trên phần cứng.
 
-- Bắt đầu lại từ đầu; ở gốc cây mã nguồn, chạy `make mrproper` (cẩn thận: dọn sạch mọi thứ, kể cả `.config`) rồi thực hiện cẩn thận các bước.
+- Bắt đầu lại từ đầu; ở gốc source tree, chạy `make mrproper` (cẩn thận: dọn sạch mọi thứ, kể cả `.config`) rồi thực hiện cẩn thận các bước.
 
 - Khi mọi cách đều thất bại, hãy tìm thông báo lỗi bằng Google!
 
 Build nên chạy sạch, không lỗi hay cảnh báo. Đôi khi vẫn thấy compiler warning, nhưng ở đây chúng ta sẽ bỏ qua. Nếu gặp compiler error khiến build thất bại thì sao? Nói lịch sự thế nào nhỉ? Có lẽ không thể: rất có thể lỗi ở phía bạn chứ không phải cộng đồng kernel. Hãy kiểm tra lại từng bước, nếu hết cách thì chạy `make mrproper` và làm lại từ đầu! Build kernel thất bại thường do cấu hình sai (chọn tùy tiện các tùy chọn xung đột), toolchain cũ, áp dụng patch sai hoặc nguyên nhân khác. Phần Một số mẹo về build kernel có hướng dẫn cụ thể hơn.
 
-Giả sử bước build đã thành công. Kernel image nén (trên x86\[\_64\] tên là `bzImage`) và tệp không nén `vmlinux` đã được tạo bằng cách liên kết các object file, như dòng cuối kết quả trên xác nhận (#3 nghĩa là với tôi đây là lần build thứ ba). Trong quá trình này, `kbuild` cũng hoàn tất build mọi kernel module.
+Được rồi, chúng ta giả định bước kernel build đã thành công. Kernel image nén, trên x86\[\_64\] có tên `bzImage`, và image không nén, file `vmlinux`, đã được build thành công bằng cách liên kết các object file được tạo ra, như có thể thấy trong output trước đó. Dòng cuối của khối output trước xác nhận điều này; #3 có nghĩa là đối với tôi, đây là lần thứ ba kernel được build. Trong quá trình build, hệ thống `kbuild` cũng tiếp tục hoàn tất việc build tất cả các kernel module.
 
 Mẹo nhanh: để đo thời gian chạy lệnh, thêm `time` trước lệnh (ở đây: `time make -j8 2>&1 | tee out.txt`). Cách này hoạt động, nhưng tiện ích `time(1)` chỉ cung cấp cái nhìn coarse-grained về thời gian thực thi.
 
@@ -220,7 +220,7 @@ Nếu muốn CPU profiling và thống kê thời gian chính xác, hãy học t
 
 Trong kết quả trên, vì build song song qua `make -j8` (tối đa tám process cùng build), mọi process đều ghi vào cùng `stdout` là console hoặc terminal. Vì thế kết quả có thể đảo thứ tự hoặc trộn lẫn.
 
-Giả sử mọi thứ diễn ra tốt như mong đợi, khi bước này kết thúc, `kbuild` đã tạo ba tệp quan trọng trong số nhiều tệp. Ở gốc cây mã nguồn, ta có:
+Giả sử mọi thứ diễn ra tốt như mong đợi, khi bước này kết thúc, `kbuild` đã tạo ba tệp quan trọng trong số nhiều tệp. Ở gốc source tree, ta có:
 
 - Kernel image không nén `vmlinux` (dùng để debug)
 
@@ -239,9 +239,9 @@ vmlinux: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically
 linked, BuildID[sha1]=e4<...>, with debug_info, not stripped
 ```
 
-Tệp `vmlinux` rất lớn vì chứa mọi kernel symbol cùng debug information bổ sung. (Hãy giữ `vmlinux` và `System.map` cho việc debug kernel.) Tiện ích `file` cho biết thêm chi tiết về image này.
+Như bạn có thể thấy, file `vmlinux` rất lớn. Lý do là nó chứa tất cả các kernel symbol cùng thông tin debug bổ sung được encode bên trong. Để bạn biết thêm, các file `vmlinux` và `System.map` được sử dụng khi debug kernel, nên hãy giữ chúng lại. Tiện ích `file` hữu ích cho biết thêm chi tiết về file image này.
 
-Kernel image mà bootloader thực sự nạp và boot luôn nằm tại vị trí chung `arch/<arch>/boot/`; vì thế với x86:
+File kernel image thực sự được bootloader load và boot vào luôn nằm trong vị trí tổng quát `arch/<arch>/boot/`; vì vậy, đối với x86 architecture, chúng ta có như sau:
 
 ```
 $ ls -lh arch/x86/boot/bzImage
@@ -283,19 +283,19 @@ $
 
 Rất tốt.
 
-Kernel có tài liệu về các tùy chỉnh và tùy chọn build bằng biến môi trường, nằm trong cây mã nguồn tại `Documentation/kbuild/kbuild.rst`. Chúng ta sẽ dùng các biến `INSTALL_MOD_PATH`, `ARCH` và `CROSS_COMPILE` trong phần sau.
+Kernel có tài liệu về các tùy chỉnh và tùy chọn build bằng biến môi trường, nằm trong source tree tại `Documentation/kbuild/kbuild.rst`. Chúng ta sẽ dùng các biến `INSTALL_MOD_PATH`, `ARCH` và `CROSS_COMPILE` trong phần sau.
 
 Kernel image và module đã sẵn sàng! Hãy tiếp tục để cài các kernel module ở bước kế tiếp.
 
 ## Bước 5 – cài đặt kernel module
 
-Ở bước trước, mọi tùy chọn đánh dấu `m` – tức các kernel module, tệp `*.ko` – đã được build trong cây mã nguồn. Nhưng như bạn sẽ thấy, vậy chưa đủ: cần cài chúng vào vị trí quy định trên hệ thống. Phần này trình bày chi tiết.
+Ở bước trước, mọi tùy chọn đánh dấu `m` – tức các kernel module, tệp `*.ko` – đã được build trong source tree. Nhưng như bạn sẽ thấy, vậy chưa đủ: cần cài chúng vào vị trí quy định trên hệ thống. Phần này trình bày chi tiết.
 
-### Tìm kernel module trong mã nguồn kernel
+### Tìm kernel module trong kernel source code
 
-Bước trước tạo kernel image nén, không nén và mọi kernel module theo cấu hình. Kernel module là tệp luôn có hậu tố `.ko` (kernel object). Chúng rất hữu ích, cung cấp chức năng kernel theo dạng module (có thể tùy ý nạp vào hoặc gỡ khỏi kernel memory; hai chương sau sẽ đi sâu).
+Như bạn vừa tìm hiểu, bước trước, build kernel image và các module, đã tạo ra cả kernel image nén lẫn không nén, cùng tất cả các kernel module theo kernel config của chúng ta. Kernel module được nhận biết qua các file luôn có hậu tố `.ko`, viết tắt của kernel object. Các module này rất hữu ích vì cung cấp chức năng kernel theo cách modular: chúng ta có thể tùy ý nạp chúng vào hoặc gỡ khỏi kernel memory; hai chương tiếp theo sẽ trình bày rất chi tiết chủ đề này.
 
-Biết rằng bước trước đã sinh các tệp kernel module, hãy dùng lệnh `find` để tìm chúng trong cây mã nguồn:
+Bây giờ, khi đã biết bước trước cũng tạo ra tất cả các file kernel module, chúng ta hãy tìm chúng trong kernel source tree. Để làm vậy, sử dụng lệnh `find` để xác định vị trí của chúng trong kernel source folder:
 
 ```
 $ cd ${LKP_KSRC}
@@ -307,7 +307,7 @@ $ find . -name "*.ko"
 ./fs/vboxsf/vboxsf.ko
 ```
 
-Chỉ build kernel module chưa đủ. Chúng phải được cài vào vị trí well-known trong root filesystem để lúc boot hệ thống tìm thấy và nạp vào kernel memory. Vì vậy cần bước cài module tiếp theo (phần Cài đặt kernel module). Vị trí well-known đó là `/lib/modules/$(uname -r)/`, với `$(uname -r)` cho biết phiên bản kernel.
+Nhưng chỉ build các kernel module là chưa đủ. Vì sao? Chúng cần được cài vào một vị trí well-known trong root filesystem để khi boot, hệ thống thực sự có thể tìm và load chúng vào kernel memory. Đó là lý do chúng ta cần bước tiếp theo, module installation, xem phần Cài đặt kernel module. Vị trí well-known trong root filesystem mà chúng được cài là `/lib/modules/$(uname -r)/`, trong đó `$(uname -r)` trả về số phiên bản kernel.
 
 ### Cài đặt kernel module
 
@@ -354,7 +354,7 @@ Tệp `/lib/modules/<kernel-ver>/modules.builtin` chứa danh sách mọi kernel
 
 #### Thay vị trí cài module mặc định
 
-Điểm quan trọng cuối: có thể cài kernel module vào vị trí tự chỉ định thay cho `/lib/modules/<kernel-ver>` mặc định bằng biến môi trường `INSTALL_MOD_PATH`. Ví dụ, đặt biến `STG_MYKMODS` chứa vị trí muốn cài module, rồi chạy `modules_install`:
+Một điểm quan trọng cuối cùng: trong quá trình kernel build, chúng ta có thể cài kernel module vào một vị trí do mình chỉ định, thay thế vị trí mặc định `/lib/modules/<kernel-ver>`. Điều này được thực hiện bằng cách đặt biến môi trường `INSTALL_MOD_PATH` thành vị trí cần thiết. Ví dụ, ở đây chúng ta thiết lập biến môi trường `STG_MYKMODS` để giữ vị trí muốn cài các kernel module, rồi chạy lệnh `modules_install`:
 
 ```
 export STG_MYKMODS=../staging/rootfs/my_kernel_modules
@@ -412,7 +412,7 @@ Found initrd image: /boot/initrd.img-5.19.0-42-generic
 done
 ```
 
-Một lần nữa, chúng ta thêm `sudo` trước `make install`, vì cần quyền root ghi các tệp và thư mục liên quan vào `/boot` (có thể thuộc root filesystem hoặc một partition riêng).
+Lưu ý rằng một lần nữa, chúng ta thêm `sudo` trước lệnh `make install`. Rõ ràng, lý do là cần quyền root để ghi các file và folder liên quan; chúng được ghi vào folder `/boot`, có thể được thiết lập như một phần của root filesystem hoặc như một partition riêng.
 
 Nếu không muốn lưu sản phẩm đầu ra – ảnh initramfs và tệp bootloader – trong `/boot` thì sao? Có thể đổi thư mục đích bằng biến môi trường `INSTALL_PATH`; điều này thường gặp khi build Linux cho hệ nhúng. Tài liệu kernel đề cập tại `https://docs.kernel.org/kbuild/kbuild.html#install-path`.
 
@@ -422,7 +422,7 @@ Bước này đã tạo ảnh `initramfs`. Vậy bên trong `kbuild` đã làm g
 
 ### Bên trong quá trình tạo ảnh initramfs
 
-Khi chạy `sudo make install` trên x86, Makefile của kernel gọi script `scripts/install.sh`. Đây là wrapper script duyệt qua các script cài đặt arch-specific và chạy chúng với tham số phù hợp nếu có. Cụ thể, các vị trí script arch-specific được kiểm tra theo thứ tự:
+Khi bạn chạy lệnh `sudo make install` trên x86, bên trong, Makefile của kernel gọi script `scripts/install.sh`. Đây là wrapper script duyệt qua tất cả các script cài đặt arch-specific có thể tồn tại hoặc không và chạy chúng với tham số thích hợp nếu có. Chính xác hơn, dưới đây là những vị trí có thể chứa các script arch-specific sẽ được thực thi nếu tồn tại, theo thứ tự này:
 
 - `${HOME}/bin/${INSTALLKERNEL}`
 
@@ -456,7 +456,7 @@ Khi tạo xong, ảnh `initramfs` cũng được chép vào `/boot`, thể hiệ
 
 Nếu tệp sắp chép vào `/boot` đã tồn tại, nó được sao lưu thành `<filename>-$(uname -r).old`. Tệp `vmlinuz-<kernel-ver>-kernel` là bản sao của `arch/x86/boot/bzImage`. Nói cách khác, đây là kernel image nén mà bootloader được cấu hình để nạp vào RAM, giải nén rồi nhảy đến entry point, trao quyền điều khiển cho kernel!
 
-Vì sao có tên `vmlinux` (kernel image không nén ở gốc cây mã nguồn) và `vmlinuz?` Đây là quy ước Unix cũ mà Linux tiếp nối: trên nhiều biến thể Unix, kernel tên `vmunix`, nên Linux gọi là `vmlinux`, còn bản nén là `vmlinuz`; chữ `z` trong `vmlinuz` gợi đến nén `gzip` mặc định. Tuy nhiên, dùng `gzip` nén kernel hiện đại đã khá lỗi thời; x86 hiện đại mặc định dùng ZSTD tốt hơn, nhanh hơn, dù quy ước tên vẫn giữ nguyên.
+Vì sao có tên `vmlinux` (kernel image không nén ở gốc source tree) và `vmlinuz?` Đây là quy ước Unix cũ mà Linux tiếp nối: trên nhiều biến thể Unix, kernel tên `vmunix`, nên Linux gọi là `vmlinux`, còn bản nén là `vmlinuz`; chữ `z` trong `vmlinuz` gợi đến nén `gzip` mặc định. Tuy nhiên, dùng `gzip` nén kernel hiện đại đã khá lỗi thời; x86 hiện đại mặc định dùng ZSTD tốt hơn, nhanh hơn, dù quy ước tên vẫn giữ nguyên.
 
 Tệp cấu hình GRUB `/boot/grub/grub.cfg` cũng được cập nhật để nhận biết kernel mới có thể boot.
 
@@ -504,7 +504,7 @@ Trong thực tế, framework này cho phép thực hiện nhiều việc hữu �
 
 - Và nhiều việc khác!
 
-Giả sử bạn xây dựng và bảo trì một distro Linux mới. Lúc cài đặt, người dùng có thể chọn định dạng SSD bằng f2fs (fast flash filesystem). Bạn không thể biết trước họ chọn filesystem nào trong rất nhiều loại. Vì thế, bạn pre-build và cung cấp nhiều kernel module để đáp ứng gần như mọi khả năng. Sau khi cài xong và boot, trong tình huống này kernel cần module `f2fs.ko` để mount thành công root filesystem f2fs rồi tiếp tục.
+Hãy tưởng tượng bạn đang xây dựng và bảo trì một Linux distribution mới. Khi cài đặt, người dùng cuối có thể quyết định định dạng SSD bằng filesystem f2fs, viết tắt của fast flash filesystem. Vấn đề là bạn không thể biết trước chính xác lựa chọn của người dùng cuối; họ có thể chọn bất kỳ filesystem nào trong rất nhiều loại. Vì vậy, bạn quyết định pre-build và cung cấp nhiều kernel module để đáp ứng gần như mọi khả năng. Khi cài đặt hoàn tất và hệ thống của người dùng boot, trong tình huống này, kernel cần kernel module `f2fs.ko` để mount thành công root filesystem f2fs và tiếp tục quá trình boot.
 
 ![Hình 3.1](images/ch03/fig03-01.jpg)
 
@@ -576,7 +576,7 @@ Bạn đang dùng laptop có đĩa không mã hóa? Điều đó không tốt: n
 
 Top 10 file and disk encryption tools for Linux, tháng 1 năm 2022: `https://www.fosslinux.com/50005/top-10-file-and-disk-encryption-tools-for-linux.htm,` và Best File \& Disk Encryption Tools for Linux, Day, tháng 5 năm 2022: `https://linuxsecurity.com/features/top-8-file-and-disk-encryption-tools-for-linux`.
 
-Với hệ thống có filesystem mã hóa, từ khá sớm trong boot process kernel phải hỏi mật khẩu, nếu đúng thì giải mã và mount đĩa, v.v.
+Giả sử một hệ thống có các filesystem được mã hóa, từ khá sớm trong boot process, kernel phải yêu cầu người dùng nhập mật khẩu và, nếu đúng, tiếp tục giải mã, mount các đĩa, v.v.
 
 Nhưng làm sao chạy chương trình C hỏi mật khẩu khi chưa có C runtime environment: root filesystem chứa library, loader (ld-linux...), kernel module cần thiết (có thể để hỗ trợ crypto), v.v.?
 
@@ -662,17 +662,17 @@ Bài tập
 
 Lấy ảnh initramfs hiện có, giải ra rồi tùy chỉnh để thêm ứng dụng hoặc script mới, có thể chạy qua một startup script.
 
-Ví dụ như đã nói, bảo mật là yếu tố then chốt trên hệ thống hiện đại; mã hóa đĩa ở block level là tính năng mạnh và đòi hỏi tùy chỉnh ảnh `initramfs`. Phần Đọc thêm có liên kết về mã hóa đĩa.
+Ví dụ, như đã đề cập trước đó, bảo mật là yếu tố then chốt trên các hệ thống hiện đại, và khả năng mã hóa đĩa ở block level là một tính năng bảo mật mạnh. Thực hiện điều này liên quan đáng kể đến việc tùy chỉnh image `initramfs`. Một lần nữa, phần Đọc thêm có các link hướng dẫn mã hóa đĩa.
 
 Giờ hãy hoàn tất quy trình build kernel x86\_64 bằng một số tùy chỉnh đơn giản cho boot script của bootloader GRUB x86.
 
 ## Bước 7 – tùy chỉnh bootloader GRUB
 
-Chúng ta đã hoàn thành bước 1 đến 6 trong phần Các bước biên dịch kernel từ mã nguồn ở Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1. Giờ có thể reboot; trước tiên hãy lưu và đóng mọi ứng dụng, tệp. Mặc định GRUB hiện đại thậm chí không hiển thị menu khi reboot mà boot thẳng kernel mới build (ở đây chỉ mô tả Ubuntu trên x86\[\_64\]; kernel mặc định cũng có thể khác theo distro).
+Chúng ta đã hoàn thành bước 1 đến 6 trong phần Các bước biên dịch kernel từ source code ở Chương 2, Biên dịch Linux kernel 6.x từ source code – Phần 1. Giờ có thể reboot; trước tiên hãy lưu và đóng mọi ứng dụng, tệp. Mặc định GRUB hiện đại thậm chí không hiển thị menu khi reboot mà boot thẳng kernel mới build (ở đây chỉ mô tả Ubuntu trên x86\[\_64\]; kernel mặc định cũng có thể khác theo distro).
 
-Trên x86\[\_64\], có thể vào menu GRUB lúc đầu boot bằng cách giữ Shift. Hành vi còn phụ thuộc yếu tố khác: với firmware UEFI/BIOS mới hoặc máy ảo lồng nhau, có thể cần cách khác để force-see menu (thử cả Esc).
+Trên x86\[\_64\], bạn luôn có thể vào menu GRUB trong giai đoạn đầu system boot. Chỉ cần bảo đảm giữ phím Shift trong khi boot. Tuy nhiên, hành vi này còn phụ thuộc vào các yếu tố khác: trên hệ thống bật firmware UEFI/BIOS mới hơn hoặc khi chạy trong nested VM, bạn có thể cần những cách khác để buộc menu GRUB hiển thị khi boot, tức force-see; hãy thử nhấn cả Esc.
 
-Nếu muốn xem và tùy chỉnh GRUB mỗi lần boot, để chọn kernel/hệ điều hành khác hoặc truyền kernel parameter thì sao? Điều này rất hữu ích khi phát triển, debug; hãy xem cách làm.
+Nếu chúng ta muốn xem và tùy chỉnh menu GRUB mỗi lần boot hệ thống, từ đó có thể chọn một kernel hoặc hệ điều hành khác để boot, hoặc thậm chí truyền thêm một số kernel parameter, thì sao? Điều này thường rất hữu ích trong quá trình phát triển và debug, nên hãy tìm hiểu cách thực hiện.
 
 ### Tùy chỉnh GRUB – cơ bản
 
@@ -682,7 +682,7 @@ Tùy chỉnh GRUB khá dễ: có thể sửa tệp `/etc/default/grub` với quy
 
 - Quy trình này chỉ được kiểm thử, xác minh trên máy khách Ubuntu 22.04 LTS x86\_64 của chúng ta.
 
-Mục tiêu là GRUB hiển thị menu lúc boot trước khi chạy hệ điều hành, cho phép tùy chỉnh thêm. Các bước nhanh như sau:
+Vậy chính xác chúng ta đang muốn làm gì ở đây? Chúng ta muốn GRUB hiển thị menu khi boot, trước khi chạy hệ điều hành yêu thích, cho phép tùy chỉnh thêm. Dưới đây là một chuỗi bước ngắn để thực hiện việc này:
 
 1\. Để an toàn, trước tiên sao lưu tệp cấu hình bootloader GRUB:
 
@@ -730,7 +730,7 @@ Nếu có chỉ thị `GRUB_HIDDEN_TIMEOUT` trong tệp, hãy biến nó thành 
 sudo update-grub
 ```
 
-Lệnh trên thường khiến ảnh `initramfs` được tạo lại. Khi xong, bạn đã sẵn sàng reboot. Nhưng hãy chờ: phần tiếp theo hướng dẫn đổi cấu hình GRUB để mặc định boot kernel bạn chọn.
+Lệnh trước thường khiến image `initramfs` được làm mới, tức được tạo lại. Khi hoàn tất, bạn đã sẵn sàng reboot hệ thống. Tuy nhiên, hãy đợi một chút! Phần tiếp theo trình bày cách sửa configuration của GRUB để mặc định boot vào kernel mà bạn chọn.
 
 ### Chọn kernel mặc định để boot
 
@@ -809,7 +809,7 @@ Hình 3.5: Menu Advanced options… của GRUB2 hiển thị các kernel có th�
 
 Kernel boot mặc định, ở đây là `6.1.25-lkp-kernel`, được đánh dấu sẵn bằng dấu sao (`*`).
 
-Ảnh trên có vài mục “thêm” vì lúc chụp tôi đã build kernel 6.1.25 vài lần, bản trước được lưu thành mục “`.old`”. Cập nhật Ubuntu cũng cài thêm distro kernel mới. Ta thấy 5.19.0-43-generic và bản trước đó; ở đây bỏ qua chúng.
+Ảnh chụp màn hình trước có thêm một vài dòng. Lý do là tại thời điểm chụp, tôi đã build kernel 6.1.25 vài lần, khiến bản trước được lưu thành mục “`.old`”; ngoài ra, việc cập nhật Ubuntu cũng dẫn đến cài các distro kernel mới hơn. Chúng ta có thể thấy kernel 5.19.0-43-generic và phiên bản trước của nó. Không sao cả; ở đây chúng ta bỏ qua chúng.
 
 Để có ví dụ khác, đây là menu chọn boot trên UEFI-based (máy Dell x86\_64 này dùng F12 để hiện boot menu). Chú ý giao diện đồ họa phong phú và hỗ trợ con trỏ chuột:
 
@@ -817,7 +817,7 @@ Kernel boot mặc định, ở đây là `6.1.25-lkp-kernel`, được đánh d�
 
 Hình 3.6: Menu chọn boot trên PC x86\_64 UEFI-based
 
-4\. Trở lại máy ảo Ubuntu x86 với GRUB: chọn mục cần dùng, ở đây là kernel 6.1 LTS mới với nhãn `*Ubuntu, with Linux 6.1.25-lkp-kernel` (Hình 3.5). Nó là dòng đầu vì vừa được thêm gần nhất vào menu hệ điều hành boot được. 5. Nhấn Enter tại mục đó. Bootloader giải nén và nạp kernel cùng initramfs (hoặc `initrd`) vào RAM rồi nhảy đến Linux kernel entry point, trao quyền điều khiển cho Linux!
+4\. Được rồi, trở lại Ubuntu VM x86 với GRUB: trong mọi trường hợp, chỉ cần cuộn đến và chọn entry mong muốn, ở đây là kernel 6.1 LTS mới với menu entry có nhãn `*Ubuntu, with Linux 6.1.25-lkp-kernel`, như trong Hình 3.5. Ở đây, nó là dòng đầu tiên của menu GRUB vì là mục mới được thêm gần nhất vào menu các hệ điều hành có thể boot. 5. Sau khi chọn menu item đó, nhấn Enter và thế là xong! Bootloader tiếp tục thực hiện công việc: giải nén và load các image kernel cùng initramfs, hoặc `initrd`, vào RAM, rồi nhảy đến entry point của Linux kernel, trao quyền điều khiển cho Linux!
 
 Nếu mọi thứ tốt như mong đợi, bạn đã boot Linux kernel 6.1.25 LTS brand-new! Chúc mừng bạn hoàn thành công việc!
 
@@ -825,7 +825,7 @@ Bạn còn có thể làm thêm: phần sau chỉ cách sửa và tùy chỉnh G
 
 ### Thử nghiệm với lời nhắc GRUB
 
-Thay vì chỉ nhấn Enter tại mục `Ubuntu, with Linux` `6.1.25-lkp-kernel`, hãy chọn dòng rồi nhấn e (edit). Bạn sẽ vào màn hình chỉnh sửa GRUB, có thể sửa các giá trị. Đây là ảnh sau khi nhấn e:
+Bạn có thể thử nghiệm thêm: thay vì chỉ nhấn Enter khi đang ở menu entry `Ubuntu, with Linux` `6.1.25-lkp-kernel`, hãy bảo đảm dòng này được chọn rồi nhấn phím e, viết tắt của edit. Khi đó, chúng ta vào màn hình chỉnh sửa của GRUB, nơi có thể tự do chỉnh các giá trị mong muốn. Dưới đây là ảnh chụp màn hình sau khi nhấn phím e:
 
 ![Hình 3.7](images/ch03/fig03-07.jpg)
 
@@ -841,7 +841,7 @@ Hãy thử vài thao tác:
 
 Câu hỏi thường gặp: quên mật khẩu nên không đăng nhập được thì sao? Có nhiều cách xử lý. Một cách là thử đặt lại qua bootloader; hãy xem như bài thực hành nhỏ.
 
-- Bài tập 2: Boot vào menu GRUB như trước, chọn mục kernel, nhấn e, cuộn đến dòng `linux`, thêm `single` (hoặc số `1`) vào cuối để được:
+- Bài tập 2: Boot vào menu GRUB như đã thực hiện, chuyển đến menu entry của kernel thích hợp, nhấn e để chỉnh sửa, cuộn xuống dòng bắt đầu bằng `linux` và thêm từ `single`, hoặc chỉ số `1`, vào cuối entry để nó có dạng như sau:
 
 ```
                linux       /vmlinuz-6.1.25-lkp-kernel root=UUID=<...> ro
@@ -875,7 +875,7 @@ x86_64
 GNU/Linux
 ```
 
-Nhớ lại phần Ví dụ sử dụng giao diện make menuconfig trong Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1, nơi chúng ta thay đổi vài cấu hình để luyện tập.
+Nhớ lại phần Ví dụ sử dụng giao diện make menuconfig trong Chương 2, Biên dịch Linux kernel 6.x từ source code – Phần 1, nơi chúng ta thay đổi vài cấu hình để luyện tập.
 
 Giờ kiểm tra từng thay đổi đã có hiệu lực. Liệt kê theo tên `CONFIG_'FOO'` liên quan:
 
@@ -885,7 +885,7 @@ Giờ kiểm tra từng thay đổi đã có hiệu lực. Liệt kê theo tên 
 
 - `CONFIG_HZ`: Chúng ta thử đặt thành 300.
 
-Hãy kiểm tra bằng script `extract-ikconfig` của kernel (nhớ đặt biến môi trường `LKP_KSRC` trỏ đến gốc cây mã nguồn kernel 6.1):
+Hãy kiểm tra bằng script `extract-ikconfig` của kernel (nhớ đặt biến môi trường `LKP_KSRC` trỏ đến gốc kernel source tree 6.1):
 
 ```
 $ ${LKP_KSRC}/scripts/extract-ikconfig /boot/vmlinuz-6.1.25-lkp-kernel
@@ -897,7 +897,7 @@ CONFIG_HZ_300=y
  [...]
 ```
 
-Đã hoạt động! Ta xem toàn bộ cấu hình qua `scripts/extract-ikconfig` vì đã bật `CONFIG_IKCONFIG[_PROC]`. Dùng chính script này cùng `grep` để kiểm tra các cấu hình còn lại đã thay trong phần Ví dụ sử dụng giao diện make menuconfig ở Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1:
+Đã hoạt động! Ta xem toàn bộ cấu hình qua `scripts/extract-ikconfig` vì đã bật `CONFIG_IKCONFIG[_PROC]`. Dùng chính script này cùng `grep` để kiểm tra các cấu hình còn lại đã thay trong phần Ví dụ sử dụng giao diện make menuconfig ở Chương 2, Biên dịch Linux kernel 6.x từ source code – Phần 1:
 
 ```
 $ scripts/extract-ikconfig /boot/vmlinuz-6.1.25-lkp-kernel | grep -E
@@ -912,15 +912,15 @@ CONFIG_HZ_300=y
 CONFIG_HZ=300
 ```
 
-Xem kỹ kết quả, ta nhận đúng mọi giá trị mong muốn. Cấu hình kernel mới khớp chính xác thiết lập trong phần Ví dụ sử dụng giao diện make menuconfig của Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1. Hoàn hảo.
+Xem kỹ kết quả, ta nhận đúng mọi giá trị mong muốn. Cấu hình kernel mới khớp chính xác thiết lập trong phần Ví dụ sử dụng giao diện make menuconfig của Chương 2, Biên dịch Linux kernel 6.x từ source code – Phần 1. Hoàn hảo.
 
-Hoặc vì bật `CONFIG_IKCONFIG_PROC`, có thể kiểm tra tương tự bằng mục proc filesystem nén `/proc/config.gz`:
+Một cách khác là vì đã bật tùy chọn `CONFIG_IKCONFIG_PROC`, chúng ta có thể thực hiện cùng phép kiểm tra bằng cách tra kernel config qua entry đã nén trong proc filesystem, `/proc/config.gz`, như sau:
 
 ```
 gunzip -c /proc/config.gz | grep -E "LOCALVERSION|CONFIG_HZ"
 ```
 
-Build kernel đã hoàn tất! Hãy xem lại phần Các bước biên dịch kernel từ mã nguồn ở Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1, để nắm high-level quy trình. Tiếp theo là phần thú vị: cross-compile kernel cho bo Raspberry Pi.
+Vậy là kernel build đã hoàn tất! Tuyệt vời. Tôi khuyên bạn xem lại Chương 2, Build Linux kernel 6.x từ source – Phần 1, trong phần Các bước build kernel từ source, để một lần nữa xem tổng quan high-level về các bước của toàn bộ quy trình. Bây giờ, chuyển sang một phần khá thú vị: trong phần tiếp theo, chúng ta sẽ học cách cross-compile kernel cho board Raspberry Pi.
 
 ## Build kernel cho Raspberry Pi
 
@@ -942,13 +942,13 @@ Cần cross-compiler x86\_64-to-AArch64 64 bit để build kernel hay bất kỳ
 
 Các phần tiếp theo chia công việc thành ba bước:
 
-1\. Bước 1 – clone cây mã nguồn kernel Raspberry Pi. 2. Bước 2 – cài cross-toolchain x86\_64-to-AArch64. 3. Bước 3 – cấu hình và build kernel Raspberry Pi AArch64.
+1\. Bước 1 – clone kernel source tree Raspberry Pi. 2. Bước 2 – cài cross-toolchain x86\_64-to-AArch64. 3. Bước 3 – cấu hình và build kernel Raspberry Pi AArch64.
 
 Hãy bắt đầu!
 
-### Bước 1 – clone cây mã nguồn kernel Raspberry Pi
+### Bước 1 – clone kernel source tree Raspberry Pi
 
-Chọn một staging folder, nơi build cây mã nguồn kernel Raspberry Pi và đặt cross-toolchain, rồi gán vào biến môi trường để tránh hardcode:
+Chọn một staging folder, nơi build kernel source tree Raspberry Pi và đặt cross-toolchain, rồi gán vào biến môi trường để tránh hardcode:
 
 1\. Thiết lập workspace. Đặt biến môi trường `RPI_STG` trỏ đến staging folder nơi làm việc (không bắt buộc đúng tên này; chọn tên reasonable-sounding rồi dùng nhất quán). Hãy chọn giá trị phù hợp hệ thống; tôi dùng `~/rpi_work`:
 
@@ -957,9 +957,9 @@ export RPI_STG=~/rpi_work
 mkdir -p ${RPI_STG}/kernel_rpi
 ```
 
-Bảo đảm đủ dung lượng: cây Git kernel Raspberry Pi chiếm khoảng 1,7 GB, toolchain đơn giản chỉ hơn 40 MB. Cần ít nhất 3–4 GB để làm việc. Nếu build image thành gói Deb như phần sau, cần thêm ít nhất 1 GB; tốt nhất để trống khoảng 7–8 GB cho an toàn.
+Hãy bảo đảm có đủ dung lượng đĩa trống: Raspberry Pi Git kernel source tree chiếm khoảng 1.7 GB, còn toolchain đơn giản hơn chỉ chiếm hơn 40 MB một chút. Bạn cần ít nhất 3 đến 4 GB không gian làm việc. Ngoài ra, nếu build các image thành package Deb, như chúng ta sẽ trình bày ngay sau đây, cần ít nhất 1 GB dung lượng đĩa nữa. Tốt nhất nên giữ khoảng 7 đến 8 GB dung lượng đĩa trống để an toàn.
 
-2\. Tải cây mã nguồn kernel Pi-specific bằng cách clone kho GitHub kernel chính thức của Raspberry Pi tại `https://github.com/raspberrypi/linux/`:
+2\. Tải kernel source tree Pi-specific bằng cách clone kho GitHub kernel chính thức của Raspberry Pi tại `https://github.com/raspberrypi/linux/`:
 
 ```
 cd ${RPI_STG}/kernel_rpi
@@ -967,13 +967,13 @@ git clone --depth=1 --branch=rpi-6.1.y \
   https://github.com/raspberrypi/linux.git
 ```
 
-Cây mã nguồn được clone vào thư mục `linux/`, tức `${RPI_STG}/kernel_rpi/linux`, có thể mất một lúc. Chú ý lệnh trên:
+Kernel source tree được clone vào folder có tên `linux/`, tức `${RPI_STG}/kernel_rpi/linux`. Việc này có thể mất một lúc. Lưu ý rằng trong lệnh trước đó, chúng ta có những thành phần sau:
 
 - Nhánh kernel Raspberry Pi được chọn không phải mới nhất (lúc viết mới nhất là dòng rpi-6.8.y), mà là kernel 6.1. Hoàn toàn phù hợp vì 6.1.y là LTS kernel và khớp với kernel x86 của chúng ta!
 
 - Truyền `--depth` bằng `1` cho `git clone` để giảm tải xuống và giải nén.
 
-Cây mã nguồn kernel Raspberry Pi đã có. Hãy kiểm tra nhanh:
+Kernel source tree Raspberry Pi đã có. Hãy kiểm tra nhanh:
 
 ```
 $ cd ${RPI_STG}/kernel_rpi/linux ; head -n5 Makefile
@@ -1037,7 +1037,7 @@ Có thể dùng toolchain khác. Ví dụ trang ARM developer cung cấp nhiều
 
 Giờ cấu hình kernel cho Raspberry Pi 4. Trước khi bắt đầu, cần ghi nhớ:
 
-- Biến môi trường `ARCH` phải là kiến trúc CPU mà phần mềm được cross-compiled để chạy trên đó. Giá trị chính xác của `ARCH` là tên thư mục dưới `arch/` trong cây mã nguồn. Ví dụ đặt `ARCH` bằng `arm` cho ARM-32, `arm64` cho AArch64, `powerpc` cho PowerPC và `openrisc` cho OpenRISC.
+- Biến môi trường `ARCH` phải là kiến trúc CPU mà phần mềm được cross-compiled để chạy trên đó. Giá trị chính xác của `ARCH` là tên thư mục dưới `arch/` trong source tree. Ví dụ đặt `ARCH` bằng `arm` cho ARM-32, `arm64` cho AArch64, `powerpc` cho PowerPC và `openrisc` cho OpenRISC.
 
 - Biến môi trường `CROSS_COMPILE` phải là cross-compiler/toolchain prefix, tức các ký tự chung đứng trước tên mọi tiện ích. Ví dụ, C compiler `gcc`, linker, C++, `objdump`, v.v. đều bắt đầu bằng `aarch64-linux-gnu-` (Hình 3.8), nên đặt `CROSS_COMPILE` bằng chuỗi đó. `Makefile` luôn gọi `${CROSS_COMPILE}<utility>` để chạy đúng công cụ. Điều này yêu cầu thư mục toolchain nằm trong `PATH`.
 
@@ -1052,7 +1052,7 @@ KERNEL=kernel8
 make ARCH=arm64 bcm2711_defconfig
 ```
 
-Kết quả là cấu hình mặc định lưu trong `.config`. Về configuration target `bcm2711_defconfig`: như phần Cấu hình kernel cho hệ thống Linux nhúng điển hình trong Chương 2, Biên dịch Linux kernel 6.x từ mã nguồn – Phần 1, phải dùng tệp cấu hình board-specific phù hợp làm điểm khởi đầu. Ở đây `bcm2711_defconfig` là tệp đúng cho Broadcom SoC (System on Chip) trên Raspberry Pi 3, 3+, 4, 400, Zero 2 W và Raspberry Pi compute module 3, 3+, 4 để tạo cấu hình build 64 bit mặc định.
+Kết quả là cấu hình mặc định lưu trong `.config`. Về configuration target `bcm2711_defconfig`: như phần Cấu hình kernel cho hệ thống Linux nhúng điển hình trong Chương 2, Biên dịch Linux kernel 6.x từ source code – Phần 1, phải dùng tệp cấu hình board-specific phù hợp làm điểm khởi đầu. Ở đây `bcm2711_defconfig` là tệp đúng cho Broadcom SoC (System on Chip) trên Raspberry Pi 3, 3+, 4, 400, Zero 2 W và Raspberry Pi compute module 3, 3+, 4 để tạo cấu hình build 64 bit mặc định.
 
 (Quan trọng: nếu build cho Raspberry Pi loại khác, xem `https://www.raspberrypi.org/documentation/linux/kernel/building.md`.)
 
@@ -1111,7 +1111,7 @@ Mục đích ở đây là minh họa cấu hình và build Linux kernel cho ki�
 
 ## Một số mẹo về build kernel
 
-Chương về build Linux kernel từ mã nguồn kết thúc với vài mẹo, vì mọi thứ không phải lúc nào cũng trơn tru như mong muốn. Mỗi phần nhỏ sau trình bày một mẹo cần lưu ý.
+Chương về build Linux kernel từ source code kết thúc với vài mẹo, vì mọi thứ không phải lúc nào cũng trơn tru như mong muốn. Mỗi phần nhỏ sau trình bày một mẹo cần lưu ý.
 
 Người mới thường nhầm ở điểm này: sau khi cấu hình, build và boot Linux kernel mới, root filesystem và mọi filesystem đã mount vẫn giống trên hệ thống gốc, dù distro hay tùy chỉnh. Chỉ kernel và ảnh initramfs thay đổi.
 
@@ -1203,7 +1203,7 @@ dpkg-buildpackage: info: binary-only upload (no source included)
 $
 ```
 
-Thư mục `debian` được tạo và điền đầy đủ nội dung trong cây kernel (dùng tree để xem). Các tệp package thực tế được ghi vào thư mục ngay trên thư mục mã nguồn kernel. Ví dụ, lệnh vừa chạy tạo các gói `deb` sau:
+Thư mục `debian` được tạo và điền đầy đủ nội dung trong cây kernel (dùng tree để xem). Các tệp package thực tế được ghi vào thư mục ngay trên thư mục kernel source code. Ví dụ, lệnh vừa chạy tạo các gói `deb` sau:
 
 ![Hình 3.9](images/ch03/fig03-09.jpg)
 
@@ -1213,7 +1213,7 @@ Rất tiện lợi! Giờ có thể cài package, tức kernel mới cùng heade
 
 ### Theo dõi quá trình build kernel
 
-Để xem chi tiết lệnh, script, GCC compiler flag, v.v. trong lúc build, truyền tùy chọn verbose `V=1` cho `make`. Dưới đây là một phần kết quả build kernel Raspberry Pi 4 khi bật verbose (tôi thêm dòng mới và ký tự nối dòng để dễ đọc):
+Để xem chi tiết các lệnh và script được thực thi, các GCC compiler flag cụ thể, v.v. trong khi kernel build chạy, hãy truyền tùy chọn verbose `V=1` cho `make`. Dưới đây là một phần output khi build kernel cho Raspberry Pi 4 với tùy chọn verbose được bật. Tôi đã thêm các dòng mới và ký tự nối dòng để output dễ đọc hơn:
 
 ```
 $ make -j8 V=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all
@@ -1264,7 +1264,7 @@ r8169_main.c
 
 Mức chi tiết này giúp debug build thất bại hoặc tìm hiểu compiler option được dùng! Lúc này trang man GCC sẽ hữu ích.
 
-Tất nhiên có thể vừa xem kết quả trên terminal vừa chuyển vào tệp bằng shell và `tee`. Ví dụ lưu vào `out.txt` trong khi vẫn xem:
+Dĩ nhiên, có thể đồng thời xem output trên cửa sổ terminal và chuyển hướng nó vào file bằng shell và `tee`. Ví dụ, bạn có thể thực hiện như sau để lưu output vào file có tên `out.txt` trong khi vẫn nhìn thấy output:
 
 ```
 make -j8 V=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all 2>&1 | tee out.txt
@@ -1274,7 +1274,7 @@ Dùng `tee -a <filename>` để nối kết quả vào tệp chỉ định thay 
 
 ### Cú pháp shell rút gọn cho quy trình build
 
-Giả sử đã cài đủ gói, cấu hình kernel xong và đang trên x86, có thể dùng cú pháp shell (thường Bash) rút gọn như sau, chẳng hạn trong build script non-interactive:
+Một cú pháp shell rút gọn cho quá trình build, thường là Bash, có thể giống ví dụ sau, với giả định đã cài các package cần thiết, hoàn thành bước kernel configuration và đang sử dụng x86. Cú pháp này có thể được sử dụng trong các build script non-interactive:
 
 ```
 time make -j8 [ARCH=<...> CROSS_COMPILE=<...>] all && \
@@ -1328,15 +1328,15 @@ Cuối cùng, hãy nhớ cách gần như luôn hữu ích: khi không sửa đ�
 
 ## Tổng kết
 
-Chương này cùng chương trước trình bày chi tiết kiến thức chuẩn bị và cách cấu hình, build Linux kernel từ mã nguồn.
+Chương này cùng chương trước trình bày chi tiết kiến thức chuẩn bị và cách cấu hình, build Linux kernel từ source code.
 
-Chương này bắt đầu bằng build kernel và kernel module thực tế. Sau đó là cài module lên hệ thống, thực hành tạo ảnh `initramfs` (hoặc `initrd`) và giải thích lý do sử dụng.
+Trong chương này, chúng ta bắt đầu với quá trình build kernel và các kernel module thực tế. Sau khi build xong, chúng ta trình bày cách cài các kernel module lên hệ thống. Sau đó, chúng ta chuyển sang thực hành tạo image `initramfs`, hoặc `initrd`, rồi giải thích lý do cần đến nó.
 
-Bước cuối là tùy chỉnh đơn giản bootloader, ở đây chỉ tập trung GRUB trên x86. Tiếp đó, chúng ta boot kernel mới, kiểm tra cấu hình như mong đợi. Phần add-on hữu ích hướng dẫn cross-compile Linux kernel cho CPU khác, ở đây là AArch64. Cuối cùng là các mẹo hỗ trợ build.
+Bước cuối trong kernel build là tùy chỉnh bootloader một cách đơn giản; ở đây, chúng ta chỉ tập trung vào GRUB trên x86. Sau đó, chúng ta trình bày cách boot hệ thống bằng kernel vừa build và xác minh configuration đúng như mong đợi. Như một phần add-on hữu ích, chúng ta còn trình bày cách cross-compile Linux kernel cho một processor khác, trong trường hợp này là AArch64. Cuối cùng, chúng ta chia sẻ một số mẹo bổ sung để hỗ trợ kernel build.
 
 Nếu chưa thực hiện, hãy xem lại kỹ, thử các quy trình và build Linux kernel tùy chỉnh của riêng mình.
 
-Chúc mừng bạn đã build Linux kernel từ đầu! Trong dự án hay sản phẩm thực tế, có thể không cần tự làm mọi bước đã hướng dẫn. Vì sao? Có thể nhóm platform/BSP riêng phụ trách; hoặc ngày càng phổ biến, nhất là Linux nhúng, dự án dùng framework Linux-builder như Yocto/Buildroot, hay kernel tùy chỉnh SoC vendor-supplied. Yocto thường lo các thao tác build lặp lại, dù học Yocto không hẳn dễ. Tuy vậy, bạn vẫn cần cấu hình kernel theo yêu cầu dự án; việc đó đòi hỏi kiến thức và hiểu biết đã học ở đây.
+Vậy là chúc mừng bạn đã hoàn tất build Linux kernel từ đầu! Với một dự án hoặc sản phẩm thực tế, bạn có thể không cần thực hiện từng bước của quy trình kernel build mà chúng tôi đã cố gắng trình bày cẩn thận. Vì sao? Một lý do là có thể có nhóm platform/BSP riêng phụ trách phần việc này. Một lý do khác, ngày càng phổ biến nhất là trong dự án embedded Linux, là dự án sử dụng framework Linux-builder như Yocto hoặc Buildroot, hoặc bạn sử dụng custom kernel do SoC vendor-supplied. Yocto thường đảm nhiệm các thao tác build mang tính quy trình, mặc dù học Yocto không hẳn dễ dàng. Tuy nhiên, bạn vẫn cần có khả năng cấu hình kernel theo yêu cầu dự án; điều đó vẫn đòi hỏi kiến thức và hiểu biết thu được ở đây.
 
 Hai chương tiếp theo đưa bạn trực tiếp vào thế giới phát triển Linux kernel, hướng dẫn viết kernel module đầu tiên.
 

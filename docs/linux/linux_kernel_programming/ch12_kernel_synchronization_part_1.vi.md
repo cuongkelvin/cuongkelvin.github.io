@@ -689,7 +689,7 @@ Trong human-interactive application có driver bên dưới, theo quy tắc kinh
 
 Có design rule thường theo trên Unix-like system: cung cấp mechanism, không phải policy.
 
-Dù vậy trên non-interactive code path, thường phải chờ lock vô hạn, với ngữ nghĩa signal gửi tới task không nên abort blocking wait (thay vào đó giữ pending). Trên Linux, uninterruptible case hóa ra phổ biến nhất.
+Dù vậy, trên các code path non-interactive, thường cần chờ lock vô thời hạn, với ý nghĩa rằng signal được gửi đến task không được chấm dứt blocking wait mà phải được giữ ở trạng thái pending. Trên Linux, trường hợp uninterruptible hóa ra phổ biến nhất.
 
 Vậy vấn đề: API `mutex_lock()` trong code path “loser” thread luôn đưa loser task vào uninterruptible sleep. Nếu không muốn, dùng API `mutex_lock_interruptible()` đưa (loser) calling task vào interruptible sleep. Có khác biệt syntax-wise: API sau trả integer `0` thành công và `-EINTR` (nhớ return convention `0/-E`) khi bị signal ngắt (nhân tiện English error message của `EINTR's` là `Interrupted system call`).
 
@@ -946,7 +946,7 @@ Project LDV (Linux Driver Verification): trong chương trực tuyến Kernel Wo
 
 Về chủ đề hiện tại, đây là một quy tắc: Lock mutex hai lần hay unlock khi chưa lock (`http://linuxtesting.org/ldv/online?action=show_rule&rule_id=0032`). Đề cập những việc không làm được với mutex lock (đã trình bày phần Dùng mutex lock đúng cách). Điều thú vị có thể thấy ví dụ bug thực tế – thử double-acquire, dẫn (self) deadlock – trong kernel driver (cùng bản sửa sau).
 
-Loại mutex khác chỉ đề cập là so-called w/w – wait/wound (hay đơn giản WW-mutex) – (wound vần với “doomed”). Thuật ngữ từ tài liệu RDBMS, là cách xử lý deadlock (tài liệu còn dùng từ “deadlock-proof”). Với w/w trong Linux kernel, usage chủ yếu graphics subsystem, phần nào DMA. Ở đây task acquire mutex lock nhận reservation hay ticket identifier duy nhất. Giờ “age” task acquire WW-mutex được xét. Khi phát hiện deadlock, task “già nhất” – giữ reservation lâu nhất – được ưu tiên. Thế nào? Bằng cho task “trẻ” back off, yêu cầu (ép) release WW lock đang giữ; do đó task trẻ bị “wounded” (tội nghiệp). Usage WW-mutex trong kernel khá thấp, đặc biệt so mutex thường. Xem Đọc thêm để biết thêm.
+Một loại mutex khác mà chúng ta chỉ đề cập sơ qua là loại được gọi là w/w – wait/wound, hay so-called WW-mutex, trong đó wound có vần với “doomed”. Thuật ngữ này bắt nguồn từ tài liệu RDBMS và là một cách xử lý deadlock; tài liệu thậm chí sử dụng từ “deadlock-proof”. Trong Linux kernel, w/w chủ yếu được sử dụng trong graphics subsystem và ở một mức độ nhất định trong DMA. Ở đây, task acquire mutex lock nhận một reservation identifier hoặc ticket identifier duy nhất. Khi đó, “tuổi” của task acquire WW-mutex được tính đến. Nếu phát hiện deadlock, task “già nhất”, tức task giữ reservation lâu nhất, được ưu tiên. Cách thực hiện là cho các task “trẻ hơn” lùi lại bằng cách yêu cầu, hay buộc, chúng release các WW lock đang giữ; vì vậy, task trẻ bị “wounded”, thật tội nghiệp. Mức sử dụng WW-mutex trong kernel khá thấp, đặc biệt so với mutex thông thường. Xem phần Đọc thêm để tìm hiểu thêm.
 
 Giờ hiểu dùng mutex lock, hãy tiếp xem lock rất phổ biến khác trong kernel – spinlock!
 
@@ -1047,7 +1047,7 @@ data
 
 Lần này để bảo vệ member global data structure `drv_ctx`, có cả mutex lock (từ version trước) và spinlock mới. Khá thường có hơn một lock trong data structure; thường mutex lock bảo vệ member usage trong critical section có thể blocking, spinlock bảo vệ member trong critical section không thể blocking (sleeping) (cũng dùng spinlock bảo vệ data member trong process context được, miễn critical section non-blocking).
 
-Tất nhiên phải bảo đảm khởi tạo mọi lock unlocked state. Làm trong code path `init` driver (tiếp output patch):
+Dĩ nhiên, chúng ta phải bảo đảm khởi tạo tất cả các lock ở unlocked state. Chúng ta thực hiện điều này trong code path `init` của driver; vì vậy, tiếp tục với output của patch:
 
 ```
 +       mutex_init(&ctx->mutex);
@@ -1282,7 +1282,7 @@ Thường hữu ích giữ kernel config option `CONFIG_DEBUG_ATOMIC_SLEEP` bậ
 
 Một lần nữa LDV project có quy tắc: “Không được acquire spin\_lock hai lần. Không được release spin\_lock chưa acquire. Cuối cùng mọi spin\_lock phải release. Không được re-release lock bằng các function spin\_unlock/spin\_unlock\_irqrestore” (`http://linuxtesting.org/ldv/online?action=show_rule&rule_id=0039`). (Tất nhiên đã trình bày trong phần Hướng dẫn locking và deadlock.) Đề cập điểm then chốt dùng spinlock đúng; thú vị ở đây cho bug instance thực tế trong driver nơi thử release spinlock hai lần – vi phạm rõ locking rule, dẫn hệ thống không ổn định.
 
-Tốt, xong spinlock? Không, còn xa! Phần tiếp đi sâu hiểu spinlock và usage trong kernel, module, nơi cũng làm với spinlock trong interrupt context.
+Tuyệt, vậy là đã xong với spinlock? Chưa, còn rất nhiều điều nữa! Phần tiếp theo giúp chúng ta hiểu sâu hơn về spinlock và cách sử dụng nó trong kernel cùng các module, trong đó chúng ta cũng làm việc với spinlock ở interrupt context.
 
 ## Locking và interrupt
 
@@ -1294,7 +1294,7 @@ Phần này nâng cao hơn chút, chắc chắn hữu ích nếu hiểu ít nh�
 
 Giờ khi triển khai chẳng hạn method `read` driver, thấy có non-blocking critical section. Dễ xử lý: như học nên dùng spinlock bảo vệ. Tốt! Nhưng nghĩ xem nếu trong critical section method `read`, hardware interrupt device xảy ra? Như biết hardware interrupt preempt mọi thứ; nên control chuyển interrupt handler code, preempt method `read` driver.
 
-Câu hỏi then chốt: có vấn đề? Tùy interrupt handler và method `read` driver làm gì và triển khai thế nào. Hình dung vài tình huống:
+Câu hỏi then chốt ở đây là: điều này có gây vấn đề không? Câu trả lời phụ thuộc vào interrupt handler và method `read` của driver đang làm gì, cũng như cách chúng được triển khai. Chúng ta hãy hình dung một vài tình huống:
 
 - Interrupt handler driver (lý tưởng) chỉ dùng local variable, nên dù method `read` trong critical section cũng không quan trọng; interrupt handling hoàn tất rất nhanh (nói chung thường khoảng 10 đến 100 microsecond), trả control về thứ bị ngắt (một lần nữa còn hơn thế; bottom-half mechanism tồn tại như softirq hay tasklet cũng có thể cần thực thi trước khi trả processor cho method `read`). Vì vậy thực sự không race trong trường hợp này.
 
@@ -1340,7 +1340,7 @@ Bắt đầu tình huống đầu.
 
 ### Tình huống 1 – driver method và hardware interrupt handler chạy serialized, sequentially
 
-Pseudo-code sau cho interrupt handler device driver. Vì “biết” ở đây chạy serialized, sequentially, timeline tiếp từ trước (từ code snippet method `read` driver giả định ngay trước phần này); vì vậy timestamp đầu là t4 theo sau t3 ở cuối method `read`):
+Pseudo-code sau dành cho interrupt handler của device driver. Vì chúng ta “biết” ở đây các phần đó chạy serialized, theo trình tự, timeline được tiếp tục từ trước, tức từ code snippet của method `read` trong driver giả định đã xem ngay trước phần này. Vì vậy, timestamp đầu tiên được hiển thị là t4, tiếp sau thời điểm t3 trước đó ở cuối method `read`:
 
 ```
 handle_interrupt(...)           << time t4; hardware interrupt fires! >>
@@ -1398,7 +1398,7 @@ Vậy dùng API trong method `read` driver sẽ disable interrupt trên local co
 
 Implementation `spin_lock_irq()` khá nested (như phần lớn spinlock functionality) nhưng nhanh; cuối cùng gọi macro `local_irq_disable()` và `preempt_disable()`, disable cả interrupt và kernel preemption trên local processor core đang chạy. Nói cách khác với spinlock API variant này, disable hardware interrupt có side effect (mong muốn) disable kernel preemption!
 
-API `spin_lock_irq()` đi cặp API `spin_unlock_irq()` tương ứng. Vậy usage spinlock đúng cho tình huống (trái cách ngây thơ trước có thể self-deadlock) như sau:
+API `spin_lock_irq()` đi cặp với API `spin_unlock_irq()` tương ứng. Vì vậy, cách sử dụng spinlock đúng cho tình huống này, thay vì cách tiếp cận đơn giản trước đó thực tế có thể dẫn đến self-deadlock, như sau:
 
 ```
 /* Driver read method ; CORRECT ! */
@@ -1495,7 +1495,7 @@ Quan trọng hiểu ngay cả bottom-half mechanism – softirq/tasklet – ch�
 
 Hardirq handler không bao giờ chạy parallel với chính mình (do đó không reentrant). Tasklet (bên trong xây trên softirq mechanism) cũng không bao giờ chạy parallel với chính mình; property giúp dùng tasklet dễ hơn. Tuy nhiên softirq có thể chạy parallel với chính mình (trên core khác).
 
-Tiếp theo dùng threaded handler cho interrupt processing giờ khá phổ biến với nhiều driver type (đặc biệt device hơi chậm, không đòi hiệu năng cực cao khác nhiều block/network/graphics device, và thực tế là mặc định khi đăng ký interrupt handler). Khi ấy vì interrupt handler entity thực sự chỉ là kernel thread (scheduling policy `SCHED_FIFO`, real-time priority 50), được phép blocking call bên trong. Hơn nữa cũng loại top-bottom half dichotomy.
+Tiếp theo, sử dụng threaded handler để xử lý interrupt hiện khá phổ biến với nhiều loại driver, đặc biệt cho các device chậm hơn, không đòi hỏi hiệu năng cực cao như nhiều block device, network device và graphics device; thực tế, đây là mặc định khi đăng ký interrupt handler. Trong trường hợp này, vì interrupt handler thực chất chỉ là một kernel thread với scheduling policy `SCHED_FIFO` và real-time priority 50, các blocking call được phép thực hiện bên trong nó. Hơn nữa, cách này cũng loại bỏ sự phân chia top-bottom half.
 
 #### Bottom half và locking
 
@@ -1515,7 +1515,7 @@ Unlock API tương ứng là `spin_unlock_bh()`.
 
 Tất nhiên overhead quan trọng trong code path rất performance-sensitive (kernel code triển khai network stack là ví dụ tuyệt). Vì vậy dùng dạng spinlock đơn giản nhất giúp hiệu năng hơn variant phức tạp.
 
-Dù vậy chắc chắn có lúc đòi dạng spinlock API mạnh hơn.
+Dù vậy, chắc chắn sẽ có những trường hợp đòi hỏi sử dụng các dạng mạnh hơn của spinlock API.
 
 Ví dụ với Linux kernel codebase 6.1.25 LTS, đây là số lần dùng xấp xỉ các dạng spinlock API đã thấy:
 
@@ -1527,7 +1527,7 @@ Ví dụ với Linux kernel codebase 6.1.25 LTS, đây là số lần dùng xấ
 
 - `spin_lock_bh()`: Hơn 4.400 lần dùng
 
-(Chỉ để đối chiếu, số ở ấn bản đầu với kernel 5.4.0 LTS lần lượt 9.400, hơn 3.600, hơn 15.000, hơn 3.700 lần.) Không rút suy luận lớn nào từ số này và usage các dạng spinlock API; chỉ muốn chỉ ra dùng dạng mạnh hơn khá phổ biến trong Linux kernel.
+Chỉ để đối chiếu, trong ấn bản đầu tiên của cuốn sách với kernel 5.4.0 LTS, các con số lần lượt là 9,400, hơn 3,600, hơn 15,000 và hơn 3,700 lần sử dụng. Chúng ta không rút ra kết luận lớn nào từ các con số và cách sử dụng những dạng spinlock API khác nhau này; chỉ muốn chỉ ra rằng sử dụng các dạng mạnh hơn của spinlock API khá phổ biến trong Linux kernel.
 
 Cuối cùng ghi chú rất ngắn internal implementation spinlock: về internals under-the-hood, implementation thường rất arch-specific, hay gồm atomic machine language instruction thực thi rất nhanh trên microprocessor. Ví dụ architecture phổ biến `x86[_64]`, spinlock cuối cùng quy về atomic test-and-set machine instruction trên member spinlock structure (thường triển khai qua machine language instruction `cmpxchg`). Trên nhiều ARM machine, như đề cập trước thường machine instruction `wfe` (Wait For Event cùng SetEvent (SEV)) ở trái tim implementation. (Có tài liệu internal implementation trong Đọc thêm.) Bất kể vậy, người viết kernel hay driver chỉ nên dùng API (và macro) được cung cấp khi dùng spinlock.
 
@@ -1547,7 +1547,7 @@ Tóm lược nhanh spinlock API-wise:
 
 Như thấy trước, spinlock – nghĩa “spinning” trên processor đang chạy khi chờ lock – không thể trên UP (làm sao spin trên một CPU có sẵn khi thread khác đồng thời chạy cùng CPU?). Quả thực trên UP system, spinlock API thành no-op (trừ khi spinlock debug config bật); tác dụng thực tế duy nhất ở đây là disable (mask) hardware interrupt và kernel preemption trên processor! Tuy nhiên SMP system (multicore) thực sự dùng spinning logic, ngữ nghĩa locking hoạt động như mong đợi.
 
-Chờ đã – chi tiết không nên gây stress cho kernel/driver developer mới; thực ra toàn mục đích là chỉ cần dùng spinlock API như mô tả, không bao giờ phải lo UP so SMP, kernel preemption what-not; chi tiết bên trong làm gì hay không đều ẩn bởi implementation.
+Khoan đã, những chi tiết này không nên khiến bạn, một kernel/driver developer mới, cảm thấy căng thẳng. Thực tế, toàn bộ ý nghĩa là bạn chỉ cần sử dụng các spinlock API như đã mô tả và sẽ không phải lo lắng về UP so với SMP, về kernel preemption và những vấn đề khác (what-not); mọi chi tiết về những gì được hay không được thực hiện bên trong đều được implementation che giấu.
 
 Tính năng mới thêm vào kernel 5.8 từ project Real-Time Linux (RTL, trước gọi PREEMPT\_RT), đáng đề cập nhanh: “local lock”. Dù use case chính cho (hard) real-time kernel, cũng hỗ trợ non-real-time kernel, chủ yếu lock debugging qua static analysis, cùng runtime debugging qua lockdep (trình bày chương sau). Đây là bài LWN: `https://lwn.net/Articles/828477/`.
 
@@ -1649,7 +1649,7 @@ Chúc mừng hoàn thành chương!
 
 Hiểu concurrency và mối quan tâm liên quan tuyệt đối then chốt với software professional bất kỳ. Trong chương học các khái niệm then chốt về critical section, nhu cầu exclusive execution bên trong, atomicity và data race thực sự nghĩa gì. Rồi học vì sao cần quan tâm concurrency khi viết code cho Linux OS. Sau đó tìm hiểu chi tiết hai locking technology rất phổ biến dùng nhiều trong kernel – mutex lock và spinlock. Cũng học quyết định khi nào dùng lock nào. Cuối cùng và lại quan trọng, trình bày cách xử lý concurrency concern khi hardware interrupt (và bottom half có thể có) tham gia.
 
-Nhưng chưa xong kernel concurrency! Còn nhiều khái niệm/công nghệ cần học, chính là điều sẽ làm trong chương tiếp, cũng cuối sách. Tôi đề nghị trước tiên nắm chắc nội dung chương bằng đọc lại cùng tài liệu phần Đọc thêm, làm bài tập cung cấp trước khi đi chương cuối!
+Nhưng chúng ta vẫn chưa hoàn tất chủ đề kernel concurrency! Còn nhiều khái niệm và công nghệ cần học, và đó chính là nội dung của chương tiếp theo, cũng là chương cuối cùng của cuốn sách. Tôi đề nghị bạn trước tiên nắm chắc nội dung chương này bằng cách đọc lại nó và các tài liệu trong phần Đọc thêm, đồng thời làm các bài tập được cung cấp, trước khi đi sâu vào chương cuối!
 
 ## Câu hỏi
 

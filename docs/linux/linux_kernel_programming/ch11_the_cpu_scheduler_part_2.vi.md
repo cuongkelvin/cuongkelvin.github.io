@@ -622,7 +622,7 @@ TasksMax=infinity
 [ … ]
 ```
 
-Hãy xem phần systemd trong Đọc thêm của chương; có nhiều liên kết đến tài liệu tốt hướng dẫn chi tiết cùng ví dụ.
+Hãy xem phần systemd trong mục Đọc thêm của chương này; có rất nhiều link đến những tài liệu tốt hướng dẫn chi tiết cùng các ví dụ.
 
 ##### Trực quan hóa cgroup (và slice, scope) bằng systemctl và systemd- cgtop
 
@@ -1150,7 +1150,7 @@ Bài tập đơn giản: chạy Bash script `ch11/cgroups/cpu_constrain/cpu_manu
 
 Mainline hay vanilla Linux (kernel tải từ `https://kernel.org`, hay cả Linux Git kernel tree điển hình) chắc chắn không phải RTOS; là General Purpose Operating System (GPOS; như Windows, macOS và Unix). Trong RTOS, nơi đặc tính hard real-time (RT) có tác dụng, phần mềm không chỉ phải có kết quả đúng mà còn có deadline gắn với việc đó; phải bảo đảm đáp ứng deadline mọi lần.
 
-Có thể phân loại OS rất khái quát theo đặc tính RT như sau (xem Hình 11.16); cực trái là non-RT OS, cực phải RTOS:
+Có thể phân loại OS một cách rất khái quát theo đặc tính RT như sau, xem Hình 11.16: ở đầu bên trái là các OS non-RT, còn ở đầu bên phải là RTOS:
 
 ![Hình 11.16](images/ch11/fig11-16.png)
 

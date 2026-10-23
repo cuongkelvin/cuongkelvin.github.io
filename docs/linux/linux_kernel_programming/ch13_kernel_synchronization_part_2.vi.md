@@ -245,7 +245,7 @@ Thấy chỉ là thin wrapper trên `atomic_set()`. Câu hỏi hiển nhiên: v�
 
 - Khác atomic operator, counter saturate tại giá trị `REFCOUNT_SATURATED` (mặc định `INT_MIN/2`, tức `0xc0000000`), không đổi khi đến đó. Then chốt: tránh counter wrap có thể gây UAF bug kỳ lạ, giả; thậm chí xem là security fix then chốt (`https://kernsec.org/wiki/index.php/Kernel_Protections/refcount_t`).
 
-- Nhiều API mới có memory ordering guarantee; đặc biệt API `refcount_t` – so các anh em `atomic_t` cũ – cùng memory ordering guarantee được ghi tại `https://www.kernel.org/doc/html/latest/core-api/refcount-vs-atomic.html#refcount-t-api-compared-to-atomic-t` (hãy xem nếu quan tâm low-level detail).
+- Một số API mới hơn có cung cấp các bảo đảm về memory ordering; đặc biệt, các API `refcount_t`, khi so với những API họ hàng `atomic_t` cũ hơn, và các bảo đảm về memory ordering của chúng được mô tả tại `https://www.kernel.org/doc/html/latest/core-api/refcount-vs-atomic.html#refcount-t-api-compared-to-atomic-t`. Hãy xem nếu bạn quan tâm đến các chi tiết low-level.
 
 - Đồng thời hiểu arch-dependent `refcount` implementation (khi tồn tại – ví dụ x86 có, ARM không) có thể khác generic implementation vừa đề cập.
 
@@ -273,7 +273,7 @@ Cũng có tập atomic operator nâng cao hơn tên RMW API. (Vì sao chính xá
 
 Nội dung giả định ít nhất hiểu cơ bản truy cập peripheral device (chip) memory và register; trình bày chi tiết trong companion volume Linux Kernel Programming – Part 2, Chương 3, Working with Hardware I/O Memory. Khuyên hiểu trước khi tiếp.
 
-Làm driver thường cần bit operation (với bitwise `AND &` và bitwise `OR |` phổ biến nhất) trên register; để sửa giá trị, set và/hoặc clear vài bit. Vấn đề chỉ C manipulation để query/set device register chưa đủ. Không: đừng quên concurrency issue! Đọc tiếp toàn câu chuyện.
+Khi làm việc với driver, bạn thường cần thực hiện các bit operation trên register, phổ biến nhất là bitwise `AND &` và bitwise `OR |`. Mục đích là sửa giá trị register bằng cách set hoặc clear một số bit trong nó. Vấn đề là chỉ thực hiện một số thao tác C để query hoặc set device register vẫn chưa đủ. Đúng vậy: đừng quên các vấn đề concurrency! Hãy đọc tiếp để biết đầy đủ câu chuyện.
 
 ### RMW atomic operation – thao tác device register
 
@@ -315,7 +315,7 @@ turn_on_feature_x_dev()
 
 Điểm then chốt: chưa đủ tốt; lý do concurrency và data race! Nghĩ xem register (cả CPU và device) thực tế là global shared writable memory location; nếu code path truy cập chạy concurrently được – thường vậy – tạo critical section phải cẩn thận bảo vệ khỏi concurrent access! Cách làm dễ; chỉ dùng spinlock (ít nhất trước mắt). Sửa pseudo-code trên để chèn API `spin_[un]` `lock()` trong critical section – RMW sequence – rất đơn giản.
 
-Tuy nhiên cách còn tốt hơn đạt data safety khi xử lý lượng nhỏ như integer; đã trình bày: atomic operator! Linux đi xa hơn, cung cấp tập atomic API cho cả:
+Tuy nhiên, có một cách còn tốt hơn để đạt data safety khi làm việc với các đại lượng nhỏ như số nguyên, và chúng ta đã trình bày nó: atomic operator! Nhưng Linux còn đi xa hơn, cung cấp một tập atomic API cho cả hai trường hợp sau:
 
 - Atomic non-RMW operation (đã thấy phần Dùng interface atomic\_t và refcount\_t).
 
@@ -532,7 +532,7 @@ Hình dung kernel code (hay driver code) tìm kiếm global data structure lớn
 
 Giả định tìm list là non-blocking operation, thường dùng spinlock bảo vệ critical section.
 
-Cách ngây thơ có thể đề xuất không lock vì chỉ đọc data trong list, không cập nhật. Nhưng tất nhiên ngay cả read shared writable data cũng phải bảo vệ khỏi write vô ý đồng thời (như đã học – xem chương trước nếu cần), dẫn dirty/torn read.
+Một cách tiếp cận đơn giản có thể đề xuất không sử dụng lock vì chúng ta chỉ đọc data trong list, không cập nhật nó. Nhưng dĩ nhiên, ngay cả việc đọc shared writable data cũng phải được bảo vệ để tránh một thao tác ghi vô ý diễn ra đồng thời và dẫn đến dirty read hoặc torn read, như bạn đã học; hãy xem lại chương trước nếu cần.
 
 Vậy kết luận cần spinlock; hình dung pseudo-code như:
 
@@ -549,7 +549,7 @@ Vậy vấn đề? Tất nhiên hiệu năng! Hình dung nhiều thread trên mu
 
 reader-writer spinlock xuất hiện. Với locking construct này, mọi thread read protected data object phải yêu cầu read lock (shared), còn thread cần write access phải yêu cầu exclusive write lock. Read lock được cấp ngay cho thread hỏi miễn không có write lock hiện dùng. Thực chất construct cho mọi reader concurrent access data, nghĩa thực chất không locking thực sự. Ổn miễn chỉ reader. Ngay khi writer thread đến sẽ yêu cầu write lock. Giờ ngữ nghĩa locking thường áp dụng: writer phải chờ mọi reader unlock. Khi đó writer có exclusive write lock, tiếp tục. Giờ reader hay writer nào thử access đều buộc chờ, spin trên unlock của writer.
 
-Vì vậy tình huống data access pattern read rất thường, write hiếm, tức read-mostly, non-blocking critical section khá dài, reader-writer spinlock có vẻ phù hợp. (Có nhược điểm; chính xác gì và thay thế sẽ xem phần sau.)
+Vì vậy, trong những tình huống mà kiểu truy cập data có thao tác đọc rất thường xuyên và thao tác ghi hiếm, tức read-mostly, đồng thời non-blocking critical section khá dài, reader-writer spinlock có vẻ là lựa chọn phù hợp. Tuy nhiên, vẫn có một số nhược điểm; chúng cụ thể là gì và lựa chọn thay thế nào sẽ được xem xét trong phần sau.
 
 ### Reader-writer spinlock interface
 
@@ -680,13 +680,13 @@ Tài liệu kernel gọn, súc tích về spinlock usage (do chính Linus Torval
 
 ### reader-writer semaphore
 
-Trước đã nói semaphore object (Chương 12, Kernel Synchronization – Part 1, phần Semaphore và mutex), so mutex. Ở đó hiểu ưu tiên chỉ dùng mutex.
+Trước đó, chúng ta đã đề cập đến semaphore object và đối chiếu nó với mutex trong Chương 12, Kernel Synchronization – Part 1, phần Semaphore và mutex. Ở đó, bạn đã hiểu rằng lựa chọn nên ưu tiên đơn giản là sử dụng mutex.
 
 Ở đây chỉ ra trong kernel cũng như reader-writer spinlock có reader-writer semaphore. Use case và ngữ nghĩa giống reader-writer spinlock. Macro/API liên quan (trong `<linux/rwsem.h>`) là `{down,up}_{read,write}_{trylock,killable}()`. Ví dụ phổ biến trong structure `struct mm_struct` (bản thân được trỏ từ task structure), một member là reader-writer semaphore: `struct rw_semaphore mmap_lock` (`https://elixir.bootlin.com/linux/v6.1.25/source/include/linux/mm_types.h#L580`).
 
 Hoàn tất thảo luận, chỉ đề cập vài synchronization mechanism liên quan khác trong kernel. Mechanism dùng nhiều trong user-space application development (đặc biệt nghĩ Pthreads framework Linux user space) là Condition Variable (CV). Tóm lược cho hai hay nhiều thread synchronize với nhau dựa giá trị data item hoặc state cụ thể. Tương đương trong Linux kernel gọi completion mechanism. Chi tiết usage trong tài liệu kernel: `https://www.kernel.org/doc/html/latest/scheduler/completion.html#completions-wait-for-completion-barrier-apis`.
 
-Rồi có sequence lock; dùng write-mostly (trái reader-write spinlock/semaphore hợp read-mostly), nơi write vượt xa read trên variable được bảo vệ. Như hình dung không quá phổ biến; ví dụ tốt sequence lock là cập nhật global `jiffies_64`.
+Tiếp theo là sequence lock, được sử dụng trong các tình huống write-mostly, trái với các lock reader-write spinlock/semaphore phù hợp với read-mostly. Đây là những nơi số lần ghi vượt xa số lần đọc trên các biến được bảo vệ. Như bạn có thể hình dung, điều này không quá phổ biến; một ví dụ tốt về sử dụng sequence lock là cập nhật biến global `jiffies_64`.
 
 Giá trị gọi so-called `jiifies` chuyển thành function `get_jiffies_64()`, trên hệ thống 32-bit đọc lượng global data `jiffies_64` 64-bit dưới sequence lock bảo vệ (không dirty read). (Nói hơi đơn giản) global `jiffies_64` được cập nhật – ghi – mỗi timer interrupt. Ai tò mò, update code global `jiffies_64` bắt đầu tại `kernel/time/tick-sched.c:tick_do_update_jiffies64()`. Function xác định có cần update jiffies, nếu có gọi `do_timer(++ticks);` cập nhật thực tế. Suốt đó API `write_seq[un]` `lock(&jiffies_lock);` bảo vệ write-mostly critical section.
 
@@ -729,7 +729,7 @@ Giả sử array được process (hay thread) access lần đầu, nên không 
 
 Hình 13.5: Sơ đồ khái niệm – thread trên CPU core 1 đọc myarr\[0\] lần đầu; processor fetch toàn data cacheline bao quanh (thường 64 byte, myarr\[0\] đến myarr\[63\], chỉ thể hiện 0-63) vào shared L3 cache và L2/L1 cache của core 1
 
-Lợi ích? Hẳn rõ: access vài phần tử sequential memory tiếp (đến tận byte 63) tăng tốc mạnh vì kiểm tra trong cache trước (L1 rồi L2, L3, khả năng cache hit tăng).
+Lợi ích là gì? Điều này khá rõ: truy cập những phần tử tiếp theo trong vùng memory liên tục, đến tận byte 63, mang lại mức tăng tốc rất lớn vì trước tiên các cache được kiểm tra, lần lượt L1, L2 rồi L3, nên khả năng cache hit cao hơn.
 
 Lý do nhanh hơn (nhiều) đơn giản: access CPU cache memory thường một đến vài nanosecond (single-digit) (L1 nhanh nhất, nhỏ nhất; Lowest Level Cache (LLC), ở đây L3, chậm nhất và lớn nhất (tương đối)). Access RAM khoảng 50 đến 100 nanosecond (tất nhiên số chính xác phụ thuộc hardware system và số tiền sẵn chi!). Đó tất nhiên toàn mục đích cache: memory gốc được cache chậm hơn cache rất nhiều (nghĩ web browser cache web page).
 
@@ -825,9 +825,9 @@ u16 ax = 1, bx = 2;
 
 (trong đó `u16` chỉ unsigned 16-bit integer value).
 
-Giờ vì khai báo cạnh nhau, rất có thể compiler cho cùng CPU cacheline ở runtime (tổng chỉ 32 bit hay 4 byte; nhớ CPU cacheline size điển hình 64 byte).
+Vì các biến được khai báo cạnh nhau, rất có thể compiler sẽ đặt chúng trong cùng một CPU cacheline ở runtime. Tổng kích thước của chúng chỉ là 32 bit, hay 4 byte; hãy nhớ rằng kích thước CPU cacheline điển hình là 64 byte.
 
-Thì sao? Để hiểu xét runtime scenario phổ biến: lại multicore system hai CPU core, mỗi core có hai internal CPU cache L1/L2, cùng unified L3 cache và RAM (như Hình 13.4).
+Vậy thì sao? Để hiểu vấn đề, chúng ta hãy xét một tình huống runtime phổ biến: một lần nữa, xét multicore system có hai CPU core, mỗi core có hai CPU internal cache L1 và L2, cùng một unified L3 cache và RAM, như trong Hình 13.4.
 
 Giờ hình dung core `0` có thread T1 làm variable `ax`, parallel trên core `1` thread T2 khác làm `bx`. Lưu ý kỹ: không data race, vì mỗi thread làm variable khác, memory item khác; nên không critical section, không cần synchronization.
 
@@ -855,11 +855,11 @@ Nhận diện false sharing khó; phải tìm variable cùng shared cacheline đ
 
 Thú vị, implementation trước của data structure then chốt memory management layer `include/linux/mmzone.h:struct zone` từng bị chính false sharing: hai spinlock variable khai báo cạnh nhau nên thường cùng cacheline! Đã sửa từ lâu (đã thảo luận ngắn memory zone trong Chương 7, Memory Management Internals – Essentials, phần Physical memory).
 
-Đo hiệu năng cẩn thận, so baseline “normal”, giúp thấy outlier, có lẽ nhận ra slowdown do false sharing.
+Đo hiệu năng cẩn thận và so sánh với một baseline “bình thường” có thể giúp phát hiện các trường hợp bất thường, đồng thời giúp bạn nhận ra rằng sự chậm lại là do false sharing.
 
 Technical reviewer rất giỏi Chi Thanh Hoang bổ sung dùng processor feature hay bỏ qua nhưng hữu ích – performance measurement counter (PMC) – để fine-tune cache-miss/flush event chắc chắn giúp thu hẹp vấn đề hiệu năng; dùng tool như perf (và eBPF).
 
-Sửa kiểu false sharing thế nào? Dễ: chỉ bảo đảm variable đủ xa nhau để không cùng cacheline (thường chèn dummy padding byte giữa variable). Vậy làm như sau có lẽ ổn (hệ thống cacheline 64-byte):
+Bạn sửa vấn đề false sharing kiểu này như thế nào? Rất đơn giản: chỉ cần bảo đảm các biến nằm đủ xa nhau để chắc chắn chúng không dùng chung cacheline. Các byte padding giả thường được chèn giữa các biến cho mục đích này. Vì vậy, cách làm sau có thể sẽ ổn trên hệ thống có cacheline 64-byte:
 
 ```
 u16 ax = 1;
@@ -905,7 +905,7 @@ Như tên, per-CPU variable giữ bản sao variable, data item đang xét, mộ
 
 (Đại thể tương tự local variable; vì local trên private stack mỗi thread nên không shared giữa thread, không critical section, không cần locking.) Ở đây cũng loại nhu cầu locking – thành lock-free technology!
 
-Nghĩ xem: hệ thống bốn live CPU core thì per-CPU variable về cơ bản array bốn phần tử: phần tử `0` biểu diễn data value CPU đầu, `1` data value CPU core hai, v.v. (xem Hình 13.9). Hiểu vậy sẽ thấy per-CPU variable cũng gần tương tự user-space Pthreads Thread Local Storage (TLS), nơi mỗi thread khi sinh tự nhận bản sao mọi TLS variable đánh dấu keyword `__thread` (còn hơn thế; tham khảo Hands-On System Programming with Linux để chi tiết). Ở đó và đây với per-CPU variable, hẳn rõ thường chỉ nên dùng per-CPU cho data item nhỏ. Vì data item được tái tạo (copy) một instance mỗi CPU core (hệ thống high-end vài trăm, thậm chí nghìn core, overhead tăng). Lại có trade-off: khả năng lock-free đổi thêm RAM usage.
+Hãy nghĩ xem: nếu chạy trên hệ thống có bốn CPU core đang hoạt động, một biến per-CPU về cơ bản là một array gồm bốn phần tử. Phần tử `0` biểu diễn giá trị data trên CPU thứ nhất, phần tử `1` biểu diễn giá trị data trên CPU core thứ hai, v.v.; hãy xem Hình 13.9. Hiểu điều này, bạn sẽ nhận ra các biến per-CPU cũng gần tương tự cách triển khai Thread Local Storage (TLS) của Pthreads trong user-space, nơi mỗi thread khi được tạo tự động nhận một bản sao của tất cả các biến TLS đánh dấu bằng từ khóa `__thread`. Còn nhiều chi tiết hơn; hãy tham khảo Hands-On System Programming with Linux. Trong cả trường hợp đó và trường hợp biến per-CPU ở đây, rõ ràng thường chỉ nên sử dụng các biến per-CPU cho data item nhỏ. Lý do là data item được sao chép thành một instance cho mỗi CPU core; trên hệ thống high-end có vài trăm hoặc thậm chí hàng nghìn core, overhead sẽ tăng. Vì vậy, một lần nữa có trade-off: chúng ta đạt khả năng lock-free với chi phí sử dụng thêm RAM.
 
 Tóm lược, per-CPU variable tốt tăng hiệu năng time-sensitive code path vì:
 
@@ -913,7 +913,7 @@ Tóm lược, per-CPU variable tốt tăng hiệu năng time-sensitive code path
 
 - Access và thao tác per-CPU variable cho trước bảo đảm luôn trên CPU core nhất định; cùng thực tế không bao giờ shared, loại cache effect tốn như cache ping-pong/false sharing (phần Tìm hiểu cơ bản CPU caching, cache effect và false sharing). Cũng giảm điện năng.
 
-Điểm sau đáng đi sâu. Như phần trước (Hình 13.7), ngay increment shared integer atomically qua nhiều thread NUMA system có thể phạt hiệu năng khổng lồ vì cache effect.
+Điểm sau đáng được tìm hiểu chi tiết hơn. Như đã thấy trong phần trước, tham khảo Hình 13.7, ngay cả việc tăng một shared integer theo cách atomic bằng nhiều thread trên NUMA system cũng có thể gây tổn thất hiệu năng rất lớn do các hiệu ứng cache.
 
 Như đã nói Paul E. McKenney trong thuyết trình (What is RCU, Prof Paul E. McKenney, 2013; YouTube video (IISc, Bangalore): `https://www.youtube.com/watch?v=obDzjElRj9c&list=P` `LIlI4QbmdBqH9-L1QOq6O5Yxt-YVjRsFZ`), cũng cho thấy per-CPU lock-free programming technique có hiệu năng vượt trội, như sơ đồ:
 
@@ -927,7 +927,7 @@ Sẽ đề cập ví dụ per-CPU usage trong kernel codebase (phần Per-CPU us
 
 Khi làm per-CPU variable phải dùng helper method (macro/API) kernel cung cấp, không thử access trực tiếp (như thấy với `refcount` và atomic operator).
 
-Tiếp cận helper API và macro (method) per-CPU data bằng chia hai phần. Đầu học allocate, initialize rồi free per-CPU data item. Sau học làm với nó (read/write).
+Chúng ta hãy tiếp cận các helper API và macro, tức các method dành cho per-CPU data, bằng cách chia phần thảo luận thành hai phần. Trước tiên, bạn sẽ học cách allocate, initialize rồi free một per-CPU data item. Sau đó, bạn sẽ học cách làm việc với nó, tức đọc và ghi data.
 
 ##### Allocate, initialize và free per-CPU variable
 
@@ -1045,7 +1045,7 @@ Buổi hands-on sample per-CPU demo kernel module chắc chắn giúp học lock
 
 Cách thú vị minh họa per-CPU variable: cho demo kernel module spawn vài kernel thread (kthread). Gọi `thrd_0`, `thrd_1`. Hơn nữa khi tạo xong, dùng CPU affinity mask feature task structure qua API `sched_setaffinity()` để affine kernel thread `thrd_0` trên CPU `0`, `thrd_1` trên CPU `1` (nên chỉ được schedule trên các core này; tất nhiên phải test trên hệ thống (VM/native) ít nhất hai CPU core).
 
-Code snippet sau minh họa định nghĩa/dùng per-CPU variable (bỏ code tạo kernel thread/thiết lập CPU affinity mask vì không liên quan chương; tuy nhiên then chốt đọc full code và thử!):
+Các code snippet sau minh họa cách chúng ta định nghĩa và sử dụng các biến per-CPU. Chúng tôi bỏ phần code tạo kernel thread và thiết lập CPU affinity mask vì không liên quan đến chương này; tuy nhiên, điều quan trọng là bạn phải đọc toàn bộ code và thử chạy nó!
 
 ```
 // ch13/3_lockfree/percpu/percpu_var.c
