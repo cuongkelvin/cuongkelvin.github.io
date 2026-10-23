@@ -134,7 +134,7 @@ Cả bốn routine `br_` được định nghĩa trong net/bridge/br\_if.c. Tron
 
 ## Tạo bridge device mới
 
-Dù bridge device là ảo, thảo luận cách enable, disable, đăng ký và hủy đăng ký device ở Chương 8 vẫn áp dụng. Bạn nên dùng chương đó làm tham khảo khi đọc mục này.
+Mặc dù bridge device là device ảo, phần thảo luận ở Chương 8 về cách enable, disable, đăng ký và hủy đăng ký device vẫn áp dụng. Bạn nên dùng chương đó làm tài liệu tham khảo khi đọc phần này.
 
 Tạo và đăng ký bridge device theo mô hình Chương 8. Khác biệt duy nhất là vì virtual device, bridge cần khởi tạo bổ sung trong private area (tức data structure `net_bridge` ở cuối Hình 16-6). Tác vụ cuối này do `new_bridge_dev` đảm nhiệm, thực hiện:
 
@@ -428,7 +428,7 @@ Khi tạo bridge port, `br_add_if` thêm MAC address enslaved device vào forwar
 
 Không có hard limit số entry có thể thêm vào forwarding database. Điều này có thể khiến hệ thống chịu DOS attack, nên có thể kỳ vọng developer thêm hard limit trong tương lai gần.
 
-Khi local device gắn bridge port, do đó có MAC address trong forwarding database, thay MAC address,[^1] entry được cập nhật bằng `br_fdb_change_addr` (xem mục “Notification chain netdevice”). Vì nhiều local interface có thể cấu hình cùng MAC address (dù không phổ biến), `bf_fdb_change_addr` kiểm tra bridge port khác cùng bridge có cùng MAC address không trước khi loại instance `net_bridge_fdb_entry`: nếu tìm thấy, bind database entry vào interface của port còn lại.
+Khi một local device gắn với bridge port, do đó có MAC address trong forwarding database, thay đổi MAC address,[^1] entry của nó trong database được cập nhật bằng `br_fdb_change_addr`, xem phần “Notification chain netdevice”. Vì nhiều local interface có thể được cấu hình cùng MAC address, dù không phổ biến, `bf_fdb_change_addr` kiểm tra liệu bridge port khác của cùng bridge có cùng MAC address hay không trước khi loại bỏ instance `net_bridge_fdb_entry`. Nếu tìm thấy bridge port khác có cùng MAC address, nó gắn database entry với interface của port còn lại.
 
 MAC address học từ ingress frame (như Chương 14) được thêm bằng `br_fdb_update`. Khi address đã có, reference tới ingress port (`dst`) được cập nhật nếu cần và timestamp lần cập nhật cuối (`ageing_timer`) được cập nhật.
 
@@ -577,7 +577,7 @@ Với bridge port và input configuration BPDU nhận trên port, function retur
 
 `br_root_selection`
 
-Với bridge port và root port hiện tại, `br_should_become_root_port` so priority vector của port đầu với priority vector root port hiện tại và return 1 nếu port đầu có priority vector tốt hơn (vì vậy nên được ưu tiên hơn root port hiện tại). Nếu không return 0. Với bridge cho trước, `br_root_selection` chọn root port như mô tả trong mục “Chọn root port” ở Chương 15.
+Với một bridge port và root port hiện tại, `br_should_become_root_port` so sánh priority vector của port thứ nhất với priority vector của root port hiện tại và trả về 1 nếu port thứ nhất có priority vector tốt hơn, do đó nên được ưu tiên thay root port hiện tại. Nó trả về 0 trong trường hợp ngược lại. Với một bridge cho trước, `br_root_selection` chọn root port như được mô tả trong phần “Chọn root port” ở Chương 15.
 
 `br_configuration_update`
 
@@ -615,7 +615,7 @@ MAC address thấp nhất trong số address cấu hình trên enslaved device �
 
 Port number
 
-Số đầu tiên trong khoảng 1−`BR_MAX_PORTS` chưa dùng được chọn. Chọn bằng `find_portno` khi tạo bridge port (xem mục “Thêm port vào bridge”).
+Số đầu tiên trong khoảng 1−`BR_MAX_PORTS` chưa được sử dụng sẽ được chọn. Việc lựa chọn được thực hiện bằng `find_portno` khi bridge port được tạo, xem phần “Thêm port vào bridge”.
 
 ### Enable Spanning Tree Protocol trên bridge device
 
@@ -718,7 +718,7 @@ Sau đây là routine kích hoạt configuration update và có thể bầu nonr
 
 `br_stp_set_bridge_priority`
 
-Lần lượt được gọi khi MAC address và priority của bridge thay đổi. Vì đây là hai field cấu thành bridge ID, và bầu root bridge dựa trên bridge ID, thay đổi bất kỳ field nào có thể đổi root bridge.
+Các function này lần lượt được gọi khi MAC address và priority của bridge thay đổi. Vì đó là hai field cấu thành bridge ID và việc bầu root bridge dựa trên bridge ID, bất kỳ thay đổi nào trong hai field đều có thể làm thay đổi root bridge.
 
 `br_stp_disable_port`
 
@@ -802,7 +802,7 @@ Khi feature của enslaved device thay đổi, feature set của bridge device �
 
 `NETDEV_DOWN`
 
-Khi enslaved device bị administrator disable, bridge port tương ứng cũng phải disable; `br_stp_disable_port` xử lý việc này. Không cần khi bridge chứa port đã down, vì điều đó ngụ ý bridge port cũng đã down.
+Khi một enslaved device bị administrator disable, bridge port liên quan cũng phải bị disable; việc này do `br_stp_disable_port` xử lý. Không cần thực hiện nếu bridge mà port thuộc về đã down, vì điều đó có nghĩa bridge port cũng đã down.
 
 `NETDEV_UP`
 

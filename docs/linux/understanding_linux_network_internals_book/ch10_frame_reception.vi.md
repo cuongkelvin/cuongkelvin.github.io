@@ -263,7 +263,7 @@ Cần local CPU ID để lấy data structure tương ứng với CPU đó trong
 
 Dòng trước lưu vào `queue` một pointer tới structure `softnet_data` tương ứng với local CPU đang phục vụ interrupt do device driver gọi `netif_rx` kích hoạt.
 
-Giờ `netif_rx` cập nhật tổng số frame CPU nhận, gồm cả frame được chấp nhận lẫn bị loại bỏ (ví dụ vì không còn chỗ trong queue):
+Bây giờ, `netif_rx` cập nhật tổng số frame mà CPU đã nhận, bao gồm cả frame được chấp nhận lẫn frame bị loại bỏ, chẳng hạn vì queue không còn chỗ:
 
 ```c
     netdev_rx_stat[this_cpu].total++
@@ -317,7 +317,7 @@ drop:
 
 Mệnh đề `if` đầu tiên xác định còn chỗ hay không. Nếu queue đầy và mệnh đề cho kết quả false, CPU được đặt vào throttle state, nghĩa là đang quá tải input traffic và vì vậy drop mọi frame tiếp theo. Code thiết lập throttle không được thể hiện ở đây, nhưng có trong mục congestion management tiếp theo.
 
-Tuy nhiên, còn chỗ trong queue chưa đủ bảo đảm frame được chấp nhận. CPU có thể đã ở “throttle” state (được mệnh đề `if` thứ ba xác định), khi đó frame bị drop.
+Tuy nhiên, việc queue còn chỗ chưa đủ để bảo đảm frame được chấp nhận. CPU có thể đã ở state “throttle”, được xác định bởi câu lệnh `if` thứ ba; trong trường hợp đó, frame bị drop.
 
 Có thể gỡ throttle state khi queue rỗng. Đây là điều mệnh đề `if` thứ hai kiểm tra. Khi queue có data và CPU ở throttle state, frame bị drop. Nhưng khi queue rỗng và CPU ở throttle state (được một mệnh đề `if` trong nửa sau đoạn code kiểm tra), throttle state được gỡ bỏ.[^6]
 

@@ -102,7 +102,7 @@ STP mô tả trong chương có mục tiêu phần nào tương tự: với grap
 
 Hãy tìm hiểu chính xác “spanning tree tốt nhất” nghĩa gì. Với graph và node muốn làm root cho trước, spanning tree tốt nhất là topology loop-free (tree) tối thiểu hóa khoảng cách từ mỗi node tới root node. Tùy graph, có thể có nhiều tree cùng điểm đánh giá chất lượng[^2] (Hình 15-4 cho ví dụ hai lời giải tốt ngang nhau).
 
-Khi link không được gán cost, hoặc đều có cùng cost (tương đương nhau), khoảng cách từ node tới root được đo bằng số link (tức network hop). Tuy nhiên, khi gán cost cho link, số hop không nhất thiết chỉ báo chất lượng path.
+Khi các link không được gán cost hoặc đều được gán cùng cost, hai trường hợp tương đương nhau, khoảng cách từ một node đến root được đo bằng số link, tức network hop. Tuy nhiên, khi gắn cost cho các link, số hop không nhất thiết biểu thị chất lượng của path.
 
 ![Figure 15-4](images/ch15/fig15-04.png)
 
@@ -140,7 +140,7 @@ Root bridge không chỉ là chỗ giữ vị trí trong topology; nó giữ vai
 
 - Root bridge bảo đảm mọi bridge trong network biết topology change khi xảy ra (xem mục “Topology change”).
 
-Lưu ý chọn port state và role (do đó link cần enable hoặc disable) phụ thuộc vị trí root bridge trong topology: vì trước hết chọn root bridge rồi dựng tree tốt nhất dựa vào đó.
+Lưu ý rằng việc chọn port state và role, từ đó chọn những link cần enable hoặc disable, phụ thuộc vào vị trí root bridge trong topology. Lý do là trước tiên chúng ta chọn root bridge, sau đó xây dựng tree tốt nhất dựa trên root bridge đó.
 
 ### Designated bridge
 
@@ -184,7 +184,7 @@ Port được enable, learning hoạt động và có thể forward data traffic
 
 Dùng learning state trung gian cho phép bridge giảm lượng flooding vốn cần thiết khi forwarding database rỗng.
 
-Trừ port ở disabled state, ingress BPDU được xử lý bất kể port state. Port ở state cụ thể nhận ingress BPDU hay truyền BPDU phụ thuộc port role, giới thiệu trong mục “Port role”.
+Ngoại trừ các port ở disabled state, ingress BPDU được xử lý bất kể state của port. Việc một port ở state cụ thể có nhận ingress BPDU hay truyền BPDU phụ thuộc vào role của port, được giới thiệu trong phần “Port role”.
 
 Hình 15-6 cho thấy cách port state thay đổi. Có tiến trình rõ ràng từ blocking qua listening và learning tới state hoạt động nhất, forwarding. Protocol quyết định chuyển tiếp giữa blocking và forwarding dựa trên nhiều yếu tố (xem mục “Định nghĩa active topology” phía sau). Lưu ý:
 
@@ -362,7 +362,7 @@ Value của ba timer Max Age, Hello Time và Forward Delay không phải cấu h
 
 Bốn thành phần của configuration BPDU—Root Bridge ID, Root Path Cost, Bridge ID và Port ID—tạo thành priority vector (xem Hình 15-8). Vì bốn thành phần liên tiếp, có thể xem vector là một số 22-byte duy nhất. Số càng thấp, bridge càng quan trọng trong topology; nói cách khác, priority vector quyết định bên thắng khi tranh role như root bridge và designated bridge. Trong phần còn lại của chương, tôi tham chiếu priority vector bằng ký hiệu \[BR-Root, Cost, BR-ID, Port-ID\].
 
-Trong ví dụ phía sau, hình chỉ thể hiện priority component của configuration BPDU được truyền, vì đó là phần bridge dùng để chọn role và state của port.
+Trong các ví dụ phía sau của chương này, hình chỉ thể hiện thành phần priority của các configuration BPDU được truyền, vì đó là phần configuration BPDU mà bridge sử dụng để chọn role và state cho các port.
 
 Với hai priority vector PV1=\[BR-Root1, Cost1, BR-ID-1, Port-ID1\] và PV2=\[BR-Root2, Cost2, BR-ID-2, Port-ID2\], PV1 được gọi là superior khi numeric value thấp hơn PV2, và inferior khi numeric value cao hơn PV2. Nói cách khác, PV1 superior so với PV2 nếu BR-Root1 \< BR-Root2; hoặc nếu bằng nhau, Cost1 \< Cost2; hoặc nếu cũng bằng nhau, BR-ID1 \< BR-ID2; hoặc khi hai bridge ID cũng khớp, Port-ID1\<Port-ID2.
 
@@ -390,19 +390,19 @@ Bất kể lý do truyền configuration BPDU ra port cụ thể, STP thực thi
 
 ### BPDU aging
 
-Vì BPDU chỉ do root bridge tạo, còn bridge khác chỉ tạo lại khi nhận BPDU trên root port, rõ ràng thời gian để thông tin do root bridge tạo qua BPDU tới leaf bridge là biến đổi. Trên stable network, thời gian chủ yếu phụ thuộc tải bridge và tốc độ xử lý BPDU.
+Vì BPDU chỉ được root bridge tạo ra, còn các bridge khác chỉ tạo lại chúng khi nhận BPDU trên root port, rõ ràng thời gian để thông tin mà root bridge gửi qua BPDU đến các leaf bridge không cố định. Trên một network ổn định, thời gian này chủ yếu phụ thuộc vào mức tải của bridge và tốc độ chúng xử lý BPDU.
 
 ![Figure 15-9](images/ch15/fig15-09.png)
 
 Hình 15-9. Relay BPDU qua nonroot bridge
 
-Không nên dùng BPDU mang thông tin cũ để dựng topology loop-free. Vì vậy, configuration BPDU có field Message Age được receiving bridge so với field Max Age để loại BPDU đã tồn tại quá lâu và priority vector không còn đáng tin.
+Không nên sử dụng các BPDU mang thông tin cũ để xây dựng topology loop-free. Vì vậy, configuration BPDU có field Message Age, được bridge nhận so sánh với field Max Age để loại bỏ những BPDU đã tồn tại quá lâu và có priority vector không còn đáng tin cậy.
 
 Field Message Age được root bridge khởi tạo 0, rồi từng nonroot bridge cập nhật trước khi forward (xem DT trong Hình 15-9). Message Age được kỳ vọng biểu thị thời gian từ khi BPDU gốc của root bridge được tạo. Tuy nhiên, tính thời gian không dễ. Chẳng hạn, cần tính cả transmission delay và processing time: thời gian frame ở media từ port bridge này tới port bridge kế tiếp, và thời gian trong memory khi mỗi bridge xử lý rồi tạo lại. Nhưng cách phổ biến trong commercial bridge là xem Message Age như hop count, giống field Time To Live (TTL) trong IP header: Message Age của ingress BPDU được tăng 256 tick (tức 1 giây) và copy vào outgoing BPDU. Nghĩa là BPDU bị drop sau tối đa 20 hop (20 giây là default value Max Age).
 
 Linux không dùng message age như hop count mà cố tuân thủ quy tắc gốc trong mục “Truyền configuration BPDU”.
 
-Khi BPDU bridge nhận trên một port chưa hết hạn (tức Message Age nhỏ hơn Max Age), bridge bắt đầu Message Age timer hết hạn sau khoảng thời gian bằng Max Age trừ Message Age. Xem mục “Timer” về action khi Message Age timer hết hạn. Điều này bảo đảm thông tin BPDU bị loại sau Max Age giây kể từ khi tạo, trừ khi được xác nhận trước đó.
+Khi BPDU mà bridge nhận trên một port chưa hết hạn, tức Message Age nhỏ hơn Max Age, bridge khởi động Message Age timer sẽ hết hạn sau khoảng thời gian bằng hiệu giữa Max Age và Message Age. Xem phần “Timer” để biết các thao tác được kích hoạt khi Message Age timer hết hạn. Điều này bảo đảm thông tin trong BPDU bị loại bỏ sau Max Age giây kể từ khi được tạo, trừ khi được xác nhận trước thời điểm đó.
 
 ## Định nghĩa active topology
 
@@ -448,7 +448,7 @@ Mỗi bridge phải chọn root port riêng, như đã nói trong mục “Port 
 
 Với mỗi port trừ port bị disable do quản trị, bridge giữ bản copy priority vector tốt nhất nhận trong ingress BPDU. Nhờ vậy, với mỗi port, bridge biết path tốt nhất (cost thấp nhất) tới root bridge.
 
-Chọn root port chỉ gồm duyệt mọi port và chọn port có priority vector tốt nhất. Nếu nhiều port cùng có priority vector tốt nhất, local port có port ID được gán thấp nhất được chọn, như Hình 15-10 (lưu ý receiver port ID không thuộc BPDU).
+Việc chọn root port chỉ đơn giản là duyệt tất cả các port và chọn port có priority vector tốt nhất. Nếu nhiều port cùng có priority vector tốt nhất, local port có port ID được gán thấp nhất sẽ được chọn, như trong Hình 15-10. Lưu ý receiver port ID không nằm trong BPDU.
 
 ![Figure 15-10](images/ch15/fig15-10.png)
 
@@ -478,7 +478,7 @@ Giả sử có topology Hình 15-12. Lưu ý không có redundant link nên khô
 
 - Bridge ID BR1 \< Bridge ID BR2 \< Bridge ID BR4 (nên BR1 là root bridge).
 
-- Mỗi bridge có thể cấu hình cost của local interface độc lập với bridge khác. Để đơn giản và hình dễ đọc, giả sử mọi path cost đối xứng (giống ở hai đầu mỗi link).[^5] Lưu ý:
+- Mỗi bridge có thể cấu hình cost của các local interface độc lập với những bridge khác. Để đơn giản và giúp hình dễ đọc hơn, chúng ta giả định mọi path cost đối xứng, tức giống nhau ở hai đầu mỗi link.[^5] Lưu ý rằng:
 
 ![Figure 15-12](images/ch15/fig15-12.png)
 
@@ -528,9 +528,9 @@ Hãy xem BR1, BR3 và BR4 phản ứng khi nhận configuration BPDU của nhau:
 
 - BR4 chọn port 1 làm root port vì nhận priority vector tốt hơn (nhớ đã giả sử bridge ID BR2 thấp hơn bridge ID BR3).
 
-Nếu so configuration BPDU BR4 nhận từ BR2 với BPDU từ BR3, có thể thấy cùng root bridge ID (BR1) và root path cost (10), nhưng thành phần thứ ba của priority vector tốt hơn của BR2, vì bridge ID BR2 nhỏ hơn BR3. Vì vậy BR4 chọn port 1 làm root port. Administrator thích link BR4 tới BR3 hơn link tới BR2 chỉ cần cấu hình cost thấp hơn trên port đó (xem mục “Bridge ID và port ID”).
+Nếu so sánh configuration BPDU mà BR4 nhận từ BR2 với BPDU nhận từ BR3, bạn có thể thấy chúng có cùng root bridge ID (BR1) và root path cost (10), nhưng thành phần thứ ba của priority vector cho thấy BR2 có ưu tiên tốt hơn vì bridge ID của BR2 nhỏ hơn bridge ID của BR3. Vì vậy, BR4 chọn port 1 làm root port. Administrator muốn ưu tiên link từ BR4 đến BR3 hơn link đến BR2 chỉ cần cấu hình cost thấp hơn trên port đó, xem phần “Bridge ID và port ID”.
 
-Trong ví dụ, ba thành phần đầu priority vector đủ chọn root port và designated port. Giờ xem ví dụ Hình 15-14 khi thành phần thứ tư, port ID, cần làm tiebreaker.
+Trong ví dụ này, ba thành phần đầu tiên của priority vector đã đủ để chọn root port và designated port. Bây giờ, với ví dụ trong Hình 15-14, chúng ta hãy xem khi nào thành phần thứ tư, port ID, cần được dùng để phân định trường hợp hòa.
 
 Giờ BR4 nhận hai BPDU từ BR2 có cùng value ở ba field đầu priority vector. Tuy nhiên, parameter thứ tư (port ID) cho phép BR4 chọn port 1 làm root port. Trong mục “Chọn root port”, chúng ta cũng đã thấy bridge dùng local port ID (khác remote port ID thuộc priority vector) làm tiebreaker khi cả bốn thành phần priority vector của ingress BPDU chưa đủ xác định BPDU thắng.
 
@@ -651,11 +651,11 @@ Trước hết hãy xem event kích hoạt topology change, rồi cách xử lý
 
 Bridge port nonforwarding đổi state sang forwarding hoặc ngược lại
 
-Gồm disabled port được enable và port chỉ đổi state theo quyết định protocol. Từ góc nhìn tree, tương đương thêm link vào tree hoặc loại link.
+Trường hợp này bao gồm một port đang disabled được enable và một port chỉ thay đổi state theo quyết định của protocol. Xét từ góc độ tree, điều này tương đương thêm một link vào tree hoặc loại bỏ một link.
 
 Root bridge ID thay đổi
 
-Chẳng hạn có thể vì root bridge hiện tại bị tắt (nên bridge khác tiếp quản root role), hoặc bridge tốt hơn được enable, hoặc root bridge hiện tại hay bridge khác đổi priority. Thay root bridge có thể gây khá nhiều thay đổi port state và role toàn network, tùy vị trí root bridge mới so với cũ. Về lý thuyết, đổi root node có thể tạo tree rất khác, nhưng thực tế bridge được cấu hình bằng parameter trong mục “Bridge ID và port ID” để topology change không gây thay đổi lớn trong tree.
+Điều này có thể xảy ra vì root bridge hiện tại bị tắt và bridge khác tiếp quản root role, vì một bridge tốt hơn được enable hoặc vì root bridge hiện tại hay bridge khác thay đổi priority. Tùy vị trí root bridge mới so với root bridge cũ, việc thay đổi root bridge có thể kích hoạt nhiều thay đổi port state và role trên toàn network. Về lý thuyết, thay root node có thể tạo ra tree rất khác, nhưng trên thực tế, bridge được cấu hình bằng các parameter trong phần “Bridge ID và port ID” để topology change không kéo theo những thay đổi lớn của tree.
 
 Nhận TCN topology change trên bridge port
 
@@ -793,7 +793,7 @@ Tuy nhiên, dù cấu hình bridge tốt thế nào, vẫn có latency tối thi
 
 Lưu ý cả hai trường hợp do timer điều khiển. Tất nhiên có thể cấu hình Forward Delay và Max Age hết hạn nhanh hơn để giảm convergence time. Tuy nhiên, tùy độ phức tạp network, không phải lúc nào cũng dùng được timer quá gấp.
 
-Hãy xem ví dụ dựa trên Hình 15-2, khi bridge D1 hỏng vì lý do nào đó. Vì cả A1 và A2 dùng D1 để truy cập phần còn lại network, mọi host nối A1 và A2 bị cô lập tới khi STP chọn root port mới cho cả A1 và A2. Vậy STP cần bao lâu để thay đổi? Trong tình huống worst-case, sẽ như sau:
+Hãy xét ví dụ dựa trên Hình 15-2 và xem điều gì xảy ra khi bridge D1 hỏng vì một lý do nào đó. Vì cả A1 lẫn A2 sử dụng D1 để truy cập phần còn lại của network, mọi host kết nối với A1 và A2 bị cô lập khỏi phần còn lại cho đến khi STP chọn được root port mới cho cả hai. Vậy STP cần bao lâu để thực hiện những thay đổi này? Trong tình huống worst-case, các sự việc diễn ra như sau:
 
 - D1 ngừng hoạt động đúng.
 
@@ -831,7 +831,7 @@ RSTP backward compatible với 802.1D, nên bridge chạy protocol cũ và mới
 
 - RSTP có thể chuyển port tới forwarding state nhanh hơn nhiều bằng handshake giữa port và cơ chế sync bảo đảm tránh loop. Cải tiến mới thú vị này chỉ hiệu quả trên link point-to-point.
 
-- Khi root port được thay, có thể vào forwarding state ngay (tức không cần chờ hai lần Forward Delay timer hết hạn như Hình 15-6). Có thể vì protocol có cơ chế bảo đảm chuyển ngay sang forwarding không gây loop.
+- Khi root port được thay thế, nó có thể chuyển ngay sang forwarding state, tức không cần chờ Forward Delay timer hết hạn hai lần như trong Hình 15-6. Điều này có thể thực hiện vì protocol có cơ chế bảo đảm chuyển ngay sang forwarding không tạo ra loop.
 
 - Chỉ hai cải tiến trước đã giúp convergence time nhanh hơn đáng kể, có thể dưới một giây (tùy độ phức tạp topology).
 
@@ -839,7 +839,7 @@ RSTP backward compatible với 802.1D, nên bridge chạy protocol cũ và mới
 
 - Phát hiện connectivity problem không còn phụ thuộc Max Age timer. Giờ khi port đáng lẽ nhận BPDU không nhận trong ba Hello time liên tiếp, bắt đầu recovery mechanism. Max Age timer cũ vẫn có, nhưng chỉ dùng khi RSTP procedure mới vừa nêu không áp dụng được.
 
-- Topology change cũng được xử lý khác. Không còn cần TCN BPDU. Giờ bridge phát hiện topology change chỉ truyền BPDU có TC flag set từ root port và designated port. Mọi bridge khác nhận BPDU như vậy chỉ lặp quá trình: truyền BPDU có TC flag set ra mỗi forwarding port, trừ port nhận BPDU gốc. Đây là cơ chế đơn giản để lan truyền topology change notification theo mọi hướng. Khi bridge nhận BPDU có TC flag set, không bắt đầu Short Aging timer mà flush address học trên mọi port trừ port nhận BPDU.
+- Topology change cũng được xử lý khác. Không còn cần TCN BPDU. Bây giờ, bridge phát hiện topology change chỉ cần truyền BPDU có TC flag được đặt từ root port và designated port. Mọi bridge khác nhận BPDU như vậy lặp lại quá trình: truyền BPDU có TC flag được đặt ra từng forwarding port, trừ port đã nhận BPDU gốc. Đây là cơ chế đơn giản để lan truyền topology change notification theo mọi hướng. Khi nhận BPDU có TC flag được đặt, bridge không khởi động Short Aging timer mà flush các address đã học trên mọi port, trừ port nhận BPDU.
 
 - Cấu trúc BPDU RSTP dùng thay đổi rất ít so với STP. Flags field giờ dùng cả 8 bit để đáp ứng cải tiến mới.
 
@@ -859,7 +859,7 @@ Từ góc nhìn host, kết quả là Hình 15-24.
 
 Ngày nay dùng VLAN trên bridged network khá phổ biến. Đây là cách tiện lợi để tạo các L2 broadcast domain khác nhau trên bridged network. Khả năng định nghĩa nhiều spanning tree topology trên cùng network có nhiều ưu điểm. Trong đó là tận dụng network bandwidth tốt hơn (tức dùng redundant link tốt hơn, hay load balancing). Điều này giảm tải trên mỗi link.
 
-MSTP dùng RSTP cho từng spanning tree instance. Thực tế protocol phức tạp hơn vẻ ngoài: các STP instance độc lập, nhưng có một special instance giữ vai trò trung tâm, đặc biệt về cách trao đổi BPDU và duy trì backward compatibility với protocol trước.
+MSTP sử dụng RSTP cho từng spanning tree instance của nó. Protocol thực tế phức tạp hơn vẻ ngoài: các STP instance độc lập, nhưng có một instance đặc biệt giữ vai trò trung tâm, nhất là về cách trao đổi BPDU và cách duy trì backward compatibility với các protocol trước đó.
 
 ![Figure 15-24](images/ch15/fig15-24.png)
 

@@ -170,7 +170,7 @@ static int vortex_rx(struct net_device *dev)
 }
 ```
 
-Khi packet sắp truyền, parameter này biểu diễn device sẽ gửi nó ra ngoài. Code đặt giá trị phức tạp hơn code nhận packet, nên tôi sẽ hoãn thảo luận tới Chương 21 và Chương 35.
+Khi một packet chuẩn bị được truyền, parameter này biểu diễn device mà packet sẽ được gửi ra qua đó. Code đặt giá trị này phức tạp hơn code nhận packet, nên tôi sẽ để phần thảo luận đến Chương 21 và Chương 35.
 
 Một số network feature cho phép nhóm vài device lại để biểu diễn một virtual interface duy nhất (tức không gắn trực tiếp với hardware device), do virtual device driver phục vụ. Khi device driver được gọi, parameter `dev` trỏ tới data structure `net_device` của virtual device. Driver chọn một device cụ thể trong nhóm và thay parameter `dev` để trỏ tới data structure `net_device` của device đó. Vì vậy, trong các trường hợp này, pointer tới transmitting device có thể thay đổi trong quá trình xử lý packet.
 
@@ -748,7 +748,7 @@ Khi flag `IFF_PROMISC` được đặt, variable `new_mode` được khởi tạ
 
 ### Thống kê
 
-Thay vì cung cấp một tập field để giữ thống kê, structure `net_device` có pointer tên `priv` được driver đặt để trỏ tới private data structure lưu thông tin interface. Private data gồm thống kê như số packet đã truyền và nhận, cùng số lỗi gặp phải.
+Thay vì cung cấp một tập field để giữ thống kê, structure `net_device` chứa pointer có tên `priv`, được driver đặt để trỏ đến private data structure lưu thông tin về interface. Private data gồm các thống kê như số packet đã truyền và nhận, cùng số lỗi gặp phải.
 
 Định dạng structure mà `priv` trỏ tới phụ thuộc cả device type lẫn model cụ thể: vì vậy các Ethernet card khác nhau có thể dùng private structure khác nhau. Tuy nhiên, gần như mọi structure đều có field kiểu `net_device_stats` (được định nghĩa trong include/linux/netdevice.h), chứa thống kê chung cho mọi network device và có thể lấy bằng method `get_stats` được mô tả ở phần sau.
 

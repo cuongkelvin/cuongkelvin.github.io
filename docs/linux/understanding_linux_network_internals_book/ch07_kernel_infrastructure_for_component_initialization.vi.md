@@ -304,7 +304,7 @@ Bạn có thể thấy không còn cần chỉ thị `#ifdef`.
 
 Các mục sau mô tả cách dùng và hoạt động của một số macro mới.
 
-Các macro này cho phép kernel tự xác định cho mỗi module code nào đưa vào kernel image, code nào loại bỏ vì không cần, code nào chỉ thực thi khi khởi tạo, v.v. Nhờ đó, lập trình viên không còn phải lặp cùng logic trong từng module.[^2] Rõ ràng, để macro thay thế được chỉ thị có điều kiện cũ như ví dụ ở mục trước, chúng phải cung cấp ít nhất hai khả năng sau:
+Các macro này cho phép kernel tự xác định cho mỗi module những phần code cần đưa vào kernel image, những phần cần loại bỏ vì không cần thiết, những phần chỉ được thực thi tại thời điểm khởi tạo, v.v. Nhờ vậy, từng lập trình viên không còn phải lặp lại cùng logic trong mỗi module.[^2] Rõ ràng, để các macro cho phép thay thế những conditional directive cũ như ví dụ ở phần trước, chúng phải cung cấp ít nhất hai khả năng sau:
 
 - Định nghĩa routine cần thực thi khi kernel component mới được enable, do được đưa tĩnh vào kernel hoặc load lúc runtime dưới dạng module
 
