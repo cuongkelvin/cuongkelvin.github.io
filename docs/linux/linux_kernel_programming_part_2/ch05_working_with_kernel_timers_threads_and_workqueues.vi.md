@@ -1146,7 +1146,7 @@ Thậm chí có thể dùng và tạo các loại workqueue khác! Kernel cung c
 
 ### Workqueue internals tối thiểu
 
-Chúng ta không đi quá sâu workqueue internals ở đây; thực tế chỉ lướt trên bề mặt (như đã đề cập, mục đích chỉ tập trung dùng kernel-global workqueue).
+Chúng ta không tìm hiểu quá sâu về workqueue internals ở đây; thực tế, chỉ đề cập sơ lược. Như đã nói trước đó, mục đích của chúng ta ở đây chỉ là tập trung vào sử dụng kernel-global workqueue.
 
 Luôn khuyến nghị dùng default kernel-global (system) workqueue để xử lý công việc background asynchronous. Nếu thấy không đủ, đừng lo – có các interface cho phép tạo workqueue riêng. (Nhớ rằng làm vậy tăng áp lực hệ thống!) Để cấp phát workqueue instance mới, có thể dùng API `alloc_workqueue()`; đây là API chính dùng để tạo (cấp phát) workqueue (qua framework cmwq hiện đại):
 
@@ -1216,7 +1216,7 @@ Hình 5.11 – Góc nhìn khái niệm đơn giản về workqueue subsystem tro
 
 Workqueue framework của kernel duy trì động các worker pool (gồm kernel thread) này; một số, như workqueue `events` (tương ứng kernel-global workqueue), là general-purpose, còn những pool khác được tạo và duy trì cho mục đích cụ thể (thể hiện ở tên kernel thread, như block I/O, `kworker*blockd`, memory control, `kworker*mm_percpu_wq`, loại device-specific như tpm, `tpm_dev_wq`, CPU frequency governor driver, `devfreq_wq`, v.v.). Lưu ý kernel workqueue subsystem duy trì tự động, tinh tế và hiệu quả mọi workqueue này (cùng worker pool kernel thread liên quan).
 
-Vậy thực sự dùng workqueue thế nào? Phần tiếp theo cho thấy cách dùng kernel-global workqueue. Tiếp đó là demo kernel module minh họa rõ cách sử dụng.
+Vậy bạn thực sự sử dụng workqueue như thế nào? Phần tiếp theo trình bày cách sử dụng kernel-global workqueue. Sau đó là một kernel module minh họa rõ cách sử dụng nó.
 
 ### Sử dụng kernel-global workqueue
 

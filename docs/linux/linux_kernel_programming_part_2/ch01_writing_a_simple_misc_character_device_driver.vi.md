@@ -692,7 +692,7 @@ Hình 1.8 – miscdrv\_rdwr: kiểm thử read (ở mức tối thiểu); bí m�
 
 Hình 1.9 – miscdrv\_rdwr: kiểm thử write (ở mức tối thiểu); một bí mật mới, tuyệt vời được ghi
 
-Phần kernel log nơi write diễn ra được tô nổi bật trong Hình 1.9. Nó hoạt động; tôi rất khuyến khích bạn tự thử, vừa làm vừa xem kernel log.
+Phần kernel log thể hiện thao tác ghi được tô nổi bật trong Hình 1.9. Cách này hoạt động; tôi rất khuyến khích bạn tự thử và theo dõi kernel log trong quá trình thực hiện.
 
 Bây giờ là lúc tìm hiểu sâu hơn một chút. Thực tế là với tư cách người viết driver, bạn phải học cách thật cẩn thận về bảo mật, nếu không đủ loại bất ngờ khó chịu sẽ chờ sẵn. Mục tiếp theo giúp bạn hiểu lĩnh vực quan trọng này.
 

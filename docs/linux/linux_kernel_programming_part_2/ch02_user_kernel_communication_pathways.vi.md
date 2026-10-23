@@ -878,7 +878,7 @@ Tất nhiên, best practice luôn là không giả định đây mãi là vị t
 
 Nhân tiện, một tính năng thú vị của Linux là filesystem có thể được mount ở nhiều vị trí khác nhau, thậm chí đồng thời nhiều nơi; ngoài ra, có người thích tạo symbolic link `/debug` trỏ đến `/sys/kernel/debug`; thực sự tùy bạn.
 
-Như thường lệ, mục tiêu là tạo các (pseudo) file dưới debugfs, rồi đăng ký và dùng read/write callback của chúng để kết nối driver với user space. Để làm vậy, cần hiểu cách dùng cơ bản của debugfs API. Chúng tôi sẽ chỉ tài liệu trong mục tiếp theo.
+Như thường lệ, mục tiêu của chúng ta là tạo các pseudo-file dưới debugfs, sau đó đăng ký và sử dụng các read/write callback từ chúng để giao tiếp driver với user space. Để thực hiện, chúng ta cần hiểu cách sử dụng cơ bản của debugfs API. Phần tiếp theo sẽ chỉ bạn đến tài liệu liên quan.
 
 ### Tra cứu tài liệu debugfs API
 
@@ -1175,7 +1175,7 @@ setting is currently On)
 #
 ```
 
-Giờ hãy remove kernel module – bên trong, code cleanup (xóa đệ quy) debugfs file sẽ chưa chạy. Ở đây, ta thực sự kích hoạt kernel bug, Oops, bằng cách cố đọc một debugfs file:
+Bây giờ, hãy gỡ kernel module. Bên trong, phần code dùng để cleanup, tức xóa đệ quy debugfs file của chúng ta, đã không được chạy. Ở đây, chúng ta thực sự kích hoạt kernel bug, tức Oops, bằng cách cố đọc một trong các debugfs file:
 
 ```
 # rmmod debugfs_simple_intf
@@ -1613,7 +1613,7 @@ purposes;
 #define IOCTL_LLKD_IOCSPOWER    _IOW(IOCTL_LLKD_MAGIC, 2, int)
 ```
 
-Phải cố làm tên dùng trong macro có ý nghĩa. Ba command (in đậm) đều có prefix `IOCTL_LLKD_`, cho biết tất cả là ioctl command cho project giả tưởng `LLKD`; tiếp theo có suffix `IOC{Q|S}`, với `IOC` nghĩa là ioctl command, `Q` nghĩa query operation và `S` nghĩa set operation.
+Chúng ta phải cố gắng đặt những tên có ý nghĩa cho các macro. Ba command được in đậm đều có prefix `IOCTL_LLKD_`, cho biết chúng là các ioctl command cho dự án giả định `LLKD`. Tiếp theo, chúng có suffix `IOC{Q|S}`, trong đó `IOC` biểu thị ioctl command, `Q` biểu thị query operation và `S` biểu thị set operation.
 
 Giờ hãy học cách thiết lập ở mức code từ cả user space lẫn kernel space (driver).
 
@@ -1636,7 +1636,7 @@ int ioctl(int fd, unsigned long request, ...);
 
 real-world, ioctl thường được dùng như generic system call. Việc dùng ioctl để thực hiện command operation trên cả hardware và software phổ biến đến đáng kinh ngạc! Hãy tham khảo kernel documentation (`Documentation/ioctl/<...>`) để xem nhiều ví dụ thực tế. Chẳng hạn, tìm chi tiết ai dùng magic number (hoặc code) nào trong ioctl ở đây: `https://www.kernel.org/doc/Documentation/ioctl/ioctl-number.txt`. (Tương tự, man page `ioctl_list(2)` cho biết danh sách đầy đủ ioctl call trong x86 kernel; dù các documentation file này có vẻ khá cũ. Tài liệu hiện có vẻ nằm ở đây: `https://github.com/torvalds/linux/tree/master/Documentation/userspace-api/ioctl`.)
 
-Hãy xem vài đoạn user space C application, đặc biệt phần thực hiện system call `ioctl(2)` (để ngắn và dễ đọc, đã bỏ error checking code; code đầy đủ có trong GitHub repository của sách):
+Chúng ta hãy xem một số code snippet của ứng dụng C trong user space, đặc biệt phần thực hiện các system call `ioctl(2)`. Để ngắn gọn và dễ đọc, chúng tôi bỏ phần code kiểm tra lỗi; code đầy đủ có trong GitHub repository của sách:
 
 ```
 // ch2/ioctl_intf/user space_ioctl/ioctl_llkd_userspace.c

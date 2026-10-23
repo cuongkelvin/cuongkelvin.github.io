@@ -186,7 +186,7 @@ Cũng có tập atomic operator nâng cao hơn gọi là RMW API. Trong nhiều 
 
 Nội dung mục này giả định bạn có ít nhất kiến thức cơ bản về truy cập peripheral device (chip) memory và register; đã trình bày chi tiết trong `Chapter 3`, Làm việc với Hardware I/O Memory. Hãy bảo đảm hiểu trước khi đi tiếp.
 
-Rất thường cần bit operation (phổ biến nhất là bitwise `AND &` và bitwise `OR` `|`) trên register; nhằm sửa giá trị, đặt và/hoặc xóa một số bit. Vấn đề là chỉ thao tác C để truy vấn hoặc đặt device register chưa đủ. Không, đừng quên concurrency! Đọc tiếp để biết đầy đủ.
+Bạn rất thường cần thực hiện bit operation trên register, với các toán tử phổ biến nhất là bitwise `AND &` và bitwise `OR` `|`. Mục đích là sửa giá trị register bằng cách set hoặc clear một số bit trong nó. Vấn đề là chỉ thực hiện các thao tác C để query hoặc set device register vẫn chưa đủ. Đúng vậy: đừng quên các vấn đề concurrency! Hãy đọc tiếp để biết đầy đủ câu chuyện.
 
 ### RMW atomic operation – thao tác device register
 
@@ -200,7 +200,7 @@ Register cơ bản là phần memory nhỏ trong peripheral device; thường k�
 #define CTRL_REG        (REG_BASE+0x1)
 ```
 
-Giả sử để bật device giả tưởng, datasheet nói đặt bit `7` (MSB) của control register thành `1`. Như người viết driver nhanh chóng học, có trình tự chuẩn để sửa register:
+Bây giờ, giả sử để bật device giả định, datasheet cho biết chúng ta có thể đặt bit `7`, tức MSB, của control register thành `1`. Như mọi người viết driver sẽ nhanh chóng học được, có một trình tự chuẩn khi sửa register:
 
 1\. Đọc giá trị register hiện tại vào temporary variable.
 
@@ -223,11 +223,11 @@ turn_on_dev()
 
 (Để bạn biết thêm, routine thực tế dùng trên Linux MMIO — memory-mapped I/O — là `ioread[8|16|32]()` và `iowrite[8|16|32]()`.)
 
-Điểm chính: chưa đủ tốt; lý do là concurrency, data race! Nghĩ xem: register (cả CPU và device register) thực chất là global shared writable memory location; vì vậy truy cập là critical section, phải bảo vệ khỏi concurrent access! Cách làm dễ; có thể dùng spinlock (ít nhất hiện tại). Sửa pseudocode để chèn API `spin_[un]lock()` trong critical section — RMW sequence — rất đơn giản. Tuy nhiên có cách tốt hơn để an toàn dữ liệu với đại lượng nhỏ như integer; đã trình bày: atomic operator! Linux còn đi xa hơn, cung cấp tập atomic API cho cả:
+Một điểm then chốt ở đây là cách này chưa đủ tốt, vì có concurrency và data race! Hãy nghĩ xem: register, cả CPU register lẫn device register, thực chất là một global shared writable memory location. Vì vậy, truy cập nó tạo thành critical section mà bạn phải bảo vệ khỏi concurrent access. Cách thực hiện khá đơn giản: ít nhất hiện tại, có thể sử dụng spinlock. Sửa pseudocode trước để chèn các API `spin_[un]lock()` vào critical section, tức RMW sequence, là việc đơn giản. Tuy nhiên, có một cách còn tốt hơn để đạt data safety khi làm việc với đại lượng nhỏ như số nguyên mà chúng ta đã trình bày: atomic operator! Linux còn đi xa hơn, cung cấp tập atomic API cho cả hai trường hợp sau:
 
 - Atomic non-RMW operation (đã thấy trong mục Dùng các interface atomic\_t và refcount\_t)
 
-- Atomic RMW operation; gồm nhiều loại operator phân thành các lớp: arithmetic, bitwise, swap (exchange), reference counting, miscellaneous và barrier
+- Các atomic RMW operation bao gồm nhiều loại operator, có thể phân thành các nhóm riêng: arithmetic, bitwise, swap (exchange), reference counting, miscellaneous và barrier
 
 Đừng phát minh lại bánh xe; kernel documentation (`https://www.kernel.org/doc/Documentation/atomic_t.txt`) có đủ thông tin. Chỉ trình bày phần liên quan, trích trực tiếp từ `Documentation/atomic_t.txt` trong kernel code base:
 
@@ -272,7 +272,7 @@ Tốt; giờ biết RMW (và non-RMW) operator, hãy thực hành — tiếp the
 
 #### Dùng RMW bitwise operator
 
-Ở đây tập trung RMW bitwise operator; để bạn khám phá loại khác (tham khảo kernel doc đã nói). Nghĩ lại cách viết pseudocode hiệu quả hơn. Có thể set (thành `1`) bit bất kỳ trong register hay memory item bằng API `set_bit()`:
+Ở đây, chúng ta tập trung vào sử dụng các RMW bitwise operator và để bạn tự khám phá những loại khác qua kernel documentation đã đề cập. Vì vậy, hãy nghĩ lại cách viết ví dụ pseudocode hiệu quả hơn. Chúng ta có thể đặt bất kỳ bit nào thành `1` trong register hoặc memory item bằng API `set_bit()`:
 
 ```
 void set_bit(unsigned int nr, volatile unsigned long *p);
@@ -367,7 +367,7 @@ static int __init atomic_rmw_bitops_init(void)
 }
 ```
 
-RMW atomic operator dùng ở đây được in đậm. Phần chính demo là cho thấy RMW bitwise atomic operator không chỉ dễ hơn mà nhanh hơn nhiều cách truyền thống, tự thực hiện RMW operation trong spinlock. Đây là hai hàm cho hai cách:
+Các RMW atomic operator được sử dụng ở đây được in đậm. Một phần quan trọng của ví dụ minh họa này là cho thấy sử dụng RMW bitwise atomic operator không chỉ dễ hơn nhiều mà còn nhanh hơn nhiều so với cách truyền thống, trong đó chúng ta tự thực hiện RMW operation trong phạm vi được spinlock bảo vệ. Dưới đây là hai function cho hai cách tiếp cận:
 
 ```
 /* Set the MSB; optimally, with the set_bit() RMW atomic API */
@@ -407,7 +407,7 @@ Hình 7.3 – Ảnh chụp output LKM ch13/1\_rmw\_atomic\_bitops, thể hiện 
 
 (Tôi chạy demo LKM trên guest VM Ubuntu 20.04 x86\_64.) Cách hiện đại — qua RMW atomic bitwise API `set_bit()` — trong lần chạy mẫu chỉ mất 415 nanosecond; cách truyền thống chậm hơn khoảng 265 lần! Code (qua `set_bit()`) cũng đơn giản hơn nhiều...
 
-Phần nào liên quan atomic bitwise operator, mục sau xem rất ngắn các API hiệu quả cao trong kernel để tìm bitmask — hóa ra khá phổ biến trong kernel.
+Có liên quan phần nào đến atomic bitwise operator, phần tiếp theo xem xét rất ngắn gọn các API hiệu quả cao có trong kernel để tìm kiếm trong bitmask, một thao tác hóa ra khá phổ biến trong kernel.
 
 ### Tìm kiếm bitmask hiệu quả
 
@@ -423,9 +423,9 @@ Xem header \<`linux/bitops.h>` còn thấy macro thú vị khác như `for_each_
 
 ## Dùng reader-writer spinlock
 
-Hình dung kernel (hay driver) code tìm kiếm global doubly linked circular list lớn (vài nghìn node). Vì data structure global (shared, writable), truy cập là critical section cần bảo vệ.
+Hãy hình dung một đoạn kernel code hoặc driver code đang tìm kiếm trong một global doubly linked circular list lớn, có vài nghìn node. Vì data structure này là global, được chia sẻ và có thể ghi, việc truy cập nó tạo thành critical section cần bảo vệ.
 
-Giả sử tìm list là non-blocking operation, thường dùng spinlock bảo vệ critical section. Cách ngây thơ có thể đề xuất không lock vì chỉ đọc, không cập nhật. Nhưng tất nhiên (như đã học), ngay read trên shared writable data cũng phải bảo vệ khỏi write vô tình xảy ra đồng thời, dẫn đến dirty/torn read. Kết luận cần spinlock; hình dung pseudocode như sau:
+Giả sử việc tìm kiếm trong list là một non-blocking operation, bạn thường sử dụng spinlock để bảo vệ critical section. Một cách tiếp cận đơn giản có thể đề xuất không dùng lock vì chúng ta chỉ đọc data trong list, không cập nhật nó. Nhưng dĩ nhiên, như đã học, ngay cả việc đọc shared writable data cũng phải được bảo vệ để tránh thao tác ghi vô ý xảy ra đồng thời, dẫn đến dirty read hoặc torn read. Vì vậy, chúng ta kết luận cần spinlock và hình dung pseudocode có dạng như sau:
 
 ```
 spin_lock(mylist_lock);
@@ -436,15 +436,15 @@ for (p = &listhead; (p = next_node(p)) != &listhead; ) {
 spin_unlock(mylist_lock);
 ```
 
-Vấn đề gì? Tất nhiên hiệu năng! Nhiều thread trên multicore system đến code gần cùng lúc; mỗi thread cố lấy spinlock, nhưng chỉ winner lấy được, duyệt toàn list rồi unlock, cho thread tiếp đi. Nói cách khác, như dự kiến, execution serialized, chậm đi rất nhiều. Nhưng không tránh được; hay có thể?
+Vậy vấn đề là gì? Dĩ nhiên là hiệu năng! Hãy tưởng tượng nhiều thread trên multicore system đi đến đoạn code này gần như cùng lúc. Mỗi thread cố lấy spinlock, nhưng chỉ một thread thắng cuộc lấy được, duyệt toàn bộ list rồi unlock, cho phép thread tiếp theo tiếp tục. Nói cách khác, đúng như dự kiến, việc thực thi giờ được tuần tự hóa, làm mọi thứ chậm đi đáng kể. Nhưng không thể tránh điều đó, hay vẫn có thể?
 
-reader-writer spinlock xuất hiện. Locking construct này yêu cầu mọi thread đọc protected data xin read lock, còn thread cần write access list xin exclusive write lock. Read lock cấp ngay cho thread yêu cầu miễn hiện không có write lock. Thực chất cho mọi reader truy cập concurrent, nghĩa là không locking thực sự. Ổn khi chỉ reader. Khi writer thread đến, yêu cầu write lock. Giờ locking semantics thường áp dụng: writer chờ mọi reader unlock. Khi xong, writer lấy exclusive write lock và đi tiếp. Nếu reader/writer khác cố truy cập, bị buộc chờ spin cho đến writer unlock.
+Đây là lúc reader-writer spinlock phát huy vai trò. Cơ chế locking này yêu cầu mọi thread đọc data được bảo vệ phải yêu cầu read lock, còn bất kỳ thread nào cần ghi vào list phải yêu cầu exclusive write lock. Read lock được cấp ngay cho thread yêu cầu, miễn là hiện không có write lock. Thực chất, cơ chế này cho phép mọi reader truy cập data đồng thời, nghĩa là không có việc khóa thực sự giữa các reader. Điều này ổn khi chỉ có reader. Ngay khi một writer thread xuất hiện, nó yêu cầu write lock. Lúc này, ngữ nghĩa locking thông thường được áp dụng: writer phải đợi mọi reader unlock. Sau đó, writer lấy exclusive write lock và tiếp tục. Vì vậy, nếu reader hoặc writer khác cố truy cập, chúng buộc phải spin chờ writer unlock.
 
-Vì vậy khi access pattern là read rất thường, write hiếm, và critical section khá dài, reader-writer spinlock performance-enhancing.
+Vì vậy, trong những tình huống mà kiểu truy cập data có thao tác đọc rất thường xuyên, thao tác ghi hiếm và critical section khá dài, reader-writer spinlock là lựa chọn giúp cải thiện hiệu năng, tức performance-enhancing.
 
 ### Reader-writer spinlock interface
 
-Đã dùng spinlock thì reader-writer variant đơn giản; lock data type được trừu tượng thành cấu trúc `rwlock_t` (thay `spinlock_t`), tên API chỉ thay `spin` bằng `read` hoặc `write`:
+Nếu đã sử dụng spinlock, việc dùng biến thể reader-writer khá đơn giản. Kiểu data của lock được trừu tượng hóa thành structure `rwlock_t` thay cho `spinlock_t`, và về tên API, chỉ cần thay `spin` bằng `read` hoặc `write`:
 
 ```
 #include <linux/rwlock.h>
@@ -488,7 +488,7 @@ Giống spinlock thường, có biến thể reader-writer spinlock API: `{read,
 
 ### Lưu ý thận trọng
 
-reader-writer spinlock có vấn đề. Một vấn đề điển hình là writer có thể starve khi block trên nhiều reader. Nghĩ xem: ba reader thread đang giữ reader-writer lock. Giờ writer đến muốn lock. Phải chờ cả ba reader unlock. Nhưng nếu lúc đó thêm reader đến (hoàn toàn có thể)? Thảm họa với writer, phải chờ lâu hơn — thực chất starve. (Có thể cần instrument/profile kỹ code path để biết thực sự vậy không.)
+Với reader-writer spinlock, vẫn có những vấn đề. Một vấn đề điển hình là writer có thể bị starvation khi bị block để chờ nhiều reader. Hãy nghĩ xem: giả sử ba reader thread đang giữ reader-writer lock. Một writer xuất hiện và muốn lấy lock. Nó phải đợi cả ba reader unlock. Nhưng nếu trong lúc đó có thêm reader đến, điều hoàn toàn có thể xảy ra, thì sao? Điều này trở thành vấn đề nghiêm trọng với writer vì nó phải chờ lâu hơn nữa, thực chất là bị starvation. Có thể cần instrument hoặc profile cẩn thận các code path liên quan để xác định liệu đây có thực sự là nguyên nhân hay không.
 
 Không chỉ vậy, cache effect — gọi cache ping-pong — có thể và thường xảy ra khi nhiều reader thread trên CPU core khác nhau đọc cùng shared state song song (khi giữ reader-writer lock); thực tế thảo luận trong mục Ảnh hưởng của cache và false sharing). Kernel documentation về spinlock (`https://www.kernel.org/doc/Documentation/locking/spinlocks.txt`) nói tương tự. Trích trực tiếp: “LƯU Ý! reader-writer lock cần nhiều atomic memory operation hơn spinlock đơn giản. Trừ khi reader critical section dài, tốt hơn chỉ dùng spinlock.” Thực tế cộng đồng kernel đang loại bỏ reader-writer spinlock nhiều nhất có thể, chuyển sang kỹ thuật lock-free tốt hơn (như RCU - Read Copy Update, công nghệ lock-free nâng cao). Vì vậy không nên dùng tùy tiện reader-writer spinlock.
 
@@ -498,15 +498,15 @@ Kernel documentation gọn và đơn giản về spinlock (chính Linus Torvalds
 
 Trước đã đề cập semaphore object (`Chapter 6`, Kernel Synchronization – Phần 1, mục Semaphore và mutex), so sánh với mutex. Đã hiểu tốt hơn đơn giản dùng mutex. Ở đây chỉ ra trong kernel, cũng như reader-writer spinlock, có reader-writer semaphore. Use case và semantics tương tự reader-writer spinlock. Macro/API liên quan (trong `<linux/rwsem.h>`) là `{down,up}_{read,write}_{trylock,killable}()`. Ví dụ phổ biến trong cấu trúc `struct mm_struct` (nằm trong task structure), một member là reader-writer semaphore: `struct rw_semaphore mmap_sem;`.
 
-Để hoàn tất, chỉ nhắc vài synchronization mechanism liên quan khác trong kernel. Cơ chế dùng nhiều khi phát triển user space application (đặc biệt Pthreads framework trong Linux user space) là Condition Variable (CV). Ngắn gọn, cho hai hay nhiều thread synchronize dựa trên giá trị dữ liệu hay state cụ thể. Tương đương trong Linux kernel gọi completion mechanism. Xem cách dùng trong kernel documentation tại `https://www.kernel.org/doc/html/latest/scheduler/completion.html#completions-wait-for-completion-barrier-apis`.
+Để kết thúc phần thảo luận này, chúng ta chỉ đề cập thêm một vài synchronization mechanism liên quan trong kernel. Một cơ chế được sử dụng nhiều khi phát triển ứng dụng user space, đặc biệt với Pthreads framework trong Linux user space, là Condition Variable (CV). Nói ngắn gọn, nó cho phép từ hai thread trở lên đồng bộ với nhau dựa trên giá trị của một data item hoặc một state cụ thể. Cơ chế tương đương trong Linux kernel được gọi là completion mechanism. Hãy tìm chi tiết về cách sử dụng trong kernel documentation tại `https://www.kernel.org/doc/html/latest/scheduler/completion.html#completions-wait-for-completion-barrier-apis`.
 
-Sequence lock dùng trong tình huống chủ yếu write (ngược reader-write spinlock/semaphore lock phù hợp chủ yếu read), nơi write nhiều hơn read rất nhiều trên protected variable. Như tưởng tượng, không phổ biến lắm; ví dụ tốt là cập nhật global `jiffies_64`.
+Sequence lock được sử dụng trong những tình huống chủ yếu là ghi, trái với các lock reader-write spinlock/semaphore phù hợp cho những tình huống chủ yếu là đọc, nơi số lần ghi vượt xa số lần đọc trên biến được bảo vệ. Như bạn có thể hình dung, điều này không quá phổ biến; một ví dụ tốt về sử dụng sequence lock là cập nhật biến global `jiffies_64`.
 
 Ai tò mò, code cập nhật global `jiffies_64` bắt đầu tại `kernel/time/tick-sched.c:tick_do_update_jiffies64()`. Hàm xác định có cần cập nhật jiffies không, nếu có gọi `do_timer(++ticks);` để thực sự cập nhật. Suốt lúc đó API `write_seq[un]lock(&jiffies_lock);` bảo vệ critical section write-critical.
 
 ## Ảnh hưởng của cache và false sharing
 
-Bộ xử lý hiện đại dùng nhiều cấp parallel cache memory bên trong để tăng tốc rất đáng kể khi làm việc với memory (đã nói ngắn trong tài liệu đồng hành Linux Kernel Programming - Chương 8, Cấp phát Kernel Memory cho người viết Module – Phần 1, mục Cấp phát slab memory). Ta hiểu CPU hiện đại không thực sự đọc/ghi RAM trực tiếp; khi software yêu cầu đọc byte RAM bắt đầu tại địa chỉ nào đó, CPU thực sự đọc nhiều byte — cả cacheline (thường 64 byte) từ địa chỉ đầu vào mọi CPU cache (giả sử L1, L2, L3: level 1, 2, 3). Nhờ vậy truy cập vài phần tử memory tuần tự tiếp theo nhanh hơn rất nhiều vì kiểm tra cache trước (L1 rồi L2 rồi L3, cache hit dễ xảy ra). Lý do nhanh hơn (nhiều) đơn giản: truy cập CPU cache memory thường từ một đến vài (single-digit) nanosecond, còn RAM từ 50 đến 100 nanosecond (tất nhiên tùy hardware và số tiền sẵn sàng bỏ ra!).
+Processor hiện đại sử dụng nhiều cấp cache memory song song bên trong để tăng tốc đáng kể khi làm việc với memory. Chúng ta đã đề cập ngắn gọn trong tài liệu đồng hành Linux Kernel Programming - Chương 8, Cấp phát Kernel Memory cho người viết Module – Phần 1, phần Cấp phát slab memory. CPU hiện đại thực sự không đọc và ghi RAM trực tiếp. Khi software yêu cầu đọc một byte RAM từ một địa chỉ, CPU thực tế đọc nhiều byte, cả một cacheline thường gồm 64 byte, từ địa chỉ bắt đầu vào các CPU cache như L1, L2 và L3, tức cấp 1, 2 và 3. Nhờ vậy, truy cập những phần tử tiếp theo trong memory liên tục nhanh hơn rất nhiều vì trước tiên các cache được kiểm tra, lần lượt L1, L2 rồi L3, khiến cache hit có khả năng xảy ra cao. Lý do nhanh hơn nhiều rất đơn giản: truy cập CPU cache memory thường mất một đến vài nanosecond, tức single-digit, còn truy cập RAM có thể mất từ 50 đến 100 nanosecond. Dĩ nhiên, điều này phụ thuộc hardware cụ thể và số tiền bạn sẵn sàng bỏ ra!
 
 Nhà phát triển software tận dụng hiện tượng này bằng những việc như:
 
@@ -516,43 +516,43 @@ Nhà phát triển software tận dụng hiện tượng này bằng những vi�
 
 Tuy nhiên có rủi ro và mọi thứ có thể sai. Ví dụ hai biến khai báo: `u16 ax = 1, bx = 2;` (`u16` là unsigned integer 16-bit).
 
-Vì khai báo liền nhau, rất có thể cùng CPU cacheline lúc runtime. Để hiểu vấn đề, xét multicore system hai CPU core, mỗi core có L1 và L2, cùng common/unified L3 cache. Thread T1 làm việc trên `ax`, thread T2 đồng thời (CPU core khác) trên `bx`. Khi T1 trên CPU `0` truy cập `ax` từ main memory (RAM), CPU cache chứa giá trị hiện tại `ax` và `bx` (vì cùng cacheline!). Tương tự T2 trên CPU `1` truy cập `bx` từ RAM, CPU cache cũng chứa giá trị hiện tại cả hai. Hình 7.4 mô tả khái niệm:
+Vì được khai báo liền nhau, rất có thể các biến sẽ nằm trong cùng một CPU cacheline ở runtime. Để hiểu vấn đề, hãy xét ví dụ sau: một multicore system có hai CPU core, mỗi core có hai CPU cache L1 và L2, cùng một L3 cache dùng chung. Thread T1 làm việc với biến `ax`, còn thread T2 đồng thời làm việc với biến `bx` trên một CPU core khác. Hãy nghĩ xem: khi T1 chạy trên CPU `0` truy cập `ax` từ main memory (RAM), các CPU cache của nó được nạp các giá trị hiện tại của cả `ax` lẫn `bx` vì chúng nằm trong cùng cacheline! Tương tự, khi T2 chạy trên CPU `1` truy cập `bx` từ RAM, các CPU cache của nó cũng được nạp giá trị hiện tại của cả hai biến. Hình 7.4 minh họa tình huống này về mặt khái niệm:
 
 ![Figure 7.4](images/ch07/fig07-04.png)
 
 Hình 7.4 – Mô tả khái niệm CPU cache memory khi T1 và T2 làm việc song song trên hai biến liền nhau, mỗi thread trên một biến riêng
 
-Đến đây ổn; nhưng nếu T1 thực hiện `ax ++`, còn T2 đồng thời `bx ++`? Thì sao? (Nhân tiện, có thể thắc mắc vì sao không lock? Thú vị là không liên quan thảo luận; không data race vì mỗi thread truy cập biến khác. Vấn đề là cùng CPU cacheline.)
+Đến đây mọi thứ vẫn ổn; nhưng nếu T1 thực hiện một thao tác, chẳng hạn `ax ++`, trong khi T2 đồng thời thực hiện `bx ++`, thì sao? Nhân tiện, bạn có thể thắc mắc vì sao chúng không dùng lock. Điều thú vị là chuyện đó không liên quan đến phần thảo luận này: không có data race vì mỗi thread truy cập một biến khác nhau. Vấn đề nằm ở việc chúng ở trong cùng một CPU cacheline.
 
-Vấn đề: cache coherency. Bộ xử lý và/hoặc OS cùng bộ xử lý (rất arch-dependent) phải giữ cache và RAM synchronized/coherent. Vì vậy ngay khi T1 sửa `ax`, cacheline đó của CPU `0` phải invalidated, tức xảy ra flush cacheline từ CPU `0` cache đến RAM để cập nhật RAM giá trị mới, rồi ngay lập tức cập nhật RAM-to-CPU `1` cache để giữ coherent!
+Vấn đề nằm ở cache coherency. Processor hoặc hệ điều hành phối hợp với processor phải giữ cho cache và RAM đồng bộ, nhất quán với nhau; mọi chi tiết này đều rất arch-dependent. Vì vậy, ngay khi T1 sửa `ax`, cacheline tương ứng của CPU `0` phải được invalidate, tức một thao tác flush CPU cacheline từ cache của CPU `0` đến RAM diễn ra để cập nhật RAM bằng giá trị mới. Ngay sau đó, cũng phải có cập nhật từ RAM-to-CPU `1` đến cache để giữ mọi thứ nhất quán!
 
-Nhưng cacheline còn chứa `bx`, và như đã nói, `bx` cũng đã được T2 sửa trên CPU `1`. Vì vậy gần cùng lúc, cacheline CPU `1` flush xuống RAM với giá trị mới `bx`, rồi cập nhật đến cache CPU `0` (suốt đó unified L3 cache cũng được đọc/cập nhật). Như hình dung, mọi cập nhật biến gây rất nhiều traffic giữa cache và RAM; chúng nảy qua lại. Thực tế thường gọi cache ping-pong! Rất có hại, làm xử lý chậm đáng kể. Hiện tượng gọi false sharing. Nhận ra false sharing mới khó; phải tìm biến trên shared cacheline được context khác nhau (thread hay thứ khác) cập nhật đồng thời.
+Nhưng cacheline cũng chứa `bx`, và như đã nói, T2 cũng đã sửa `bx` trên CPU `1`. Vì vậy, gần như cùng lúc, cacheline của CPU `1` được flush đến RAM với giá trị mới của `bx`, sau đó cập nhật đến cache của CPU `0`; trong suốt quá trình này, unified L3 cache cũng được đọc và cập nhật. Như bạn có thể hình dung, mọi cập nhật những biến này gây ra rất nhiều lưu lượng giữa cache và RAM, khiến data nảy qua lại. Thực tế, điều này thường được gọi là cache ping-pong! Hiệu ứng rất có hại, làm xử lý chậm đáng kể. Hiện tượng này được gọi là false sharing. Nhận ra false sharing mới là phần khó: chúng ta phải tìm những biến nằm trên shared cacheline được các context khác nhau, như thread hoặc những context khác, cập nhật đồng thời.
 
 Thú vị là triển khai trước của data structure then chốt ở memory management layer, `include/linux/mmzone.h:struct zone`, gặp chính false sharing: hai spinlock khai báo liền nhau! Đã sửa từ lâu (nói ngắn về memory zone trong tài liệu đồng hành Linux Kernel Programming - Chương 7, Kiến thức thiết yếu về Memory Management Internals, mục Tổ chức physical RAM/zone).
 
-Sửa false sharing thế nào? Dễ: bảo đảm biến cách đủ xa để không cùng cacheline (thường chèn dummy padding byte giữa biến). Cũng xem tham khảo false sharing trong mục Đọc thêm.
+Bạn sửa false sharing này như thế nào? Rất đơn giản: chỉ cần bảo đảm các biến nằm đủ xa nhau để chắc chắn chúng không dùng chung cacheline. Các byte padding giả thường được chèn giữa các biến cho mục đích này. Bạn cũng nên xem các tài liệu về false sharing trong phần Đọc thêm.
 
 ## Lập trình Lock-free với per-CPU variable
 
-Như đã học, khi thao tác shared writable data, critical section phải được bảo vệ bằng cách nào đó. Locking có lẽ phổ biến nhất. Tuy nhiên không hoàn toàn tốt vì hiệu năng có thể giảm. Để hiểu, xét ví dụ lock: phễu có cuống chỉ đủ một thread đi mỗi lần. Khác là một trạm thu phí trên cao tốc đông, hay đèn giao thông ở giao lộ đông. Giúp hình dung vì sao locking gây bottleneck, một số trường hợp nghiêm trọng làm hiệu năng chậm như bò. Tệ hơn, tác hại nhân lên trên multicore system high-end vài trăm core; thực chất locking không scale tốt.
+Như đã học, khi thao tác trên shared writable data, critical section phải được bảo vệ bằng một cách nào đó. Locking có lẽ là kỹ thuật phổ biến nhất để thực hiện việc bảo vệ này. Tuy nhiên, mọi thứ không hoàn toàn thuận lợi vì hiệu năng có thể giảm. Để hiểu vì sao, hãy xét một vài hình ảnh so sánh với lock. Một hình ảnh là chiếc phễu có cuống chỉ đủ rộng cho một thread đi qua mỗi lần, không hơn. Hình ảnh khác là một trạm thu phí duy nhất trên đường cao tốc đông đúc hoặc đèn giao thông ở giao lộ bận rộn. Những ví dụ này giúp hình dung vì sao locking có thể tạo bottleneck, trong các trường hợp nghiêm trọng khiến hiệu năng giảm đến mức rất chậm. Tệ hơn, các tác động xấu có thể tăng lên trên multicore system high-end có vài trăm core; thực chất, locking không mở rộng tốt.
 
-Vấn đề khác là lock contention; lock cụ thể được acquire thường thế nào? Tăng số lock có lợi giảm contention cho lock giữa hai hay nhiều process (hay thread). Gọi lock proficiency. Tuy nhiên không scale vô hạn: sau một lúc hàng nghìn lock trên hệ thống (Linux kernel thực tế vậy) không phải tin tốt — cơ hội deadlock tinh vi tăng đáng kể. Có nhiều thách thức — hiệu năng, deadlock, priority inversion, convoying (do lock ordering, code path nhanh chờ code chậm đầu đã lấy lock mà code nhanh cũng cần), v.v. Phát triển kernel scalable lên cấp nữa đòi hỏi lock-free algorithm và triển khai trong kernel. Dẫn đến kỹ thuật đổi mới như per-CPU (PCP) data, lock-free data structure (theo thiết kế), RCU.
+Một vấn đề khác là lock contention: một lock cụ thể được acquire thường xuyên đến mức nào? Tăng số lock trong hệ thống có lợi ích là giảm contention đối với một lock giữa hai hoặc nhiều process hay thread. Điều này được gọi là lock proficiency. Tuy nhiên, cách này cũng không mở rộng vô hạn: đến một mức nào đó, có hàng nghìn lock trên hệ thống, thực tế là trường hợp Linux kernel, không phải điều tốt vì khả năng xuất hiện deadlock tinh vi tăng đáng kể. Vì vậy, tồn tại nhiều thách thức: vấn đề hiệu năng, deadlock, nguy cơ priority inversion, convoying và những vấn đề khác. Convoying xảy ra khi do lock ordering, các code path nhanh phải chờ code path chậm hơn đã lấy trước một lock mà chúng cũng cần. Phát triển kernel lên một mức mở rộng cao hơn nữa đòi hỏi sử dụng các lock-free algorithm và triển khai chúng trong kernel. Điều này dẫn đến nhiều kỹ thuật sáng tạo, trong đó có per-CPU (PCP) data, lock-free data structure theo thiết kế và RCU.
 
-Tuy nhiên sách chỉ chọn trình bày khá chi tiết per-CPU như kỹ thuật lock-free programming. Chi tiết RCU (cùng data structure lock-free theo thiết kế) ngoài phạm vi. Xem mục Đọc thêm để có tài nguyên hữu ích về RCU, ý nghĩa và cách dùng trong Linux kernel.
+Tuy nhiên, trong cuốn sách này, chúng ta chỉ chọn trình bày tương đối chi tiết per-CPU như một kỹ thuật lập trình lock-free. Chi tiết về RCU và lock-free data structure liên quan theo thiết kế nằm ngoài phạm vi sách. Hãy tham khảo phần Đọc thêm của chương này để có những tài liệu hữu ích về RCU, ý nghĩa và cách sử dụng nó trong Linux kernel.
 
 ### Per-CPU variable
 
-Như tên, per-CPU variable giữ bản sao biến, dữ liệu đang xét, cho mỗi CPU (live) trên hệ thống. Thực chất loại bỏ vùng vấn đề concurrency, critical section, bằng tránh chia sẻ dữ liệu giữa thread. Với per-CPU data, mỗi CPU tham chiếu bản sao riêng nên thread chạy trên processor đó thao tác không lo race. (Gần tương tự local variable; nằm trên private stack mỗi thread, không shared nên không critical section, không cần locking.) Ở đây cũng loại bỏ nhu cầu locking — thành công nghệ lock-free!
+Như tên gọi, biến per-CPU hoạt động bằng cách giữ một bản sao của biến, tức data item liên quan, cho mỗi CPU đang hoạt động trên hệ thống. Thực chất, chúng ta loại bỏ vùng gây vấn đề concurrency, tức critical section, bằng cách tránh chia sẻ data giữa các thread. Với kỹ thuật per-CPU data, vì mỗi CPU tham chiếu đến bản sao data của riêng mình, thread chạy trên processor đó có thể thao tác mà không lo race. Điều này gần tương tự biến cục bộ: vì chúng nằm trên private stack của mỗi thread, chúng không được chia sẻ giữa các thread, nên không có critical section và không cần locking. Ở đây, nhu cầu locking cũng bị loại bỏ, khiến nó trở thành một kỹ thuật lock-free!
 
-Nếu chạy hệ thống bốn CPU core live, per-CPU variable thực chất là array bốn phần tử: `0` biểu diễn giá trị trên CPU đầu, `1` trên CPU core thứ hai, v.v. Hiểu vậy sẽ thấy per-CPU variable gần tương tự triển khai user space Pthreads Thread Local Storage (TLS), mỗi thread tự động nhận bản sao biến (TLS) đánh dấu keyword `__thread`. Ở đó và ở đây với per-CPU variable, rõ ràng: chỉ dùng per-CPU variable cho dữ liệu nhỏ. Vì dữ liệu được tạo lại (copy) một instance mỗi CPU core (trên hệ thống high-end vài trăm core overhead tăng). Đề cập ví dụ dùng per-CPU trong kernel code base (mục Dùng Per-CPU trong kernel). Khi làm per-CPU variable, phải dùng helper method (macro/API) kernel cung cấp, không cố truy cập trực tiếp (như refcount/atomic operator).
+Hãy nghĩ xem: nếu chạy trên hệ thống có bốn CPU core đang hoạt động, một biến per-CPU về cơ bản là array gồm bốn phần tử. Phần tử `0` biểu diễn giá trị data trên CPU thứ nhất, phần tử `1` biểu diễn giá trị trên CPU core thứ hai, v.v. Hiểu điều này, bạn sẽ thấy các biến per-CPU cũng gần tương tự cách triển khai Thread Local Storage (TLS) của Pthreads trong user space, nơi mỗi thread tự động nhận một bản sao của biến TLS đánh dấu bằng từ khóa `__thread`. Trong cả trường hợp đó lẫn trường hợp biến per-CPU ở đây, điều cần nhớ là chỉ sử dụng biến per-CPU cho data item nhỏ. Lý do là data item được sao chép thành một instance cho mỗi CPU core; trên hệ thống high-end có vài trăm core, overhead sẽ tăng. Chúng ta đề cập một số ví dụ sử dụng per-CPU trong kernel code base ở phần Sử dụng Per-CPU trong kernel. Khi làm việc với biến per-CPU, bạn phải sử dụng các helper method, gồm macro và API do kernel cung cấp, không cố truy cập trực tiếp, tương tự những gì đã thấy với refcount và atomic operator.
 
 #### Làm việc với per-CPU
 
-Tiếp cận helper API và macro (method) cho per-CPU data bằng hai phần. Trước học cấp phát, khởi tạo, sau đó giải phóng per-CPU data. Rồi học làm việc (đọc/ghi).
+Chúng ta hãy tiếp cận các helper API và macro, tức các method cho per-CPU data, bằng cách chia phần thảo luận thành hai phần. Trước tiên, bạn sẽ học cách cấp phát, khởi tạo rồi giải phóng một per-CPU data item. Sau đó, bạn sẽ học cách làm việc với nó, tức đọc và ghi.
 
 ##### Cấp phát, khởi tạo và giải phóng per-CPU variable
 
-Có hai loại per-CPU variable tổng quát: cấp phát tĩnh và động. per-CPU variable tĩnh được cấp phát ngay compile time, thường qua macro `DEFINE_PER_CPU` hoặc `DECLARE_PER_CPU`. Dùng `DEFINE` cho cấp phát và khởi tạo. Ví dụ cấp phát một integer làm per-CPU variable:
+Nhìn chung, có hai loại biến per-CPU: được cấp phát tĩnh và được cấp phát động. Các biến per-CPU được cấp phát tĩnh ngay tại compile time, thường qua một trong các macro `DEFINE_PER_CPU` hoặc `DECLARE_PER_CPU`. Sử dụng macro `DEFINE` cho phép cấp phát và khởi tạo biến. Dưới đây là ví dụ cấp phát một số nguyên làm biến per-CPU:
 
 ```
 #include <linux/percpu.h>
@@ -565,11 +565,11 @@ Trên hệ thống bốn CPU core chẳng hạn, về khái niệm khi khởi t�
 
 Hình 7.5 – Biểu diễn khái niệm per-CPU data trên hệ thống bốn CPU live
 
-(Triển khai thực tế phức tạp hơn nhiều; xem mục Đọc thêm về nội bộ.) Ngắn gọn dùng per-CPU variable tăng hiệu năng code path time-sensitive vì:
+Dĩ nhiên, cách triển khai thực tế phức tạp hơn đáng kể; hãy tham khảo phần Đọc thêm của chương này để biết thêm về cách triển khai bên trong. Nói ngắn gọn, sử dụng các biến per-CPU giúp cải thiện hiệu năng trên các code path time-sensitive vì những lý do sau:
 
 - Tránh lock tốn kém làm performance-busting.
 
-- Truy cập và thao tác per-CPU variable bảo đảm ở trên một CPU core cụ thể; loại bỏ cache effect đắt như cache ping-pong, false sharing (mục Ảnh hưởng của cache và false sharing).
+- Việc truy cập và thao tác trên biến per-CPU được bảo đảm duy trì trên một CPU core cụ thể. Điều này loại bỏ các hiệu ứng cache tốn kém như cache ping-pong và false sharing, đã trình bày trong phần Ảnh hưởng của cache và false sharing.
 
 Cấp phát động per-CPU data qua wrapper macro `alloc_percpu()` hoặc `alloc_percpu_gfp()`, chỉ truyền kiểu dữ liệu object cần cấp phát per-CPU, với macro sau truyền thêm allocation flag `gfp`:
 
@@ -579,13 +579,13 @@ alloc_percpu[_gfp](type [,gfp]);
 
 Routine bên dưới `__alloc_per_cpu[_gfp]()` export qua `EXPORT_SYMBOL_GPL()` (nên chỉ dùng khi LKM phát hành GPL-compatible license).
 
-Như đã học, resource-managed API variant `devm_*()` cho phép (thường khi viết driver) dùng thuận tiện routine cấp phát memory; kernel lo giải phóng, giúp ngăn leakage. Macro `devm_alloc_percpu(dev, type)` là resource-managed version của `__alloc_percpu()`.
+Như đã học, các biến thể API resource-managed `devm_*()` cho phép bạn sử dụng thuận tiện các routine này để cấp phát memory, thường khi viết driver. Kernel sẽ lo việc giải phóng, giúp ngăn các tình huống memory leak. Macro `devm_alloc_percpu(dev, type)` cho phép sử dụng cơ chế này như phiên bản resource-managed của `__alloc_percpu()`.
 
 Memory cấp phát qua routine trên phải giải phóng sau bằng API `void free_percpu(void __percpu *__pdata)`.
 
 ##### Thực hiện I/O (đọc và ghi) trên per-CPU variable
 
-Câu hỏi chính: chính xác truy cập (đọc) và cập nhật (ghi) per-CPU variable thế nào? Kernel cung cấp nhiều helper routine; xem ví dụ đơn giản. Định nghĩa integer per-CPU variable, sau muốn truy cập và in giá trị hiện tại. Vì per-CPU, giá trị lấy auto-calculated theo CPU core code đang chạy; nếu code sau chạy trên core `1`, thực chất lấy `pcpa[1]` (không thực hiện chính xác vậy; chỉ khái niệm):
+Dĩ nhiên, câu hỏi then chốt là chính xác bạn truy cập, tức đọc, và cập nhật, tức ghi, các biến per-CPU như thế nào? Kernel cung cấp một số helper routine cho việc này; hãy xét một ví dụ đơn giản để hiểu cách thực hiện. Chúng ta định nghĩa một biến per-CPU kiểu integer và sau đó muốn truy cập, in giá trị hiện tại của nó. Bạn cần hiểu rằng vì là per-CPU, giá trị được lấy sẽ được tính tự động, hay auto-calculated, dựa trên CPU core mà code đang chạy. Nói cách khác, nếu code sau chạy trên core `1`, về thực chất giá trị `pcpa[1]` được fetch. Cách triển khai không chính xác như vậy; đây chỉ là mô tả khái niệm:
 
 ```
 DEFINE_PER_CPU(int, pcpa);
@@ -619,7 +619,7 @@ $
 
 (Nhân tiện gọi wrapper `printk()` (hay `pr_<foo>()`) trong critical section như đang làm là ổn vì non-blocking.) Vấn đề là API `vmalloc()` có thể blocking; có thể sleep (thảo luận chi tiết trong tài liệu đồng hành Linux Kernel Programming - Chương 9, Cấp phát Kernel Memory cho người viết Module – Phần 2, mục Tìm hiểu và dùng kernel API vmalloc()), trong khi code giữa cặp `get_cpu_var()`/`put_cpu_var()` phải atomic, non-blocking.
 
-Nội bộ macro `get_cpu_var()` gọi `preempt_disable()`, disable kernel preemption, `put_cpu_var()` đảo ngược bằng `preempt_enable()`. Như đã thấy (các chương CPU scheduling trong tài liệu đồng hành Linux Kernel Programming), có thể nested và kernel giữ biến `preempt_count` xác định kernel preemption thực sự enable hay disable. Kết quả là phải ghép đúng macro `{get,put}_cpu_var()` (ví dụ gọi `get` hai lần thì cũng phải gọi `put` hai lần).
+Bên trong, macro `get_cpu_var()` gọi `preempt_disable()` để disable kernel preemption, còn `put_cpu_var()` hoàn tác việc này bằng cách gọi `preempt_enable()`. Như đã thấy trong các chương về CPU scheduling của tài liệu đồng hành Linux Kernel Programming, các lời gọi này có thể lồng nhau và kernel duy trì biến `preempt_count` để xác định kernel preemption thực sự đang enabled hay disabled. Kết luận là bạn phải ghép cặp cẩn thận các macro `{get,put}_cpu_var()` khi sử dụng. Ví dụ, nếu gọi macro `get` hai lần, cũng phải gọi macro `put` tương ứng hai lần.
 
 `get_cpu_var()` là lvalue nên có thể thao tác; ví dụ tăng per-CPU variable `pcpa`, chỉ cần:
 
@@ -645,7 +645,7 @@ for_each_online_cpu(i) {
 
 Để biết thêm, luôn có thể dùng macro `smp_processor_id()` xác định đang chạy CPU core nào; thực tế chính cách macro `convenient.h:PRINT_CTX()` làm.
 
-Tương tự, kernel cung cấp routine làm việc với pointer đến biến cần per-CPU, các macro `{get,put}_cpu_ptr()` và `per_cpu_ptr()`. Được dùng nhiều khi làm per-CPU data structure (khác chỉ integer đơn giản); lấy an toàn pointer đến structure của CPU đang chạy và dùng (`per_cpu_ptr()`).
+Theo cách tương tự, kernel cung cấp các routine làm việc với pointer đến các biến cần là per-CPU, gồm các macro `{get,put}_cpu_ptr()` và `per_cpu_ptr()`. Các macro này được sử dụng nhiều khi làm việc với per-CPU data structure thay vì chỉ một số nguyên đơn giản. Chúng ta lấy an toàn pointer đến structure của CPU hiện đang chạy và sử dụng nó qua `per_cpu_ptr()`.
 
 #### Per-CPU – kernel module ví dụ
 
@@ -655,9 +655,9 @@ hands-on sample per-CPU demo kernel module chắc chắn giúp dùng tính năng
 
 - per-CPU data structure cấp phát động
 
-Để demo per-CPU variable thú vị, làm như sau: cho demo kernel module spawn vài kernel thread, gọi `thrd_0` và `thrd_1`. Hơn nữa, khi tạo, dùng CPU mask (và API) gắn affinity kernel thread `thrd_0` với CPU `0`, `thrd_1` với CPU `1` (nên chỉ schedule chạy trên các core này; tất nhiên kiểm thử trên VM ít nhất hai CPU core).
+Để minh họa các biến per-CPU theo một cách thú vị, chúng ta hãy làm như sau: cho kernel module minh họa tạo ra hai kernel thread, gọi là `thrd_0` và `thrd_1`. Sau khi tạo, chúng ta sử dụng CPU mask và API để gắn affinity của kernel thread `thrd_0` với CPU `0`, và kernel thread `thrd_1` với CPU `1`. Vì vậy, chúng chỉ được schedule chạy trên những core này; dĩ nhiên, phải kiểm thử code trên VM có ít nhất hai CPU core.
 
-Code snippet sau minh họa định nghĩa và dùng per-CPU variable (bỏ code tạo kernel thread và CPU affinity mask vì không liên quan nội dung chương; dù vậy quan trọng phải duyệt toàn code và thử!):
+Các code snippet sau minh họa cách chúng ta định nghĩa và sử dụng các biến per-CPU. Chúng tôi bỏ phần code tạo kernel thread và thiết lập CPU affinity mask vì chúng không liên quan đến phạm vi chương này; tuy vậy, điều quan trọng là phải đọc toàn bộ code và thử chạy nó!
 
 ```
 // ch13/2_percpu/percpu_var.c
@@ -689,9 +689,9 @@ static int __init init_percpu_var(void)
 
 Vì sao không dùng resource-managed `devm_alloc_percpu()`? Có, nên dùng khi phù hợp; nhưng ở đây không viết driver đúng nghĩa, không có pointer `struct device *dev` sẵn, là tham số đầu bắt buộc của `devm_alloc_percpu()`.
 
-Nhân tiện, gặp vấn đề khi viết kernel module: để đặt CPU mask (đổi CPU affinity mỗi kernel thread), kernel API là hàm `sched_setaffinity()`, tiếc không export nên không dùng được. Vì vậy làm điều chắc chắn là hack: lấy địa chỉ hàm không hợp tác qua `kallsyms_lookup_name()` (hoạt động khi định nghĩa `CONFIG_KALLSYMS`), rồi gọi qua function pointer. Hoạt động nhưng chắc chắn không đúng cách viết code.
+Nhân tiện, tôi gặp một vấn đề khi viết kernel module này: để đặt CPU mask nhằm thay đổi CPU affinity của từng kernel thread, kernel API là function `sched_setaffinity()`. Đáng tiếc, function này không được export nên chúng ta không thể sử dụng. Vì vậy, chúng ta thực hiện một cách rõ ràng được xem là hack: lấy address của function không hợp tác qua `kallsyms_lookup_name()`, hoạt động khi `CONFIG_KALLSYMS` được định nghĩa, rồi gọi qua function pointer. Cách này hoạt động nhưng chắc chắn không phải cách viết code đúng.
 
-Ý tưởng thiết kế tạo hai kernel thread, mỗi thread thao tác per-CPU data variable khác nhau. Nếu global variable thường, chắc chắn là critical section cần lock; nhưng chính vì per-CPU và bảo đảm thread chạy core riêng, có thể cập nhật concurrent bằng dữ liệu khác! Kernel thread worker routine sau, argument là thread number (`0` hay `1`). Theo đó rẽ nhánh, thao tác per-CPU data (kernel thread đầu tăng integer ba lần, kernel thread thứ hai giảm ba lần):
+Ý tưởng thiết kế của chúng ta là tạo hai kernel thread và để mỗi thread thao tác khác nhau trên các biến data per-CPU. Nếu đây là các global variable thông thường, nó chắc chắn tạo thành critical section và dĩ nhiên cần lock. Nhưng ở đây, chính vì các biến là per-CPU và chúng ta bảo đảm các thread chạy trên core riêng, chúng ta có thể cập nhật chúng đồng thời với data khác nhau! Kernel thread worker routine như sau; argument của nó là số hiệu thread, `0` hoặc `1`. Theo đó, chúng ta rẽ nhánh và thao tác trên per-CPU data: kernel thread đầu tăng số nguyên ba lần, còn kernel thread thứ hai giảm nó ba lần.
 
 ```
 /* Our kernel thread worker routine */
@@ -749,7 +749,7 @@ Hình 7.6 – Ảnh chụp kernel log khi LKM ch13/2\_percpu/percpu\_var chạy
 
 Trong ba dòng output cuối Hình 7.6, thấy tóm tắt giá trị per-CPU data variable trên CPU `0` và CPU `1` (hiển thị qua hàm `disp_vars()`). Rõ ràng per-CPU integer `pcpa` (và data structure `pcp_ctx`) có giá trị khác như dự kiến, không locking tường minh.
 
-Kernel module vừa demo dùng macro `for_each_online_cpu(i)` hiển thị giá trị per-CPU variable trên mỗi online CPU. Nếu VM có sáu CPU nhưng chỉ muốn hai CPU “live” lúc runtime? Có nhiều cách; một là truyền tham số `maxcpus=n` cho kernel VM lúc boot — xem có bằng tra `/proc/cmdline`:
+Kernel module vừa minh họa sử dụng macro `for_each_online_cpu(i)` để hiển thị giá trị các biến per-CPU trên mỗi online CPU. Tiếp theo, nếu VM có sáu CPU nhưng bạn chỉ muốn hai CPU hoạt động ở runtime thì sao? Có nhiều cách thực hiện; một cách là truyền parameter `maxcpus=n` cho kernel của VM khi boot. Bạn có thể kiểm tra parameter có ở đó hay không bằng cách xem `/proc/cmdline`:
 
 ```
 $ cat /proc/cmdline
@@ -813,7 +813,7 @@ Với mọi tình huống debug, có những thời điểm debugging khác nhau
 
 - Sau phát hành, ngoài thực địa
 
-Lời răn well-known tiếc thay đúng: bug lộ càng “xa” lúc phát triển, sửa càng tốn! Vì vậy thực sự muốn tìm và sửa sớm nhất có thể!
+Một lời nhắc nhở well-known nhưng đáng tiếc là đúng: bug được phát hiện càng “xa” giai đoạn phát triển thì chi phí sửa càng lớn! Vì vậy, bạn thực sự nên cố gắng tìm và sửa bug sớm nhất có thể!
 
 Sách tập trung phát triển kernel, nên ở đây tập trung vài công cụ/kỹ thuật debug locking issue lúc phát triển.
 
@@ -847,7 +847,7 @@ Hình 7.8 – Ảnh chụp (cắt bớt) menu kernel hacking / Lock Debugging (s
 
 Hình 7.8 là ảnh chụp (cắt bớt) menu `<Kernel hacking > Lock Debugging` `(spinlocks, mutexes, etc...)` với các mục cần cho debug kernel được bật.
 
-Thay vì tương tác từng menu item, chọn `<Help>` để biết ý nghĩa, cách đơn giản hơn lấy cùng thông tin là xem Kconfig file liên quan (mô tả menu). Ở đây `lib/Kconfig.debug`, mọi menu debug-related ở đó. Trường hợp này tìm chuỗi `menu "Lock Debugging (spinlocks, mutexes,` `etc...)"`, nơi mục `Lock Debugging` bắt đầu (xem bảng sau).
+Thay vì tương tác với từng menu item và chọn nút `<Help>` để xem ý nghĩa của nó, cách đơn giản hơn nhiều để lấy cùng thông tin trợ giúp là xem bên trong Kconfig file liên quan, vốn mô tả menu. Ở đây, đó là `lib/Kconfig.debug`, nơi chứa mọi menu debug-related. Trong trường hợp cụ thể này, hãy tìm chuỗi `menu "Lock Debugging (spinlocks, mutexes,` `etc...)"`, nơi bắt đầu phần `Lock Debugging`, xem bảng sau.
 
 Bảng sau tóm tắt mỗi kernel lock debugging configuration option giúp debug gì (không trình bày tất cả, một số trích trực tiếp file `lib/Kconfig.debug`):
 
@@ -870,27 +870,27 @@ Như gợi ý, bật tất cả/phần lớn lock debug option trong debug kerne
 
 ### Lock validator lockdep – bắt locking issue sớm
 
-Linux kernel có tính năng cực kỳ hữu ích đang chờ nhà phát triển tận dụng: runtime locking correctness hay locking dependency validator; ngắn là lockdep. Ý tưởng: runtime `lockdep` tham gia mỗi khi có locking activity trong kernel — lấy/release bất kỳ kernel-level lock hay locking sequence nhiều lock. Được theo dõi/map (đoạn sau nói hiệu năng và giảm tác động). Áp dụng quy tắc locking đúng well-known (gợi ý chương trước mục Hướng dẫn locking và deadlock), `lockdep` kết luận tính đúng của việc đã làm.
+Linux kernel có một tính năng cực kỳ hữu ích mà người phát triển kernel nên tận dụng: công cụ xác minh tính đúng đắn của locking hoặc dependency giữa các lock ở runtime, gọi tắt là lockdep. Ý tưởng cơ bản là runtime `lockdep` tham gia mỗi khi có hoạt động locking trong kernel, từ việc lấy hoặc release bất kỳ kernel-level lock nào đến một locking sequence gồm nhiều lock. Những hoạt động này được theo dõi hoặc ánh xạ; đoạn tiếp theo trình bày thêm về tác động hiệu năng và cách giảm nó. Bằng cách áp dụng các quy tắc locking đúng đã được biết rõ, tức well-known, như gợi ý trong phần Hướng dẫn locking và deadlock ở chương trước, `lockdep` đưa ra kết luận về tính đúng đắn của những gì đã thực hiện.
 
 Điều hay là `lockdep` đạt chứng minh toán học (hay closure) 100% lock sequence đúng hay không. Trích trực tiếp kernel documentation (`https://www.kernel.org/doc/html/v5.4/locking/lockdep-design.html`):
 
 “Validator đạt ‘closure’ toán học hoàn hảo (chứng minh tính đúng locking): với mỗi locking sequence đơn giản, độc lập, single-task xảy ra ít nhất một lần trong vòng đời kernel, chứng minh chắc chắn 100% rằng không tổ hợp và timing nào của các sequence này gây bất kỳ lớp deadlock liên quan lock nào.”
 
-Hơn nữa `lockdep` cảnh báo (qua macro `WARN*()`) mọi vi phạm các lớp locking bug: deadlock/lock inversion, circular lock dependency, hard IRQ/soft IRQ safe/unsafe locking bug. Thông tin quý; validate code bằng `lockdep` tiết kiệm hàng trăm giờ năng suất bằng bắt sớm. (Để biết thêm, `lockdep` theo dõi mọi lock và locking sequence hay “lock chain”; xem qua `/proc/lockdep_chains`).
+Hơn nữa, `lockdep` cảnh báo qua các macro `WARN*()` về mọi vi phạm thuộc những nhóm locking bug sau: deadlock hoặc lock inversion, circular lock dependency và hard IRQ/soft IRQ safe/unsafe locking bug. Thông tin này rất quý giá: xác minh code bằng `lockdep` có thể tiết kiệm hàng trăm giờ làm việc bị lãng phí bằng cách phát hiện sớm vấn đề locking. Để bạn biết thêm, `lockdep` theo dõi mọi lock và locking sequence, hay lock chain, của chúng; có thể xem qua `/proc/lockdep_chains`.
 
-Về giảm tác động hiệu năng: có hàng nghìn hay nhiều hơn lock instance, validate mọi lock sequence sẽ cực chậm (thực tế nhiệm vụ có algorithmic time complexity `O(N^2)`!). Không hoạt động được; vì vậy `lockdep` chỉ verify tình huống locking (chẳng hạn code path lấy lock A rồi B — lock sequence hay lock chain) một lần đầu xảy ra. (Biết nhờ giữ 64-bit hash cho mỗi lock chain gặp.)
+Một vài lời về giảm tác động đến hiệu năng: bạn có thể hình dung rằng với hàng nghìn hoặc nhiều hơn các lock instance, xác minh từng lock sequence sẽ chậm đến mức vô lý. Thực tế, đây là nhiệm vụ có algorithmic time complexity bậc `O(N^2)`! Cách đó sẽ không khả thi, nên `lockdep` chỉ xác minh mỗi tình huống locking một lần, ngay lần đầu nó xảy ra. Ví dụ, trên một code path, lock A được lấy rồi đến lock B; đây được gọi là lock sequence hoặc lock chain. Nó nhận biết điều này bằng cách duy trì một hash 64-bit cho mỗi lock chain gặp phải.
 
-Cách user space sơ khai: rất sơ khai — không bảo đảm — để thử phát hiện deadlock là dùng GNU `ps(1)`; `ps -LA -o state,pid,cmd | grep "^D"` in mọi thread ở state `D` — uninterruptible sleep (`TASK_UNINTERRUPTIBLE`). Có thể do deadlock, cũng có thể không; kéo dài lâu thì khả năng cao hơn. Thử xem! Tất nhiên `lockdep` tốt hơn nhiều. (Chỉ hoạt động với GNU `ps`, không loại nhẹ như `busybox ps`.)
+Cách tiếp cận sơ khai từ user space: một cách rất đơn giản và chắc chắn không được bảo đảm để thử phát hiện deadlock là sử dụng GNU `ps(1)` trong user space. Lệnh `ps -LA -o state,pid,cmd | grep "^D"` in mọi thread ở state `D`, tức uninterruptible sleep (`TASK_UNINTERRUPTIBLE`). Trạng thái này có thể do deadlock, nhưng cũng có thể không; nếu kéo dài lâu, khả năng deadlock cao hơn. Hãy thử! Dĩ nhiên, `lockdep` là giải pháp tốt hơn nhiều. Lưu ý cách này chỉ hoạt động với GNU `ps`, không phải những phiên bản nhẹ như `busybox ps`.
 
 Công cụ user space hữu ích khác `strace(1)` và `ltrace(1)` — lần lượt trace chi tiết mọi system call và library call của process (hay thread); có thể bắt process/thread treo, xem kẹt đâu (`strace -p` `PID` đặc biệt hữu ích trên process treo).
 
-Điểm cần rõ khác: `lockdep` cảnh báo locking sai (toán học) ngay cả khi không deadlock thực tế lúc runtime! `lockdep` cung cấp chứng minh có vấn đề có thể gây bug (deadlock, unsafe locking, v.v.) tương lai nếu không sửa; thường hoàn toàn đúng; nghiêm túc sửa. (Tuy nhiên thường không gì trong software đúng 100% mọi lúc: nếu chính code `lockdep` có bug? Thậm chí có config option `CONFIG_DEBUG_LOCKDEP`. Điều chính là con người chúng ta phải đánh giá kỹ, kiểm tra false positive.)
+Một điểm khác bạn cần hiểu rõ là `lockdep` sẽ cảnh báo về locking sai xét về mặt toán học ngay cả khi không có deadlock thực sự xảy ra ở runtime! `lockdep` cung cấp bằng chứng rằng tồn tại vấn đề có thể gây bug, chẳng hạn deadlock hoặc unsafe locking, tại một thời điểm trong tương lai nếu không được sửa. Nó thường hoàn toàn đúng, nên hãy xem xét nghiêm túc và sửa vấn đề. Tuy nhiên, thông thường không có gì trong software đúng 100% ở mọi thời điểm: nếu bug xuất hiện ngay trong code `lockdep` thì sao? Thậm chí có tùy chọn config `CONFIG_DEBUG_LOCKDEP`. Điều quan trọng là chúng ta, những người phát triển, phải đánh giá tình huống cẩn thận và kiểm tra false positive.
 
 Tiếp, `lockdep` làm trên lock class; đơn giản lock “logic” khác instance “physical”. Ví dụ open file data structure kernel, `struct` `file`, có hai lock — mutex và spinlock — mỗi cái được `lockdep` xem là lock class. Dù vài nghìn instance `struct file` trong memory lúc runtime, `lockdep` chỉ theo class. Thêm chi tiết thiết kế nội bộ `lockdep`, tham khảo kernel documentation chính thức (`https://www.kernel.org/doc/html/v5.4/locking/lockdep-design.html`).
 
 ### Ví dụ – bắt deadlock bug với lockdep
 
-Ở đây giả định đã build, chạy debug kernel bật `lockdep` (chi tiết trong mục Configure debug kernel cho lock debugging). Xác minh thực sự enable:
+Ở đây, chúng ta giả định đến lúc này bạn đã build và đang chạy một debug kernel có bật `lockdep`, như được mô tả chi tiết trong phần Cấu hình debug kernel để debug lock. Hãy xác minh rằng nó thực sự được bật:
 
 ```
 $ uname -r
@@ -904,7 +904,7 @@ Tốt! Giờ hands-on deadlock, xem `lockdep` giúp bắt. Đọc tiếp!
 
 #### Ví dụ 1 – bắt self deadlock bug với lockdep
 
-Ví dụ đầu, quay lại kernel module trong tài liệu đồng hành Linux Kernel Programming - Chương 6, Kiến thức thiết yếu về Kernel Internals – Process và Thread, mục Duyệt task list, tại `https://github.com/PacktPublishing/Linux-Kernel-Programming/blob/master/ch6/foreach/thrd_showall/thrd_showall.c`. Ở đó lặp từng thread, in chi tiết từ task structure; code snippet lấy tên thread (nhớ member task structure `comm`):
+Với ví dụ đầu tiên, chúng ta hãy quay lại một kernel module trong tài liệu đồng hành Linux Kernel Programming - Chương 6, Kiến thức thiết yếu về Kernel Internals – Process và Thread, phần Duyệt task list, tại `https://github.com/PacktPublishing/Linux-Kernel-Programming/blob/master/ch6/foreach/thrd_showall/thrd_showall.c`. Ở đó, chúng ta lặp qua từng thread, in một số chi tiết từ task structure của nó. Liên quan đến điều này, dưới đây là code snippet lấy tên thread; hãy nhớ tên nằm trong một member của task structure có tên `comm`:
 
 ```
 // ch6/foreach/thrd_showall/thrd_showall.c
@@ -925,7 +925,7 @@ thread ptr */
         [ ... ]
 ```
 
-Hoạt động nhưng có vẻ cách tốt hơn: thay tra trực tiếp tên bằng `t->comm` (như ở đây), kernel cung cấp helper routine `{get,set}_task_comm()` để lấy/đặt tên task. Vì vậy viết lại dùng helper macro `get_task_comm()`; tham số đầu buffer chứa tên (kỳ vọng đã cấp phát memory), tham số thứ hai pointer đến task structure thread cần tên (code snippet từ `ch13/3_lockdep/buggy_thrdshow_eg/thrd_showall_buggy.c`):
+Cách này hoạt động, nhưng có vẻ có một cách tốt hơn: thay vì tra trực tiếp tên thread bằng `t->comm` như ở đây, kernel cung cấp các helper routine `{get,set}_task_comm()` để lấy và đặt tên task. Vì vậy, chúng ta viết lại code để sử dụng helper macro `get_task_comm()`. Tham số đầu tiên là buffer chứa tên, được giả định đã cấp phát memory; tham số thứ hai là pointer đến task structure của thread mà bạn đang truy vấn tên. Code snippet sau lấy từ `ch13/3_lockdep/buggy_thrdshow_eg/thrd_showall_buggy.c`:
 
 ```
 // ch13/3_lockdep/buggy_lockdep/thrd_showall_buggy.c
@@ -946,9 +946,9 @@ static int showthrds_buggy(void)
         [ ... ]
 ```
 
-Khi compile và chèn vào kernel trên hệ thống kiểm thử (VM, may quá), có thể kỳ lạ, thậm chí treo! (Tôi lấy được kernel log qua `dmesg(1)` trước khi hệ thống mất phản hồi hoàn toàn.).
+Khi được biên dịch và insert vào kernel trên hệ thống kiểm thử của chúng ta, may mắn là một VM, module có thể gây hành vi kỳ lạ hoặc thậm chí khiến hệ thống treo! Khi thực hiện, tôi đã lấy được kernel log qua `dmesg(1)` trước khi hệ thống hoàn toàn mất phản hồi.
 
-Nếu hệ thống treo ngay chèn LKM? Đó là hương vị khó khăn kernel debugging! Thử (đã hiệu quả khi tôi thử ví dụ trên VM Fedora 29 x86\_64) reboot VM treo, tra kernel log qua tiện ích systemd mạnh `journalctl(1)` với lệnh `journalctl --since="1 hour ago"`; giờ có thể thấy printk `lockdep`. Tiếc không bảo đảm phần log chính đã lưu disk (lúc treo) để `journalctl` lấy. Vì vậy kdump của kernel — rồi postmortem analysis kernel dump image file bằng `crash(8)` — có thể cứu nguy (xem tài nguyên `kdump` và crash trong mục Đọc thêm).
+Nếu hệ thống của bạn treo ngay khi insert LKM thì sao? Đó là một ví dụ về khó khăn của kernel debugging! Một cách có thể thử, đã hiệu quả với tôi khi thử chính ví dụ này trên Fedora 29 VM x86\_64, là reboot VM bị treo rồi tra kernel log bằng tiện ích mạnh mẽ `journalctl(1)` của systemd với lệnh `journalctl --since="1 hour ago"`; lúc này, bạn có thể thấy các printk từ `lockdep`. Tuy nhiên, đáng tiếc là không bảo đảm phần kernel log quan trọng đã được lưu xuống đĩa tại thời điểm treo để `journalctl` có thể lấy lại. Đó là lý do sử dụng tính năng kdump của kernel, rồi thực hiện postmortem analysis trên kernel dump image file bằng `crash(8)`, có thể cứu nguy. Xem các tài liệu về sử dụng `kdump` và crash trong phần Đọc thêm của chương này.
 
 Xem kernel log rõ: `lockdep` bắt (self) deadlock (thể hiện phần output liên quan trong ảnh):
 
@@ -956,7 +956,7 @@ Xem kernel log rõ: `lockdep` bắt (self) deadlock (thể hiện phần output 
 
 Hình 7.9 – (Một phần) ảnh chụp kernel log sau khi nạp module có bug; lockdep bắt self deadlock!
 
-Dù còn nhiều chi tiết (gồm kernel stack backtrace của `insmod(8)` — process context ở đây, register value, v.v.), ảnh trên đủ suy ra. `lockdep` nói `insmod/2367 is trying to acquire lock:`, rồi `but task is` `already holding lock:`. Tiếp (nhìn kỹ Hình 7.9), lock `insmod` giữ là `(p->alloc_lock)` (tạm bỏ phần sau; giải thích ngay), routine cố acquire (sau `at:`) là `__get_task_comm+0x28/0x50`. Giờ rõ hơn: tìm chính xác khi gọi `get_task_comm()`; đó là macro wrapper quanh worker routine thực `__get_task_comm()`. Code:
+Mặc dù còn nhiều chi tiết theo sau, bao gồm stack backtrace của kernel stack thuộc `insmod(8)` vì đó là process context trong trường hợp này, các giá trị register, v.v., những gì thấy trong hình trước đã đủ để suy ra điều xảy ra. Rõ ràng, `lockdep` báo `insmod/2367 is trying to acquire lock:`, tiếp theo là `but task is` `already holding lock:`. Sau đó, hãy xem kỹ Hình 7.9: lock mà `insmod` đang giữ là `(p->alloc_lock)`. Tạm thời bỏ qua phần theo sau; chúng ta sẽ giải thích ngay sau đây. Routine thực sự cố acquire lock, hiển thị sau `at:`, là `__get_task_comm+0x28/0x50`. Bây giờ chúng ta đã có manh mối: hãy xác định chính xác điều xảy ra khi gọi `get_task_comm()`. Chúng ta thấy đó là một macro, wrapper quanh worker routine thực sự `__get_task_comm()`. Code của nó như sau:
 
 ```
 // fs/exec.c
@@ -970,7 +970,7 @@ char *__get_task_comm(char *buf, size_t buf_size, struct task_struct *tsk)
 EXPORT_SYMBOL_GPL(__get_task_comm);
 ```
 
-À vấn đề: hàm `__get_task_comm()` cố acquire lại chính lock đang giữ, gây (self) deadlock! Lấy ở đâu? Nhớ dòng code đầu trong kernel module (có bug) sau vào loop gọi `task_lock(t)`, vài dòng sau gọi `get_task_comm()`, nội bộ cố acquire cùng lock: kết quả self deadlock:
+À, vấn đề nằm ở đây: function `__get_task_comm()` cố acquire lại chính lock mà chúng ta đang giữ, gây ra self deadlock! Chúng ta đã acquire nó ở đâu? Hãy nhớ rằng ngay dòng code đầu tiên sau khi vào vòng lặp trong kernel module có bug, chúng ta gọi `task_lock(t)`. Chỉ vài dòng sau, chúng ta gọi `get_task_comm()`, bên trong nó lại cố acquire chính lock đó: kết quả là self deadlock:
 
 ```
 do_each_thread(g, t) {   /* 'g' : process ptr; 't': thread ptr */
@@ -989,7 +989,7 @@ static inline void task_lock(struct task_struct *p)
 }
 ```
 
-Giờ hợp lý: spinlock trong task structure tên `alloc_lock`, như `lockdep` báo. Báo cáo `lockdep` có vài ký hiệu khó hiểu. Xét các dòng:
+Bây giờ mọi thứ đã rõ: đó là spinlock có tên `alloc_lock` bên trong task structure, đúng như `lockdep` thông báo. Báo cáo của `lockdep` có một số ký hiệu khó hiểu. Hãy xét các dòng sau:
 
 ```
 [ 1021.449384] insmod/2367 is trying to acquire lock:
@@ -1001,13 +1001,13 @@ __get_task_comm+0x28/0x50
 showthrds_buggy+0x13e/0x6d1 [thrd_showall_buggy]
 ```
 
-Bỏ timestamp, số cột ngoài trái dòng thứ hai trong code block trên là lightweight hash 64-bit nhận diện lock sequence cụ thể. Chú ý giống hệt hash dòng sau; biết cùng lock được thao tác! `{+.+.}` là ký hiệu lockdep cho state lúc acquire (nghĩa: `+` acquire với IRQ enable, `.` acquire với IRQ disable và không trong IRQ context, v.v.). Giải thích trong kernel documentation (`https://www.kernel.org/doc/Documentation/locking/lockdep-design.txt`); chỉ nói vậy.
+Bỏ qua timestamp, con số ở cột ngoài cùng bên trái của dòng thứ hai trong code block trước là lightweight hash 64-bit dùng để nhận diện lock sequence cụ thể này. Lưu ý nó giống hệt hash trong dòng tiếp theo, nên chúng ta biết cùng một lock đang được thao tác! `{+.+.}` là ký hiệu của lockdep cho state mà lock được acquire: `+` có nghĩa lock được acquire với IRQ bật, `.` có nghĩa lock được acquire với IRQ tắt và không ở IRQ context, v.v. Các ký hiệu được giải thích trong kernel documentation tại `https://www.kernel.org/doc/Documentation/locking/lockdep-design.txt`; chúng ta chỉ đề cập đến đây.
 
 Steve Rostedt có bài trình bày chi tiết diễn giải output `lockdep` tại Linux Plumber's Conference (2011); slide hữu ích, khám phá deadlock đơn giản/phức tạp và cách `lockdep` phát hiện: Lockdep: How to read its cryptic output (`https://blog.linuxplumbersconf.org/2011/ocw/sessions/153`).
 
 ##### Sửa lỗi
 
-Giờ hiểu vấn đề, sửa thế nào? Xem và diễn giải báo cáo lockdep (Hình 7.9), khá đơn giản: (như nói) vì task structure spinlock `alloc_lock` đã lấy đầu loop `do-while` (qua `task_lock(t)`), bảo đảm unlock trước gọi routine `get_task_comm()` (nội bộ lấy/release chính lock đó), rồi gọi `get_task_comm()`, sau lock lại.
+Bây giờ đã hiểu vấn đề, chúng ta sửa nó như thế nào? Xem và diễn giải báo cáo của lockdep trong Hình 7.9, cách sửa khá đơn giản. Như đã đề cập, spinlock `alloc_lock` của task structure đã được lấy ở đầu vòng lặp `do-while` qua `task_lock(t)`. Vì vậy, hãy bảo đảm unlock nó trước khi gọi routine `get_task_comm()`, vốn lấy và release cùng lock này ở bên trong, rồi thực hiện `get_task_comm()` và lock lại sau đó.
 
 Ảnh sau (Hình 7.10) cho thấy khác biệt (qua tiện ích `diff(1)`) giữa phiên bản cũ có bug (`ch13/3_lockdep/buggy_thrdshow_eg/thrd_showall_buggy.c`) và mới sửa (`ch13/3_lockdep/fixed_lockdep/thrd_showall_fixed.c`):
 
@@ -1019,9 +1019,9 @@ Tốt; tiếp ví dụ bắt AB-BA deadlock!
 
 #### Ví dụ 2 – bắt AB-BA deadlock với lockdep
 
-Thêm ví dụ, xem (demo) kernel module cố tình tạo circular dependency cuối cùng deadlock. Code: `ch13/3_lockdep/deadlock_eg_AB-BA`. Dựa module trước (`ch13/2_percpu`); như nhớ, tạo hai kernel thread, bảo đảm (dùng `sched_setaffinity()` hack) mỗi thread chạy CPU core riêng (đầu core `0`, sau core `1`).
+Để có thêm một ví dụ, chúng ta hãy xem kernel module minh họa cố tình tạo circular dependency, cuối cùng dẫn đến deadlock. Code nằm tại `ch13/3_lockdep/deadlock_eg_AB-BA`. Module này dựa trên module trước đó của chúng ta, `ch13/2_percpu`; như bạn còn nhớ, chúng ta tạo hai kernel thread và dùng một phiên bản `sched_setaffinity()` đã chỉnh sửa để bảo đảm mỗi kernel thread chạy trên một CPU core riêng, thread đầu trên CPU core `0` và thread thứ hai trên core `1`.
 
-Như vậy có concurrency. Trong thread dùng hai spinlock `lockA` và `lockB`. Hiểu process context có từ hai lock, ghi tài liệu và theo lock ordering: lấy lockA trước, rồi lockB. Tốt; vậy cách không nên làm:
+Bằng cách này, chúng ta có concurrency. Bây giờ, bên trong các thread, chúng ta cho chúng làm việc với hai spinlock `lockA` và `lockB`. Hiểu rằng đang có process context với từ hai lock trở lên, chúng ta ghi lại và tuân theo quy tắc lock ordering: lấy lockA trước, sau đó lấy lockB. Vì vậy, dưới đây là một cách không nên thực hiện:
 
 ```
 kthread 0 on CPU #0                kthread 1 on CPU #1
@@ -1121,7 +1121,7 @@ $ dmesg
 $
 ```
 
-Giờ chạy `lock_ooo` bằng `1`, như dự kiến hệ thống lock up! Không theo lock ordering, trả giá bằng system deadlock! Lần này reboot VM rồi `journalctl --since="10 min ago"` lấy được báo cáo lockdep:
+Bây giờ, chạy với kernel module parameter `lock_ooo` được đặt thành `1`, chúng ta thấy hệ thống bị khóa cứng đúng như dự kiến! Chúng ta đã vi phạm quy tắc lock ordering và trả giá bằng system deadlock. Lần này, reboot VM rồi chạy `journalctl --since="10 min ago"` giúp tôi lấy được báo cáo của lockdep:
 
 ```
 ======================================================
@@ -1156,7 +1156,7 @@ other info that might help us debug this:
 
 Báo cáo `lockdep` tuyệt vời. Xem dòng sau `Possible` `unsafe locking scenario:`; thể hiện gần chính xác điều xảy ra runtime — out-of-order (ooo) locking sequence trên `CPU1 : lock(lockB); -->` `lock(lockA);`! Vì `lockA` đã được kernel thread trên CPU `0` lấy, kernel thread trên CPU `1` spin mãi — nguyên nhân gốc AB-BA deadlock.
 
-Hơn nữa, thú vị là ngay sau chèn module (`lock_ooo` đặt `1`), kernel còn phát hiện soft lockup bug. Printk đến console ở log level `KERN_EMERG`, cho thấy dù hệ thống có vẻ treo. Thậm chí cho biết kernel thread liên quan nơi phát sinh (output cũng trên VM Ubuntu 20.04 LTS x86\_64 chạy custom debug kernel 5.4.0):
+Hơn nữa, khá thú vị là ngay sau khi insert module với `lock_ooo` đặt thành `1`, kernel còn phát hiện một soft lockup bug. Printk được gửi đến console ở log level `KERN_EMERG`, cho phép chúng ta nhìn thấy nó ngay cả khi hệ thống có vẻ treo. Nó thậm chí hiển thị các kernel thread liên quan nơi vấn đề phát sinh. Một lần nữa, output này lấy trên Ubuntu 20.04 LTS VM x86\_64 của tôi, chạy custom debug kernel 5.4.0:
 
 ```
 Message from syslogd@seawolf-VirtualBox at Dec 24 11:01:51 ...
@@ -1191,9 +1191,9 @@ Kết thúc bằng vài điểm nữa về infrastructure `lockdep` mạnh mẽ.
 
 #### lockdep annotation
 
-Trong user space, bạn quen macro rất hữu ích `assert()`. Assert Boolean expression, điều kiện (ví dụ `assert(p == 5);`). Nếu assertion true runtime, không gì xảy ra, tiếp tục; nếu false, process aborted, `printf()` ồn đến `stderr` chỉ assertion nào, đâu thất bại. Cho nhà phát triển kiểm tra runtime condition mong đợi. Assertion quý — giúp bắt bug!
+Trong user space, bạn hẳn quen sử dụng macro rất hữu ích `assert()`. Ở đó, bạn assert một biểu thức Boolean, tức một điều kiện, ví dụ `assert(p == 5);`. Nếu assertion đúng ở runtime, không có gì xảy ra và việc thực thi tiếp tục. Khi assertion sai, process bị abort và thông báo qua `printf()` đến `stderr` chỉ rõ assertion nào thất bại và ở đâu. Điều này cho phép người phát triển kiểm tra những điều kiện mà họ kỳ vọng ở runtime. Vì vậy, assertion rất có giá trị: chúng giúp phát hiện bug!
 
-Tương tự `lockdep` cho nhà phát triển kernel assert lock được giữ ở điểm cụ thể qua macro `lockdep_assert_held()`. Gọi lockdep annotation. Định nghĩa macro:
+Theo cách tương tự, `lockdep` cho phép người phát triển kernel assert rằng một lock đang được giữ tại một điểm cụ thể qua macro `lockdep_assert_held()`. Đây được gọi là lockdep annotation. Định nghĩa macro được trình bày ở đây:
 
 ```
 // include/linux/lockdep.h
@@ -1202,15 +1202,15 @@ Tương tự `lockdep` cho nhà phát triển kernel assert lock được giữ 
     } while (0)
 ```
 
-Assertion thất bại gây warning (qua `WARN_ON()`). Quý vì ngụ ý lock `l` lẽ ra đang giữ nhưng thực sự không. Chú ý assertion chỉ tham gia khi enable lock debugging (mặc định khi bật trong kernel; chỉ tắt khi lỗi trong `lockdep` hay kernel locking infrastructure khác). Kernel code base thực tế dùng annotation `lockdep` khắp nơi, core lẫn driver. (Có vài biến thể assertion `lockdep` dạng `lockdep_assert_held*()` cùng macro hiếm dùng `lockdep_*pin_lock()`.)
+Assertion thất bại tạo warning qua `WARN_ON()`. Điều này rất có giá trị vì cho biết lock `l` lẽ ra phải đang được giữ nhưng thực tế không phải vậy. Cũng lưu ý rằng những assertion này chỉ hoạt động khi bật lock debugging. Đây là mặc định khi lock debugging được bật trong kernel; nó chỉ bị tắt khi có lỗi trong `lockdep` hoặc phần khác của kernel locking infrastructure. Thực tế, kernel code base sử dụng annotation `lockdep` ở khắp nơi, trong cả core code lẫn driver code. Có một vài biến thể của assertion `lockdep` dạng `lockdep_assert_held*()` cùng những macro ít dùng `lockdep_*pin_lock()`.
 
 #### Vấn đề lockdep
 
 Có thể phát sinh vài vấn đề khi dùng `lockdep`:
 
-- Nạp/gỡ module lặp có thể vượt internal lock class limit của `lockdep` (lý do theo kernel documentation: nạp kernel module `x.ko` tạo tập lock class mới cho mọi lock, gỡ `x.ko` không xóa; thực tế tái sử dụng). Vì vậy không nạp/gỡ module lặp, hoặc reset hệ thống.
+- Load và unload module lặp lại có thể khiến vượt giới hạn lock class nội bộ của `lockdep`. Theo giải thích trong kernel documentation, load kernel module `x.ko` tạo một tập lock class mới cho tất cả các lock của nó, trong khi unload `x.ko` không loại bỏ chúng; chúng thực tế được tái sử dụng. Vì vậy, hoặc tránh load và unload module liên tục, hoặc reset hệ thống.
 
-- Đặc biệt data structure có số lock khổng lồ (như array structure), không khởi tạo đúng từng lock có thể gây `lockdep` lock-class overflow.
+- Đặc biệt trong những trường hợp data structure có số lock rất lớn, chẳng hạn array các structure, việc không khởi tạo đúng từng lock có thể dẫn đến lock-class overflow trong `lockdep`.
 
 Integer `debug_locks` đặt `0` mỗi khi disable lock debugging (ngay debug kernel); có thể thông báo `*WARNING* lock debugging` `disabled!! - possibly due to a lockdep warning`. Có thể do `lockdep` đã warning trước. Reboot hệ thống rồi thử lại.
 
@@ -1220,7 +1220,7 @@ Dù sách dựa kernel 5.4 LTS, tính năng mạnh (rất gần thời điểm v
 
 ### Lock statistics
 
-Lock có thể contended, khi context muốn acquire nhưng đã bị lấy nên chờ unlock. Contention nặng có thể gây bottleneck hiệu năng nghiêm trọng; kernel cung cấp lock statistics để dễ xác định lock contention cao. Enable bằng bật kernel configuration option `CONFIG_LOCK_STAT` (không có, entry `/proc/lock_stat` không hiện diện, thường trên phần lớn distribution kernel).
+Một lock có thể chịu contention: một context muốn acquire lock nhưng lock đã được lấy, nên nó phải chờ unlock. Contention cao có thể gây bottleneck hiệu năng nghiêm trọng. Kernel cung cấp lock statistics để dễ xác định các lock có contention cao. Hãy bật lock statistics bằng tùy chọn kernel configuration `CONFIG_LOCK_STAT`. Nếu không bật, entry `/proc/lock_stat` sẽ không có, là trường hợp thường gặp trên phần lớn distribution kernel.
 
 Lock stats code tận dụng `lockdep` chèn hook vào locking code path (hook `__contended`, `__acquired`, `__released`) thu thống kê tại điểm quan trọng. Kernel documentation gọn về lock statistics (`https://www.kernel.org/doc/html/latest/locking/lockstat.html#lock-statistics`) truyền đạt điều này (và hơn nữa) bằng state diagram hữu ích; hãy tra.
 
@@ -1246,7 +1246,7 @@ Khi chạy, nhận output (cũng trên VM Ubuntu 20.04 LTS x86\_64 chạy custom
 
 Hình 7.11 – Ảnh chụp script lock\_stats\_demo.sh chạy, hiển thị một số lock statistics
 
-(Output Hình 7.11 khá dài ngang nên xuống dòng.) Thời gian hiển thị microsecond. Field `class name` là lock class; thấy nhiều lock gắn với task/memory structure (`task_struct` và `mm_struct`)! Thay lặp tài liệu, tham khảo kernel documentation lock statistics giải thích từng field (`con-bounces`, `waittime*`, v.v.; gợi ý `con` viết tắt contended), cách diễn giải. Như dự kiến, xem Hình 7.11, trường hợp đơn giản:
+Output trong Hình 7.11 khá dài theo chiều ngang nên bị xuống dòng. Thời gian được hiển thị bằng microsecond. Field `class name` là lock class; chúng ta có thể thấy nhiều lock gắn với task structure và memory structure, `task_struct` và `mm_struct`! Thay vì lặp lại tài liệu, chúng tôi hướng bạn đến kernel documentation về lock statistics, giải thích từng field trước đó như `con-bounces`, `waittime*`, v.v., cùng cách diễn giải output. Gợi ý: `con` viết tắt của contended. Đúng như dự kiến, trong trường hợp đơn giản ở Hình 7.11, chúng ta thấy những điều sau:
 
 - Field đầu `class_name` là lock class; thấy tên (symbolic) lock.
 
@@ -1276,7 +1276,7 @@ Tốt, gần xong! Kết thúc chương bằng trình bày ngắn memory barrier
 
 ## Memory barrier – giới thiệu
 
-Cuối cùng nhưng không kém quan trọng, nói ngắn về memory barrier. Nghĩa gì? Đôi khi program flow trở nên không biết trước với lập trình viên vì bộ vi xử lý, memory controller và compiler reorder memory read/write. Phần lớn “thủ thuật” lành tính, tối ưu. Nhưng có trường hợp — thường qua hardware boundary, như CPU core trên multicore system, CPU đến peripheral device và ngược lại trên UniProcessor (UP) — không nên reorder; phải tuân memory load/store sequence gốc và dự định. Memory barrier (thường machine-level instruction nhúng trong macro `*mb*()`) ngăn reordering; buộc cả CPU/memory controller và compiler sắp instruction/data theo sequence mong muốn. Chèn vào code path qua macro sau: `#include <asm/barrier.h>`:
+Cuối cùng nhưng không kém phần quan trọng, chúng ta hãy đề cập ngắn gọn đến một vấn đề khác: memory barrier. Nó có nghĩa là gì? Đôi khi, luồng chạy chương trình trở nên khó xác định đối với lập trình viên vì microprocessor, memory controller và compiler có thể sắp xếp lại các thao tác đọc và ghi memory. Trong phần lớn trường hợp, những “thủ thuật” này vô hại và giúp tối ưu hóa. Nhưng có những trường hợp, thường qua ranh giới hardware như giữa các CPU core trên multicore system, hoặc giữa CPU và peripheral device theo cả hai chiều trên UniProcessor (UP), không được phép sắp xếp lại; phải tuân theo trình tự load và store memory ban đầu đã được dự định. Memory barrier, thường là các machine-level instruction được nhúng trong macro `*mb*()`, là cách ngăn việc sắp xếp lại như vậy. Nó buộc cả CPU, memory controller và compiler sắp xếp instruction hoặc data theo trình tự mong muốn. Có thể chèn memory barrier vào code path bằng các macro sau: `#include <asm/barrier.h>`:
 
 - `rmb()`: Chèn read (hay load) memory barrier vào instruction stream
 
@@ -1301,7 +1301,7 @@ struct cp_desc {
 };
 ```
 
-DMA descriptor object tên `struct cp_desc` có ba “word”. Mỗi word phải khởi tạo. Để DMA controller diễn giải descriptor đúng, thường quan trọng các write đến DMA descriptor được thấy theo thứ tự người viết driver dự định. Để bảo đảm, dùng memory barrier. Thực tế kernel documentation — Dynamic DMA mapping Guide (`https://www.kernel.org/doc/Documentation/DMA-API-HOWTO.txt`) — bảo đảm phải vậy. Ví dụ thiết lập DMA descriptor, phải code như sau để đúng trên mọi platform:
+DMA descriptor object có tên `struct cp_desc` chứa ba “word”. Mỗi word đều phải được khởi tạo. Để DMA controller diễn giải descriptor chính xác, thường rất quan trọng là các thao tác ghi vào DMA descriptor được quan sát theo đúng thứ tự mà người viết driver dự định. Memory barrier được sử dụng để bảo đảm điều này. Thực tế, kernel documentation liên quan, Dynamic DMA mapping Guide tại `https://www.kernel.org/doc/Documentation/DMA-API-HOWTO.txt`, yêu cầu chúng ta bảo đảm như vậy. Ví dụ, khi thiết lập DMA descriptor, bạn phải viết code như sau để có hành vi chính xác trên mọi platform:
 
 ```
 desc->word0 = address;
@@ -1332,19 +1332,19 @@ PCI_DMA_TODEVICE);
     [...]
 ```
 
-Driver theo yêu cầu datasheet chip, đòi word `txd->opts2` và `txd->addr` được lưu memory, rồi lưu word `txd->opts1`. Vì thứ tự write quan trọng, dùng write memory barrier `wmb()`. (Để biết thêm, RCU chắc chắn dùng memory barrier thích hợp để enforce memory ordering.) Hơn nữa macro `READ_ONCE()` và `WRITE_ONCE()` trên từng biến tuyệt đối bảo đảm compiler/CPU làm điều bạn muốn. Ngăn compiler optimization khi cần, dùng memory barrier khi cần, bảo đảm cache coherency khi nhiều thread ở core khác truy cập biến đồng thời.
+Driver tuân theo yêu cầu trong datasheet của chip: các word `txd->opts2` và `txd->addr` phải được lưu vào memory trước, sau đó mới lưu word `txd->opts1`. Vì thứ tự thực hiện những thao tác ghi này quan trọng, driver sử dụng write memory barrier `wmb()`. Ngoài ra, để bạn biết thêm, RCU cũng sử dụng các memory barrier thích hợp để thực thi memory ordering. Hơn nữa, việc sử dụng các macro `READ_ONCE()` và `WRITE_ONCE()` trên từng biến hoàn toàn bảo đảm compiler và CPU thực hiện điều bạn mong muốn. Chúng ngăn compiler optimization khi cần, sử dụng memory barrier khi cần và bảo đảm cache coherency khi nhiều thread trên các core khác nhau đồng thời truy cập biến liên quan.
 
 Chi tiết tham khảo kernel documentation về memory barrier (`https://www.kernel.org/doc/Documentation/DMA-API-HOWTO.txt`). Có mục chi tiết WHERE ARE MEMORY BARRIERS NEEDED?. Tin tốt là phần lớn được xử lý bên dưới; với người viết driver, chỉ khi làm như thiết lập DMA descriptor hay bắt đầu/kết thúc giao tiếp CPU-to-peripheral (và ngược lại) mới có thể cần barrier.
 
-Điều cuối — FAQ (đáng tiếc): dùng keyword `volatile` làm concurrency concern biến mất kỳ diệu không? Tất nhiên không. `volatile` chỉ bảo compiler disable optimization phổ biến quanh biến đó (thứ ngoài code path có thể sửa biến đánh dấu `volatile`), chỉ vậy. Thường cần và hữu ích với MMIO. Về memory barrier, thú vị compiler không reorder read/write biến `volatile` so với biến volatile khác. Tuy nhiên atomicity riêng biệt, không được bảo đảm bằng `volatile`.
+Một điều cuối cùng, cũng là câu hỏi thường gặp đáng tiếc: sử dụng từ khóa `volatile` có làm các vấn đề concurrency biến mất một cách kỳ diệu không? Dĩ nhiên là không. Từ khóa `volatile` chỉ yêu cầu compiler vô hiệu hóa các tối ưu hóa thông thường quanh biến đó vì những thành phần ngoài code path này cũng có thể sửa biến đánh dấu `volatile`, chỉ vậy thôi. Điều này thường cần thiết và hữu ích khi làm việc với MMIO. Liên quan đến memory barrier, compiler sẽ không sắp xếp lại các thao tác đọc hoặc ghi trên biến `volatile` so với những biến volatile khác. Tuy nhiên, atomicity là một khái niệm riêng, không được bảo đảm bằng việc sử dụng từ khóa `volatile`.
 
 ## Tổng kết
 
 Bạn thấy đấy!? Chúc mừng, bạn đã làm được, hoàn tất cuốn sách!
 
-Trong chương này tiếp từ chương trước tìm hiểu kernel synchronization. Học locking trên integer hiệu quả/an toàn hơn qua cả `atomic_t` và interface `refcount_t` mới. Trong đó học RMW sequence điển hình dùng atomically/an toàn trong hoạt động phổ biến của người viết driver — cập nhật device register. Sau đó trình bày reader-writer spinlock thú vị, hữu ích nhưng nhiều lưu ý. Thấy dễ vô tình gây vấn đề hiệu năng do caching side effect, gồm false sharing và cách tránh. Tiếp trình bày khá chi tiết lợi ích cho nhà phát triển — lock-free algorithm và programming technique — tập trung per-CPU variable trong Linux kernel. Quan trọng học dùng cẩn thận (đặc biệt dạng nâng cao như RCU). Cuối cùng học memory barrier là gì, thường dùng đâu.
+Trong chương này, chúng ta tiếp tục chương trước trong quá trình tìm hiểu kernel synchronization. Bạn đã học cách thực hiện locking trên số nguyên hiệu quả và an toàn hơn qua cả `atomic_t` lẫn interface mới hơn `refcount_t`. Trong đó, bạn học cách áp dụng RMW sequence điển hình một cách atomic và an toàn cho công việc phổ biến của người viết driver: cập nhật device register. Sau đó, chúng ta trình bày reader-writer spinlock, thú vị và hữu ích nhưng có một số lưu ý. Bạn thấy việc vô tình tạo vấn đề hiệu năng do các caching side effect không mong muốn dễ đến mức nào, bao gồm false sharing và cách tránh. Tiếp theo, chúng ta trình bày tương đối chi tiết lock-free algorithm và kỹ thuật lập trình, một lợi ích lớn cho người phát triển, tập trung vào các biến per-CPU trong Linux kernel. Điều quan trọng là học cách sử dụng chúng cẩn thận, đặc biệt những dạng nâng cao như RCU. Cuối cùng, bạn học memory barrier là gì và thường được sử dụng ở đâu.
 
-Hành trình dài làm việc trong Linux kernel (và lĩnh vực liên quan như device driver) giờ thực sự bắt đầu. Tuy nhiên không hands-on liên tục, thực sự làm với tài liệu, thành quả nhanh phai... Tôi khuyến khích luôn gắn bó chủ đề này và khác. Khi kiến thức/kinh nghiệm tăng, đóng góp Linux kernel (hay open source project bất kỳ) là nỗ lực cao đẹp, đáng thực hiện.
+Hành trình dài làm việc trong Linux kernel và các lĩnh vực liên quan, như device driver, giờ đã thực sự bắt đầu. Tuy nhiên, hãy hiểu rằng nếu không thực hành hands-on liên tục và thực sự làm việc với những tài liệu này, thành quả sẽ nhanh chóng phai đi. Tôi khuyến khích bạn tiếp tục gắn bó với các chủ đề này và những chủ đề khác. Khi kiến thức và kinh nghiệm tăng lên, đóng góp cho Linux kernel hoặc bất kỳ open source project nào cũng là một việc có ý nghĩa mà bạn nên thực hiện.
 
 ## Câu hỏi
 

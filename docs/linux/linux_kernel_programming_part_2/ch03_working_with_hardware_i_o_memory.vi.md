@@ -58,7 +58,7 @@ Chúng ta sẽ lần lượt xem xét cả hai kỹ thuật trong các mục Tì
 
 Hãy nghĩ một chút: ngay cả khi biết API nào dùng để map hoặc làm việc trên I/O memory theo một cách nào đó, trước hết bạn cần xin phép OS. Xét cho cùng, OS là bộ quản lý tài nguyên tổng thể của hệ thống và bạn phải hỏi đàng hoàng trước khi dùng tài nguyên của nó. Tất nhiên còn hơn thế — khi hỏi, điều thực sự làm là yêu cầu nó thiết lập một số cấu trúc dữ liệu nội bộ cho phép kernel hiểu driver hay subsystem nào đang dùng I/O memory region hoặc port nào.
 
-Trước khi thực hiện bất kỳ peripheral I/O nào, bạn được kỳ vọng xin kernel cho phép và, giả sử được phép, thực hiện I/O. Sau đó, bạn phải trả I/O region về kernel. Quá trình này gồm các bước sau:
+Trước khi thực hiện bất kỳ peripheral I/O nào, bạn cần yêu cầu kernel cho phép; nếu được chấp thuận, bạn thực hiện I/O. Sau đó, bạn cần release I/O region trở lại kernel. Quá trình này gồm các bước sau:
 
 1\. Trước I/O: Yêu cầu quyền truy cập memory region hoặc port region.
 
@@ -593,7 +593,7 @@ Tương tự, helper routine `outsw()` ghi tổng cộng `count` lần (tức co
 
 - Tiếp theo, kernel dường như cung cấp các helper API tương đương `in|out[b|w|l]()`, tức `in|out[b|w|l]_p()`. Ở đây, hậu tố `_p` có nghĩa đưa pause hay delay vào I/O. Ban đầu dành cho ngoại vi chậm; tuy nhiên, hiện nay điều này dường như trở thành chi tiết backward-compatible không còn ý nghĩa: các routine “delayed I/O” chỉ là wrapper đơn giản trên routine thông thường (thực tế không có delay).
 
-- Cũng có phiên bản user space tương đương của các PIO API (ví dụ, có thể dùng chúng để viết user space driver). Tất nhiên, gọi thành công các API `in|out[b|w|l]()` trong user mode đòi hỏi process gọi thực hiện thành công các system call `iopl(2)`/`ioperm(2)`, đến lượt chúng lại đòi quyền root (hoặc bạn cần có capability bit `CAP_SYS_RAWIO` được đặt; điều này cũng có thể làm vì mục đích bảo mật.)
+- Cũng có các phiên bản user space tương đương của PIO API; ví dụ, bạn có thể sử dụng chúng để viết một user space driver. Dĩ nhiên, để gọi thành công các API `in|out[b|w|l]()` trong user mode, process thực hiện lời gọi phải gọi thành công các system call `iopl(2)`/`ioperm(2)`, mà những system call này đòi hỏi root access. Một cách khác là có capability bit `CAP_SYS_RAWIO` được đặt; cũng có thể thực hiện cách này vì mục đích bảo mật.
 
 Đến đây, chúng ta kết thúc thảo luận về port I/O cũng như chương này.
 

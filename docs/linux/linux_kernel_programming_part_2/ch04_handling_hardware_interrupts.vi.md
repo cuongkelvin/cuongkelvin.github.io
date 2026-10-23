@@ -290,7 +290,7 @@ Vì vậy, nói tổng quát hơn, giả sử interrupt handler gọi một hàm
         a() -- b() -- c() -- [...] -- g() -- schedule() -- [...]
 ```
 
-Ở đây, bạn có thể thấy gọi `a()` cuối cùng dẫn đến gọi `schedule()`, mà như vừa chỉ ra sẽ dẫn đến “Oops”, một kernel bug. Vì thế câu hỏi là, bạn, người phát triển driver, làm sao biết khi gọi `a()` sẽ dẫn đến gọi `schedule()`? Có vài điểm bạn cần hiểu và tận dụng:
+Ở đây, bạn có thể thấy gọi `a()` cuối cùng dẫn đến `schedule()` được gọi, và như vừa chỉ ra, điều này dẫn đến “Oops”, một kernel bug. Vì vậy, câu hỏi là với vai trò người phát triển driver, làm sao bạn biết gọi `a()` sẽ dẫn đến `schedule()` được gọi? Có một số điểm bạn cần hiểu và tận dụng liên quan đến điều này:
 
 - (Như đã nhắc trong tài liệu đồng hành Linux Kernel Programming - Chương 8, Cấp phát kernel memory cho tác giả module – Phần 1) Một cách để biết trước kernel code có bao giờ đi vào atomic context hoặc interrupt context là xem trực tiếp kernel. Khi cấu hình kernel (một lần nữa, như đã thấy trong tài liệu đồng hành Linux Kernel Programming, nhớ `make` `menuconfig` từ Linux Kernel Programming - Chương 2, Build Linux kernel 5.x từ source – Phần 1), bạn có thể bật một kernel config option giúp nhận biết chính xác hoàn cảnh này. Hãy xem menu Kernel Hacking / Lock Debugging. Ở đó có một Boolean tunable tên Sleep inside atomic section checking. Hãy bật nó!
 
@@ -692,7 +692,7 @@ Hình 4.5: Mô hình hardirq—user mode RT SCHED\_FIFO thread bị ngắt bởi
 
 Real-time thread B được biểu diễn chạy từ thời điểm `t0` (trên x-axis; y-axis biểu diễn real-time priority; `rtprio` của thread B là 45); nó có 12 ms (hard deadline) để hoàn tất công việc. Tuy nhiên, giả sử sau 6 ms (tại `t1`), hardware interrupt kích hoạt. Trong Hình 4.5, chúng ta không hiển thị low-level interrupt setup code được thực thi. Lúc này hardware interrupt kích hoạt tại `t1` khiến interrupt handler được gọi; tức hardirq (biểu diễn bằng double-arrow dọc lớn màu đen trong sơ đồ trên). Hiển nhiên hardware interrupt preempt thread B. Giả sử nó mất 200 microsecond để thực thi; không nhiều, nhưng nếu một đợt interrupt flood (chẳng hạn 20 interrupt, tiêu thụ 4 ms) đến thì sao! Điều này được biểu diễn trong sơ đồ trên: interrupt tiếp tục ở tốc độ cao cho đến `t2`; chỉ sau khi tất cả hoàn tất, context mới được khôi phục. Vì vậy scheduling code chạy và (giả sử) context switch trở lại thread B, cấp processor cho nó (trên Intel CPU hiện đại, chúng ta lấy thời gian context switching bảo thủ 50 microsecond: `https://blog.tsunanet.net/2010/11/how-long-does-it-take-to-make-context.html`). Tuy nhiên, ngay sau đó, tại `t3`, hardware interrupt lại kích hoạt, tiếp tục preempt B. Điều này có thể kéo dài vô hạn; RT thread cuối cùng sẽ chạy (khi interrupt storm kết thúc) nhưng có thể đạt hoặc không đạt deadline! Đây là vấn đề chính.
 
-Vấn đề mô tả ở đoạn trước không biến mất chỉ bằng cách tăng real-time priority của user mode thread; hardirq hardware interrupt vẫn luôn preempt chúng, bất kể priority.
+Vấn đề được mô tả trong đoạn trước không biến mất chỉ bằng cách tăng real-time priority của các thread user mode. Các hardware interrupt hardirq vẫn luôn preempt chúng, bất kể priority của chúng.
 
 Bằng cách backport threaded interrupt từ dự án RTL vào mainline Linux, chúng ta giải quyết được vấn đề. Như thế nào? Hãy nghĩ: với mô hình threaded interrupt, phần lớn interrupt handling hiện do một kernel thread `SCHED_FIFO` chạy ở real-time priority `50` thực hiện. Vì vậy, chỉ cần thiết kế user space application có các `SCHED_FIFO` RT thread với real-time priority cao hơn `50` ở những nơi thiết yếu. Điều này đảm bảo chúng được chạy ưu tiên hơn hardware interrupt handler!
 
@@ -900,7 +900,7 @@ Nói cách khác, interrupt handling chia thành hai half—top và bottom. Tuy 
 
 - Bottom half routine đảm nhiệm phần lớn interrupt handling.
 
-Vậy bottom half là gì? Chỉ là hàm C được đăng ký thích hợp với kernel. Registration API thực tế cần dùng phụ thuộc loại bottom half định sử dụng. Có ba loại:
+Vậy bottom half là gì? Nó chỉ là một function C được đăng ký thích hợp với kernel. Registration API mà bạn cần sử dụng phụ thuộc vào loại bottom half dự định dùng. Có ba loại:
 
 - Cơ chế bottom-half cũ, hiện deprecated; viết tắt BH (bạn gần như có thể bỏ qua).
 
@@ -977,7 +977,7 @@ Hãy xem các tham số:
 
 - `unsigned long data`: Bất kỳ dữ liệu nào muốn truyền đến tasklet routine (cookie).
 
-Công việc khởi tạo nên làm ở đâu? Thường trong probe function (hoặc `init`) của driver. Vậy giờ đã khởi tạo và sẵn sàng, gọi nó thế nào? Hãy tìm hiểu.
+Công việc khởi tạo này nên được thực hiện ở đâu? Thông thường, nó nằm trong probe function hoặc function `init` của driver. Vậy khi đã được khởi tạo và sẵn sàng, chúng ta gọi nó như thế nào? Hãy cùng tìm hiểu.
 
 #### Chạy tasklet
 
@@ -1095,13 +1095,13 @@ void open_softirq(int nr, void (*action)(struct softirq_action *))
 }
 ```
 
-Sơ đồ sau biểu diễn khái niệm về các softirq sẵn có và priority level trên Linux (ở kernel phiên bản 5.4), với `0` cao nhất và `9` thấp nhất:
+Sơ đồ sau biểu diễn về mặt khái niệm các softirq có sẵn và priority level của chúng trên Linux tính đến kernel 5.4, trong đó `0` là softirq priority level cao nhất và `9` là thấp nhất:
 
 ![Figure 4.11](images/ch04/fig04-11.png)
 
 Hình 4.11—10 softirq trên Linux theo thứ tự priority (0:cao nhất, 9:thấp nhất)
 
-Bảng sau tổng hợp từng softirq của kernel theo thứ tự priority (`0`: `HI_SOFTIRQ` cao nhất), cùng action hay vector, chức năng, và comment nêu use case:
+Bảng sau tổng hợp từng softirq của kernel theo thứ tự priority, trong đó `0`: `HI_SOFTIRQ` có priority cao nhất, cùng action hoặc vector, chức năng và comment nêu trường hợp sử dụng của nó:
 
 | Softirq# | Softirq | Comment (dùng để làm gì/thực hiện gì) | Hàm "action" hoặc "vector" |
 |---|---|---|---|
@@ -1187,7 +1187,7 @@ Như đã học về tasklet, cần hiểu một số điểm về concurrency l
 
 Như bạn đã biết, hardirq code chỉ dành cho thiết lập và interrupt handling tối thiểu, để phần lớn interrupt processing được thực hiện an toàn qua các cơ chế deferred functionality đã nói, tasklet và/hoặc softirq. Việc xử lý “bottom half” cũng như deferred functionality này được thực hiện theo thứ tự priority — trước hết là softirq kernel timer, rồi tasklet (cả hai chỉ là trường hợp đặc biệt của cơ chế softirq bên dưới), sau đó threaded interrupt, cuối cùng workqueue (hai loại cuối dùng kernel thread bên dưới). Vậy câu hỏi lớn là khi viết driver, bạn nên dùng loại nào? Có nên dùng deferred mechanism không? Điều này thực sự phụ thuộc vào thời gian để hoàn tất toàn bộ interrupt processing. Nếu toàn bộ interrupt processing luôn có thể hoàn tất trong vài microsecond, chỉ cần dùng top-half hardirq; không cần gì khác.
 
-Nhưng nếu không phải vậy? Hãy xem bảng sau; cột đầu chỉ tổng thời gian cần để hoàn tất interrupt processing, còn các cột khác đưa ra gợi ý sử dụng cùng ưu và nhược điểm:
+Nhưng nếu không phải như vậy thì sao? Hãy xem bảng sau: cột đầu tiên chỉ tổng thời gian cần thiết để xử lý interrupt hoàn chỉnh, còn các cột khác đưa ra một số gợi ý về cách sử dụng cùng các ưu điểm và nhược điểm:
 
 | Thời gian: Nếu hardware interrupt handling luôn cần | Việc nên làm | Ưu/nhược điểm |
 |---|---|---|
