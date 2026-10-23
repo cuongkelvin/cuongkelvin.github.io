@@ -875,7 +875,7 @@ LƯU Ý Driver chỉ capture data khi trigger tương ứng được kích hoạ
 
 ### Gắn device với trigger
 
-Gắn device với trigger gồm ghi trigger name vào file `current_trigger` trong trigger directory của device. Ví dụ, giả sử cần gắn device với trigger có index `2`:
+Gắn một device với trigger cụ thể nghĩa là ghi tên trigger vào file `current_trigger` có trong trigger directory của device. Ví dụ, giả sử chúng ta cần gắn device với trigger có index `2`:
 
 ```
 # set trigger2 as current trigger for device0
@@ -1498,7 +1498,7 @@ Bây giờ mọi thứ đã thiết lập, có thể dump data bằng lệnh sau
 [...]
 ```
 
-Lệnh trên dump raw data cần xử lý thêm để lấy real data. Để hiểu data output và xử lý, cần xem channel type như sau:
+Lệnh trước dump raw data cần được xử lý thêm để thu được data thực tế. Để hiểu output data và xử lý nó, chúng ta cần xem channel type như sau:
 
 ```
 $ cat /sys/bus/iio/devices/iio:device0/scan_elements/in_voltage_type
@@ -1815,7 +1815,7 @@ printf("Backend description string: %s\n",
            iio_context_get_description(ctx));
 ```
 
-Bây giờ context đã tạo và có thể đọc thông tin, người dùng có thể muốn duyệt nó, tức điều hướng các thực thể tạo nên context, ví dụ lấy số IIO device hoặc instance của device đã cho.
+Bây giờ context đã được tạo và chúng ta có thể đọc thông tin của nó, người dùng có thể muốn duyệt context, tức điều hướng qua các thành phần tạo nên nó. Ví dụ, có thể lấy số lượng IIO device hoặc lấy một instance của device cụ thể.
 
 LƯU Ý Context là góc nhìn tại một thời điểm và cố định về IIO entity trên target. Ví dụ nếu tạo IIO trigger device sau khi tạo context, trigger device không thể truy cập từ context này. Vì không có context synchronization API, cách đúng là hủy và re-create hoặc tạo dynamic IIO element cần thiết ở đầu chương trình trước khi tạo context.
 
@@ -1877,7 +1877,7 @@ struct iio_channel* iio_device_find_channel(
 
 Có thể lấy số channel sẵn có từ object `iio_device` nhờ `iio_device_get_channels_count()`. Sau đó truy cập từng object `iio_channel` bằng `iio_device_get_channel()`, chỉ định index channel. Ví dụ, trên accelerometer three-axis (x, y, z), `iio_device_get_channel(iio_device, 0)` tương ứng lấy channel 0, tức `accel_x`. Trên ADC converter eight-channel, `iio_device_get_channel(iio_device, 0)` tương ứng lấy channel 0, tức `voltage0`.
 
-Cũng có thể lookup channel bằng tên qua `iio_device_find_channel()`, nhận argument channel name và Boolean cho biết channel là output hay không. Nếu còn nhớ, trong phần Quy ước đặt tên channel attribute, attribute name tuân mẫu `{direction}_{type}{index}_{modifier}_{info_mask}`. Phần của mẫu cần dùng với `iio_device_find_channel()` là `{type}` `{index}_{modifier}`. Sau đó tùy Boolean parameter, tên cuối được tạo bằng thêm prefix `in_` hoặc `out_`. Ví dụ để lấy channel `X` của accelerometer, dùng `iio_device_find_channel(iio_device, "accel_x", 0)`. Với channel đầu của analog-to-digital converter, dùng `iio_device_find_channel(iio_device,`
+Một cách khác là tìm channel theo tên bằng `iio_device_find_channel()`, nhận các argument là tên channel và một Boolean cho biết channel có phải output hay không. Nếu còn nhớ, trong phần Quy ước đặt tên channel attribute, chúng ta đã thấy các attribute name tuân theo mẫu `{direction}_{type}{index}_{modifier}_{info_mask}`. Phần của mẫu cần dùng với `iio_device_find_channel()` là `{type}` `{index}_{modifier}`. Sau đó, tùy giá trị Boolean parameter, tên cuối cùng được tạo bằng cách thêm prefix `in_` hoặc `out_`. Ví dụ, để lấy channel `X` của accelerometer, chúng ta dùng `iio_device_find_channel(iio_device, "accel_x", 0)`. Với channel đầu tiên của analog-to-digital converter, chúng ta dùng `iio_device_find_channel(iio_device,`
 
 ```
 "voltage0", 0).

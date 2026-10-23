@@ -38,7 +38,7 @@ Mọi cơ chế trên được Linux kernel hỗ trợ, cung cấp cho driver qu
 
 Spinlock là hardware-based locking primitive dựa khả năng hardware cung cấp atomic operation (như `test_and_set`, nếu triển khai non-atomic thành read, modify, write). Là locking primitive đơn giản nhất và nền tảng, hoạt động theo tình huống sau.
 
-Khi CPUB chạy, task B muốn acquire spinlock (gọi locking function), spinlock đã do central processing unit (CPU) khác giữ (giả sử CPUA chạy task A đã gọi locking function), CPUB chỉ spin quanh loop `while` (block task B) đến khi CPU kia release lock (task A gọi release function). Spinning chỉ xảy ra trên multi-core machine (nên ví dụ có nhiều CPU), vì single-core không thể (task giữ spinlock và đi tiếp hoặc không chạy cho đến release lock). Spinlock gọi là lock CPU giữ, khác mutex (mục tiếp chương) là lock task giữ.
+Khi CPUB chạy và task B muốn acquire spinlock bằng cách gọi locking function của nó, nhưng spinlock đã được một central processing unit (CPU) khác giữ, giả sử CPUA đang chạy task A đã gọi locking function, CPUB chỉ spin trong vòng lặp `while`, block task B, cho đến khi CPU kia release lock qua lời gọi release function của task A. Việc spin này chỉ xảy ra trên máy multi-core, vì vậy ví dụ trước có nhiều CPU. Trên máy single-core, nó không thể xảy ra: task hoặc giữ spinlock và tiếp tục, hoặc không chạy cho đến khi lock được release. Spinlock được gọi là lock do CPU giữ, trái với mutex, được thảo luận trong phần tiếp theo, là lock do task giữ.
 
 Spinlock hoạt động bằng disable scheduler trên local CPU (CPU chạy task gọi spinlock locking API). Nghĩa là task đang chạy không thể preempt trừ interrupt request (IRQ) nếu chưa disable trên local CPU (nói thêm sau). Nói cách khác, spinlock bảo vệ resource chỉ một CPU lấy/truy cập tại mỗi thời điểm. Phù hợp an toàn symmetrical multiprocessing (SMP), thực thi atomic task. LƯU Ý
 
@@ -95,7 +95,7 @@ static __always_inline void spin_unlock(spinlock_t *lock)
 static __always_inline void spin_lock(spinlock_t *lock)
 ```
 
-Tuy nhiên có hạn chế dùng kiểu này. Spinlock ngăn preemption local CPU nhưng không ngăn interrupt chiếm CPU (thực thi handler). Hình dung CPU giữ “spinlock” thay task A bảo vệ resource, interrupt đến. CPU dừng task, rẽ vào interrupt handler. Đến đây ổn. Nếu IRQ handler cần acquire cùng spinlock (có thể đoán resource shared với handler), sẽ spin vô hạn cố lấy lock do task bị nó preempt giữ. Chắc chắn deadlock.
+Tuy nhiên, có một số hạn chế đã biết khi sử dụng spinlock theo cách này. Mặc dù spinlock ngăn preemption trên local CPU, nó không ngăn interrupt chiếm CPU để thực thi interrupt handler. Hãy hình dung CPU đang giữ spinlock thay cho task A để bảo vệ một resource và interrupt xảy ra. CPU dừng current task rồi chuyển đến interrupt handler. Đến đây vẫn ổn. Nhưng nếu IRQ handler cần acquire chính spinlock đó thì sao? Bạn có thể đã đoán resource được chia sẻ với interrupt handler. Nó sẽ spin vô hạn tại chỗ, cố acquire lock đang được giữ bởi task mà chính nó đã preempt. Tình huống này chắc chắn dẫn đến deadlock.
 
 Để giải quyết, Linux kernel cung cấp `_irq` variant cho spinlock, ngoài disable/enable preemption còn disable/enable interrupt local CPU. Hàm là `spin_lock_irq()` và `spin_unlock_irq()`, định nghĩa:
 
@@ -116,7 +116,7 @@ Xét ví dụ:
 
 Điều này khiến `spin_lock_irq()` không an toàn từ IRQs off-context vì `spin_unlock_irq()` tương ứng mù quáng enable IRQ, có nguy cơ bật cả IRQ chưa enable khi gọi `spin_lock_irq()`. Chỉ hợp lý dùng `spin_lock_irq()` khi biết interrupt enable — chắc không gì khác đã disable trên local CPU.
 
-Giờ nếu lưu interrupt status vào biến trước acquire, restore chính xác khi release thì không vấn đề. Kernel cung cấp variant `_irqsave` hoạt động như `_irq` nhưng thêm save/restore interrupt status. Là `spin_lock_irqsave()` và `spin_lock_irqrestore()`, định nghĩa:
+Bây giờ, hãy hình dung bạn lưu trạng thái interrupt vào một biến trước khi acquire lock và khôi phục chính xác trạng thái đó khi release; khi đó sẽ không còn vấn đề. Để thực hiện, kernel cung cấp các function thuộc biến thể `_irqsave`, hoạt động giống các function `_irq` nhưng có thêm khả năng lưu và khôi phục trạng thái interrupt. Đó là `spin_lock_irqsave()` và `spin_lock_irqrestore()`, được định nghĩa như sau:
 
 ```
 spin_lock_irqsave(spinlock_t *lock, unsigned long flags)
@@ -135,7 +135,7 @@ Vì vậy chỉ disable interrupt bảo vệ khỏi kernel preemption nếu prot
 
 ## Mutex
 
-Mutex là locking primitive thứ hai và cuối thảo luận chương này. Hoạt động như spinlock, chỉ khác code có thể sleep. Nếu cố lock mutex do task khác giữ, task bị suspend, chỉ wake up khi release. Không spinning, CPU làm việc khác khi task chờ sleeping. Như đã nói spinlock là lock CPU giữ; mutex là lock task giữ.
+Mutex là locking primitive thứ hai và cuối cùng được thảo luận trong chương này. Nó hoạt động giống spinlock, với khác biệt duy nhất là code của bạn có thể sleep. Nếu cố lock một mutex đang được task khác giữ, task của bạn bị tạm ngừng và chỉ được đánh thức khi mutex được release. Lần này không có spinning, nghĩa là CPU có thể làm việc khác trong lúc task của bạn ngủ chờ. Như đã đề cập, spinlock là lock được CPU giữ; ngược lại, mutex là lock được task giữ.
 
 Mutex là data structure đơn giản nhúng wait queue (đưa bên cạnh tranh sleep), spinlock bảo vệ truy cập queue, như snippet:
 
@@ -151,9 +151,9 @@ struct mutex {
 };
 ```
 
-Snippet trên bỏ phần chỉ dùng debug để dễ đọc. Tuy nhiên thấy mutex xây trên spinlock. `owner` là process sở hữu (giữ) lock. `wait_list` là list bên cạnh tranh mutex sleep. `wait_lock` là spinlock bảo vệ thao tác `wait_list` (bỏ/chèn bên cạnh tranh sleep). Giữ `wait_list` coherent trên SMP system.
+Trong code snippet trước, các thành phần chỉ dùng ở debug mode được bỏ đi để dễ đọc. Tuy nhiên, có thể thấy mutex được xây dựng trên spinlock. `owner` biểu diễn process sở hữu, tức giữ, lock. `wait_list` là list nơi các task cạnh tranh mutex được đưa vào trạng thái ngủ. `wait_lock` là spinlock bảo vệ việc thao tác trên `wait_list`, gồm loại bỏ hoặc chèn những task ngủ chờ trong đó. Nó giúp giữ `wait_list` nhất quán trên các SMP system.
 
-Mutex API trong header `include/linux/mutex.h`. Trước acquire/release phải khởi tạo. Như kernel core data structure khác, có khởi tạo tĩnh:
+Các mutex API nằm trong header file `include/linux/mutex.h`. Trước khi acquire và release mutex, phải khởi tạo nó. Giống các kernel core data structure khác, có cách khởi tạo tĩnh như sau:
 
 ```
 static DEFINE_MUTEX(my_mutex);
@@ -166,7 +166,7 @@ static DEFINE_MUTEX(my_mutex);
 struct mutex mutexname = __MUTEX_INITIALIZER(mutexname)
 ```
 
-Cách thứ hai kernel cung cấp là dynamic initialization qua low-level function `__mutex_init()`, thực tế bọc bởi macro user-friendly `mutex_init()`. Xem snippet:
+Cách thứ hai mà kernel cung cấp là dynamic initialization, thực hiện qua lời gọi low-level function `__mutex_init()`. Function này thực tế được bọc bởi macro user-friendly hơn nhiều là `mutex_init()`. Bạn có thể xem cách sử dụng trong code snippet sau:
 
 ```
 struct fake_data {
@@ -230,11 +230,11 @@ Tất cả khiến mutex phù hợp:
 
 - Nếu protected resource không được IRQ handler truy cập, operation không cần atomic
 
-Tuy nhiên dùng spinlock cho critical section rất nhỏ có thể rẻ hơn (CPU cycle), vì chỉ suspend scheduler rồi spin; so chi phí mutex phải suspend current task, chèn vào wait queue, cần scheduler chuyển task khác và reschedule task sleep khi mutex release.
+Tuy nhiên, sử dụng spinlock cho các critical section rất nhỏ có thể ít tốn kém hơn xét theo CPU cycle. Spinlock chỉ tạm ngừng scheduler rồi bắt đầu spin, trong khi mutex phải tạm ngừng current task và chèn nó vào wait queue của mutex. Điều này đòi hỏi scheduler chuyển sang task khác rồi schedule lại task đang ngủ sau khi mutex được release.
 
 ## Trylock method
 
-Có lúc chỉ cần acquire lock nếu chưa bị bên khác giữ. Method thử acquire rồi trả status ngay (không spin với spinlock, không sleep với mutex), cho biết lock thành công không.
+Có những trường hợp chúng ta chỉ cần acquire lock nếu nó chưa được bên cạnh tranh khác giữ. Các method như vậy thử acquire lock rồi trả về ngay một giá trị trạng thái cho biết đã lock thành công hay chưa, không spin nếu sử dụng spinlock và không sleep nếu sử dụng mutex.
 
 Cả spinlock và mutex API có trylock method, lần lượt `spin_trylock()` và `mutex_trylock()`, thấy loại sau ở đây. Cả hai trả 0 thất bại (lock đã locked) hoặc 1 thành công (acquire). Vì vậy hợp lý dùng với statement `if`:
 
@@ -242,7 +242,7 @@ Cả spinlock và mutex API có trylock method, lần lượt `spin_trylock()` v
 int mutex_trylock(struct mutex *lock)
 ```
 
-`spin_trylock()` dành spinlock. Lock nếu chưa locked, như method `spin_lock()`. Tuy nhiên trả `0` ngay không spin nếu đã locked. Xem:
+`spin_trylock()` được sử dụng cho spinlock. Nó lock spinlock nếu spinlock chưa bị lock, giống method `spin_lock()`. Tuy nhiên, nếu spinlock đã bị lock, nó trả về `0` ngay mà không spin. Bạn có thể xem cách hoạt động ở đây:
 
 ```
 static DEFINE_SPINLOCK(foo_lock);
@@ -265,7 +265,7 @@ static void foo(void)
 }
 ```
 
-`mutex_trylock()` dành mutex. Lock nếu chưa locked, như `mutex_lock()`. Tuy nhiên trả `0` ngay không sleep nếu đã locked. Ví dụ snippet:
+Ngược lại, `mutex_trylock()` được sử dụng cho mutex. Nó lock mutex nếu mutex chưa bị lock, giống method `mutex_lock()`. Tuy nhiên, nếu mutex đã bị lock, nó trả về `0` ngay mà không sleep. Bạn có thể xem ví dụ trong code snippet sau:
 
 ```
 static DEFINE_MUTEX(bar_mutex);
@@ -288,11 +288,11 @@ static void bar (void)
 }
 ```
 
-Trích đoạn dùng `mutex_trylock()` với `if` để driver thích nghi hành vi. Xong trylock variant, sang khái niệm khác — trì hoãn thực thi tường minh.
+Trong đoạn trích trước, `mutex_trylock()` được sử dụng cùng câu lệnh `if` để driver có thể điều chỉnh hành vi. Bây giờ đã hoàn tất biến thể trylock, chúng ta hãy chuyển sang một khái niệm hoàn toàn khác: học cách trì hoãn việc thực thi một cách tường minh.
 
 ## Làm việc với cơ chế waiting, sleeping và delay trong kernel
 
-Sleeping ở đây là task (thay running kernel code) tự nguyện nhường processor, có thể schedule task khác. Simple sleeping là task sleep rồi wake sau thời gian cho trước (ví dụ trì hoãn operation thụ động), còn có sleeping dựa external event (như data availability). Simple sleep triển khai bằng API riêng; wake up ngầm (kernel xử lý) khi hết thời gian. Cơ chế còn lại phụ thuộc event, waking-up tường minh (task khác phải wake dựa condition, nếu không sleep mãi) trừ khi chỉ sleeping timeout. Triển khai qua wait queue. Cả sleep API và wait queue là passive waiting. Khác cách waking-up xảy ra.
+Thuật ngữ sleeping trong phần này chỉ cơ chế mà một task, thay mặt kernel code đang chạy, tự nguyện nhường processor để task khác có thể được schedule. Simple sleeping là việc task ngủ rồi được đánh thức sau một khoảng thời gian cho trước, chẳng hạn để trì hoãn thụ động một thao tác. Ngoài ra, có những cơ chế ngủ dựa trên external event như data trở nên có sẵn. Simple sleep được triển khai bằng các API riêng; việc đánh thức được kernel tự xử lý một cách ngầm định sau khi hết thời gian. Cơ chế còn lại phụ thuộc vào event và việc đánh thức, tức waking-up, là tường minh: task khác phải chủ động đánh thức chúng ta theo một điều kiện, nếu không sẽ ngủ mãi, trừ khi có chỉ định sleeping timeout. Cơ chế này được triển khai trong kernel bằng khái niệm wait queue. Cả sleep API lẫn wait queue đều thực hiện điều có thể gọi là passive waiting. Khác biệt giữa chúng là cách quá trình waking-up diễn ra.
 
 ## Wait queue
 
@@ -308,7 +308,7 @@ struct wait_queue_head {
 };
 ```
 
-Wait queue chỉ là list (sleeping process chờ wake) và spinlock bảo vệ list. Dùng khi hơn một process muốn sleep chờ một hay nhiều event để wake. Member head thực chất list process chờ event. Mỗi process muốn sleep chờ event đặt mình vào list trước sleep. Khi trong list, gọi wait queue entry. Event đến, một hay nhiều process wake và chuyển khỏi list.
+Wait queue chỉ gồm một list chứa các process đang ngủ chờ được đánh thức và một spinlock bảo vệ truy cập list đó. Chúng ta có thể dùng wait queue khi nhiều process muốn ngủ để chờ một hoặc nhiều event xảy ra rồi được đánh thức. Member head thực chất là list các process chờ event. Mỗi process muốn ngủ chờ event tự đưa mình vào list trước khi ngủ. Khi nằm trong list, process được gọi là wait queue entry. Khi event xảy ra, một hoặc nhiều process trong list được đánh thức và đưa ra khỏi list.
 
 Khai báo/khởi tạo wait queue hai cách. Đầu dùng tĩnh `DECLARE_WAIT_QUEUE_HEAD`:
 
@@ -323,7 +323,7 @@ wait_queue_head_t my_event;
 init_waitqueue_head(&my_event);
 ```
 
-Process muốn sleep chờ `my_event` có thể gọi `wait_event_interruptible()` hoặc `wait_event()`. Thường event chỉ là resource trở nên sẵn có, nên hợp lý chỉ sleep sau kiểm tra availability đầu. Để dễ, cả hai nhận expression thay argument thứ hai, chỉ sleep khi expression `false`, như snippet:
+Bất kỳ process nào muốn ngủ để chờ `my_event` xảy ra đều có thể gọi `wait_event_interruptible()` hoặc `wait_event()`. Phần lớn trường hợp, event chỉ là việc một resource trở nên có sẵn, nên hợp lý là process chỉ ngủ sau khi kiểm tra availability của resource đó lần đầu. Để đơn giản hóa, cả hai function nhận một biểu thức ở argument thứ hai, để process chỉ được đưa vào trạng thái ngủ nếu biểu thức cho giá trị `false`, như minh họa trong code snippet sau:
 
 ```
 wait_event(&my_event, (event_occured == 1));
@@ -337,7 +337,7 @@ LƯU Ý
 
 `wait_event()` đưa process vào exclusive wait, tức uninterruptible sleep, không bị signal interrupt. Chỉ dùng critical task. Phần lớn khuyến nghị interruptible function.
 
-Có lúc không chỉ cần condition `true` mà timeout sau thời gian chờ. Dùng `wait_event_timeout()`, prototype:
+Có những trường hợp bạn không chỉ cần điều kiện trở thành `true` mà còn cần timeout sau một khoảng chờ nhất định. Bạn có thể xử lý bằng `wait_event_timeout()`, có prototype như sau:
 
 ```
 wait_event_timeout(wq_head, condition, timeout)
@@ -356,7 +356,7 @@ unsigned long msecs_to_jiffies(const unsigned int m)
 unsigned long usecs_to_jiffies(const unsigned int u)
 ```
 
-Sau thay đổi biến có thể ảnh hưởng wait condition, phải gọi hàm họ `wake_up*` thích hợp. Để wake process sleep trên wait queue, gọi `wake_up()`, `wake_up_all()`, `wake_up_interruptible()` hoặc `wake_up_interruptible_all()`. Mỗi lần gọi, condition được re-evaluated. Nếu `true`, một process (hay tất cả với variant `_all()`) trong wait queue wake, state đặt `TASK_RUNNING`; nếu `false`, không gì xảy ra. Snippet:
+Sau khi bất kỳ biến nào có thể ảnh hưởng đến kết quả của wait condition thay đổi, bạn phải gọi function thích hợp trong họ `wake_up*`. Để đánh thức process đang ngủ trên wait queue, nên gọi `wake_up()`, `wake_up_all()`, `wake_up_interruptible()` hoặc `wake_up_interruptible_all()`. Mỗi khi gọi một trong các function này, điều kiện được đánh giá lại (re-evaluated). Nếu điều kiện là `true` tại thời điểm đó, một process hoặc tất cả process với biến thể `_all()` trong wait queue sẽ được đánh thức và state được đặt thành `TASK_RUNNING`; nếu điều kiện là `false`, không có gì xảy ra. Code snippet sau minh họa khái niệm này:
 
 ```
 wake_up(&my_event);
@@ -365,9 +365,9 @@ wake_up_interruptible(&my_event);
 wake_up_interruptible_all(&my_event);
 ```
 
-Ở trên, `wake_up()` wake một process, `wake_up_all()` wake tất cả từ wait queue. Còn `wake_up_interruptible()` wake một process đang interruptible sleep, `wake_up_interruptible_all()` wake mọi process đang interruptible sleep từ wait queue.
+Trong code snippet trước, `wake_up()` chỉ đánh thức một process từ wait queue, còn `wake_up_all()` đánh thức tất cả process trong wait queue. Ngược lại, `wake_up_interruptible()` chỉ đánh thức một process trong wait queue đang ở interruptible sleep, còn `wake_up_interruptible_all()` đánh thức tất cả process trong wait queue đang ở interruptible sleep.
 
-Vì có thể signal interrupt, phải kiểm tra return value variant `_interruptible`. Nonzero nghĩa sleep đã bị signal interrupt, driver nên trả `ERESTARTSYS`, như snippet:
+Vì có thể bị signal ngắt, bạn nên kiểm tra return value của các biến thể `_interruptible`. Giá trị khác 0 nghĩa là quá trình ngủ đã bị một signal ngắt, và driver nên trả về `ERESTARTSYS`, như minh họa trong code snippet sau:
 
 ```
 #include <linux/module.h>
@@ -411,7 +411,7 @@ MODULE_AUTHOR("John Madieu <john.madieu@gmail.com>");
 MODULE_LICENSE("GPL");
 ```
 
-Ví dụ dùng API `msleep()`, sẽ giải thích ngay. Trở lại code — current process (thực tế `insmod`) sleep trên wait queue 5 giây, work handler wake. Output `dmesg`:
+Trong ví dụ trước, chúng ta sử dụng API `msleep()`, sẽ được giải thích ngay sau đây. Trở lại hành vi của code, current process, thực tế là `insmod`, được đưa vào trạng thái ngủ trong wait queue trong 5 giây và được work handler đánh thức. Output của `dmesg` như sau:
 
 ```
 [342081.385491] Wait queue example
@@ -422,11 +422,11 @@ Ví dụ dùng API `msleep()`, sẽ giải thích ngay. Trở lại code — cur
 [342092.912033] waitqueue example cleanup
 ```
 
-Giờ quen wait queue cho process sleep và chờ wake, học cơ chế sleeping đơn giản khác chỉ trì hoãn execution flow vô điều kiện.
+Bây giờ đã hiểu khái niệm wait queue, cho phép đưa các process vào trạng thái ngủ và chờ chúng được đánh thức, chúng ta hãy học một cơ chế ngủ đơn giản khác: trì hoãn execution flow một cách vô điều kiện.
 
 ## Simple sleeping trong kernel
 
-Còn gọi passive delay vì task sleep (cho CPU schedule task khác) khi chờ, khác active delay là busy wait, task chờ bằng lãng phí CPU clock, tiêu thụ resource. Trước dùng sleeping API, driver include `#include <linux/delay>`, cung cấp hàm sau:
+Cơ chế ngủ đơn giản này cũng được gọi là passive delay vì task ngủ trong lúc chờ, cho phép CPU schedule task khác. Ngược lại, active delay là busy wait: task chờ bằng cách lãng phí CPU clock và do đó tiêu thụ resource. Trước khi sử dụng sleeping API, driver phải include `#include <linux/delay>` để có function sau:
 
 ```
 usleep_range(unsigned long min, unsigned long max)
@@ -459,7 +459,7 @@ mdelay(unsigned long msecs)
 
 Độ chính xác `ndelay` phụ thuộc timer chính xác thế nào (không phải luôn vậy trên embedded system on a chip, SoC). Độ chính xác mức `ndelay` có thể không có trên nhiều non-PC device. Thay vào đó dễ gặp:
 
-- `udelay`: API dựa busy-wait loop. Busy wait đủ loop cycle để đạt delay. Dùng nếu cần sleep vài `µsecs` (\< \~10 microsecond). Khuyến nghị ngay sleep dưới 10 us vì hệ thống chậm (một số embedded SoC), overhead thiết lập hrtimer cho `usleep` có thể không đáng. Đánh giá tùy tình huống cụ thể, nhưng cần biết.
+- `udelay`: API này dựa trên một busy-wait loop. Nó busy wait đủ số lượt lặp để đạt delay mong muốn. Bạn nên dùng function này nếu cần ngủ vài `µsecs`, tức \< \~10 microsecond. API này được khuyến nghị ngay cả khi ngủ dưới 10 us vì trên các hệ thống chậm hơn, như một số embedded SoC, overhead thiết lập hrtimer cho `usleep` có thể không đáng. Đánh giá này dĩ nhiên phụ thuộc tình huống cụ thể, nhưng đó là điều cần lưu ý.
 
 - `mdelay`: Đây là macro wrapper quanh `udelay` để tính đến khả năng overflow khi truyền argument lớn cho `udelay`. Nói chung, không khuyến khích dùng `mdelay`, và nên refactor code để cho phép dùng `msleep`.
 
@@ -606,7 +606,7 @@ Từ danh sách clock event device trên, nói được:
 
 - Luôn có directory lạ `broadcast`. Thảo luận timer đặc biệt này mục sau.
 
-Muốn biết timer bên dưới clock event device, đọc `current_device` trong clock event directory. Xem ví dụ ba máy.
+Để biết timer bên dưới một clock event device cụ thể, bạn có thể đọc nội dung `current_device` trong clock event directory. Bây giờ, chúng ta sẽ xem ví dụ trên ba máy khác nhau.
 
 Trên platform i.MX 6:
 
@@ -651,7 +651,7 @@ Clock event device có thể configure one-shot mode hoặc periodic mode:
 
 ### Tick device
 
-Tick device là software extension của clock event device, cung cấp stream tick event liên tục cách đều. Kernel tự tạo khi clock event device mới đăng ký, luôn chọn tốt nhất. Vì vậy tick device gắn và được clock event device hỗ trợ.
+Tick device là phần mở rộng software của clock event device, cung cấp một luồng tick event liên tục xảy ra theo các khoảng thời gian đều nhau. Kernel tự động tạo tick device khi clock event device mới được đăng ký và luôn chọn clock event device tốt nhất. Vì vậy, rõ ràng tick device được gắn với và được hỗ trợ bởi một clock event device.
 
 Định nghĩa data structure tick-device trong snippet:
 
@@ -662,13 +662,13 @@ struct tick_device {
 };
 ```
 
-Trong structure, `evtdev` là clock event device được trừu tượng bởi tick device. `mode` theo dõi working mode clock event bên dưới. Vì vậy tick device periodic cũng nghĩa clock event device dưới configure periodic. Sơ đồ:
+Trong data structure này, `evtdev` là clock event device được tick device trừu tượng hóa. `mode` được sử dụng để theo dõi working mode của clock event bên dưới. Vì vậy, khi nói tick device ở periodic mode, điều đó cũng có nghĩa clock event device bên dưới được configure hoạt động ở chế độ này. Sơ đồ sau minh họa điều đó:
 
 ![Figure 3.3](images/ch03/fig03-03.jpg)
 
 Hình 3.3 – Tương quan clockevent và tick-device
 
-Tick device có thể global hệ thống hoặc local (per-CPU). Framework quyết định global hay không bằng chọn local tick device theo tính năng underlying clock event device. Mỗi loại:
+Tick device có thể là global cho toàn hệ thống hoặc local, tức per-CPU tick device. Framework quyết định tick device có cần là global hay không bằng cách chọn một local tick device dựa trên các tính năng của clock event device bên dưới nó. Mỗi loại tick device được mô tả như sau:
 
 - Per-CPU tick device cung cấp chức năng local CPU như process accounting, profiling, hiển nhiên CPU local periodic tick (periodic mode), CPU local next event interrupt (non-periodic) cho CPU local hrtimer management (xem `update_process_times()` để biết xử lý). Timer core code có per-CPU variable `tick_cpu_device` biểu diễn instance tick device per-CPU.
 
@@ -759,23 +759,23 @@ unsigned long long __weak sched_clock(void)
 
 Ví dụ hàm cung cấp timestamp `printk()`, hoặc gọi khi dùng `ktime_get_boottime()` hay kernel API liên quan. Mặc định triển khai jiffy-backed (có thể ảnh hưởng scheduling accuracy). Nếu override, phải trả monotonic timestamp 64-bit nanosecond biểu diễn số nanosecond từ reboot gần nhất. Phần lớn platform đọc trực tiếp timer register. Platform thiếu timer dùng cùng timer main clock source device. Ví dụ Raspberry Pi. Khi vậy register đọc main clock source và register lấy `sched_clock()` giống nhau: xem `drivers/clocksource/bcm2835_timer.c`.
 
-Timer cho `sched_clock()` phải rất nhanh so clock source timer. Như tên, chủ yếu scheduler dùng nên gọi thường xuyên hơn nhiều. Nếu trade-offs accuracy với clock source, có thể hy sinh accuracy cho speed trong `sched_clock()`.
+Timer điều khiển `sched_clock()` phải rất nhanh so với các clock source timer. Như tên gọi, nó chủ yếu được scheduler sử dụng, nghĩa là được gọi thường xuyên hơn nhiều. Nếu phải thực hiện các trade-offs về độ chính xác so với clock source, bạn có thể hy sinh độ chính xác để đổi lấy tốc độ trong `sched_clock()`.
 
 Nếu không override trực tiếp `sched_clock()`, kernel time core có helper `sched_clock_register()` cung cấp platform-dependent timer reading function và rating. Dù sao function vào kernel time framework variable `cd`, kiểu `struct clock_data` (giả sử rate timer mới lớn hơn timer đang điều khiển hàm hiện tại).
 
 ### Dynamic tick/tickless kernel
 
-Dynamic tick là hệ quả logic chuyển high-resolution timer interface. Trước đó periodic tick sinh interrupt định kỳ (`HZ` lần/giây) điều khiển OS. Giữ system thức dù không task/timer handler cần chạy. CPU không nghỉ lâu, phải wake vô ích.
+Dynamic tick là hệ quả logic của việc chuyển sang high-resolution timer interface. Trước khi chúng được đưa vào, periodic tick định kỳ phát interrupt, `HZ` lần mỗi giây, để điều khiển hệ điều hành. Điều này giữ hệ thống luôn thức ngay cả khi không có task hoặc timer handler cần chạy. Với cách tiếp cận đó, CPU không thể nghỉ lâu vì phải thức dậy mà không có mục đích thực sự.
 
 Dynamic tick giải quyết bằng cho dừng periodic tick trong khoảng thời gian nhất định để tiết kiệm điện. Chỉ enable lại khi có task cần thực hiện; nếu không disable.
 
-Hoạt động thế nào? CPU hết task (idle task được schedule), chỉ hai event tạo công việc sau idle: kernel timer hết hạn (dự đoán được) hoặc I/O operation hoàn tất. Khi CPU vào idle, timer framework xem next scheduled timer event; nếu sau periodic tick tiếp, lập trình lại per-CPU clock event device đến event muộn hơn. Cho idle CPU sleep lâu không bị periodic tick ngắt vô ích.
+Cơ chế này hoạt động như thế nào? Khi CPU không còn task để chạy, tức idle task được schedule trên CPU đó, chỉ hai event có thể tạo ra công việc mới sau khi CPU nghỉ: một internal kernel timer hết hạn, điều có thể dự đoán, hoặc một thao tác I/O hoàn tất. Khi CPU đi vào idle state, timer framework xem xét timer event tiếp theo đã được schedule. Nếu event đó muộn hơn periodic tick tiếp theo, framework lập trình lại per-CPU clock event device đến event muộn hơn. Điều này cho phép idle CPU ngủ lâu hơn mà không bị periodic tick ngắt không cần thiết.
 
 Tuy nhiên có low power state ngay per-CPU clock event device dừng. Khi đó broadcast tick device được lập trình next future event.
 
 Ngay trước CPU vào idle như vậy (hàm `do_idle()`), gọi tick broadcast framework (`tick_nohz_idle_enter()`), disable periodic tick biến `tick_device` (xem `tick_nohz_idle_stop_tick()`). CPU được thêm list cần wake bằng đặt bit tương ứng trong “broadcast map” `tick_broadcast_mask`, bitmap biểu diễn processor sleep. Framework tính thời gian cần wake (next event time); nếu sớm hơn thời gian `tick_broadcast_device` đang lập trình, cập nhật thời gian interrupt `tick_broadcast_device` theo giá trị mới, lập trình vào clock event device dưới broadcast tick device. Biến `tick_cpu_device` của CPU sắp deep idle giờ shutdown, không còn functional.
 
-Lặp lại mỗi CPU vào deep idle, biến `tick_broadcast_device` lập trình phát ở wake-up time sớm nhất trong các CPU deep idle.
+Các thủ tục trước được lặp lại mỗi khi một CPU đi vào deep idle state, và biến `tick_broadcast_device` được lập trình phát tại thời điểm wake-up sớm nhất trong số những CPU đang ở deep idle state.
 
 Khi next event broadcast tick device phát, xem bitmask CPU sleep, tìm CPU sở hữu timer có thể đã hết hạn, gửi IPI đến mọi remote CPU trong bitmask có thể chứa expired timer.
 
@@ -783,11 +783,11 @@ Tuy nhiên nếu CPU rời idle bởi interrupt (architecture code gọi `handle
 
 ## Dùng standard kernel low-precision (low-res) timer
 
-Standard timer (nay legacy, còn low-resolution) là kernel timer granularity `jiffies`. Resolution gắn regular system tick, tùy architecture/configuration (tức `CONFIG_HZ` hay `HZ`) kernel dùng kiểm soát scheduling/thực thi hàm tại thời điểm tương lai (dựa jiffies).
+Standard timer, nay là legacy và cũng được gọi là low-resolution timer, là các kernel timer hoạt động với granularity của `jiffies`. Resolution của chúng gắn với resolution của system tick thông thường, phụ thuộc architecture và configuration, tức `CONFIG_HZ` hoặc đơn giản là `HZ`, mà kernel sử dụng để điều khiển việc schedule và thực thi function tại một thời điểm trong tương lai dựa trên jiffies.
 
 ### Jiffies và HZ
 
-Jiffy là kernel time unit, duration tùy `HZ`, tần số tăng biến `jiffies` trong kernel. Mỗi increment event là tick. Clock source dựa `jiffies` là nền tối thiểu chung hoạt động mọi hệ thống.
+Jiffy là đơn vị thời gian của kernel có độ dài phụ thuộc vào giá trị `HZ`, biểu diễn tần số tăng biến `jiffies` trong kernel. Mỗi sự kiện tăng được gọi là tick. Clock source dựa trên `jiffies` là clock source chung tối thiểu, có thể hoạt động trên mọi hệ thống.
 
 Vì `jiffies` tăng `HZ` lần/giây, nếu `HZ = 1,000`, tăng 1.000 lần/giây (một tick mỗi 1/1.000 giây hay 1 millisecond). Phần lớn Advanced RISC Machines (ARM) kernel configuration, `HZ` mặc định `100`, còn x86 `250`, cho resolution 10 hoặc 4 millisecond. Các giá trị `HZ` trên hai running system:
 
@@ -847,11 +847,11 @@ int mod_timer(struct timer_list *timer,
 void add_timer(struct timer_list *timer)
 ```
 
-`mod_timer()` đặt initial expiration delay hoặc cập nhật active timer; gọi trên inactive timer sẽ activate.
+Function `mod_timer()` được sử dụng để đặt expiration delay ban đầu hoặc cập nhật giá trị này trên một active timer. Điều đó có nghĩa gọi function này trên một inactive timer sẽ activate timer đó.
 
-LƯU Ý Activate ở đây là arm và queue timer. Khi timer đã arm, queued, đếm ngược chờ hết hạn rồi chạy callback, gọi pending.
+LƯU Ý Activate timer ở đây nghĩa là arm và queue timer. Khi timer vừa được arm, được queue và đang đếm ngược chờ hết hạn trước khi chạy callback function, nó được gọi là pending.
 
-Nên ưu tiên hàm này hơn `add_timer()`, hàm chỉ khởi động inactive timer. Trước `add_timer()`, phải đặt expiration delay và callback:
+Bạn nên ưu tiên function này hơn `add_timer()`, một function khác chỉ dùng để khởi động inactive timer. Trước khi gọi `add_timer()`, bạn phải đặt expiration delay và callback của timer như sau:
 
 ```
 my_timer.expires = jiffies + ((12 * HZ) / 10); /* 1.2s */
@@ -871,7 +871,7 @@ int del_timer(struct timer_list *timer);
 int del_timer_sync(struct timer_list *timer);
 ```
 
-`del_timer()` remove (dequeue) object `timer` khỏi timer management queue. Thành công trả khác tùy inactive/active. Đầu `0`, sau `1`, ngay khi callback đang chạy.
+`del_timer()` loại bỏ, tức dequeue, object `timer` khỏi timer management queue. Khi thành công, nó trả về giá trị khác nhau tùy được gọi trên inactive timer hay active timer. Trong trường hợp đầu, nó trả về `0`; trong trường hợp sau, nó trả về `1`, ngay cả khi callback function của timer đang được thực thi.
 
 Xét execution flow xóa timer trên một CPU khi callback chạy CPU khác:
 
@@ -946,7 +946,7 @@ MODULE_DESCRIPTION("Standard timer example");
 MODULE_LICENSE("GPL");
 ```
 
-Ví dụ minh họa standard timer, yêu cầu timeout 500 millisecond. Đơn vị timer là jiffy. Để truyền timeout dạng con người (giây/millisecond), phải dùng conversion helper. Một số:
+Trong ví dụ trước, chúng ta minh họa cách sử dụng cơ bản của standard timer và yêu cầu timeout 500 millisecond. Tuy nhiên, đơn vị thời gian của loại timer này là jiffy. Vì vậy, để truyền giá trị timeout theo đơn vị dễ hiểu như giây hoặc millisecond, bạn phải sử dụng các conversion helper. Một số helper được trình bày ở đây:
 
 ```
 unsigned long msecs_to_jiffies(const unsigned int m)
@@ -955,7 +955,7 @@ unsigned long timespec64_to_jiffies(
                   const struct timespec64 *value);
 ```
 
-Với helper trên không mong accuracy tốt hơn jiffy. Ví dụ `usecs_to_jiffies(100)` trả một jiffy. Giá trị làm tròn lên jiffy gần nhất.
+Với các helper function trước, bạn không nên kỳ vọng độ chính xác tốt hơn một jiffy. Ví dụ, sử dụng `usecs_to_jiffies(100)` sẽ trả về một jiffy. Giá trị được trả về được làm tròn lên giá trị jiffy gần nhất.
 
 Để truyền argument thêm vào timer callback, ưu tiên nhúng làm element trong structure cùng timer, dùng macro `from_timer()` trên element lấy structure lớn, từ đó truy cập mọi element. Định nghĩa macro:
 
@@ -964,7 +964,7 @@ Với helper trên không mong accuracy tốt hơn jiffy. Ví dụ `usecs_to_jif
     container_of(callback_timer, typeof(*var), timer_fieldname)
 ```
 
-Ví dụ cần truyền hai element: đầu kiểu `struct sometype`, sau integer. Định nghĩa structure thêm:
+Ví dụ, giả sử chúng ta cần truyền hai thành phần cho timer callback: thành phần thứ nhất có kiểu `struct sometype`, còn thành phần thứ hai là một số nguyên. Để truyền các argument, chúng ta định nghĩa thêm một structure như sau:
 
 ```
 struct fake_data {
@@ -993,7 +993,7 @@ void timer_callback(struct timer_list *t)
 }
 ```
 
-Snippet mô tả truyền/lấy data timer callback bằng container structure. Mặc định pointer `timer_list` truyền callback thay kiểu `unsigned long` ở phiên bản trước 4.15.
+Trong code snippet trước, chúng ta mô tả cách truyền data cho timer callback và lấy data này bằng container structure. Mặc định, pointer đến `timer_list` được truyền vào callback function, thay vì kiểu data `unsigned long` như trong các phiên bản trước 4.15.
 
 ## High-resolution timer (hrtimer)
 
@@ -1027,7 +1027,7 @@ void hrtimer_init(struct hrtimer *timer,
                   enum hrtimer_mode mode);
 ```
 
-Trong hàm, `timer` là pointer hrtimer cần khởi tạo. `clock_id` chỉ loại clock cấp hrtimer. Option phổ biến:
+Trong function trước, `timer` là pointer đến hrtimer cần khởi tạo. `clock_id` cho biết phải sử dụng loại clock nào để cấp cho hrtimer này. Các lựa chọn phổ biến như sau:
 
 - `CLOCK_REALTIME`: Chọn real-time time — wall time. Đổi system time có thể ảnh hưởng timer.
 
@@ -1041,28 +1041,28 @@ Tham số `mode` trong snippet chỉ hrtimer hoạt động thế nào. Option:
 
 - `HRTIMER_MODE_REL`: Hết hạn sau thời gian chỉ định tương đối từ bây giờ.
 
-- `HRTIMER_MODE_PINNED`: Hrtimer gắn CPU. Chỉ xét khi bắt đầu để phát/chạy callback cùng CPU đã queue.
+- `HRTIMER_MODE_PINNED`: Hrtimer này được gắn với một CPU. Điều này chỉ được xét khi khởi động hrtimer, để nó phát và thực thi callback trên cùng CPU mà nó được queue.
 
 - `HRTIMER_MODE_ABS_PINNED`: Kết hợp flag đầu và thứ ba.
 
 - `HRTIMER_MODE_REL_PINNED`: Kết hợp flag hai và ba.
 
-Khởi tạo xong, gán callback function chạy khi hết hạn. Prototype mong đợi:
+Sau khi hrtimer được khởi tạo, phải gán cho nó một callback function sẽ được thực thi khi timer hết hạn. Code snippet sau trình bày prototype cần sử dụng:
 
 ```
 enum hrtimer_restart callback(struct hrtimer *h);
 ```
 
-`hrtimer_restart` là kiểu callback trả. Phải `HRTIMER_NORESTART` để không restart (one-shot operation), hoặc `HRTIMER_RESTART` để restart (mô phỏng periodic mode). Trường hợp đầu trả `HRTIMER_NORESTART`, driver phải restart tường minh (ví dụ `hrtimer_start()`) nếu cần. Trả `HRTIMER_RESTART`, restart ngầm do kernel xử lý. Tuy nhiên driver phải reset timeout trước callback trả. Dùng `hrtimer_forward()`, định nghĩa:
+`hrtimer_restart` là kiểu giá trị mà callback phải trả về. Nó phải là `HRTIMER_NORESTART` để chỉ timer không được restart, dùng cho one-shot operation, hoặc `HRTIMER_RESTART` để chỉ timer phải restart nhằm mô phỏng chế độ định kỳ. Trong trường hợp đầu, khi trả về `HRTIMER_NORESTART`, driver phải restart timer một cách tường minh nếu cần, chẳng hạn bằng `hrtimer_start()`. Khi trả về `HRTIMER_RESTART`, timer được restart ngầm định vì kernel xử lý việc này. Tuy nhiên, driver cần reset timeout trước khi return từ callback. Để làm vậy, driver có thể sử dụng `hrtimer_forward()`, được định nghĩa như sau:
 
 ```
 u64 hrtimer_forward(struct hrtimer *timer,
                     ktime_t now, ktime_t interval)
 ```
 
-Ở trên `timer` là hrtimer cần forward, `now` là điểm bắt đầu forward, `interval` là khoảng tới tương lai. Lưu ý chỉ cập nhật expiry value, không requeue.
+Trong code snippet trước, `timer` là hrtimer cần forward, `now` là thời điểm bắt đầu tính việc forward và `interval` là khoảng thời gian về tương lai mà timer cần được forward. Tuy nhiên, lưu ý rằng thao tác này chỉ cập nhật timer expiry value và không requeue timer.
 
-Lấy `now` nhiều cách: `ktime_get()` trả current monotonic clock time, hay `hrtimer_get_expires()` trả thời gian lẽ ra hết hạn trước forward. Minh họa:
+Có thể lấy parameter `now` theo nhiều cách: sử dụng `ktime_get()` để nhận thời gian monotonic clock hiện tại, hoặc `hrtimer_get_expires()` để nhận thời điểm timer dự kiến hết hạn trước khi forward. Điều này được minh họa trong code snippet sau:
 
 ```
 hrtimer_forward(hrtimer, ktime_get(), ms_to_ktime(500));
@@ -1071,7 +1071,7 @@ hrtimer_forward(handle, hrtimer_get_expires(handle),
                  ns_to_ktime(450));
 ```
 
-Dòng đầu forward hrtimer 500 millisecond từ hiện tại, dòng hai 450 nanosecond từ thời gian lẽ ra hết hạn. Dòng đầu tương đương `hrtimer_forward_now()`, forward đến thời điểm chỉ định từ bây giờ. Khai báo:
+Trong dòng đầu của ví dụ trước, hrtimer được forward thêm 500 millisecond tính từ thời điểm hiện tại; trong dòng thứ hai, nó được forward thêm 450 nanosecond tính từ thời điểm dự kiến hết hạn. Dòng đầu tương đương với `hrtimer_forward_now()`, forward hrtimer một khoảng thời gian xác định kể từ hiện tại. Function được khai báo như sau:
 
 ```
 u64 hrtimer_forward_now(struct hrtimer *timer,
@@ -1085,7 +1085,7 @@ int hrtimer_start(struct hrtimer *timer, ktime_t time,
                     const enum hrtimer_mode mode);
 ```
 
-`mode` là timer expiry mode, nên `HRTIMER_MODE_ABS` cho absolute time hay `HRTIMER_MODE_REL` cho relative từ hiện tại. Phải nhất quán initialization mode. `timer` pointer tới initialized hrtimer. Cuối `time` là expiry time. Vì kiểu `ktime_t`, nhiều helper tạo element `ktime_t` từ các input time unit. Như:
+Trong code snippet trước, `mode` biểu diễn timer expiry mode và phải là `HRTIMER_MODE_ABS` cho giá trị thời gian tuyệt đối hoặc `HRTIMER_MODE_REL` cho giá trị tương đối so với hiện tại. Parameter này phải nhất quán với initialization mode parameter. Parameter `timer` là pointer đến hrtimer đã khởi tạo. Cuối cùng, `time` là expiry time của hrtimer. Vì có kiểu `ktime_t`, nhiều helper function cho phép tạo một phần tử `ktime_t` từ các đơn vị thời gian input khác nhau, như sau:
 
 ```
 ktime_t ktime_set(const s64 secs,
@@ -1183,7 +1183,7 @@ Triển khai trên tạo initial element `ktime_t` 1 giây và 1.000 nanosecond 
 
 ## Triển khai work-deferring mechanism
 
-Deferring là schedule công việc thực thi tương lai. Cách dời hành động lại sau. Kernel có facility cho cơ chế này; cho defer hàm bất kỳ loại để gọi/chạy sau. Có ba:
+Deferring là phương pháp schedule một công việc để thực thi trong tương lai, tức dời hành động đến thời điểm sau. Dĩ nhiên, kernel cung cấp các phương tiện triển khai cơ chế này, cho phép bạn hoãn việc gọi và thực thi function bất kể loại của chúng. Có ba cơ chế như vậy trong kernel, được trình bày dưới đây:
 
 - Softirq: Thực thi atomic context
 
@@ -1211,14 +1211,14 @@ Structure nhúng pointer tới hàm chạy khi raise softirq. Prototype handler:
 void softirq_handler(struct softirq_action *h)
 ```
 
-Chạy softirq handler là thực thi action function, chỉ một parameter: pointer đến structure `softirq_action` tương ứng. Đăng ký runtime qua `open_softirq()`:
+Chạy softirq handler dẫn đến thực thi action function này, chỉ có một parameter là pointer đến structure `softirq_action` tương ứng. Bạn có thể đăng ký softirq handler ở runtime bằng function `open_softirq()`, như minh họa ở đây:
 
 ```
 void open_softirq(int nr,
                   void (*action)(struct softirq_action *))
 ```
 
-`nr` là softirq index, cũng priority (0 cao nhất). `action` pointer handler. Index có thể liệt kê:
+`nr` biểu diễn softirq index, cũng được xem là softirq priority, trong đó 0 là cao nhất. `action` là pointer đến softirq handler. Các index có thể có được liệt kê trong code snippet sau:
 
 ```
 enum
@@ -1239,7 +1239,7 @@ enum
 };
 ```
 
-Softirq index nhỏ (priority cao) chạy trước index lớn (priority thấp). Tên mọi softirq có trong kernel liệt kê array:
+Softirq có index thấp hơn, tức priority cao hơn, chạy trước softirq có index cao hơn, tức priority thấp hơn. Tên tất cả các softirq có sẵn trong kernel được liệt kê trong array sau:
 
 ```
 const char * const softirq_to_name[NR_SOFTIRQS] = {
@@ -1272,7 +1272,7 @@ Array `struct softirq_action` có `NR_SOFTIRQS` entry khai báo trong `kernel/so
 static struct softirq_action softirq_vec[NR_SOFTIRQS] ;
 ```
 
-Mỗi entry chứa một — chỉ một — softirq. Vì vậy tối đa `NR_SOFTIRQS` (thực tế 10 trong v5.10, stable mới nhất lúc viết) softirq đăng ký. Snippet từ `kernel/softirq.c`:
+Mỗi entry trong array này có thể chứa một và chỉ một softirq. Vì vậy, có thể đăng ký tối đa `NR_SOFTIRQS` softirq, thực tế là 10 trong v5.10, phiên bản stable mới nhất tại thời điểm viết. Code snippet sau từ `kernel/softirq.c` minh họa điều này:
 
 ```
 void open_softirq(int nr,
@@ -1289,7 +1289,7 @@ open_softirq(NET_TX_SOFTIRQ, net_tx_action);
 open_softirq(NET_RX_SOFTIRQ, net_rx_action);
 ```
 
-Trước softirq đã đăng ký chạy, cần activate/schedule. Gọi `raise_softirq()` hoặc `raise_softirq_irqoff()` (nếu interrupt đã off), như:
+Trước khi một softirq đã đăng ký có thể thực thi, nó cần được activate hoặc schedule. Để làm vậy, bạn phải gọi `raise_softirq()` hoặc `raise_softirq_irqoff()` nếu interrupt đã bị tắt, như minh họa trong code snippet sau:
 
 ```
 void __raise_softirq_irqoff(unsigned int nr)
@@ -1308,13 +1308,13 @@ Khi kiểm tra flag, cho nó chạy. Hàm mô tả để nghiên cứu, không n
 
 `raise_softirq_irqoff` cần gọi interrupt disable. Đầu nội bộ gọi `__raise_softirq_irqoff()` đã mô tả để activate. Sau kiểm tra có gọi từ interrupt (hardirq/softirq) context không bằng macro `in_interrupt()` (chỉ trả `current_thread_info( )->preempt_count`, 0 là preemption-enabled, không interrupt context, \> 0 là trong). Nếu `in_interrupt() > 0`, không làm gì vì softirq flag kiểm tra ở exit path mọi I/O IRQ handler (xem `asm_do_IRQ()` ARM hoặc `do_IRQ()` x86, gọi `irq_exit()`). Softirq ở đây interrupt context. Nếu `in_interrupt() == 0`, gọi `wakeup_softirqd()` wake local CPU thread `ksoftirqd` (thực ra schedule) bảo đảm softirq chạy sớm nhưng lần này process context.
 
-`raise_softirq` trước gọi `local_irq_save()` (disable interrupt local processor sau lưu interrupt flag hiện tại), rồi `raise_softirq_irqoff()` đã nói để schedule softirq local CPU (nhớ phải gọi khi disable IRQ local CPU). Cuối gọi `local_irq_restore()` restore flag đã lưu.
+Ngược lại, `raise_softirq` trước tiên gọi `local_irq_save()`, disable interrupt trên local processor sau khi lưu các interrupt flag hiện tại. Sau đó, nó gọi `raise_softirq_irqoff()` đã mô tả trước để schedule softirq trên local CPU. Hãy nhớ function này phải được gọi với IRQ bị disable trên local CPU. Cuối cùng, nó gọi `local_irq_restore()` để khôi phục các interrupt flag đã lưu.
 
 Vài điều cần nhớ softirq:
 
 - Softirq không preempt softirq khác. Chỉ hardware interrupt có thể. Chạy priority cao, scheduler preemption disable, IRQ enable. Phù hợp deferred processing quan trọng, time-critical nhất.
 
-- Handler chạy CPU thì softirq khác trên CPU disable. Tuy nhiên softirq chạy concurrent. Khi một cái chạy, cái khác (ngay cùng loại) có thể chạy processor khác. Ưu điểm chính so hardirq, lý do network subsystem dùng, có thể cần nhiều CPU power.
+- Trong khi một handler chạy trên CPU, những softirq khác trên CPU đó bị disable. Tuy nhiên, các softirq vẫn có thể chạy đồng thời. Khi một softirq đang chạy, softirq khác, thậm chí cùng loại, có thể chạy trên processor khác. Đây là một trong những ưu điểm chính của softirq so với hardirq và là lý do chúng được sử dụng trong networking subsystem, nơi có thể cần nhiều năng lực CPU.
 
 - Softirq chủ yếu schedule ở return path hardware interrupt handler. Nếu schedule ngoài interrupt context, chạy process context nếu vẫn pending khi local thread `ksoftirqd` nhận CPU. Có thể kích hoạt thực thi:
 
@@ -1330,7 +1330,7 @@ invoke_softirq().
 
 - Khi local thread `ksoftirqd` nhận CPU (wake).
 
-Kernel function thực sự duyệt softirq pending bitmap và chạy là `__do_softirq()`, trong `kernel/softirq.c`. Luôn gọi với interrupt disable local CPU. Làm:
+Kernel function thực sự chịu trách nhiệm duyệt pending bitmap của softirq và chạy chúng là `__do_softirq()`, được định nghĩa trong `kernel/softirq.c`. Function này luôn được gọi với interrupt bị disable trên local CPU. Nó thực hiện các công việc sau:
 
 - Đầu lưu current per-CPU pending softirq bitmap vào biến `pending`, disable softirq local qua `__local_bh_disable_ip`.
 
@@ -1367,11 +1367,11 @@ Sau chạy lệnh top snippet trên, thấy entry `ksoftirqd/<n>`, `<n>` là log
 
 ## Tasklet
 
-Trước thảo luận, lưu ý tasklet dự kiến bị loại khỏi Linux kernel, nên mục này chỉ nhằm giảng giải để hiểu cách dùng trong module cũ. Vì vậy không dùng trong phát triển của bạn.
+Trước khi bắt đầu thảo luận về tasklet, bạn cần lưu ý rằng chúng dự kiến bị loại bỏ khỏi Linux kernel. Vì vậy, phần này chỉ phục vụ mục đích giảng dạy, giúp bạn hiểu cách sử dụng chúng trong các kernel module cũ. Do đó, bạn không nên dùng chúng trong quá trình phát triển của mình.
 
 Tasklet là bottom half xây trên softirq `HI_SOFTIRQ` và `TASKLET_SOFTIRQ`, loại dựa `HI_SOFTIRQ` chạy trước loại `TASKLET_SOFTIRQ`. Đơn giản tasklet là softirq, cùng quy tắc. Nhưng khác softirq, hai instance cùng tasklet không chạy concurrent. API khá cơ bản, trực quan.
 
-Tasklet biểu diễn bằng structure `struct tasklet_struct` trong `<linux/interrupt.h>`. Mỗi instance là tasklet riêng, như:
+Tasklet được biểu diễn bằng structure `struct tasklet_struct`, được định nghĩa trong `<linux/interrupt.h>`. Mỗi instance của structure này biểu diễn một tasklet duy nhất, như minh họa trong code snippet sau:
 
 ```
 struct tasklet_struct
@@ -1388,7 +1388,7 @@ unsigned long data;
 };
 ```
 
-Dù API dự kiến bỏ, đã hiện đại hóa đôi chút so legacy. Callback lưu field `callback()` thay `func()` giữ tương thích cũ. Callback mới nhận một argument pointer structure `tasklet_struct`. Handler do softirq bên dưới thực thi. Tương đương `action` của softirq, cùng prototype/ý nghĩa argument. `data` được truyền làm argument duy nhất. Chạy handler `callback()` hay `func()` tùy khởi tạo. Có thể tĩnh bằng macro `DECLARE_TASKLET()` hoặc `DECLARE_TASKLET_OLD()`, định nghĩa:
+Mặc dù API này dự kiến bị loại bỏ, nó đã được hiện đại hóa đôi chút so với cách triển khai legacy. Callback function được lưu trong field `callback()` thay vì `func()`, vốn được giữ để tương thích với cách triển khai cũ. Callback mới chỉ nhận một argument là pointer đến structure `tasklet_struct`. Handler sẽ được thực thi bởi softirq bên dưới. Nó tương đương `action` đối với softirq, với cùng prototype và cùng ý nghĩa của argument. `data` được truyền làm argument duy nhất. Việc handler `callback()` hay `func()` được thực thi phụ thuộc vào cách tasklet được khởi tạo. Tasklet có thể được khởi tạo tĩnh bằng macro `DECLARE_TASKLET()` hoặc `DECLARE_TASKLET_OLD()`. Các macro này được định nghĩa như sau:
 
 ```
 #define DECLARE_TASKLET_OLD(name, _func)       \
@@ -1404,28 +1404,28 @@ Dù API dự kiến bỏ, đã hiện đại hóa đôi chút so legacy. Callbac
 }
 ```
 
-Thấy dùng `DECLARE_TASKLET_OLD()` giữ legacy implementation, `func()` làm callback. Prototype handler cung cấp phải:
+Từ những gì có thể thấy, sử dụng `DECLARE_TASKLET_OLD()` giữ cách triển khai legacy và dùng `func()` làm callback. Vì vậy, prototype của handler được cung cấp phải như sau:
 
 ```
 void foo(unsigned long data);
 ```
 
-Dùng `DECLARE_TASKLET()`, field `callback` làm handler, field `use_callback` đặt `true` (tasklet core kiểm tra để quyết định handler). Prototype:
+Khi sử dụng `DECLARE_TASKLET()`, field `callback` được dùng làm handler và field `use_callback` được đặt thành `true`, vì tasklet core kiểm tra giá trị này để xác định handler cần gọi. Trong trường hợp này, prototype của callback như sau:
 
 ```
 void foo(struct tasklet_struct *t)
 ```
 
-Snippet trước, pointer `t` được tasklet core truyền khi gọi handler, trỏ tasklet của bạn. Vì pointer tasklet truyền callback, thường nhúng tasklet object trong user-specific structure lớn, lấy pointer qua macro `container_of()`. Nên dùng dynamic initialization qua hàm `tasklet_setup()`, định nghĩa:
+Trong snippet trước, pointer `t` được tasklet core truyền khi gọi handler và trỏ đến tasklet của bạn. Vì pointer đến tasklet được truyền làm argument cho callback, người ta thường nhúng tasklet object vào một structure user-specific lớn hơn, có pointer lấy được qua macro `container_of()`. Để làm vậy, bạn nên sử dụng dynamic initialization qua function `tasklet_setup()`, được định nghĩa như sau:
 
 ```
 void tasklet_setup(struct tasklet_struct *t,
      void (*callback)(struct tasklet_struct *));
 ```
 
-Prototype cho thấy dynamic initialization buộc dùng triển khai mới, field `callback` làm tasklet handler.
+Từ prototype trước, chúng ta có thể suy ra rằng nếu sử dụng dynamic initialization, không có lựa chọn nào khác ngoài cách triển khai mới, trong đó field `callback` được dùng làm tasklet handler.
 
-Chọn tĩnh/động tùy mục tiêu, ví dụ tasklet duy nhất toàn module hay private mỗi probed device, hoặc cần direct/indirect reference. Mặc định initialized tasklet runnable khi schedule, gọi enabled. `DECLARE_TASKLET_DISABLED` là cách khởi tạo tĩnh default-disabled. Không có tương đương động trừ gọi `tasklet_disable()` sau khởi tạo. Tasklet disable cần `tasklet_enable()` để runnable. Schedule (như raise softirq) qua `tasklet_schedule()` và `tasklet_hi_schedule()`. Dùng API `tasklet_disable()` disable scheduled/running tasklet, chỉ trả khi thực thi kết thúc (nếu đang chạy). Sau đó vẫn schedule nhưng không chạy CPU đến enable lại. Variant asynchronous `tasklet_disable_nosync()` trả ngay dù chưa kết thúc. Hơn nữa disable bao lần phải enable bấy lần (kernel enforce/verify qua field `count` trong object `struct tasklet`). Định nghĩa API nói trên:
+Sử dụng phương pháp tĩnh hay động phụ thuộc vào mục tiêu, chẳng hạn muốn tasklet là duy nhất cho toàn module hay riêng cho mỗi device được probe, hoặc cần tham chiếu trực tiếp hay gián tiếp đến tasklet. Mặc định, tasklet đã khởi tạo có thể chạy khi được schedule, tức được enable. `DECLARE_TASKLET_DISABLED` là lựa chọn khởi tạo tĩnh các tasklet default-disabled. Không có lựa chọn tương đương cho tasklet được khởi tạo động, trừ khi gọi `tasklet_disable()` trên nó sau khi khởi tạo. Tasklet bị disable cần lời gọi `tasklet_enable()` để có thể chạy. Tasklet được schedule, tương tự raise softirq, qua các function `tasklet_schedule()` và `tasklet_hi_schedule()`. Có thể sử dụng API `tasklet_disable()` để disable tasklet đã schedule hoặc đang chạy. Function này disable tasklet và chỉ trả về sau khi tasklet kết thúc thực thi, giả sử nó đang chạy. Sau đó, tasklet vẫn có thể được schedule nhưng không chạy trên CPU cho đến khi được enable lại. Cũng có thể sử dụng biến thể bất đồng bộ `tasklet_disable_nosync()`, trả về ngay cả khi việc kết thúc chưa diễn ra. Hơn nữa, một tasklet bị disable bao nhiêu lần phải được enable lại bấy nhiêu lần; kernel thực thi và kiểm tra điều này qua field `count` trong object `struct tasklet`. Định nghĩa các API tasklet được đề cập được minh họa trong snippet sau:
 
 ```
 DECLARE_TASKLET(name, _callback)
@@ -1441,7 +1441,7 @@ void tasklet_hi_schedule(struct tasklet_struct *t);
 
 Kernel giữ tasklet normal-priority và high-priority trong hai per-CPU queue (mỗi CPU có cặp low- và high-priority). `tasklet_schedule()` thêm tasklet vào normal priority list CPU gọi, schedule softirq với flag `TASKLET_SOFTIRQ`. `tasklet_hi_schedule()` thêm high-priority list (vẫn nơi gọi), schedule softirq flag `HI_SOFTIRQ`. Khi schedule, đặt `TASKLET_STATE_SCHED`, queue thực thi. Lúc chạy đặt `TASKLET_STATE_RUN`, bỏ state `TASKLET_STATE_SCHED`, khiến tasklet re-schedulable trong thực thi bởi chính tasklet hay interrupt handler.
 
-High priority tasklet dành soft interrupt handler yêu cầu low latency. Gọi `tasklet_schedule()` trên tasklet đã schedule chưa chạy không làm gì, chỉ thực thi một lần. Tasklet có thể tự reschedule, gọi `tasklet_schedule()` bên trong an toàn. High priority luôn trước normal, cần cẩn thận kẻo tăng system latency. Dừng bằng `tasklet_kill()` như snippet, ngăn chạy lại, hoặc chờ hoàn tất trước kill nếu đang scheduled. Nếu tự re-schedules, trước phải ngăn việc re-scheduling chính nó rồi gọi:
+High priority tasklet được dùng cho soft interrupt handler có yêu cầu latency thấp. Gọi `tasklet_schedule()` trên một tasklet đã được schedule nhưng chưa bắt đầu thực thi sẽ không làm gì, nên tasklet chỉ được thực thi một lần. Tasklet có thể tự reschedule, và bạn có thể gọi `tasklet_schedule()` an toàn từ bên trong tasklet. High priority tasklet luôn chạy trước tasklet thông thường, nên phải được sử dụng cẩn thận để tránh làm tăng system latency. Dừng tasklet đơn giản là gọi `tasklet_kill()`, như trong code snippet sau. Function này ngăn tasklet chạy lại, hoặc đợi nó hoàn tất trước khi kill nếu tasklet hiện được schedule chạy. Nếu tasklet tự schedule lại, tức re-schedules, trước tiên phải ngăn việc tự re-scheduling rồi mới gọi function này:
 
 ```
 void tasklet_kill(struct tasklet_struct *t);
@@ -1482,7 +1482,7 @@ MODULE_AUTHOR("John Madieu <john.madieu@gmail.com>");
 MODULE_LICENSE("GPL");
 ```
 
-Snippet khai báo tĩnh tasklet `my_tasklet` và hàm gọi khi schedule. Không dùng variant `_OLD`, nên prototype handler giống field `callback` trong tasklet object.
+Trong code snippet trước, chúng ta khai báo tĩnh tasklet `my_tasklet` và function cần được gọi khi tasklet này được schedule. Vì không sử dụng biến thể `_OLD`, chúng ta định nghĩa prototype của handler giống field `callback` trong tasklet object.
 
 LƯU Ý
 
@@ -1494,7 +1494,7 @@ Thêm từ Linux kernel 2.6, deferring mechanism dùng nhiều và đơn giản 
 
 Ở lõi workqueue subsystem có hai data structure giải thích rõ khái niệm:
 
-- Work cần defer (work item), biểu diễn instance `struct work_struct`, chỉ handler cần chạy. Nếu cần delay từ submit đến chạy, có instance `struct delayed_work`. Work item là structure đơn giản chỉ chứa pointer tới hàm schedule asynchronous execution. Tóm lại hai loại:
+- Công việc cần defer, được gọi là work item, được biểu diễn trong kernel bằng các instance của `struct work_struct`, chỉ ra handler function cần chạy. Nếu cần một khoảng delay trước khi work chạy sau khi được submit vào workqueue, kernel cung cấp instance `struct delayed_work` thay thế. Work item là một structure đơn giản chỉ chứa pointer đến function cần được schedule để thực thi bất đồng bộ. Tóm lại, có thể liệt kê hai loại work item structure như sau:
 
 - Structure `work_struct`, schedule task chạy sớm nhất hệ thống cho phép
 
@@ -1539,7 +1539,7 @@ Field `func`, kiểu `work_func_t`, cho biết header hàm `work`, như:
 typedef void (*work_func_t)(struct work_struct *work);
 ```
 
-`work` là input parameter tương ứng work structure cần schedule. Nếu delayed work, là field `delayed_work.work`. Khi đó cần hàm `to_delayed_work()` lấy delayed work structure bên dưới:
+`work` là input parameter tương ứng với work structure cần schedule. Nếu bạn submit delayed work, nó tương ứng với field `delayed_work.work`. Khi đó, cần sử dụng function `to_delayed_work()` để lấy delayed work structure bên dưới, như minh họa trong code snippet sau:
 
 ```
 struct delayed_work *to_delayed_work(
@@ -1554,7 +1554,7 @@ struct workqueue_struct *create_singlethread_workqueue(
                                           const char *name)
 ```
 
-`create_workqueue()` tạo dedicated thread (worker) mỗi CPU. Ví dụ 8-core tạo 8 kernel thread chạy work submit. Trừ lý do mạnh tạo mỗi CPU một thread, nên single-thread variant. Phần lớn một system kernel thread đủ. Dùng `create_singlethread_workqueue()` tạo single-threaded workqueue. Normal/delayed work cùng queue được. Schedule work trên queue tạo bằng `queue_work()` hay `queue_delayed_work()` tùy loại. Định nghĩa:
+`create_workqueue()` tạo một thread chuyên dụng, hay worker thread, cho mỗi CPU trên hệ thống. Ví dụ, trên hệ thống 8-core, nó tạo 8 kernel thread để chạy các work được submit vào workqueue của bạn. Trừ khi có lý do thuyết phục để tạo một thread trên mỗi CPU, bạn nên ưu tiên biến thể một thread, tức single-thread. Trong phần lớn trường hợp, một system kernel thread là đủ. Khi đó, nên dùng `create_singlethread_workqueue()`, như tên gọi, tạo một single-threaded workqueue. Cả normal work lẫn delayed work đều có thể được enqueue vào cùng queue. Để schedule work trên workqueue đã tạo, bạn có thể sử dụng `queue_work()` hoặc `queue_delayed_work()` tùy bản chất work. Các function được định nghĩa như sau:
 
 ```
 bool queue_work(struct workqueue_struct *wq,
@@ -1564,7 +1564,7 @@ bool queue_delayed_work(struct workqueue_struct *wq,
                         unsigned long delay)
 ```
 
-Hàm trả `false` nếu work đã trong queue, `true` nếu không. `queue_dalayed_work()` schedule delayed work item chạy sau delay. Đơn vị jiffy. Có API chuyển millisecond/microsecond sang jiffies:
+Các function này trả về `false` nếu work đã nằm trong queue và `true` trong trường hợp ngược lại. `queue_dalayed_work()` được sử dụng để schedule một delayed work item thực thi sau một khoảng delay cho trước. Đơn vị thời gian của delay là jiffy. Tuy nhiên, có các API chuyển millisecond và microsecond sang jiffies, được định nghĩa như sau:
 
 ```
 unsigned long msecs_to_jiffies(const unsigned int m)
@@ -1627,7 +1627,7 @@ struct workqueue_struct *system_wq __read_mostly;
 EXPORT_SYMBOL(system_wq);
 ```
 
-Vì system workqueue shared, không nên queue work chạy quá lâu, kẻo chậm work cạnh tranh khác, chờ lâu hơn trước thực thi.
+Bạn cũng cần lưu ý rằng vì system workqueue này được chia sẻ, không nên queue các work có thể chạy quá lâu. Nếu không, chúng có thể làm chậm những work cạnh tranh khác, khiến các work đó phải chờ lâu hơn mức cần thiết trước khi được thực thi.
 
 Flush kernel-global workqueue — bảo đảm batch work hoàn tất — dùng `flush_scheduled_work()`:
 
@@ -1641,7 +1641,7 @@ LƯU Ý Trừ lý do mạnh cần dedicated thread, ưu tiên default (kernel-gl
 
 ## Thế hệ workqueue mới
 
-Triển khai workqueue gốc (nay legacy) có hai loại: một thread system-wide, hoặc mỗi CPU một thread. CPU tăng gây hạn chế:
+Cách triển khai workqueue ban đầu, nay là legacy, sử dụng hai loại workqueue: một loại có một thread cho toàn hệ thống, tức system-wide, và một loại có một thread trên mỗi CPU. Tuy nhiên, khi số CPU tăng lên, cách này dẫn đến một số hạn chế sau:
 
 - Hệ thống rất lớn, kernel có thể hết process identifier (PID) (mặc định 32.000) ngay boot, trước process `init` bắt đầu.
 
@@ -1653,7 +1653,7 @@ Hơn nữa subsystem cần concurrency động/fine-grained phải tự thread p
 
 ### cmwq
 
-Cmwq nâng cấp workqueue API. Chọn hàm `alloc_workqueue()` hay macro `alloc_ordered_workqueue()` để tạo. Cả hai cấp phát, trả pointer thành công, `NULL` thất bại. Giải phóng bằng `destroy_workqueue()`. Snippet:
+cmwq là bản nâng cấp của workqueue API. Sử dụng API mới này nghĩa là bạn chọn giữa function `alloc_workqueue()` và macro `alloc_ordered_workqueue()` để tạo workqueue. Cả hai cấp phát một workqueue, trả về pointer đến nó khi thành công và `NULL` khi thất bại. Workqueue được trả về có thể được giải phóng bằng function `destroy_workqueue()`. Bạn có thể xem minh họa code trong snippet sau:
 
 ```
 struct workqueue_struct *alloc_workqueue(const char *fmt,
@@ -1665,11 +1665,11 @@ void destroy_workqueue(struct workqueue_struct *wq)
 
 `fmt` là `printf` format tên workqueue, `args...` là argument `fmt`.
 
-Gọi `destroy_workqueue()` khi xong. Mọi work pending thực hiện trước kernel thực sự destroy. `alloc_workqueue()` tạo dựa `max_active`, định nghĩa concurrency level bằng hạn chế số work (thực tế task) thực thi (worker runnable) đồng thời từ queue trên CPU bất kỳ. Ví dụ `max_active` 5 nghĩa tối đa 5 work item cùng lúc mỗi CPU. `alloc_ordered_workqueue()` tạo queue xử lý item từng cái theo queued order (first-in, first-out (FIFO)).
+Sau khi dùng xong workqueue, cần gọi `destroy_workqueue()` trên nó. Tất cả các work đang pending sẽ được hoàn thành trước khi kernel thực sự hủy workqueue. `alloc_workqueue()` tạo workqueue dựa trên `max_active`, xác định mức concurrency bằng cách giới hạn số work, thực chất là task, có thể thực thi đồng thời từ workqueue này trên một CPU bất kỳ, với các worker ở runnable state. Ví dụ, `max_active` bằng 5 nghĩa là tối đa 5 work item của workqueue có thể thực thi cùng lúc trên mỗi CPU. Ngược lại, `alloc_ordered_workqueue()` tạo workqueue xử lý từng work item theo thứ tự được queue, tức first-in, first-out (FIFO).
 
-`flags` kiểm soát cách/khi work item queue, gán execution resource, schedule, thực thi. Nhiều flag nên dành thời gian:
+`flags` điều khiển cách thức và thời điểm các work item được queue, được gán execution resource, được schedule và thực thi. API mới này có nhiều flag mà chúng ta nên dành thời gian tìm hiểu, như sau:
 
-- `WQ_UNBOUND`: Legacy workqueue có worker mỗi CPU, chạy task trên CPU submit. Kernel scheduler buộc schedule worker trên CPU định nghĩa. Ngay một workqueue có thể ngăn CPU idle/tắt, tăng power hay scheduling policy kém. `WQ_UNBOUND` tắt hành vi previously-described. Work item không còn bound CPU, nên tên unbound. Không locality, scheduler reschedule worker bất kỳ CPU phù hợp. Scheduler quyết định cuối, cân bằng CPU load, đặc biệt work dài đôi khi CPU-intensive.
+- `WQ_UNBOUND`: Legacy workqueue có một worker thread trên mỗi CPU và được thiết kế để chạy task trên CPU nơi task được submit. Kernel scheduler không có lựa chọn nào khác ngoài việc luôn schedule worker trên CPU mà nó được định nghĩa. Với cách này, ngay cả một workqueue cũng có thể ngăn CPU nghỉ và được tắt, dẫn đến tiêu thụ điện cao hơn hoặc scheduling policy kém. `WQ_UNBOUND` tắt hành vi previously-described này. Work item không còn gắn với CPU, nên có tên unbound workqueue. Không còn locality và scheduler có thể reschedule worker trên bất kỳ CPU nào mà nó thấy phù hợp. Lúc này, scheduler có quyền quyết định cuối cùng và có thể cân bằng CPU load, đặc biệt với các work dài và đôi khi CPU-intensive.
 
 - `WQ_MEM_RECLAIM`: Đặt cho workqueue cần bảo đảm forward progress trong memory reclaim path (free memory thấp nguy hiểm; memory pressure). Khi đó allocation `GFP_KERNEL` có thể block/deadlock toàn queue. Queue bảo đảm ít nhất worker ready-to-use — so-called rescuer thread — dành riêng bất kể memory pressure, để tiến triển. Mỗi workqueue có flag một rescuer thread.
 
@@ -1679,7 +1679,7 @@ LƯU Ý Memory reclaim là cơ chế Linux trên memory allocation path, chỉ c
 
 - `WQ_FREEZABLE`: Cho power-management. Workqueue có flag frozen khi system suspend/hibernate. Trên freezing path, mọi work item hiện tại của worker được xử lý. Freeze xong, không item mới chạy đến unfreeze. Filesystem-related workqueue có thể dùng (bảo đảm sửa file đẩy disk hoặc tạo hibernation image trên freezing path, không có thay đổi on-disk sau image tạo. Item non-freezable hay làm khác có thể filesystem corruption. Ví dụ mọi internal workqueue Extents File System (XFS) đặt flag (xem `fs/xfs/xfs_super.c`) để không có thay đổi on-disk sau freezer infrastructure freeze kernel thread/tạo image. Tuyệt đối không đặt nếu workqueue chạy task thuộc hibernation/suspend/resume process. Thêm ở `Documentation/power/freezing-of-tasks.txt`, xem internal function `freeze_workqueues_begin()` và `thaw_workqueues()`.
 
-- `WQ_HIGHPRI`: Task có flag chạy ngay không chờ CPU sẵn. Dùng workqueue có item cần execution priority cao. Worker thread high-priority (nice thấp). Đầu cmwq, high-priority item chỉ queue đầu global normal-priority worklist để chạy ngay. Nay normal/high-priority queue không tương tác vì mỗi loại worklist/pool riêng. High-priority item queue vào high-priority worker pool target CPU. Task không nên block nhiều. Dùng nếu không muốn item cạnh tranh CPU với normal/lower-priority task. Crypto/block device subsystem dùng, ví dụ.
+- `WQ_HIGHPRI`: Các task được đặt flag này chạy ngay và không chờ CPU trở nên có sẵn. Flag này được sử dụng cho các workqueue chứa work item cần priority cao khi thực thi. Những workqueue đó có worker thread priority cao, tức high-priority, với nice value thấp hơn. Trong giai đoạn đầu của cmwq, các work item high-priority chỉ được queue ở đầu một global worklist normal-priority để có thể chạy ngay. Ngày nay, không có tương tác giữa workqueue normal-priority và high-priority vì mỗi loại có worklist và worker pool riêng. Work item của high-priority workqueue được queue vào high-priority worker pool của target CPU. Các task trong workqueue này không nên block nhiều. Hãy sử dụng flag này nếu không muốn work item của bạn cạnh tranh CPU với task normal- hoặc lower-priority. Ví dụ, các subsystem crypto và block device sử dụng nó.
 
 - `WQ_CPU_INTENSIVE`: Item CPU-intensive có thể đốt nhiều CPU cycle, không tham gia workqueue concurrency management. Như task khác, system scheduler điều tiết, hữu ích bound item tiêu nhiều CPU time. Dù scheduler kiểm soát execution, concurrency management kiểm soát khởi đầu, runnable non-CPU-intensive item có thể khiến CPU-intensive item bị trễ. Subsystem `crypto` và `dm-crypt` dùng. Để không chậm non-CPU-intensive item khác, chúng không được xét khi workqueue code xác định CPU available.
 
@@ -1709,21 +1709,21 @@ Chúng ta đã hoàn tất phần triển khai quản lý workqueue mới của 
 
 ## Kernel interrupt handling
 
-Ngoài phục vụ process/user request, nhiệm vụ Linux kernel là quản lý, giao tiếp hardware. Từ CPU đến device hay ngược lại, qua interrupt. Interrupt là signal external hardware device gửi processor yêu cầu chú ý ngay. Trước hiển thị CPU, interrupt phải enable bởi interrupt controller, device riêng chủ yếu route interrupt đến CPU.
+Ngoài phục vụ process và các yêu cầu của người dùng, một nhiệm vụ khác của Linux kernel là quản lý và giao tiếp với hardware. Giao tiếp này diễn ra từ CPU đến device hoặc từ device đến CPU, thông qua interrupt. Interrupt là signal do một hardware device bên ngoài gửi đến processor để yêu cầu được chú ý ngay lập tức. Trước khi CPU có thể nhìn thấy interrupt, nó phải được enable bởi interrupt controller, vốn là một device riêng có nhiệm vụ chính định tuyến interrupt đến các CPU.
 
 Linux kernel cho cung cấp handler cho interrupt quan tâm để khi kích hoạt, handler chạy.
 
-Interrupt là cách device dừng kernel, báo điều thú vị/quan trọng xảy ra. Gọi IRQ trên Linux. Ưu điểm chính tránh polling device. Device báo state change; không phải ta poll.
+Interrupt là cách device làm gián đoạn kernel để thông báo rằng một điều đáng chú ý hoặc quan trọng đã xảy ra. Trên Linux, chúng được gọi là IRQ. Ưu điểm chính của interrupt là tránh phải polling device. Device có trách nhiệm thông báo khi state của nó thay đổi; chúng ta không phải poll nó.
 
-Muốn nhận thông báo interrupt, đăng ký IRQ, cung cấp hàm interrupt handler gọi mỗi khi raise interrupt.
+Để được thông báo khi interrupt xảy ra, bạn cần đăng ký với IRQ đó, cung cấp một function gọi là interrupt handler, sẽ được gọi mỗi khi interrupt được phát.
 
 ## Thiết kế và đăng ký interrupt handler
 
-Handler chạy interrupt disable local CPU. Vì vậy phải tuân ràng buộc khi thiết kế interrupt service routine (ISR):
+Khi interrupt handler được thực thi, nó chạy với interrupt bị disable trên local CPU. Vì vậy, khi thiết kế interrupt service routine (ISR), cần tuân theo một số ràng buộc được trình bày dưới đây:
 
 - Execution time: Vì IRQ handler interrupt disable local CPU, code ngắn/nhỏ nhất, đủ nhanh để re-enabling CPU-local interrupt nhanh, không bỏ IRQ tiếp. Handler Time-consuming có thể thay đổi mạnh real-time property, làm hệ thống chậm.
 
-- Execution context: Handler atomic context, cấm sleeping (hay cơ chế có thể sleep như mutex, copy data kernel-user space và ngược lại, v.v.). Mọi phần cần sleep phải defer context an toàn khác (process context).
+- Execution context: Vì interrupt handler được thực thi trong atomic context, sleeping và các cơ chế có thể sleep đều bị cấm, chẳng hạn mutex, copy data từ kernel sang user space hoặc ngược lại. Mọi phần code cần hoặc liên quan đến sleeping phải được defer sang context khác an toàn hơn, tức process context.
 
 IRQ handler cần hai argument: interrupt line cài handler và unique device ID (UDI) ngoại vi (chủ yếu context data structure — pointer per-device/private structure hardware liên quan), như:
 

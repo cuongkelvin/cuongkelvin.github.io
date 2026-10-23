@@ -787,7 +787,7 @@ Sau khi code trên thực thi, file `bar` và `foo` hiển thị trong sysfs, t�
 
 - `__ATTR_NULL`: Dùng làm list terminator. Đặt cả name thành `NULL` và dùng làm chỉ báo cuối danh sách (xem `kernel/workqueue.c`).
 
-Mọi macro này chỉ cần attribute name làm parameter. Khác biệt là không giống `__ATTR`, có function name `store`/`show` tùy ý, attribute ở đây được xây với giả định method `show` và `store` lần lượt tên `<attribute_name>_show` và `<attribute_name>_store`. Code sau minh họa bằng macro `__ATTR_RW_MODE`, định nghĩa như sau:
+Tất cả các macro này chỉ nhận tên attribute làm parameter. Điểm khác biệt là với `__ATTR`, tên các function `store`/`show` có thể tùy ý, còn các attribute ở đây được xây dựng với giả định rằng method `show` và `store` lần lượt có tên `<attribute_name>_show` và `<attribute_name>_store`. Code sau minh họa bằng macro `__ATTR_RW_MODE`, được định nghĩa như sau:
 
 ```
 #define __ATTR_RW_MODE(_name, _mode) {                 \

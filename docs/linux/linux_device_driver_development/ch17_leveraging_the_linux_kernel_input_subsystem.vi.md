@@ -420,7 +420,7 @@ E: SUBSYSTEM=input
 E: USEC_INITIALIZED=74842430
 ```
 
-Tool khác có thể dùng để in key mà device hỗ trợ là `evetest`. Nó cũng nhận và in event khi device báo cáo. Code sau cho thấy cách dùng trên input device:
+Một công cụ khác bạn có thể sử dụng để in các key mà device hỗ trợ là `evetest`. Nó cũng có thể bắt và in các event khi device báo cáo chúng. Code sau minh họa cách sử dụng trên input device của chúng ta:
 
 ```
 # evtest /dev/input/event0
@@ -558,7 +558,7 @@ Thay đổi hiện có hiệu lực, hãy đọc data để xem tương ứng đ
                 [...] /* handle this error */
 ```
 
-Nếu execution flow đến điểm này, mọi thứ đã tốt. Giờ có thể duyệt event input device hỗ trợ và so sánh với event input core báo cáo trước khi quyết định:
+Nếu execution flow đến được điểm này, điều đó có nghĩa mọi thứ đã diễn ra tốt. Bây giờ, chúng ta có thể duyệt các event mà input device hỗ trợ và so sánh chúng với event do input core báo cáo trước khi đưa ra quyết định:
 
 ```
             /* We could have done a switch/case if we had

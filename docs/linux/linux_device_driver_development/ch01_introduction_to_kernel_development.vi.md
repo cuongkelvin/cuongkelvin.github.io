@@ -22,7 +22,7 @@ Khi làm lĩnh vực embedded system, có thuật ngữ phải quen trước c�
 
 - Compilation: Còn gọi native compilation hay native build. Xảy ra khi target và host giống nhau; tức build trên máy A (host) binary sẽ thực thi cùng máy (A, target) hay máy cùng loại. Native compilation cần native compiler. Vì vậy native compiler là compiler có target và host giống nhau.
 
-- Cross-compilation: Target và host khác nhau. Build binary trên máy A (host) để chạy trên máy B (target). Host (máy A) phải cài cross-compiler hỗ trợ target architecture. Vì vậy cross-compiler là compiler có target khác host.
+- Cross-compilation: Ở đây, target và host khác nhau. Bạn build một binary trên máy A, tức host, để chạy trên máy B, tức target. Trong trường hợp này, host phải cài cross-compiler hỗ trợ target architecture. Vì vậy, cross-compiler là compiler có target khác host.
 
 Vì embedded computer có tài nguyên hạn chế hay ít (CPU, RAM, disk, v.v.), host thường là máy x86 mạnh hơn nhiều, tài nguyên nhiều hơn để tăng tốc phát triển. Tuy nhiên vài năm qua embedded computer mạnh hơn, có xu hướng dùng native compilation (do đó làm host). Ví dụ điển hình Raspberry Pi 4 với quad-core CPU mạnh và RAM tới 8 GB.
 
@@ -69,7 +69,7 @@ Với native compilation, dùng lệnh cài toolchain:
 sudo apt install gcc binutils
 ```
 
-Khi cross-compile, phải xác định/cài đúng toolchain. So native compiler, executable của cross-compiler có prefix tên target OS, architecture và (đôi khi) library. Vì vậy có quy ước nhận diện architecture-specific toolchain: `arch[-vendor][-os]-abi`. Xem ý nghĩa field:
+Khi cần cross-compile, bạn phải xác định và cài đúng toolchain. So với native compiler, tên executable của cross-compiler có prefix là tên hệ điều hành đích, architecture và đôi khi cả library. Vì vậy, để nhận diện các toolchain architecture-specific, một quy ước đặt tên đã được định nghĩa: `arch[-vendor][-os]-abi`. Chúng ta hãy xem ý nghĩa các field trong mẫu này:
 
 - `arch` xác định kiến trúc, tức `arm`, `mips`, `x86`, `i686`, v.v.
 
@@ -87,7 +87,7 @@ Khi cross-compile, phải xác định/cài đúng toolchain. So native compiler
 
 Một số tên toolchain minh họa pattern:
 
-- `arm-none-eabi`: Toolchain cho kiến trúc ARM. Không vendor, nhắm bare-metal system (không nhắm OS), tuân ARM EABI.
+- `arm-none-eabi`: Đây là toolchain nhắm đến architecture ARM. Nó không chỉ định vendor, nhắm đến một hệ thống bare-metal, tức không nhắm đến hệ điều hành, và tuân theo ARM EABI.
 
 - `arm-none-linux-gnueabi` hoặc `arm-linux-gnueabi`: Toolchain tạo object cho ARM chạy Linux với configuration (ABI) mặc định do toolchain cung cấp. Lưu ý `arm-none-linux-gnueabi` giống `arm-linux-gnueabi` vì như đã thấy không chỉ vendor thì giả định không có. Biến thể hỗ trợ hardware floating point là `arm-linux-gnueabihf` hoặc `arm-none-linux-`
 
@@ -121,7 +121,7 @@ Ví dụ cài GCC version 8 cho aarch64 bằng lệnh:
 sudo apt install gcc-8-aarch64-linux-gnu
 ```
 
-Toolchain đã cài, có thể xem version distribution package manager chọn. Ví dụ kiểm tra aarch64 cross-compiler version đã cài:
+Bây giờ toolchain đã được cài, chúng ta có thể xem phiên bản mà package manager của distribution đã chọn. Ví dụ, để kiểm tra phiên bản aarch64 cross-compiler được cài, chúng ta có thể sử dụng lệnh sau:
 
 ```
 $ aarch64-linux-gnu-gcc --version
@@ -151,7 +151,7 @@ Giờ môi trường đã thiết lập, bảo đảm tool version đúng, có t
 
 ## Lấy source
 
-Thời kernel ban đầu (đến 2003), dùng kiểu đánh version odd-even, số lẻ stable, chẵn unstable. Khi version 2.6 phát hành, đổi sang X.Y.Z. Xem chi tiết:
+Trong thời kỳ đầu của kernel, đến năm 2003, kiểu đánh phiên bản odd-even được sử dụng, trong đó số lẻ là stable và số chẵn là unstable. Khi phiên bản 2.6 được phát hành, cơ chế đánh phiên bản chuyển sang X.Y.Z. Chúng ta hãy xem chi tiết hơn:
 
 - X: Version thực tế kernel, còn gọi major. Tăng khi có API change backward-incompatible.
 
@@ -161,7 +161,7 @@ Thời kernel ban đầu (đến 2003), dùng kiểu đánh version odd-even, s�
 
 Gọi semantic versioning, dùng đến 2.6.39 khi Linus Torvalds quyết định nâng lên 3.0, đồng nghĩa kết thúc semantic versioning năm 2011. Khi đó dùng X.Y.
 
-Đến version 3.20, Linus nói không thể tăng Y nữa. Vì vậy quyết định versioning tùy ý, tăng X khi Y lớn tới mức hết ngón tay/chân để đếm. Vì vậy version đi trực tiếp từ 3.20 lên 4.0.
+Khi đến phiên bản 3.20, Linus cho rằng không thể tiếp tục tăng Y nữa. Vì vậy, ông quyết định chuyển sang một cơ chế đánh phiên bản tùy ý: tăng X mỗi khi Y lớn đến mức không còn đủ ngón tay và ngón chân để đếm. Đây là lý do phiên bản chuyển thẳng từ 3.20 lên 4.0.
 
 Giờ kernel dùng versioning X.Y tùy ý, không liên quan semantic versioning.
 
@@ -239,7 +239,7 @@ Xem nội dung main source directory:
 
 Để bảo đảm portability, mọi code architecture-specific nên ở directory `arch`. Hơn nữa kernel code liên quan user space API không đổi (system call, `/proc`, `/sys`, v.v.) vì sẽ phá chương trình hiện có.
 
-Mục này làm quen nội dung Linux kernel source. Sau xem mọi source, khá tự nhiên configure để compile kernel. Mục tiếp học kernel configuration hoạt động thế nào.
+Trong phần này, chúng ta đã làm quen với nội dung source của Linux kernel. Sau khi xem toàn bộ source, bước tự nhiên tiếp theo là configure để có thể biên dịch kernel. Trong phần tiếp theo, chúng ta sẽ học cách kernel configuration hoạt động.
 
 ## Configure và build Linux kernel
 
@@ -320,7 +320,7 @@ Lệnh kernel configuration với default configuration file như sau:
 make <foo_defconfig>
 ```
 
-Tạo file `.config` mới ở main (root) directory, file `.config` cũ đổi tên `.config.old`. Hữu ích để hoàn tác configuration change trước. Rồi tùy chỉnh bằng lệnh:
+Thao tác này tạo một file `.config` mới trong directory chính, tức root directory, còn `.config` cũ được đổi tên thành `.config.old`. Điều này hữu ích để hoàn tác những thay đổi configuration trước đó. Sau đó, để tùy chỉnh configuration, bạn có thể sử dụng lệnh sau:
 
 ```
 make menuconfig
@@ -530,7 +530,7 @@ Giờ biết (cross-)compile Linux kernel, học cài đặt.
 
 Quy trình cài Linux kernel khác giữa native compilation và cross-compilation:
 
-- Native installation (cài trên host), chỉ chạy `sudo make install`. Phải dùng `sudo` vì cài tại directory `/boot`. Nếu x86 native installation, có file:
+- Trong native installation, tức cài trên host, bạn có thể chỉ cần chạy `sudo make install`. Phải sử dụng `sudo` vì việc cài đặt diễn ra trong directory `/boot`. Nếu thực hiện native installation trên x86, các file sau được cung cấp:
 
 - `/boot/vmlinuz-<version>`: Biến thể compressed, stripped của `vmlinux`. Cùng kernel image như trong `arch/<arch>/boot`.
 
@@ -540,7 +540,7 @@ Quy trình cài Linux kernel khác giữa native compilation và cross-compilati
 
 - Embedded installation thường dùng single file kernel. Hơn nữa target không truy cập được nên ưu tiên cài thủ công. Vì vậy embedded Linux build system (Yocto/Buildroot) dùng internal script đưa kernel image vào target root filesystem. Embedded installation có thể đơn giản nhờ build system, nhưng native installation (đặc biệt x86) có thể cần lệnh bootloader-related bổ sung (như `update-grub2`) để hệ thống thấy kernel mới.
 
-Giờ quen kernel configuration, gồm build/install process, hãy xem kernel module cho mở rộng kernel runtime.
+Bây giờ đã quen với kernel configuration, bao gồm các quy trình build và cài đặt, chúng ta hãy xem kernel module, cho phép mở rộng kernel ở runtime.
 
 ## Build và cài module
 

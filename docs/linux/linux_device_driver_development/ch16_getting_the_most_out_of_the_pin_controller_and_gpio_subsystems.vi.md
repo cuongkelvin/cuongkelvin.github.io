@@ -779,7 +779,7 @@ Vì vậy có thể hữu ích khi biết GPIO tương ứng pin nào trên pin 
 pins]>;
 ```
 
-GPIO controller offset đề cập GPIO controller node chứa range definition. Pin controller node được `phandle` tham chiếu phải tuân binding định nghĩa trong `Documentation/pinctrl/pinctrl-bindings.txt`.
+GPIO controller offset chỉ GPIO controller node chứa range definition. Pin controller node được `phandle` tham chiếu phải tuân theo các binding được định nghĩa trong `Documentation/pinctrl/pinctrl-bindings.txt`.
 
 Mỗi offset là số từ 0 tới N. Có thể xếp số range tùy ý với chỉ một pin-to-GPIO line mapping nếu tổ chức range phù hợp, nhưng thực tế thường tập hợp thành các tập rời rạc.
 
@@ -980,7 +980,7 @@ Khi driver sở hữu GPIO, có thể đổi direction theo nhu cầu input ho�
 
 Một số GPIO controller cho điều chỉnh GPIO debounce-interval (chỉ hữu ích khi GPIO line cấu hình input). Có thể đặt bằng `gpio_set_debounce()`. Trong function, argument `debounce` là debounce time theo millisecond.
 
-Vì nên lấy và cấu hình resource trong probing method của driver, GPIO line phải tuân quy tắc này.
+Vì cách thực hành tốt là lấy và cấu hình các resource trong probing method của driver, các GPIO line cũng phải tuân theo quy tắc này.
 
 Lưu ý GPIO management (cấu hình hoặc lấy/đặt value) không độc lập context; có memory-mapped GPIO controller truy cập được từ mọi context (process và atomic). Mặt khác, có GPIO do chip rời trên slow bus (I2C hoặc SPI) cung cấp có thể sleep (vì gửi/nhận command trên bus cần chờ lên đầu queue để truyền command và nhận response). GPIO như vậy chỉ được thao tác từ process context. Controller driver well-designed phải báo client lời gọi GPIO driving method có thể sleep hay không. Có thể kiểm tra bằng function `gpio_cansleep()`, return `true` cho GPIO line có controller trên slow bus, `false` cho GPIO thuộc memory-mapped controller.
 
@@ -1438,7 +1438,7 @@ Kernel Linux GPIO user space sysfs đã deprecated và ngừng phát triển. N�
 
 - Thiếu hỗ trợ bulk GPIO operation, tức thực hiện operation trên tập GPIO bằng một command (một lần).
 
-- Cần nhiều operation chỉ để đặt GPIO value (mở và ghi export file, mở và ghi direction file, mở và ghi value file).
+- Cần rất nhiều thao tác chỉ để đặt một GPIO value: mở và ghi vào file export, mở và ghi vào file direction, rồi mở và ghi vào file value.
 
 - Polling không đáng tin cậy — user code phải poll value `/sys/class/gpio/gpioX/`, và với mỗi event cần `close/re-open` hoặc `lseek` trong file trước khi re-reading value mới. Có thể dẫn tới mất event.
 
@@ -1753,7 +1753,7 @@ Nếu chỉ cần simple GPIO operation, library `Gpiod` gồm tập command-lin
 
 - `gpiomon`: Theo dõi GPIO bằng chờ event trên line. Cho phép chỉ định event cần theo dõi, số event xử lý trước khi thoát hoặc có báo event ra console hay không.
 
-Bây giờ đã liệt kê command-line tool sẵn có, có thể học cơ chế khác do GPIO subsystem cung cấp và dùng được từ user space, nhờ đó dùng các tool đã nêu.
+Bây giờ đã liệt kê các command-line tool có sẵn, chúng ta có thể tiếp tục tìm hiểu một cơ chế khác do GPIO subsystem cung cấp, có thể sử dụng từ user space và là cơ sở để dùng những công cụ vừa nêu.
 
 ## GPIO aggregator
 

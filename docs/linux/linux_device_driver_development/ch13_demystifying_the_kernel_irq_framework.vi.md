@@ -692,7 +692,7 @@ IPI6:          0          0  completion interrupts
 root@udoo-labcsmart:~#
 ```
 
-Trong command output ở đây, cột đầu là IPI identifier và cột cuối mô tả IPI. Các cột giữa là số lần thực thi tương ứng trên từng CPU.
+Trong output của lệnh ở đây, cột đầu tiên là IPI identifier và cột cuối cùng là mô tả IPI. Các cột ở giữa biểu diễn số lần thực thi tương ứng trên từng CPU.
 
 ## Tổng kết
 

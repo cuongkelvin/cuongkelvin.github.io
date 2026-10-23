@@ -16,7 +16,7 @@ Vì vậy, chương này sẽ thảo luận các chủ đề sau:
 
 ## Giới thiệu khái niệm module
 
-Khi build Linux kernel, image kết quả là một file duy nhất được tạo bằng liên kết mọi object file tương ứng với tính năng đã enable trong configuration. Vì vậy, mọi tính năng được đưa vào đều sẵn có ngay khi kernel bắt đầu, dù filesystem chưa sẵn sàng hoặc chưa tồn tại. Các tính năng này là built-in, module tương ứng gọi static module. Module như vậy luôn sẵn có trong kernel image nên không thể unload, đổi lại final kernel image lớn hơn. Static module còn gọi built-in module, vì là một phần kernel image output cuối. Mọi thay đổi code của nó đòi rebuild toàn kernel.
+Khi build Linux kernel, image thu được là một file duy nhất, tạo bằng cách liên kết tất cả các object file tương ứng với những tính năng được bật trong configuration. Vì vậy, mọi tính năng được đưa vào đều có sẵn ngay khi kernel khởi động, ngay cả khi filesystem chưa sẵn sàng hoặc chưa tồn tại. Những tính năng này là built-in, và module tương ứng được gọi là static module. Module như vậy luôn có sẵn trong kernel image nên không thể unload, đổi lại kích thước kernel image cuối cùng tăng lên. Static module cũng được gọi là built-in module vì nó là một phần của kernel image cuối cùng. Bất kỳ thay đổi nào trong code của nó đều đòi hỏi build lại toàn bộ kernel.
 
 Tuy nhiên, một số tính năng (như device driver, filesystem, framework) có thể compile thành loadable module. Chúng tách khỏi final kernel image và được load theo nhu cầu. Có thể xem là plugin load/unload động để thêm/bỏ tính năng kernel lúc runtime. Vì mỗi module được lưu thành file riêng trên filesystem, dùng loadable module đòi hỏi truy cập filesystem.
 
@@ -127,7 +127,7 @@ Có hai giải pháp compile kernel module:
 
 - Thứ hai là trong kernel tree, cho upstream code vì tích hợp tốt vào kernel configuration/compilation process. Cho tạo module liên kết tĩnh (built-in) hoặc loadable kernel module.
 
-Giờ đã liệt kê/đặc tả hai cách build kernel module, trước nghiên cứu từng cách, đi sâu Linux kernel build process. Giúp hiểu compilation prerequisite mỗi giải pháp.
+Bây giờ đã liệt kê và trình bày đặc điểm của hai giải pháp build kernel module, trước khi nghiên cứu từng giải pháp, chúng ta hãy tìm hiểu sâu quy trình build Linux kernel. Điều này giúp hiểu các điều kiện tiên quyết để biên dịch đối với từng giải pháp.
 
 ## Tìm hiểu Linux kernel build system
 
@@ -173,7 +173,7 @@ obj-$(CONFIG_MYMODULE) += mymodule.o
 
 `$(CONFIG_MYMODULE)` cho `y`, `m` hay không gì (trống), theo giá trị trong kernel configuration (hiển thị `menuconfig`). Nếu `CONFIG_MYMODULE` không `y` cũng không `m`, file không compile/link. `y` nghĩa built-in (viết tắt `yes` trong kernel configuration), `m` là loadable module. `$(CONFIG_MYMODULE)` lấy đáp án đúng từ config process thông thường.
 
-Đến nay giả định module build từ một source file `.c`. Khi nhiều source file, cần thêm dòng liệt kê, như sau:
+Đến đây, chúng ta giả định module được build từ một source file `.c` duy nhất. Khi module được build từ nhiều source file, cần thêm một dòng liệt kê các source file đó, như sau:
 
 ```
 <module_name>-y := <file1>.o <file2>.o
@@ -314,7 +314,7 @@ Khi cross-compiling out-of-tree kernel module, chủ yếu hai biến lệnh ker
 
 Khi dùng build system như Yocto, Linux kernel được cross-compiled trước làm dependency, rồi mới cross-compiling module. Tôi chủ ý dùng tên biến `KERNEL_SRC` cho prebuilt kernel directory vì Yocto tự export cho kernel module recipe. Đặt thành giá trị `STAGING_KERNEL_DIR` trong class `module.bbclass`, được mọi kernel module recipe kế thừa.
 
-Vì vậy khác biệt native/cross-compilation out-of-tree kernel module là lệnh `make` cuối, với kiến trúc Arm 32-bit như:
+Vì vậy, điểm thay đổi giữa native compilation và cross-compilation của một out-of-tree kernel module là lệnh `make` cuối cùng. Với architecture Arm 32-bit, lệnh có dạng như sau:
 
 ```
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
@@ -460,7 +460,7 @@ Có dạng:
 
 Ví dụ `my_module` là tên module, `value` là giá trị gán parameter.
 
-Giờ xử lý được module parameter, đi sâu tình huống not-so-obvious, học Linux kernel và build system xử lý module dependency.
+Bây giờ đã có thể xử lý module parameter, chúng ta hãy đi sâu hơn vào một tình huống not-so-obvious, nơi sẽ học cách bản thân Linux kernel và hệ thống build của nó xử lý module dependency.
 
 ## Xử lý symbol export và module dependency
 
@@ -496,7 +496,7 @@ Khi phát triển thường dùng `insmod` để load module. Cần truyền cho
 insmod /path/to/mydrv.ko
 ```
 
-Dạng low-level module-loading, nền cho cách module loading khác, và là cách dùng trong sách. Mặt khác `modprobe` chủ yếu system admin hay production system dùng. `modprobe` là lệnh thông minh parse `modules.dep` (đã nói) để load dependency trước module. Tự xử lý module dependency như package manager. Gọi:
+Đây là dạng low-level của module loading, làm nền tảng cho phương pháp module-loading khác và là cách chúng ta sử dụng trong cuốn sách này. Ngược lại, `modprobe` chủ yếu được system admin hoặc production system sử dụng. `modprobe` là lệnh thông minh phân tích file `modules.dep` đã đề cập để load các dependency trước khi load module được chỉ định. Nó tự động xử lý module dependency, tương tự package manager. Lệnh được gọi như sau:
 
 ```
 modprobe mydrv
@@ -579,7 +579,7 @@ Giờ quen kernel module management, mở rộng kỹ năng phát triển kernel
 
 Phát triển Linux kernel là học từ người khác, không phát minh lại bánh xe. Có tập quy tắc cần theo. Cả chương cũng không đủ bao quát, nên tôi chọn hai quy tắc liên quan nhất với mình, những điều có khả năng thay đổi khi lập trình user space: xử lý lỗi và in message.
 
-Trong user space, thoát method `main()` đủ phục hồi mọi lỗi có thể xảy ra. Kernel không vậy, đặc biệt vì trực tiếp làm hardware. In message cũng khác, sẽ xem trong mục này.
+Trong user space, thoát khỏi method `main()` là đủ để phục hồi sau mọi lỗi có thể đã xảy ra. Trong kernel thì không như vậy, đặc biệt vì kernel làm việc trực tiếp với hardware. Việc in message cũng khác, và chúng ta sẽ xem điều đó trong phần này.
 
 ## Xử lý lỗi
 
@@ -608,7 +608,7 @@ Trả error code sai cho lỗi có thể khiến kernel hoặc user space applic
 [...]
 ```
 
-Thường cách chuẩn trả lỗi là `return –ERROR`, đặc biệt trả lời system call. Ví dụ I/O error có error code `EIO`, nên trả `-EIO` như:
+Trong phần lớn trường hợp, cách chuẩn để trả về lỗi là sử dụng `return –ERROR`, đặc biệt khi đáp ứng system call. Ví dụ, với lỗi I/O, error code là `EIO` và bạn nên trả về `-EIO`, như sau:
 
 ```
 dev = init(&ptr);
@@ -649,7 +649,7 @@ err_alloc:
         return ret;
 ```
 
-Lý do dùng `goto` đơn giản. Xử lý error, giả sử tại bước 5 cần cleanup thao tác trước (4, 3, 2, 1), thay vì nhiều nested checking operation như:
+Lý do sử dụng câu lệnh `goto` khá đơn giản. Khi xử lý lỗi, giả sử ở bước 5 bạn cần cleanup các thao tác trước đó theo thứ tự bước 4, 3, 2 và 1, thay vì thực hiện nhiều phép kiểm tra lồng nhau như sau:
 
 ```
 if (ops1() != ERR) {
@@ -685,7 +685,7 @@ Tuy nhiên chỉ nên dùng `goto` đi về trước trong hàm, không về sau
 
 ### Xử lý null pointer error
 
-Khi trả lỗi từ hàm lẽ ra trả pointer, thường trả pointer `NULL`. Hoạt động nhưng khá vô nghĩa vì không biết chính xác vì sao trả `NULL`. Vì vậy kernel có ba hàm `ERR_PTR`, `IS_ERR`, `PTR_ERR`, định nghĩa:
+Khi trả về lỗi từ các function vốn phải trả về pointer, chúng thường trả pointer `NULL`. Cách này hoạt động nhưng không mang nhiều ý nghĩa vì chúng ta không biết chính xác vì sao pointer `NULL` được trả về. Với mục đích đó, kernel cung cấp ba function `ERR_PTR`, `IS_ERR` và `PTR_ERR`, được định nghĩa như sau:
 
 ```
 void *ERR_PTR(long error);
@@ -717,7 +717,7 @@ static int foo_probe([...]){
 }
 ```
 
-Điểm bổ sung về error handling, cũng trích kernel coding style: nếu tên hàm là hành động/mệnh lệnh, nên trả integer error code. Tuy nhiên nếu tên là predicate, trả Boolean cho biết operation thành công không.
+Đây là một điểm bổ sung về error handling, cũng được trích từ kernel coding style: nếu tên function là một hành động hoặc một mệnh lệnh, function nên trả về integer error code. Tuy nhiên, nếu tên function là một predicate, function nên trả về Boolean để biểu thị trạng thái thành công của thao tác.
 
 Ví dụ `Add work` là command, nên `add_work()` trả `0` thành công, `-EBUSY` thất bại. `PCI device present` là predicate, vì vậy `pci_dev_present()` trả `1` nếu tìm device khớp, `0` nếu không.
 
@@ -739,7 +739,7 @@ Trong mọi helper, `<level>` là log level encode thành tên khá có nghĩa, 
 
 Bảng 2.1 – Linux kernel printing API
 
-Log level hoạt động: mỗi khi in message, kernel so log level message với console log level hiện tại; nếu cái đầu cao hơn (giá trị thấp hơn) cái sau, message được in ngay ra console. Kiểm tra log-level parameter bằng:
+Log level hoạt động như sau: mỗi khi in một message, kernel so sánh log level của message với console log level hiện tại. Nếu mức thứ nhất cao hơn, tức có giá trị số thấp hơn mức thứ hai, message được in ngay lên console. Bạn có thể kiểm tra các parameter log-level bằng cách sau:
 
 ```
 cat /proc/sys/kernel/printk
@@ -752,7 +752,7 @@ Trong output, giá trị đầu là current log level (`4`). Theo đó mọi mes
 echo <level> > /proc/sys/kernel/printk
 ```
 
-Ngoài ra có thể thêm prefix custom string cho output message module. Định nghĩa macro `pr_fmt`. Thường prefix bằng module name:
+Ngoài ra, bạn có thể thêm một custom string làm prefix cho các output message của module. Để thực hiện, cần định nghĩa macro `pr_fmt`. Thông thường, prefix của message được đặt theo tên module, như sau:
 
 ```
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
