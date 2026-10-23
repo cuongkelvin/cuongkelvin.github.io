@@ -691,7 +691,7 @@ Thành phần cốt lõi của một Self-Checking Testbench là câu lệnh **`
 
 Hãy bổ sung câu lệnh `assert` vào Testbench cổng AND từ đầu chương:
 
-#### Mã nguồn Verilog (SystemVerilog Assertions):
+### Mã nguồn Verilog (SystemVerilog Assertions):
 ```verilog
   initial begin
     r_In1 = 1'b0; r_In2 = 1'b0; #10;
@@ -709,7 +709,7 @@ Hãy bổ sung câu lệnh `assert` vào Testbench cổng AND từ đầu chươ
   end
 ```
 
-#### Mã nguồn VHDL Assertions:
+### Mã nguồn VHDL Assertions:
 ```vhdl
   process begin
     r_In1 <= '0'; r_In2 <= '0'; wait for 10 ns;
@@ -729,7 +729,7 @@ Hãy bổ sung câu lệnh `assert` vào Testbench cổng AND từ đầu chươ
   end process;
 ```
 
-#### Nếu câu lệnh `assert` bị vi phạm, trình mô phỏng sẽ in ngay dòng thông báo lỗi ra màn hình console:
+### Nếu câu lệnh `assert` bị vi phạm, trình mô phỏng sẽ in ngay dòng thông báo lỗi ra màn hình console:
 
 * **Trong Verilog / SystemVerilog:**
   `# ASSERT: Error: ASRT_0301 testbench.sv(20): Immediate assert condition (w_Out==1'b1) FAILED at time: 10ns, scope: And_Gate_TB`

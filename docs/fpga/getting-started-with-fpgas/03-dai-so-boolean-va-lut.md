@@ -436,7 +436,7 @@ Trong dự án này, bạn sẽ áp dụng kiến thức về đại số Boolea
 └─────────────────────────────────────────────────────────────┘
 ```
 
-#### Bảng Chân Lý Cho Dự Án #2:
+### Bảng Chân Lý Cho Dự Án #2:
 
 | Nút SW1 (Đầu vào 1) | Nút SW2 (Đầu vào 2) | Đèn LED D1 (Đầu ra Q) |
 | :---: | :---: | :---: |

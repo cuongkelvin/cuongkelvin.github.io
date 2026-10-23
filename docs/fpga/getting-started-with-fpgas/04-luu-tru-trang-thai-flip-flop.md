@@ -488,7 +488,7 @@ Có hai loại logic chính diễn ra bên trong một FPGA: **Logic Tổ hợp 
 
 Rất khó để nhận biết một đoạn code Verilog/VHDL sẽ sinh ra LUT (Logic tổ hợp) hay Flip-flop (Logic tuần tự). Đặc biệt, một khối `always` (Verilog) hoặc `process` (VHDL) có thể định nghĩa cả hai loại logic này. Hãy so sánh hai ví dụ sau:
 
-#### Ví dụ 1: Khối Always / Process Tổ hợp (Combinational)
+### Ví dụ 1: Khối Always / Process Tổ hợp (Combinational)
 
 * **Verilog:**
   ```verilog
@@ -506,7 +506,7 @@ Rất khó để nhận biết một đoạn code Verilog/VHDL sẽ sinh ra LUT 
   ```
 * **Kết quả:** Đoạn mã này **chỉ sinh ra LUTs**, hoàn toàn không sinh ra bất kỳ Flip-flop nào vì danh sách nhạy không chứa xung nhịp Clock.
 
-#### Ví dụ 2: Khối Always / Process Tuần tự (Sequential)
+### Ví dụ 2: Khối Always / Process Tuần tự (Sequential)
 
 * **Verilog:**
   ```verilog

@@ -339,7 +339,7 @@ Dòng `:= (others => '0')` ở khai báo `r_LFSR` không phải tuỳ chọn. B�
 
 Yêu cầu dự án: Làm nhấp nháy 4 đèn LED trên bo mạch phát triển, nhưng **chỉ có đúng 1 đèn LED nhấp nháy tại một thời điểm**. Người dùng sử dụng 2 nút nhấn để chọn đèn LED nào sẽ nhấp nháy.
 
-#### Bảng Chọn LED (Table 6-6):
+### Bảng Chọn LED (Table 6-6):
 
 | `i_Switch_2` | `i_Switch_1` | Đèn LED được chọn | Tín hiệu |
 | :---: | :---: | :---: | :---: |

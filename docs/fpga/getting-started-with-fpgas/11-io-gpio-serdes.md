@@ -239,7 +239,7 @@ Kỹ thuật này nổi tiếng nhờ bộ nhớ **LPDDR** (low-power double dat
 
 Muốn dùng DDR ở chân ra thì cần đệm **ODDR**. Chi tiết tuỳ hãng, nhưng tác giả khuyên **instantiate thẳng trong mã** vì cấu hình không phức tạp. Mẫu của AMD (sách lấy từ Virtex-7 Library Guide; cùng primitive `ODDR` có trên mọi 7-series, kể cả Artix-7 của QMTech):
 
-#### Verilog:
+### Verilog:
 ```verilog
 ODDR #(
   .DDR_CLK_EDGE("OPPOSITE_EDGE"),
@@ -256,7 +256,7 @@ ODDR #(
 );
 ```
 
-#### VHDL:
+### VHDL:
 ```vhdl
 ODDR_inst : ODDR
   generic map (
