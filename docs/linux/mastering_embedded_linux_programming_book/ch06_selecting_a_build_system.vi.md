@@ -124,7 +124,7 @@ $ make
 
 Lưu ý bạn không chỉ định số job song song cho `make` bằng tùy chọn `-j`: Buildroot tự sử dụng CPU tối ưu. Nếu muốn giới hạn số job, chạy `make menuconfig` và xem mục Build options.
 
-Quá trình build mất từ nửa giờ đến một giờ, tùy khả năng host system và tốc độ kết nối Internet. Khi hoàn tất, bạn sẽ thấy hai thư mục mới được tạo:
+Quá trình build sẽ mất từ nửa giờ đến một giờ, tùy năng lực host system và tốc độ kết nối Internet của bạn. Khi hoàn tất, bạn sẽ thấy hai directory mới đã được tạo:
 
 - `dl/`: Chứa archive của các dự án upstream mà Buildroot đã build
 
@@ -136,7 +136,7 @@ Trong `output/`, bạn sẽ thấy:
 
 - `host/`: Chứa các công cụ Buildroot cần và chạy trên host, gồm executable của toolchain (trong `output/host/usr/bin`).
 
-- `images/`: Quan trọng nhất, chứa kết quả build. Tùy lựa chọn khi cấu hình, bạn sẽ thấy bootloader, kernel và một hoặc nhiều root filesystem image.
+- `images/`: Đây là directory quan trọng nhất, chứa các kết quả của quá trình build. Tùy những gì bạn chọn khi cấu hình, bạn sẽ tìm thấy bootloader, kernel và một hoặc nhiều root filesystem image.
 
 - `staging/`: Symbolic link đến `sysroot` của toolchain. Tên link hơi gây nhầm lẫn vì nó không trỏ đến staging area theo định nghĩa trong Chương 5, Xây dựng root filesystem.
 
@@ -144,7 +144,7 @@ Trong `output/`, bạn sẽ thấy:
 
 ### Chạy
 
-Một số cấu hình mẫu có mục tương ứng trong thư mục `boards/`, chứa file cấu hình tùy biến và thông tin cài kết quả lên target. Với hệ thống vừa build, file liên quan là `board/qemu/arm-vexpress/readme.txt`, hướng dẫn cách khởi động QEMU với target này. Giả sử đã cài `qemu-system-arm` như Chương 1, Bắt đầu, bạn có thể chạy bằng lệnh:
+Một số cấu hình mẫu có entry tương ứng trong directory `boards/`, chứa các configuration file tùy chỉnh và thông tin về cách cài kết quả lên target. Với hệ thống bạn vừa build, file liên quan là `board/qemu/arm-vexpress/readme.txt`, hướng dẫn cách khởi động QEMU với target này. Giả sử bạn đã cài `qemu-system-arm` như mô tả trong Chương 1, Bắt đầu, bạn có thể chạy nó bằng lệnh sau:
 
 ```
 $ qemu-system-arm -M vexpress-a9 -m 256 \
@@ -330,7 +330,7 @@ Dự án OpenEmbedded hướng tới tạo tập binary package theo định d�
 
 Từ năm 2010, các thành phần chung của OpenEmbedded và Poky được kết hợp thành dự án riêng tên OpenEmbedded core, hay oe-core.
 
-Vì vậy, Yocto Project tập hợp một số thành phần, quan trọng nhất gồm:
+Vì vậy, Yocto Project tập hợp một số thành phần, trong đó những thành phần quan trọng nhất là:
 
 - Poky: Reference distribution
 
@@ -530,7 +530,7 @@ $ cd ~/poky
 $ . oe-init-build-env build-nova
 ```
 
-Giờ cần thêm layer này vào cấu hình build, `conf/bblayers.conf`:
+Bây giờ, bạn cần thêm layer này vào build configuration, `conf/bblayers.conf`:
 
 ```
 LCONF_VERSION = "6"
@@ -550,7 +550,7 @@ BBLAYERS_NON_REMOVABLE ?= " \
   "
 ```
 
-Có thể xác nhận thiết lập đúng bằng helper script khác:
+Bạn có thể xác nhận nó đã được thiết lập đúng bằng một helper script khác:
 
 ```
 $ bitbake-layers show-layers
@@ -645,7 +645,7 @@ Mặc định, giấy phép thương mại không được phép, nhưng dễ d�
 LICENSE_FLAGS = "commercial"
 ```
 
-Sau đó, trong `conf/local.conf`, cho phép rõ ràng giấy phép này như sau:
+Sau đó, trong `conf/local.conf`, bạn cho phép giấy phép này một cách tường minh, như sau:
 
 ```
 LICENSE_FLAGS_WHITELIST = "commercial"
@@ -709,7 +709,7 @@ Có thể thực hiện thay đổi rộng hơn qua `EXTRA_IMAGE_FEATURES`. Quá
 
 Vấn đề của thay đổi trong `local.conf` là chúng chỉ có tính cục bộ. Nếu muốn tạo image chia sẻ với developer khác hoặc nạp lên production system, bạn nên đưa thay đổi vào image recipe.
 
-Image recipe chứa hướng dẫn tạo các image file cho target, gồm bootloader, kernel và root filesystem image. Có thể lấy danh sách image sẵn có bằng lệnh:
+Image recipe chứa hướng dẫn về cách tạo các image file cho target, bao gồm bootloader, kernel và root filesystem image. Bạn có thể lấy danh sách những image có sẵn bằng lệnh sau:
 
 ```
 $ ls meta*/recipes*/images/*.bb
@@ -817,7 +817,7 @@ $ arm-poky-linux-gnueabi-gcc -print-sysroot
 /not/exist
 ```
 
-Vì vậy, nếu thử cross compile như các chương trước, nó thất bại như sau:
+Vì vậy, nếu bạn thử cross compile theo cách tôi đã trình bày trong các chương trước, nó sẽ thất bại như sau:
 
 ```
 $ arm-poky-linux-gnueabi-gcc helloworld.c -o helloworld

@@ -18,7 +18,7 @@ Một số công cụ cần tùy chọn kernel đặc biệt, cụ thể trong c
 
 Debug symbol rất hữu ích để chuyển raw program address thành tên hàm và dòng code. Triển khai executable có debug symbol không đổi thực thi code, nhưng yêu cầu có bản binary và kernel được biên dịch với `debug`, ít nhất cho thành phần muốn profile. Một số công cụ hoạt động tốt nhất nếu cài chúng trên target system, ví dụ `perf`. Kỹ thuật giống debug thông thường đã bàn trong Chương 12, Debug bằng GDB.
 
-Nếu muốn công cụ tạo call graph, có thể phải biên dịch có bật stack frame. Nếu muốn gắn địa chỉ với dòng code chính xác, có thể cần mức optimization thấp hơn.
+Nếu muốn công cụ tạo call graph, bạn có thể phải compile với stack frame được bật. Nếu muốn công cụ liên hệ chính xác address với các dòng code, bạn có thể cần compile với mức optimization thấp hơn.
 
 Cuối cùng, một số công cụ cần chèn instrumentation vào chương trình để capture sample, nên phải biên dịch lại thành phần đó. Áp dụng cho `gprof` với ứng dụng, `Ftrace` và `LTTng` với kernel.
 
@@ -53,7 +53,7 @@ Load average: 0.24 0.06 0.02 2/51 105
   [...]
 ```
 
-Dòng tổng hợp cho tỷ lệ phần trăm thời gian chạy trong các trạng thái như bảng:
+Dòng tổng hợp hiển thị tỷ lệ phần trăm thời gian chạy trong các trạng thái khác nhau, như bảng sau:
 
 | procps | Busybox |  |
 |---|---|---|
@@ -87,7 +87,7 @@ Giả sử có một user space process chiếm phần lớn thời gian, hãy x
 
 ### Profiler của người nghèo
 
-Có thể profile ứng dụng chỉ bằng GDB, dừng ở khoảng bất kỳ và xem đang làm gì. Đây là profiler của người nghèo, dễ thiết lập và là một cách thu thập profile data.
+Bạn có thể profile một ứng dụng chỉ bằng cách dùng GDB để dừng nó tại những khoảng thời gian bất kỳ và xem nó đang làm gì. Đây là profiler của người nghèo. Nó dễ thiết lập và là một cách thu thập profile data.
 
 Quy trình đơn giản được giải thích ở đây:
 
@@ -99,9 +99,9 @@ debug trực tiếp). Process dừng.
 
 để xem call stack.
 
-3\. Gõ `continue` để chương trình tiếp tục. 4. Sau một lúc, gõ Ctrl + C để dừng lại rồi quay bước 2.
+3\. Gõ `continue` để chương trình tiếp tục chạy. 4. Sau một lúc, nhấn Ctrl + C để dừng chương trình lần nữa rồi quay lại bước 2.
 
-Lặp bước 2 đến 4 vài lần, nhanh chóng biết nó đang lặp hay có tiến triển; lặp đủ thường xuyên sẽ hình dung được hotspot trong code.
+Nếu lặp lại các bước 2 đến 4 vài lần, bạn sẽ nhanh chóng hình dung được chương trình đang lặp hay vẫn tiến triển. Nếu lặp đủ thường xuyên, bạn cũng sẽ biết các hotspot trong code nằm ở đâu.
 
 Có cả website dành cho ý tưởng tại `http://poormansprofiler.org`, cùng script giúp dễ hơn. Tôi đã dùng kỹ thuật nhiều lần qua các năm với nhiều operating system, debugger.
 
@@ -117,17 +117,17 @@ Giờ tôi xem cách dùng `perf` cho statistical profiling.
 
 Cốt lõi `perf` là tập event counter với rule về khi nào chủ động thu dữ liệu. Bằng đặt rule, có thể capture dữ liệu toàn hệ thống, riêng kernel, hoặc một process cùng child, trên mọi CPU hay chỉ một. Rất linh hoạt. Chỉ công cụ này, có thể bắt đầu nhìn toàn hệ thống rồi thu hẹp vào device driver có vẻ gây vấn đề, ứng dụng chạy chậm, hoặc library function dường như thực thi lâu hơn dự kiến.
 
-Code công cụ command-line `perf` thuộc kernel, ở thư mục `tools/perf`. Công cụ và kernel subsystem phát triển hand-in-hand, nghĩa là phải cùng phiên bản kernel. `perf` làm được nhiều. Trong chương, tôi chỉ xét vai trò profiler. Để biết khả năng khác, đọc man page `perf` và tài liệu đoạn trước.
+Code của công cụ command-line `perf` là một phần của kernel, nằm trong directory `tools/perf`. Công cụ và kernel subsystem được phát triển hand-in-hand, nghĩa là chúng phải thuộc cùng một kernel version. `perf` có nhiều khả năng. Trong chương này, tôi chỉ xem xét nó với vai trò profiler. Để biết các khả năng khác, hãy đọc man page của `perf` và tham khảo tài liệu được đề cập ở đoạn trước.
 
 ### Cấu hình kernel cho perf
 
 Cần kernel cấu hình cho `perf_events` và lệnh `perf` cross compile để chạy target. Cấu hình kernel liên quan là `CONFIG_PERF_EVENTS`, trong menu General setup \| Kernel Performance Events And Counters.
 
-Nếu muốn profile bằng tracepoint — sẽ bàn thêm sau — bật cả tùy chọn phần `Ftrace`. Nhân tiện, nên bật `CONFIG_DEBUG_INFO`.
+Nếu muốn profile bằng tracepoint, chủ đề sẽ được trình bày thêm ở phần sau, bạn cũng phải bật các option được mô tả trong phần về `Ftrace`. Trong khi cấu hình, bạn cũng nên bật `CONFIG_DEBUG_INFO`.
 
 Lệnh `perf` có nhiều dependency khiến cross compile khá rối. Tuy nhiên, cả Yocto Project và Buildroot đều có target package.
 
-Cũng cần debug symbol trên target cho binary muốn profile, nếu không `perf` không resolve được địa chỉ thành symbol có nghĩa. Lý tưởng là có debug symbol cả hệ thống gồm kernel. Với kernel, nhớ debug symbol ở file `vmlinux`.
+Bạn cũng cần debug symbol trên target cho các binary muốn profile; nếu không, `perf` sẽ không thể resolve address thành symbol có ý nghĩa. Lý tưởng nhất là có debug symbol cho toàn bộ hệ thống, bao gồm kernel. Với kernel, hãy nhớ rằng debug symbol nằm trong file `vmlinux`.
 
 ### Build perf bằng Yocto Project
 
@@ -170,9 +170,9 @@ samples) ]
 -rw-------    1 root     root      387360 Aug 25  2015 perf.data
 ```
 
-Giờ hiển thị kết quả từ `perf.data` bằng lệnh `perf report`. Có ba giao diện chọn trên command line:
+Bây giờ, bạn có thể hiển thị kết quả từ `perf.data` bằng lệnh `perf report`. Có ba user interface mà bạn có thể chọn trên command line:
 
-- `--stdio`: Giao diện thuần text, không tương tác. Phải khởi chạy `perf report` và annotate cho mỗi view trace.
+- `--stdio`: Đây là interface thuần text, không có tương tác với user. Bạn phải khởi chạy `perf report` và annotate cho mỗi lần xem trace.
 
 - `--tui`: Giao diện menu text-based đơn giản, cho chuyển giữa màn hình.
 
@@ -192,7 +192,7 @@ Tần số 1000Hz có thể cao hơn thực cần, gây observer effect. Thử t
 
 ### Call graph
 
-Điều này vẫn chưa thật dễ: hàm đầu danh sách phần lớn là memory operation cấp thấp, khá chắc đã tối ưu. Sẽ tốt nếu lùi lại xem hàm được gọi từ đâu. Làm được bằng capture backtrace mỗi sample, với tùy chọn `-g` cho `perf record`. Giờ `perf report` hiện dấu cộng (+) nơi hàm thuộc call chain. Có thể mở rộng trace xem hàm thấp hơn trong chain:
+Điều này vẫn chưa thực sự giúp công việc dễ dàng hơn: các function ở đầu danh sách chủ yếu là thao tác memory ở mức thấp, và bạn có thể khá chắc rằng chúng đã được tối ưu. Sẽ hữu ích nếu lùi lại để xem các function này được gọi từ đâu. Bạn có thể thực hiện bằng cách thu thập backtrace từ mỗi sample, thông qua option `-g` của `perf record`. Lúc này, `perf report` hiển thị dấu cộng (+) ở nơi function thuộc một call chain. Bạn có thể mở rộng trace để xem các function ở sâu hơn trong chain:
 
 ![image](images/ch13/fig13-02.png)
 
@@ -200,7 +200,7 @@ Tạo call graph dựa khả năng lấy call frame từ stack, giống yêu c�
 
 ### perf annotate
 
-Đã biết cần xem hàm nào, sẽ tốt nếu đi vào xem code và hit count mỗi instruction. Đó là việc `perf annotate` làm, bằng gọi `objdump` cài trên target. Chỉ cần dùng `perf annotate` thay `perf report`.
+Giờ đã biết cần xem những function nào, sẽ hữu ích nếu đi vào xem code và có hit count cho từng instruction. Đó là việc `perf annotate` thực hiện, bằng cách gọi một bản `objdump` được cài trên target. Bạn chỉ cần dùng `perf annotate` thay cho `perf report`.
 
 `perf annotate` cần symbol table cho executable và vmlinux. Đây là ví dụ hàm được chú giải:
 
@@ -257,7 +257,7 @@ Dùng lệnh `gprof` đọc sample từ `gmon.out` và debug information từ b�
 -rw-r--r-- 1 root root   473 Nov 24 14:07 gmon.out
 ```
 
-Sau đó phân tích sample đã capture trên target hoặc host bằng:
+Sau đó, bạn phân tích các sample đã thu thập trên target hoặc host bằng lệnh sau:
 
 ```
 # gprof busybox
@@ -330,11 +330,11 @@ Tracer `function` chèn instrumentation mỗi kernel function để ghi và gắ
 
 ### Chuẩn bị dùng Ftrace
 
-`Ftrace` và các tùy chọn được cấu hình trong menu kernel. Tối thiểu cần:
+`Ftrace` và các option của nó được cấu hình trong kernel configuration menu. Tối thiểu, bạn cần các option sau:
 
 - `CONFIG_FUNCTION_TRACER` trong menu Kernel hacking \| Tracers \| Kernel Function Tracer
 
-Vì lý do sẽ rõ sau, nên bật cả tùy chọn:
+Vì những lý do sẽ rõ ở phần sau, bạn cũng nên bật các option sau:
 
 - `CONFIG_FUNCTION_GRAPH_TRACER` trong menu Kernel hacking \| Tracers \| Kernel Function Graph Tracer
 
@@ -406,7 +406,7 @@ vfs_write
 
 Có thể capture rất nhiều data point chỉ trong một giây.
 
-Như profiler, khó hiểu danh sách hàm phẳng như vậy. Nếu chọn tracer `function_graph`, Ftrace capture call graph như sau:
+Cũng như với profiler, một danh sách function phẳng như vậy rất khó diễn giải. Nếu chọn tracer `function_graph`, Ftrace sẽ thu thập call graph như sau:
 
 ```
 # tracer: function_graph
@@ -431,7 +431,7 @@ Như profiler, khó hiểu danh sách hàm phẳng như vậy. Nếu chọn trac
  0) + 63.375 us   |            }
 ```
 
-Giờ thấy các function call lồng nhau, giới hạn bằng ngoặc `{` và `}`. Ở ngoặc đóng, có số đo thời gian trong hàm, chú giải dấu cộng `+` nếu hơn `10 µs`, dấu chấm than `!` nếu hơn `100 µs`.
+Bây giờ, bạn có thể thấy sự lồng nhau của các function call, được phân định bằng các dấu ngoặc `{` và `}`. Tại dấu ngoặc đóng có số đo thời gian dành cho function, được đánh dấu cộng `+` nếu mất hơn `10 µs`, và dấu chấm than `!` nếu mất hơn `100 µs`.
 
 Thường chỉ quan tâm hoạt động kernel do một process hay thread gây ra; khi đó giới hạn trace cho một thread bằng ghi thread ID vào `set_ftrace_pid`.
 
@@ -516,7 +516,7 @@ Cũng có thể ghi tên event vào `set_event` như sau:
 # echo "kmem:kmalloc kmem:kfree" > set_event
 ```
 
-Giờ khi đọc trace, thấy hàm và tham số:
+Bây giờ, khi đọc trace, bạn có thể thấy các function và parameter của chúng:
 
 ```
 # tracer: nop
@@ -585,7 +585,7 @@ Có package tên `lttng-babletrace` cho target. Buildroot tự build `babeltrace
 
 LTTng dùng được tập event `ftrace` đã mô tả làm trace point tiềm năng. Ban đầu chúng bị tắt.
 
-Giao diện control LTTng là lệnh `lttng`. Liệt kê kernel probe bằng:
+Control interface cho LTTng là lệnh `lttng`. Bạn có thể liệt kê các kernel probe bằng lệnh sau:
 
 ```
 # lttng list --kernel
@@ -664,13 +664,13 @@ Chạy test load rồi dừng tracing:
 
 Trace session được ghi vào session directory, `lttng-traces/<session>/kernel`.
 
-Dùng Babeltrace viewer dump raw trace data dạng text; ở đây tôi chạy trên host computer:
+Bạn có thể dùng Babeltrace viewer để dump raw trace data ở định dạng text; trong trường hợp này, tôi chạy nó trên host computer:
 
 ```
 $ babeltrace  lttng-traces/test-20150824-140942/kernel
 ```
 
-Output quá dài để vừa trang, nên tôi để lại bài tập cho bạn đọc capture và hiển thị trace theo cách này. Text output từ eBabeltrace có ưu điểm dễ tìm chuỗi bằng grep và lệnh tương tự.
+Output quá dài để trình bày vừa trang này, vì vậy tôi dành việc thu thập và hiển thị trace theo cách này làm bài thực hành cho bạn đọc. Text output từ eBabeltrace có ưu điểm là dễ tìm kiếm string bằng grep và các lệnh tương tự.
 
 Lựa chọn tốt cho graphical trace viewer là Trace Compass plug-in cho Eclipse, nay thuộc bộ Eclipse IDE for C/C++ Developers. Như thường lệ, import trace data vào Eclipse khá lắt nhắt. Ngắn gọn, cần theo các bước:
 
@@ -716,7 +716,7 @@ Callgrind có thể mô phỏng processor L1/L2 cache và báo cache miss. Captu
 
 Đây là thread error detector phát hiện synchronization error trong chương trình C, C++, Fortran có POSIX thread.
 
-Helgrind phát hiện ba lớp lỗi. Thứ nhất, dùng API sai. Ví dụ unlock mutex đã unlock, unlock mutex do thread khác lock, không kiểm tra return value một số hàm Pthread. Thứ hai, giám sát thứ tự thread lấy lock, phát hiện deadlock tiềm năng từ chu trình lock. Cuối cùng, phát hiện data race khi hai thread truy cập shared memory location mà không có lock hay synchronization phù hợp bảo đảm truy cập single-threaded.
+Helgrind có thể phát hiện ba loại lỗi. Thứ nhất, nó có thể phát hiện việc sử dụng API không đúng. Ví dụ gồm unlock một mutex đã được unlock, unlock mutex do một thread khác lock, hoặc không kiểm tra return value của một số Pthread function. Thứ hai, nó theo dõi thứ tự các thread lấy lock, qua đó phát hiện deadlock tiềm ẩn có thể phát sinh từ việc hình thành chu trình lock. Cuối cùng, nó phát hiện data race có thể xảy ra khi hai thread truy cập một shared memory location mà không dùng lock phù hợp hoặc cơ chế đồng bộ khác để bảo đảm truy cập single-threaded.
 
 Dùng Helgrind đơn giản, chỉ cần lệnh:
 
@@ -724,7 +724,7 @@ Dùng Helgrind đơn giản, chỉ cần lệnh:
 # valgrind --tool=helgrind <program>
 ```
 
-Nó in vấn đề và vấn đề tiềm năng khi tìm thấy. Có thể chuyển thông báo vào file bằng thêm `--log-file=<filename>`.
+Nó in ra các vấn đề và vấn đề tiềm ẩn khi phát hiện chúng. Bạn có thể chuyển các thông báo này vào một file bằng cách thêm `--log-file=<filename>`.
 
 ## Dùng strace hiển thị system call
 
@@ -823,7 +823,7 @@ Thậm chí dùng `strace` làm profile tool cơ bản: dùng tùy chọn `-c`, 
 
 Không ai có thể phàn nàn Linux thiếu lựa chọn profile và trace. Chương này cung cấp tổng quan một số lựa chọn phổ biến nhất.
 
-Khi hệ thống không hoạt động tốt như muốn, bắt đầu bằng `top`, cố nhận diện vấn đề. Nếu chỉ một ứng dụng, dùng `perf record/report` profile, nhớ cần cấu hình kernel bật `perf` và debug symbol cho binary, kernel. OProfile thay thế `perf record`, cho thông tin tương tự. Thẳng thắn thì `gprof` lỗi thời, nhưng có ưu điểm không cần kernel hỗ trợ. Nếu vấn đề không cục bộ, dùng `perf` (hoặc OProfile) xem system-wide.
+Khi gặp một hệ thống không hoạt động tốt như mong muốn, hãy bắt đầu bằng `top` và cố xác định vấn đề. Nếu vấn đề nằm ở một ứng dụng duy nhất, bạn có thể dùng `perf record/report` để profile nó, đồng thời nhớ rằng phải cấu hình kernel để bật `perf` và cần debug symbol cho các binary lẫn kernel. OProfile là lựa chọn thay thế cho `perf record` và có thể cung cấp thông tin tương tự. Nói thẳng thì `gprof` đã lỗi thời, nhưng nó có ưu điểm là không cần kernel support. Nếu vấn đề không được khoanh vùng rõ như vậy, hãy dùng `perf` (hoặc OProfile) để có góc nhìn system-wide.
 
 `Ftrace` phát huy khi có câu hỏi cụ thể về hành vi kernel. Tracer `function`, `function_graph` cho chi tiết quan hệ, thứ tự function call. Event tracer cho lấy thêm thông tin hàm, gồm tham số, return value. LTTng có vai trò tương tự, dùng event trace mechanism, thêm ring buffer tốc độ cao để lấy lượng dữ liệu lớn từ kernel. Valgrind có ưu điểm riêng là chạy code trong sandbox, báo lỗi khó tìm bằng cách khác. Với Callgrind, tạo call graph và báo processor cache usage; với Helgrind, báo vấn đề thread-related. Cuối cùng đừng quên `strace`. Đây là công cụ dự phòng tốt để biết chương trình gọi system call nào, từ theo dõi file open call tìm file path name đến kiểm tra system wake up và signal đến.
 

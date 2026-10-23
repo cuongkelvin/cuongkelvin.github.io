@@ -24,7 +24,7 @@ Bạn có thể map task sang process, có 40 chương trình riêng giao tiếp
 
 Ở cực kia, có thể map task sang thread và triển khai hệ thống bằng một process chứa 40 thread. Hợp tác dễ hơn nhiều vì chung address space và file descriptor. Overhead gửi message giảm hoặc mất hẳn; context switch giữa thread nhanh hơn giữa process. Nhược điểm là một task có thể làm hỏng heap hay stack của task khác. Nếu bất kỳ thread nào gặp lỗi nghiêm trọng, cả process kết thúc, kéo theo mọi thread. Cuối cùng, debug process multi-threaded phức tạp có thể là ác mộng.
 
-Kết luận nên rút ra là cả hai thiết kế đều chưa lý tưởng, và có cách tốt hơn. Nhưng trước đó, tôi sẽ tìm hiểu sâu hơn API và hành vi process, thread.
+Kết luận bạn nên rút ra là cả hai thiết kế đều chưa lý tưởng và có một cách tốt hơn. Nhưng trước khi đến phần đó, tôi sẽ tìm hiểu sâu hơn một chút về API và hành vi của process và thread.
 
 ## Process
 
@@ -32,7 +32,7 @@ Process giữ môi trường cho thread chạy: memory mapping, file descriptor,
 
 ### Tạo process mới
 
-Hàm `POSIX` tạo process là `fork(2)`. Đây là hàm lạ vì mỗi lời gọi thành công có hai lần trả về: một trong process gọi, gọi là parent, một trong process mới, gọi là child như sơ đồ:
+Function `POSIX` để tạo process là `fork(2)`. Đây là một function khác thường vì mỗi lời gọi thành công có hai lần trả về: một trong process thực hiện lời gọi, gọi là parent, và một trong process vừa được tạo, gọi là child, như sơ đồ sau:
 
 ![image](images/ch10/fig10-03.png)
 
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
 Có vẻ lạ khi một hàm nhân bản process hiện có, hàm khác loại bỏ tài nguyên và nạp chương trình khác vào memory, nhất là fork thường gần như lập tức được theo sau bằng `exec`. Phần lớn operating system kết hợp hai hành động trong một lời gọi.
 
-Tuy nhiên, có ưu điểm rõ ràng. Ví dụ, rất dễ triển khai redirection và pipe trong shell. Giả sử muốn liệt kê directory, trình tự sự kiện là:
+Tuy nhiên, cách này có những ưu điểm rõ ràng. Chẳng hạn, nó giúp triển khai redirection và pipe trong shell rất dễ dàng. Giả sử bạn muốn lấy danh sách nội dung một directory, trình tự sự kiện sẽ như sau:
 
 1\. Bạn gõ `ls` ở shell prompt. 2. Shell fork bản sao chính nó. 3. Child exec `/bin/ls`. 4. Chương trình `ls` in danh sách directory ra `stdout` (file descriptor 1)
 
@@ -148,7 +148,7 @@ Tuy nhiên, có ưu điểm rõ ràng. Ví dụ, rất dễ triển khai redirec
 
 5\. Chương trình `ls` kết thúc và shell lấy lại quyền điều khiển.
 
-Giờ giả sử muốn ghi danh sách directory vào file bằng redirect output với ký tự `>`. Trình tự là:
+Bây giờ, giả sử bạn muốn ghi danh sách nội dung directory vào một file bằng cách redirect output với ký tự `>`. Trình tự lúc này như sau:
 
 1\. Bạn gõ `ls > listing.txt`. 2. Shell fork bản sao chính nó.
 
@@ -164,7 +164,7 @@ Lưu ý bước ba có cơ hội sửa environment của child process trước 
 
 ### Daemon
 
-Chúng ta đã gặp daemon ở vài nơi. Daemon là process chạy background, thuộc process `init`, `PID1`, và không nối với controlling terminal. Các bước tạo daemon:
+Chúng ta đã gặp daemon ở một số phần trước. Daemon là một process chạy ở background, thuộc sở hữu của process `init`, `PID1`, và không kết nối với controlling terminal. Các bước tạo daemon như sau:
 
 1\. Gọi `fork()` tạo process mới, sau đó parent phải thoát,
 
@@ -184,7 +184,7 @@ May thay, mọi bước trên có thể thực hiện bằng một function call
 
 Mỗi process là hòn đảo memory. Có hai cách truyền thông tin từ process này sang process khác. Thứ nhất, sao chép từ address space này sang address space kia. Thứ hai, tạo vùng memory cả hai truy cập được để chia sẻ dữ liệu.
 
-Cách đầu thường kết hợp queue hoặc buffer để có chuỗi message truyền giữa process. Cần sao chép message hai lần: vào vùng tạm rồi đến đích. Ví dụ gồm socket, pipe và POSIX message queue.
+Cách đầu tiên thường được kết hợp với queue hoặc buffer để có một chuỗi message truyền giữa các process. Điều này đòi hỏi copy message hai lần: trước tiên vào vùng lưu tạm, sau đó đến đích. Một số ví dụ là socket, pipe và POSIX message queue.
 
 Cách thứ hai không chỉ cần phương thức tạo memory được map vào hai (hoặc nhiều) address space cùng lúc, mà còn cần phương tiện đồng bộ truy cập memory, ví dụ semaphore hoặc mutex. POSIX có hàm cho tất cả những việc này.
 
@@ -194,7 +194,7 @@ Protocol Message-based thường dễ lập trình, debug hơn shared memory, nh
 
 #### IPC Message-based
 
-Có một số lựa chọn sẽ được tóm lược sau. Thuộc tính phân biệt chúng gồm:
+Có một số lựa chọn mà tôi sẽ tóm tắt dưới đây. Các attribute phân biệt chúng là:
 
 - Luồng message là uni- hay bi-directorial.
 
@@ -248,7 +248,7 @@ Còn có abstraction cấp cao hơn, đặc biệt dbus, đang chuyển từ Lin
 
 #### IPC shared memory-based
 
-Chia sẻ memory loại bỏ nhu cầu sao chép giữa address space nhưng gây vấn đề đồng bộ truy cập. Đồng bộ giữa process thường dùng semaphore.
+Chia sẻ memory loại bỏ nhu cầu copy dữ liệu giữa các address space, nhưng đặt ra vấn đề đồng bộ hóa việc truy cập vùng memory đó. Đồng bộ hóa giữa các process thường được thực hiện bằng semaphore.
 
 ##### POSIX shared memory
 
@@ -432,7 +432,7 @@ Khi build threaded program, phải thêm switch `–pthread` ở cả giai đo�
 
 Ưu điểm lớn của thread là chia sẻ address space nên chia sẻ được memory variable. Đây cũng là nhược điểm lớn vì cần synchronization để giữ data consistency, tương tự memory segment chia sẻ giữa process nhưng với lưu ý rằng thread chia sẻ toàn bộ memory. Thread có thể tạo private memory bằng thread local storage (TLS).
 
-Giao diện `pthreads` cung cấp cơ bản cần cho synchronization: mutex và condition variable. Nếu muốn cấu trúc phức tạp hơn, bạn phải tự xây dựng.
+Interface `pthreads` cung cấp những thành phần cơ bản cần thiết để đồng bộ hóa: mutex và condition variable. Nếu muốn cấu trúc phức tạp hơn, bạn phải tự xây dựng chúng.
 
 Lưu ý mọi phương thức IPC mô tả trước đó hoạt động tốt như nhau giữa các thread trong cùng process.
 
@@ -448,9 +448,9 @@ Lưu ý mọi phương thức IPC mô tả trước đó hoạt động tốt nh
 
 ### Condition thay đổi
 
-Thread hợp tác cần cách báo nhau có thay đổi cần chú ý. Điều đó gọi là condition, thông báo gửi qua condition variable, `condvar`.
+Các thread phối hợp với nhau cần có cách thông báo cho nhau rằng một điều gì đó đã thay đổi và cần được xử lý. Điều đó được gọi là condition, và thông báo được gửi qua một condition variable, `condvar`.
 
-Condition đơn giản là thứ có thể kiểm tra cho kết quả `true` hoặc `false`. Ví dụ buffer chứa zero hoặc một số item. Một thread lấy item khỏi buffer và sleep khi trống. Thread khác đặt item vào buffer rồi báo thread kia, vì condition thread kia đang chờ đã đổi. Nếu đang sleep, nó cần thức dậy làm việc. Phức tạp duy nhất là condition theo định nghĩa là shared resource, nên cần mutex bảo vệ. Đây là ví dụ đơn giản theo quan hệ producer-consumer mô tả trước:
+Condition đơn giản là một điều mà bạn có thể kiểm tra để nhận kết quả `true` hoặc `false`. Ví dụ đơn giản là buffer không chứa item nào hoặc chứa một số item. Một thread lấy item ra khỏi buffer và sleep khi buffer rỗng. Thread khác đặt item vào buffer rồi thông báo cho thread kia rằng nó đã làm như vậy, vì condition mà thread kia đang chờ đã thay đổi. Nếu đang sleep, thread đó cần thức dậy để thực hiện công việc. Điểm phức tạp duy nhất là condition, theo định nghĩa, là một shared resource nên phải được mutex bảo vệ. Sau đây là một ví dụ đơn giản theo quan hệ producer-consumer được mô tả trong phần trước:
 
 ```
 pthread_cond_t cv = PTHREAD_COND_INITIALIZER;
@@ -553,7 +553,7 @@ const struct sched_param *param);
 int sched_getscheduler(pid_t pid);
 ```
 
-Cặp thứ hai thao tác trên `pthread_t`, nên đổi được tham số thread khác trong process:
+Cặp thứ hai thao tác trên `pthread_t`, vì vậy có thể thay đổi parameter của các thread khác trong một process:
 
 ```
 pthread_setschedparam(pthread_t thread, int policy,
@@ -564,7 +564,7 @@ pthread_getschedparam(pthread_t thread, int *policy,
 
 #### Niceness
 
-Một số thread timeshare quan trọng hơn thread khác. Có thể chỉ điều này bằng giá trị `nice`, nhân phần CPU thread được hưởng với scaling factor. Tên đến từ function call `nice(2)`, thuộc Unix từ thuở đầu. Thread trở nên `nice` bằng giảm tải lên hệ thống, hoặc ngược lại bằng tăng tải. Giá trị từ 19, rất nice, đến -20, rất không nice. Mặc định 0, nice trung bình, hay so-so.
+Một số timeshare thread quan trọng hơn những thread khác. Bạn có thể biểu thị điều này bằng giá trị `nice`, nhân phần CPU mà thread được hưởng với một scaling factor. Tên này bắt nguồn từ function call `nice(2)`, vốn đã có trong Unix từ những ngày đầu. Một thread trở nên `nice` bằng cách giảm tải mà nó đặt lên hệ thống, hoặc đi theo hướng ngược lại bằng cách tăng tải. Giá trị nằm trong khoảng từ 19, rất nice, đến -20, rất không nice. Giá trị mặc định là 0, tức nice ở mức trung bình, hay so-so.
 
 Có thể đổi giá trị `nice` cho thread `SCHED_NORMAL` và `SCHED_BATCH`. Để giảm niceness, tăng CPU load, cần capability `CAP_SYS_NICE`, có cho root user.
 
@@ -582,7 +582,7 @@ Có hai real-time policy:
 
 Mỗi thread real-time có priority từ 1 đến 99, với 99 cao nhất. Để gán real-time policy cho thread, cần `CAP_SYS_NICE`, mặc định chỉ cấp cho root user.
 
-Một vấn đề real-time scheduling, cả Linux lẫn nơi khác, là thread trở thành compute bound, thường do lỗi gây vòng lặp vô hạn, ngăn thread real-time priority thấp hơn và toàn bộ thread timeshare chạy. Hệ thống thất thường, có thể treo hoàn toàn. Có vài cách phòng tránh.
+Một vấn đề của real-time scheduling, cả trong Linux lẫn các hệ thống khác, là một thread trở thành compute bound, thường do bug khiến nó lặp vô hạn. Thread này ngăn các real-time thread có priority thấp hơn cũng như toàn bộ timeshare thread được chạy. Hệ thống trở nên thất thường và có thể treo hoàn toàn. Có một vài cách để phòng tránh khả năng này.
 
 Thứ nhất, từ Linux 2.6.25, scheduler mặc định dành 5% CPU time cho thread không real-time, nên ngay cả thread real-time chạy mất kiểm soát cũng không thể dừng hoàn toàn hệ thống. Cấu hình qua hai kernel control:
 
@@ -598,7 +598,7 @@ Lựa chọn thứ hai là dùng watchdog hardware hoặc software giám sát th
 
 Thực tế timeshare policy đáp ứng phần lớn computing workload. Thread I/O bound dành nhiều thời gian block nên luôn có phần thời gian được hưởng còn dư. Khi unblock, chúng gần như được scheduling ngay. Trong khi đó, thread CPU-bound tự nhiên chiếm CPU cycle còn lại. Có thể dùng nice dương cho thread ít quan trọng và âm cho thread quan trọng.
 
-Dĩ nhiên, đây chỉ là hành vi trung bình, không bảo đảm luôn như vậy. Nếu cần hành vi deterministic hơn, cần real-time policy. Đặc điểm đánh dấu thread real-time:
+Dĩ nhiên, đây chỉ là hành vi trung bình; không có gì bảo đảm rằng điều này luôn đúng. Nếu cần hành vi có tính deterministic cao hơn, bạn phải dùng real-time policy. Những đặc điểm phân biệt một thread real-time là:
 
 - Có deadline phải tạo output trước thời điểm đó
 

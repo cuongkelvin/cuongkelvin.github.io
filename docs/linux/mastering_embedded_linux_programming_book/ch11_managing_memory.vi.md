@@ -78,7 +78,7 @@ Các thành phần dùng memory kernel-space gồm:
 
 ### Kernel dùng bao nhiêu memory?
 
-Tiếc rằng không có câu trả lời hoàn chỉnh, nhưng phần sau là gần nhất có thể.
+Đáng tiếc là không có câu trả lời hoàn chỉnh cho câu hỏi đó, nhưng phần trình bày tiếp theo là câu trả lời gần đúng nhất mà chúng ta có thể đưa ra.
 
 Đầu tiên, có thể xem memory do code và data kernel chiếm trong kernel log đã nêu, hoặc dùng lệnh `size` như sau:
 
@@ -90,7 +90,7 @@ text      data     bss       dec       hex       filename
 
 Thông thường kích thước nhỏ so với tổng memory. Nếu không, cần xem cấu hình kernel và loại bỏ thành phần không cần. Có nỗ lực đang diễn ra để cho phép build kernel nhỏ: tìm Linux-tiny hoặc Linux Kernel Tinification. Trang dự án cho nỗ lực sau là `https://tiny.wiki.kernel.org/`.
 
-Có thể lấy thêm thông tin memory usage bằng đọc `/proc/meminfo`:
+Bạn có thể lấy thêm thông tin về mức sử dụng memory bằng cách đọc `/proc/meminfo`:
 
 ```
 # cat /proc/meminfo
@@ -222,7 +222,7 @@ Như thấy, page fault sinh ra khi kernel trap truy cập page chưa map. Thự
 
 ## Process memory map
 
-Có thể xem memory map process qua filesystem `proc`. Ví dụ, đây là map của process `init`, PID 1:
+Bạn có thể xem memory map của một process thông qua filesystem `proc`. Chẳng hạn, sau đây là map của process `init`, PID 1:
 
 ```
 # cat /proc/1/maps
@@ -377,11 +377,11 @@ Số này thực ra là bit mask xác định muốn giải phóng loại cache 
 
 ## Memory usage Per-process
 
-Có nhiều metric đo memory process dùng. Tôi bắt đầu với hai metric dễ lấy nhất – virtual set size (vss) và resident memory size (rss), cả hai có trong phần lớn triển khai lệnh `ps` và `top`:
+Có một số metric để đo lượng memory mà process đang sử dụng. Tôi sẽ bắt đầu với hai metric dễ lấy nhất: virtual set size (vss) và resident memory size (rss). Cả hai đều có trong phần lớn implementation của các lệnh `ps` và `top`:
 
 - Vss: Gọi VSZ trong lệnh `ps`, VIRT trong `top`, là tổng memory process map. Đây là tổng mọi region trong `/proc/<PID>/map`. Con số ít đáng quan tâm vì tại mỗi thời điểm chỉ một phần virtual memory được gắn physical memory.
 
-- Rss: Gọi RSS trong `ps`, RES trong `top`, là tổng memory map tới physical page. Gần memory budget thực tế hơn, nhưng có vấn đề: cộng Rss mọi process sẽ ước tính quá cao memory đang dùng vì một số page được chia sẻ.
+- Rss: Được gọi là RSS trong `ps` và RES trong `top`, là tổng lượng memory được map đến các physical memory page. Con số này gần với lượng memory thực của process hơn, nhưng có một vấn đề: nếu cộng Rss của mọi process, bạn sẽ ước tính quá cao lượng memory đang sử dụng vì một số page được chia sẻ.
 
 ### Dùng top và ps
 
@@ -430,11 +430,11 @@ Lệnh đơn giản này giúp cảm nhận memory usage và chỉ dấu đầu 
 
 Năm 2009, Matt Mackall bắt đầu xem vấn đề tính shared page khi đo memory process, thêm hai metric mới gọi unique set size, Uss, và proportional set size, Pss:
 
-- Uss: Memory gắn với physical memory và riêng cho process, không chia sẻ với bất kỳ process khác. Đây là lượng memory được giải phóng nếu process kết thúc.
+- Uss: Đây là lượng memory đã được cấp physical memory và chỉ thuộc về một process, không chia sẻ với bất kỳ process nào khác. Đó là lượng memory sẽ được giải phóng nếu process kết thúc.
 
-- Pss: Chia phần tính shared page gắn với physical memory cho mọi process map chúng. Ví dụ, vùng library code dài 12 page chia sẻ bởi sáu process, mỗi process được tính hai page trong Pss. Vì vậy cộng Pss mọi process cho lượng memory thực tế chúng dùng. Nói cách khác, Pss là con số cần tìm.
+- Pss: Phân chia phần hạch toán các shared page đã được cấp physical memory cho mọi process map những page đó. Chẳng hạn, nếu một vùng library code dài 12 page và được sáu process chia sẻ, mỗi process được tính hai page trong Pss. Vì vậy, nếu cộng Pss của mọi process, bạn sẽ nhận được lượng memory thực sự mà các process đó sử dụng. Nói cách khác, Pss là con số chúng ta đang tìm kiếm.
 
-Thông tin có trong `/proc/<PID>/smaps`, chứa thông tin bổ sung cho mỗi mapping trong `/proc/<PID>/maps`. Đây là một phần file, cung cấp thông tin mapping code segment `libc`:
+Thông tin này có trong `/proc/<PID>/smaps`, chứa thông tin bổ sung cho từng mapping được hiển thị trong `/proc/<PID>/maps`. Sau đây là một phần của file như vậy, cung cấp thông tin về mapping cho code segment của `libc`:
 
 ```
 b6e6d000-b6f45000 r-xp 00000000 b3:02 2444 /lib/libc-2.13.so
@@ -481,7 +481,7 @@ Chạy `smem` trực tiếp bằng `root`, bạn thấy:
 
 Dòng cuối output cho thấy trong trường hợp này tổng Pss khoảng nửa Rss.
 
-Nếu không có hoặc không muốn cài Python trên target, capture trạng thái bằng `smemcap`, cũng bằng `root`:
+Nếu không có hoặc không muốn cài Python trên target, bạn có thể thu thập trạng thái bằng `smemcap`, cũng chạy với quyền `root`:
 
 ```
 # smemcap > smem-bbb-cap.tar
@@ -505,7 +505,7 @@ Android còn có công cụ `procrank`, có thể cross compile cho embedded Lin
 
 Memory leak xảy ra khi memory được cấp nhưng không giải phóng lúc không còn cần. Memory leakage không riêng embedded system, nhưng thành vấn đề một phần vì target vốn ít memory, một phần vì thường chạy lâu không reboot, khiến các rò rỉ tích thành vũng lớn.
 
-Bạn nhận ra leak khi chạy `free` hoặc `top`, thấy free memory liên tục giảm dù drop cache như phần trước. Có thể tìm thủ phạm bằng xem Uss và Rss từng process. Có nhiều công cụ nhận diện memory leak trong chương trình. Tôi xem hai công cụ: `mtrace` và `Valgrind`.
+Bạn sẽ nhận ra có memory leak khi chạy `free` hoặc `top` và thấy free memory liên tục giảm, ngay cả khi đã drop cache như phần trước. Bạn có thể xác định thủ phạm bằng cách xem Uss và Rss của từng process. Có một số công cụ để xác định memory leak trong chương trình. Tôi sẽ xem xét hai công cụ: `mtrace` và `Valgrind`.
 
 ### mtrace
 
@@ -614,7 +614,7 @@ $ valgrind --leak-check=full ./mtrace-example
 
 Memory allocation policy chuẩn là over-commit, nghĩa là kernel cho ứng dụng allocation nhiều hơn physical memory hiện có. Phần lớn thời gian hoạt động tốt vì ứng dụng thường yêu cầu nhiều memory hơn thực cần. Nó còn hỗ trợ triển khai `fork(2)`: an toàn sao chép chương trình lớn vì page memory chia sẻ với flag `copy-on-write`. Trong phần lớn trường hợp, `fork` được theo sau bởi lời gọi hàm `exec`, bỏ chia sẻ memory rồi nạp chương trình mới.
 
-Tuy nhiên luôn có khả năng workload cụ thể khiến nhóm process đồng thời đòi dùng allocation đã được hứa, nên yêu cầu vượt lượng thật. Đây là tình huống out of memory, OOM. Lúc đó không còn lựa chọn ngoài giết process đến khi vấn đề biến mất. Đó là việc của out of memory killer. Trước đó, có tham số tinh chỉnh allocation kernel trong `/proc/sys/vm/overcommit_memory`, có thể đặt:
+Tuy nhiên, luôn có khả năng một workload cụ thể khiến một nhóm process đồng thời cố sử dụng những allocation đã được hứa cấp, do đó yêu cầu nhiều memory hơn lượng thực có. Đây là tình trạng out of memory, hay OOM. Tại thời điểm này, không còn lựa chọn nào khác ngoài kill các process cho đến khi vấn đề được giải quyết. Đó là nhiệm vụ của out of memory killer. Trước khi đến phần đó, có một parameter để tinh chỉnh việc cấp phát của kernel trong `/proc/sys/vm/overcommit_memory`, mà bạn có thể đặt thành:
 
 - `0`: over-commit theo heuristic (mặc định)
 
@@ -626,7 +626,7 @@ Lựa chọn 1 chỉ thực sự hữu ích nếu chạy chương trình làm vi
 
 Lựa chọn 2, không bao giờ over-commit, có vẻ tốt nếu lo hết memory, có thể trong ứng dụng nhiệm vụ trọng yếu hoặc safety-critical. Nó làm allocation vượt commit limit thất bại; limit bằng swap space cộng tổng memory nhân over-commit ratio. Tỷ lệ over-commit được điều khiển bởi `/proc/sys/vm/overcommit_ratio`, mặc định 50%.
 
-Ví dụ, giả sử thiết bị có 512 MB system RAM, đặt ratio rất thận trọng 25%:
+Chẳng hạn, giả sử bạn có một thiết bị với system RAM 512 MB và đặt một tỷ lệ rất thận trọng là 25%:
 
 ```
 # echo 25 > /proc/sys/vm/overcommit_ratio
@@ -637,7 +637,7 @@ CommitLimit:      127252 kB
 
 Không có swap nên commit limit là 25% `MemTotal`, như dự kiến.
 
-Có variable quan trọng khác trong `/proc/meminfo: Committed_AS`. Đây là tổng memory cần để đáp ứng mọi allocation đến nay. Tôi thấy trên một hệ thống:
+Có một variable quan trọng khác trong `/proc/meminfo: Committed_AS`. Đây là tổng lượng memory cần để đáp ứng mọi allocation đã thực hiện đến thời điểm đó. Tôi thấy thông tin sau trên một hệ thống:
 
 ```
 # grep -e MemTotal -e Committed_AS /proc/meminfo
@@ -675,6 +675,6 @@ Không thể thống kê từng byte memory dùng trong virtual memory system. T
 
 Khi muốn tinh chỉnh memory usage hay tìm nguồn allocation bất ngờ, có tài nguyên cung cấp chi tiết hơn. Với kernel space, thông tin hữu ích nhất trong `/proc: meminfo`, `slabinfo`, `vmallocinfo`. Để đo chính xác user space, metric tốt nhất là Pss, được `smem` và công cụ khác hiển thị. Với memory debugging, có thể dùng tracer đơn giản như `mtrace`, hoặc lựa chọn hạng nặng Valgrind memcheck.
 
-Nếu lo hậu quả out of memory, có thể fine-tune allocation mechanism qua `/proc/sys/vm/overcommit_memory` và điều khiển khả năng process cụ thể bị giết qua tham số `oom_score_adj`.
+Nếu lo ngại hậu quả của tình trạng out of memory, bạn có thể fine-tune cơ chế cấp phát qua `/proc/sys/vm/overcommit_memory` và kiểm soát khả năng một process cụ thể bị kill thông qua parameter `oom_score_adj`.
 
 Chương tiếp theo trình bày debug user space và kernel code bằng GNU debugger, những hiểu biết có được khi quan sát code chạy, gồm cả hàm memory management đã mô tả ở đây.

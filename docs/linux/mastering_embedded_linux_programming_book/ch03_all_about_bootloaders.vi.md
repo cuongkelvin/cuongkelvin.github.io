@@ -160,7 +160,7 @@ Giờ quay lại node cpu và cpus. CPU cũng có địa chỉ: trên thiết b�
 
 Cấu trúc device tree mô tả đến đây giả định một hệ thống phân cấp component, nhưng thực tế có nhiều hệ thống. Ngoài data connection hiển nhiên giữa component với phần khác, nó còn có thể nối với interrupt controller, clock source và voltage regulator. Để biểu diễn các kết nối này, chúng ta có phandle.
 
-Lấy ví dụ hệ thống chứa serial port có thể phát sinh interrupt và interrupt controller:
+Hãy lấy ví dụ về một hệ thống có serial port có thể phát sinh interrupt, cùng interrupt controller:
 
 ```
 /dts-v1/;
@@ -275,9 +275,9 @@ $ dtc simpledts-1.dts -o simpledts-1.dtb
 DTC: dts->dts on file "simpledts-1.dts"
 ```
 
-Cần chú ý `dtc` không đưa thông báo lỗi hữu ích và không kiểm tra gì ngoài cú pháp ngôn ngữ cơ bản, nghĩa là debug lỗi gõ trong source file có thể kéo dài.
+Hãy lưu ý rằng `dtc` không cung cấp thông báo lỗi hữu ích và không kiểm tra gì ngoài cú pháp cơ bản của ngôn ngữ. Điều này có nghĩa là debug một lỗi gõ trong source file có thể mất nhiều thời gian.
 
-Để build ví dụ phức tạp hơn, phải dùng kernel `kbuild`, như chương tiếp theo.
+Để build những ví dụ phức tạp hơn, bạn phải dùng `kbuild` của kernel, như trình bày trong chương tiếp theo.
 
 ## Chọn bootloader
 
@@ -292,9 +292,9 @@ Bootloader có đủ hình thức và kích thước. Các đặc điểm mong m
 | CFE | Broadcom MIPS |
 | YAMON | MIPS |
 
-Chúng ta tập trung U-Boot vì hỗ trợ khá nhiều processor architecture và rất nhiều board, thiết bị riêng. Nó tồn tại lâu và có cộng đồng hỗ trợ tốt.
+Chúng ta sẽ tập trung vào U-Boot vì nó hỗ trợ khá nhiều processor architecture cùng một số lượng lớn board và device cụ thể. Nó đã tồn tại từ lâu và có một cộng đồng hỗ trợ tốt.
 
-Có thể bạn nhận bootloader cùng SoC hoặc board. Như thường lệ, hãy xem kỹ và hỏi lấy source code ở đâu, chính sách cập nhật thế nào, họ hỗ trợ ra sao nếu muốn thay đổi, v.v. Có thể cân nhắc bỏ loader vendor-supplied và thay bằng phiên bản hiện tại của open source bootloader.
+Có thể bạn đã nhận được bootloader đi kèm SoC hoặc board. Như thường lệ, hãy xem xét kỹ những gì mình có và đặt câu hỏi: có thể lấy source code ở đâu, chính sách cập nhật là gì, họ sẽ hỗ trợ ra sao nếu bạn muốn sửa đổi, v.v. Bạn có thể cân nhắc bỏ loader vendor-supplied và thay bằng phiên bản hiện tại của một bootloader open source.
 
 ## U-Boot
 
@@ -332,7 +332,7 @@ Kết quả biên dịch gồm:
 
 - `u-boot.img`: `u-boot.bin` được thêm U-Boot header, phù hợp upload tới bản U-Boot đang chạy
 
-- `u-boot.srec`: U-Boot dạng Motorola `srec`, phù hợp truyền qua serial connection
+- `u-boot.srec`: Đây là U-Boot ở định dạng Motorola `srec`, phù hợp để truyền qua serial connection
 
 BeagleBone Black còn cần Secondary Program Loader (SPL), như mô tả trước. Nó được build cùng lúc, tên `MLO`:
 
@@ -350,7 +350,7 @@ Quy trình tương tự cho target khác.
 
 ### Cài U-Boot
 
-Cài bootloader lên board lần đầu cần hỗ trợ bên ngoài. Nếu board có hardware debug interface như JTAG, thường có thể nạp U-Boot trực tiếp vào RAM và cho chạy. Từ đó, dùng lệnh U-Boot sao chép vào flash memory. Chi tiết rất board-specific và ngoài phạm vi sách.
+Cài bootloader lên board lần đầu đòi hỏi một số hỗ trợ từ bên ngoài. Nếu board có hardware debug interface, chẳng hạn JTAG, thường có thể load một bản sao U-Boot trực tiếp vào RAM và cho nó chạy. Từ đó, bạn có thể dùng các lệnh U-Boot để copy nó vào flash memory. Chi tiết thực hiện rất board-specific và nằm ngoài phạm vi cuốn sách này.
 
 Một số thiết kế SoC có boot ROM tích hợp dùng để đọc boot code từ nguồn ngoài như SD card, serial interface hay USB; chip AM335x của BeagleBone Black là trường hợp như vậy. Đây là cách nạp U-Boot qua micro-SD card.
 
@@ -369,7 +369,7 @@ Format partition đầu thành `FAT16`:
 $ sudo mkfs.vfat -F 16 -n boot /dev/mmcblk0p1
 ```
 
-Giờ mount partition vừa format: một số hệ thống chỉ cần rút micro-SD rồi cắm lại; số khác cần nhấn biểu tượng. Trên phiên bản Ubuntu hiện tại, nó nên mount ở `/media/[user]/boot`, nên tôi sao chép U-Boot và SPL như sau:
+Bây giờ, hãy mount partition vừa format: trên một số hệ thống, chỉ cần tháo micro-SD card rồi cắm lại; trên hệ thống khác, bạn có thể phải nhấn một biểu tượng. Trên các phiên bản Ubuntu hiện tại, nó sẽ được mount tại `/media/[user]/boot`, nên tôi sẽ copy U-Boot và SPL vào đó như sau:
 
 ```
 cp MLO u-boot.img /media/chris/boot
@@ -399,7 +399,7 @@ Trong phần này, tôi mô tả một số nhiệm vụ phổ biến có thể 
 
 Thường U-Boot cung cấp command-line interface qua serial port. Command prompt được tùy biến cho từng board. Trong ví dụ, tôi dùng `U-Boot#`. Gõ `help` in mọi lệnh đã cấu hình trong phiên bản U-Boot này; gõ `help <command>` in thêm thông tin về lệnh cụ thể.
 
-Command interpreter mặc định khá đơn giản. Không có chỉnh sửa command-line bằng phím con trỏ trái, phải; không có hoàn thành lệnh bằng Tab; không có command history bằng phím con trỏ lên. Nhấn các phím này làm hỏng lệnh đang gõ, phải gõ `Ctrl`+`C` rồi bắt đầu lại. Phím chỉnh dòng duy nhất dùng an toàn là back space. Có thể cấu hình command shell khác tên Hush với hỗ trợ tương tác tinh vi hơn. Number format mặc định là hexadecimal, như lệnh sau:
+Command interpreter mặc định khá đơn giản. Nó không hỗ trợ chỉnh sửa command-line bằng các phím con trỏ trái hoặc phải, không hỗ trợ hoàn thành lệnh bằng phím Tab, và không có command history qua phím con trỏ lên. Nhấn bất kỳ phím nào trong số này sẽ làm hỏng lệnh bạn đang nhập, và bạn phải nhấn `Ctrl`+`C` rồi nhập lại từ đầu. Phím chỉnh sửa dòng duy nhất bạn có thể dùng an toàn là back space. Bạn có thể chọn cấu hình một command shell khác có tên Hush, cung cấp hỗ trợ tương tác tinh vi hơn. Định dạng số mặc định là hexadecimal. Ví dụ, như trong lệnh sau:
 
 ```
 nand read 82000000 400000 200000
@@ -473,13 +473,13 @@ Entry Point: 80008000
 Verifying Checksum ... OK
 ```
 
-Lệnh `mmc rescan` re-initializes driver `mmc`, có thể để phát hiện SD card vừa cắm. Sau đó `fatload` đọc file từ partition FAT-formatted trên SD card. Định dạng:
+Lệnh `mmc rescan` re-initializes driver `mmc`, có thể để phát hiện một SD card vừa được cắm vào. Tiếp theo, `fatload` được dùng để đọc một file từ partition FAT-formatted trên SD card. Định dạng như sau:
 
 `fatload <interface> [<dev[:part]> [<addr> [<filename> [bytes [pos]]]]]`
 
 Nếu `<interface>` là `mmc` như ở đây, `<dev:part>` là device number của interface `mmc` tính từ zero, và partition number tính từ một. Vì vậy `<0:1>` là partition đầu trên thiết bị đầu. Memory location `0x82000000` được chọn trong vùng RAM chưa dùng lúc đó. Nếu định boot kernel, phải bảo đảm vùng RAM không bị ghi đè khi kernel image được giải nén và đặt ở runtime location `0x80008000`.
 
-Để nạp image file qua network, dùng Trivial File Transfer Protocol (TFTP). Cần cài TFTP daemon, tftpd, trên hệ thống phát triển rồi khởi chạy. Cũng phải cấu hình firewall giữa PC và target board cho TFTP qua UDP port 69. Mặc định tftpd chỉ cho truy cập thư mục `/var/lib/tftpboot`. Bước tiếp là sao chép file muốn truyền tới target vào đó. Giả sử dùng cặp static IP address để không cần quản trị network thêm, chuỗi lệnh nạp tập kernel image file sẽ như sau:
+Để load image file qua mạng, bạn dùng Trivial File Transfer Protocol (TFTP). Điều này yêu cầu cài TFTP daemon, tftpd, trên development system và khởi chạy nó. Bạn cũng phải cấu hình mọi firewall giữa PC và target board để cho phép TFTP protocol qua UDP port 69. Cấu hình mặc định của tftpd chỉ cho phép truy cập directory `/var/lib/tftpboot`. Bước tiếp theo là copy các file muốn truyền đến target vào directory đó. Sau đó, giả sử bạn dùng một cặp static IP address để không cần quản trị mạng thêm, chuỗi lệnh load một tập hợp kernel image file sẽ có dạng như sau:
 
 ```
 U-Boot# setenv ipaddr 192.168.159.42
@@ -549,13 +549,13 @@ setenv bootcmd nand read 82000000 400000 200000\;bootm 82000000
 
 ### Port U-Boot sang board mới
 
-Giả sử bộ phận hardware tạo board mới tên "Nova" dựa trên BeagleBone Black, và bạn cần port U-Boot sang đó. Cần hiểu bố cục code U-Boot và cơ chế board configuration. Trong bản 2014.10, U-Boot dùng cùng cơ chế cấu hình Linux kernel, `Kconfig`. Trong vài bản phát hành tiếp, thiết lập hiện có được chuyển từ header file trong `include/configs` sang file `Kconfig`. Tính đến bản 2014.10, mỗi board có file `Kconfig` chứa thông tin tối thiểu lấy từ file `boards.cfg` cũ.
+Giả sử bộ phận hardware của bạn đã tạo một board mới có tên “Nova” dựa trên BeagleBone Black, và bạn cần port U-Boot sang board đó. Bạn cần hiểu cách bố trí code U-Boot và cách cơ chế board configuration hoạt động. Trong release 2014.10, U-Boot áp dụng cùng cơ chế cấu hình với Linux kernel, `Kconfig`. Trong vài release tiếp theo, các thiết lập cấu hình hiện có sẽ được chuyển từ vị trí hiện tại trong các header file thuộc `include/configs` sang các file `Kconfig`. Tính đến release 2014.10, mỗi board có một file `Kconfig` chứa thông tin tối thiểu lấy từ file `boards.cfg` cũ.
 
 Các thư mục chính bạn sẽ làm việc gồm:
 
 - `arch`: Chứa code riêng từng kiến trúc được hỗ trợ trong thư mục arm, mips, powerpc, v.v. Trong mỗi kiến trúc có thư mục con cho từng thành viên, ví dụ `arch/arm/cpu` có thư mục cho biến thể kiến trúc gồm amt926ejs, armv7, armv8.
 
-- `board`: Chứa code riêng board. Khi nhiều board cùng vendor, có thể gom vào thư mục con; vì vậy hỗ trợ board am335x evm, cơ sở của BeagelBone, nằm trong `board/ti/am335x`.
+- `board`: Chứa code dành riêng cho một board. Khi có nhiều board từ cùng một vendor, chúng có thể được gom vào một subdirectory; vì vậy, hỗ trợ cho board am335x evm, cơ sở của BeagelBone, nằm trong `board/ti/am335x`.
 
 - `common`: Chứa core function gồm command shell và lệnh gọi từ đó, mỗi lệnh trong file tên `cmd_[command name].c`.
 
@@ -576,7 +576,7 @@ Cách `Kconfig` trích thông tin cấu hình từ file `Kconfig`, lưu cấu h�
 | `+T:` | Normal và TPL image |
 | `+ST:` | Normal, SPL, TPL image |
 
-Mỗi board có cấu hình mặc định trong `configs/[board name}_defconfig`. Với Nova, cần tạo file ví dụ tên `nova_defonfig.` và thêm các dòng:
+Mỗi board có một cấu hình mặc định được lưu trong `configs/[board name}_defconfig`. Với Nova board, bạn cần tạo một file, chẳng hạn có tên `nova_defonfig.`, và thêm các dòng sau vào đó:
 
 ```
 CONFIG_SPL=y
@@ -595,7 +595,7 @@ bool "Support Nova!"
 
 #### File Board-specific
 
-Mỗi board có thư mục con tên `board/[board name]` hoặc `board/[vendor]/[board name]`, nên chứa:
+Mỗi board có một subdirectory tên `board/[board name]` hoặc `board/[vendor]/[board name]`, cần chứa những thành phần sau:
 
 - `Kconfig`: Chứa tùy chọn cấu hình board
 
@@ -816,4 +816,4 @@ Mọi hệ thống cần bootloader để đưa hardware vào hoạt động và
 
 Khi sử dụng, U-Boot rất linh hoạt, cho nạp image từ mass storage, flash memory hoặc network rồi boot. Barebox cũng làm được tương tự nhưng nền tảng hỗ trợ hardware nhỏ hơn. Dù thiết kế sạch hơn và internal API POSIX-inspired, tại thời điểm viết sách, có vẻ nó chưa được chấp nhận ngoài cộng đồng nhỏ nhưng tận tâm của mình.
 
-Sau khi trình bày một số phức tạp của boot Linux, trong chương tiếp bạn sẽ thấy giai đoạn kế khi thành phần thứ ba của dự án embedded, kernel, bắt đầu tham gia.
+Sau khi tìm hiểu một số điểm phức tạp của quá trình boot Linux, trong chương tiếp theo bạn sẽ thấy giai đoạn kế tiếp khi thành phần thứ ba của dự án embedded, kernel, bắt đầu tham gia.

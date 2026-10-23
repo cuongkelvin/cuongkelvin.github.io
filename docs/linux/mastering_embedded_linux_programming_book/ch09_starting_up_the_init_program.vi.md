@@ -116,7 +116,7 @@ Có 8 runlevel đánh số từ 0 đến 6, cộng S:
 
 - 6: Reboot hệ thống
 
-Level 1 đến 5 dùng tùy ý. Trên Linux distribution desktop, theo quy ước được gán:
+Bạn có thể sử dụng các level 1 đến 5 tùy ý. Trên các Linux distribution cho desktop, chúng được gán theo quy ước sau:
 
 - 1: Single user
 
@@ -167,7 +167,7 @@ Các field như sau:
 
 - `id`: Định danh duy nhất tối đa bốn ký tự.
 
-- `runlevels`: Runlevel cần thực thi entry. (Để trống trong BusyBox `inittab`)
+- `runlevels`: Các runlevel mà entry này cần được thực thi. (Trường này được để trống trong `inittab` của BusyBox)
 
 - `action`: Một trong các keyword nêu sau.
 
@@ -266,7 +266,7 @@ Thực ra chúng là symbolic link về script thích hợp trong `init.d`. Scri
 
 ### Thêm daemon mới
 
-Giả sử có chương trình tên `simpleserver` viết như Unix daemon truyền thống, nghĩa là fork và chạy background. Cần script `init.d` như sau:
+Giả sử bạn có một chương trình tên `simpleserver`, được viết như một Unix daemon truyền thống, nghĩa là nó fork và chạy ở background. Bạn cần một script `init.d` như sau:
 
 ```
 #! /bin/sh
@@ -290,14 +290,14 @@ exit 0
 
 `Start-stop-daemon` là helper function giúp thao tác background process như vậy dễ hơn. Ban đầu đến từ Debian installer package `dpkg`, nhưng phần lớn embedded system dùng bản BusyBox. Nó khởi động daemon bằng tham số `-S`, bảo đảm không bao giờ có hơn một instance chạy cùng lúc; tìm daemon theo tên bằng `-K` và gửi signal, mặc định `SIGTERM`. Đặt script vào `/etc/init.d/simpleserver` và cho phép thực thi.
 
-Sau đó thêm `symlinks` từ mỗi run level muốn chạy chương trình, ở đây chỉ `runlevel` mặc định `5`:
+Sau đó, thêm `symlinks` từ mỗi run level mà bạn muốn chạy chương trình; trong trường hợp này chỉ là `runlevel` mặc định, `5`:
 
 ```
 # cd /etc/init.d/rc5.d
 # ln -s ../init.d/simpleserver S99simpleserver
 ```
 
-Số `99` nghĩa là đây là một trong các chương trình được khởi chạy cuối. Nhớ rằng có thể có link khác bắt đầu `S99`, khi đó script `rc` chạy theo thứ tự từ điển.
+Số `99` có nghĩa là đây sẽ là một trong những chương trình được khởi chạy cuối cùng. Hãy nhớ rằng có thể có các link khác bắt đầu bằng `S99`; khi đó, script `rc` chỉ chạy chúng theo thứ tự từ điển.
 
 Hiếm khi phải lo nhiều về thao tác shutdown trên thiết bị embedded, nhưng nếu cần làm gì, thêm `kill symlinks` vào level 0 và 6:
 
@@ -310,7 +310,7 @@ Hiếm khi phải lo nhiều về thao tác shutdown trên thiết bị embedded
 
 ### Khởi động và dừng service
 
-Có thể tương tác với script trong `/etc/init.d` bằng gọi trực tiếp, ví dụ script `syslog` điều khiển daemon `syslogd` và `klogd`:
+Bạn có thể tương tác với các script trong `/etc/init.d` bằng cách gọi chúng trực tiếp, chẳng hạn script `syslog` điều khiển các daemon `syslogd` và `klogd`:
 
 ```
 # /etc/init.d/syslog --help
@@ -333,9 +333,9 @@ Mọi script triển khai `start` và `stop`, và nên triển khai `help`. Mộ
 
 - Cấu hình đơn giản, hợp lý hơn (khi đã hiểu); thay vì shell script đôi lúc rắc rối của System V `init`, `systemd` dùng unit configuration file để đặt tham số
 
-- Có dependency rõ ràng giữa service, thay vì số hai chữ số chỉ đặt thứ tự chạy script
+- Có dependency tường minh giữa các service, thay vì một mã hai chữ số chỉ đơn thuần xác định thứ tự chạy script
 
-- Dễ đặt permission và resource limit cho mỗi service, quan trọng cho bảo mật
+- Dễ đặt permission và resource limit cho từng service, điều quan trọng đối với bảo mật
 
 - `systemd` có thể giám sát service và khởi động lại nếu cần
 
@@ -368,7 +368,7 @@ Thứ hai, service là daemon có thể khởi động và dừng, rất giống
 
 Cuối cùng, unit là file cấu hình mô tả `target`, `service` và một số thứ khác. Unit là text file chứa property và value.
 
-Có thể thay đổi trạng thái và tìm hiểu điều đang diễn ra bằng lệnh `systemctl`.
+Bạn có thể thay đổi trạng thái và tìm hiểu những gì đang diễn ra bằng lệnh `systemctl`.
 
 ##### Unit
 
@@ -399,7 +399,7 @@ Unit dependency được thể hiện qua `Requires`, `Wants`, `Conflicts`:
 
 - `Conflicts`: Dependency phủ định: các unit được liệt kê bị dừng khi unit này khởi động; ngược lại, nếu một unit đó khởi động thì unit này dừng
 
-Xử lý dependency tạo danh sách unit cần khởi động (hoặc dừng). Keyword `Before` và `After` xác định thứ tự khởi động. Thứ tự dừng là đảo ngược thứ tự khởi động:
+Việc xử lý dependency tạo ra danh sách những unit cần được khởi động (hoặc dừng). Các keyword `Before` và `After` xác định thứ tự khởi động chúng. Thứ tự dừng chính là thứ tự ngược lại của thứ tự khởi động:
 
 - `Before`: Unit này phải khởi động trước các unit được liệt kê
 
@@ -419,7 +419,7 @@ Không có directive `Before` hay `After`, unit được khởi động hoặc d
 
 Service là daemon có thể khởi động và dừng, tương đương System V `service`. Service là một loại unit file với tên kết thúc `.service`, ví dụ `lighttpd.service`.
 
-Service unit có section `[Service]` mô tả cách chạy. Đây là phần liên quan từ `lighttpd.service`:
+Service unit có một section `[Service]` mô tả cách chạy service. Sau đây là phần liên quan trong `lighttpd.service`:
 
 ```
 [Service]
@@ -427,7 +427,7 @@ ExecStart=/usr/sbin/lighttpd -f /etc/lighttpd/lighttpd.conf -D
 ExecReload=/bin/kill -HUP $MAINPID
 ```
 
-Đây là các lệnh chạy khi khởi động service và khởi động lại. Có nhiều điểm cấu hình khác có thể thêm; xem man page `systemd.service`.
+Đây là các lệnh được chạy khi khởi động và khởi động lại service. Bạn có thể thêm nhiều thiết lập cấu hình khác tại đây, nên hãy tham khảo man page của `systemd.service`.
 
 ##### Target
 
@@ -507,7 +507,7 @@ Giờ bạn thấy cách thêm dependency tại runtime mà không phải sửa 
 /etc/systemd/system/simpleserver.service
 ```
 
-Nếu là service quan trọng, có thể muốn khởi động lại khi thất bại. Thực hiện bằng thêm flag vào section `[Service]`:
+Nếu đây là một service quan trọng, bạn có thể muốn khởi động lại nó khi gặp lỗi. Bạn có thể thực hiện bằng cách thêm flag sau vào section `[Service]`:
 
 `Restart=on-abort`
 
@@ -537,7 +537,7 @@ Watchdog như vậy xử lý từng service, nhưng nếu chính `systemd` thấ
 
 `systemd` có nhiều tính năng hữu ích trong embedded Linux, gồm nhiều thứ chưa nhắc trong mô tả ngắn này như resource control bằng slice (xem man page `systemd.slice(5)` và `systemd.resource-control(5)`), device management (`udev(7)`) và system logging (`journald(5)`).
 
-Phải cân bằng với kích thước: ngay cả bản build tối thiểu chỉ có thành phần cốt lõi `systemd`, `udevd`, `journald`, nó cũng gần 10 MiB storage, gồm cả shared library.
+Bạn phải cân nhắc lợi ích đó với kích thước của nó: ngay cả bản build tối thiểu chỉ có các thành phần cốt lõi `systemd`, `udevd` và `journald` cũng chiếm gần 10 MiB storage, bao gồm các shared library.
 
 Cũng phải nhớ phát triển `systemd` bám sát kernel, nên không hoạt động với kernel cũ hơn bản phát hành `systemd` quá một hoặc hai năm.
 

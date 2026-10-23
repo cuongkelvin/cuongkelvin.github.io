@@ -541,7 +541,7 @@ Chúng ta đã thấy một số ví dụ về kernel command line, nhưng còn 
 | `debug` | Đặt console log level thành mức cao nhất, tám, để bảo đảm bạn thấy mọi thông báo kernel trên console. |
 | `init=` | Chương trình `init` chạy từ root filesystem đã mount, mặc định là `/sbin/init`. |
 | `lpj=` | Đặt `loops_per_jiffy` thành hằng số cho trước, xem đoạn tiếp theo. |
-| `panic=` | Hành vi khi kernel panic: nếu lớn hơn không, đây là số giây trước khi reboot; nếu bằng không, chờ mãi mãi (mặc định); nếu nhỏ hơn không, reboot ngay không trì hoãn. |
+| `panic=` | Hành vi khi kernel panic: nếu giá trị lớn hơn 0, nó chỉ số giây trước khi reboot; nếu bằng 0, kernel chờ vô thời hạn (đây là mặc định); nếu nhỏ hơn 0, kernel reboot ngay mà không trì hoãn. |
 | `quiet` | Đặt console log level thành một, ngăn mọi thông báo trừ thông báo khẩn cấp. Vì phần lớn thiết bị có serial console, xuất tất cả các chuỗi đó mất thời gian. Vì vậy, giảm số thông báo bằng tùy chọn này giúp giảm boot time. |
 | `rdinit=` | Chương trình `init` chạy từ ramdisk, mặc định là `/init`. |
 | `ro` | Mount root device ở chế độ read-only. Không ảnh hưởng đến ramdisk, vốn luôn là read/write. |

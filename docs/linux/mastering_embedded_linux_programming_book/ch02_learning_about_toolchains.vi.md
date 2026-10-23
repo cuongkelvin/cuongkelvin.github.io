@@ -1,6 +1,6 @@
 # Chương 2. Tìm hiểu toolchain
 
-Toolchain là thành phần đầu tiên của embedded Linux và điểm khởi đầu dự án. Những lựa chọn ở giai đoạn sớm này sẽ tác động sâu sắc đến kết quả cuối. Toolchain phải sử dụng hiệu quả phần cứng bằng instruction set tối ưu cho processor, dùng floating point unit nếu có, v.v. Nó phải hỗ trợ ngôn ngữ bạn cần và triển khai vững chắc POSIX cùng system interface khác. Không chỉ vậy, nó cần được cập nhật khi phát hiện lỗ hổng bảo mật hoặc bug. Cuối cùng, nó nên cố định suốt dự án. Nói cách khác, một khi chọn toolchain, điều quan trọng là gắn bó với nó. Thay compiler và development library thiếu nhất quán trong dự án sẽ gây bug tinh vi.
+Toolchain là thành phần đầu tiên của embedded Linux và là điểm khởi đầu cho dự án của bạn. Những lựa chọn ở giai đoạn đầu này sẽ ảnh hưởng sâu sắc đến kết quả cuối cùng. Toolchain phải có khả năng tận dụng hardware hiệu quả bằng cách dùng instruction set tối ưu cho processor, sử dụng floating point unit nếu có, v.v. Nó phải hỗ trợ các ngôn ngữ bạn cần và có phần triển khai vững chắc cho POSIX cùng các system interface khác. Không chỉ vậy, toolchain cần được cập nhật khi phát hiện lỗ hổng bảo mật hoặc bug. Cuối cùng, nó nên được giữ cố định trong suốt dự án. Nói cách khác, khi đã chọn toolchain, điều quan trọng là tiếp tục dùng nó. Thay đổi compiler và development library thiếu nhất quán trong quá trình làm dự án sẽ dẫn đến các bug khó nhận biết.
 
 Lấy toolchain đơn giản như download và cài package. Nhưng chính toolchain là thứ phức tạp, như tôi sẽ trình bày trong chương.
 
@@ -16,9 +16,9 @@ GNU toolchain chuẩn gồm ba thành phần chính:
 
 - C library: API chuẩn hóa dựa POSIX specification, là interface chính từ ứng dụng đến operating system kernel. Có nhiều C library để cân nhắc, xem phần sau.
 
-Ngoài ra cần bản sao Linux kernel header chứa định nghĩa, constant cần khi truy cập kernel trực tiếp. Hiện cần để compile C library, sau cũng cần khi viết chương trình hoặc compile library tương tác Linux device cụ thể, ví dụ hiển thị graphics qua Linux frame buffer driver. Không đơn giản là copy header file trong include directory kernel source code. Những header đó chỉ dùng trong kernel, chứa định nghĩa gây xung đột nếu dùng nguyên để compile Linux application thông thường. Thay vào đó cần sinh sanitized kernel header, tôi minh họa ở Chương 5, Tạo root filesystem.
+Ngoài ra, bạn cần một bản sao các Linux kernel header, chứa các định nghĩa và hằng số cần thiết khi truy cập kernel trực tiếp. Trước mắt, bạn cần chúng để compile C library, nhưng về sau cũng sẽ cần khi viết chương trình hoặc compile library tương tác với các Linux device cụ thể, chẳng hạn hiển thị đồ họa qua Linux frame buffer driver. Đây không đơn thuần là việc copy các header file trong include directory của kernel source code. Những header đó chỉ dành cho kernel và chứa các định nghĩa sẽ gây xung đột nếu được dùng nguyên trạng để compile ứng dụng Linux thông thường. Thay vào đó, bạn cần tạo một tập hợp sanitized kernel header, như tôi minh họa trong Chương 5, Tạo root filesystem.
 
-Thông thường không thiết yếu kernel header được sinh từ đúng Linux version sẽ dùng hay không. Vì kernel interface luôn backwards-compatible, chỉ cần header từ kernel cùng phiên bản hoặc cũ hơn kernel trên target.
+Thông thường, việc kernel header có được tạo từ chính xác Linux version mà bạn sẽ dùng hay không không phải yếu tố quyết định. Vì kernel interface luôn backwards-compatible, bạn chỉ cần dùng header từ một kernel có phiên bản bằng hoặc cũ hơn kernel đang dùng trên target.
 
 Phần lớn cũng coi GNU debugger, GDB, là phần toolchain và thường build tại thời điểm này. Tôi nói GDB ở Chương 12, Debug bằng GDB.
 
@@ -30,7 +30,7 @@ Cho mục đích của chúng ta, có hai loại:
 
 - Cross: Toolchain chạy trên hệ thống khác loại target, cho phát triển trên desktop PC nhanh rồi load lên embedded target để test.
 
-Gần mọi phát triển embedded Linux dùng cross development toolchain, một phần vì đa số embedded device không phù hợp phát triển chương trình do thiếu computing power, memory, storage, cũng vì giữ riêng host/target environment. Điểm sau đặc biệt quan trọng khi host/target cùng architecture như X86\_64. Khi đó dễ muốn compile native trên host rồi chỉ copy binary sang target. Hoạt động tới mức nào đó, nhưng host distribution có thể update thường hơn target, các kỹ sư build cho target có development library version hơi khác, vi phạm nguyên tắc toolchain cố định suốt đời dự án. Có thể làm được nếu bảo đảm host/target build environment đồng bộ hoàn toàn, nhưng tốt hơn nhiều giữ riêng, cross toolchain là cách làm. Tuy nhiên có lập luận ngược ủng hộ native development. Cross development gây gánh nặng cross-compiling mọi library/tool cần trên target. Sau chương sẽ thấy cross-compiling không luôn đơn giản vì phần lớn open source package không thiết kế build kiểu này. Integrated build tool như Buildroot/Yocto Project giúp đóng gói rule cross compile các package cần trong embedded system điển hình, nhưng nếu muốn compile nhiều package bổ sung thì tốt hơn compile native. Ví dụ cung cấp Debian distribution cho Raspberry Pi/BeagleBone bằng cross compiler là bất khả thi, phải compile native. Tạo native build environment từ đầu không dễ, cần tạo cross compiler trước để bootstrap native environment trên target rồi dùng build package. Cần build farm target board well-provisioned hoặc dùng QEMU mô phỏng target. Muốn tìm hiểu thêm, xem Scratchbox project, giờ phiên bản thứ hai Scratchbox2 (`https://maemo.gitorious.org/scratchbox2`). Nokia phát triển để build Maemo Linux operating system, hiện Mer project, Tizen project và nơi khác dùng.
+Gần như toàn bộ hoạt động phát triển embedded Linux đều dùng cross development toolchain. Một phần lý do là phần lớn embedded device không phù hợp để phát triển chương trình vì thiếu năng lực tính toán, memory và storage; lý do khác là cách này giữ host environment và target environment tách biệt. Điểm thứ hai đặc biệt quan trọng khi host và target dùng cùng architecture, chẳng hạn X86\_64. Khi đó, bạn dễ muốn compile native trên host rồi chỉ copy binary sang target. Cách này hoạt động ở một mức độ nhất định, nhưng host distribution có thể được cập nhật thường xuyên hơn target, và các kỹ sư build code cho target có thể dùng các phiên bản host development library hơi khác nhau. Như vậy, bạn vi phạm nguyên tắc giữ toolchain cố định trong suốt vòng đời dự án. Bạn có thể dùng cách này nếu bảo đảm host build environment và target build environment luôn đồng bộ hoàn toàn, nhưng cách tốt hơn nhiều là giữ host và target tách biệt, và cross toolchain giúp thực hiện điều đó. Tuy nhiên, cũng có lập luận ngược lại ủng hộ native development. Cross development tạo ra gánh nặng cross-compiling mọi library và công cụ cần cho target. Ở phần sau của chương, chúng ta sẽ thấy cross-compiling không phải lúc nào cũng đơn giản vì phần lớn package open source không được thiết kế để build theo cách này. Các công cụ build tích hợp, bao gồm Buildroot và Yocto Project, hỗ trợ bằng cách đóng gói các rule để cross compile một loạt package cần trong embedded system điển hình; nhưng nếu muốn compile nhiều package bổ sung, tốt hơn bạn nên compile native. Chẳng hạn, không thể cung cấp một Debian distribution cho Raspberry Pi hoặc BeagleBone bằng cross compiler; chúng phải được compile native. Tạo native build environment từ đầu không dễ: bạn phải tạo cross compiler trước để bootstrap native build environment trên target, rồi dùng môi trường đó để build package. Bạn sẽ cần một build farm gồm các target board well-provisioned, hoặc có thể dùng QEMU để mô phỏng target. Nếu muốn tìm hiểu thêm, hãy xem Scratchbox project, hiện ở phiên bản phát triển thứ hai có tên Scratchbox2 (`https://maemo.gitorious.org/scratchbox2`). Nokia phát triển nó để build Maemo Linux operating system, và hiện nó được Mer project, Tizen project cùng những dự án khác sử dụng.
 
 Trong chương này tôi tập trung cross compiler environment phổ biến hơn, tương đối dễ setup, quản trị.
 
@@ -65,9 +65,9 @@ $ gcc -dumpmachine
 x86_64-linux-gnu
 ```
 
-Khi native compiler cài trên máy, thường tạo link tới từng tool không prefix để gọi compiler bằng `gcc`.
+Khi native compiler được cài trên một máy, thông thường các link đến từng công cụ trong toolchain được tạo mà không có prefix, để bạn có thể gọi compiler bằng lệnh `gcc`.
 
-Đây ví dụ cross compiler:
+Sau đây là một ví dụ sử dụng cross compiler:
 
 ```
 $ mipsel-unknown-linux-gnu-gcc -dumpmachine
@@ -76,7 +76,7 @@ mipsel-unknown-linux-gnu
 
 ## Chọn C library
 
-Programming interface tới Unix operating system được định nghĩa bằng C, nay theo POSIX standard. C library triển khai interface đó, là cửa ngõ kernel cho Linux program như sơ đồ. Ngay cả viết ngôn ngữ khác như Java/Python, run-time support library tương ứng cuối cùng phải gọi C library:
+Programming interface đến Unix operating system được định nghĩa bằng ngôn ngữ C và hiện được quy định bởi các tiêu chuẩn POSIX. C library là phần triển khai interface đó; nó là cửa ngõ đến kernel cho các chương trình Linux, như sơ đồ dưới đây. Ngay cả khi bạn viết chương trình bằng ngôn ngữ khác, chẳng hạn Java hoặc Python, các run-time support library tương ứng cuối cùng vẫn phải gọi C library:
 
 ![figure](images/ch02/fig02-01.png)
 
@@ -88,13 +88,13 @@ Có nhiều C library để chọn. Các lựa chọn chính:
 
 - glibc: Có tại `http://www.gnu.org/software/libc`. GNU C library chuẩn, lớn và tới gần đây chưa cấu hình được nhiều, nhưng triển khai POSIX API đầy đủ nhất.
 
-- eglibc: Có tại `http://www.eglibc.org/home`. Đây embedded GLIBC, từng là chuỗi patch glibc thêm configuration option và hỗ trợ architecture glibc chưa có (cụ thể PowerPC e500). Việc chia luôn khá gượng ép; may code base eglibc hợp nhất lại glibc từ 2.20, cho một library cải tiến. Eglibc không còn duy trì.
+- eglibc: Có tại `http://www.eglibc.org/home`. Đây là embedded GLIBC. Nó từng là một loạt patch cho glibc, bổ sung configuration option và hỗ trợ những architecture mà glibc chưa hỗ trợ, cụ thể là PowerPC e500. Việc tách eglibc khỏi glibc vốn khá gượng ép; may mắn là code base của eglibc đã được hợp nhất trở lại glibc từ phiên bản 2.20, để lại một library được cải tiến duy nhất. eglibc không còn được bảo trì.
 
-- uClibc: Có tại `http://www.uclibc.org`. 'u' thực là ký tự Hy Lạp 'mu', chỉ micro controller C library. Ban đầu cho uClinux (Linux CPU không memory management unit), sau thích nghi full Linux. Có configuration utility cho fine-tune feature theo nhu cầu. Ngay full configuration vẫn nhỏ hơn glibc nhưng POSIX implementation kém đầy đủ.
+- uClibc: Có tại `http://www.uclibc.org`. Chữ “u” thực ra là ký tự Hy Lạp “mu”, biểu thị đây là micro controller C library. Ban đầu, nó được phát triển để hoạt động với uClinux (Linux dành cho CPU không có memory management unit), nhưng sau đó đã được điều chỉnh để dùng với Linux đầy đủ. Nó có một configuration utility cho phép bạn fine-tune các tính năng theo nhu cầu. Ngay cả cấu hình đầy đủ cũng nhỏ hơn glibc, nhưng phần triển khai các tiêu chuẩn POSIX không đầy đủ bằng.
 
-- musl libc: Có tại `http://www.musl-libc.org`. C library mới thiết kế embedded system.
+- musl libc: Có tại `http://www.musl-libc.org`. Đây là một C library mới được thiết kế cho embedded system.
 
-Vậy chọn gì? Tôi khuyên chỉ uClibc nếu dùng uClinux hoặc storage/RAM rất ít, kích thước nhỏ có lợi. Ngoài ra thích glibc up-to-date hoặc eglibc. Chưa kinh nghiệm musl libc nhưng nếu glibc/eglibc không hợp hãy thử. Quá trình tóm tắt hình sau:
+Vậy nên chọn loại nào? Tôi khuyên chỉ dùng uClibc nếu bạn dùng uClinux hoặc có dung lượng storage hay RAM rất hạn chế, khiến kích thước nhỏ trở thành một lợi thế. Trong các trường hợp khác, tôi thích dùng glibc up-to-date hoặc eglibc. Tôi chưa có kinh nghiệm với musl libc, nhưng nếu thấy glibc/eglibc không phù hợp thì bạn cứ thử nó. Quá trình này được tóm tắt trong hình sau:
 
 ![figure](images/ch02/fig02-02.png)
 
@@ -102,9 +102,9 @@ Chọn C library
 
 ## Tìm toolchain
 
-Có ba lựa chọn cross development toolchain: bản build sẵn phù hợp, bản embedded build tool sinh như Chương 6, Lựa chọn build system, hoặc tự tạo như phần sau.
+Bạn có ba lựa chọn cho cross development toolchain: tìm một toolchain được build sẵn phù hợp với nhu cầu, dùng toolchain do một embedded build tool tạo ra như được trình bày trong Chương 6, Lựa chọn build system, hoặc tự tạo toolchain theo mô tả ở phần sau của chương này.
 
-Cross toolchain pre-built hấp dẫn vì chỉ download/cài, nhưng bị giới hạn cấu hình bản đó, phụ thuộc người/tổ chức cung cấp. Có lẽ một trong:
+Cross toolchain pre-built là lựa chọn hấp dẫn vì bạn chỉ cần download và cài đặt. Tuy nhiên, bạn bị giới hạn bởi cấu hình của toolchain cụ thể đó và phụ thuộc vào người hoặc tổ chức cung cấp nó. Nhiều khả năng nhà cung cấp sẽ thuộc một trong các nhóm sau:
 
 - SoC hoặc board vendor. Phần lớn cung cấp Linux toolchain.
 
@@ -118,21 +118,21 @@ Cross toolchain pre-built hấp dẫn vì chỉ download/cài, nhưng bị giớ
 
 - Link từ forum bạn không tìm lại được.
 
-Mọi trường hợp phải quyết định toolchain pre-built có đáp ứng yêu cầu không. Có C library thích không? Provider cập nhật security fix, bug không, nhớ nhận xét support/update Chương 1, Bắt đầu. Nếu không ở bất kỳ câu nào, cân nhắc tự tạo.
+Trong tất cả các trường hợp này, bạn phải quyết định toolchain pre-built được cung cấp có đáp ứng yêu cầu hay không. Nó có dùng C library mà bạn muốn không? Nhà cung cấp có cung cấp các bản cập nhật sửa lỗ hổng bảo mật và bug không? Hãy nhớ những nhận xét của tôi về hỗ trợ và cập nhật trong Chương 1, Bắt đầu. Nếu câu trả lời cho bất kỳ câu hỏi nào là không, bạn nên cân nhắc tự tạo toolchain.
 
-Tiếc rằng build toolchain không dễ. Nếu thật muốn tự làm toàn bộ, xem Cross Linux From Scratch (`http://trac.clfs.org`), có hướng dẫn step-by-step tạo từng component.
+Đáng tiếc là build toolchain không phải nhiệm vụ dễ dàng. Nếu thực sự muốn tự làm toàn bộ, hãy xem Cross Linux From Scratch (`http://trac.clfs.org`). Ở đó, bạn sẽ tìm thấy hướng dẫn step-by-step để tạo từng thành phần.
 
-Lựa chọn đơn giản hơn là crosstool-NG, đóng gói quá trình thành script với front-end menu-driven. Nhưng vẫn cần kiến thức khá để chọn đúng. Còn đơn giản hơn dùng Buildroot/Yocto Project vì sinh toolchain trong build process. Đây giải pháp tôi thích như Chương 6, Lựa chọn build system.
+Một lựa chọn đơn giản hơn là dùng crosstool-NG, đóng gói quá trình thành một tập hợp script và có front-end menu-driven. Tuy vậy, bạn vẫn cần một lượng kiến thức tương đối để đưa ra các lựa chọn đúng. Đơn giản hơn nữa là dùng build system như Buildroot hoặc Yocto Project, vì chúng tạo toolchain như một phần của quá trình build. Đây là giải pháp tôi ưa dùng, như đã trình bày trong Chương 6, Lựa chọn build system.
 
 ### Build toolchain bằng crosstool-NG
 
-Bắt đầu crosstool-NG vì cho thấy quá trình tạo và tạo được nhiều loại toolchain.
+Tôi sẽ bắt đầu với crosstool-NG vì nó cho phép bạn xem quá trình tạo toolchain và tạo một số loại toolchain khác nhau.
 
 Vài năm trước Dan Kegel viết script/makefile sinh cross development toolchain tên crosstool (`kegel.com/crosstool`). Năm 2007 Yann E. Morin dùng nền này tạo thế hệ tiếp crosstool-NG (`crosstool-ng.org`). Ngày nay là cách thuận tiện nhất tạo cross toolchain stand-alone từ source.
 
 ### Cài crosstool-NG
 
-Trước bắt đầu cần native toolchain, build tool hoạt động trên host PC. Với crosstool-NG trên Ubuntu, cài package bằng:
+Trước khi bắt đầu, bạn cần có native toolchain và các build tool hoạt động được trên host PC. Để dùng crosstool-NG trên Ubuntu host, bạn cần cài các package bằng lệnh sau:
 
 ```
 $ sudo apt-get install automake bison chrpath flex g++ git gperf
@@ -150,13 +150,13 @@ $ make
 $ make install
 ```
 
-Option `--enable-local` nghĩa cài chương trình vào current directory, không cần root như default `/usr/local/bin`. Gõ `./ct-ng` từ current directory mở crosstool menu.
+Option `--enable-local` có nghĩa là chương trình sẽ được cài vào current directory. Cách này tránh phải có root permission như khi cài vào vị trí mặc định `/usr/local/bin`. Gõ `./ct-ng` từ current directory để mở crosstool menu.
 
 ### Chọn toolchain
 
-Crosstool-NG build nhiều tổ hợp. Để dễ initial configuration, có sample cho common use-cases. Dùng `./ct-ng list-samples` tạo list.
+Crosstool-NG có thể build nhiều tổ hợp toolchain khác nhau. Để cấu hình ban đầu dễ hơn, nó cung cấp một tập hợp sample bao quát nhiều use-cases phổ biến. Dùng `./ct-ng list-samples` để tạo danh sách.
 
-Ví dụ target BeagleBone Black có ARM Cortex A8 core, VFPv3 floating point unit, muốn glibc hiện tại. Sample gần nhất `arm-cortex_a8-linux-gnueabi`. Xem default config bằng prefix `show-`:
+Chẳng hạn, giả sử target của bạn là BeagleBone Black, có ARM Cortex A8 core và VFPv3 floating point unit, và bạn muốn dùng một phiên bản glibc hiện tại. Sample gần nhất là `arm-cortex_a8-linux-gnueabi`. Bạn có thể xem cấu hình mặc định bằng cách thêm prefix `show-` vào trước tên:
 
 ```
 $ ./ct-ng show-arm-cortex_a8-linux-gnueabi
@@ -177,13 +177,13 @@ Tools          : dmalloc-5.5.2 duma-2_5_15 gdb-7.8 ltrace-
 $ ./ct-ng  arm-cortex_a8-linux-gnueabi
 ```
 
-Giờ xem lại, thay đổi bằng configuration menu command `menuconfig`:
+Ở thời điểm này, bạn có thể xem lại cấu hình và thực hiện thay đổi bằng configuration menu command `menuconfig`:
 
 ```
 $ ./ct-ng menuconfig
 ```
 
-Menu dựa Linux kernel `menuconfig`, nên ai từng cấu hình kernel quen điều hướng. Nếu chưa, xem Chương 4, Port và cấu hình kernel, mô tả `menuconfig`.
+Menu system dựa trên `menuconfig` của Linux kernel, vì vậy việc điều hướng user interface sẽ quen thuộc với bất kỳ ai từng cấu hình kernel. Nếu bạn chưa từng làm, hãy tham khảo Chương 4, Port và cấu hình kernel, để biết mô tả về `menuconfig`.
 
 Tôi khuyên vài thay đổi cấu hình ở đây:
 
@@ -193,9 +193,9 @@ Tôi khuyên vài thay đổi cấu hình ở đây:
 
 - Trong C-library \| extra config, thêm --enable-obsolete-rpc (`CT_LIBC_GLIBC_EXTRA_CONFIG_ARRAY`)
 
-Đầu cần nếu muốn thêm library sau cài toolchain, sẽ mô tả sau. Tiếp chọn floating point implementation tối ưu cho processor có hardware unit. Cuối ép sinh toolchain với obsolete header `rpc.h` vẫn được vài package dùng (chỉ vấn đề nếu chọn glibc). Tên trong ngoặc là configuration label lưu file. Đổi xong thoát `menuconfig`, lưu như thường.
+Lựa chọn đầu tiên cần thiết nếu bạn muốn thêm library vào toolchain sau khi cài đặt, như tôi sẽ mô tả ở phần sau của chương. Lựa chọn tiếp theo chọn floating point implementation tối ưu cho processor có hardware floating point unit. Lựa chọn cuối buộc toolchain được tạo cùng một header file đã lỗi thời, `rpc.h`, vẫn được một số package sử dụng (lưu ý rằng đây chỉ là vấn đề nếu bạn chọn glibc). Các tên trong ngoặc là configuration label được lưu trong configuration file. Sau khi thực hiện các thay đổi, hãy thoát `menuconfig` và lưu cấu hình khi thoát.
 
-Configuration data lưu file `.config`. Dòng đầu là Automatically generated make config: don't edit, thường lời khuyên tốt, nhưng tôi khuyên bỏ qua ở đây. Nhớ ARM hai ABI: truyền floating point parameter qua integer register hay VFP? Float configuration vừa chọn là loại sau, nên ABI phần tuple phải `eabihf`. Có configuration parameter đúng việc nhưng không bật mặc định, không hiện menu, ít nhất crosstool bản này. Vì thế phải sửa `.config`, thêm dòng in đậm như sau:
+Dữ liệu cấu hình được lưu trong file có tên `.config`. Khi xem file, bạn sẽ thấy dòng đầu ghi Automatically generated make config: don't edit. Đây thường là lời khuyên tốt, nhưng trong trường hợp này tôi khuyên bạn bỏ qua nó. Bạn còn nhớ từ phần thảo luận về toolchain ABI rằng ARM có hai biến thể: một truyền floating point parameter trong integer register và một dùng VFP register không? Float configuration bạn vừa chọn thuộc loại thứ hai, nên phần ABI trong tuple phải là `eabihf`. Có một configuration parameter thực hiện chính xác điều bạn cần, nhưng nó không được bật mặc định và cũng không xuất hiện trong menu, ít nhất là ở phiên bản crosstool này. Vì vậy, bạn phải sửa `.config` và thêm dòng được in đậm như sau:
 
 ```
 […]
@@ -212,25 +212,25 @@ CT_ARCH_ARM_TUPLE_USE_EABIHF=y
 [...]
 ```
 
-Giờ dùng crosstool-NG lấy, configure, build component theo đặc tả bằng:
+Bây giờ, bạn có thể dùng crosstool-NG để lấy, cấu hình và build các thành phần theo đặc tả của mình bằng lệnh sau:
 
 ```
 $ ./ct-ng build
 ```
 
-Build khoảng nửa giờ, sau thấy toolchain tại `~/x-tools/arm-cortex_a8-linux-gnueabihf/`.
+Quá trình build mất khoảng nửa giờ, sau đó bạn sẽ thấy toolchain nằm tại `~/x-tools/arm-cortex_a8-linux-gnueabihf/`.
 
 ## Cấu tạo toolchain
 
-Để hình dung toolchain điển hình có gì, tôi muốn khảo sát crosstool-NG toolchain vừa tạo.
+Để hình dung một toolchain điển hình chứa những gì, tôi muốn xem xét toolchain crosstool-NG mà bạn vừa tạo.
 
-Toolchain trong directory `~/x-tools/arm-cortex_a8-linux-gnueabihf/bin`. Có cross compiler `arm-cortex_a8-linux-gnueabihf-gcc`. Để dùng thêm directory vào path:
+Toolchain nằm trong directory `~/x-tools/arm-cortex_a8-linux-gnueabihf/bin`. Trong đó, bạn sẽ tìm thấy cross compiler `arm-cortex_a8-linux-gnueabihf-gcc`. Để sử dụng nó, bạn cần thêm directory này vào path bằng lệnh sau:
 
 ```
 $ PATH=~/x-tools/arm-cortex_a8-linux-gnueabihf/bin:$PATH
 ```
 
-Giờ lấy chương trình `hello world` đơn giản như:
+Bây giờ, bạn có thể lấy một chương trình `hello world` đơn giản có dạng như sau:
 
 ```
 #include <stdio.h>
@@ -248,7 +248,7 @@ Compile như sau:
 $ arm-cortex_a8-linux-gnueabihf-gcc helloworld.c -o helloworld
 ```
 
-Xác nhận cross compiled bằng lệnh `file` in file type:
+Bạn có thể xác nhận chương trình đã được cross compile bằng cách dùng lệnh `file` để in loại file:
 
 ```
 $ file helloworld
@@ -259,7 +259,7 @@ stripped
 
 ### Tìm hiểu cross compiler
 
-Tưởng tượng vừa nhận toolchain, muốn biết cấu hình. Query gcc biết nhiều. Ví dụ tìm version bằng `--version`:
+Hãy tưởng tượng bạn vừa nhận được một toolchain và muốn biết thêm về cách nó được cấu hình. Bạn có thể tìm hiểu nhiều thông tin bằng cách truy vấn gcc. Chẳng hạn, để biết phiên bản, bạn dùng `--version`:
 
 ```
 $ arm-cortex_a8-linux-gnueabi-gcc --version
@@ -326,24 +326,24 @@ Nhiều output nhưng điểm đáng chú ý:
 
 - `--enable-threads=posix`: Bật POSIX thread
 
-Đây setting mặc định compiler. Override phần lớn trên gcc command line; ví dụ compile CPU khác thì override `–-with-cpu` bằng thêm `-mcpu`:
+Đây là các thiết lập mặc định cho compiler. Bạn có thể ghi đè phần lớn chúng trên gcc command line. Ví dụ, nếu muốn compile cho một CPU khác, bạn có thể ghi đè thiết lập đã cấu hình `–-with-cpu` bằng cách thêm `-mcpu` vào command line, như sau:
 
 ```
 $ arm-cortex_a8-linux-gnueabihf-gcc -mcpu=cortex-a5 helloworld.c -o
 helloworld
 ```
 
-Có thể in các option architecture-specific bằng `--target-help,` như sau:
+Bạn có thể in danh sách các option architecture-specific có sẵn bằng `--target-help,` như sau:
 
 ```
 $ arm-cortex_a8-linux-gnueabihf-gcc --target-help
 ```
 
-Có thể thắc mắc cần cấu hình chính xác lúc sinh toolchain không nếu đổi sau được; câu trả lời tùy cách dùng dự kiến. Nếu tạo toolchain mới mỗi target, nên setup tất cả ban đầu giảm rủi ro sai sau. Nói trước Chương 6, Lựa chọn build system, tôi gọi triết lý Buildroot. Ngược lại muốn toolchain generic, sẵn cung cấp setting đúng khi build target cụ thể, nên base toolchain generic như Yocto Project. Ví dụ trước theo triết lý Buildroot.
+Bạn có thể thắc mắc liệu có cần cấu hình chính xác ngay khi tạo toolchain không, nếu về sau vẫn thay đổi được. Câu trả lời phụ thuộc vào cách bạn dự định sử dụng nó. Nếu dự định tạo một toolchain mới cho mỗi target, việc thiết lập mọi thứ ngay từ đầu là hợp lý vì sẽ giảm nguy cơ cấu hình sai về sau. Nói trước một chút về Chương 6, Lựa chọn build system, tôi gọi đây là triết lý Buildroot. Ngược lại, nếu muốn build một toolchain tổng quát và sẵn sàng cung cấp thiết lập đúng khi build cho một target cụ thể, bạn nên giữ base toolchain tổng quát, như cách Yocto Project thực hiện. Các ví dụ trước tuân theo triết lý Buildroot.
 
 ### Sysroot, library và header file
 
-Toolchain sysroot là directory có subdirectory library, header, configuration file khác. Đặt khi cấu hình qua `--with-sysroot=` hoặc command line `--sysroot=`. Xem default location bằng `-print-sysroot`:
+Toolchain sysroot là một directory chứa các subdirectory dành cho library, header file và các configuration file khác. Nó có thể được đặt khi cấu hình toolchain thông qua `--with-sysroot=`, hoặc được đặt trên command line bằng `--sysroot=`. Bạn có thể xem vị trí sysroot mặc định bằng `-print-sysroot`:
 
 ```
 $ arm-cortex_a8-linux-gnueabi-gcc -print-sysroot
@@ -355,7 +355,7 @@ Trong sysroot có:
 
 - `lib`: Shared object của C library, dynamic linker/loader `ld-linux`
 
-- `usr/lib`: Static library archive C library, mọi library khác có thể cài sau
+- `usr/lib`: Các static library archive dành cho C library và mọi library khác có thể được cài về sau
 
 - `usr/include`: Header mọi library
 
@@ -373,11 +373,11 @@ Bảng sau cho command khác cùng mô tả ngắn:
 
 | Lệnh | Mô tả |
 |---|---|
-| `addr2line` | Chuyển program address sang filename, number bằng đọc debug symbol table trong executable. Rất hữu ích decode address trong system crash report. |
+| `addr2line` | Chuyển program address thành filename và số dòng bằng cách đọc các debug symbol table trong executable file. Công cụ này rất hữu ích khi giải mã address được in trong báo cáo system crash. |
 | `ar` | Archive utility tạo static library. |
 | `as` | GNU assembler. |
 | `c++filt` | Demangle C++/Java symbol. |
-| `cpp` | C preprocessor expand `#define`, `#include`, directive tương tự. Hiếm cần dùng riêng. |
+| `cpp` | Đây là C preprocessor, được dùng để mở rộng `#define`, `#include` và các directive tương tự. Bạn hiếm khi cần sử dụng riêng công cụ này. |
 | `elfedit` | Cập nhật ELF header của ELF file. |
 | `g++` | GNU C++ front-end, giả định source file chứa code C++. |
 | `gcc` | GNU C front-end, giả định source file chứa code C. |
@@ -391,11 +391,11 @@ Bảng sau cho command khác cùng mô tả ngắn:
 | `nm` | Liệt kê symbol từ object file. |
 | `objcopy` | Copy, chuyển đổi object file. |
 | `objdump` | Hiển thị thông tin object file. |
-| `ranlib` | Tạo/sửa index static library để link stage nhanh hơn. |
+| `ranlib` | Tạo hoặc sửa một index trong static library, giúp giai đoạn link nhanh hơn. |
 | `readelf` | Hiện thông tin file theo ELF object format. |
 | `size` | Liệt kê section size, total size. |
 | `strings` | Hiện printable character string trong file. |
-| `strip` | Bỏ debug symbol table khỏi object file để nhỏ hơn. Thường strip mọi executable code đặt target. |
+| `strip` | Được dùng để loại bỏ các debug symbol table khỏi object file, qua đó giảm kích thước file. Thông thường, bạn sẽ strip toàn bộ executable code được đưa lên target. |
 
 ## Xem các thành phần C library
 
@@ -409,13 +409,13 @@ C library không chỉ một library file. Gồm bốn phần chính cùng tri�
 
 - `librt`: Phần mở rộng real-time POSIX gồm shared memory, asynchronous I/O
 
-Đầu tiên `libc` luôn link, phần khác phải link rõ bằng option `-l`. Parameter `-l` là tên library bỏ `lib`. Ví dụ chương trình tính sine bằng `sin()` link với `libm` qua `-lm`:
+Library đầu tiên, `libc`, luôn được link vào, nhưng các library còn lại phải được link một cách tường minh bằng option `-l`. Parameter của `-l` là tên library đã bỏ phần `lib`. Chẳng hạn, một chương trình tính hàm sine bằng lời gọi `sin()` sẽ được link với `libm` bằng `-lm`:
 
 ```
 arm-cortex_a8-linux-gnueabihf-gcc myprog.c -o myprog -lm
 ```
 
-Xác minh library link trong chương trình này hoặc khác bằng lệnh `readelf`:
+Bạn có thể xác minh những library nào đã được link vào chương trình này hoặc bất kỳ chương trình nào khác bằng lệnh `readelf`:
 
 ```
 $ arm-cortex_a8-linux-gnueabihf-readelf -a myprog | grep "Shared
@@ -442,13 +442,13 @@ ${CROSS_COMPILE}readelf -a $1 | grep "Shared library"
 
 ## Link với library: static và dynamic linking
 
-Mọi ứng dụng viết cho Linux bằng C/C++ đều link C library libc. Cơ bản tới mức không cần bảo `gcc`/`g++` vì luôn link. Library khác muốn link phải nêu rõ qua option `-l`.
+Mọi ứng dụng bạn viết cho Linux, dù bằng C hay C++, đều được link với C library, libc. Điều này cơ bản đến mức bạn không cần yêu cầu `gcc` hoặc `g++` thực hiện, vì chúng luôn link libc. Những library khác mà bạn muốn link phải được nêu tên tường minh qua option `-l`.
 
-Library code có thể link hai cách: tĩnh, nghĩa mọi library function ứng dụng gọi cùng dependency được lấy từ library archive, gắn vào executable; động, nghĩa sinh reference tới library file/function trong code nhưng actual linking làm động runtime.
+Library code có thể được link theo hai cách: static linking, nghĩa là mọi library function mà ứng dụng gọi cùng các dependency của chúng được lấy từ library archive và gắn vào executable; hoặc dynamic linking, nghĩa là code chứa các tham chiếu đến library file và các function trong đó, nhưng việc link thực sự được thực hiện động tại runtime.
 
 ### Static library
 
-Static linking hữu ích vài trường hợp. Ví dụ hệ nhỏ chỉ BusyBox, vài script, đơn giản hơn link BusyBox tĩnh, tránh copy runtime library và linker. Cũng nhỏ hơn vì chỉ link code ứng dụng dùng thay toàn C library. Còn hữu ích nếu cần chạy trước khi filesystem chứa runtime library sẵn có.
+Static linking hữu ích trong một số trường hợp. Chẳng hạn, nếu bạn build một hệ thống nhỏ chỉ gồm BusyBox và vài script file, việc link BusyBox tĩnh sẽ đơn giản hơn và tránh phải copy các runtime library file cùng linker. Kích thước cũng nhỏ hơn vì bạn chỉ link code mà ứng dụng sử dụng thay vì cung cấp toàn bộ C library. Static linking còn hữu ích nếu bạn cần chạy chương trình trước khi filesystem chứa các runtime library sẵn sàng.
 
 Bảo gcc link tĩnh mọi library bằng thêm `-static` command line:
 
@@ -477,7 +477,7 @@ gnueabihf/sysroot/usr/lib/libc.a
 
 Chú ý cú pháp `$(arm-cortex_a8-linux-gnueabihf-gcc -print-sysroot)` đặt output chương trình trên command line. Tôi dùng như cách chung tham chiếu file trong sysroot.
 
-Tạo static library đơn giản như tạo archive object file bằng `ar`. Nếu hai source file `test1.c`, `test2.c`, muốn library `libtest.a,` thì:
+Tạo static library đơn giản như tạo một archive các object file bằng lệnh `ar`. Nếu tôi có hai source file tên `test1.c` và `test2.c` và muốn tạo một static library tên `libtest.a,` thì tôi sẽ làm như sau:
 
 ```
 $ arm-cortex_a8-linux-gnueabihf-gcc -c test1.c
@@ -501,9 +501,9 @@ I../libs -o helloworld
 
 ### Shared library
 
-Cách triển khai phổ biến hơn là shared object link runtime, dùng storage/system memory hiệu quả vì chỉ cần load một code copy. Cũng dễ cập nhật library không re-link mọi chương trình dùng.
+Cách triển khai library phổ biến hơn là dưới dạng shared object được link tại runtime. Cách này sử dụng storage và system memory hiệu quả hơn, vì chỉ cần load một bản sao code. Nó cũng giúp cập nhật library file dễ dàng mà không phải re-link mọi chương trình sử dụng chúng.
 
-Object code shared library phải position-independent để runtime linker tự đặt memory tại address trống kế. Thêm `-fPIC` gcc rồi link option `-shared`:
+Object code của shared library phải position-independent để runtime linker có thể tự do đặt nó vào memory tại address trống tiếp theo. Để thực hiện, hãy thêm parameter `-fPIC` cho gcc rồi link bằng option `-shared`:
 
 ```
 $ arm-cortex_a8-linux-gnueabihf-gcc -fPIC -c test1.c
@@ -512,7 +512,7 @@ $ arm-cortex_a8-linux-gnueabihf-gcc -shared -o libtest.so test1.o
 test2.o
 ```
 
-Để link ứng dụng, thêm `-ltest` như static trước, nhưng lần này code không vào executable mà có library reference để runtime linker resolve:
+Để link ứng dụng với library này, bạn thêm `-ltest`, giống hệt trường hợp static ở đoạn trước. Tuy nhiên, lần này code không được đưa vào executable; thay vào đó, executable có một tham chiếu đến library mà runtime linker phải resolve:
 
 ```
 $ arm-cortex_a8-linux-gnueabihf-gcc helloworld.c -ltest -L../libs -
@@ -524,7 +524,7 @@ linux-armhf.so.3]
 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
 ```
 
-Runtime linker là `/lib/ld-linux-armhf.so.3`, phải trong target filesystem. Linker tìm `libtest.so` trong default path `/lib`, `/usr/lib`. Nếu muốn tìm directory khác, đặt list path colon-separated trong shell variable `LD_LIBRARY_PATH`:
+Runtime linker cho chương trình này là `/lib/ld-linux-armhf.so.3`, phải hiện diện trong filesystem của target. Linker sẽ tìm `libtest.so` trong search path mặc định: `/lib` và `/usr/lib`. Nếu muốn nó tìm library trong các directory khác nữa, bạn có thể đặt danh sách path colon-separated trong shell variable `LD_LIBRARY_PATH`:
 
 ```
 # export LD_LIBRARY_PATH=/opt/lib:/opt/usr/lib
@@ -532,11 +532,11 @@ Runtime linker là `/lib/ld-linux-armhf.so.3`, phải trong target filesystem. L
 
 #### Hiểu shared library version number
 
-Ưu điểm shared library là update độc lập chương trình dùng. Hai loại update: fix bug/thêm function backwards-compatible, hoặc phá tương thích ứng dụng hiện có. GNU/Linux có versioning scheme cho cả hai.
+Một lợi ích của shared library là có thể cập nhật chúng độc lập với các chương trình sử dụng chúng. Có hai loại cập nhật library: loại sửa bug hoặc thêm function mới theo cách backwards-compatible, và loại phá vỡ tính tương thích với ứng dụng hiện có. GNU/Linux có một cơ chế đánh phiên bản để xử lý cả hai trường hợp.
 
-Mỗi library có release version, interface number. Release version chỉ string thêm tên, ví dụ JPEG image library libjpeg hiện release 8.0.2 nên tên `libjpeg.so.8.0.2`. Symbolic link `libjpeg.so` tới `libjpeg.so.8.0.2` để khi compile bằng `–ljpeg,` link bản hiện tại. Nếu cài 8.0.3, link cập nhật, bạn link bản đó.
+Mỗi library có một release version và một interface number. Release version chỉ là một string được thêm vào tên library. Chẳng hạn, JPEG image library, libjpeg, hiện ở release 8.0.2 nên library có tên `libjpeg.so.8.0.2`. Có một symbolic link tên `libjpeg.so` trỏ đến `libjpeg.so.8.0.2`, để khi compile chương trình bằng `–ljpeg,` bạn link với phiên bản hiện tại. Nếu cài phiên bản 8.0.3, link được cập nhật và bạn sẽ link với phiên bản đó.
 
-Giả sử 9.0.0 tới, phá backwards compatibility. Link `libjpeg.so` trỏ `libjpeg.so.9.0.0` nên chương trình mới link bản mới, có thể compile error khi interface đổi mà developer sửa được. Chương trình target chưa compile lại thất bại kiểu nào đó vì dùng interface cũ. Đây `soname` giúp. `soname` mã hóa interface number lúc build, runtime linker dùng khi load. Format `<library name>.so.<interface number>`. Với `libjpeg.so.8.0.2,` thì `soname` là `libjpeg.so.8`:
+Bây giờ, giả sử phiên bản 9.0.0 xuất hiện và phá vỡ backwards compatibility. Link từ `libjpeg.so` lúc này trỏ đến `libjpeg.so.9.0.0`, nên mọi chương trình mới được link với phiên bản mới, có thể gây compile error khi interface đến libjpeg thay đổi; developer có thể sửa các lỗi đó. Những chương trình trên target chưa được compile lại sẽ gặp lỗi theo một cách nào đó vì vẫn dùng interface cũ. Đây là lúc `soname` phát huy tác dụng. `soname` mã hóa interface number tại thời điểm library được build và được runtime linker sử dụng khi load library. Nó có định dạng `<library name>.so.<interface number>`. Với `libjpeg.so.8.0.2,` giá trị `soname` là `libjpeg.so.8`:
 
 ```
 $ readelf -a /usr/lib/libjpeg.so.8.0.2 | grep SONAME
@@ -544,23 +544,23 @@ $ readelf -a /usr/lib/libjpeg.so.8.0.2 | grep SONAME
 [libjpeg.so.8]
 ```
 
-Chương trình compile với nó request `libjpeg.so.8` runtime, là symbolic link target tới `libjpeg.so.8.0.2`. Khi cài libjpeg 9.0.0 có `soname` `libjpeg.so.9`, nên cài được hai bản không tương thích cùng library trên hệ. Chương trình link `libjpeg.so.8.*.*` load `libjpeg.so.8,`, link `libjpeg.so.9.*.*` load `libjpeg.so.9`.
+Mọi chương trình được compile với library này sẽ yêu cầu `libjpeg.so.8` tại runtime; trên target, đó là symbolic link trỏ đến `libjpeg.so.8.0.2`. Khi libjpeg phiên bản 9.0.0 được cài, nó sẽ có `soname` là `libjpeg.so.9`, vì vậy có thể cài hai phiên bản không tương thích của cùng một library trên cùng hệ thống. Các chương trình được link với `libjpeg.so.8.*.*` sẽ load `libjpeg.so.8,`, còn những chương trình được link với `libjpeg.so.9.*.*` sẽ load `libjpeg.so.9`.
 
-Đó vì sao listing `<sysroot>/usr/lib/libjpeg*` thấy bốn file:
+Đây là lý do khi xem danh sách nội dung directory `<sysroot>/usr/lib/libjpeg*`, bạn thấy bốn file sau:
 
 - `libjpeg.a`: Library archive dùng static linking
 
 - `libjpeg.so -> libjpeg.so.8.0.2` : Symbolic link dùng dynamic linking
 
-- `libjpeg.so.8 -> libjpeg.so.8.0.2`: Symbolic link khi load library runtime
+- `libjpeg.so.8 -> libjpeg.so.8.0.2`: Đây là symbolic link được dùng khi load library tại runtime
 
 - `libjpeg.so.8.0.2`: Shared library thực dùng compile time, runtime
 
-Hai file đầu chỉ cần host để build, hai cuối cần target runtime.
+Hai file đầu chỉ cần trên host computer để build, còn hai file cuối cần trên target tại runtime.
 
 ## Nghệ thuật cross compiling
 
-Có cross toolchain hoạt động là khởi đầu hành trình, không kết thúc. Lúc nào đó muốn cross compile tool, application, library target cần. Nhiều là open source package, mỗi loại phương pháp compile, đặc điểm riêng. Một số common build system:
+Có một cross toolchain hoạt động được là điểm bắt đầu của hành trình, chưa phải điểm kết thúc. Đến một lúc nào đó, bạn sẽ muốn bắt đầu cross compile các công cụ, ứng dụng và library cần trên target. Nhiều thành phần trong số đó là package open source, mỗi package có phương pháp compile và đặc điểm riêng. Có một số build system phổ biến, bao gồm:
 
 - Makefile thuần điều khiển toolchain qua variable `make` `CROSS_COMPILE`
 
@@ -568,7 +568,7 @@ Có cross toolchain hoạt động là khởi đầu hành trình, không kết 
 
 - CMake (`https://cmake.org`)
 
-Chỉ trình bày hai đầu vì cần ngay embedded Linux cơ bản. Với CMake có tài nguyên xuất sắc trên website tham chiếu trên.
+Ở đây, tôi chỉ trình bày hai loại đầu tiên vì chúng cần thiết ngay cả cho một embedded Linux system cơ bản. Với CMake, có một số tài liệu rất tốt trên website CMake được dẫn ở mục trước.
 
 ### Makefile đơn giản
 
@@ -587,7 +587,7 @@ $ export CROSS_COMPILE=arm-cortex_a8-linux-gnueabi-
 $ make
 ```
 
-Với U-Boot/Linux còn phải đặt variable `make` `ARCH` theo architecture hỗ trợ, trình bày Chương 3, Tất cả về bootloader và Chương 4, Port và cấu hình kernel.
+Trong trường hợp U-Boot và Linux, bạn còn phải đặt variable `make` có tên `ARCH` thành một trong các machine architecture mà chúng hỗ trợ. Tôi sẽ trình bày việc này trong Chương 3, Tất cả về bootloader, và Chương 4, Port và cấu hình kernel.
 
 ### Autotools
 
@@ -601,9 +601,9 @@ Autotools chỉ nhóm tool làm build system nhiều open source project. Compon
 
 - Gnulib (`https://www.gnu.org/software/gnulib`)
 
-Vai trò Autotools là làm mượt khác biệt nhiều loại hệ thống compile package, xét compiler version, library version, header location, dependency package khác. Package dùng Autotools có script `configure` kiểm dependency, sinh makefile theo kết quả. Script cũng có thể cho bật/tắt feature. Tìm option bằng `./configure --help`.
+Vai trò của Autotools là xử lý những khác biệt giữa nhiều loại hệ thống mà package có thể được compile cho, có tính đến các phiên bản compiler, phiên bản library, vị trí header file khác nhau và dependency với các package khác. Các package dùng Autotools đi kèm một script tên `configure`, có nhiệm vụ kiểm tra dependency và tạo makefile dựa trên những gì nó tìm thấy. Configure script cũng có thể cho phép bạn bật hoặc tắt một số tính năng. Bạn có thể xem các option được cung cấp bằng cách chạy `./configure --help`.
 
-Để configure, build, install package cho native operating system, thường chạy ba lệnh:
+Để cấu hình, build và cài một package cho native operating system, thông thường bạn chạy ba lệnh sau:
 
 ```
 $ ./configure
@@ -611,7 +611,7 @@ $ make
 $ sudo make install
 ```
 
-Autotools cũng xử lý cross development. Ảnh hưởng configure script bằng shell variable:
+Autotools cũng có thể xử lý cross development. Bạn có thể tác động đến hành vi của configure script bằng cách đặt các shell variable sau:
 
 - `CC`: C compiler command
 
@@ -619,7 +619,7 @@ Autotools cũng xử lý cross development. Ảnh hưởng configure script bằ
 
 - `LDFLAGS`: Linker flag bổ sung, ví dụ library ở directory non-standard `<lib dir>` thì thêm library search path bằng `-L<lib dir>`
 
-- `LIBS`: List library bổ sung cho linker, ví dụ `-lm` cho math library
+- `LIBS`: Chứa danh sách library bổ sung để truyền cho linker, chẳng hạn `-lm` cho math library
 
 - `CPPFLAGS`: C/C++ preprocessor flag, ví dụ thêm `-I<include dir>` tìm header trong directory non-standard `<include dir>`
 
@@ -642,13 +642,13 @@ If you meant to cross compile, use '--host'.
 See 'config.log' for more details
 ```
 
-Lý do thất bại là `configure` thường khám phá toolchain capability bằng compile code snippet, chạy xem kết quả, không thể nếu cross compiled. Tuy nhiên message gợi ý giải pháp. Autotools hiểu ba machine type có thể liên quan khi compile:
+Nguyên nhân thất bại là `configure` thường cố xác định các khả năng của toolchain bằng cách compile những đoạn code nhỏ rồi chạy chúng để xem kết quả. Cách này không hoạt động nếu chương trình được cross compile. Tuy nhiên, thông báo lỗi có một gợi ý về cách giải quyết. Autotools phân biệt ba loại máy có thể tham gia quá trình compile package:
 
 - Build: Máy build package, mặc định current machine.
 
-- Host: Máy chạy chương trình. Native compile để trống, mặc định cùng build. Cross compile đặt tuple toolchain.
+- Host: Đây là máy tính mà chương trình sẽ chạy trên đó. Với native compile, giá trị này được để trống và mặc định là cùng máy với build. Với cross compile, bạn đặt nó thành tuple của toolchain.
 
-- Target: Máy mà chương trình sẽ sinh code cho, ví dụ đặt khi build cross compiler.
+- Target: Đây là máy tính mà chương trình sẽ tạo code cho; chẳng hạn, bạn sẽ đặt giá trị này khi build cross compiler.
 
 Vậy cross compile chỉ cần override host:
 
@@ -657,7 +657,7 @@ $ CC=arm-cortex_a8-linux-gnueabihf-gcc \
 ./configure --host=arm-cortex_a8-linux-gnueabihf
 ```
 
-Điểm cuối: default install directory `<sysroot>/usr/local/*`. Thường cài `<sysroot>/usr/*` để header/library được tìm ở default location. Lệnh đầy đủ configure package Autotools điển hình:
+Một điểm cuối cần lưu ý là install directory mặc định là `<sysroot>/usr/local/*`. Thông thường, bạn sẽ cài vào `<sysroot>/usr/*` để header file và library được tìm thấy ở các vị trí mặc định. Lệnh đầy đủ để cấu hình một package Autotools điển hình là:
 
 ```
 $ CC=arm-cortex_a8-linux-gnueabihf-gcc \
@@ -681,26 +681,26 @@ $ CC=arm-cortex_a8-linux-gnueabihf-gcc \
 ./configure --host=arm-cortex_a8-linux-gnueabihf --prefix=/usr
 ```
 
-Có vẻ hoạt động! Nếu lỗi, có message trên terminal và `config.log`. Chú ý đã tạo nhiều makefile, giờ build:
+Có vẻ lệnh đã hoạt động! Nếu thất bại, thông báo lỗi sẽ được in trên terminal và ghi vào `config.log`. Lưu ý rằng một số makefile đã được tạo, vì vậy bây giờ bạn có thể build:
 
 ```
 $ make
 ```
 
-Cuối cài vào toolchain directory bằng variable `make` `DESTDIR`. Nếu không sẽ thử cài directory `/usr` của host, không phải điều muốn.
+Cuối cùng, bạn cài nó vào toolchain directory bằng cách đặt variable `make` có tên `DESTDIR`. Nếu không, nó sẽ cố cài vào directory `/usr` của host computer, và đó không phải điều bạn muốn.
 
 ```
 $ make DESTDIR=$(arm-cortex_a8-linux-gnueabihf-gcc -print-sysroot)
 install
 ```
 
-Có thể lệnh cuối lỗi file permission. Toolchain crosstool-NG mặc định read-only, vì vậy hữu ích đặt `CT_INSTALL_DIR_RO` thành `y` lúc build. Vấn đề thường khác là toolchain cài system directory như `/opt`, `/usr/local`, cần root khi install.
+Bạn có thể thấy lệnh cuối thất bại với lỗi file permission. Toolchain crosstool-NG mặc định là read-only, đó là lý do việc đặt `CT_INSTALL_DIR_RO` thành `y` khi build nó lại hữu ích. Một vấn đề phổ biến khác là toolchain được cài trong system directory như `/opt` hoặc `/usr/local`; khi đó, bạn cần root permission khi chạy lệnh cài đặt.
 
-Sau cài, nên thấy nhiều file thêm toolchain:
+Sau khi cài đặt, bạn sẽ thấy nhiều file khác nhau đã được thêm vào toolchain:
 
-- `<sysroot>/usr/bin`: sqlite3. Interface command-line SQLite có thể cài, chạy target.
+- `<sysroot>/usr/bin`: sqlite3. Đây là command-line interface cho SQLite mà bạn có thể cài và chạy trên target.
 
-- \<`sysroot>/usr/lib`: libsqlite3.so.0.8.6, libsqlite3.so.0, libsqlite3.so libsqlite3. la libsqlite3.a. Shared và static library.
+- \<`sysroot>/usr/lib`: libsqlite3.so.0.8.6, libsqlite3.so.0, libsqlite3.so libsqlite3. la libsqlite3.a. Đây là các shared library và static library.
 
 - `<sysroot>/usr/lib/pkgconfig`: `sqlite3.pc`: Package configuration file, mô tả phần sau.
 
@@ -708,14 +708,14 @@ Sau cài, nên thấy nhiều file thêm toolchain:
 
 - \<`sysroot>/usr/share/man/man1`: sqlite3.1. Manual page.
 
-Giờ compile chương trình dùng sqlite3 bằng thêm `-lsqlite3` ở link stage:
+Bây giờ, bạn có thể compile các chương trình sử dụng sqlite3 bằng cách thêm `-lsqlite3` vào giai đoạn link:
 
 ```
 $ arm-cortex_a8-linux-gnueabihf-gcc -lsqlite3 sqlite-test.c -o
 sqlite-test
 ```
 
-Ở đây `sqlite-test.c` là chương trình giả định gọi SQLite function. Vì sqlite3 cài sysroot, compiler tìm header/library dễ. Nếu cài nơi khác phải thêm `-L<lib dir>`, `-I<include dir>`.
+Trong đó, `sqlite-test.c` là một chương trình giả định gọi các SQLite function. Vì sqlite3 đã được cài vào sysroot, compiler sẽ tìm thấy header file và library file mà không gặp vấn đề gì. Nếu chúng được cài ở nơi khác, bạn phải thêm `-L<lib dir>` và `-I<include dir>`.
 
 Tất nhiên cũng có runtime dependency, cần cài file đúng vào target directory như Chương 5, Tạo root filesystem.
 
@@ -739,7 +739,7 @@ Libs.private: -ldl -lpthread
 Cflags: -I${includedir}
 ```
 
-Dùng utility `pkg-config` trích thông tin dạng cấp trực tiếp gcc. Với library như libsqlite3 cần biết library name (`--libs`) và special C flag (`--cflags`):
+Bạn có thể dùng tiện ích `pkg-config` để trích xuất thông tin dưới dạng có thể truyền thẳng cho gcc. Với một library như libsqlite3, bạn muốn biết tên library (`--libs`) và mọi C flag đặc biệt (`--cflags`):
 
 ```
 $ pkg-config sqlite3 --libs --cflags
@@ -749,7 +749,7 @@ to the PKG_CONFIG_PATH environment variable
 No package 'sqlite3' found
 ```
 
-Ối! Thất bại vì tìm sysroot host, chưa cài development package libsqlite3 trên host. Cần trỏ sysroot target toolchain bằng shell variable `PKG_CONFIG_LIBDIR`:
+Ối! Lệnh thất bại vì nó tìm trong sysroot của host, trong khi development package cho libsqlite3 chưa được cài trên host. Bạn cần trỏ nó đến sysroot của target toolchain bằng cách đặt shell variable `PKG_CONFIG_LIBDIR`:
 
 ```
 $ PKG_CONFIG_LIBDIR=$(arm-cortex_a8-linux-gnueabihf-gcc -print-
@@ -758,7 +758,7 @@ pkg-config sqlite3 --libs --cflags
  -lsqlite3
 ```
 
-Giờ output `-lsqlite3`. Ở đây đã biết nhưng thường không, nên kỹ thuật giá trị. Lệnh compile cuối:
+Bây giờ, output là `-lsqlite3`. Trong trường hợp này, bạn đã biết điều đó, nhưng thông thường thì không, nên đây là một kỹ thuật có giá trị. Lệnh compile cuối cùng sẽ là:
 
 ```
 $ PKG_CONFIG_LIBDIR=$(arm-cortex_a8-linux-gnueabihf-gcc -print-
@@ -777,16 +777,16 @@ Sqlite3 là package well-behaved, cross compile tốt nhưng không phải mọi
 
 - Script cứ thử chạy cross compiled code
 
-Mỗi trường hợp cần phân tích lỗi kỹ, thêm parameter configure script để cấp thông tin đúng, hoặc patch code tránh hẳn vấn đề. Nhớ một package có thể nhiều dependency, đặc biệt chương trình GUI dùng GTK/QT hay multimedia. Ví dụ mplayer, tool phát multimedia phổ biến, phụ thuộc hơn 100 library. Build hết mất nhiều tuần.
+Mỗi trường hợp đòi hỏi phân tích lỗi cẩn thận và bổ sung parameter cho configure script để cung cấp thông tin đúng, hoặc patch code để tránh hẳn vấn đề. Hãy nhớ rằng một package có thể có nhiều dependency, đặc biệt với các chương trình có graphical interface dùng GTK hoặc QT, hoặc xử lý nội dung multimedia. Chẳng hạn, mplayer, một công cụ phát nội dung multimedia phổ biến, phụ thuộc vào hơn 100 library. Build tất cả chúng có thể mất nhiều tuần công sức.
 
-Vì vậy tôi không khuyên cross compile thủ công component target kiểu này trừ không lựa chọn hoặc số package ít. Tốt hơn nhiều dùng Buildroot/Yocto Project, hoặc tránh bằng native build environment target architecture. Giờ thấy vì sao distribution như Debian luôn compile native.
+Vì vậy, tôi không khuyến nghị cross compile thủ công các thành phần cho target theo cách này, trừ khi không có lựa chọn khác hoặc số package cần build ít. Cách tốt hơn nhiều là dùng build tool như Buildroot hoặc Yocto Project, hoặc tránh hẳn vấn đề bằng cách thiết lập native build environment cho target architecture. Giờ bạn có thể thấy vì sao các distribution như Debian luôn được compile native.
 
 ## Tổng kết
 
-Toolchain luôn là điểm đầu: mọi thứ sau phụ thuộc toolchain hoạt động, đáng tin.
+Toolchain luôn là điểm khởi đầu: mọi thứ tiếp theo đều phụ thuộc vào việc có một toolchain hoạt động tốt và đáng tin cậy.
 
-Phần lớn embedded build environment dựa cross development toolchain tách rõ host mạnh build code và target chạy. Toolchain gồm GNU binutils, C compiler từ GNU compiler collection—có lẽ cả C++—cộng C library đã mô tả. Thường GNU debugger gdb sinh lúc này, mô tả Chương 12, Debug bằng GDB. Cũng theo dõi Clang sẽ phát triển vài năm tới.
+Phần lớn embedded build environment dựa trên một cross development toolchain, tạo ra sự tách biệt rõ ràng giữa host computer mạnh dùng để build code và target computer dùng để chạy code đó. Bản thân toolchain gồm GNU binutils, một C compiler từ GNU compiler collection, và rất có thể cả C++ compiler, cộng với một trong các C library mà tôi đã mô tả. Thông thường, GNU debugger, gdb, cũng được tạo ở giai đoạn này; tôi trình bày nó trong Chương 12, Debug bằng GDB. Ngoài ra, hãy theo dõi Clang compiler vì nó sẽ tiếp tục phát triển trong vài năm tới.
 
-Có thể bắt đầu chỉ toolchain—crosstool-NG build hoặc Linaro download—dùng compile mọi package target cần, chấp nhận công sức lớn. Hoặc lấy toolchain trong distribution có nhiều package. Distribution sinh từ source bằng Buildroot/Yocto Project, hoặc binary distribution bên thứ ba như thương mại Mentor Graphics, open source Denx ELDK. Cẩn thận toolchain/distribution tặng miễn phí cùng hardware: thường cấu hình kém, không duy trì. Dù trường hợp nào chọn theo tình huống rồi dùng nhất quán suốt dự án.
+Bạn có thể bắt đầu chỉ với một toolchain, có thể được build bằng crosstool-NG hoặc download từ Linaro, rồi dùng nó để compile mọi package cần trên target, chấp nhận lượng công việc vất vả đi kèm. Hoặc bạn có thể lấy toolchain như một phần của distribution có nhiều package. Distribution có thể được tạo từ source code bằng build system như Buildroot hoặc Yocto Project, hoặc là binary distribution từ bên thứ ba, có thể là doanh nghiệp thương mại như Mentor Graphics hay dự án open source như Denx ELDK. Hãy thận trọng với toolchain hoặc distribution được cung cấp miễn phí như một phần của hardware package: chúng thường được cấu hình kém và không được bảo trì. Trong mọi trường hợp, bạn nên lựa chọn theo hoàn cảnh của mình, rồi sử dụng nhất quán trong suốt dự án.
 
-Khi có toolchain, build được component embedded Linux khác. Chương sau học bootloader đưa device vào hoạt động, bắt đầu boot.
+Khi đã có toolchain, bạn có thể dùng nó để build các thành phần còn lại của embedded Linux system. Trong chương tiếp theo, bạn sẽ tìm hiểu bootloader, thành phần đưa device vào hoạt động và bắt đầu quá trình boot.

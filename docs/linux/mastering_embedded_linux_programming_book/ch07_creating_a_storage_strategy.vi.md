@@ -265,7 +265,7 @@ Character device quan trọng nhất: cho phép truy cập flash memory bên dư
 | `MEMREADOOB` | Đọc dữ liệu out-of-band cho page |
 | `MEMLOCK` | Lock chip (nếu hỗ trợ) |
 | `MEMUNLOCK` | Unlock chip (nếu hỗ trợ) |
-| `MEMGETREGIONCOUNT` | Lấy số erase region: non-zero nếu partition có erase block kích thước khác nhau, phổ biến với NOR flash, hiếm với NAND |
+| `MEMGETREGIONCOUNT` | Lấy số erase region: giá trị non-zero nếu partition có các erase block với kích thước khác nhau, điều phổ biến trên NOR flash nhưng hiếm gặp trên NAND |
 | `MEMGETREGIONINFO` | Nếu `MEMGETREGIONCOUNT` là non-zero, có thể dùng để lấy offset, kích thước và số block của mỗi region |
 | `MEMGETOOBSEL` | Không còn được khuyến nghị sử dụng |
 | `MEMGETBADBLOCK` | Lấy bad block flag |
@@ -299,7 +299,7 @@ Tiếc là cách này không hoạt động với NAND memory vì việc sao ch�
 
 Driver mtdblock ít được dùng. Mục đích của nó là cung cấp flash memory dưới dạng block device để format và mount thành filesystem. Tuy nhiên, nó có hạn chế nghiêm trọng vì không xử lý bad block trong NAND flash, không wear leveling và không xử lý chênh lệch kích thước giữa filesystem block với flash erase block. Nói cách khác, nó không có flash translation layer, thứ thiết yếu cho lưu trữ file đáng tin cậy. Trường hợp duy nhất mtdblock hữu ích là mount filesystem read-only như Squashfs trên flash memory đáng tin cậy như NOR.
 
-Nếu muốn filesystem read-only trên NAND flash, nên dùng UBI driver như mô tả sau trong chương.
+Nếu muốn một filesystem read-only trên NAND flash, bạn nên dùng UBI driver, như mô tả ở phần sau của chương.
 
 #### Ghi log kernel oops vào MTD
 
@@ -329,7 +329,7 @@ Flash translation layer có các tính năng sau:
 
 - Garbage collection: Hệ quả của sub-allocation là erase block chứa hỗn hợp dữ liệu tốt và dữ liệu cũ sau khi filesystem được dùng một thời gian. Vì chỉ giải phóng được toàn erase block, cách duy nhất thu hồi chỗ trống là gom dữ liệu tốt vào một nơi rồi trả erase block nay đã trống về free list: đó là garbage collection, thường triển khai bằng background thread.
 
-- Wear leveling: Mỗi block có giới hạn erase cycle. Để tối đa tuổi thọ chip, cần di chuyển dữ liệu sao cho mỗi block bị erase số lần gần bằng nhau.
+- Wear leveling: Số erase cycle của mỗi block có giới hạn. Để tối đa hóa tuổi thọ chip, cần di chuyển dữ liệu sao cho mỗi block được xóa với số lần gần bằng nhau.
 
 - Bad block handling: Với chip NAND flash, phải tránh dùng block được đánh dấu bad và cũng đánh dấu good block thành bad nếu không thể erase.
 
@@ -495,7 +495,7 @@ Theo cách này, UBI đáp ứng hai yêu cầu flash translation layer: wear le
 # ubiformat /dev/mtd6 -s 2048
 ```
 
-Dùng lệnh `ubiattach` để nạp UBI driver trên MTD partition đã chuẩn bị như vậy:
+Bạn dùng lệnh `ubiattach` để load UBI driver trên một MTD partition đã được chuẩn bị theo cách này:
 
 ```
 # ubiattach -p /dev/mtd6 -O 2048
@@ -510,7 +510,7 @@ Lần đầu attach MTD partition sau `ubiformat` sẽ chưa có volume. Có th�
 # ubimkvol /dev/ubi0 -N vol_2 -s 96MiB
 ```
 
-Giờ bạn có device node `/dev/ubi0_0` và `/dev/ubi0_1`. Xác nhận tình trạng bằng `ubinfo`:
+Bây giờ, bạn có các device node `/dev/ubi0_0` và `/dev/ubi0_1`. Bạn có thể xác nhận trạng thái bằng `ubinfo`:
 
 ```
 # ubinfo -a /dev/ubi0
@@ -544,7 +544,7 @@ Name:        vol_2
 Character device major/minor: 250:2
 ```
 
-Lưu ý vì mỗi LEB có header chứa meta information UBI dùng, LEB nhỏ hơn PEB một page. Ví dụ, chip có PEB size 128 KB và page 2 KB sẽ có LEB 126 KB. Đây là thông tin quan trọng cần khi tạo UBIFS image.
+Lưu ý rằng mỗi LEB có một header chứa meta information mà UBI sử dụng, nên LEB nhỏ hơn PEB một page. Chẳng hạn, một chip có PEB size 128 KB và page 2 KB sẽ có LEB 126 KB. Đây là thông tin quan trọng bạn cần khi tạo UBIFS image.
 
 #### UBIFS
 
@@ -552,7 +552,7 @@ UBIFS dùng UBI volume để tạo filesystem vững chắc. Nó thêm sub-alloc
 
 UBIFS có journal để phục hồi nhanh khi mất điện. Journal chiếm dung lượng, thường 4 MiB hoặc hơn, nên UBIFS không phù hợp thiết bị flash rất nhỏ.
 
-Sau khi tạo UBI volume, có thể mount bằng device node của volume, `/dev/ubi0_0`, hoặc device node của toàn partition cộng volume name như sau:
+Sau khi tạo các UBI volume, bạn có thể mount chúng bằng device node của volume, `/dev/ubi0_0`, hoặc bằng device node của toàn bộ partition kèm volume name, như sau:
 
 ```
 # mount -t ubifs ubi0:vol_1 /mnt
@@ -560,7 +560,7 @@ Sau khi tạo UBI volume, có thể mount bằng device node của volume, `/dev
 
 Tạo filesystem image cho UBIFS là quy trình two-stage: trước tiên tạo UBIFS image bằng `mkfs.ubifs`, rồi đưa vào UBI volume bằng `ubinize`.
 
-Ở bước đầu, `mkfs.ubifs` cần page size qua `-m`, kích thước UBI LEB qua `-e`, nhớ rằng LEB thường ngắn hơn PEB một page, và số erase block tối đa trong volume qua `-c`. Nếu volume đầu 32 MiB, erase block 128 KiB, số erase block là 256. Vì vậy, để lấy nội dung directory rootfs tạo UBIFS image tên `rootfs.ubi`, gõ:
+Ở giai đoạn đầu, `mkfs.ubifs` cần được cung cấp page size bằng `-m`, kích thước UBI LEB bằng `-e` (hãy nhớ rằng LEB thường nhỏ hơn PEB một page), và số erase block tối đa trong volume bằng `-c`. Nếu volume đầu tiên có kích thước 32 MiB và mỗi erase block là 128 KiB, số erase block sẽ là 256. Vì vậy, để lấy nội dung directory rootfs và tạo UBIFS image có tên `rootfs.ubi`, bạn nhập lệnh sau:
 
 ```
 $ mkfs.ubifs -r rootfs -m 2048 -e 126KiB -c 256 -o rootfs.ubi
@@ -600,7 +600,7 @@ $ ubinize -o ~/ubi.img -p 128KiB -m 2048 -s 512 ubinize.cfg
 # ubiattach -p /dev/mtd6 -O 2048
 ```
 
-Nếu muốn boot với root filesystem UBIFS, cung cấp các tham số kernel command line:
+Nếu muốn boot với UBIFS root filesystem, bạn cung cấp các kernel command line parameter sau:
 
 ```
 ubi.mtd=6 root=ubi0:vol_1 rootfstype=ubifs
@@ -608,7 +608,7 @@ ubi.mtd=6 root=ubi0:vol_1 rootfstype=ubifs
 
 ## Filesystem cho managed flash
 
-Khi xu hướng managed flash tiếp tục, đặc biệt eMMC, cần xem cách dùng hiệu quả. Dù có vẻ mang đặc tính hard disk drive, một số chip NAND flash có hạn chế erase block lớn, erase cycle giới hạn và bad block handling. Dĩ nhiên, cũng cần độ vững chắc khi mất điện.
+Khi xu hướng sử dụng công nghệ managed flash tiếp tục phát triển, đặc biệt là eMMC, chúng ta cần xem xét cách dùng chúng hiệu quả. Mặc dù có vẻ mang các đặc tính giống hard disk drive, một số NAND flash chip có những hạn chế về erase block lớn, erase cycle hữu hạn và xử lý bad block. Và dĩ nhiên, chúng ta cần hệ thống vững chắc khi xảy ra mất nguồn.
 
 Có thể dùng mọi disk filesystem thông thường, nhưng nên chọn loại giảm disk write và khởi động lại nhanh sau shutdown ngoài dự kiến, thường nhờ journal.
 
@@ -681,7 +681,7 @@ Cũng có thể buộc `discard` từ command line độc lập với cách moun
 /: 2061000704 bytes were trimmed
 ```
 
-Ví dụ trên dùng verbose option `-v` để in số byte có thể giải phóng. Ở đây 2.061.000.704 là lượng chỗ trống xấp xỉ trong filesystem, nên là lượng storage tối đa có thể được giải phóng.
+Ví dụ trước dùng verbose option `-v` để in số byte có khả năng được giải phóng. Trong trường hợp này, 2.061.000.704 là lượng dung lượng trống xấp xỉ trong filesystem, nên đó là lượng storage tối đa có thể đã được giải phóng.
 
 ### Ext4
 
@@ -759,9 +759,9 @@ Filesystem kết quả là read-only, nên không có cơ chế sửa bất kỳ
 
 ## Filesystem tạm thời
 
-Luôn có file tồn tại ngắn hoặc không còn ý nghĩa sau reboot. Nhiều file được đặt vào `/tmp`, nên hợp lý là giữ chúng khỏi permanent storage.
+Luôn có một số file chỉ tồn tại trong thời gian ngắn hoặc không còn ý nghĩa sau khi reboot. Nhiều file như vậy được đặt trong `/tmp`, nên việc tránh để chúng được ghi xuống permanent storage là hợp lý.
 
-Temporary filesystem, `tmpfs`, lý tưởng cho mục đích này. Có thể tạo filesystem tạm RAM-based chỉ bằng mount `tmpfs`:
+Temporary filesystem, `tmpfs`, là lựa chọn lý tưởng cho mục đích này. Bạn có thể tạo một filesystem tạm RAM-based chỉ bằng cách mount `tmpfs`:
 
 ```
 # mount -t tmpfs tmp_files /tmp
@@ -818,7 +818,7 @@ Nếu dùng Yocto Project, có thể tạo root filesystem read-only bằng các
 
 ## Lựa chọn filesystem
 
-Đến đây đã xem công nghệ solid state memory và nhiều loại filesystem. Giờ là lúc tổng hợp lựa chọn.
+Đến đây, chúng ta đã tìm hiểu công nghệ đằng sau solid state memory và nhiều loại filesystem. Bây giờ là lúc tổng hợp các lựa chọn.
 
 Trong phần lớn trường hợp, có thể chia nhu cầu lưu trữ thành ba nhóm:
 
@@ -874,7 +874,7 @@ Lựa chọn thứ ba là cập nhật toàn bộ system image: kernel, root fil
 
 ### Cập nhật image atomic
 
-Để cập nhật atomic, cần hai thứ: bản sao operating system thứ hai dùng được trong cập nhật và cơ chế bootloader chọn bản operating system cần nạp. Bản thứ hai có thể giống hệt bản đầu, tạo dự phòng hoàn toàn, hoặc là operating system nhỏ chuyên cập nhật bản chính. Trong phương án đầu, có hai bản operating system, mỗi bản gồm Linux kernel, root filesystem và ứng dụng hệ thống, như sơ đồ:
+Để quá trình cập nhật có tính atomic, chúng ta cần hai thứ: một bản sao operating system thứ hai có thể dùng trong khi cập nhật, và một cơ chế trong bootloader để chọn bản operating system sẽ được load. Bản sao thứ hai có thể giống hệt bản đầu, tạo ra khả năng dự phòng đầy đủ cho operating system, hoặc là một operating system nhỏ chuyên dùng để cập nhật bản chính. Trong phương án đầu tiên, có hai bản operating system, mỗi bản gồm Linux kernel, root filesystem và các ứng dụng hệ thống, như sơ đồ sau:
 
 ![image](images/ch07/fig07-06.png)
 
@@ -882,9 +882,9 @@ Ban đầu, boot flag chưa được đặt nên bootloader nạp bản 1. Để
 
 Nếu cập nhật thất bại, boot flag không đổi và operating system tốt gần nhất được dùng. Ngay cả khi cập nhật gồm nhiều thành phần, kernel image, DTB, root filesystem và system application filesystem, toàn bộ vẫn atomic vì boot flag chỉ cập nhật khi mọi cập nhật hoàn tất.
 
-Nhược điểm chính là cần storage cho hai bản operating system.
+Nhược điểm chính của phương án này là nó cần dung lượng lưu trữ cho hai bản sao operating system.
 
-Có thể giảm yêu cầu storage bằng cách giữ operating system tối thiểu chỉ để cập nhật bản chính, như sơ đồ:
+Bạn có thể giảm yêu cầu storage bằng cách giữ một operating system tối thiểu chỉ để cập nhật operating system chính, như sơ đồ sau:
 
 ![image](images/ch07/fig07-07.png)
 
