@@ -905,9 +905,7 @@ L2: li x7, 0  // k = 0; initialize 3rd for loop
 
 Để tính địa chỉ c[i][j], cần biết mảng two-dimensional 32 ×32 được lưu thế nào trong bộ nhớ. Như bạn mong đợi, bố cục giống như có 32 mảng single-dimensional, mỗi mảng 32 phần tử. Vì vậy, bước đầu là bỏ qua i “mảng single-dimensional”, hay hàng, để tới hàng ta muốn. Do đó, ta nhân chỉ số chiều thứ nhất với kích thước hàng, 32. Vì 32 là lũy thừa của 2, ta có thể dùng phép dịch thay thế:
 
-```
-slli x30, x5, 5  // x30 = i * 2<sup>5</sup>(size of row of c)
-```
+<pre>slli x30, x5, 5  // x30 = i * 2<sup>5</sup>(size of row of c)</pre>
 
 Giờ ta cộng chỉ số thứ hai để chọn phần tử thứ j của hàng mong muốn:
 
@@ -930,23 +928,19 @@ fld f0, 0(x30)  // f0 = 8 bytes of c[i][j]
 
 Năm instruction sau gần như giống năm instruction vừa rồi: tính địa chỉ rồi load số double precision b[k][j].
 
-```
-L3: slli x29, x7, 5  // x29 = k * 2<sup>5</sup>(size of row of b)
+<pre>L3: slli x29, x7, 5  // x29 = k * 2<sup>5</sup>(size of row of b)
   add x29, x29, x6  // x29 = k * size(row) + j
   slli x29, x29, 3  // x29 = byte offset of [k][j]
   add x29, x12, x29 // x29 = byte address of b[k][j]
-  fld f1, 0(x29)  // f1 = 8 bytes of b[k][j]
-```
+  fld f1, 0(x29)  // f1 = 8 bytes of b[k][j]</pre>
 
 Tương tự, năm instruction tiếp theo giống năm instruction vừa rồi: tính địa chỉ rồi load số double precision a[i][k].
 
-```
-slli x29, x5, 5  // x29 = i * 2<sup>5</sup>(size of row of a)
+<pre>slli x29, x5, 5  // x29 = i * 2<sup>5</sup>(size of row of a)
 add x29, x29, x7 // x29 = i * size(row) + k
 slli x29, x29, 3  // x29 = byte offset of [i][k]
 add x29, x11, x29 // x29 = byte address of a[i][k]
-fld f2, 0(x29) // f2 = a[i][k]
-```
+fld f2, 0(x29) // f2 = a[i][k]</pre>
 
 Giờ đã load mọi dữ liệu, cuối cùng ta sẵn sàng thực hiện một số phép toán floating-point! Ta nhân các phần tử của a và b nằm trong register f2 và f1, rồi tích lũy tổng vào f0.
 

@@ -1443,23 +1443,19 @@ Bước cuối là lưu địa chỉ instruction gây lỗi vào supervisor exce
 
 Cho chuỗi instruction này,
 
-```
-40<sub>hex</sub>  sub  x11, x2, x4
+<pre>40<sub>hex</sub>  sub  x11, x2, x4
 44<sub>hex</sub>  and  x12, x2, x5
 48<sub>hex</sub>  or  x13, x2, x6
 4C<sub>hex</sub>  add  x1, x2, x1
 50<sub>hex</sub>  sub  x15, x6, x7
 54<sub>hex</sub>  ld x16, 100(x7)
-. . .
-```
+. . .</pre>
 
 giả sử các instruction được gọi khi có exception bắt đầu như sau:
 
-```
-1C090000<sub>hex</sub>  sd    x26, 1000(x10)
+<pre>1C090000<sub>hex</sub>  sd    x26, 1000(x10)
 1C090004<sub>hex</sub>  sd    x27, 1008(x10)
-. . .
-```
+. . .</pre>
 
 Cho biết điều xảy ra trong pipeline nếu exception hardware trục trặc xảy ra trong add instruction.
 

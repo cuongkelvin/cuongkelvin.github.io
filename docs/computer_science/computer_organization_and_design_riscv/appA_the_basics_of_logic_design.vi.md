@@ -822,10 +822,8 @@ Hình A.6.3 cho các adder 4-bit nối với carry-lookahead unit như vậy. B�
 
 Xác định giá trị gi, pi, Pi và Gi của hai số 16-bit này:
 
-```
-a:    0001 1010 0011 0011<sub>two</sub>
-b:    1110 0101 1110 1011two
-```
+<pre>a:    0001 1010 0011 0011<sub>two</sub>
+b:    1110 0101 1110 1011two</pre>
 
 Ngoài ra, CarryOut15 (C4) bằng bao nhiêu?
 
@@ -1523,9 +1521,7 @@ A.23 [20] <§§B3, A.4, A.5>Lặp Bài tập A.22 nhưng cho unsigned divider th
 
 A.24 [15] <§A.5>ALU hỗ trợ set on less than (slt) chỉ bằng sign bit adder. Thử với −7<sub>ten</sub> và 6<sub>ten</sub>. Để dễ theo ví dụ, giới hạn binary 4 bit: 1001<sub>two</sub> và 0110<sub>two</sub>.
 
-```
-1001<sub>two</sub> − 0110<sub>two</sub> = 1001<sub>two</sub> + 1010<sub>two</sub> = 0011<sub>two</sub>
-```
+<pre>1001<sub>two</sub> − 0110<sub>two</sub> = 1001<sub>two</sub> + 1010<sub>two</sub> = 0011<sub>two</sub></pre>
 
 Kết quả này gợi ý −7>6, rõ ràng sai. Vì vậy phải xét overflow khi quyết định. Sửa ALU 1-bit Hình A.5.10 trang A-33 để xử lý slt đúng. Đổi trên bản photocopy để tiết kiệm thời gian.
 

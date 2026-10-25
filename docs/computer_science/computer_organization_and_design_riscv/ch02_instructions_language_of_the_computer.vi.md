@@ -400,18 +400,14 @@ Khái quát điều này, trong mọi cơ số, giá trị chữ số d thứ i 
 
 trong đó i bắt đầu từ 0 và tăng từ phải sang trái. Biểu diễn này dẫn tới cách đánh số bit rõ ràng trong doubleword: chỉ dùng lũy thừa của cơ số cho bit đó. Ta đặt chỉ số dưới ten cho số thập phân và two cho số nhị phân. Ví dụ,
 
-```
-1011<sub>two</sub>
-```
+<pre>1011<sub>two</sub></pre>
 
 biểu diễn
 
-```
-(1 ×2<sup>3</sup>) + (0 ×2<sup>2</sup>) + (1 ×2<sup>1</sup>) + (1 ×2<sup>0</sup>)<sub>ten</sub>
+<pre>(1 ×2<sup>3</sup>) + (0 ×2<sup>2</sup>) + (1 ×2<sup>1</sup>) + (1 ×2<sup>0</sup>)<sub>ten</sub>
 = (1 ×8) + (0 ×4)+ (1 ×2)+ (1 ×1)<sub>ten</sub>
 = 8+0+2+1<sub>ten</sub>
-= 11<sub>ten</sub>
-```
+= 11<sub>ten</sub></pre>
 
 Ta đánh số bit 0, 1, 2, 3, … từ phải sang trái trong doubleword. Hình dưới cho thấy cách đánh số bit trong doubleword RISC-V và vị trí số 1011<sub>two</sub>, (tiếc là phải tách đôi để vừa trang sách):
 
@@ -429,8 +425,7 @@ Bit ngoài cùng trái trong doubleword RISC-V.
 
 Doubleword RISC-V dài 64 bit, nên có thể biểu diễn 2<sup>64</sup> pattern 64-bit khác nhau. Tự nhiên là dùng những tổ hợp ấy biểu diễn các số từ 0 tới 2<sup>64</sup> −1 (18,446,774,073,709,551,615<sub>ten</sub>):
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
 00000000 00000000<sub>two</sub>= 0<sub>ten</sub>
 00000000 00000000 00000000 00000000 00000000 00000000
 00000000 00000001<sub>two</sub>= 1<sub>ten</sub>
@@ -442,8 +437,7 @@ Doubleword RISC-V dài 64 bit, nên có thể biểu diễn 2<sup>64</sup> patte
 11111111 11111111 11111111 11111111 11111111 11111111
 11111111 11111110<sub>two</sub>= 18,446,744,073,709,551,614<sub>ten</sub>
 11111111 11111111 11111111 11111111 11111111 11111111
-11111111 11111111<sub>two</sub>= 18,446,744,073,709,551,615<sub>ten</sub>
-```
+11111111 11111111<sub>two</sub>= 18,446,744,073,709,551,615<sub>ten</sub></pre>
 
 Nghĩa là số nhị phân 64-bit có thể biểu diễn bằng giá trị bit nhân lũy thừa của 2 (ở đây x<sub>i</sub> là bit thứ i của x):
 
@@ -467,8 +461,7 @@ Khi tìm lựa chọn hấp dẫn hơn, câu hỏi xuất hiện: kết quả s�
 
 Vì không có lựa chọn tốt hơn rõ ràng, giải pháp cuối là chọn biểu diễn làm phần cứng đơn giản: số 0 đầu nghĩa là dương, số 1 đầu nghĩa là âm. Quy ước biểu diễn số nhị phân signed này gọi là two’s complement:
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
 00000000<sub>two</sub>= 0<sub>ten</sub>
 00000000 00000000 00000000 00000000 00000000 00000000
 00000001<sub>two</sub>= 1<sub>ten</sub>
@@ -493,8 +486,7 @@ Vì không có lựa chọn tốt hơn rõ ràng, giải pháp cuối là chọn
 11111111 11111111 11111111 11111111 11111111 11111111
 11111111 11111110<sub>two</sub>= −2<sub>ten</sub>
 11111111 11111111 11111111 11111111 11111111 11111111
-11111111 11111111<sub>two</sub>= −1<sub>ten</sub>
-```
+11111111 11111111<sub>two</sub>= −1<sub>ten</sub></pre>
 
 Nửa số dương, từ 0 tới 9,223,372,036,854,775,807<sub>ten</sub> (2<sup>63</sup>−1), dùng biểu diễn như trước. Bit pattern tiếp theo (1000 … 0000<sub>two</sub>) biểu diễn số âm nhất −9,223,372,036,854,775,808<sub>ten</sub> (−2<sup>63</sup>). Theo sau là tập số âm giảm dần: −9,223,372,036,854,775,807<sub>ten</sub> (1000 … 0001<sub>two</sub>) xuống −1<sub>ten</sub> (1111 … 1111<sub>two</sub>).
 
@@ -512,10 +504,8 @@ Sign bit được nhân với −2<sup>63</sup>, và các bit còn lại nhân v
 
 Giá trị thập phân của số two’s complement 64-bit này là gì?
 
-```
-11111111 11111111 11111111 11111111 11111111 11111111
-11111111 11111100<sub>two</sub>
-```
+<pre>11111111 11111111 11111111 11111111 11111111 11111111
+11111111 11111100<sub>two</sub></pre>
 
 **Trả lời**
 
@@ -549,9 +539,7 @@ Hãy xét hai mẹo hữu ích khi làm việc với số two’s complement. M�
 
 2<sub>ten</sub>=00000000 00000000 00000000 00000000 00000000 00000000
 
-```
-00000000 00000010<sub>two</sub>
-```
+<pre>00000000 00000010<sub>two</sub></pre>
 
 Đổi dấu số này bằng đảo bit và cộng một,
 
@@ -559,10 +547,8 @@ Hãy xét hai mẹo hữu ích khi làm việc với số two’s complement. M�
 
 Theo hướng ngược lại,
 
-```
-11111111 11111111 11111111 11111111 11111111 11111111
-11111111 11111110<sub>two</sub>
-```
+<pre>11111111 11111111 11111111 11111111 11111111 11111111
+11111111 11111110<sub>two</sub></pre>
 
 trước tiên được đảo rồi tăng một:
 
@@ -580,22 +566,16 @@ Chuyển phiên bản nhị phân 16-bit của 2<sub>ten</sub> và −2<sub>ten<
 
 Phiên bản nhị phân 16-bit của số 2 là
 
-```
-00000000 00000010<sub>two</sub>= 2<sub>ten</sub>
-```
+<pre>00000000 00000010<sub>two</sub>= 2<sub>ten</sub></pre>
 
 Nó được chuyển thành số 64-bit bằng tạo 48 bản sao giá trị most significant bit (0) và đặt bên trái doubleword. Phần phải nhận giá trị cũ:
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
-00000000 00000010<sub>two</sub>= 2<sub>ten</sub>
-```
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
+00000000 00000010<sub>two</sub>= 2<sub>ten</sub></pre>
 
 Hãy đổi dấu phiên bản 16-bit của 2 bằng mẹo trước. Do đó,
 
-```
-0000 0000 0000 0010<sub>two</sub>
-```
+<pre>0000 0000 0000 0010<sub>two</sub></pre>
 
 trở thành
 
@@ -603,10 +583,8 @@ trở thành
 
 Tạo phiên bản 64-bit của số âm nghĩa là sao chép sign bit 48 lần rồi đặt bên trái:
 
-```
-11111111 11111111 11111111 11111111 11111111 11111111
-11111111 11111110<sub>two</sub>= −2<sub>ten</sub>
-```
+<pre>11111111 11111111 11111111 11111111 11111111 11111111
+11111111 11111110<sub>two</sub>= −2<sub>ten</sub></pre>
 
 Mẹo này đúng vì số two’s complement dương thực sự có vô hạn 0 bên trái và số two’s complement âm có vô hạn 1. Bit pattern nhị phân biểu diễn số giấu các bit đầu để vừa chiều rộng phần cứng; sign extension chỉ khôi phục một số bit đó.
 
@@ -626,10 +604,8 @@ Với số thập phân signed, ta dùng “−” biểu diễn âm vì kích t
 
 Giá trị thập phân của số two’s complement 64-bit này là gì?
 
-```
-11111111 11111111 11111111 11111111 11111111 11111111
-11111111 11111000<sub>two</sub>
-```
+<pre>11111111 11111111 11111111 11111111 11111111 11111111
+11111111 11111000<sub>two</sub></pre>
 
 1) −4<sub>ten</sub> 2) −8<sub>ten</sub> 3) −16<sub>ten</sub> 4) 18,446,744,073,709,551,609<sub>ten</sub>
 
@@ -705,10 +681,8 @@ Vì thường xử lý các cơ số khác nhau, để tránh nhầm lẫn, ta �
 
 Chuyển các số hexadecimal 8-digit và nhị phân 32-bit sau sang cơ số còn lại:
 
-```
-eca8 6420<sub>hex</sub>
-0001 0011 0101 0111 1001 1011 1101 1111<sub>two</sub>
-```
+<pre>eca8 6420<sub>hex</sub>
+0001 0011 0101 0111 1001 1011 1101 1111<sub>two</sub></pre>
 
 **Trả lời**
 
@@ -875,17 +849,13 @@ Lewis Carroll, Alice’s Adventures in Wonderland, 1865
 
 Loại phép toán đầu như vậy gọi là shift. Chúng dịch mọi bit trong doubleword trái hoặc phải, điền các bit trống bằng 0. Ví dụ nếu register x19 chứa
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
-00000000 00001001<sub>two</sub>= 9<sub>ten</sub>
-```
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
+00000000 00001001<sub>two</sub>= 9<sub>ten</sub></pre>
 
 và instruction dịch trái 4 được thực hiện, giá trị mới là:
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
-00000000 10010000<sub>two</sub>= 144<sub>ten</sub>
-```
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
+00000000 10010000<sub>two</sub>= 144<sub>ten</sub></pre>
 
 Đối ngẫu dịch trái là dịch phải. Tên thực của hai shift instruction RISC-V là shift left logical immediate (slli) và shift right logical immediate (srli). Instruction sau thực hiện phép toán trên nếu giá trị gốc ở register x19 và kết quả cần vào register x11:
 
@@ -907,17 +877,13 @@ Phép toán hữu ích khác tách field là AND. (Ta viết hoa để tránh nh
 
 Phép toán logic bit-by-bit với hai toán hạng tính 1 chỉ nếu cả hai toán hạng có 1.
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
-00001101 11000000<sub>two</sub>
-```
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
+00001101 11000000<sub>two</sub></pre>
 
 và register x10 chứa
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
-00111100 00000000<sub>two</sub>
-```
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
+00111100 00000000<sub>two</sub></pre>
 
 thì sau khi thực thi instruction RISC-V
 
@@ -927,10 +893,8 @@ and x9, x10, x11   // reg x9 = reg x10 & reg x11
 
 giá trị register x9 sẽ là
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
-00001100 00000000<sub>two</sub>
-```
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
+00001100 00000000<sub>two</sub></pre>
 
 Như thấy, AND có thể áp bit pattern lên tập bit để ép 0 ở nơi bit pattern có 0. Bit pattern như vậy kết hợp AND theo truyền thống gọi là mask vì mask “che” một số bit.
 
@@ -946,10 +910,8 @@ or x9, x10, x11 // reg x9 = reg x10 | reg x11
 
 là giá trị này trong register x9:
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
-00111101 11000000<sub>two</sub>
-```
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
+00111101 11000000<sub>two</sub></pre>
 
 Phép toán logic cuối có tính đảo ngược. NOT nhận một toán hạng và đặt 1 trong kết quả nếu bit toán hạng là 0, và ngược lại. Dùng ký hiệu trước, nó tính ![p0209_43](images/ch02_instructions_language_of_the_computer/p0209_43.png) .
 
@@ -971,10 +933,8 @@ xor x9, x10, x12 // reg x9 = reg x10 ^ reg x12
 
 là giá trị này trong register x9:
 
-```
-00000000 00000000 00000000 00000000 00000000 00000000
-00110001 11000000<sub>two</sub>
-```
+<pre>00000000 00000000 00000000 00000000 00000000 00000000
+00110001 11000000<sub>two</sub></pre>
 
 Hình 2.8 trên cho quan hệ giữa toán tử C, Java với instruction RISC-V. Hằng hữu ích trong logical operation cũng như arithmetic operation, nên RISC-V cung cấp thêm instruction and immediate (andi), or immediate (ori) và exclusive or immediate (xori).
 
@@ -1733,9 +1693,7 @@ Assembly code RISC-V để load hằng 64-bit này vào register x19 là gì?
 
 Đầu tiên load bit 12 tới 31 với bit pattern ấy, là 976 thập phân, dùng lui:
 
-```
-lui   x19, 976 // 976<sub>decimal</sub> = 0000 0000 0011 1101 0000
-```
+<pre>lui   x19, 976 // 976<sub>decimal</sub> = 0000 0000 0011 1101 0000</pre>
 
 Giá trị register x19 sau đó là:
 
@@ -1746,9 +1704,7 @@ Giá trị register x19 sau đó là:
 
 Bước tiếp là cộng 12 bit thấp nhất, có giá trị thập phân 1280:
 
-```
-addi   x19, x19, 1280// 1280<sub>decimal</sub> = 00000101 00000000
-```
+<pre>addi   x19, x19, 1280// 1280<sub>decimal</sub> = 00000101 00000000</pre>
 
 Giá trị cuối trong register x19 là giá trị mong muốn:
 
@@ -1771,10 +1727,8 @@ Do đó biểu diễn ký hiệu machine language RISC-V không còn bị giới
 
 Branch instruction RISC-V dùng instruction format RISC-V gọi là SB-type. Định dạng biểu diễn địa chỉ branch từ −4096 tới 4094 theo bội số 2. Vì lý do sắp rõ, chỉ branch được tới địa chỉ chẵn. SB-type gồm opcode 7-bit, function code 3-bit, hai toán hạng register 5-bit (rs1, rs2), và address immediate 12-bit. Địa chỉ dùng mã hóa bất thường, đơn giản thiết kế datapath nhưng làm assembly phức tạp. Instruction
 
-```
-bne  x10, x11, 2000  // if x10 != x11, go to location 2000<sub>ten</sub> =
-0111 1101 0000
-```
+<pre>bne  x10, x11, 2000  // if x10 != x11, go to location 2000<sub>ten</sub> =
+0111 1101 0000</pre>
 
 có thể được assemble thành định dạng này (thực tế phức tạp hơn chút như sẽ thấy):
 
@@ -1786,9 +1740,7 @@ Instruction jump-and-link vô điều kiện (jal) là instruction duy nhất d�
 
 Giống SB-type, toán hạng địa chỉ UJ-type dùng mã hóa immediate bất thường và không mã hóa được địa chỉ lẻ. Nên,
 
-```
-jal x0, 2000 // go to location 2000<sub>ten</sub> = 0111 1101 0000
-```
+<pre>jal x0, 2000 // go to location 2000<sub>ten</sub> = 0111 1101 0000</pre>
 
 được assemble thành định dạng:
 
@@ -1892,9 +1844,7 @@ Một trong vài cách định địa chỉ phân biệt bằng cách dùng toá
 
 Câu lệnh assembly language tương ứng machine instruction này là gì?
 
-```
-00578833<sub>hex</sub>
-```
+<pre>00578833<sub>hex</sub></pre>
 
 **Trả lời**
 
@@ -3761,9 +3711,7 @@ add x5,x30, x31
 
 2.12 [5] <§§2.2, 2.5> Cho loại instruction và assembly language instruction của giá trị nhị phân sau:
 
-```
-0000 0000 0001 0000 1000 0000 1011 0011<sub>two</sub>
-```
+<pre>0000 0000 0001 0000 1000 0000 1011 0011<sub>two</sub></pre>
 
 Gợi ý: Hình 2.20 có thể hữu ích.
 
