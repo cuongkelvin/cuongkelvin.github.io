@@ -2,4 +2,5 @@ title: Computer Science
 nav:
   - index.md
   - digital_design_and_computer_architecture
+  - computer_organization_and_design_riscv
   - ...

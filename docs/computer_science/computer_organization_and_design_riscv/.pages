@@ -1,0 +1,15 @@
+title: Computer Organization and Design
+nav:
+  - 1. Computer Abstractions and Technology: ch01_computer_abstractions_and_technology.vi.md
+  - "2. Instructions: Language of the Computer": ch02_instructions_language_of_the_computer.vi.md
+  - 3. Arithmetic for Computers: ch03_arithmetic_for_computers.vi.md
+  - 4. The Processor: ch04_the_processor.vi.md
+  - 5. Exploiting Memory Hierarchy: ch05_large_and_fast_exploiting_memory_hierarchy.vi.md
+  - 6. Parallel Processors: ch06_parallel_processors_from_client_to_cloud.vi.md
+  - A. The Basics of Logic Design: appA_the_basics_of_logic_design.vi.md
+  - B. Graphics and Computing GPUs: appB_graphics_and_computing_gpus.vi.md
+  - C. Mapping Control to Hardware: appC_mapping_control_to_hardware.vi.md
+  - D. A Survey of RISC Architectures: appD_a_survey_of_risc_architectures.vi.md
+  - Glossary: glossary.vi.md
+  - Answers to Check Yourself: answers_to_check_yourself.vi.md
+  - ...
