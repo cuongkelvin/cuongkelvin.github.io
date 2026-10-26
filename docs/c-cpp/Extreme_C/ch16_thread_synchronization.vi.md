@@ -23,13 +23,13 @@ Chúng ta bắt đầu chương này với một thảo luận chung về concur
 
 <a id="_idParaDest-215"></a>
 
-### POSIX concurrency control
+## POSIX concurrency control
 
 Trong phần này, chúng ta sẽ<a id="_idIndexMarker1104"></a> xem xét các cơ chế kiểm soát khả dĩ được library pthread cung cấp. Semaphore, mutex và condition variable cùng với các loại lock khác nhau được dùng theo nhiều tổ hợp khác nhau để mang lại tính tất định cho các chương trình multithreaded. Trước tiên, chúng ta bắt đầu với POSIX mutex.
 
 <a id="_idParaDest-216"></a>
 
-#### POSIX mutex
+### POSIX mutex
 
 Các mutex được giới thiệu<a id="_idIndexMarker1105"></a> trong library pthread có thể được dùng để đồng bộ hóa cả process lẫn thread. Trong phần này, chúng ta sẽ dùng chúng trong một chương trình C multithreaded để đồng bộ hóa một số thread.
 
@@ -127,7 +127,7 @@ Trong phần này, chúng tôi đã giới thiệu POSIX mutex và cách chúng 
 
 <a id="_idParaDest-217"></a>
 
-#### POSIX condition variable
+### POSIX condition variable
 
 Nếu bạn còn nhớ từ *ví dụ 15.2* trong chương trước<a id="_idIndexMarker1113"></a>, chúng ta đã đối mặt với một race condition. Giờ, chúng ta muốn đưa ra một ví dụ mới rất giống *ví dụ 15.2*, nhưng là một ví dụ mà việc dùng condition variable sẽ đơn giản hơn. *Ví dụ 16.1* có hai thread thay vì ba (vốn là trường hợp của *ví dụ 15.2*), và chúng được yêu cầu in các ký tự `A` và `B` ra output, nhưng chúng ta muốn chúng luôn theo một thứ tự cụ thể; trước tiên là `A` rồi đến `B`.
 
@@ -255,7 +255,7 @@ Vấn đề race condition quan sát được trong các ví dụ 15.2 và 16.1 
 
 <a id="_idParaDest-218"></a>
 
-#### POSIX barrier
+### POSIX barrier
 
 POSIX barrier dùng một cách tiếp cận khác <a id="_idIndexMarker1119"></a>để đồng bộ hóa một số thread. Giống như một nhóm người đang lên kế hoạch thực hiện một số tác vụ song song và tại một số điểm cần gặp nhau, tổ chức lại và tiếp tục, điều tương tự có thể xảy ra với thread (hay thậm chí process). Một số thread làm tác vụ của chúng nhanh hơn, và những thread khác chậm hơn. Nhưng có thể có một checkpoint (hay điểm hẹn) mà tại đó mọi thread phải dừng và chờ các thread khác tham gia. Những checkpoint này có thể được mô phỏng bằng *POSIX barrier*.
 
@@ -331,7 +331,7 @@ Một loại semaphore cụ thể, binary semaphore (được gọi thay thế c
 
 <a id="_idParaDest-219"></a>
 
-#### POSIX semaphore
+### POSIX semaphore
 
 Trong hầu hết các trường hợp, mutex (hay *binary semaphore*) là<a id="_idIndexMarker1123"></a> đủ để đồng bộ hóa một số thread truy cập một tài nguyên dùng chung. Đó là vì, để<a id="_idIndexMarker1124"></a> thực hiện các thao tác đọc và ghi một cách tuần tự, chỉ <a id="_idIndexMarker1125"></a>một thread nên có thể đi vào critical section tại một thời điểm. Nó được biết đến là *mutual exclusion*, do đó có tên "mutex".
 
@@ -339,7 +339,7 @@ Tuy nhiên, trong một số kịch bản, bạn có thể muốn có nhiều h�
 
 Trước khi chúng ta đi vào một ví dụ về general semaphore, hãy đưa ra một ví dụ về một binary semaphore (hay một mutex). Chúng ta sẽ không dùng các hàm `pthread_mutex_*` trong ví dụ này; thay vào đó, chúng ta sẽ dùng các hàm `sem_*` vốn được dự định phơi ra các chức năng semaphore-related.
 
-##### Binary semaphore
+#### Binary semaphore
 
 Code sau là <a id="_idIndexMarker1127"></a>giải pháp được tạo bằng semaphore cho *ví dụ 15.3*. Để nhắc lại, nó gồm hai thread; mỗi thread tăng một số nguyên dùng chung bằng một giá trị khác nhau. Chúng ta muốn bảo vệ data integrity của biến dùng chung. Lưu ý rằng chúng ta sẽ không dùng POSIX mutex trong code sau:
 
@@ -445,7 +445,7 @@ Số lượng thread tối đa được phép ở trong critical section đượ
 
 Chúng ta kết thúc code trên bằng việc gọi `sem_destroy` (hay `sem_close` trong các hệ thống Apple), vốn thực chất giải phóng đối tượng semaphore cùng mọi tài nguyên bên dưới của nó. Về các named semaphore, vì chúng có thể được chia sẻ giữa một số process, các kịch bản phức tạp hơn có thể xảy ra khi đóng một semaphore. Chúng tôi sẽ trình bày những kịch bản này trong *Chương 18*, *Process Synchronization*.
 
-##### General semaphore
+#### General semaphore
 
 Giờ, đã đến lúc đưa ra một ví dụ kinh điển<a id="_idIndexMarker1132"></a> dùng general semaphore. Cú pháp khá giống code trên, nhưng kịch bản trong đó <a id="_idIndexMarker1133"></a>nhiều thread được phép đi vào critical section có thể thú vị.
 
@@ -600,7 +600,7 @@ Trong phần tiếp theo, chúng ta sẽ nói về memory model đằng sau POSI
 
 <a id="_idParaDest-220"></a>
 
-### POSIX thread và memory
+## POSIX thread và memory
 
 Phần này sẽ nói về các tương tác giữa các thread và memory của process. Như bạn<a id="_idIndexMarker1139"></a> biết, có nhiều segment trong memory layout của một process. Segment Text, segment Stack, segment Data và segment Heap đều là một phần của<a id="_idIndexMarker1140"></a> memory layout này, và chúng ta đã trình bày chúng trong *Chương 4*, *Cấu trúc memory của process (Process Memory Structure)*. Các thread tương tác khác nhau với mỗi memory segment này. Trong phần này, chúng ta chỉ thảo luận các vùng memory Stack và Heap vì chúng là những vùng được dùng nhiều nhất và gây vấn đề nhiều nhất khi viết các chương trình multithreaded.
 
@@ -610,7 +610,7 @@ Trong tiểu mục tiếp theo, chúng tôi sẽ giải thích segment Stack đ�
 
 <a id="_idParaDest-221"></a>
 
-#### Memory Stack
+### Memory Stack
 
 Mỗi thread có vùng Stack riêng được dự định là private chỉ với thread đó. Vùng Stack của một thread là một phần của<a id="_idIndexMarker1142"></a> segment Stack của process sở hữu và mọi thread, theo mặc định, nên có vùng Stack của chúng được cấp phát từ segment Stack. Cũng có thể một thread có một vùng Stack được cấp phát từ segment Heap. Chúng tôi sẽ cho thấy trong các ví dụ sau cách làm điều này, nhưng lúc này, chúng ta giả định rằng Stack của một thread là một phần của segment Stack của process.
 
@@ -763,7 +763,7 @@ Trong phần này, nói chung, chúng tôi đã cho thấy tại sao các addres
 
 <a id="_idParaDest-222"></a>
 
-#### Memory Heap
+### Memory Heap
 
 Segment Heap và segment Data có thể được mọi thread truy cập. Không giống segment Data, vốn được tạo ra vào lúc biên dịch, segment Heap là động, và nó được định hình vào lúc runtime. Các thread có thể vừa đọc vừa sửa đổi nội dung của Heap. Ngoài ra, nội dung của Heap có thể tồn tại chừng nào process còn sống, và độc lập với vòng đời của các thread riêng lẻ. Ngoài ra, các đối tượng lớn có thể được đặt bên trong Heap. Tất cả những yếu tố này cùng nhau đã khiến Heap trở thành một nơi tuyệt vời để lưu các state sẽ được chia sẻ giữa một số thread.
 
@@ -948,7 +948,7 @@ Trong phần tiếp theo, chúng ta sẽ nói về memory visibility và cách c
 
 <a id="_idParaDest-223"></a>
 
-#### Memory visibility
+### Memory visibility
 
 Chúng tôi đã giải thích *memory visibility* và *cache coherency* trong các chương trước, đối với các hệ thống có<a id="_idIndexMarker1153"></a> nhiều hơn một lõi CPU. Trong phần này, chúng tôi muốn xem xét library pthread và xem nó bảo đảm memory visibility như thế nào.
 
@@ -1002,7 +1002,7 @@ volatile int number;
 
 <a id="_idParaDest-224"></a>
 
-### Tóm tắt
+## Tóm tắt
 
 Trong chương này, chúng ta đã trình bày các cơ chế concurrent control được POSIX threading API cung cấp. Chúng ta đã thảo luận:
 
