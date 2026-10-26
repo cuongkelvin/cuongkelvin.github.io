@@ -3,4 +3,7 @@ nav:
   - index.md
   - digital_design_and_computer_architecture
   - computer_organization_and_design_riscv
+  - computer_systems_a_programmers_perspective
+  - computer_architecture_a_quantitative_approach
+  - operating_systems_three_easy_pieces
   - ...

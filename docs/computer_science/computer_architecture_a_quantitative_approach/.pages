@@ -1,0 +1,20 @@
+title: Computer Architecture – A Quantitative Approach
+nav:
+  - 1. Fundamentals of Quantitative Design: ch01_fundamentals_of_quantitative_design_and_analysis.vi.md
+  - 2. Memory Hierarchy Design: ch02_memory_hierarchy_design.vi.md
+  - 3. Instruction-Level Parallelism: ch03_instruction_level_parallelism_and_its_exploitation.vi.md
+  - 4. Data-Level Parallelism – Vector, SIMD, GPU: ch04_data_level_parallelism_in_vector_simd_and_gpu_architectures.vi.md
+  - 5. Thread-Level Parallelism: ch05_thread_level_parallelism.vi.md
+  - 6. Warehouse-Scale Computers: ch06_warehouse_scale_computers.vi.md
+  - A. Instruction Set Principles: appA_instruction_set_principles.vi.md
+  - B. Review of Memory Hierarchy: appB_review_of_memory_hierarchy.vi.md
+  - C. Pipelining – Basic and Intermediate Concepts: appC_pipelining_basic_and_intermediate_concepts.vi.md
+  - D. Storage Systems: appD_storage_systems.vi.md
+  - E. Embedded Systems: appE_embedded_systems.vi.md
+  - F. Interconnection Networks: appF_interconnection_networks.vi.md
+  - G. Vector Processors in More Depth: appG_vector_processors_in_more_depth.vi.md
+  - H. Hardware and Software for VLIW and EPIC: appH_hardware_and_software_for_vliw_and_epic.vi.md
+  - I. Large-Scale Multiprocessors: appI_large_scale_multiprocessors_and_scientific_applications.vi.md
+  - J. Computer Arithmetic: appJ_computer_arithmetic.vi.md
+  - K. Survey of Instruction Set Architectures: appK_survey_of_instruction_set_architectures.vi.md
+  - ...

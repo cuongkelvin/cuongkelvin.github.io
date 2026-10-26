@@ -1,0 +1,62 @@
+title: Operating Systems – Three Easy Pieces
+nav:
+  - "1. A Dialogue on the Book": ch01_a_dialogue_on_the_book.vi.md
+  - "2. Introduction to Operating Systems": ch02_introduction_to_operating_systems.vi.md
+  - "3. A Dialogue on Virtualization": ch03_a_dialogue_on_virtualization.vi.md
+  - "4. The Abstraction the Process": ch04_the_abstraction_the_process.vi.md
+  - "5. Interlude Process API": ch05_interlude_process_api.vi.md
+  - "6. Mechanism Limited Direct Execution": ch06_mechanism_limited_direct_execution.vi.md
+  - "7. Scheduling Introduction": ch07_scheduling_introduction.vi.md
+  - "8. Scheduling the Multi Level Feedback Queue": ch08_scheduling_the_multi_level_feedback_queue.vi.md
+  - "9. Scheduling Proportional Share": ch09_scheduling_proportional_share.vi.md
+  - "10. Multiprocessor Scheduling": ch10_multiprocessor_scheduling.vi.md
+  - "11. Summary Dialogue on Cpu Virtualization": ch11_summary_dialogue_on_cpu_virtualization.vi.md
+  - "12. A Dialogue on Memory Virtualization": ch12_a_dialogue_on_memory_virtualization.vi.md
+  - "13. The Abstraction Address Spaces": ch13_the_abstraction_address_spaces.vi.md
+  - "14. Interlude Memory API": ch14_interlude_memory_api.vi.md
+  - "15. Mechanism Address Translation": ch15_mechanism_address_translation.vi.md
+  - "16. Segmentation": ch16_segmentation.vi.md
+  - "17. Free Space Management": ch17_free_space_management.vi.md
+  - "18. Paging Introduction": ch18_paging_introduction.vi.md
+  - "19. Paging Faster Translations TLBs": ch19_paging_faster_translations_tlbs.vi.md
+  - "20. Paging Smaller Tables": ch20_paging_smaller_tables.vi.md
+  - "21. Beyond Physical Memory Mechanisms": ch21_beyond_physical_memory_mechanisms.vi.md
+  - "22. Beyond Physical Memory Policies": ch22_beyond_physical_memory_policies.vi.md
+  - "23. The VAX VMS Virtual Memory System": ch23_the_vax_vms_virtual_memory_system.vi.md
+  - "24. Summary Dialogue on Memory Virtualization": ch24_summary_dialogue_on_memory_virtualization.vi.md
+  - "25. A Dialogue on Concurrency": ch25_a_dialogue_on_concurrency.vi.md
+  - "26. Concurrency an Introduction": ch26_concurrency_an_introduction.vi.md
+  - "27. Interlude Thread API": ch27_interlude_thread_api.vi.md
+  - "28. Locks": ch28_locks.vi.md
+  - "29. Lock Based Concurrent Data Structures": ch29_lock_based_concurrent_data_structures.vi.md
+  - "30. Condition Variables": ch30_condition_variables.vi.md
+  - "31. Semaphores": ch31_semaphores.vi.md
+  - "32. Common Concurrency Problems": ch32_common_concurrency_problems.vi.md
+  - "33. Event Based Concurrency": ch33_event_based_concurrency.vi.md
+  - "34. Summary Dialogue on Concurrency": ch34_summary_dialogue_on_concurrency.vi.md
+  - "35. A Dialogue on Persistence": ch35_a_dialogue_on_persistence.vi.md
+  - "36. I/O Devices": ch36_io_devices.vi.md
+  - "37. Hard Disk Drives": ch37_hard_disk_drives.vi.md
+  - "38. Redundant Arrays of Inexpensive Disks": ch38_redundant_arrays_of_inexpensive_disks.vi.md
+  - "39. Interlude Files and Directories": ch39_interlude_files_and_directories.vi.md
+  - "40. File System Implementation": ch40_file_system_implementation.vi.md
+  - "41. Locality and the Fast File System": ch41_locality_and_the_fast_file_system.vi.md
+  - "42. Crash Consistency FSCK and Journaling": ch42_crash_consistency_fsck_and_journaling.vi.md
+  - "43. Log Structured File Systems": ch43_log_structured_file_systems.vi.md
+  - "44. Data Integrity and Protection": ch44_data_integrity_and_protection.vi.md
+  - "45. Summary Dialogue on Persistence": ch45_summary_dialogue_on_persistence.vi.md
+  - "46. A Dialogue on Distribution": ch46_a_dialogue_on_distribution.vi.md
+  - "47. Distributed Systems": ch47_distributed_systems.vi.md
+  - "48. Sun's Network File System NFS": ch48_suns_network_file_system_nfs.vi.md
+  - "49. The Andrew File System AFS": ch49_the_andrew_file_system_afs.vi.md
+  - "50. Summary Dialogue on Distribution": ch50_summary_dialogue_on_distribution.vi.md
+  - "A. A Dialogue on Virtual Machine Monitors": appA_a_dialogue_on_virtual_machine_monitors.vi.md
+  - "B. Virtual Machine Monitors": appB_virtual_machine_monitors.vi.md
+  - "C. A Dialogue on Monitors": appC_a_dialogue_on_monitors.vi.md
+  - "D. Monitors Deprecated": appD_monitors_deprecated.vi.md
+  - "E. A Dialogue on Labs": appE_a_dialogue_on_labs.vi.md
+  - "F. Laboratory Tutorial": appF_laboratory_tutorial.vi.md
+  - "G. Laboratory Systems Projects": appG_laboratory_systems_projects.vi.md
+  - "H. Laboratory xv6 Projects": appH_laboratory_xv6_projects.vi.md
+  - "I. Flash Based SSDs": appI_flash_based_ssds.vi.md
+  - ...
