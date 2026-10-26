@@ -32,3 +32,16 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung hoà
 - [**Chương 6 — Con trỏ và struct**](understanding_and_using_c_pointers/ch06_pointers_and_structures.vi.md) — giải phóng struct, giảm chi phí cấp phát, dùng con trỏ cho cấu trúc dữ liệu
 - [**Chương 7 — Bảo mật và lỗi dùng con trỏ**](understanding_and_using_c_pointers/ch07_security_issues_and_the_improper_use_of_pointers.vi.md) — khai báo và khởi tạo, các lỗi khi dùng và giải phóng, công cụ phân tích tĩnh
 - [**Chương 8 — Chủ đề khác**](understanding_and_using_c_pointers/ch08_odds_and_ends.vi.md) — ép kiểu con trỏ, aliasing và strict aliasing, thread, kỹ thuật hướng đối tượng
+
+## Theo sách *Extreme C*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Đi sâu vào C ở mức hệ thống: từ biên dịch, bộ nhớ, hướng đối tượng trong C tới đồng thời, IPC và công cụ build.
+
+- [**Lời nói đầu**](Extreme_C/ch00_preface.vi.md) — giới thiệu sách
+- [**Chương 1–5 — Nền tảng**](Extreme_C/ch01_essential_features.vi.md) — các tính năng cốt lõi của C, từ mã nguồn tới file nhị phân, object file, cấu trúc bộ nhớ tiến trình, stack và heap
+- [**Chương 6–9 — Hướng đối tượng trong C**](Extreme_C/ch06_oop_and_encapsulation.vi.md) — đóng gói, composition và aggregation, kế thừa và đa hình, so sánh với C++
+- [**Chương 10–12 — Unix và chuẩn C mới**](Extreme_C/ch10_unix_history_and_architecture.vi.md) — lịch sử và kiến trúc Unix, system call và kernel, các tính năng của chuẩn C mới nhất
+- [**Chương 13–18 — Đồng thời**](Extreme_C/ch13_concurrency.vi.md) — khái niệm đồng thời, đồng bộ hóa, thực thi và đồng bộ thread, thực thi và đồng bộ process
+- [**Chương 19–20 — IPC và socket**](Extreme_C/ch19_single_host_ipc_and_sockets.vi.md) — giao tiếp liên tiến trình trên một máy, lập trình socket
+- [**Chương 21–23 — Công cụ**](Extreme_C/ch21_integration_with_other_languages.vi.md) — tích hợp C với ngôn ngữ khác, unit test và debug, build system
+- [**Chỉ mục**](Extreme_C/91_index.md) — chỉ mục thuật ngữ của sách

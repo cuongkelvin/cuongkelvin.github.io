@@ -1,0 +1,27 @@
+title: Extreme C
+nav:
+  - Preface: ch00_preface.vi.md
+  - 1. Essential Features: ch01_essential_features.vi.md
+  - 2. From Source to Binary: ch02_from_source_to_binary.vi.md
+  - 3. Object Files: ch03_object_files.vi.md
+  - 4. Process Memory Structure: ch04_process_memory_structure.vi.md
+  - 5. Stack and Heap: ch05_stack_and_heap.vi.md
+  - 6. OOP and Encapsulation: ch06_oop_and_encapsulation.vi.md
+  - 7. Composition and Aggregation: ch07_composition_and_aggregation.vi.md
+  - 8. Inheritance and Polymorphism: ch08_inheritance_and_polymorphism.vi.md
+  - 9. Abstraction and OOP in C++: ch09_abstraction_and_oop_in_cplusplus.vi.md
+  - 10. Unix – History and Architecture: ch10_unix_history_and_architecture.vi.md
+  - 11. System Calls and Kernels: ch11_system_calls_and_kernels.vi.md
+  - 12. The Most Recent C: ch12_the_most_recent_c.vi.md
+  - 13. Concurrency: ch13_concurrency.vi.md
+  - 14. Synchronization: ch14_synchronization.vi.md
+  - 15. Thread Execution: ch15_thread_execution.vi.md
+  - 16. Thread Synchronization: ch16_thread_synchronization.vi.md
+  - 17. Process Execution: ch17_process_execution.vi.md
+  - 18. Process Synchronization: ch18_process_synchronization.vi.md
+  - 19. Single-Host IPC and Sockets: ch19_single_host_ipc_and_sockets.vi.md
+  - 20. Socket Programming: ch20_socket_programming.vi.md
+  - 21. Integration with Other Languages: ch21_integration_with_other_languages.vi.md
+  - 22. Unit Testing and Debugging: ch22_unit_testing_and_debugging.vi.md
+  - 23. Build Systems: ch23_build_systems.vi.md
+  - Index: 91_index.md
