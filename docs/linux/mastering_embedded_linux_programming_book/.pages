@@ -1,12 +1,32 @@
 title: Mastering Embedded Linux Programming
 nav:
-  - 2. Learning About Toolchains: ch02_learning_about_toolchains.vi.md
-  - 3. All About Bootloaders: ch03_all_about_bootloaders.vi.md
-  - 4. Porting and Configuring the Kernel: ch04_porting_and_configuring_the_kernel.vi.md
-  - 6. Selecting a Build System: ch06_selecting_a_build_system.vi.md
-  - 7. Creating a Storage Strategy: ch07_creating_a_storage_strategy.vi.md
-  - 9. Starting Up the init Program: ch09_starting_up_the_init_program.vi.md
-  - 10. Processes and Threads: ch10_learning_about_processes_and_threads.vi.md
-  - 11. Managing Memory: ch11_managing_memory.vi.md
-  - 13. Profiling and Tracing: ch13_profiling_and_tracing.vi.md
-  - ...
+  - Preface: ch00_preface.vi.md
+  - "I. Elements of Embedded Linux":
+      - Overview: section1_elements_of_embedded_linux.vi.md
+      - 1. Starting Out: ch01_starting_out.vi.md
+      - 2. Learning About Toolchains: ch02_learning_about_toolchains.vi.md
+      - 3. All About Bootloaders: ch03_all_about_bootloaders.vi.md
+      - 4. Configuring and Building the Kernel: ch04_configuring_and_building_the_kernel.vi.md
+      - 5. Building a Root Filesystem: ch05_building_a_root_filesystem.vi.md
+      - 6. Selecting a Build System: ch06_selecting_a_build_system.vi.md
+      - 7. Developing with Yocto: ch07_developing_with_yocto.vi.md
+      - 8. Yocto Under the Hood: ch08_yocto_under_the_hood.vi.md
+  - "II. System Architecture and Design Decisions":
+      - Overview: section2_system_architecture_and_design_decisions.vi.md
+      - 9. Creating a Storage Strategy: ch09_creating_a_storage_strategy.vi.md
+      - 10. Updating Software in the Field: ch10_updating_software_in_the_field.vi.md
+      - 11. Interfacing with Device Drivers: ch11_interfacing_with_device_drivers.vi.md
+      - 12. Prototyping with Breakout Boards: ch12_prototyping_with_breakout_boards.vi.md
+      - 13. Starting Up – The init Program: ch13_starting_up_the_init_program.vi.md
+      - 14. Starting with BusyBox runit: ch14_starting_with_busybox_runit.vi.md
+      - 15. Managing Power: ch15_managing_power.vi.md
+  - "III. Writing Embedded Applications":
+      - Overview: section3_writing_embedded_applications.vi.md
+      - 16. Packaging Python: ch16_packaging_python.vi.md
+      - 17. Processes and Threads: ch17_learning_about_processes_and_threads.vi.md
+      - 18. Managing Memory: ch18_managing_memory.vi.md
+  - "IV. Debugging and Optimizing Performance":
+      - Overview: section4_debugging_and_optimizing_performance.vi.md
+      - 19. Debugging with GDB: ch19_debugging_with_gdb.vi.md
+      - 20. Profiling and Tracing: ch20_profiling_and_tracing.vi.md
+      - 21. Real-Time Programming: ch21_real_time_programming.vi.md

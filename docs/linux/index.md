@@ -149,17 +149,13 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách. Nhìn Linux từ
 
 ## Theo sách *Mastering Embedded Linux Programming*
 
-Bản dịch tiếng Việt một số chương chọn lọc, kèm hình minh họa của sách.
+Bản dịch tiếng Việt bản mới của sách, kèm hình minh họa. Chia thành bốn phần, từ các thành phần của một hệ embedded Linux tới gỡ lỗi và tối ưu hiệu năng.
 
-- [**Chương 2 — Toolchain**](mastering_embedded_linux_programming_book/ch02_learning_about_toolchains.vi.md) — các loại toolchain, chọn thư viện C, cấu tạo toolchain
-- [**Chương 3 — Bootloader**](mastering_embedded_linux_programming_book/ch03_all_about_bootloaders.vi.md) — trình tự boot, UEFI, chuyển giao sang kernel, device tree, U-Boot
-- [**Chương 4 — Port và cấu hình kernel**](mastering_embedded_linux_programming_book/ch04_porting_and_configuring_the_kernel.vi.md) — chọn và build kernel, boot kernel, port sang board mới
-- [**Chương 6 — Chọn build system**](mastering_embedded_linux_programming_book/ch06_selecting_a_build_system.vi.md) — định dạng package, Buildroot, Yocto Project
-- [**Chương 7 — Chiến lược lưu trữ**](mastering_embedded_linux_programming_book/ch07_creating_a_storage_strategy.vi.md) — truy cập flash, file system cho NOR, NAND và managed flash, file system nén chỉ đọc
-- [**Chương 9 — Chương trình init**](mastering_embedded_linux_programming_book/ch09_starting_up_the_init_program.vi.md) — BusyBox init, System V init, systemd
-- [**Chương 10 — Process và thread**](mastering_embedded_linux_programming_book/ch10_learning_about_processes_and_threads.vi.md) — process, thread, lập lịch
-- [**Chương 11 — Quản lý bộ nhớ**](mastering_embedded_linux_programming_book/ch11_managing_memory.vi.md) — virtual memory, bố cục bộ nhớ kernel và user, swap, `mmap`, đo mức dùng bộ nhớ
-- [**Chương 13 — Profiling và tracing**](mastering_embedded_linux_programming_book/ch13_profiling_and_tracing.vi.md) — top, perf, OProfile, tracing sự kiện, Ftrace
+- [**Lời nói đầu**](mastering_embedded_linux_programming_book/ch00_preface.vi.md) — giới thiệu sách
+- [**Phần I — Các thành phần của embedded Linux**](mastering_embedded_linux_programming_book/section1_elements_of_embedded_linux.vi.md) — toolchain, bootloader, cấu hình và build kernel, root filesystem, build system, Yocto (chương 1–8)
+- [**Phần II — Kiến trúc hệ thống và các quyết định thiết kế**](mastering_embedded_linux_programming_book/section2_system_architecture_and_design_decisions.vi.md) — chiến lược lưu trữ, cập nhật phần mềm từ xa, device driver, làm prototype với breakout board, chương trình init, BusyBox runit, quản lý điện năng (chương 9–15)
+- [**Phần III — Viết ứng dụng embedded**](mastering_embedded_linux_programming_book/section3_writing_embedded_applications.vi.md) — đóng gói Python, process và thread, quản lý bộ nhớ (chương 16–18)
+- [**Phần IV — Gỡ lỗi và tối ưu hiệu năng**](mastering_embedded_linux_programming_book/section4_debugging_and_optimizing_performance.vi.md) — debug với GDB, profiling và tracing, lập trình real-time (chương 19–21)
 
 ## Chủ đề *Network device driver*
 
