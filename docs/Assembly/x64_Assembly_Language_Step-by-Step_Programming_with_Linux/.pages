@@ -1,0 +1,20 @@
+title: x64 Assembly Language Step-by-Step
+nav:
+  - Introduction: ch00_introduction.vi.md
+  - "1. It's All in the Plan": ch01_it_s_all_in_the_plan.vi.md
+  - 2. Alien Bases: ch02_alien_bases.vi.md
+  - 3. Lifting the Hood: ch03_lifting_the_hood.vi.md
+  - 4. Location, Location, Location: ch04_location_location_location.vi.md
+  - 5. The Right to Assemble: ch05_the_right_to_assemble.vi.md
+  - 6. A Place to Stand, with Access to Tools: ch06_a_place_to_stand_with_access_to_tools.vi.md
+  - 7. Following Your Instructions: ch07_following_your_instructions.vi.md
+  - 8. Our Object All Sublime: ch08_our_object_all_sublime.vi.md
+  - 9. Bits, Flags, Branches, and Tables: ch09_bits_flags_branches_and_tables.vi.md
+  - 10. Dividing and Conquering: ch10_dividing_and_conquering.vi.md
+  - 11. Strings and Things: ch11_strings_and_things.vi.md
+  - 12. Heading Out to C: ch12_heading_out_to_c.vi.md
+  - 13. Conclusion: ch13_conclusion.vi.md
+  - A. The Return of the Insight Debugger: ch14_appendix_a_the_return_of_the_insight_debugger.vi.md
+  - B. Partial x64 Instruction Reference: ch15_appendix_b_partial_x64_instruction_reference.vi.md
+  - C. Character Set Charts: ch16_appendix_c_character_set_charts.vi.md
+  - ...
