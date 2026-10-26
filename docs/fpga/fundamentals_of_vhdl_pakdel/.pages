@@ -1,0 +1,22 @@
+title: Fundamentals of VHDL
+nav:
+  - 0. Preface: ch00_preface.vi.md
+  - 1. Overview: ch01_overview.vi.md
+  - 2. Creating a Project in Vivado: ch02_creating_a_project_in_vivado.vi.md
+  - 3. The VHDL Design Structure: ch03_the_vhdl_design_structure.vi.md
+  - 4. Statements and Data Types: ch04_the_vhdl_statements_and_data_types.vi.md
+  - 5. Simulations in Vivado: ch05_the_simulations_in_vivado.vi.md
+  - 6. Buttons and LEDs Project: ch06_the_buttons_and_leds_project.vi.md
+  - 7. Blinky LEDs Project: ch07_the_blinky_leds_project.vi.md
+  - 8. LED Brightness Project: ch08_the_led_brightness_project.vi.md
+  - 9. UART Demonstration Project: ch09_the_uart_demonstration_project.vi.md
+  - 10. UART I/O and Register Access: ch10_the_uart_io_and_register_access.vi.md
+  - 11. ADC Processing Project: ch11_the_adc_processing_project.vi.md
+  - 12. SPI Interface Project: ch12_the_spi_interface_project.vi.md
+  - 13. Miscellaneous Vivado Projects: ch13_some_miscellaneous_projects_with_vivado.vi.md
+  - 14. VHDL from Simulink HDL Coder: ch14_generating_vhdl_code_using_simulink_hdl_coder.vi.md
+  - 15. Simulink Flowcharts for VHDL: ch15_flowcharts_in_simulink_for_vhdl_code_generation.vi.md
+  - 16. ML Regression Model on FPGA: ch16_machine_learning_regression_model_on_fpga.vi.md
+  - 17. ML Binary Classification on FPGA: ch17_machine_learning_binary_classification_on_fpga.vi.md
+  - 18. Deep Neural Network on FPGA: ch18_deploying_a_deep_neural_network_on_fpga.vi.md
+  - ...

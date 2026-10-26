@@ -1,0 +1,22 @@
+title: Free Range VHDL
+nav:
+  - 0. Purpose of This Book: ch00_purpose_of_this_book.vi.md
+  - 1. Introduction to VHDL: ch01_introduction_to_vhdl.vi.md
+  - 2. VHDL Invariants: ch02_vhdl_invariants.vi.md
+  - 3. VHDL Design Units: ch03_vhdl_design_units.vi.md
+  - 4. VHDL Programming Paradigm: ch04_vhdl_programming_paradigm.vi.md
+  - 5. Standard Models in VHDL Architectures: ch05_standard_models_in_vhdl_architectures.vi.md
+  - 6. VHDL Operators: ch06_vhdl_operators.vi.md
+  - 7. VHDL for Sequential Circuits: ch07_using_vhdl_for_sequential_circuits.vi.md
+  - 8. Finite State Machine Design: ch08_finite_state_machine_design_using_vhdl.vi.md
+  - 9. Structural Modeling: ch09_structural_modeling_in_vhdl.vi.md
+  - 10. Registers and RTL: ch10_registers_and_register_transfer_level.vi.md
+  - 11. Data Objects: ch11_data_objects.vi.md
+  - 12. Looping Constructs: ch12_looping_constructs.vi.md
+  - 13. Standard Digital Circuits in VHDL: ch13_standard_digital_circuits_in_vhdl.vi.md
+  - A. VHDL Reserved Words: appA_vhdl_reserved_words.vi.md
+  - B. Standard VHDL Packages: appB_standard_vhdl_packages.vi.md
+  - C. Exercise Solutions: appC_exercise_solutions.vi.md
+  - D. VHDL Reference Cards: appD_vhdl_reference_cards.vi.md
+  - E. Contributors: appE_contributors_to_this_book.vi.md
+  - ...
