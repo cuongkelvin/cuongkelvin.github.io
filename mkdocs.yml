@@ -57,6 +57,7 @@ extra_css:
 
 extra_javascript:
   - javascripts/nav-toggle.js   # nút ẩn/hiện thanh điều hướng trái trên header
+  - javascripts/goatcounter.js  # đếm lượt xem (cuongkelvin.goatcounter.com)
   - javascripts/mathjax.js   # cấu hình MathJax cho arithmatex
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
