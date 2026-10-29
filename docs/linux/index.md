@@ -2,6 +2,68 @@
 
 Sổ tay ghi chép trong quá trình tự học lập trình hệ thống trên Linux.
 
+## Lộ trình đọc
+
+Thứ tự đọc đề xuất: kernel, rồi driver, rồi network, rồi embedded, cuối cùng là Yocto. Đọc bản tiếng Việt; khi cần đối chiếu thì mở bản gốc tiếng Anh.
+
+```
+Kernel     1. Kaiwan LKP 2e          →  2. ULK3
+Driver     3. Kaiwan LKP Part 2      →  4. Madieu 2022
+Network    5. Benvenuti (cả cuốn)    →  6. Rosen  →  7. Network driver
+Embedded   8. Embedded Linux Primer  →  9. Mastering Embedded Linux Development 4e
+Yocto     10. ELDUYP 3e              → 11. Giometti 2025  →  12. Cookbook 2e (tra cứu)
+```
+
+| Bước | Giai đoạn | Sách | Đọc để nắm |
+|---|---|---|---|
+| 1 | Kernel | [Linux Kernel Programming 2e](linux_kernel_programming/ch01_linux_kernel_programming_a_quick_introduction.vi.md) | Build kernel, viết module, process và thread, bộ nhớ, scheduler, đồng bộ hóa trên kernel mới |
+| 2 | Kernel | [Understanding the Linux Kernel 3e](understanding_the_linux_kernel/ch01_introduction.vi.md) | Cơ chế bên trong kernel ở mức sâu: địa chỉ bộ nhớ, process, interrupt, scheduling, VFS, page cache, IPC |
+| 3 | Driver | [Linux Kernel Programming Part 2](linux_kernel_programming_part_2/ch01_writing_a_simple_misc_character_device_driver.vi.md) | Char driver, giao tiếp user space và kernel, I/O memory, interrupt, timer, workqueue |
+| 4 | Driver | [Linux Device Driver Development 2e](linux_device_driver_development/ch01_introduction_to_kernel_development.vi.md) | Platform driver, device tree, I2C, SPI, regmap, DMA |
+| 5 | Network | [Understanding Linux Network Internals](understanding_linux_network_internals_book/ch01_introduction.vi.md) | `sk_buff`, `net_device`, khởi tạo device, NAPI, nhận và gửi frame, protocol handler, bridging |
+| 6 | Network | [Linux Kernel Networking](linux_kernel_networking_book/ch01_introduction.vi.md) | Netlink, IPv4, IPv6, routing, neighbouring, Netfilter, IPsec, TCP và UDP |
+| 7 | Network | [Network device driver](network_device_drivers/ldd3_ch17/ch17_network_drivers.vi.md) | Viết network driver, thứ tự đọc ở ghi chú bên dưới |
+| 8 | Embedded | [Embedded Linux Primer 2e](embedded_linux_primer_book/ch01_introduction.vi.md) | Khởi động kernel và user space, bootloader, file system, MTD, BusyBox, debug, real-time, USB, udev |
+| 9 | Embedded | [Mastering Embedded Linux Development 4e](mastering_embedded_linux_programming_book/ch01_starting_out.vi.md) | Toàn bộ quy trình dựng hệ thống embedded Linux, ví dụ trên Raspberry Pi 4 |
+| 10–12 | Yocto | [Ba quyển Yocto](../yocto/index.md) | Poky, BitBake, layer, recipe, thêm phần cứng mới, tra cứu theo công thức |
+
+**Ghi chú**
+
+- **Bước 1 và 2 bổ sung cho nhau.** Kaiwan cho cách làm thực tế trên kernel 6.1, ULK3 giải thích cơ chế sâu. ULK3 viết cho kernel 2.6.11 trên x86: phần segmentation và IDT không áp dụng cho ARM, scheduler O(1) đã được thay bằng CFS rồi EEVDF. Khi hai sách khác nhau, tin Kaiwan.
+- **Bước 3 nối tiếp bước 1**, cùng tác giả. Bước 4 dùng bản Madieu 2022.
+- **Bước 5 đọc trước Rosen** để nắm `sk_buff`, `net_device` và đường đi của frame trong kernel. Chỉ có chương 1–17; phần IPv4, neighbouring và routing của Benvenuti không dịch vì Rosen đã có, với code mới hơn.
+- **Bước 7, thứ tự đọc network driver:**
+    1. [LDD3 ch17](network_device_drivers/ldd3_ch17/ch17_network_drivers.vi.md): nắm khái niệm qua driver mẫu snull.
+    2. [Madieu 2017 ch22](network_device_drivers/madieu2017_ch22/ch22_network_interface_card_drivers.vi.md): cách viết theo API mới.
+    3. Đọc lại Benvenuti [ch09](understanding_linux_network_internals_book/ch09_interrupts_and_network_drivers.vi.md)–[ch11](understanding_linux_network_internals_book/ch11_frame_transmission.vi.md): chuyện gì xảy ra sau khi driver gọi `netif_rx` hoặc `napi_schedule`.
+    4. [ELDD ch15](network_device_drivers/eldd_ch15/ch15_network_interface_cards.vi.md): tham khảo thêm.
+- **Bước 8 và 9 đọc song song.** Đọc chương MEL 4e trước, rồi mở chương Primer tương ứng ở những phần Primer sâu hơn, theo bảng dưới.
+- **Bước 9 dùng MEL 4e (2025)** thay cho MEL 3e vì mới hơn và ví dụ chạy trên Raspberry Pi 4.
+- **Bước 10–12** đọc sau MEL 4e [ch06](mastering_embedded_linux_programming_book/ch06_selecting_a_build_system.vi.md)–[ch08](mastering_embedded_linux_programming_book/ch08_yocto_under_the_hood.vi.md).
+
+**Bảng đọc kèm bước 8 và 9**
+
+| Chủ đề | MEL 4e | Primer |
+|---|---|---|
+| Tổng quan | [ch01](mastering_embedded_linux_programming_book/ch01_starting_out.vi.md) | [ch01](embedded_linux_primer_book/ch01_introduction.vi.md)–[ch02](embedded_linux_primer_book/ch02_the_big_picture.vi.md) |
+| Toolchain | [ch02](mastering_embedded_linux_programming_book/ch02_learning_about_toolchains.vi.md) | [ch12](embedded_linux_primer_book/ch12_embedded_development_environment.vi.md) |
+| Bootloader | [ch03](mastering_embedded_linux_programming_book/ch03_all_about_bootloaders.vi.md) | [ch07](embedded_linux_primer_book/ch07_bootloaders.vi.md) |
+| Kernel: cấu hình, build, khởi động | [ch04](mastering_embedded_linux_programming_book/ch04_configuring_and_building_the_kernel.vi.md) | [ch04](embedded_linux_primer_book/ch04_the_linux_kernel_a_different_perspective.vi.md)–[ch05](embedded_linux_primer_book/ch05_kernel_initialization.vi.md) |
+| Root filesystem, BusyBox | [ch05](mastering_embedded_linux_programming_book/ch05_building_a_root_filesystem.vi.md) | [ch06](embedded_linux_primer_book/ch06_user_space_initialization.vi.md), [ch11](embedded_linux_primer_book/ch11_busybox.vi.md) |
+| Build system | [ch06](mastering_embedded_linux_programming_book/ch06_selecting_a_build_system.vi.md)–[ch08](mastering_embedded_linux_programming_book/ch08_yocto_under_the_hood.vi.md) | [ch16](embedded_linux_primer_book/ch16_open_source_build_systems.vi.md) |
+| Storage, flash, MTD | [ch09](mastering_embedded_linux_programming_book/ch09_creating_a_storage_strategy.vi.md) | [ch09](embedded_linux_primer_book/ch09_file_systems.vi.md)–[ch10](embedded_linux_primer_book/ch10_mtd_subsystem.vi.md) |
+| Cập nhật phần mềm (OTA) | [ch10](mastering_embedded_linux_programming_book/ch10_updating_software_in_the_field.vi.md) | |
+| Driver nhìn từ user space | [ch11](mastering_embedded_linux_programming_book/ch11_interfacing_with_device_drivers.vi.md) | [ch08](embedded_linux_primer_book/ch08_device_driver_basics.vi.md) |
+| Prototype với board mở rộng | [ch12](mastering_embedded_linux_programming_book/ch12_prototyping_with_add_on_boards.vi.md) | |
+| Init (BusyBox init, systemd…) | [ch13](mastering_embedded_linux_programming_book/ch13_starting_up_the_init_program.vi.md) | [ch06](embedded_linux_primer_book/ch06_user_space_initialization.vi.md) |
+| Quản lý điện năng | [ch14](mastering_embedded_linux_programming_book/ch14_managing_power.vi.md) | |
+| Python, container | [ch15](mastering_embedded_linux_programming_book/ch15_packaging_python.vi.md)–[ch16](mastering_embedded_linux_programming_book/ch16_deploying_container_images.vi.md) | |
+| Process, thread, bộ nhớ | [ch17](mastering_embedded_linux_programming_book/ch17_learning_about_processes_and_threads.vi.md)–[ch18](mastering_embedded_linux_programming_book/ch18_managing_memory.vi.md) | |
+| Debug với GDB | [ch19](mastering_embedded_linux_programming_book/ch19_debugging_with_gdb.vi.md) | [ch13](embedded_linux_primer_book/ch13_development_tools.vi.md)–[ch15](embedded_linux_primer_book/ch15_debugging_embedded_linux_applications.vi.md) |
+| Profiling, tracing | [ch20](mastering_embedded_linux_programming_book/ch20_profiling_and_tracing.vi.md) | |
+| Real-time | [ch21](mastering_embedded_linux_programming_book/ch21_real_time_programming.vi.md) | [ch17](embedded_linux_primer_book/ch17_linux_and_real_time.vi.md) |
+| USB, udev | | [ch18](embedded_linux_primer_book/ch18_universal_serial_bus.vi.md)–[ch19](embedded_linux_primer_book/ch19_udev.vi.md) |
+
 ## Theo sách *Linux Kernel Programming*
 
 Bản dịch tiếng Việt, kèm hình minh họa của sách.
@@ -19,18 +81,6 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách.
 - [**Chương 11 — CPU scheduler, phần 2**](linux_kernel_programming/ch11_the_cpu_scheduler_part_2.vi.md) — CPU affinity, đặt policy và priority, cgroup, chạy Linux như RTOS
 - [**Chương 12 — Đồng bộ hóa trong kernel, phần 1**](linux_kernel_programming/ch12_kernel_synchronization_part_1.vi.md) — critical section, mutex vs spinlock, locking và interrupt, lỗi thường gặp
 - [**Chương 13 — Đồng bộ hóa trong kernel, phần 2**](linux_kernel_programming/ch13_kernel_synchronization_part_2.vi.md) — `atomic_t`/`refcount_t`, reader-writer spinlock, false sharing, per-CPU và RCU, memory barrier
-
-## Theo sách *Linux Kernel Programming Part 2*
-
-Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung vào character device driver và đồng bộ hóa.
-
-- [**Chương 1 — Misc character device driver đơn giản**](linux_kernel_programming_part_2/ch01_writing_a_simple_misc_character_device_driver.vi.md) — viết misc driver, chép dữ liệu giữa kernel và user space, lưu ý bảo mật
-- [**Chương 2 — Giao tiếp user-kernel**](linux_kernel_programming_part_2/ch02_user_kernel_communication_pathways.vi.md) — procfs, sysfs, debugfs, netlink socket, `ioctl`, bảng so sánh các cách
-- [**Chương 3 — Hardware I/O memory**](linux_kernel_programming_part_2/ch03_working_with_hardware_i_o_memory.vi.md) — truy cập vùng nhớ phần cứng, memory-mapped I/O và port-mapped I/O
-- [**Chương 4 — Xử lý hardware interrupt**](linux_kernel_programming_part_2/ch04_handling_hardware_interrupts.vi.md) — cấp phát IRQ, viết interrupt handler, threaded interrupt, top half và bottom half
-- [**Chương 5 — Kernel timer, thread và workqueue**](linux_kernel_programming_part_2/ch05_working_with_kernel_timers_threads_and_workqueues.vi.md) — delay trong kernel, kernel timer, kernel thread, workqueue
-- [**Chương 6 — Đồng bộ hóa trong kernel, phần 1**](linux_kernel_programming_part_2/ch06_kernel_synchronization_part_1.vi.md) — critical section, mutex vs spinlock, locking và interrupt
-- [**Chương 7 — Đồng bộ hóa trong kernel, phần 2**](linux_kernel_programming_part_2/ch07_kernel_synchronization_part_2.vi.md) — `atomic_t`/`refcount_t`, reader-writer spinlock, false sharing, per-CPU, lock debugging, memory barrier
 
 ## Theo sách *Understanding the Linux Kernel*
 
@@ -56,6 +106,18 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách.
 - [**Chương 18 — Filesystem Ext2 và Ext3**](understanding_the_linux_kernel/ch18_the_ext2_and_ext3_filesystems.vi.md) — cấu trúc dữ liệu trên đĩa và trong bộ nhớ, quản lý không gian đĩa, journaling của Ext3
 - [**Chương 19 — Giao tiếp giữa tiến trình**](understanding_the_linux_kernel/ch19_process_communication.vi.md) — pipe, FIFO, System V IPC, POSIX message queue
 - [**Chương 20 — Thực thi chương trình**](understanding_the_linux_kernel/ch20_program_execution.vi.md) — định dạng file thực thi, execution domain, họ hàm `exec`
+
+## Theo sách *Linux Kernel Programming Part 2*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung vào character device driver và đồng bộ hóa.
+
+- [**Chương 1 — Misc character device driver đơn giản**](linux_kernel_programming_part_2/ch01_writing_a_simple_misc_character_device_driver.vi.md) — viết misc driver, chép dữ liệu giữa kernel và user space, lưu ý bảo mật
+- [**Chương 2 — Giao tiếp user-kernel**](linux_kernel_programming_part_2/ch02_user_kernel_communication_pathways.vi.md) — procfs, sysfs, debugfs, netlink socket, `ioctl`, bảng so sánh các cách
+- [**Chương 3 — Hardware I/O memory**](linux_kernel_programming_part_2/ch03_working_with_hardware_i_o_memory.vi.md) — truy cập vùng nhớ phần cứng, memory-mapped I/O và port-mapped I/O
+- [**Chương 4 — Xử lý hardware interrupt**](linux_kernel_programming_part_2/ch04_handling_hardware_interrupts.vi.md) — cấp phát IRQ, viết interrupt handler, threaded interrupt, top half và bottom half
+- [**Chương 5 — Kernel timer, thread và workqueue**](linux_kernel_programming_part_2/ch05_working_with_kernel_timers_threads_and_workqueues.vi.md) — delay trong kernel, kernel timer, kernel thread, workqueue
+- [**Chương 6 — Đồng bộ hóa trong kernel, phần 1**](linux_kernel_programming_part_2/ch06_kernel_synchronization_part_1.vi.md) — critical section, mutex vs spinlock, locking và interrupt
+- [**Chương 7 — Đồng bộ hóa trong kernel, phần 2**](linux_kernel_programming_part_2/ch07_kernel_synchronization_part_2.vi.md) — `atomic_t`/`refcount_t`, reader-writer spinlock, false sharing, per-CPU, lock debugging, memory barrier
 
 ## Theo sách *Linux Device Driver Development*
 
@@ -123,6 +185,14 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách. Đi qua từng g
 - [**Phụ lục B — Quản trị mạng**](linux_kernel_networking_book/chB_network_administration.vi.md) — danh sách công cụ dòng lệnh để quản trị và debug mạng
 - [**Phụ lục C — Thuật ngữ**](linux_kernel_networking_book/chC_glossary.vi.md) — bảng thuật ngữ của sách
 
+## Chủ đề *Network device driver*
+
+Ba chương về driver card mạng, lấy từ ba quyển sách khác nhau để đọc đối chiếu.
+
+- [**LDD3 — Chương 17: Network driver**](network_device_drivers/ldd3_ch17/ch17_network_drivers.vi.md) — driver mẫu snull, kết nối với kernel, `net_device`, gửi và nhận gói, interrupt handler
+- [**Essential Linux Device Drivers — Chương 15: Network interface card**](network_device_drivers/eldd_ch15/ch15_network_interface_cards.vi.md) — cấu trúc dữ liệu driver, giao tiếp với tầng giao thức, quản lý buffer, ví dụ Ethernet NIC
+- [**Linux Device Drivers Development — Chương 22: NIC driver**](network_device_drivers/madieu2017_ch22/ch22_network_interface_card_drivers.vi.md) — cấu trúc dữ liệu driver, các method của device và driver
+
 ## Theo sách *Embedded Linux Primer*
 
 Bản dịch tiếng Việt, kèm hình minh họa của sách. Nhìn Linux từ góc độ hệ nhúng, từ bootloader, kernel tới công cụ debug.
@@ -157,11 +227,3 @@ Bản dịch tiếng Việt bản thứ tư của sách, kèm hình minh họa. 
 - [**Phần III — Kiến trúc hệ thống và quyết định thiết kế**](mastering_embedded_linux_programming_book/part3_system_architecture_and_design_decisions.vi.md) — chiến lược lưu trữ, cập nhật phần mềm từ xa, device driver, làm prototype với add-on board, chương trình init, quản lý điện năng (chương 9–14)
 - [**Phần IV — Phát triển ứng dụng**](mastering_embedded_linux_programming_book/part4_developing_applications.vi.md) — đóng gói Python, triển khai container, process và thread, quản lý bộ nhớ (chương 15–18)
 - [**Phần V — Gỡ lỗi và tối ưu hiệu năng**](mastering_embedded_linux_programming_book/part5_debugging_and_optimizing_performance.vi.md) — debug với GDB, profiling và tracing, lập trình real-time (chương 19–21)
-
-## Chủ đề *Network device driver*
-
-Ba chương về driver card mạng, lấy từ ba quyển sách khác nhau để đọc đối chiếu.
-
-- [**LDD3 — Chương 17: Network driver**](network_device_drivers/ldd3_ch17/ch17_network_drivers.vi.md) — driver mẫu snull, kết nối với kernel, `net_device`, gửi và nhận gói, interrupt handler
-- [**Essential Linux Device Drivers — Chương 15: Network interface card**](network_device_drivers/eldd_ch15/ch15_network_interface_cards.vi.md) — cấu trúc dữ liệu driver, giao tiếp với tầng giao thức, quản lý buffer, ví dụ Ethernet NIC
-- [**Linux Device Drivers Development — Chương 22: NIC driver**](network_device_drivers/madieu2017_ch22/ch22_network_interface_card_drivers.vi.md) — cấu trúc dữ liệu driver, các method của device và driver

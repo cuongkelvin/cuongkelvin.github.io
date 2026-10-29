@@ -2,12 +2,12 @@ title: Linux
 nav:
   - index.md
   - linux_kernel_programming
-  - linux_kernel_programming_part_2
   - understanding_the_linux_kernel
+  - linux_kernel_programming_part_2
   - linux_device_driver_development
   - understanding_linux_network_internals_book
   - linux_kernel_networking_book
+  - network_device_drivers
   - embedded_linux_primer_book
   - mastering_embedded_linux_programming_book
-  - network_device_drivers
   - ...
