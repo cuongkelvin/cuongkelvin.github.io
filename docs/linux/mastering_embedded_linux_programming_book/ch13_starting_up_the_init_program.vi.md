@@ -1,36 +1,42 @@
-# *Chương 13*: Khởi động – Chương trình init (Starting Up – The init Program)
+# Chương 13: Khởi động – Chương trình init (Starting Up – The init Program)
 
-Chúng ta đã xem kernel boot như thế nào tới điểm nó khởi chạy chương trình đầu tiên, `init`, trong [*Chương 4*](ch04_configuring_and_building_the_kernel.vi.md), *Cấu hình và build kernel*. Trong [*Chương 5*](ch05_building_a_root_filesystem.vi.md), *Xây dựng root filesystem*, và [*Chương 6*](ch06_selecting_a_build_system.vi.md), *Chọn build system*, chúng ta đã xem việc tạo các root filesystem với độ phức tạp khác nhau, tất cả đều chứa một chương trình `init`. Bây giờ, đã đến lúc xem chương trình `init` chi tiết hơn và khám phá vì sao nó lại quan trọng đối với phần còn lại của hệ thống đến vậy.
+Trong Chương 4, chúng ta đã xem kernel boot như thế nào cho đến lúc nó khởi chạy chương trình đầu tiên, `init`. Trong Chương 5 và 6, chúng ta đã xem cách tạo các root filesystem với độ phức tạp khác nhau, tất cả đều chứa một chương trình `init`. Giờ là lúc xem xét chính chương trình `init` chi tiết hơn và khám phá vì sao nó lại quan trọng đến vậy đối với phần còn lại của hệ thống.
 
-Có nhiều hiện thực khả dĩ của `init`. Tôi sẽ mô tả ba hiện thực chính trong chương này: BusyBox `init`, System V `init` và `systemd`. Với mỗi hiện thực, tôi sẽ đưa ra một cái nhìn tổng quan về cách nó hoạt động và loại hệ thống mà nó phù hợp nhất. Một phần của việc này là cân bằng trade-off giữa kích thước, độ phức tạp và tính linh hoạt. Chúng ta sẽ học cách khởi chạy một daemon bằng cả BusyBox `init` lẫn System V `init`. Chúng ta cũng sẽ học cách thêm một service vào `systemd` để làm điều tương tự.
+Có nhiều bản hiện thực của `init`. Trong chương này, tôi sẽ mô tả ba bản chính: BusyBox `init`, System V `init` và `systemd`. Tôi sẽ giải thích cách chúng hoạt động và loại hệ thống nào phù hợp nhất với từng loại. Một phần của việc này là cân bằng sự đánh đổi giữa kích thước, độ phức tạp và tính linh hoạt. Chúng ta sẽ học cách khởi chạy một daemon bằng cả BusyBox `init` lẫn System V `init`. Chúng ta cũng sẽ học cách thêm một service vào `systemd`.
 
 Trong chương này, chúng ta sẽ đề cập các chủ đề sau:
 
 - Sau khi kernel đã boot
+
 - Giới thiệu các chương trình `init`
+
 - BusyBox `init`
+
 - System V `init`
+
 - `systemd`
 
 ## Yêu cầu kỹ thuật
 
 Để làm theo các ví dụ, hãy bảo đảm bạn có những thứ sau:
 
-- Một hệ thống host Linux-based
-- Bản phát hành Buildroot 2020.02.9 LTS
-- Bản phát hành Yocto 3.1 (Dunfell) LTS
+- Một hệ thống host Ubuntu 24.04 hoặc bản LTS mới hơn với ít nhất 90 GB dung lượng đĩa trống
 
-Lẽ ra bạn đã cài bản phát hành 2020.02.9 LTS của Buildroot cho [*Chương 6*](ch06_selecting_a_build_system.vi.md), *Chọn build system*. Nếu chưa, hãy tham khảo mục *System requirements* của *The Buildroot user manual* ([https://buildroot.org/downloads/manual/manual.html](https://buildroot.org/downloads/manual/manual.html)) trước khi cài Buildroot trên host Linux theo hướng dẫn trong [*Chương 6*](ch06_selecting_a_build_system.vi.md).
+- Bản phát hành Buildroot 2024.02.6 LTS
 
-Lẽ ra bạn đã build bản phát hành Yocto 3.1 (Dunfell) LTS cho [*Chương 6*](ch06_selecting_a_build_system.vi.md), *Chọn build system*. Nếu chưa, hãy tham khảo các mục *Compatible Linux Distribution* và *Build Host Packages* của hướng dẫn *Yocto Project Quick Build* ([https://www.yoctoproject.org/docs/current/brief-yoctoprojectqs/brief-yoctoprojectqs.html](https://www.yoctoproject.org/docs/current/brief-yoctoprojectqs/brief-yoctoprojectqs.html)) trước khi build Yocto trên host Linux theo hướng dẫn trong [*Chương 6*](ch06_selecting_a_build_system.vi.md).
+- Bản phát hành Yocto 5.0 (scarthgap) LTS
 
-Toàn bộ code cho chương này có thể được tìm thấy trong thư mục `Chapter13` của repository GitHub của sách: [https://github.com/PacktPublishing/Mastering-Embedded-Linux-Programming-Third-Edition](https://github.com/PacktPublishing/Mastering-Embedded-Linux-Programming-Third-Edition).
+Lẽ ra bạn đã cài đặt bản phát hành 2024.02.6 LTS của Buildroot cho Chương 6. Nếu chưa, hãy tham khảo phần System requirements của The Buildroot user manual (`https://buildroot.org/downloads/manual/manual.html)` trước khi cài đặt Buildroot trên host Linux theo hướng dẫn từ Chương 6.
+
+Lẽ ra bạn đã build bản phát hành 5.0 (scarthgap) LTS của Yocto trong Chương 6. Nếu chưa, hãy tham khảo các phần Compatible Linux Distribution và Build Host Packages của Yocto Project Quick Build guide (`https://docs.yoctoproject.org/brief-yoctoprojectqs/`) trước khi build Yocto trên host Linux theo hướng dẫn trong Chương 6.
+
+Code dùng trong chương này có trong thư mục của chương trong GitHub repository của cuốn sách: `https://github.com/PacktPublishing/Mastering-Embedded-Linux-Development`.
 
 ## Sau khi kernel đã boot
 
-Chúng ta đã thấy trong [*Chương 4*](ch04_configuring_and_building_the_kernel.vi.md), *Cấu hình và build kernel*, cách code bootstrap của kernel tìm một root filesystem, hoặc `initramfs` hoặc một filesystem được chỉ định bởi `root=` trên kernel command line, rồi thực thi một chương trình mà, theo mặc định, là `/init` với `initramfs` và `/sbin/init` với một filesystem thông thường. Chương trình `init` có đặc quyền `root`, và vì nó là process đầu tiên chạy, nó có **process ID** (**PID**) là `1`. Nếu, vì lý do nào đó, `init` không thể được khởi động, kernel sẽ panic.
+Trong Chương 4, chúng ta đã thấy code bootstrap của kernel tìm một root filesystem như thế nào, hoặc là `initramfs` hoặc là một filesystem được chỉ định bởi `root=` trên kernel command line. Code bootstrap của kernel sau đó thực thi một chương trình, mặc định là `/init` đối với `initramfs` và `/sbin/init` đối với một filesystem thông thường. Chương trình `init` có quyền `root`, và vì nó là process đầu tiên chạy, nó có process ID (PID) là 1. Nếu vì lý do nào đó `init` không thể được khởi động, kernel sẽ panic và hệ thống sẽ không boot được.
 
-Chương trình `init` là tổ tiên của tất cả các process khác, như được thể hiện ở đây bằng lệnh `pstree` chạy trên một hệ thống embedded Linux đơn giản:
+Chương trình `init` là tổ tiên của mọi process khác, như được thể hiện ở đây bằng lệnh `pstree` chạy trên một hệ thống embedded Linux đơn giản:
 
 ```
 # pstree -gn
@@ -40,59 +46,82 @@ init(1)-+-syslogd(63)
         `-sh(100)---pstree(109)
 ```
 
-Công việc của chương trình `init` là nắm quyền điều khiển quá trình boot trong user space và làm cho nó chạy. Nó có thể đơn giản như một lệnh `shell` chạy một shell script—có một ví dụ về điều này ở đầu [*Chương 5*](ch05_building_a_root_filesystem.vi.md), *Xây dựng root filesystem*—nhưng trong đa số trường hợp, bạn sẽ dùng một daemon `init` chuyên dụng để thực hiện các nhiệm vụ sau:
+Công việc của chương trình `init` là nắm quyền điều khiển quá trình boot trong user space và đưa nó vào hoạt động. Nó có thể đơn giản chỉ là một lệnh shell chạy một shell script—có một ví dụ về điều này ở đầu Chương 5—nhưng trong hầu hết các trường hợp, bạn sẽ dùng một daemon `init` chuyên dụng để thực hiện các tác vụ sau:
 
-- Trong lúc boot, sau khi kernel chuyển giao quyền điều khiển, chương trình `init` khởi động các chương trình daemon khác và cấu hình các tham số hệ thống cùng những thứ khác cần để đưa hệ thống vào trạng thái hoạt động.
-- Tùy chọn, nó khởi chạy một login daemon, chẳng hạn `getty`, trên các terminal cho phép login shell.
-- Nó nhận nuôi các process trở thành mồ côi do process cha trực tiếp của chúng kết thúc và không còn process nào khác trong thread group.
-- Nó phản ứng với việc bất kỳ process con trực tiếp nào của `init` kết thúc bằng cách bắt signal `SIGCHLD` và thu giá trị trả về để ngăn chúng trở thành zombie process. Tôi sẽ nói thêm về zombie trong [*Chương 17*](ch17_learning_about_processes_and_threads.vi.md), *Tìm hiểu về process và thread*.
-- Tùy chọn, nó khởi động lại các daemon đã kết thúc.
-- Nó xử lý việc tắt hệ thống.
+- Khởi động các daemon khác và cấu hình các tham số hệ thống cùng những thứ khác cần thiết để đưa hệ thống vào trạng thái hoạt động.
 
-Nói cách khác, `init` quản lý vòng đời của hệ thống từ lúc khởi động tới lúc tắt. Có một trường phái cho rằng `init` ở vị trí tốt để xử lý các sự kiện runtime khác, chẳng hạn phần cứng mới và việc nạp và gỡ module. Đây là điều `systemd` làm.
+- Tùy chọn, khởi chạy một daemon đăng nhập, như `getty`, trên các terminal cho phép login shell.
+
+- Nhận nuôi các process trở thành mồ côi do process cha trực tiếp của chúng kết thúc và không còn process nào khác trong thread group.
+
+- Phản hồi khi bất kỳ process con trực tiếp nào của nó kết thúc bằng cách bắt signal `SIGCHLD` và thu nhận giá trị trả về để ngăn chúng trở thành zombie process. Tôi sẽ nói thêm về zombie trong Chương 17.
+
+- Tùy chọn, khởi động lại các daemon khác đã kết thúc.
+
+- Xử lý việc tắt hệ thống.
+
+Nói cách khác, `init` quản lý vòng đời của hệ thống từ lúc bootup đến lúc tắt máy. Có một trường phái cho rằng `init` ở vị trí tốt để xử lý các sự kiện runtime khác như phần cứng mới và việc nạp và gỡ module. Đây là điều mà `systemd` làm.
 
 ## Giới thiệu các chương trình init
 
-Ba chương trình `init` mà bạn có khả năng gặp nhất trong các thiết bị nhúng là BusyBox `init`, System V `init` và `systemd`. Buildroot có các tùy chọn để build cả ba với BusyBox `init` là mặc định. Yocto Project cho phép bạn dễ dàng chọn giữa System V `init` và `systemd` với System V `init` là mặc định. Dù bản phân phối Poky-tiny của Yocto đi kèm BusyBox `init`, hầu hết các distribution layer khác thì không.
+Ba chương trình init mà bạn có khả năng gặp nhất trong các thiết bị nhúng là BusyBox `init`, System V `init` và `systemd`. Buildroot cung cấp cả ba với BusyBox `init` là mặc định. The Yocto Project cho phép bạn chọn giữa System V `init` và `systemd` với System V `init` là mặc định. Trong khi tiny distribution của Yocto đi kèm BusyBox `init`, hầu hết các distro layer khác thì không.
 
-Bảng sau đưa ra một số chỉ số để so sánh ba chương trình:
+Bảng sau đưa ra một số tiêu chí để so sánh ba chương trình:
 
-![](images/B11566_13_Table_01.jpg)
+| Tiêu chí | BusyBox init | System V init | systemd |
+|---|---|---|---|
+| Độ phức tạp | Thấp | Trung bình | Cao |
+| Tốc độ bootup | Nhanh | Chậm | Trung bình |
+| Shell yêu cầu | ash | dash hoặc bash | Không |
+| Số file thực thi | 1(\*) | 4 | 50 |
+| libc | Bất kỳ | Bất kỳ | glibc |
+| Kích thước (MB) | \< 0.1(\*) | 0.1 | 34(\*\*) |
 
-(*) BusyBox `init` là một phần của file thực thi duy nhất của BusyBox, được tối ưu cho kích thước trên đĩa.
+Bảng 13.1 – So sánh BusyBox init, System V init và systemd
 
-(**) Dựa trên cấu hình Buildroot của `systemd`.
+(\*) BusyBox `init` là một phần của file thực thi duy nhất của BusyBox, vốn được tối ưu cho kích thước trên đĩa.
 
-Nói chung, tính linh hoạt và độ phức tạp tăng lên khi bạn đi từ BusyBox `init` tới `systemd`.
+(\*\*) Dựa trên cấu hình `systemd` của Buildroot.
+
+Nói chung, tính linh hoạt và độ phức tạp tăng dần khi bạn đi từ BusyBox `init` đến `systemd`.
 
 ## BusyBox init
 
-**BusyBox** có một chương trình `init` tối giản dùng một file cấu hình, `/etc/inittab`, để định nghĩa các quy tắc khởi động chương trình lúc boot và dừng chúng lúc tắt máy. Thông thường, công việc thực tế được làm bởi các shell script, theo quy ước được đặt trong thư mục `/etc/init.d`.
+BusyBox có một chương trình `init` tối giản dùng một file cấu hình `/etc/inittab` để khởi động các chương trình lúc bootup và dừng chúng lúc tắt máy. Công việc thực sự được thực hiện bởi các shell script, theo quy ước được đặt trong thư mục `/etc/init.d`.
 
-`init` bắt đầu bằng việc đọc `/etc/inittab`. File này chứa một danh sách các chương trình cần chạy, mỗi dòng một chương trình, với định dạng sau:
+`init` bắt đầu bằng việc đọc `/etc/inittab`. File này chứa danh sách các chương trình cần chạy, mỗi chương trình một dòng, theo định dạng này:
 
 ```
 <id>::<action>:<program>
 ```
 
-Vai trò của các tham số này như sau:
+Vai trò của các tham số này là:
 
-- `id`: Đây là controlling terminal cho lệnh.
-- `action`: Tham số này bao gồm các điều kiện để chạy lệnh này, như được thể hiện trong danh sách sau.
-- `program`: Đây là chương trình cần chạy.
+- `id`: Terminal điều khiển của lệnh
 
-Các action như sau:
+- `action`: Khi nào và cách chạy chương trình
 
-- `sysinit`: Chạy chương trình khi `init` khởi động, trước bất kỳ loại action nào khác.
-- `respawn`: Chạy chương trình và khởi động lại nó nếu nó kết thúc. Nó thường được dùng để chạy một chương trình như một daemon.
-- `askfirst`: Giống `respawn`, nhưng nó in message `Please press Enter to activate this console` ra console, và nó chạy chương trình sau khi *Enter* được nhấn. Nó được dùng để khởi động một shell tương tác trên một terminal mà không hỏi username hay mật khẩu.
+- `program`: Chương trình cần chạy cùng với tất cả các đối số command-line của nó
+
+Các action là:
+
+- `sysinit`: Chạy chương trình khi `init` khởi động, trước mọi loại action khác.
+
+- `respawn`: Chạy chương trình và khởi động lại nó nếu nó kết thúc. Nó được dùng để chạy một chương trình như một daemon.
+
+- `askfirst`: Giống như `respawn`, nhưng nó in thông điệp Please press Enter to activate this console ra console và chạy chương trình sau khi Enter được nhấn. Nó được dùng để khởi động một shell tương tác trên một terminal mà không nhắc nhập username hay mật khẩu.
+
 - `once`: Chạy chương trình một lần nhưng không cố khởi động lại nó nếu nó kết thúc.
-- `wait`: Chạy chương trình và chờ nó hoàn tất.
+
+- `wait`: Chạy chương trình và chờ nó hoàn thành.
+
 - `restart`: Chạy chương trình khi `init` nhận signal `SIGHUP`, cho biết nó nên nạp lại file `inittab`.
-- `ctrlaltdel`: Chạy chương trình khi `init` nhận signal `SIGINT`, thường là kết quả của việc nhấn *Ctrl* + *Alt* + *Del* trên console.
+
+- `ctrlaltdel`: Chạy chương trình khi `init` nhận signal `SIGINT`, thường là kết quả của việc nhấn Ctrl + Alt + Del trên console.
+
 - `shutdown`: Chạy chương trình khi `init` tắt.
 
-Đây là một ví dụ nhỏ mount `proc` và `sysfs` và chạy một shell trên một serial interface:
+Đây là một ví dụ nhỏ mount `proc` và `sysfs` rồi chạy một shell trên một giao diện serial:
 
 ```
 null::sysinit:/bin/mount -t proc proc /proc
@@ -100,47 +129,55 @@ null::sysinit:/bin/mount -t sysfs sysfs /sys
 console::askfirst:-/bin/sh
 ```
 
-Với các project đơn giản mà bạn muốn khởi chạy một số ít daemon, và có lẽ khởi động một login shell trên một serial terminal, việc viết script thủ công là dễ dàng. Điều này phù hợp nếu bạn đang tạo một embedded Linux kiểu **roll your own** (**RYO**). Tuy nhiên, bạn sẽ thấy các script `init` viết tay nhanh chóng trở nên không bảo trì được khi số thứ cần cấu hình tăng lên. Chúng không mô-đun lắm và vì vậy cần được cập nhật mỗi khi một component mới được thêm hoặc gỡ bỏ.
+Đối với các project đơn giản mà bạn muốn khởi chạy một số ít daemon và khởi động một login shell trên một serial terminal, việc viết các script thủ công rất dễ dàng. Điều này phù hợp nếu bạn đang tạo một embedded Linux roll-your-own (RYO). Tuy nhiên, bạn sẽ thấy rằng các script `init` viết tay nhanh chóng trở nên không thể bảo trì khi số lượng thứ cần cấu hình tăng lên. Chúng không mấy module hóa và cần được cập nhật mỗi khi một thành phần mới được thêm vào hoặc gỡ bỏ.
 
-### Các init script của Buildroot
+### Các script init của Buildroot
 
-Buildroot đã tận dụng hiệu quả BusyBox `init` trong nhiều năm. Buildroot có hai script trong `/etc/init.d/` tên `rcS` và `rcK`. Script đầu tiên chạy lúc boot và duyệt qua tất cả các script trong `/etc/init.d/` có tên bắt đầu bằng chữ `S` hoa theo sau là hai chữ số, và chạy chúng theo thứ tự số. Đây là các start script. Script `rcK` được chạy lúc tắt máy và duyệt qua tất cả các script bắt đầu bằng chữ `K` hoa theo sau là hai chữ số và chạy chúng theo thứ tự số. Đây là các kill script.
+Buildroot đã sử dụng hiệu quả BusyBox `init` trong nhiều năm. Buildroot có hai script trong `/etc/init.d/` tên là `rcS` và `rcK` (`rc` là viết tắt của "run commands"). Script `rcS` chạy lúc bootup. Nó duyệt qua tất cả các script trong `/etc/init.d/` có tên bắt đầu bằng chữ `S` hoa theo sau là hai chữ số và chạy chúng theo thứ tự số. Đây là các start script. Script `rcK` được chạy lúc tắt máy. Nó duyệt qua tất cả các script bắt đầu bằng chữ `K` hoa theo sau là hai chữ số và chạy chúng theo thứ tự số. Đây là các kill script.
 
-Với cơ chế này, các package Buildroot dễ dàng cung cấp start script và kill script của riêng chúng, dùng số two-digit để áp đặt thứ tự chạy, và nhờ đó hệ thống trở nên mở rộng được. Nếu bạn đang dùng Buildroot, điều này là trong suốt. Nếu không, bạn có thể dùng nó làm mô hình để viết các script BusyBox `init` của riêng mình.
+Với cấu trúc này, các package của Buildroot dễ dàng cung cấp start script và kill script của riêng chúng để hệ thống trở nên mở rộng được. Số two-digit kiểm soát thứ tự chạy các script `init`. Nếu bạn đang dùng Buildroot, cấu trúc này là trong suốt. Nếu không, bạn có thể dùng nó làm mô hình để viết các script BusyBox `init` của riêng mình.
 
-Giống BusyBox `init`, System V `init` dựa vào các shell script bên trong `/etc/init.d` và một file cấu hình `/etc/inittab`. Dù hai hệ thống `init` này tương tự nhau ở nhiều mặt, System V `init` có nhiều tính năng hơn và một lịch sử dài hơn nhiều.
+Giống như BusyBox `init`, System V `init` dựa vào các shell script bên trong `/etc/init.d` và một file cấu hình `/etc/inittab`. Mặc dù hai hệ thống `init` giống nhau ở nhiều mặt, System V `init` có nhiều tính năng hơn và lịch sử dài hơn nhiều.
 
 ## System V init
 
-Chương trình `init` này được lấy cảm hứng từ chương trình của Unix System V và vì vậy có nguồn gốc từ thời mid-1980s. Phiên bản thường gặp nhất trong các bản phân phối Linux ban đầu được viết bởi Miquel van Smoorenburg. Cho đến gần đây, nó là daemon `init` cho gần như tất cả các bản phân phối desktop và server cùng khá nhiều hệ thống nhúng. Tuy nhiên, trong những năm gần đây, nó đã bị thay thế bởi `systemd`, mà tôi sẽ mô tả ở mục tiếp theo.
+Chương trình `init` này được lấy cảm hứng từ chương trình của Unix System V và có từ mid-1980s. Phiên bản thường gặp nhất trong các bản phân phối Linux ban đầu được viết bởi Miquel van Smoorenburg. Cho đến gần đây, nó là daemon `init` cho hầu như mọi bản phân phối desktop và server cũng như khá nhiều hệ thống nhúng. Tuy nhiên, trong những năm gần đây nó đã bị thay thế bởi `systemd`, mà chúng ta sẽ mô tả trong phần tiếp theo.
 
-Daemon BusyBox `init` tôi vừa mô tả chỉ là một phiên bản trimmed-down của System V `init`. So với BusyBox `init`, System V `init` có hai ưu điểm:
+Daemon BusyBox `init` chỉ là một phiên bản trimmed-down của System V `init`. System V `init` có hai ưu điểm so với BusyBox `init`:
 
-- Thứ nhất, các boot script được viết theo một định dạng well-known, mô-đun, giúp dễ dàng thêm package mới lúc build hoặc lúc runtime.
-- Thứ hai, nó có khái niệm **runlevel**, cho phép một tập chương trình được khởi động hoặc dừng trong một lần khi chuyển từ runlevel này sang runlevel khác.
+- Thứ nhất, các boot script được viết theo một định dạng module hóa well-known, giúp dễ dàng thêm package mới lúc build hoặc lúc runtime.
 
-Có tám runlevel, đánh số từ `0` tới `6`, cộng thêm `S`:
+- Thứ hai, nó có khái niệm runlevel, cho phép một tập hợp chương trình được khởi động hoặc dừng một lượt khi chuyển từ runlevel này sang runlevel khác.
+
+Có tám runlevel được đánh số từ `0` đến `6` cộng với `S`:
 
 - `S`: Chạy các tác vụ khởi động
+
 - `0`: Dừng hệ thống
-- `1` tới `5`: Có sẵn cho mục đích chung
+
+- `1` đến `5`: Dành cho sử dụng chung
+
 - `6`: Reboot hệ thống
 
-Các mức `1` tới `5` có thể được dùng tùy ý bạn. Trên các bản phân phối Linux desktop, chúng theo quy ước được gán như sau:
+Các level `1` đến `5` có thể được dùng tùy ý. Trên hầu hết các bản phân phối Linux desktop, chúng được gán như sau:
 
-- `1`: Single user
+- `1`: Một người dùng
+
 - `2`: Multi-user không có cấu hình mạng
+
 - `3`: Multi-user có cấu hình mạng
+
 - `4`: Không dùng
+
 - `5`: Multi-user với đăng nhập đồ họa
 
-Chương trình `init` khởi động runlevel mặc định được cho bởi dòng `initdefault` trong `/etc/inittab` như sau:
+Chương trình `init` khởi động runlevel mặc định được cho bởi dòng `initdefault` trong `/etc/inittab`:
 
 ```
 id:3:initdefault:
 ```
 
-Bạn có thể đổi runlevel lúc runtime bằng lệnh `telinit [runlevel]`, lệnh này gửi một message tới `init`. Bạn có thể tìm runlevel hiện tại và runlevel trước đó bằng lệnh `runlevel`. Đây là một ví dụ:
+Bạn có thể đổi runlevel lúc runtime bằng lệnh `telinit <runlevel>`, lệnh này gửi một thông điệp đến `init`. Bạn có thể tìm runlevel hiện tại và runlevel trước đó bằng lệnh `runlevel`. Đây là một ví dụ:
 
 ```
 # runlevel
@@ -151,55 +188,61 @@ INIT: Switching to runlevel: 3
 5 3
 ```
 
-Ban đầu, output từ lệnh `runlevel` là `N 5`, cho biết không có runlevel trước đó, vì runlevel chưa thay đổi kể từ khi boot và runlevel hiện tại là `5`. Sau khi đổi runlevel, output là `5 3`, cho thấy đã có một chuyển đổi từ `5` sang `3`.
+Output ban đầu từ lệnh `runlevel` là `N 5`. Một `N` cho biết không có runlevel trước đó vì runlevel chưa thay đổi kể từ khi boot. Runlevel hiện tại là `5`. Sau khi đổi runlevel, output là `5` `3`, cho biết đã có một chuyển đổi từ `5` sang `3`.
 
-Các lệnh `halt` và `reboot` lần lượt chuyển sang runlevel `0` và `6`. Bạn có thể override runlevel mặc định bằng cách cho một runlevel khác trên kernel command line dưới dạng một chữ số từ `0` tới `6`. Chẳng hạn, để buộc runlevel là single user, bạn sẽ nối thêm `1` vào kernel command line, và nó sẽ trông đại loại như thế này:
+Các lệnh `halt` và `reboot` chuyển sang runlevel `0` và `6` tương ứng. Bạn có thể ghi đè runlevel mặc định bằng cách đưa một runlevel khác (một chữ số duy nhất từ `0` đến `6`) trên kernel command line. Ví dụ, để buộc runlevel mặc định là một người dùng, bạn thêm `1` vào cuối kernel command line như sau:
 
 ```
 console=ttyAMA0 root=/dev/mmcblk1p2 1
 ```
 
-Mỗi runlevel có một số script dừng các thứ, gọi là kill script, và một nhóm khác khởi động các thứ, gọi là start script. Khi vào một runlevel mới, `init` trước tiên chạy các kill script trong mức mới, rồi tới các start script trong mức mới. Các daemon đang chạy mà không có start script lẫn kill script trong runlevel mới sẽ được gửi một signal `SIGTERM`. Nói cách khác, hành động mặc định khi chuyển runlevel là kết thúc các daemon trừ khi được chỉ thị khác.
+Mỗi runlevel có một số kill script để dừng các thứ, và một nhóm start script khác để khởi động chúng. Khi vào một runlevel mới, `init` trước tiên chạy các kill script rồi đến các start script từ level mới. Các daemon đang chạy mà không có start script lẫn kill script trong runlevel mới sẽ được gửi một signal `SIGTERM`. Nói cách khác, action mặc định khi chuyển runlevel là kết thúc các daemon trừ khi được chỉ định khác.
 
-Thật ra, runlevel không được dùng nhiều lắm trong embedded Linux: hầu hết thiết bị chỉ đơn giản boot vào runlevel mặc định và ở yên đó. Tôi có cảm giác điều này một phần là do hầu hết mọi người không biết về chúng.
+Thực tế, runlevel không được dùng nhiều trong embedded Linux. Hầu hết các thiết bị đơn giản boot vào runlevel mặc định và ở lại đó. Tôi có cảm giác điều này một phần là vì hầu hết mọi người không biết đến chúng.
 
-> **Mẹo**
->
-> Runlevel là một cách đơn giản và tiện lợi để chuyển giữa các chế độ, chẳng hạn từ chế độ sản xuất sang chế độ bảo trì.
+MẸO
 
-System V `init` là một tùy chọn trong Buildroot và Yocto Project. Trong cả hai trường hợp, các script `init` đã được loại bỏ mọi đặc thù của shell `bash`, nên chúng sẽ hoạt động với shell `ash` của BusyBox. Tuy nhiên, Buildroot hơi ăn gian bằng cách thay chương trình BusyBox `init` bằng System V `init` và thêm một `inittab` bắt chước hành vi của BusyBox. Buildroot không hiện thực runlevel, ngoại trừ việc chuyển sang mức `0` hoặc `6` sẽ dừng hoặc reboot hệ thống.
+Runlevel là một cách đơn giản và tiện lợi để chuyển đổi giữa các chế độ, ví dụ, từ chế độ sản xuất sang chế độ bảo trì.
 
-Tiếp theo, hãy xem một số chi tiết. Các ví dụ sau được lấy từ bản phát hành Yocto Project 3.1. Các bản phân phối khác có thể hiện thực các script `init` hơi khác.
+System V `init` là một tùy chọn trong Buildroot và The Yocto Project. Trong cả hai trường hợp, các script `init` đã được loại bỏ mọi đặc thù của shell `bash`, vì vậy chúng sẽ hoạt động với shell `ash` của BusyBox. Tuy nhiên, Buildroot hơi ăn gian bằng cách thay chương trình BusyBox `init` bằng System V `init` và thêm một `inittab` mô phỏng hành vi của BusyBox. Buildroot không hiện thực runlevel ngoại trừ `0` và `6`, là các runlevel dừng hoặc reboot hệ thống.
+
+Tiếp theo, hãy xem một số chi tiết. Các ví dụ sau được lấy từ bản phát hành The Yocto Project 5.0. Các bản phân phối Linux khác có thể hiện thực các script `init` hơi khác một chút.
 
 ### inittab
 
-Chương trình `init` bắt đầu bằng việc đọc `/etc/inittab`, chứa các mục định nghĩa điều gì xảy ra ở mỗi runlevel. Định dạng là một phiên bản mở rộng của `inittab` BusyBox mà tôi đã mô tả ở mục trước, điều không đáng ngạc nhiên vì ngay từ đầu BusyBox đã mượn nó từ System V.
+Chương trình `init` bắt đầu bằng việc đọc các mục định nghĩa điều gì xảy ra ở mỗi runlevel từ một file cấu hình `/etc/inittab`. Định dạng là một phiên bản mở rộng của `inittab` BusyBox được mô tả ở phần trước. Điều này không có gì ngạc nhiên vì ngay từ đầu BusyBox đã mượn nó từ System V.
 
-Định dạng của mỗi dòng trong `inittab` như sau:
+Định dạng của mỗi mục trong `inittab` là:
 
 ```
-id:runlevels:action:process
+<id>:<runlevels>:<action>:<process>
 ```
 
-Các trường được thể hiện ở đây:
+Các trường là:
 
-- `id`: Một định danh duy nhất dài tối đa bốn ký tự.
-- `runlevels`: Các runlevel mà mục này nên được thực thi. Trường này để trống trong `inittab` của BusyBox.
-- `action`: Một trong các keyword được cho trong đoạn sau.
-- `process`: Lệnh cần chạy.
+- `id`: Một định danh duy nhất dài tối đa bốn ký tự
 
-Các action giống với BusyBox `init`: `sysinit`, `respawn`, `once`, `wait`, `restart`, `ctrlaltdel` và `shutdown`. Tuy nhiên, System V `init` không có `askfirst`, action đặc thù của BusyBox.
+- `runlevels`: Các runlevel mà mục này thuộc về
 
-Làm ví dụ, đây là `inittab` hoàn chỉnh được Yocto Project cung cấp cho target `core-image-minimal` trên machine `qemuarm`:
+- `action`: Khi nào và cách chạy lệnh
+
+- `process`: Lệnh cần chạy
+
+Các action giống như của BusyBox `init`: `sysinit`, `respawn`, `once`, `wait`, `restart`, `ctrlaltdel` và `shutdown`. Tuy nhiên, System V `init` không có `askfirst`, vốn đặc thù cho BusyBox.
+
+Đây là `inittab` đầy đủ được The Yocto Project cung cấp khi build `core-image-minimal` cho machine `qemuarm`:
 
 ```
 # /etc/inittab: init(8) configuration.
 # $Id: inittab,v 1.91 2002/01/25 13:35:21 miquels Exp $
+
 # The default runlevel.
 id:5:initdefault:
+
 # Boot-time system configuration/initialization script.
 # This is run first except when booting in emergency (-b) mode.
 si::sysinit:/etc/init.d/rcS
+
 # What to do in single-user mode.
 ~~:S:wait:/sbin/sulogin
 # /etc/init.d executes the S and K scripts upon change
@@ -209,6 +252,7 @@ si::sysinit:/etc/init.d/rcS
 # Runlevel 1 is single-user.
 # Runlevels 2-5 are multi-user.
 # Runlevel 6 is reboot.
+
 l0:0:wait:/etc/init.d/rc 0
 l1:1:wait:/etc/init.d/rc 1
 l2:2:wait:/etc/init.d/rc 2
@@ -216,6 +260,7 @@ l3:3:wait:/etc/init.d/rc 3
 l4:4:wait:/etc/init.d/rc 4
 l5:5:wait:/etc/init.d/rc 5
 l6:6:wait:/etc/init.d/rc 6
+
 # Normally not reached, but fallthrough in case of emergency.
 z6:6:respawn:/sbin/sulogin
 AMA0:12345:respawn:/sbin/getty 115200 ttyAMA0
@@ -227,87 +272,102 @@ AMA0:12345:respawn:/sbin/getty 115200 ttyAMA0
 # Format:
 # <id>:<runlevels>:<action>:<process>
 #
+
 1:2345:respawn:/sbin/getty 38400 tty1
 ```
 
-Mục đầu tiên, `id:5:initdefault`, đặt `runlevel` mặc định là `5`. Mục tiếp theo, `si::sysinit:/etc/init.d/rcS`, chạy script `rcS` lúc boot. Sẽ có thêm về điều này sau. Xa hơn một chút, có một nhóm sáu mục bắt đầu bằng `l0:0:wait:/etc/init.d/rc 0`. Chúng chạy script `/etc/init.d/rc` mỗi khi có thay đổi runlevel. Script này chịu trách nhiệm xử lý các start script và kill script.
+Mục `id:5:initdefault` đầu tiên đặt runlevel mặc định là `5`. Mục `si::sysinit` tiếp theo chạy script `/etc/init.d/rcS` lúc bootup. Tất cả những gì script `rcS` làm là vào runlevel `S`:
 
-Gần cuối `inittab`, có một mục chạy một daemon `getty` để tạo login prompt trên `/dev/ttyAMA0` khi vào các runlevel `1` tới `5`, nhờ đó cho phép bạn đăng nhập và có một shell tương tác:
+```
+#!/bin/sh
+<…>
+exec /etc/init.d/rc S
+```
+
+Do đó, runlevel đầu tiên được vào là `S`, theo sau là runlevel mặc định `5`. Lưu ý rằng runlevel `S` không được ghi lại và không bao giờ được hiển thị là runlevel trước đó bởi lệnh `runlevel`.
+
+Bảy mục bắt đầu bằng `l0` đến `l6` chạy script `/etc/init.d/rc` bất cứ khi nào có thay đổi runlevel. Script `rc` chịu trách nhiệm xử lý các start script và kill script.
+
+Dò xuống thêm một chút để tìm một mục chạy daemon `getty`:
 
 ```
 AMA0:12345:respawn:/sbin/getty 115200 ttyAMA0
 ```
 
-Device `ttyAMA0` là serial console trên board Arm Versatile mà chúng ta đang giả lập bằng QEMU; nó sẽ khác với các development board khác. Cũng có một mục để chạy `getty` trên `tty1`, được kích hoạt khi vào các runlevel `2` tới `5`. Đây là một virtual console, thường được ánh xạ tới một màn hình đồ họa nếu bạn đã build kernel với `CONFIG_FRAMEBUFFER_CONSOLE` hoặc `VGA_CONSOLE`. Các bản phân phối Linux desktop thường sinh ra sáu daemon `getty` trên các virtual terminal `1` tới `6`, mà bạn có thể chọn bằng tổ hợp phím *Ctrl* + *Alt* + *F1* tới *Ctrl* + *Alt* + *F6*, với virtual terminal `7` được dành riêng cho màn hình đồ họa. Ubuntu và Arch Linux là các ngoại lệ đáng chú ý vì chúng dùng virtual terminal `1` cho đồ họa. Virtual terminal hiếm khi được dùng trên thiết bị nhúng.
+Mục này tạo một dấu nhắc đăng nhập trên `/dev/ttyAMA0` khi vào các runlevel `1` đến `5`, cho phép bạn đăng nhập và có một shell tương tác. Thiết bị `ttyAMA0` là serial console trên board Arm Versatile được QEMU giả lập. Tên thiết bị có thể khác đối với serial console trên các dev board khác.
 
-Script `/etc/init.d/rcS` được mục `sysinit` chạy làm không nhiều hơn việc vào runlevel `S`:
+Mục cuối cùng chạy một daemon `getty` khác trên `/dev/tty1`:
 
 ```
-#!/bin/sh
-[…]
-exec /etc/init.d/rc S
+1:2345:respawn:/sbin/getty 38400 tty1
 ```
 
-Do đó, runlevel đầu tiên được vào là `S`, tiếp theo là runlevel mặc định `5`. Lưu ý rằng runlevel `S` không được ghi lại và không bao giờ được lệnh `runlevel` hiển thị như một runlevel trước đó.
+Mục này được kích hoạt khi vào các runlevel `2` đến `5`. Thiết bị `tty1` là một virtual console được ánh xạ tới một màn hình đồ họa khi bạn build kernel với `CONFIG_FRAMEBUFFER_CONSOLE` hoặc `VGA_CONSOLE`.
+
+Các bản phân phối Linux desktop thường spawn sáu daemon `getty` trên các virtual terminal 1 đến 6, với `tty7` dành riêng cho màn hình đồ họa. Ubuntu và Arch Linux là những ngoại lệ đáng chú ý vì chúng dùng `tty1` cho đồ họa. Bạn có thể chuyển giữa các virtual terminal bằng các tổ hợp phím Ctrl + Alt + F1 đến Ctrl + Alt + F6. Virtual terminal hiếm khi được dùng trên các thiết bị nhúng.
 
 ### Các script init.d
 
-Mỗi component cần phản ứng với thay đổi runlevel có một script trong `/etc/init.d` để thực hiện thay đổi. Script nên nhận hai tham số: `start` và `stop`. Tôi sẽ đưa ra một ví dụ về điều này sau.
+Mỗi thành phần cần phản hồi một thay đổi runlevel có một script trong `/etc/init.d` để thực hiện thay đổi. Script nên nhận hai tham số: `start` và `stop`. Tôi sẽ đưa ra ví dụ về từng tham số trong phần Adding a new daemon.
 
-Script runlevel-handling, `/etc/init.d/rc`, nhận runlevel mà nó đang chuyển sang làm tham số. Với mỗi runlevel, có một thư mục tên `rc<runlevel>.d`:
+Script xử lý runlevel `/etc/init.d/rc` (runlevel-handling) nhận runlevel mà nó đang chuyển sang làm tham số. Có một thư mục tên `rc<runlevel>.d` cho mỗi runlevel:
 
 ```
 # ls -d /etc/rc*
-/etc/rc0.d /etc/rc2.d /etc/rc4.d /etc/rc6.d
-/etc/rc1.d /etc/rc3.d /etc/rc5.d /etc/rcS.d
+/etc/rc0.d  /etc/rc2.d  /etc/rc4.d  /etc/rc6.d
+/etc/rc1.d  /etc/rc3.d  /etc/rc5.d  /etc/rcS.d
 ```
 
-Ở đó bạn sẽ tìm thấy một tập script bắt đầu bằng chữ `S` hoa theo sau là hai chữ số, và bạn cũng có thể tìm thấy các script bắt đầu bằng chữ `K` hoa. Đây lần lượt là các start script và kill script. Đây là một ví dụ về các script cho runlevel `5`:
+Ở đó bạn sẽ tìm thấy một tập script bắt đầu bằng chữ `S` hoa theo sau là hai chữ số. Bạn cũng có thể tìm thấy các script bắt đầu bằng chữ `K` hoa. Đây là các start script và kill script. Đây là một ví dụ về các script cho runlevel `5`:
 
 ```
 # ls /etc/rc5.d
-S01networking S20hwclock.sh S99rmnologin.sh S99stop-bootlogd
-S15mountnfs.sh S20syslog
+S01networking   S20hwclock.sh  S99rmnologin.sh  S99stop-bootlogd
+S15mountnfs.sh  S20syslog
 ```
 
-Đây thực ra là các symbolic link trỏ ngược về script phù hợp trong `init.d`. Script `rc` chạy tất cả các script bắt đầu bằng `K` trước, thêm tham số `stop`, rồi chạy những script bắt đầu bằng `S`, thêm tham số `start`. Một lần nữa, mã two-digit có mặt để áp đặt thứ tự chạy của các script.
+Thực tế, đây là các symbolic link trỏ ngược về các script tương ứng của chúng trong `init.d`. Script `rc` trước tiên chạy tất cả các script bắt đầu bằng `K`, truyền vào tham số `stop`. Sau đó nó chạy tất cả các script bắt đầu bằng `S`, truyền vào tham số `start`. Một lần nữa, các mã two-digit có mặt để quy định thứ tự thực thi các script.
 
 ### Thêm một daemon mới
 
-Hãy tưởng tượng bạn có một chương trình tên `simpleserver` được viết như một Unix daemon truyền thống; nói cách khác, nó fork và chạy ở background. Code cho một chương trình như vậy nằm trong `MELP/Chapter13/simpleserver`. Bạn sẽ cần một script `init.d` như thế này, bạn sẽ tìm thấy nó trong `MELP/Chapter13/simpleserver-sysvinit`:
+Hãy tưởng tượng bạn có một chương trình tên `simpleserver` được viết như một daemon Unix truyền thống; nói cách khác, nó fork và chạy ở chế độ nền. Code cho chương trình này nằm trong `MELD/Chapter13/simpleserver`. Script `init.d` tương ứng (xem bên dưới) nằm trong `MELD/Chapter13/simpleserver-sysvinit/init.d`:
 
 ```
 #! /bin/sh
 
 case "$1" in
-      start)
-           echo "Starting simpelserver"
-           start-stop-daemon -S -n simpleserver -a /usr/bin/simpleserver
-           ;;
-     stop)
-           echo "Stopping simpleserver"
-           start-stop-daemon -K -n simpleserver
-           ;;
-     *)
-           echo "Usage: $0 {start|stop}"
-           exit 1
+   start)
+     echo "Starting simpelserver"
+     start-stop-daemon -S -n simpleserver -a /usr/bin/simpleserver
+     ;;
+   stop)
+     echo "Stopping simpleserver"
+     start-stop-daemon -K -n simpleserver
+     ;;
+   *)
+     echo "Usage: $0 {start|stop}"
+     exit 1
 esac
 
 exit 0
 ```
 
-`start-stop-daemon` là một helper function giúp việc thao tác các background process như thế này dễ hơn. Ban đầu nó đến từ package trình cài đặt Debian, `dpkg`, nhưng hầu hết hệ thống nhúng dùng phiên bản từ BusyBox. Nó khởi động daemon với tham số `-S`, bảo đảm không bao giờ có nhiều hơn một instance chạy tại bất kỳ thời điểm nào. Để dừng một daemon, bạn dùng tham số `-K`, khiến nó gửi một signal, mặc định là `SIGTERM`, để báo cho daemon biết đã đến lúc kết thúc.
+`start-stop-daemon` là một chương trình giúp thao tác với các process chạy nền dễ dàng hơn. Ban đầu nó đến từ package trình cài đặt Debian (`dpkg`) nhưng hầu hết các hệ thống nhúng dùng bản từ BusyBox. Chạy `start-stop-daemon` với tham số `-S` khởi động daemon, bảo đảm rằng không bao giờ có nhiều hơn một instance chạy tại bất kỳ thời điểm nào. Chạy `start-stop-daemon` với tham số `-K` dừng daemon bằng cách gửi cho nó một signal, mặc định là `SIGTERM`, để báo cho daemon biết đã đến lúc kết thúc.
 
-Để làm cho `simpleserver` hoạt động, sao chép script vào thư mục đích tên `/etc/init.d/simpleserver` và làm cho nó thực thi được. Sau đó, thêm link từ mỗi runlevel mà bạn muốn chạy chương trình này; trong trường hợp này, chỉ runlevel mặc định `5`:
+Để `simpleserver` hoạt động, hãy copy script `init.d` vào `/etc/init.d` và làm cho nó thực thi được. Sau đó, thêm các link từ mỗi runlevel mà bạn muốn chạy chương trình này—trong trường hợp này, chỉ runlevel mặc định `5`:
 
 ```
 # cd /etc/init.d/rc5.d
 # ln -s ../init.d/simpleserver S99simpleserver
 ```
 
-Số `99` nghĩa là đây sẽ là một trong những chương trình cuối cùng được khởi động. Hãy nhớ rằng có thể có các link khác bắt đầu bằng `S99`, khi đó script `rc` sẽ chỉ chạy chúng theo thứ tự từ vựng.
+Số `99` nghĩa là đây sẽ là một trong những chương trình cuối cùng được khởi động.
 
-Trong thiết bị nhúng, hiếm khi phải bận tâm quá nhiều về các thao tác tắt máy, nhưng nếu có gì đó cần làm, hãy thêm kill link vào các mức `0` và `6`:
+LƯU Ý QUAN TRỌNG
+
+Hãy nhớ rằng có thể có các link khác bắt đầu bằng `S99`, trong trường hợp đó script `rc` sẽ chỉ chạy chúng theo thứ tự từ điển.
+
+Trong các thiết bị nhúng, hiếm khi phải lo lắng quá nhiều về các thao tác tắt máy, nhưng nếu có việc gì cần làm, hãy thêm các kill link vào level `0` và `6`:
 
 ```
 # cd /etc/init.d/rc0.d
@@ -316,70 +376,82 @@ Trong thiết bị nhúng, hiếm khi phải bận tâm quá nhiều về các t
 # ln -s ../init.d/simpleserver K01simpleserver
 ```
 
-Chúng ta có thể bỏ qua runlevel và thứ tự để test và debug các script `init.d` nhanh hơn.
+Chúng ta có thể bỏ qua runlevel và thứ tự để kiểm thử và debug các script `init.d` tức thời hơn.
 
 ### Khởi động và dừng service
 
-Bạn có thể tương tác với các script trong `/etc/init.d` bằng cách gọi chúng trực tiếp. Đây là một ví dụ dùng script `syslog`, điều khiển các daemon `syslogd` và `klogd`:
+Bạn có thể tương tác với các script trong `/etc/init.d` bằng cách gọi chúng trực tiếp. Đây là một ví dụ dùng script `syslog` điều khiển các daemon `syslogd` và `klogd`:
 
 ```
 # /etc/init.d/syslog --help
 Usage: syslog { start | stop | restart }
+
 # /etc/init.d/syslog stop
 Stopping syslogd/klogd: stopped syslogd (pid 198)
 stopped klogd (pid 201)
 done
+
 # /etc/init.d/syslog start
 Starting syslogd/klogd: done
 ```
 
-Tất cả các script đều hiện thực `start` và `stop`, và chúng cũng nên hiện thực `help`. Một số hiện thực cả `status`, cho bạn biết service có đang chạy hay không. Các bản phân phối chính thống vẫn dùng System V `init` có một lệnh tên `service` để khởi động và dừng service, che giấu chi tiết của việc gọi trực tiếp các script.
+Tất cả các script đều hiện thực `start` và `stop`, và chúng cũng nên hiện thực `help`. Một số hiện thực cả `status`, cho bạn biết service có đang chạy hay không. Các bản phân phối chính thống vẫn dùng System V `init` có một lệnh tên `service` để khởi động và dừng service, che giấu chi tiết của việc gọi script trực tiếp.
 
-System V `init` là một daemon `init` đơn giản đã phục vụ các quản trị viên Linux hàng thập kỷ. Dù runlevel mang lại mức độ tinh vi cao hơn BusyBox `init`, System V `init` vẫn thiếu khả năng giám sát service và khởi động lại chúng nếu cần. Khi System V `init` bắt đầu lộ tuổi tác, hầu hết các bản phân phối Linux phổ biến đã chuyển sang `systemd`.
+System V `init` là một daemon `init` đơn giản đã phục vụ các quản trị viên Linux trong nhiều thập kỷ. Mặc dù runlevel mang lại mức độ tinh vi cao hơn BusyBox `init`, System V `init` vẫn thiếu khả năng giám sát service và khởi động lại chúng khi cần. Khi System V `init` bắt đầu lộ vẻ già cỗi, hầu hết các bản phân phối Linux phổ biến đã chuyển sang `systemd`.
 
 ## systemd
 
-`systemd`, [https://www.freedesktop.org/wiki/Software/systemd/](https://www.freedesktop.org/wiki/Software/systemd/), tự định nghĩa mình là một *system and service manager*. Project được Lennart Poettering và Kay Sievers khởi xướng năm 2010 để tạo một bộ công cụ tích hợp quản lý hệ thống Linux xoay quanh một daemon `init`. Nó cũng bao gồm quản lý thiết bị (`udev`) và logging, cùng những thứ khác. `systemd` là state of the art và vẫn đang tiến hóa nhanh. Nó phổ biến trên các bản phân phối Linux desktop và server và cũng đang trở nên phổ biến trên các hệ thống embedded Linux, đặc biệt trên các thiết bị phức tạp hơn. Vậy, nó tốt hơn System V `init` cho hệ thống nhúng như thế nào?
+`systemd` (`https://systemd.io/`) tự định nghĩa mình là một trình quản lý hệ thống và service. Project được khởi xướng năm 2010 bởi Lennart Poettering và Kay Sievers để tạo một tập công cụ tích hợp cho việc quản lý một hệ thống Linux dựa trên một daemon `init`. Nó cũng bao gồm quản lý thiết bị (`udev`) và logging, cùng nhiều thứ khác. `systemd` là state of the art và vẫn đang phát triển nhanh chóng. Nó phổ biến trên các bản phân phối Linux desktop và server và ngày càng phổ biến trên các hệ thống embedded Linux. Vậy, nó tốt hơn System V `init` như thế nào?
 
-- Cấu hình đơn giản và logic hơn (một khi bạn hiểu nó). Thay vì các shell script đôi khi rối rắm của System V `init`, `systemd` có các file cấu hình unit được viết theo một định dạng well-defined.
-- Có các phụ thuộc tường minh giữa các service, thay vì một mã two-digit chỉ đặt trình tự chạy các script.
-- Dễ đặt quyền và giới hạn tài nguyên cho mỗi service, điều quan trọng cho bảo mật.
-- Nó có thể giám sát service và khởi động lại chúng nếu cần.
-- Các service được khởi động song song, có khả năng giảm thời gian boot.
+- Cấu hình đơn giản và logic hơn (một khi bạn hiểu nó). Thay vì các shell script rối rắm, `systemd` có các file cấu hình unit được viết theo một định dạng well-defined.
 
-Một mô tả đầy đủ về `systemd` vừa không khả thi vừa không phù hợp ở đây. Giống System V `init`, tôi sẽ tập trung vào các use case nhúng với các ví dụ dựa trên cấu hình được tạo bởi bản phát hành Yocto Project 3.1, với `systemd` phiên bản `244`. Tôi sẽ đưa ra một tổng quan nhanh, rồi cho bạn thấy một số ví dụ cụ thể.
+- Có các dependency tường minh giữa các service. Đây là một cải tiến lớn so với các số two-digit chỉ kiểm soát thứ tự thực thi các script.
 
-### Build systemd với Yocto Project và Buildroot
+- Dễ dàng đặt quyền và giới hạn tài nguyên cho từng service vì mục đích bảo mật.
 
-Daemon `init` mặc định trong Yocto Project là System V. Để chọn `systemd`, thêm dòng này vào `conf/local.conf`:
+- Nó có thể giám sát service và khởi động lại chúng khi cần.
+
+- Các service được khởi động song song, giảm thời gian boot.
+
+Không thể mô tả đầy đủ `systemd` ở đây. Cũng như với System V `init`, tôi sẽ tập trung vào các trường hợp sử dụng nhúng với các ví dụ dựa trên bản phát hành The Yocto Project 5.0 với `systemd` phiên bản 255.
+
+### Build systemd với The Yocto Project và Buildroot
+
+Daemon `init` mặc định trong The Yocto Project là System V. Để chọn `systemd`, hãy thêm dòng này vào `conf/local.conf`:
 
 ```
 INIT_MANAGER = "systemd"
 ```
 
-Buildroot dùng BusyBox `init` theo mặc định. Bạn có thể chọn `systemd` qua `menuconfig` bằng cách tìm trong menu **System configuration** | **Init system**. Bạn cũng sẽ phải cấu hình toolchain dùng `glibc` cho C library, vì `systemd` không hỗ trợ `uClibc-ng` hay `musl`. Ngoài ra, có các hạn chế về phiên bản và cấu hình của kernel. Có một danh sách đầy đủ các phụ thuộc thư viện và kernel trong file `README` ở top level của source code `systemd`.
+Buildroot mặc định dùng BusyBox `init`. Bạn có thể chọn `systemd` qua `menuconfig` bằng cách tìm trong menu System configuration \| Init system. Bạn cũng sẽ phải cấu hình toolchain dùng `glibc` cho thư viện C vì `systemd` không chính thức hỗ trợ `uClibc-ng` hay `musl`. Ngoài ra, có các hạn chế về phiên bản và cấu hình của kernel. Có một danh sách đầy đủ các dependency về thư viện và kernel trong file `README` ở cấp trên cùng của source code `systemd`.
 
 ### Giới thiệu target, service và unit
 
-Trước khi mô tả cách `systemd` hoạt động, tôi cần giới thiệu ba khái niệm then chốt sau:
+Trước khi mô tả cách `systemd` hoạt động, tôi cần giới thiệu ba khái niệm then chốt:
 
-- **unit**: Một file cấu hình mô tả một target, một service và vài thứ khác. Unit là các file văn bản chứa thuộc tính và giá trị.
-- **service**: Một daemon có thể được khởi động và dừng, rất giống một service của System V `init`.
-- **target**: Một nhóm service, tương tự, nhưng tổng quát hơn, một runlevel của System V `init`. Có một target mặc định là nhóm service được khởi động lúc boot.
+- Unit: Một file cấu hình mô tả một target, một service hoặc một số thứ khác. Unit là các file văn bản chứa các thuộc tính và giá trị.
+
+- Service: Một daemon có thể được khởi động và dừng, giống như một service System V `init`.
+
+- Target: Một nhóm service, tương tự như một runlevel System V `init`. Có một target mặc định gồm tất cả các service được khởi động lúc boot.
 
 Bạn có thể thay đổi trạng thái và tìm hiểu điều gì đang diễn ra bằng lệnh `systemctl`.
 
 #### Unit
 
-Mục cấu hình cơ bản là unit file. Unit file được tìm thấy ở ba nơi khác nhau:
+Thành phần cấu hình cơ bản là unit file. Unit file được tìm thấy ở bốn nơi khác nhau:
 
 - `/etc/systemd/system`: Cấu hình cục bộ
+
 - `/run/systemd/system`: Cấu hình runtime
-- `/lib/systemd/system`: Cấu hình Distribution-wide
 
-Khi tìm một unit, `systemd` tìm trong các thư mục theo thứ tự đó, dừng ngay khi tìm thấy kết quả khớp, và cho phép bạn override hành vi của một unit distribution-wide bằng cách đặt một unit cùng tên trong `/etc/systemd/system`. Bạn có thể disable hoàn toàn một unit bằng cách tạo một file cục bộ rỗng hoặc được link tới `/dev/null`.
+- `/usr/lib/systemd/system:` Cấu hình Distribution-wide (vị trí mặc định)
 
-Tất cả unit file đều bắt đầu bằng một section được đánh dấu `[Unit]`, chứa thông tin cơ bản và các phụ thuộc. Làm ví dụ, đây là section `Unit` của service D-Bus, `/lib/systemd/system/dbus.service`:
+- `/lib/systemd/system`: Cấu hình Distribution-wide (vị trí mặc định cũ)
+
+Khi tìm một unit, `systemd` tìm trong các thư mục này theo thứ tự trên, dừng ngay khi tìm thấy kết quả khớp. Bạn có thể ghi đè hành vi của một unit distribution-wide bằng cách đặt một unit cùng tên trong `/etc/systemd/system`. Bạn cũng có thể vô hiệu hóa hoàn toàn một unit bằng cách tạo một file cục bộ rỗng hoặc được link tới `/dev/null`.
+
+Mọi unit file đều bắt đầu bằng một section được đánh dấu `[Unit]` chứa thông tin cơ bản và các dependency. Ví dụ, đây là section `Unit` của service D-Bus `/lib/systemd/system/dbus.service`:
 
 ```
 [Unit]
@@ -388,22 +460,25 @@ Documentation=man:dbus-daemon(1)
 Requires=dbus.socket
 ```
 
-Ngoài mô tả và một tham chiếu tới tài liệu, có một phụ thuộc vào unit `dbus.socket` được biểu diễn qua keyword `Requires`. Điều này bảo `systemd` tạo một socket cục bộ khi service D-Bus được khởi động.
+Ngoài phần mô tả và một tham chiếu tới tài liệu, có một dependency vào unit `dbus.socket` được biểu đạt qua từ khóa `Requires`. Điều này báo cho `systemd` tạo một local socket khi service D-Bus được khởi động.
 
-Các phụ thuộc trong section `Unit` được biểu diễn qua các keyword `Requires`, `Wants` và `Conflicts`:
+Dependency được biểu đạt bởi các từ khóa `Requires`, `Wants` và `Conflicts`:
 
-- `Requires`: Một danh sách các unit mà unit này phụ thuộc vào, được khởi động khi unit này được khởi động.
-- `Wants`: Một dạng yếu hơn của `Requires`; các unit được liệt kê được khởi động nhưng unit hiện tại không bị dừng nếu bất kỳ unit nào trong đó thất bại.
-- `Conflicts`: Một phụ thuộc phủ định; các unit được liệt kê bị dừng khi unit này được khởi động và, ngược lại, nếu một trong số chúng được khởi động, unit này bị dừng.
+- `Requires`: Một danh sách các unit mà unit này phụ thuộc vào; chúng được khởi động khi unit này được khởi động.
 
-Ba keyword này định nghĩa các **outgoing dependency**. Chúng được dùng chủ yếu để tạo phụ thuộc giữa các target. Có một tập phụ thuộc khác gọi là **incoming dependency**, được dùng để tạo liên kết giữa *service* và *target*. Nói cách khác, outgoing dependency được dùng để tạo danh sách các target cần được khởi động khi hệ thống chuyển từ trạng thái này sang trạng thái khác, và incoming dependency được dùng để xác định các service nên được khởi động hoặc dừng ở bất kỳ trạng thái cụ thể nào. Incoming dependency được tạo bởi keyword `WantedBy`, mà tôi sẽ mô tả trong mục sắp tới về *Thêm service của riêng bạn*.
+- `Wants`: Một dạng yếu hơn của `Requires`; unit này vẫn tiếp tục ngay cả khi bất kỳ dependency nào trong số này khởi động thất bại.
 
-Xử lý các phụ thuộc tạo ra một danh sách các unit nên được khởi động hoặc dừng. Các keyword `Before` và `After` xác định thứ tự chúng được khởi động. Thứ tự dừng chỉ đơn giản là đảo ngược thứ tự khởi động:
+- `Conflicts`: Một dependency phủ định; các unit này bị dừng khi unit này được khởi động, và ngược lại, nếu một trong số chúng sau đó được khởi động lại, thì unit này bị dừng.
+
+Ba từ khóa này định nghĩa các dependency đi ra (outgoing). Chúng được dùng để tạo dependency giữa các target. Có một tập dependency khác gọi là dependency đi vào (incoming), được dùng để tạo liên kết giữa service và target. Nói cách khác, dependency đi ra được dùng để tạo danh sách các target cần được khởi động khi hệ thống đi từ trạng thái này sang trạng thái khác, còn dependency đi vào được dùng để xác định các service cần được khởi động hoặc dừng khi vào bất kỳ trạng thái nào. Dependency đi vào được tạo bởi từ khóa `WantedBy`, mà tôi sẽ mô tả trong phần sắp tới, Adding your own service.
+
+Việc xử lý các dependency tạo ra một danh sách các unit cần được khởi động hoặc dừng. Các từ khóa `Before` và `After` xác định thứ tự khởi động chúng. Thứ tự dừng đơn giản là đảo ngược của thứ tự khởi động:
 
 - `Before`: Khởi động unit này trước các unit được liệt kê.
+
 - `After`: Khởi động unit này sau các unit được liệt kê.
 
-Trong ví dụ sau, directive `After` bảo đảm web server được khởi động sau khi network subsystem được khởi động:
+Ví dụ, directive `After` bảo đảm rằng web server sau được khởi động sau khi network subsystem được khởi động:
 
 ```
 [Unit]
@@ -411,13 +486,13 @@ Description=Lighttpd Web Server
 After=network.target
 ```
 
-Khi không có directive `Before` hay `After`, các unit sẽ được khởi động hoặc dừng song song không theo thứ tự cụ thể nào.
+Khi không có directive `Before` hay `After`, các unit được khởi động hoặc dừng song song mà không có thứ tự.
 
 #### Service
 
-Một **service** là một daemon có thể được khởi động và dừng, tương đương với một service của System V `init`. Một service là một loại unit file có tên kết thúc bằng `.service`, chẳng hạn `lighttpd.service`.
+Một service là một daemon có thể được khởi động và dừng như một service System V `init`. Một service có một unit file với tên kết thúc bằng `.service`.
 
-Một service unit có một section `[Service]` mô tả nó nên được chạy như thế nào. Đây là section liên quan từ `lighttpd.service`:
+Một service unit có một section `[Service]` mô tả cách service nên được chạy. Đây là section `[Service]` từ `lighttpd.service`:
 
 ```
 [Service]
@@ -425,11 +500,11 @@ ExecStart=/usr/sbin/lighttpd -f /etc/lighttpd/lighttpd.conf -D
 ExecReload=/bin/kill -HUP $MAINPID
 ```
 
-Đây là các lệnh cần chạy khi khởi động service và khởi động lại nó. Có nhiều điểm cấu hình hơn nữa bạn có thể thêm ở đây, nên hãy tham khảo manual page của `systemd.service(5)`.
+Đây là các lệnh cần chạy khi khởi động và khởi động lại service. Còn nhiều điểm cấu hình khác mà bạn có thể thêm vào đây, vì vậy hãy tham khảo manual page của `systemd.service(5)`.
 
 #### Target
 
-Một **target** là một loại unit khác nhóm các service (hoặc các loại unit khác). Một target là một metaservice theo nghĩa đó và cũng đóng vai trò một điểm đồng bộ. Một target chỉ có các phụ thuộc. Target có tên kết thúc bằng `.target`, chẳng hạn `multi-user.target`. Một target là một trạng thái mong muốn đóng cùng vai trò như các runlevel của System V `init`. Chẳng hạn, đây là unit hoàn chỉnh cho `multi-user.target`:
+Một target là một unit nhóm các service hoặc các loại unit khác lại với nhau. Xét về mặt đó, một target là một metaservice và đóng vai trò một điểm đồng bộ. Một target chỉ có dependency. Target có tên kết thúc bằng `.target` như `multi-user.target`. Một target là một trạng thái mong muốn, thực hiện cùng vai trò như các runlevel System V `init`. Đây là `multi-user.target` đầy đủ:
 
 ```
 [Unit]
@@ -441,60 +516,73 @@ After=basic.target rescue.service rescue.target
 AllowIsolate=yes
 ```
 
-Điều này nói rằng basic target phải được khởi động trước multi-user target. Nó cũng nói rằng vì nó xung đột với rescue target, khởi động rescue target sẽ khiến multi-user target bị dừng trước.
+Điều này nói rằng basic target phải được khởi động trước multi-user target. Điều này cũng nói rằng vì nó xung đột với rescue target, việc khởi động rescue target sẽ khiến multi-user target bị dừng trước. Rescue target và multi-user target không thể chạy đồng thời vì rescue target boot vào chế độ single-user. Kích hoạt rescue target chỉ có ý nghĩa trong quá trình khôi phục hệ thống.
 
-### systemd boot hệ thống như thế nào
+### Cách systemd boot hệ thống
 
-Bây giờ, chúng ta có thể xem `systemd` hiện thực bootstrap như thế nào. `systemd` được kernel chạy do `/sbin/init` được symbolic link tới `/lib/systemd/systemd`. Nó chạy target mặc định, `default.target`, luôn là một link tới target mong muốn, chẳng hạn `multi-user.target` cho đăng nhập văn bản hoặc `graphical.target` cho môi trường đồ họa. Chẳng hạn, nếu target mặc định là `multi-user.target`, bạn sẽ tìm thấy symbolic link này:
+Hãy xem `systemd` hiện thực bootstrap như thế nào. Kernel khởi động `systemd` vì `/sbin/init` là symbolic link tới `/lib/systemd/systemd`. `systemd` chạy `default.target`, vốn luôn là một link tới target mong muốn: hoặc `multi-user.target` cho đăng nhập văn bản hoặc `graphical.target` cho môi trường đồ họa. Nếu target mặc định là `multi-user.target`, bạn sẽ thấy symbolic link này:
 
 ```
-/etc/systemd/system/default.target -> /lib/systemd/system/multi-user.target
+/etc/systemd/system/default.target -> /lib/systemd/system/multi-user.
+target
 ```
 
-Target mặc định có thể được override bằng cách truyền `system.unit=<new target>` trên kernel command line. Bạn có thể dùng `systemctl` để tìm target mặc định, như được thể hiện ở đây:
+Ghi đè target mặc định bằng cách truyền `system.unit=<new target>` trên kernel command line.
+
+Để tìm target mặc định:
 
 ```
 # systemctl get-default
 multi-user.target
 ```
 
-Khởi động một target như `multi-user.target` tạo một cây phụ thuộc đưa hệ thống vào trạng thái hoạt động. Trong một hệ thống điển hình, `multi-user.target` phụ thuộc vào `basic.target`, target này phụ thuộc vào `sysinit.target`, target này phụ thuộc vào các service cần được khởi động sớm. Bạn có thể in một đồ thị văn bản bằng `systemctl list-dependencies`.
+Khởi động một target như `multi-user.target` tạo ra một cây dependency đưa hệ thống vào trạng thái hoạt động. Trong một hệ thống điển hình, `multi-user.target` phụ thuộc vào `basic.target`, vốn phụ thuộc vào `sysinit.target`, vốn phụ thuộc vào các service cần được khởi động sớm.
 
-Bạn cũng có thể liệt kê tất cả các service và trạng thái hiện tại của chúng bằng lệnh sau:
+Để in một đồ thị dạng văn bản của các dependency hệ thống:
+
+```
+# systemctl list-dependencies
+```
+
+Để liệt kê tất cả các service và trạng thái hiện tại của chúng:
 
 ```
 # systemctl list-units --type service
 ```
 
-Bạn có thể làm tương tự cho target bằng lệnh sau:
+Để liệt kê tất cả các target:
 
 ```
 # systemctl list-units --type target
 ```
 
-Giờ chúng ta đã thấy cây phụ thuộc của hệ thống, làm sao chèn thêm một service vào cây này?
+Giờ chúng ta đã thấy cây dependency của hệ thống, làm thế nào để chèn thêm một service?
 
 ### Thêm service của riêng bạn
 
-Dùng cùng ví dụ `simpleserver` như trước, đây là một service unit, bạn sẽ tìm thấy nó trong `MELP/Chapter13/simpleserver-systemd`:
+Đây là một unit cho service `simpleserver` của chúng ta:
 
 ```
 [Unit]
 Description=Simple server
+
 [Service]
 Type=forking
 ExecStart=/usr/bin/simpleserver
+
 [Install]
 WantedBy=multi-user.target
 ```
 
-Section `[Unit]` chỉ chứa một mô tả để nó hiển thị đúng khi được liệt kê bằng `systemctl` và các lệnh khác. Không có phụ thuộc nào; như tôi đã nói, nó rất đơn giản.
+Bạn sẽ tìm thấy file `simpleserver.service` này trong `MELD/Chapter13/simpleserver-systemd`.
 
-Section `[Service]` trỏ tới file thực thi và có một flag cho biết nó fork. Nếu nó còn đơn giản hơn và chạy ở foreground, `systemd` sẽ làm việc daemon hóa cho chúng ta và `Type=forking` sẽ không cần thiết.
+Section `[Unit]` chỉ chứa một mô tả hiển thị dưới `systemctl`. Không có dependency nào vì service này rất đơn giản.
 
-Section `[Install]` tạo một incoming dependency vào `multi-user.target` để server của chúng ta được khởi động khi hệ thống vào chế độ multi-user.
+Section `[Service]` trỏ tới file thực thi và có một cờ cho biết nó fork. Nếu `simpleserver` còn đơn giản hơn nữa và chạy ở foreground, `systemd` sẽ làm việc daemon hóa cho chúng ta và `Type=forking` sẽ không cần thiết.
 
-Khi unit đã được lưu trong `/etc/systemd/system/simpleserver.service`, bạn có thể khởi động và dừng nó bằng các lệnh `systemctl start simpleserver` và `systemctl stop simpleserver`. Bạn cũng có thể dùng `systemctl` để tìm trạng thái hiện tại của nó:
+Section `[Install]` tạo một dependency đi vào trên `multi-user.target` để server của chúng ta được khởi động khi hệ thống vào chế độ multi-user.
+
+Khi bạn đặt file `simpleserver.service` vào thư mục `/etc/systemd/system`, bạn có thể khởi động và dừng service bằng các lệnh `systemctl start simpleserver` và `sytemctl stop` `simpleserver`. Bạn cũng có thể dùng `systemctl` để lấy trạng thái hiện tại của nó:
 
 ```
 # systemctl status simpleserver
@@ -504,39 +592,48 @@ simpleserver.service - Simple server
 Main PID: 180 (simpleserver)
   CGroup: /system.slice/simpleserver.service
           └─180 /usr/bin/simpleserver -n
+
 Jan 01 02:20:50 qemuarm systemd[1]: Started Simple server.
 ```
 
-Tại thời điểm này, nó sẽ chỉ khởi động và dừng theo lệnh, như được thể hiện ở đây. Để làm cho nó bền vững, bạn cần thêm một phụ thuộc vĩnh viễn vào một target. Đây là mục đích của section `[Install]` trong unit; nó nói rằng khi service này được enable, nó sẽ trở thành phụ thuộc của `multi-user.target`, và vì vậy sẽ được khởi động lúc boot. Bạn enable nó bằng `systemctl enable`, như thế này:
+Tại thời điểm này, service chỉ khởi động và dừng theo lệnh. Để làm cho nó bền vững, bạn cần thêm một dependency cố định vào một target. Section `[Install]` nói rằng khi service này được enable, nó trở thành phụ thuộc vào `multi-user.target` để nó khởi động lúc boot.
+
+Để enable service:
 
 ```
 # systemctl enable simpleserver
-Created symlink from /etc/systemd/system/multiuser.target.wants/simpleserver.service to /etc/systemd/system/simpleserver.service.
+Created symlink from /etc/systemd/system/multiuser.target.wants/
+simpleserver.service to /etc/systemd/system/simpleserver.service.
 ```
 
-Bây giờ, bạn có thể thấy các service thêm phụ thuộc như thế nào mà không phải liên tục sửa các target unit file. Một target có thể có một thư mục tên `<target_name>.target.wants`, có thể chứa link tới các service. Điều này hoàn toàn giống với việc thêm unit phụ thuộc vào danh sách `[Wants]` trong target. Trong trường hợp này, bạn sẽ thấy link này đã được tạo:
+Để cập nhật cây dependency của `systemd` mà không cần reboot:
 
 ```
-/etc/systemd/system/multi-user.target.wants/simpleserver.service -> /etc/systemd/system/simpleserver.service
+# systemctl daemon-reload
 ```
 
-Nếu đây là một service quan trọng, bạn có thể muốn khởi động lại nó nếu nó thất bại. Bạn có thể làm điều đó bằng cách thêm flag này vào section `[Service]`:
+Bạn cũng có thể thêm dependency vào service mà không cần sửa các target unit file. Một target có thể có một thư mục tên `<target_name>.target.wants` với các link tới service. Tạo một link bên trong thư mục này tương đương với việc thêm một unit vào danh sách `[Wants]` trong target. Lệnh `systemctl` `enable` `simpleserver` đã tạo link sau:
+
+```
+/etc/systemd/system/multi-user.target.wants/simpleserver.service -> /etc/
+systemd/system/simpleserver.service
+```
+
+Bạn có thể muốn khởi động lại một service quan trọng nếu nó crash. Để làm được điều đó, hãy thêm cờ sau vào section `[Service]`:
 
 ```
 Restart=on-abort
 ```
 
-Các tùy chọn khác cho `Restart` là `on-success`, `on-failure`, `on-abnormal`, `on-watchdog`, `on-abort` hoặc `always`.
+Các tùy chọn `Restart` khác là `on-success`, `on-failure`, `on-abnormal`, `on-watchdog` và `always`.
 
-### Thêm watchdog
+### Thêm một watchdog
 
-Watchdog là một yêu cầu phổ biến trong thiết bị nhúng: bạn cần thực hiện hành động nếu một service then chốt ngừng hoạt động, thường bằng cách reset hệ thống. Trên hầu hết SoC nhúng, có một hardware watchdog, có thể được truy cập qua device node `/dev/watchdog`. **Watchdog** được khởi tạo với một timeout lúc boot, rồi phải được reset trong khoảng thời gian đó, nếu không watchdog sẽ bị kích hoạt, và hệ thống sẽ reboot. Giao diện với watchdog driver được mô tả trong source kernel ở `Documentation/watchdog` và code của các driver nằm trong `drivers/watchdog`.
+Nhiều hệ thống nhúng cần một watchdog: bạn cần hành động nếu một service quan trọng ngừng hoạt động. Điều này thường có nghĩa là reboot hệ thống. Hầu hết các SoC nhúng có một hardware watchdog có thể được truy cập qua device node `/dev/watchdog`. Watchdog được khởi tạo với một timeout lúc boot. Nếu timer này không được reset trong khoảng thời gian timeout, watchdog bị kích hoạt và hệ thống reboot. Giao diện với watchdog driver được mô tả trong kernel source dưới `Documentation/watchdog/` và code của các driver nằm trong `drivers/watchdog/`.
 
-Một vấn đề nảy sinh nếu có hai hoặc nhiều service then chốt cần được một watchdog bảo vệ. `systemd` có một tính năng hữu ích phân phối watchdog giữa nhiều service.
+Một vấn đề nảy sinh khi có hai hoặc nhiều service quan trọng cần được bảo vệ bởi một watchdog. `systemd` có một tính năng hữu ích phân phối watchdog giữa nhiều service. `systemd` có thể được cấu hình để mong đợi một lời gọi keepalive định kỳ từ một service và hành động khi không nhận được keepalive, tạo ra một software watchdog. Để điều này hoạt động, bạn cần thêm code vào daemon để gửi các thông điệp keepalive. Daemon đọc giá trị của biến môi trường `WATCHDOG_USEC` và gọi `sd_notify(false, "WATCHDOG=1")` trong khoảng thời gian này. Chu kỳ nên được đặt khoảng một nửa watchdog timeout. Có các ví dụ trong source code `systemd`.
 
-`systemd` có thể được cấu hình để mong đợi một lời gọi `keepalive` đều đặn từ một service và thực hiện hành động nếu không nhận được, tạo ra một software watchdog per-service. Để điều này hoạt động, bạn phải thêm code vào daemon để gửi các message `keepalive`. Nó cần kiểm tra một giá trị non-zero trong biến môi trường `WATCHDOG_USEC`, rồi gọi `sd_notify(false, "WATCHDOG=1")` trong khoảng thời gian này (nên dùng chu kỳ bằng một nửa watchdog timeout). Có các ví dụ trong source code `systemd`.
-
-Để enable watchdog trong service unit, thêm thứ gì đó như thế này vào section `[Service]`:
+Để bật software watchdog trong một service unit, hãy thêm thứ gì đó như sau vào section `[Service]`:
 
 ```
 WatchdogSec=30s
@@ -546,32 +643,26 @@ StartLimitBurst=4
 StartLimitAction=reboot-force
 ```
 
-Trong ví dụ này, service mong đợi một lời gọi `keepalive` mỗi 30 giây. Nếu nó không được gửi tới, service sẽ được khởi động lại, nhưng nếu nó bị khởi động lại hơn bốn lần trong 5 phút, `systemd` sẽ buộc reboot ngay lập tức. Một lần nữa, có mô tả đầy đủ về các thiết lập này trong manual page `systemd.service(5)`.
+Trong ví dụ này, service mong đợi một lời gọi keepalive mỗi 30 giây. Nếu keepalive không được gửi tới, service được khởi động lại, nhưng nếu nó bị khởi động lại hơn bốn lần trong 5 phút, `systemd` ngay lập tức reboot toàn bộ hệ thống. Có một mô tả đầy đủ về các thiết lập này trong manual page `systemd.service(5)`.
 
-Một watchdog như thế này lo cho từng service riêng lẻ, nhưng điều gì xảy ra nếu chính `systemd` thất bại, kernel crash, hoặc phần cứng bị treo? Trong những trường hợp đó, chúng ta cần bảo `systemd` dùng watchdog driver: chỉ cần thêm `RuntimeWatchdogSec=NN` vào `/etc/systemd/system.conf.systemd`, thiết lập này sẽ reset watchdog trong khoảng thời gian đó, và vì vậy hệ thống sẽ reset nếu `systemd` thất bại vì lý do nào đó.
+Một software watchdog lo cho từng service riêng lẻ, nhưng nếu chính `systemd` thất bại, kernel crash hoặc phần cứng bị treo thì sao? Trong những trường hợp đó, chúng ta cần bảo `systemd` dùng hardware watchdog. Thêm `RuntimeWatchdogSec=<N>` vào `/etc/systemd/system.conf`. Điều này sẽ reset watchdog trong khoảng thời gian `N` đã cho, để hệ thống reboot nếu `systemd` thất bại vì lý do nào đó. Đây sẽ là một hard reboot tức thì hay "reset" hệ thống mà không có quá trình tắt máy êm ái nào.
 
 ### Ý nghĩa đối với embedded Linux
 
-`systemd` có nhiều tính năng hữu ích trong embedded Linux, bao gồm nhiều tính năng tôi chưa đề cập trong mô tả ngắn gọn này, chẳng hạn kiểm soát tài nguyên bằng slice (được mô tả trong các manual page cho `systemd.slice(5)` và `systemd.resource-control(5)`), quản lý thiết bị (`udev(7)`), và các cơ chế ghi log hệ thống (`journald(5)`).
+`systemd` có rất nhiều tính năng hữu ích cho embedded Linux. Chương này chỉ đề cập một số trong đó. Các tính năng khác bao gồm kiểm soát tài nguyên (được mô tả trong các manual page của `systemd.slice(5)` và `systemd.resource-control(5)`), quản lý thiết bị (`udev(7)`), các tiện ích logging hệ thống (`journald(5)`), mount unit để auto-mounting filesystem và timer unit cho các job `cron`.
 
-Bạn phải cân bằng điều đó với kích thước của nó: ngay cả với một bản build tối thiểu chỉ gồm các component lõi, `systemd`, `udevd` và `journald`, nó đã gần tới 10 MiB dung lượng lưu trữ, bao gồm cả các shared library.
+Bạn cần cân bằng các tính năng này với kích thước của `systemd`. Ngay cả một bản build tối giản chỉ gồm các thành phần lõi (`systemd`, `udevd` và `journald`) cũng gần tới 10 MB dung lượng lưu trữ bao gồm cả shared library.
 
-Bạn cũng phải nhớ rằng việc phát triển `systemd` bám sát kernel và `glibc`, nên nó sẽ không hoạt động trên một kernel và `glibc` cũ hơn bản phát hành của `systemd` quá một hai năm.
+Bạn cũng cần lưu ý rằng việc phát triển `systemd` bám sát kernel và `glibc`, vì vậy một bản phát hành `systemd` sẽ không hoạt động trên một kernel và `glibc` cũ hơn chính nó quá một hoặc hai năm.
 
 ## Tóm tắt
 
-Mọi thiết bị Linux đều cần một chương trình `init` dạng nào đó. Nếu bạn đang thiết kế một hệ thống chỉ phải khởi chạy một số ít daemon lúc khởi động và giữ khá tĩnh sau đó, thì BusyBox `init` là đủ cho nhu cầu của bạn. Nó thường là một lựa chọn tốt nếu bạn đang dùng Buildroot làm build system.
+Mọi thiết bị Linux đều cần một chương trình `init` nào đó. Nếu bạn đang thiết kế một hệ thống chỉ cần khởi chạy một số ít daemon lúc khởi động, thì BusyBox `init` là đủ. BusyBox `init` cũng thường là một lựa chọn tốt nếu bạn đang dùng Buildroot làm build system.
 
-Mặt khác, nếu bạn có một hệ thống có các phụ thuộc phức tạp giữa các service lúc boot hoặc lúc runtime, và bạn có không gian lưu trữ, thì `systemd` sẽ là lựa chọn tốt nhất. Ngay cả khi không có sự phức tạp, `systemd` có một số tính năng hữu ích trong cách nó xử lý watchdog, remote logging, v.v., nên bạn chắc chắn nên cân nhắc nghiêm túc.
+Mặt khác, nếu bạn có một hệ thống với các dependency phức tạp giữa các service lúc boot hoặc lúc runtime, thì `systemd` là lựa chọn tốt nhất. Ngay cả khi không có độ phức tạp như vậy, `systemd` có một số tính năng hữu ích như watchdog, remote logging, v.v. Nếu bạn có đủ dung lượng lưu trữ, bạn nên nghiêm túc cân nhắc `systemd`.
 
-Trong khi đó, System V `init` vẫn tồn tại. Nó được hiểu rõ, và đã có sẵn các script `init` cho mọi component quan trọng với chúng ta. Nó vẫn là `init` mặc định cho bản phân phối tham chiếu của Yocto Project (Poky).
+Trong khi đó, System V `init` vẫn tồn tại. Nó được hiểu rõ và đã có sẵn các script `init` cho mọi thành phần quan trọng đối với chúng ta. System V vẫn là `init` mặc định cho distribution tham chiếu của The Yocto Project (Poky). Về thời gian boot, `systemd` nhanh hơn với các workload tương tự. Tuy nhiên, nếu bạn đang tìm cách boot nhanh nhất, không cái nào trong hai cái đánh bại BusyBox `init` đơn giản với các boot script tối giản.
 
-Về mặt giảm thời gian boot, `systemd` nhanh hơn System V `init` với khối lượng công việc tương tự. Tuy nhiên, nếu bạn đang tìm một lần boot rất nhanh, không cái nào đánh bại BusyBox `init` đơn giản với các boot script tối giản.
+## Tìm hiểu thêm
 
-Trong chương tiếp theo, chúng ta sẽ xem kỹ một hệ thống `init` lesser-known rất phù hợp cho các hệ thống embedded Linux. BusyBox `runit` mang lại sức mạnh và tính linh hoạt của `systemd` mà không có thêm độ phức tạp và overhead. Nếu Buildroot là build system bạn chọn và BusyBox `init` không đáp ứng nhu cầu của bạn, thì có nhiều lý do tốt để cân nhắc BusyBox `runit` thay thế. Chúng ta sẽ học những lý do đó là gì và có thêm kinh nghiệm hands-on với Buildroot trong quá trình đó.
-
-## Đọc thêm
-
-- *systemd System and Service Manager* (Trình quản lý hệ thống và service systemd): [https://www.freedesktop.org/wiki/Software/systemd/](https://www.freedesktop.org/wiki/Software/systemd/)
-
-  Có nhiều link hữu ích ở cuối trang tại URL trên.
+- systemd System and Service Manager – `https://systemd.io/`

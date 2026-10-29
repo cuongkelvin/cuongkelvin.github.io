@@ -147,15 +147,16 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách. Nhìn Linux từ
 - [**Chương 19 — udev**](embedded_linux_primer_book/ch19_udev.vi.md) — phát hiện thiết bị, rule của udev, tùy biến hành vi
 - [**Phụ lục A–F**](embedded_linux_primer_book/chA_gnu_public_license.vi.md) — giấy phép GPL, lệnh U-Boot, lệnh BusyBox, giao tiếp SDRAM, nguồn tài liệu, file cấu hình BDI-2000
 
-## Theo sách *Mastering Embedded Linux Programming*
+## Theo sách *Mastering Embedded Linux Development* (bản 4)
 
-Bản dịch tiếng Việt bản mới của sách, kèm hình minh họa. Chia thành bốn phần, từ các thành phần của một hệ embedded Linux tới gỡ lỗi và tối ưu hiệu năng.
+Bản dịch tiếng Việt bản thứ tư của sách, kèm hình minh họa. Chia thành năm phần, từ các thành phần của một hệ embedded Linux tới gỡ lỗi và tối ưu hiệu năng.
 
 - [**Lời nói đầu**](mastering_embedded_linux_programming_book/ch00_preface.vi.md) — giới thiệu sách
-- [**Phần I — Các thành phần của embedded Linux**](mastering_embedded_linux_programming_book/section1_elements_of_embedded_linux.vi.md) — toolchain, bootloader, cấu hình và build kernel, root filesystem, build system, Yocto (chương 1–8)
-- [**Phần II — Kiến trúc hệ thống và các quyết định thiết kế**](mastering_embedded_linux_programming_book/section2_system_architecture_and_design_decisions.vi.md) — chiến lược lưu trữ, cập nhật phần mềm từ xa, device driver, làm prototype với breakout board, chương trình init, BusyBox runit, quản lý điện năng (chương 9–15)
-- [**Phần III — Viết ứng dụng embedded**](mastering_embedded_linux_programming_book/section3_writing_embedded_applications.vi.md) — đóng gói Python, process và thread, quản lý bộ nhớ (chương 16–18)
-- [**Phần IV — Gỡ lỗi và tối ưu hiệu năng**](mastering_embedded_linux_programming_book/section4_debugging_and_optimizing_performance.vi.md) — debug với GDB, profiling và tracing, lập trình real-time (chương 19–21)
+- [**Phần I — Các thành phần của embedded Linux**](mastering_embedded_linux_programming_book/part1_elements_of_embedded_linux.vi.md) — toolchain, bootloader, cấu hình và build kernel, root filesystem (chương 1–5)
+- [**Phần II — Build image embedded Linux**](mastering_embedded_linux_programming_book/part2_building_embedded_linux_images.vi.md) — chọn build system, phát triển với Yocto và cách Yocto hoạt động bên trong (chương 6–8)
+- [**Phần III — Kiến trúc hệ thống và quyết định thiết kế**](mastering_embedded_linux_programming_book/part3_system_architecture_and_design_decisions.vi.md) — chiến lược lưu trữ, cập nhật phần mềm từ xa, device driver, làm prototype với add-on board, chương trình init, quản lý điện năng (chương 9–14)
+- [**Phần IV — Phát triển ứng dụng**](mastering_embedded_linux_programming_book/part4_developing_applications.vi.md) — đóng gói Python, triển khai container, process và thread, quản lý bộ nhớ (chương 15–18)
+- [**Phần V — Gỡ lỗi và tối ưu hiệu năng**](mastering_embedded_linux_programming_book/part5_debugging_and_optimizing_performance.vi.md) — debug với GDB, profiling và tracing, lập trình real-time (chương 19–21)
 
 ## Chủ đề *Network device driver*
 
