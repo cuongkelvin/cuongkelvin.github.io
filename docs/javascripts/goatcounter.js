@@ -16,7 +16,8 @@ function gcShow(id, path, label, place) {
   var old = document.getElementById(id)
   if (old) old.remove()
   fetch(GC + "/counter/" + encodeURIComponent(path) + ".json")
-    .then(function (r) { return r.ok ? r.json() : null })
+    // 404 = trang chưa có lượt nào được ghi (GoatCounter xử lý lượt mới chậm vài giây).
+    .then(function (r) { return r.ok ? r.json() : r.status === 404 ? { count: "0" } : null })
     .then(function (d) {
       if (!d || document.getElementById(id)) return
       var el = document.createElement("div")
