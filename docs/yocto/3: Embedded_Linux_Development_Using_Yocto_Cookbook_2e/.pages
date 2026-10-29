@@ -1,0 +1,11 @@
+title: Embedded Linux Development Using Yocto Cookbook
+nav:
+  - Foreword: ch00a_foreword.vi.md
+  - Contributors: ch00b_contributors.vi.md
+  - Preface: ch00c_preface.vi.md
+  - 1. The Build System: ch01_the_build_system.vi.md
+  - 2. The BSP Layer: ch02_the_bsp_layer.vi.md
+  - 3. The Software Layer: ch03_the_software_layer.vi.md
+  - 4. Application Development: ch04_application_development.vi.md
+  - 5. Debugging, Tracing, and Profiling: ch05_debugging_tracing_and_profiling.vi.md
+  - ...

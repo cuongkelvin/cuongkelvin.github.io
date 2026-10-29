@@ -1,6 +1,7 @@
 title: Yocto
 nav:
   - index.md
-  - Embedded_Linux_Development_Using_Yocto_Project
-  - yocto_project_customization_book
+  - "1: Embedded_Linux_Development_Using_Yocto_Project"
+  - "2: yocto_project_customization_book"
+  - "3: Embedded_Linux_Development_Using_Yocto_Cookbook_2e"
   - ...
