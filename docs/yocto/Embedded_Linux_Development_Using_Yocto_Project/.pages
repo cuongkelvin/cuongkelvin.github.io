@@ -1,0 +1,21 @@
+title: Embedded Linux Development Using Yocto Project
+nav:
+  - Preface: ch00_preface.vi.md
+  - 1. Meeting the Yocto Project: ch01_meeting_the_yocto_project.vi.md
+  - 2. Baking Our First Poky-Based System: ch02_baking_our_first_poky_based_system.vi.md
+  - 3. Using Toaster to Bake an Image: ch03_using_toaster_to_bake_an_image.vi.md
+  - 4. Meeting the BitBake Tool: ch04_meeting_the_bitbake_tool.vi.md
+  - 5. Grasping the BitBake Tool: ch05_grasping_the_bitbake_tool.vi.md
+  - 6. The Temporary Build Directory: ch06_detailing_the_temporary_build_directory.vi.md
+  - 7. Assimilating Packaging Support: ch07_assimilating_packaging_support.vi.md
+  - 8. Diving into BitBake Metadata: ch08_diving_into_bitbake_metadata.vi.md
+  - 9. Developing with the Yocto Project: ch09_developing_with_the_yocto_project.vi.md
+  - 10. Debugging with the Yocto Project: ch10_debugging_with_the_yocto_project.vi.md
+  - 11. Exploring External Layers: ch11_exploring_external_layers.vi.md
+  - 12. Creating Custom Layers: ch12_creating_custom_layers.vi.md
+  - 13. Customizing Existing Recipes: ch13_customizing_existing_recipes.vi.md
+  - 14. Achieving GPL Compliance: ch14_achieving_gpl_compliance.vi.md
+  - 15. Booting Our Custom Embedded Linux: ch15_booting_our_custom_embedded_linux.vi.md
+  - 16. Emulation with QEMU: ch16_speeding_up_product_development_through_emulation_qemu.vi.md
+  - 17. Best Practices: ch17_best_practices.vi.md
+  - ...
