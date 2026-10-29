@@ -1,0 +1,35 @@
+title: "Fundamentals of Software Architecture"
+nav:
+  - "Preface": ch00_preface.vi.md
+  - "1. Introduction": ch01_introduction.vi.md
+  - "Part I – Foundations": part1_foundations.vi.md
+  - "2. Architectural Thinking": ch02_architectural_thinking.vi.md
+  - "3. Modularity": ch03_modularity.vi.md
+  - "4. Architectural Characteristics Defined": ch04_architectural_characteristics_defined.vi.md
+  - "5. Identifying Architectural Characteristics": ch05_identifying_architectural_characteristics.vi.md
+  - "6. Measuring and Governing Architecture Characteristics": ch06_measuring_and_governing_architecture_characteristics.vi.md
+  - "7. The Scope of Architectural Characteristics": ch07_the_scope_of_architectural_characteristics.vi.md
+  - "8. Component Based Thinking": ch08_component_based_thinking.vi.md
+  - "Part II – Architecture Styles": part2_architecture_styles.vi.md
+  - "9. Foundations": ch09_foundations.vi.md
+  - "10. Layered Architecture Style": ch10_layered_architecture_style.vi.md
+  - "11. The Modular Monolith Architecture Style": ch11_the_modular_monolith_architecture_style.vi.md
+  - "12. Pipeline Architecture Style": ch12_pipeline_architecture_style.vi.md
+  - "13. Microkernel Architecture Style": ch13_microkernel_architecture_style.vi.md
+  - "14. Service Based Architecture Style": ch14_service_based_architecture_style.vi.md
+  - "15. Event Driven Architecture Style": ch15_event_driven_architecture_style.vi.md
+  - "16. Space Based Architecture Style": ch16_space_based_architecture_style.vi.md
+  - "17. Orchestration Driven Service Oriented Architecture": ch17_orchestration_driven_service_oriented_architecture.vi.md
+  - "18. Microservices Architecture": ch18_microservices_architecture.vi.md
+  - "19. Choosing the Appropriate Architecture Style": ch19_choosing_the_appropriate_architecture_style.vi.md
+  - "20. Architectural Patterns": ch20_architectural_patterns.vi.md
+  - "Part III – Techniques and Soft Skills": part3_techniques_and_soft_skills.vi.md
+  - "21. Architectural Decisions": ch21_architectural_decisions.vi.md
+  - "22. Analyzing Architecture Risk": ch22_analyzing_architecture_risk.vi.md
+  - "23. Diagramming Architecture": ch23_diagramming_architecture.vi.md
+  - "24. Making Teams Effective": ch24_making_teams_effective.vi.md
+  - "25. Negotiation and Leadership Skills": ch25_negotiation_and_leadership_skills.vi.md
+  - "26. Architectural Intersections": ch26_architectural_intersections.vi.md
+  - "27. The Laws of Software Architecture Revisited": ch27_the_laws_of_software_architecture_revisited.vi.md
+  - "28. Appendix Discussion Questions": ch28_appendix_discussion_questions.vi.md
+  - ...

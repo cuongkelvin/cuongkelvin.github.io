@@ -1,0 +1,7 @@
+title: Embedded Security & Safety
+nav:
+  - index.md
+  - safety_critical_systems
+  - engineering_secure_devices
+  - secure_boot_encryption_with_linux
+  - ...

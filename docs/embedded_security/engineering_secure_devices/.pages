@@ -1,0 +1,21 @@
+title: "Engineering Secure Devices"
+nav:
+  - "Foreword": 09_foreword.vi.md
+  - "Introduction": ch00_introduction.vi.md
+  - "Part I – Fundamentals": part1_fundamentals.vi.md
+  - "1. Secure Development Process": ch01_secure_development_process.vi.md
+  - "2. Cryptography": ch02_cryptography.vi.md
+  - "Part II – Device Security Building Blocks": part2_device_security_building_blocks.vi.md
+  - "3. Random Number Generators": ch03_random_number_generators.vi.md
+  - "4. Cryptographic Implementations": ch04_cryptographic_implementations.vi.md
+  - "5. Confidential Data Storage and Secure Memory": ch05_confidential_data_storage_and_secure_memory.vi.md
+  - "6. Secure Device Identity": ch06_secure_device_identity.vi.md
+  - "7. Secure Communication": ch07_secure_communication.vi.md
+  - "Part III – Advanced Device Security Concepts": part3_advanced_device_security_concepts.vi.md
+  - "8. Secure Boot and System Integrity": ch08_secure_boot_and_system_integrity.vi.md
+  - "9. Secure Firmware Update": ch09_secure_firmware_update.vi.md
+  - "10. Robust Device Architecture": ch10_robust_device_architecture.vi.md
+  - "11. Access Control and Management": ch11_access_control_and_management.vi.md
+  - "12. System Monitoring": ch12_system_monitoring.vi.md
+  - "13. Afterword": ch13_afterword.vi.md
+  - ...

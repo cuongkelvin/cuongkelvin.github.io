@@ -1,0 +1,24 @@
+title: "Software Architecture: The Hard Parts"
+nav:
+  - "Preface": ch00_preface.vi.md
+  - "1. What Happens When There Are No Best Practices": ch01_what_happens_when_there_are_no_best_practices.vi.md
+  - "Part I – Pulling Things Apart": part1_pulling_things_apart.vi.md
+  - "2. Discerning Coupling in Software Architecture": ch02_discerning_coupling_in_software_architecture.vi.md
+  - "3. Architectural Modularity": ch03_architectural_modularity.vi.md
+  - "4. Architectural Decomposition": ch04_architectural_decomposition.vi.md
+  - "5. Component Based Decomposition Patterns": ch05_component_based_decomposition_patterns.vi.md
+  - "6. Pulling Apart Operational Data": ch06_pulling_apart_operational_data.vi.md
+  - "7. Service Granularity": ch07_service_granularity.vi.md
+  - "Part II – Putting Things Back Together": part2_putting_things_back_together.vi.md
+  - "8. Reuse Patterns": ch08_reuse_patterns.vi.md
+  - "9. Data Ownership and Distributed Transactions": ch09_data_ownership_and_distributed_transactions.vi.md
+  - "10. Distributed Data Access": ch10_distributed_data_access.vi.md
+  - "11. Managing Distributed Workflows": ch11_managing_distributed_workflows.vi.md
+  - "12. Transactional Sagas": ch12_transactional_sagas.vi.md
+  - "13. Contracts": ch13_contracts.vi.md
+  - "14. Managing Analytical Data": ch14_managing_analytical_data.vi.md
+  - "15. Build Your Own Trade Off Analysis": ch15_build_your_own_trade_off_analysis.vi.md
+  - "16. Appendix Concept and Term References": ch16_appendix_concept_and_term_references.vi.md
+  - "17. Appendix Architecture Decision Record References": ch17_appendix_architecture_decision_record_references.vi.md
+  - "18. Appendix Trade Off References": ch18_appendix_trade_off_references.vi.md
+  - ...

@@ -1,0 +1,30 @@
+title: "Software Architecture in Practice"
+nav:
+  - "Preface": ch00_preface.vi.md
+  - "1. What Is Software Architecture": ch01_what_is_software_architecture.vi.md
+  - "2. Why Is Software Architecture Important": ch02_why_is_software_architecture_important.vi.md
+  - "3. Understanding Quality Attributes": ch03_understanding_quality_attributes.vi.md
+  - "4. Availability": ch04_availability.vi.md
+  - "5. Deployability": ch05_deployability.vi.md
+  - "6. Energy Efficiency": ch06_energy_efficiency.vi.md
+  - "7. Integrability": ch07_integrability.vi.md
+  - "8. Modifiability": ch08_modifiability.vi.md
+  - "9. Performance": ch09_performance.vi.md
+  - "10. Safety": ch10_safety.vi.md
+  - "11. Security": ch11_security.vi.md
+  - "12. Testability": ch12_testability.vi.md
+  - "13. Usability": ch13_usability.vi.md
+  - "14. Working with Other Quality Attributes": ch14_working_with_other_quality_attributes.vi.md
+  - "15. Software Interfaces": ch15_software_interfaces.vi.md
+  - "16. Virtualization": ch16_virtualization.vi.md
+  - "17. The Cloud and Distributed Computing": ch17_the_cloud_and_distributed_computing.vi.md
+  - "18. Mobile Systems": ch18_mobile_systems.vi.md
+  - "19. Architecturally Significant Requirements": ch19_architecturally_significant_requirements.vi.md
+  - "20. Designing an Architecture": ch20_designing_an_architecture.vi.md
+  - "21. Evaluating an Architecture": ch21_evaluating_an_architecture.vi.md
+  - "22. Documenting an Architecture": ch22_documenting_an_architecture.vi.md
+  - "23. Managing Architecture Debt": ch23_managing_architecture_debt.vi.md
+  - "24. The Role of Architects in Projects": ch24_the_role_of_architects_in_projects.vi.md
+  - "25. Architecture Competence": ch25_architecture_competence.vi.md
+  - "26. A Glimpse of the Future Quantum Computing": ch26_a_glimpse_of_the_future_quantum_computing.vi.md
+  - ...

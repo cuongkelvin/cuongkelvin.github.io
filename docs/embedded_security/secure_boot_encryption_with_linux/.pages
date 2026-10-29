@@ -1,0 +1,10 @@
+title: "Secure Boot Encryption with Linux"
+nav:
+  - "Introduction": ch00_introduction.vi.md
+  - "1. Linux Cryptography": ch01_linux_cryptography.vi.md
+  - "2. What Secure Boot Is and What It Is Not": ch02_what_secure_boot_is_and_what_it_is_not.vi.md
+  - "3. Real Implementations": ch03_real_implementations.vi.md
+  - "4. Final Considerations": ch04_final_considerations.vi.md
+  - "5. Appendix a Notes on Tamper Detection": ch05_appendix_a_notes_on_tamper_detection.vi.md
+  - "6. Appendix B Securing Secrets Across Booting Stages": ch06_appendix_b_securing_secrets_across_booting_stages.vi.md
+  - ...

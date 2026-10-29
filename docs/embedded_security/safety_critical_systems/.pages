@@ -1,0 +1,39 @@
+title: "Embedded Software Development for Safety-Critical Systems"
+nav:
+  - "Preface": ch00_preface.vi.md
+  - "Part I – Background": part1_background.vi.md
+  - "1. Introduction": ch01_introduction.vi.md
+  - "2. Terminology of Safety": ch02_terminology_of_safety.vi.md
+  - "3. Safety Standards and Certification": ch03_safety_standards_and_certification.vi.md
+  - "4. Representative Companies": ch04_representative_companies.vi.md
+  - "Part II – The Project": part2_the_project.vi.md
+  - "5. Development Methodologies": ch05_development_methodologies.vi.md
+  - "6. The Safety Case": ch06_the_safety_case.vi.md
+  - "7. Foundational Analyses": ch07_foundational_analyses.vi.md
+  - "8. Using Pre Existing Software Components": ch08_using_pre_existing_software_components.vi.md
+  - "9. The Device Within the System": ch09_the_device_within_the_system.vi.md
+  - "Part III – Design Patterns": part3_design_patterns.vi.md
+  - "10. Balancing Design Aspects": ch10_balancing_design_aspects.vi.md
+  - "11. Error Detection and Handling": ch11_error_detection_and_handling.vi.md
+  - "12. Expecting the Unexpected": ch12_expecting_the_unexpected.vi.md
+  - "13. Replication and Diversification": ch13_replication_and_diversification.vi.md
+  - "Part IV – Design Validation": part4_design_validation.vi.md
+  - "14. Markov Models": ch14_markov_models.vi.md
+  - "15. The Fault Tree": ch15_the_fault_tree.vi.md
+  - "16. Software Failure Rates": ch16_software_failure_rates.vi.md
+  - "17. Semi Formal Verification": ch17_semi_formal_verification.vi.md
+  - "18. Formal Verification": ch18_formal_verification.vi.md
+  - "Part V – Implementation": part5_implementation.vi.md
+  - "19. Coding Guidelines": ch19_coding_guidelines.vi.md
+  - "20. Code Coverage Metrics": ch20_code_coverage_metrics.vi.md
+  - "21. Static Analysis": ch21_static_analysis.vi.md
+  - "Part VI – Implementation Verification": part6_implementation_verification.vi.md
+  - "22. Integration and System Testing": ch22_integration_and_system_testing.vi.md
+  - "23. The Offline Tools": ch23_the_offline_tools.vi.md
+  - "24. Conclusion": ch24_conclusion.vi.md
+  - "Part VII – Appendices": part7_appendices.vi.md
+  - "25. Appendix a Goal Structuring Notation": ch25_appendix_a_goal_structuring_notation.vi.md
+  - "26. Appendix B Bayesian Belief Networks": ch26_appendix_b_bayesian_belief_networks.vi.md
+  - "27. Appendix C Calculating 2 3 4": ch27_appendix_c_calculating_2_3_4.vi.md
+  - "28. Appendix D Notations": ch28_appendix_d_notations.vi.md
+  - ...

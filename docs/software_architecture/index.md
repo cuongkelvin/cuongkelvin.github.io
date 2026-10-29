@@ -1,0 +1,98 @@
+# Software Architecture
+
+Sổ tay ghi chép về kiến trúc phần mềm.
+
+## Theo sách *Fundamentals of Software Architecture*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Nền tảng kiến trúc phần mềm: tư duy kiến trúc, đặc tính kiến trúc, các kiểu kiến trúc phổ biến, kỹ năng của kiến trúc sư.
+
+- [Preface](fundamentals_of_software_architecture/ch00_preface.vi.md)
+- [1. Introduction](fundamentals_of_software_architecture/ch01_introduction.vi.md)
+- [Part I – Foundations](fundamentals_of_software_architecture/part1_foundations.vi.md)
+- [2. Architectural Thinking](fundamentals_of_software_architecture/ch02_architectural_thinking.vi.md)
+- [3. Modularity](fundamentals_of_software_architecture/ch03_modularity.vi.md)
+- [4. Architectural Characteristics Defined](fundamentals_of_software_architecture/ch04_architectural_characteristics_defined.vi.md)
+- [5. Identifying Architectural Characteristics](fundamentals_of_software_architecture/ch05_identifying_architectural_characteristics.vi.md)
+- [6. Measuring and Governing Architecture Characteristics](fundamentals_of_software_architecture/ch06_measuring_and_governing_architecture_characteristics.vi.md)
+- [7. The Scope of Architectural Characteristics](fundamentals_of_software_architecture/ch07_the_scope_of_architectural_characteristics.vi.md)
+- [8. Component Based Thinking](fundamentals_of_software_architecture/ch08_component_based_thinking.vi.md)
+- [Part II – Architecture Styles](fundamentals_of_software_architecture/part2_architecture_styles.vi.md)
+- [9. Foundations](fundamentals_of_software_architecture/ch09_foundations.vi.md)
+- [10. Layered Architecture Style](fundamentals_of_software_architecture/ch10_layered_architecture_style.vi.md)
+- [11. The Modular Monolith Architecture Style](fundamentals_of_software_architecture/ch11_the_modular_monolith_architecture_style.vi.md)
+- [12. Pipeline Architecture Style](fundamentals_of_software_architecture/ch12_pipeline_architecture_style.vi.md)
+- [13. Microkernel Architecture Style](fundamentals_of_software_architecture/ch13_microkernel_architecture_style.vi.md)
+- [14. Service Based Architecture Style](fundamentals_of_software_architecture/ch14_service_based_architecture_style.vi.md)
+- [15. Event Driven Architecture Style](fundamentals_of_software_architecture/ch15_event_driven_architecture_style.vi.md)
+- [16. Space Based Architecture Style](fundamentals_of_software_architecture/ch16_space_based_architecture_style.vi.md)
+- [17. Orchestration Driven Service Oriented Architecture](fundamentals_of_software_architecture/ch17_orchestration_driven_service_oriented_architecture.vi.md)
+- [18. Microservices Architecture](fundamentals_of_software_architecture/ch18_microservices_architecture.vi.md)
+- [19. Choosing the Appropriate Architecture Style](fundamentals_of_software_architecture/ch19_choosing_the_appropriate_architecture_style.vi.md)
+- [20. Architectural Patterns](fundamentals_of_software_architecture/ch20_architectural_patterns.vi.md)
+- [Part III – Techniques and Soft Skills](fundamentals_of_software_architecture/part3_techniques_and_soft_skills.vi.md)
+- [21. Architectural Decisions](fundamentals_of_software_architecture/ch21_architectural_decisions.vi.md)
+- [22. Analyzing Architecture Risk](fundamentals_of_software_architecture/ch22_analyzing_architecture_risk.vi.md)
+- [23. Diagramming Architecture](fundamentals_of_software_architecture/ch23_diagramming_architecture.vi.md)
+- [24. Making Teams Effective](fundamentals_of_software_architecture/ch24_making_teams_effective.vi.md)
+- [25. Negotiation and Leadership Skills](fundamentals_of_software_architecture/ch25_negotiation_and_leadership_skills.vi.md)
+- [26. Architectural Intersections](fundamentals_of_software_architecture/ch26_architectural_intersections.vi.md)
+- [27. The Laws of Software Architecture Revisited](fundamentals_of_software_architecture/ch27_the_laws_of_software_architecture_revisited.vi.md)
+- [28. Appendix Discussion Questions](fundamentals_of_software_architecture/ch28_appendix_discussion_questions.vi.md)
+
+## Theo sách *Software Architecture in Practice*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Kiến trúc phần mềm nhìn qua các thuộc tính chất lượng: availability, deployability, hiệu năng, bảo mật, khả năng kiểm thử, rồi cách thiết kế, đánh giá và ghi chép kiến trúc.
+
+- [Preface](software_architecture_in_practice/ch00_preface.vi.md)
+- [1. What Is Software Architecture](software_architecture_in_practice/ch01_what_is_software_architecture.vi.md)
+- [2. Why Is Software Architecture Important](software_architecture_in_practice/ch02_why_is_software_architecture_important.vi.md)
+- [3. Understanding Quality Attributes](software_architecture_in_practice/ch03_understanding_quality_attributes.vi.md)
+- [4. Availability](software_architecture_in_practice/ch04_availability.vi.md)
+- [5. Deployability](software_architecture_in_practice/ch05_deployability.vi.md)
+- [6. Energy Efficiency](software_architecture_in_practice/ch06_energy_efficiency.vi.md)
+- [7. Integrability](software_architecture_in_practice/ch07_integrability.vi.md)
+- [8. Modifiability](software_architecture_in_practice/ch08_modifiability.vi.md)
+- [9. Performance](software_architecture_in_practice/ch09_performance.vi.md)
+- [10. Safety](software_architecture_in_practice/ch10_safety.vi.md)
+- [11. Security](software_architecture_in_practice/ch11_security.vi.md)
+- [12. Testability](software_architecture_in_practice/ch12_testability.vi.md)
+- [13. Usability](software_architecture_in_practice/ch13_usability.vi.md)
+- [14. Working with Other Quality Attributes](software_architecture_in_practice/ch14_working_with_other_quality_attributes.vi.md)
+- [15. Software Interfaces](software_architecture_in_practice/ch15_software_interfaces.vi.md)
+- [16. Virtualization](software_architecture_in_practice/ch16_virtualization.vi.md)
+- [17. The Cloud and Distributed Computing](software_architecture_in_practice/ch17_the_cloud_and_distributed_computing.vi.md)
+- [18. Mobile Systems](software_architecture_in_practice/ch18_mobile_systems.vi.md)
+- [19. Architecturally Significant Requirements](software_architecture_in_practice/ch19_architecturally_significant_requirements.vi.md)
+- [20. Designing an Architecture](software_architecture_in_practice/ch20_designing_an_architecture.vi.md)
+- [21. Evaluating an Architecture](software_architecture_in_practice/ch21_evaluating_an_architecture.vi.md)
+- [22. Documenting an Architecture](software_architecture_in_practice/ch22_documenting_an_architecture.vi.md)
+- [23. Managing Architecture Debt](software_architecture_in_practice/ch23_managing_architecture_debt.vi.md)
+- [24. The Role of Architects in Projects](software_architecture_in_practice/ch24_the_role_of_architects_in_projects.vi.md)
+- [25. Architecture Competence](software_architecture_in_practice/ch25_architecture_competence.vi.md)
+- [26. A Glimpse of the Future Quantum Computing](software_architecture_in_practice/ch26_a_glimpse_of_the_future_quantum_computing.vi.md)
+
+## Theo sách *Software Architecture: The Hard Parts*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Các quyết định khó trong kiến trúc phân tán: tách hệ thống, quản lý dữ liệu, giao dịch phân tán, cân nhắc đánh đổi.
+
+- [Preface](software_architecture_the_hard_parts/ch00_preface.vi.md)
+- [1. What Happens When There Are No Best Practices](software_architecture_the_hard_parts/ch01_what_happens_when_there_are_no_best_practices.vi.md)
+- [Part I – Pulling Things Apart](software_architecture_the_hard_parts/part1_pulling_things_apart.vi.md)
+- [2. Discerning Coupling in Software Architecture](software_architecture_the_hard_parts/ch02_discerning_coupling_in_software_architecture.vi.md)
+- [3. Architectural Modularity](software_architecture_the_hard_parts/ch03_architectural_modularity.vi.md)
+- [4. Architectural Decomposition](software_architecture_the_hard_parts/ch04_architectural_decomposition.vi.md)
+- [5. Component Based Decomposition Patterns](software_architecture_the_hard_parts/ch05_component_based_decomposition_patterns.vi.md)
+- [6. Pulling Apart Operational Data](software_architecture_the_hard_parts/ch06_pulling_apart_operational_data.vi.md)
+- [7. Service Granularity](software_architecture_the_hard_parts/ch07_service_granularity.vi.md)
+- [Part II – Putting Things Back Together](software_architecture_the_hard_parts/part2_putting_things_back_together.vi.md)
+- [8. Reuse Patterns](software_architecture_the_hard_parts/ch08_reuse_patterns.vi.md)
+- [9. Data Ownership and Distributed Transactions](software_architecture_the_hard_parts/ch09_data_ownership_and_distributed_transactions.vi.md)
+- [10. Distributed Data Access](software_architecture_the_hard_parts/ch10_distributed_data_access.vi.md)
+- [11. Managing Distributed Workflows](software_architecture_the_hard_parts/ch11_managing_distributed_workflows.vi.md)
+- [12. Transactional Sagas](software_architecture_the_hard_parts/ch12_transactional_sagas.vi.md)
+- [13. Contracts](software_architecture_the_hard_parts/ch13_contracts.vi.md)
+- [14. Managing Analytical Data](software_architecture_the_hard_parts/ch14_managing_analytical_data.vi.md)
+- [15. Build Your Own Trade Off Analysis](software_architecture_the_hard_parts/ch15_build_your_own_trade_off_analysis.vi.md)
+- [16. Appendix Concept and Term References](software_architecture_the_hard_parts/ch16_appendix_concept_and_term_references.vi.md)
+- [17. Appendix Architecture Decision Record References](software_architecture_the_hard_parts/ch17_appendix_architecture_decision_record_references.vi.md)
+- [18. Appendix Trade Off References](software_architecture_the_hard_parts/ch18_appendix_trade_off_references.vi.md)
