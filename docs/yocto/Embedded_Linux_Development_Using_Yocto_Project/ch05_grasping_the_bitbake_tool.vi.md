@@ -24,7 +24,7 @@ BitBake dùng file `build/conf/bblayers.conf` để liệt kê các layer đư�
 
 ![](images/Figure_5.02_B19361.jpg)
 
-*Hình 5.2 – Nội dung của build/conf/bblayer.conf sau khi chạy source oe-init-build-env build* *(ghi chú: sách in bblayer.conf; đúng là bblayers.conf)*
+*Hình 5.2 – Nội dung của build/conf/bblayer.conf sau khi chạy source oe-init-build-env build* *(ghi chú: đúng là bblayers.conf)*
 
 Biến `BBLAYERS`, ở dòng 8, là một danh sách space-delimited các thư mục layer. BitBake parse từng layer để nạp nội dung của nó vào metadata collection. Có ba nhóm chính để phân loại metadata được BitBake sử dụng. Chúng được liệt kê như sau:
 
@@ -56,7 +56,7 @@ Theo góc nhìn của BitBake, có ba loại dependency khác nhau:
 - Lúc thực thi
 - Task
 
-Một ứng dụng cần một package khác, chẳng hạn một thư viện, thì có một build dependency để compile thành công. Build dependency bao gồm compiler. *(ghi chú: sách in dấu chấm; đúng là dấu phẩy)* thư viện và các công cụ build native (như **CMake**). Ngoài ra, một build dependency có một execution dependency bất cứ khi nào một ứng dụng chỉ cần đến trong lúc thực thi. Runtime dependency bao gồm font, icon, các thư viện được mở động và các trình thông dịch ngôn ngữ.
+Một ứng dụng cần một package khác, chẳng hạn một thư viện, thì có một build dependency để compile thành công. Build dependency bao gồm compiler, thư viện và các công cụ build native (như **CMake**). Ngoài ra, một build dependency có một execution dependency bất cứ khi nào một ứng dụng chỉ cần đến trong lúc thực thi. Runtime dependency bao gồm font, icon, các thư viện được mở động và các trình thông dịch ngôn ngữ.
 
 > **Mẹo**
 >
@@ -113,7 +113,7 @@ Theo mặc định, chúng ta có thể tránh dùng một phiên bản recipe �
 
 *Hình 5.4 – Cách hạ mức ưu tiên phiên bản trong một recipe*
 
-Như vậy, dù phiên bản cao hơn, recipe đó sẽ không được chọn *(ghi chú: sách in "choosen"; đúng là "chosen")* nếu `PREFERRED_VERSION` không được đặt một cách tường minh để dùng nó.
+Như vậy, dù phiên bản cao hơn, recipe đó sẽ không được chọn nếu `PREFERRED_VERSION` không được đặt một cách tường minh để dùng nó.
 
 ## Fetch source code
 
@@ -199,7 +199,7 @@ File từ xa và Git repository là những fetch backend được dùng phổ b
 Để cung cấp cơ chế tải về tin cậy này, BitBake tuân theo các bước logic đã được định nghĩa. Trong quá trình build, bước đầu tiên của BitBake là tìm source code trong thư mục download cục bộ (được chỉ định bởi `DL_DIR`). Nếu thất bại, bước tiếp theo là thử các vị trí được định nghĩa bởi biến `PREMIRRORS`. Cuối cùng, trong trường hợp vẫn thất bại, BitBake tìm ở các vị trí được chỉ định trong biến `MIRRORS`. Tóm lại, các bước này như sau:
 
 1. `DL_DIR`: Tìm file cần tải trên máy host.
-2. `MIRRORS` *(ghi chú: sách xếp MIRRORS ở bước 2; theo dòng mở đầu thì PREMIRRORS được thử trước MIRRORS)*: Tìm file cần tải trong một danh sách mirror.
+2. `MIRRORS` *(ghi chú: đúng là `PREMIRRORS` ở bước 2 và `MIRRORS` ở bước 3, như câu mở đầu)*: Tìm file cần tải trong một danh sách mirror.
 3. `PREMIRRORS`: Biến này được dùng để giảm việc tải từ các server bên ngoài và thường được dùng bên trong các công ty để giảm hoặc cấm việc dùng internet.
 
 Ví dụ, khi cấu hình một server cục bộ, `https://mylocalserver`, làm `PREMIRROR`, chúng ta có thể thêm đoạn code sau vào một file cấu hình toàn cục, như `build/conf/local.conf`:
@@ -275,7 +275,7 @@ Chúng ta sẽ mô tả ngắn gọn các task thường dùng nhất ở đây:
 - `do_unpack`: Task tự nhiên tiếp theo sau task `do_fetch` là `do_unpack`. Task này chịu trách nhiệm giải nén source code hoặc checkout revision hay branch được yêu cầu trong trường hợp nguồn được tham chiếu dùng một hệ thống SCM.
 - `do_patch`: Khi source code đã được giải nén đúng cách, BitBake bắt đầu điều chỉnh source code. Mọi file được `do_fetch` fetch về có phần mở rộng `.patch` đều được coi là một patch cần áp dụng. Task này áp danh sách các patch cần thiết. Source code đã được sửa đổi cuối cùng sẽ được dùng để build package.
 - `do_configure`, `do_compile` và `do_install`: Các task `do_configure`, `do_compile` và `do_install` được thực hiện theo thứ tự này. Điều quan trọng cần lưu ý là các biến môi trường được định nghĩa trong các task khác nhau giữa task này với task khác. Poky cung cấp một bộ sưu tập phong phú các task được định nghĩa sẵn trong các class, mà chúng ta nên dùng khi có thể – ví dụ, khi một recipe kế thừa class `autotools`, class này cung cấp một bản hiện thực đã biết của các task `do_configure`, `do_compile` và `do_install`.
-- `do_package`: Task `do_package` chia các file được recipe cài đặt thành các thành phần logic, như debugging symbol, tài liệu và thư viện. Chúng ta sẽ đề cập chi tiết về đóng gói sâu hơn trong *Chương 7*, *Tìm hiểu cơ chế hỗ trợ đóng gói* *(ghi chú: sách in "Assimilating Package Support"; đúng là "Assimilating Packaging Support")*.
+- `do_package`: Task `do_package` chia các file được recipe cài đặt thành các thành phần logic, như debugging symbol, tài liệu và thư viện. Chúng ta sẽ đề cập chi tiết về đóng gói sâu hơn trong *Chương 7*, *Tìm hiểu cơ chế hỗ trợ đóng gói*.
 
 ## Tóm tắt
 

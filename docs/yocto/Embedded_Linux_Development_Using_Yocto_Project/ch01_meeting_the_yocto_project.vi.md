@@ -60,7 +60,7 @@ BitBake đánh giá toàn bộ metadata hiện có, quản lý việc mở rộn
 
 ### OpenEmbedded Core
 
-Metadata collection OpenEmbedded Core cung cấp bộ máy của build system Poky. Nó cung cấp các tính năng cốt lõi và hướng tới việc tổng quát và gọn nhẹ nhất có thể. Nó hỗ trợ bảy architecture bộ xử lý khác nhau (ARM, ARM64, x86, x86-64, PowerPC, PowerPC 64, MIPS, MIPS64, RISC-V32 và RISC-V 64) *(ghi chú: sách in "seven"; danh sách có 10 architecture)*, và chỉ hỗ trợ những nền tảng có thể được QEMU emulate.
+Metadata collection OpenEmbedded Core cung cấp bộ máy của build system Poky. Nó cung cấp các tính năng cốt lõi và hướng tới việc tổng quát và gọn nhẹ nhất có thể. Nó hỗ trợ mười architecture bộ xử lý khác nhau (ARM, ARM64, x86, x86-64, PowerPC, PowerPC 64, MIPS, MIPS64, RISC-V32 và RISC-V 64), và chỉ hỗ trợ những nền tảng có thể được QEMU emulate.
 
 Việc phát triển được tập trung tại mailing list [https://lists.openembedded.org/g/openembedded-core](https://lists.openembedded.org/g/openembedded-core) ([mailto:openembedded-core@lists.openembedded.org](mailto:openembedded-core@lists.openembedded.org)), và metadata của nó được đặt trong thư mục con `meta` của Poky.
 
@@ -71,7 +71,7 @@ Metadata bao gồm các recipe và file cấu hình. Nó gồm một tập hỗn
 - `meta-poky`: Layer này cung cấp các chính sách phân phối mặc định và được hỗ trợ, nhận diện thương hiệu về mặt hình ảnh, và thông tin theo dõi metadata (người bảo trì, trạng thái upstream, v.v.). Mục đích là để làm một template được tuyển chọn kỹ, có thể được những người build bản phân phối dùng làm điểm khởi đầu cho bản phân phối tùy chỉnh của họ.
 - `meta-yocto-bsp`: Layer này cung cấp **Board Support Package** (**BSP**) được dùng làm phần cứng tham chiếu cho việc phát triển Yocto Project và cho quy trình **Quality Assurance** (**QA**).
 
-*Chương 9*, *Phát triển với Yocto Project* *(ghi chú: sách in Chapter 9; đúng là Chương 8, Diving into BitBake Metadata)*, khám phá metadata chi tiết hơn và đóng vai trò tài liệu tham khảo khi chúng ta viết các recipe của mình.
+*Chương 8*, *Đi sâu vào metadata của BitBake*, khám phá metadata chi tiết hơn và đóng vai trò tài liệu tham khảo khi chúng ta viết các recipe của mình.
 
 ## Các bản phát hành của Yocto Project
 

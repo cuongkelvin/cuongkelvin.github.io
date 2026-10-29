@@ -16,7 +16,7 @@ Tiếp theo, chúng ta sẽ cung cấp những thông tin cần thiết để b�
 
 Nếu là người dùng Windows, bạn có thể cài đặt một bản phân phối Linux trên Windows. WSLv2 chỉ có trên các bản build Windows 10+ lớn hơn 18917. WSLv2 cho phép phát triển bằng Yocto Project. Bạn có thể cài đặt bản phân phối Linux từ Microsoft Store.
 
-Vui lòng tham khảo phần *(ghi chú: sách in "session"; đúng là "section")* *Setting Up to Use Windows Subsystem For Linux* ([https://docs.yoctoproject.org/4.0.4/dev-manual/start.html#setting-up-to-use-windows-subsystem-for-linux-wslv2](https://docs.yoctoproject.org/4.0.4/dev-manual/start.html#setting-up-to-use-windows-subsystem-for-linux-wslv2)) trong *Yocto Project Development Tasks Manual* ([https://docs.yoctoproject.org/4.0.4/dev-manual/index.html](https://docs.yoctoproject.org/4.0.4/dev-manual/index.html)). Khi đã cài đặt xong WSLv2, bạn có thể làm theo các mục tiếp theo như thể đang chạy trên một máy Linux native.
+Vui lòng tham khảo phần *Setting Up to Use Windows Subsystem For Linux* ([https://docs.yoctoproject.org/4.0.4/dev-manual/start.html#setting-up-to-use-windows-subsystem-for-linux-wslv2](https://docs.yoctoproject.org/4.0.4/dev-manual/start.html#setting-up-to-use-windows-subsystem-for-linux-wslv2)) trong *Yocto Project Development Tasks Manual* ([https://docs.yoctoproject.org/4.0.4/dev-manual/index.html](https://docs.yoctoproject.org/4.0.4/dev-manual/index.html)). Khi đã cài đặt xong WSLv2, bạn có thể làm theo các mục tiếp theo như thể đang chạy trên một máy Linux native.
 
 ### Chuẩn bị một hệ thống Linux-based
 
@@ -181,7 +181,7 @@ Quá trình build Poky trông giống như hình sau:
 
 Chúng ta có thể dùng emulation phần cứng để đẩy nhanh quá trình phát triển, vì nó cho phép chạy thử mà không cần đến bất kỳ phần cứng thật nào. May mắn là hầu hết các dự án chỉ có một phần rất nhỏ là hardware-dependent.
 
-QEMU là một package phần mềm mã nguồn mở, miễn phí, thực hiện ảo hóa phần cứng. Các machine QEMU-based cho phép kiểm thử và phát triển mà không cần phần cứng thật. Hiện tại, các emulation ARMv5, ARMv7, ARMv8, MIPS, MIPS64, PowerPC, PowerPC 64, RISC-V 32, RISC-V 64, x86 và x86-64 được hỗ trợ. Chúng ta sẽ đi vào chi tiết hơn về cách dùng QEMU trong *sw* *(ghi chú: sách in "sw"; đúng là Chương 16)*, *Tăng tốc phát triển sản phẩm nhờ emulation – QEMU*.
+QEMU là một package phần mềm mã nguồn mở, miễn phí, thực hiện ảo hóa phần cứng. Các machine QEMU-based cho phép kiểm thử và phát triển mà không cần phần cứng thật. Hiện tại, các emulation ARMv5, ARMv7, ARMv8, MIPS, MIPS64, PowerPC, PowerPC 64, RISC-V 32, RISC-V 64, x86 và x86-64 được hỗ trợ. Chúng ta sẽ đi vào chi tiết hơn về cách dùng QEMU trong *Chương 16*, *Tăng tốc phát triển sản phẩm nhờ emulation – QEMU*.
 
 OpenEmbedded Core cung cấp công cụ script `runqemu`, là một lớp bọc giúp dùng QEMU dễ dàng hơn. Cách chạy công cụ script này như sau:
 

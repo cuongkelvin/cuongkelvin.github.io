@@ -60,7 +60,7 @@ Thư mục `classes` nên chứa các class dành riêng cho layer đó (các fi
 
 Thư mục `<layer>/conf` là bắt buộc và nên cung cấp các file cấu hình (các file `.conf`). File cấu hình layer, `<layer>/conf/layer.conf`, sẽ được đề cập chi tiết trong chương tiếp theo, là file chứa định nghĩa của layer.
 
-Một ví dụ về bố cục thư mục của thư mục `<layer>/conf` được thể hiện trong *Hình 11.2* *(ghi chú: sách in Figure 11.2; đúng là Hình 11.3)*, trong đó **(a)** cho thấy cấu trúc của một BSP layer và **(b)** cho thấy cấu trúc của một distribution layer:
+Một ví dụ về bố cục thư mục của thư mục `<layer>/conf` được thể hiện trong *Hình 11.3*, trong đó **(a)** cho thấy cấu trúc của một BSP layer và **(b)** cho thấy cấu trúc của một distribution layer:
 
 ![](images/Figure_11.3_B19361.jpg)
 

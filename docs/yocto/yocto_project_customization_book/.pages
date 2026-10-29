@@ -1,0 +1,20 @@
+title: Yocto Project Customization for Linux
+nav:
+  - About the Author: ch00a_about_the_author.vi.md
+  - About the Technical Reviewer: ch00b_about_the_technical_reviewer.vi.md
+  - Acknowledgments: ch00c_acknowledgments.vi.md
+  - Introduction: ch00d_introduction.vi.md
+  - 1. Setting Up the Building Environment: ch01_setting_up_the_building_environment.vi.md
+  - 2. Installing the Sources: ch02_installing_the_sources.vi.md
+  - 3. Yocto Project Basics: ch03_yocto_project_basics.vi.md
+  - 4. Yocto Tools: ch04_yocto_tools.vi.md
+  - 5. BitBake Internals: ch05_bitbake_internals.vi.md
+  - 6. Recipes: ch06_recipes.vi.md
+  - 7. Generating and Managing Layers: ch07_generating_and_managing_layers.vi.md
+  - 8. Adding New Hardware: ch08_adding_new_hardware.vi.md
+  - 9. C Application Recipes: ch09_c_application_recipes.vi.md
+  - 10. Python Application Recipes: ch10_python_application_recipes.vi.md
+  - 11. Miscellaneous Recipes: ch11_miscellaneous_recipes.vi.md
+  - 12. Image Recipes: ch12_image_recipes.vi.md
+  - 13. Optimizations and Best Practices: ch13_optimizations_and_best_practices.vi.md
+  - ...

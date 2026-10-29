@@ -73,7 +73,7 @@ Khi dùng Yocto Project, chúng ta thường thêm nhiều cấu hình vào `bui
 
 Bên cạnh những khía cạnh kỹ thuật đó, việc dùng một distro tùy chỉnh còn cho phép gắn thương hiệu phù hợp cho SDK hoặc các artifact Yocto Project-generated khác.
 
-Chúng ta đã học cách tạo một bản phân phối tùy chỉnh trong sectiown *(ghi chú: sách in "sectiown"; đúng là "section")* *Dùng một bản phân phối tùy chỉnh* ở *Chương 12*, *Tạo các layer tùy chỉnh*.
+Chúng ta đã học cách tạo một bản phân phối tùy chỉnh trong phần *Dùng một bản phân phối tùy chỉnh* ở *Chương 12*, *Tạo các layer tùy chỉnh*.
 
 ### Tránh dùng lại các image có sẵn cho sản phẩm của bạn
 

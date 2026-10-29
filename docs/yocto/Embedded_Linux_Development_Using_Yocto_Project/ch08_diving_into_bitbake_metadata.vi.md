@@ -58,7 +58,7 @@ Khi cần gán một biến chỉ khi biến đó vẫn chưa được gán, có
 
 ![](images/Figure_8.05_B19361.jpg)
 
-*Hình 8.5 – Một ví dụ về giá trị* *(ghi chú: caption trong sách bị thiếu chữ)*
+*Hình 8.5 – Một ví dụ về gán giá trị khi biến chưa được gán*
 
 Hành vi tương tự xảy ra nếu có nhiều phép gán `?=` cho cùng một biến. Lần dùng đầu tiên của toán tử `?=` chịu trách nhiệm gán biến. Hãy xem ví dụ sau:
 
@@ -268,7 +268,7 @@ Ví dụ này cho kết quả là giá trị của biến `DEPENDS` chứa `depe
 
 #### Hệ thống kế thừa
 
-Directive `inherit` chỉ định những class chức năng nào mà recipe (`.bb`) của chúng ta cung cấp một cơ chế kế thừa sơ khai *(ghi chú: câu trong sách bị ghép sai ngữ pháp; bản dịch dịch sát câu gốc)*, giống như các ngôn ngữ lập trình object-oriented. Ví dụ, chúng ta có thể trừu tượng hóa các task liên quan đến việc dùng các công cụ build Autoconf và Automake và đưa chúng vào class để các recipe của chúng ta dùng lại. Một `.bbclass` cho trước được định vị bằng cách tìm `classes/filename.bbclass` trong `BBPATH`. Vì vậy, trong một recipe dùng Autoconf hoặc Automake, chúng ta có thể dùng như sau:
+Directive `inherit` chỉ định những class chức năng mà recipe (`.bb`) của chúng ta dùng; nó cung cấp một cơ chế kế thừa sơ khai, giống như các ngôn ngữ lập trình object-oriented. Ví dụ, chúng ta có thể trừu tượng hóa các task liên quan đến việc dùng các công cụ build Autoconf và Automake và đưa chúng vào class để các recipe của chúng ta dùng lại. Một `.bbclass` cho trước được định vị bằng cách tìm `classes/filename.bbclass` trong `BBPATH`. Vì vậy, trong một recipe dùng Autoconf hoặc Automake, chúng ta có thể dùng như sau:
 
 ![](images/Figure_8.27_B19361.jpg)
 

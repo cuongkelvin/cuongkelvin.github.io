@@ -82,7 +82,7 @@ Cấu trúc của thư mục `work` là giống nhau cho mọi kiến trúc. V�
 
 ![](images/Figure_6.4_B19361.jpg)
 
-*Hình 6.4 – Nội dung của build/tmp/work/core2-64-poky-linux/pm-utils/1.4.1-r1/* *(ghi chú: sách in pm-utils; đoạn văn nói về recipe sysvinit-inittab)*
+*Hình 6.4 – Nội dung của build/tmp/work/core2-64-poky-linux/pm-utils/1.4.1-r1/* *(ghi chú: đúng là thư mục của recipe sysvinit-inittab mà đoạn văn nói tới)*
 
 Recipe `sysvinit-inittab` là một ví dụ rất tốt, vì nó machine-specific. Recipe này chứa file `inittab` định nghĩa serial console để sinh ra tiến trình đăng nhập, thứ thay đổi tùy theo từng machine.
 

@@ -6,7 +6,7 @@ Trong chương này, chúng ta sẽ xem cách bảo đảm việc tuân thủ li
 
 **Copyleft** là một cách hợp pháp để dùng luật bản quyền nhằm tối đa hóa quyền và thể hiện sự tự do. Tuy nhiên, nó ảnh hưởng đến sản phẩm của chúng ta. Chúng ta phải đáp ứng mọi nghĩa vụ của các license open source và phần mềm tự do.
 
-Khi build một bản phân phối Linux, ít nhất có hai project được dùng: Linux kernel và một compiler. **GNU Compiler Collection** (**GCC**) vẫn là compiler được dùng phổ biến nhất. Linux kernel dùng license **General Public License** (**GPL**) **v2**, còn GCC dùng các license **GPLv2**, **GPLv2.1** *(ghi chú: sách in GPLv2.1; không có license này, có lẽ ý là LGPLv2.1)* và **GPLv3**, tùy theo project được dùng.
+Khi build một bản phân phối Linux, ít nhất có hai project được dùng: Linux kernel và một compiler. **GNU Compiler Collection** (**GCC**) vẫn là compiler được dùng phổ biến nhất. Linux kernel dùng license **General Public License** (**GPL**) **v2**, còn GCC dùng các license **GPLv2**, **LGPLv2.1** và **GPLv3**, tùy theo project được dùng.
 
 Tuy nhiên, một hệ thống Linux-based có thể bao gồm hầu như mọi project có trên toàn thế giới, cộng thêm tất cả các ứng dụng mà công ty làm ra cho sản phẩm của mình. Vậy làm sao chúng ta biết được số lượng project và license được bao gồm, và làm sao chúng ta đáp ứng các yêu cầu tuân thủ copyleft?
 

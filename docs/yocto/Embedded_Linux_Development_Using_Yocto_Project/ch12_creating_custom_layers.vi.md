@@ -152,7 +152,7 @@ File `meta-newlayer/recipes-bbexample/bbexample/bbexample_git.bb` được tạo
 
 ![](images/Figure_12.11_B19361.jpg)
 
-*Hình 12.11 – Nội dung của bbexamle\_git.bb* *(ghi chú: sách in bbexamle; đúng là bbexample)*
+*Hình 12.11 – Nội dung của bbexamle\_git.bb* *(ghi chú: đúng là bbexample\_git.bb)*
 
 `devtool` đã tạo một recipe cơ sở, không nên được xem là recipe cuối cùng. Bạn nên kiểm tra các tùy chọn compile, thông tin metadata bổ sung, v.v.
 

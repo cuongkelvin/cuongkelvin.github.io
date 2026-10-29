@@ -15,3 +15,15 @@ Bản dịch tiếng Việt, kèm hình minh họa của sách. Đi từ lần b
 - [**Chương 14 — Tuân thủ GPL**](Embedded_Linux_Development_Using_Yocto_Project/ch14_achieving_gpl_compliance.vi.md) — quản lý giấy phép và mã nguồn khi phát hành sản phẩm
 - [**Chương 15–16 — Chạy trên phần cứng và giả lập**](Embedded_Linux_Development_Using_Yocto_Project/ch15_booting_our_custom_embedded_linux.vi.md) — boot ảnh tự build trên board thật, tăng tốc phát triển bằng QEMU
 - [**Chương 17 — Kinh nghiệm thực tế**](Embedded_Linux_Development_Using_Yocto_Project/ch17_best_practices.vi.md) — các thói quen tốt khi làm dự án dùng Yocto
+
+## Theo sách *Yocto Project Customization for Linux*
+
+Bản dịch tiếng Việt, kèm hình minh họa của sách. Tập trung vào việc tùy biến Yocto: viết recipe, quản lý layer, thêm phần cứng mới.
+
+- [**Giới thiệu**](yocto_project_customization_book/ch00d_introduction.vi.md) — mục tiêu của sách, kèm các trang về tác giả, người hiệu đính và lời cảm ơn
+- [**Chương 1–2 — Chuẩn bị**](yocto_project_customization_book/ch01_setting_up_the_building_environment.vi.md) — dựng môi trường build, tải mã nguồn
+- [**Chương 3–5 — Nền tảng Yocto**](yocto_project_customization_book/ch03_yocto_project_basics.vi.md) — khái niệm cơ bản, các công cụ đi kèm, cách BitBake hoạt động bên trong
+- [**Chương 6–7 — Recipe và layer**](yocto_project_customization_book/ch06_recipes.vi.md) — cấu trúc recipe, tạo và quản lý layer
+- [**Chương 8 — Thêm phần cứng mới**](yocto_project_customization_book/ch08_adding_new_hardware.vi.md) — hỗ trợ board và thiết bị mới
+- [**Chương 9–12 — Viết recipe cho từng loại**](yocto_project_customization_book/ch09_c_application_recipes.vi.md) — ứng dụng C, ứng dụng Python, các loại recipe khác, recipe cho image
+- [**Chương 13 — Tối ưu và kinh nghiệm**](yocto_project_customization_book/ch13_optimizations_and_best_practices.vi.md) — tăng tốc build và các thói quen tốt

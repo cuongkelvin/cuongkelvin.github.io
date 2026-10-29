@@ -148,7 +148,7 @@ Một recipe đầy đủ, từ `meta/recipes-devtools/python/python3-dbus_1.2.1
 
 *Hình 7.7 – Một ví dụ về cách dùng RDEPENDS*
 
-Recipe từ *Hình 7.6* *(ghi chú: sách in Figure 7.6; đúng là Hình 7.7)* cho thấy package `python3-dbus` có một danh sách runtime dependency vào nhiều module Python, ở dòng 21.
+Recipe từ *Hình 7.7* cho thấy package `python3-dbus` có một danh sách runtime dependency vào nhiều module Python, ở dòng 21.
 
 ## Dùng package để tạo một image rootfs
 
@@ -240,7 +240,7 @@ Package index và các package phải được cung cấp thông qua một giao 
 
 Chúng ta sẽ trình bày chi tiết các biến `IMAGE_FEATURES` và `EXTRA_IMAGE_FEATURES` trong *Chương 12*, *Tạo các layer tùy chỉnh*. Nếu muốn một image nhỏ không có hỗ trợ quản lý package, chúng ta nên bỏ `package-management` khỏi `EXTRA_IMAGE_FEATURES`.
 
-Các cấu hình `PACKAGE_FEED_URIS` và `EXTRA_IMAGE_FEATURES` bảo đảm rằng image ở phía client có thể truy cập server và có các tiện ích cần thiết để cài đặt, gỡ bỏ và nâng cấp các package của nó. Sau các bước này, chúng ta có thể dùng runtwime *(ghi chú: sách in "runtwime"; đúng là "runtime")* package management trên thiết bị target.
+Các cấu hình `PACKAGE_FEED_URIS` và `EXTRA_IMAGE_FEATURES` bảo đảm rằng image ở phía client có thể truy cập server và có các tiện ích cần thiết để cài đặt, gỡ bỏ và nâng cấp các package của nó. Sau các bước này, chúng ta có thể dùng runtime package management trên thiết bị target.
 
 Ví dụ, nếu chọn định dạng package RPM cho image, chúng ta có thể fetch thông tin repository bằng lệnh sau:
 
