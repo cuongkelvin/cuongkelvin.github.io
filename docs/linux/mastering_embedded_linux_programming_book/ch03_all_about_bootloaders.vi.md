@@ -128,7 +128,7 @@ Nếu bạn làm việc với các SoC Arm hoặc PowerPC, gần như chắc ch�
 
 Device tree là một cách linh hoạt để định nghĩa các thành phần phần cứng của một hệ thống máy tính. Hãy nhớ rằng device tree chỉ là dữ liệu tĩnh, không phải code thực thi. Thông thường, device tree được bootloader nạp và truyền cho kernel, mặc dù có thể đóng gói device tree cùng với chính kernel image để phục vụ các bootloader không có khả năng nạp chúng riêng.
 
-Định dạng này bắt nguồn từ một bootloader của Sun Microsystems tên là OpenBoot, được chuẩn hóa thành đặc tả Open Firmware (chuẩn IEEE IEEE1275-1994). Nó được dùng trong các máy tính Macintosh PowerPC-based và vì vậy là một lựa chọn hợp lý cho bản port Linux sang PowerPC. Kể từ đó, nó đã được áp dụng ở quy mô lớn bởi nhiều bản hiện thực Linux cho Arm và, ở mức độ ít hơn, bởi MIPS, MicroBlaze, ARC và các kiến trúc khác.
+Định dạng này bắt nguồn từ một bootloader của Sun Microsystems tên là OpenBoot, được chuẩn hóa thành đặc tả Open Firmware (chuẩn IEEE IEEE1275-1994). Nó được dùng trong các máy tính Macintosh PowerPC-based và vì vậy là một lựa chọn hợp lý cho bản port Linux sang PowerPC. Kể từ đó, nó đã được áp dụng ở quy mô lớn bởi nhiều bản triển khai Linux cho Arm và, ở mức độ ít hơn, bởi MIPS, MicroBlaze, ARC và các kiến trúc khác.
 
 Tôi khuyên bạn truy cập `https://www.devicetree.org` để biết thêm thông tin.
 

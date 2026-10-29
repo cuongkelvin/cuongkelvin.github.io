@@ -1,3 +1,3 @@
 <a id="part5"></a>
 
-# Phần 5: Hiện thực
+# Phần 5: Bản triển khai

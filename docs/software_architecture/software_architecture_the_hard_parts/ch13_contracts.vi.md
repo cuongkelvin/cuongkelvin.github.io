@@ -8,7 +8,7 @@ Addison gặp Sydney vào bữa trưa ở căng tin để trò chuyện về vi�
 
 “Sao không dùng gRPC cho mọi giao tiếp luôn? Tôi nghe nói nó rất nhanh,” Sydney nói.
 
-“Chà, đó là một cách hiện thực, không phải một architecture,” Addison nói. “Chúng ta cần quyết định loại contract nào chúng ta muốn trước khi chọn cách hiện thực chúng. Trước hết, chúng ta cần quyết định giữa contract chặt hay lỏng. Một khi đã quyết định loại, tôi sẽ để cậu quyết định cách hiện thực chúng, miễn là chúng vượt qua các fitness function của chúng ta.”
+“Chà, đó là một cách triển khai, không phải một architecture,” Addison nói. “Chúng ta cần quyết định loại contract nào chúng ta muốn trước khi chọn cách triển khai chúng. Trước hết, chúng ta cần quyết định giữa contract chặt hay lỏng. Một khi đã quyết định loại, tôi sẽ để cậu quyết định cách triển khai chúng, miễn là chúng vượt qua các fitness function của chúng ta.”
 
 “Điều gì quyết định loại contract chúng ta cần?” Sydney nói.
 
@@ -189,7 +189,7 @@ Nhiều kiến trúc sư có mục tiêu đã nêu cho microservices architectur
 
 **Dễ tiến hóa hơn (Easier to evolve)**
 
-Vì có ít hoặc không có thông tin schema, những contract này có thể tiến hóa tự do hơn. Tất nhiên, các thay đổi semantic coupling vẫn đòi hỏi phối hợp giữa mọi bên liên quan—việc hiện thực không thể giảm semantic coupling—nhưng contract lỏng cho phép tiến hóa phần hiện thực dễ dàng hơn.
+Vì có ít hoặc không có thông tin schema, những contract này có thể tiến hóa tự do hơn. Tất nhiên, các thay đổi semantic coupling vẫn đòi hỏi phối hợp giữa mọi bên liên quan—việc triển khai không thể giảm semantic coupling—nhưng contract lỏng cho phép tiến hóa phần triển khai dễ dàng hơn.
 
 Contract lỏng cũng có một vài nhược điểm:
 
@@ -218,7 +218,7 @@ Theo định nghĩa, contract lỏng không có các đặc điểm của contra
 
 ### Contract trong microservices (Contracts in Microservices)
 
-Kiến trúc sư phải liên tục đưa ra quyết định về cách các service<a id="idm45798375102792"></a><a id="idm45798375101736"></a> tương tác với nhau, thông tin gì cần truyền (ngữ nghĩa), cách truyền nó (hiện thực), và mức độ coupling chặt giữa các service.
+Kiến trúc sư phải liên tục đưa ra quyết định về cách các service<a id="idm45798375102792"></a><a id="idm45798375101736"></a> tương tác với nhau, thông tin gì cần truyền (ngữ nghĩa), cách truyền nó (triển khai), và mức độ coupling chặt giữa các service.
 
 #### Mức coupling (Coupling levels)
 
@@ -230,7 +230,7 @@ Hãy xét hai microservice với tính transaction độc lập<a id="idm4579837
 
 *Hình 13-3. Hai service phải dùng chung thông tin domain về khách hàng*
 
-Kiến trúc sư có thể hiện thực cả hai service trên cùng một technology stack và dùng một contract có kiểu chặt, hoặc là một giao thức remote procedure platform-specific (đặc thù nền tảng) (như RMI) hoặc là một giao thức implementation-independent (độc lập với hiện thực) như gRPC, và truyền thông tin khách hàng từ service này sang service kia với độ tin cậy cao về độ trung thực contract. Tuy nhiên, coupling chặt này vi phạm một trong những mục tiêu hướng tới của microservices architecture, nơi kiến trúc sư cố gắng tạo ra các service decoupled.
+Kiến trúc sư có thể triển khai cả hai service trên cùng một technology stack và dùng một contract có kiểu chặt, hoặc là một giao thức remote procedure platform-specific (đặc thù nền tảng) (như RMI) hoặc là một giao thức implementation-independent (độc lập với bản triển khai) như gRPC, và truyền thông tin khách hàng từ service này sang service kia với độ tin cậy cao về độ trung thực contract. Tuy nhiên, coupling chặt này vi phạm một trong những mục tiêu hướng tới của microservices architecture, nơi kiến trúc sư cố gắng tạo ra các service decoupled.
 
 Hãy xét cách tiếp cận thay thế, trong đó mỗi service có cách biểu diễn nội bộ riêng về Customer, và việc tích hợp dùng các cặp name-value để truyền thông tin từ service này sang service kia, như minh họa trong [Hình 13-4](#fig-contracts-ms-loose).
 
@@ -242,7 +242,7 @@ Hãy xét cách tiếp cận thay thế, trong đó mỗi service có cách bi�
 
 *Hình 13-4. Các microservice với cách biểu diễn ngữ nghĩa nội bộ riêng có thể truyền giá trị trong các message đơn giản*
 
-Coupling lỏng này đáp ứng nhiều mục tiêu bao trùm của microservices. Thứ nhất, nó tạo ra các service decoupled cao được mô hình hóa theo bounded context, cho phép mỗi team tiến hóa cách biểu diễn nội bộ mạnh mẽ đến mức cần thiết. Thứ hai, nó tạo ra decoupling hiện thực. Nếu cả hai service bắt đầu trên cùng một technology stack, nhưng team ở service thứ hai quyết định chuyển sang nền tảng khác, nhiều khả năng điều đó sẽ không ảnh hưởng gì đến service thứ nhất. Mọi nền tảng thông dụng đều có thể tạo ra và tiêu thụ các cặp name-value, khiến chúng trở thành ngôn ngữ chung của integration architecture.
+Coupling lỏng này đáp ứng nhiều mục tiêu bao trùm của microservices. Thứ nhất, nó tạo ra các service decoupled cao được mô hình hóa theo bounded context, cho phép mỗi team tiến hóa cách biểu diễn nội bộ mạnh mẽ đến mức cần thiết. Thứ hai, nó tạo ra decoupling triển khai. Nếu cả hai service bắt đầu trên cùng một technology stack, nhưng team ở service thứ hai quyết định chuyển sang nền tảng khác, nhiều khả năng điều đó sẽ không ảnh hưởng gì đến service thứ nhất. Mọi nền tảng thông dụng đều có thể tạo ra và tiêu thụ các cặp name-value, khiến chúng trở thành ngôn ngữ chung của integration architecture.
 
 Nhược điểm lớn nhất của contract lỏng là độ trung thực contract—với vai trò <a id="idm45798375085368"></a><a id="idm45798375084008"></a><a id="idm45798375083048"></a>kiến trúc sư, làm sao tôi biết developer truyền đúng số lượng và kiểu tham số cho các lời gọi tích hợp? Một số giao thức, như JSON, bao gồm công cụ schema cho phép kiến trúc sư phủ thêm metadata lên contract lỏng. Kiến trúc sư cũng có thể dùng một kiểu architect fitness function gọi là *consumer-driven contract*.
 
@@ -266,7 +266,7 @@ Các ưu điểm của consumer-driven contract như sau:
 
 **Cho phép coupling contract lỏng giữa các service (Allow loose contract coupling between services)**
 
-Dùng các cặp name-value là coupling lỏng nhất có thể giữa hai service, cho phép thay đổi hiện thực với ít khả năng gây hỏng nhất.
+Dùng các cặp name-value là coupling lỏng nhất có thể giữa hai service, cho phép thay đổi bản triển khai với ít khả năng gây hỏng nhất.
 
 **Cho phép mức độ chặt chẽ biến thiên (Allow variability in strictness)**
 
@@ -274,7 +274,7 @@ Nếu các team dùng architecture fitness function, kiến trúc sư có thể 
 
 **Có thể tiến hóa (Evolvable)**
 
-Coupling lỏng hàm ý khả năng tiến hóa. Dùng các cặp name-value đơn giản cho phép các điểm tích hợp thay đổi chi tiết hiện thực mà không làm hỏng ngữ nghĩa của thông tin được truyền giữa các service.
+Coupling lỏng hàm ý khả năng tiến hóa. Dùng các cặp name-value đơn giản cho phép các điểm tích hợp thay đổi chi tiết triển khai mà không làm hỏng ngữ nghĩa của thông tin được truyền giữa các service.
 
 Đây là các nhược điểm của consumer-driven contract:
 
@@ -356,9 +356,9 @@ Kiến trúc sư có thể dùng stamp coupling để quản lý trạng thái w
 
 *Hình 13-8. Dùng stamp coupling cho quản lý workflow*
 
-Trong ví dụ này, kiến trúc sư thiết kế contract bao gồm thông tin workflow: tình trạng của workflow, trạng thái transaction, v.v. Khi mỗi domain service nhận contract, nó cập nhật phần của mình trong contract và trạng thái cho workflow, rồi chuyển tiếp. Ở cuối workflow, bên nhận có thể truy vấn contract để xác định thành công hay thất bại, cùng với tình trạng và thông tin như message lỗi. Nếu hệ thống cần hiện thực tính nhất quán transaction xuyên suốt, thì các domain service nên phát lại contract tới các service đã đi qua trước đó để khôi phục tính nhất quán nguyên tử.
+Trong ví dụ này, kiến trúc sư thiết kế contract bao gồm thông tin workflow: tình trạng của workflow, trạng thái transaction, v.v. Khi mỗi domain service nhận contract, nó cập nhật phần của mình trong contract và trạng thái cho workflow, rồi chuyển tiếp. Ở cuối workflow, bên nhận có thể truy vấn contract để xác định thành công hay thất bại, cùng với tình trạng và thông tin như message lỗi. Nếu hệ thống cần triển khai tính nhất quán transaction xuyên suốt, thì các domain service nên phát lại contract tới các service đã đi qua trước đó để khôi phục tính nhất quán nguyên tử.
 
-Dùng stamp coupling để quản lý workflow tạo ra coupling giữa các service<a id="idm45798374997048"></a><a id="idm45798374995720"></a> cao hơn mức danh nghĩa, nhưng semantic coupling phải đi đâu đó—hãy nhớ, kiến trúc sư không thể giảm semantic coupling thông qua hiện thực. Tuy nhiên, trong nhiều trường hợp, chuyển sang choreography có thể cải thiện throughput và scalability, khiến lựa chọn stamp coupling thay vì mediation trở nên hấp dẫn. [Bảng 13-4](#totbl-stamp-coupling) thể hiện các trade-offs của stamp coupling.
+Dùng stamp coupling để quản lý workflow tạo ra coupling giữa các service<a id="idm45798374997048"></a><a id="idm45798374995720"></a> cao hơn mức danh nghĩa, nhưng semantic coupling phải đi đâu đó—hãy nhớ, kiến trúc sư không thể giảm semantic coupling thông qua triển khai. Tuy nhiên, trong nhiều trường hợp, chuyển sang choreography có thể cải thiện throughput và scalability, khiến lựa chọn stamp coupling thay vì mediation trở nên hấp dẫn. [Bảng 13-4](#totbl-stamp-coupling) thể hiện các trade-offs của stamp coupling.
 
 > **Các đánh đổi (Trade-Offs)**
 >

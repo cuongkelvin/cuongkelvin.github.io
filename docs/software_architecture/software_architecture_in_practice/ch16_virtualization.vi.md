@@ -40,7 +40,7 @@ Việc cô lập mạng đạt được thông qua việc định danh message. 
 
 Giờ chúng ta đã thấy cách việc sử dụng tài nguyên của một ứng dụng có thể được cô lập khỏi việc sử dụng tài nguyên của một ứng dụng khác, chúng ta có thể dùng và kết hợp các cơ chế này. *Virtual machine* cho phép thực thi nhiều máy tính mô phỏng, hay ảo, trong một máy tính vật lý duy nhất.
 
-[Hình 16.1](#ch16fig01) mô tả một số VM nằm trong một máy tính vật lý. Máy tính vật lý được gọi là “host computer” và các VM được gọi là “guest computer”. [Hình 16.1](#ch16fig01) cũng cho thấy một *hypervisor*, là một hệ điều hành cho các VM. Hypervisor này chạy trực tiếp trên phần cứng máy tính vật lý và thường được gọi là hypervisor *bare-metal* hoặc *Type 1*. Các VM mà nó host hiện thực các ứng dụng và service. Bare-metal hypervisor thường chạy trong một data center hoặc cloud.
+[Hình 16.1](#ch16fig01) mô tả một số VM nằm trong một máy tính vật lý. Máy tính vật lý được gọi là “host computer” và các VM được gọi là “guest computer”. [Hình 16.1](#ch16fig01) cũng cho thấy một *hypervisor*, là một hệ điều hành cho các VM. Hypervisor này chạy trực tiếp trên phần cứng máy tính vật lý và thường được gọi là hypervisor *bare-metal* hoặc *Type 1*. Các VM mà nó host triển khai các ứng dụng và service. Bare-metal hypervisor thường chạy trong một data center hoặc cloud.
 
 <a id="ch16fig01"></a>
 

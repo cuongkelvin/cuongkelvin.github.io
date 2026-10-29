@@ -1,5 +1,15 @@
 # A Xử lý lỗi
 
+Lập trình viên luôn luôn nên kiểm tra các mã lỗi do các system-level function trả về. Có rất nhiều cách tinh vi khiến mọi thứ có thể hỏng, và việc sử dụng thông tin trạng thái mà kernel có thể cung cấp cho chúng ta là điều hoàn toàn hợp lý. Đáng tiếc là lập trình viên thường ngại kiểm tra lỗi vì nó làm code rối hơn, biến một dòng code duy nhất thành một câu lệnh điều kiện nhiều dòng. Việc kiểm tra lỗi cũng gây khó hiểu vì các function khác nhau báo lỗi theo những cách khác nhau.
+
+Chúng tôi cũng gặp vấn đề tương tự khi viết cuốn sách này. Một mặt, chúng tôi muốn các ví dụ code ngắn gọn và dễ đọc. Mặt khác, chúng tôi không muốn khiến sinh viên có ấn tượng sai rằng bỏ qua việc kiểm tra lỗi là chấp nhận được. Để giải quyết các vấn đề này, chúng tôi áp dụng một cách tiếp cận dựa trên error-handling wrapper, do W. Richard Stevens tiên phong trong cuốn sách về lập trình mạng của ông [110].
+
+Ý tưởng là: với một base system-level function foo nào đó, chúng ta định nghĩa một wrapper function Foo có các đối số giống hệt, nhưng chữ cái đầu được viết hoa. Wrapper gọi base function và kiểm tra lỗi. Nếu phát hiện lỗi, wrapper in ra một thông báo có ích rồi kết thúc process. Ngược lại, nó trả về cho caller. Lưu ý rằng nếu không có lỗi, wrapper hoạt động y hệt như base function. Nói cách khác, nếu một chương trình chạy đúng với các wrapper, nó cũng sẽ chạy đúng nếu chúng ta viết thường chữ cái đầu của mỗi wrapper rồi biên dịch lại.
+
+Các wrapper được đóng gói trong một source file duy nhất (csapp.c), được biên dịch và link vào mỗi chương trình. Một header file riêng (csapp.h) chứa các function prototype của các wrapper.
+
+Phụ lục này hướng dẫn về các kiểu xử lý lỗi khác nhau trong hệ thống Unix và đưa ra ví dụ về các kiểu error-handling wrapper khác nhau. Bản sao của các file csapp.h và csapp.c có trên Web site của CS:APP.
+
 ## A.1 Xử lý lỗi trong các hệ thống Unix
 
 Các lời gọi function systems-level mà chúng ta sẽ gặp trong sách sử dụng ba kiểu trả về lỗi khác nhau: Unix-style, Posix-style và GAI-style.

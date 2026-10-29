@@ -183,7 +183,7 @@ Hãy để ý cách số lượng database connection trong cùng bối cảnh �
 
 Nếu không có một loại chiến lược connection hay kế hoạch governance nào đó, các service<a id="idm45798381119896"></a><a id="idm45798381118616"></a> sẽ cố dùng nhiều connection nhất có thể, thường xuyên khiến các service khác thiếu những connection rất cần thiết. Vì lý do này, điều quan trọng là quản trị cách dùng database connection trong một architecture phân tán. Một cách tiếp cận hiệu quả là giao cho mỗi service một *connection quota* (hạn ngạch connection) để quản trị việc phân bổ các database connection khả dụng giữa các service. Một connection quota chỉ định số lượng database connection tối đa mà một service được phép dùng hoặc đặt sẵn trong connection pool của nó.
 
-Bằng cách chỉ định một connection quota, các service không được phép tạo nhiều database connection hơn số được phân bổ cho nó. Nếu một service chạm tới số lượng database connection tối đa trong quota của nó, nó phải chờ một trong các connection nó đang dùng trở nên khả dụng. Phương pháp này có thể được hiện thực bằng hai cách tiếp cận: phân bổ đều cùng một connection quota cho mọi service, hoặc giao một connection quota khác nhau cho mỗi service dựa trên nhu cầu của nó.
+Bằng cách chỉ định một connection quota, các service không được phép tạo nhiều database connection hơn số được phân bổ cho nó. Nếu một service chạm tới số lượng database connection tối đa trong quota của nó, nó phải chờ một trong các connection nó đang dùng trở nên khả dụng. Phương pháp này có thể được triển khai bằng hai cách tiếp cận: phân bổ đều cùng một connection quota cho mọi service, hoặc giao một connection quota khác nhau cho mỗi service dựa trên nhu cầu của nó.
 
 Cách tiếp cận phân bổ đều thường được dùng khi mới deploy các service, và chưa biết mỗi service sẽ cần bao nhiêu connection trong các hoạt động bình thường và cao điểm. Dù đơn giản, cách tiếp cận này không quá hiệu quả vì một số service có thể cần nhiều connection hơn các service khác, trong khi một số connection do các service khác giữ có thể không được dùng đến.
 
@@ -714,7 +714,7 @@ Trong phần này, chúng tôi giới thiệu xếp hạng sao cho các loại d
 
 ### Relational database (Relational Databases)
 
-Relational database (còn gọi là RDBMS) đã là<a id="ch06-rdbms"></a><a id="ch06-rdbms2"></a> database được ưa chuộng trong hơn ba thập kỷ. Có giá trị đáng kể trong việc dùng chúng và sự ổn định mà chúng mang lại, đặc biệt trong hầu hết các ứng dụng business-related (liên quan đến nghiệp vụ). <a id="idm45798380182600"></a>Những database này nổi tiếng với Structured Query Language (SQL) phổ biến khắp nơi và các thuộc tính ACID mà chúng cung cấp. Giao diện SQL mà chúng cung cấp khiến chúng trở thành lựa chọn ưa thích để hiện thực các mô hình `read` khác nhau trên cùng một mô hình `write`. Xếp hạng sao cho relational database xuất hiện trong [Hình 6-25](#fig-data-decomposition-star-rating-rdbms).
+Relational database (còn gọi là RDBMS) đã là<a id="ch06-rdbms"></a><a id="ch06-rdbms2"></a> database được ưa chuộng trong hơn ba thập kỷ. Có giá trị đáng kể trong việc dùng chúng và sự ổn định mà chúng mang lại, đặc biệt trong hầu hết các ứng dụng business-related (liên quan đến nghiệp vụ). <a id="idm45798380182600"></a>Những database này nổi tiếng với Structured Query Language (SQL) phổ biến khắp nơi và các thuộc tính ACID mà chúng cung cấp. Giao diện SQL mà chúng cung cấp khiến chúng trở thành lựa chọn ưa thích để triển khai các mô hình `read` khác nhau trên cùng một mô hình `write`. Xếp hạng sao cho relational database xuất hiện trong [Hình 6-25](#fig-data-decomposition-star-rating-rdbms).
 
 <a id="fig-data-decomposition-star-rating-rdbms"></a>
 
@@ -744,7 +744,7 @@ Relational database đã thống trị nhiều năm nhờ hỗ trợ các thuộ
 
 **Hỗ trợ ngôn ngữ lập trình, độ trưởng thành sản phẩm, hỗ trợ SQL và cộng đồng (Programming language support, product maturity, SQL support, and community)**
 
-Vì relational database đã tồn tại nhiều năm, các pattern thiết kế, hiện thực và vận hành well-known (nổi tiếng) có thể được áp dụng cho chúng, nhờ đó khiến chúng dễ áp dụng, phát triển và tích hợp trong một architecture. Nhiều relational database thiếu hỗ trợ cho các reactive stream API và các khái niệm mới tương tự; các khái niệm kiến trúc mới hơn mất nhiều thời gian hơn để hiện thực trong các relational database well-established (đã vững vàng). Nhiều giao diện ngôn ngữ lập trình hoạt động với relational database, và cộng đồng người dùng rất lớn (dù bị chia nhỏ giữa tất cả các nhà cung cấp).
+Vì relational database đã tồn tại nhiều năm, các pattern thiết kế, triển khai và vận hành well-known (nổi tiếng) có thể được áp dụng cho chúng, nhờ đó khiến chúng dễ áp dụng, phát triển và tích hợp trong một architecture. Nhiều relational database thiếu hỗ trợ cho các reactive stream API và các khái niệm mới tương tự; các khái niệm kiến trúc mới hơn mất nhiều thời gian hơn để triển khai trong các relational database well-established (đã vững vàng). Nhiều giao diện ngôn ngữ lập trình hoạt động với relational database, và cộng đồng người dùng rất lớn (dù bị chia nhỏ giữa tất cả các nhà cung cấp).
 
 **Ưu tiên đọc/ghi (Read/write priority)**
 
@@ -945,7 +945,7 @@ Nhiều graph database hỗ trợ transaction ACID. Một số graph<a id="idm45
 
 **Hỗ trợ ngôn ngữ lập trình, độ trưởng thành sản phẩm, hỗ trợ SQL và cộng đồng (Programming language support, product maturity, SQL support, and community)**
 
-Graph database có nhiều hỗ trợ trong cộng đồng. Nhiều thuật toán, như [Dijkstra’s algorithm](https://oreil.ly/TFr1D) hoặc *node similarity*, được hiện thực sẵn trong database, giảm nhu cầu phải viết chúng từ đầu. <a id="idm45798379966136"></a>Framework ngôn ngữ gọi là Gremlin hoạt động trên nhiều database khác nhau, giúp dễ dùng hơn. [Neo4J](https://neo4j.com) hỗ trợ một ngôn ngữ truy vấn gọi là Cypher, cho phép developer dễ dàng truy vấn database.
+Graph database có nhiều hỗ trợ trong cộng đồng. Nhiều thuật toán, như [Dijkstra’s algorithm](https://oreil.ly/TFr1D) hoặc *node similarity*, được triển khai sẵn trong database, giảm nhu cầu phải viết chúng từ đầu. <a id="idm45798379966136"></a>Framework ngôn ngữ gọi là Gremlin hoạt động trên nhiều database khác nhau, giúp dễ dùng hơn. [Neo4J](https://neo4j.com) hỗ trợ một ngôn ngữ truy vấn gọi là Cypher, cho phép developer dễ dàng truy vấn database.
 
 **Ưu tiên đọc/ghi (Read/write priority)**
 

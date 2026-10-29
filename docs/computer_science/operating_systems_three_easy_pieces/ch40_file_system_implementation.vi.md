@@ -68,7 +68,7 @@ Mỗi inode được tham chiếu ngầm bằng một số (gọi là inumber), 
 
 ![p0482_6](images/ch40_file_system_implementation/p0482_6.png)
 
-Để đọc inode số 32, file system trước tiên tính offset trong inode region (32 · sizeof(inode) hay 8192), cộng vào address bắt đầu inode table trên disk (inodeStartAddr = 12K B), nhờ đó có đúng byte address của block inode mong muốn: 20K B. Nhớ rằng disk không được đánh address theo byte, mà gồm nhiều sector có thể đánh address, thường có kích thước 512 byte. Vì vậy, để fetch block inode chứa inode 32, file system phát lệnh read tới sector (20×1024)/512, tức 40, để lấy inode block mong muốn. Tổng quát hơn, sector address iaddr của inode block được tính như sau:
+Để đọc inode số 32, file system trước tiên tính offset trong inode region (32 · sizeof(inode) hay 8192), cộng vào address bắt đầu inode table trên disk (inodeStartAddr = 12KB), nhờ đó có đúng byte address của block inode mong muốn: 20K B. Nhớ rằng disk không được đánh address theo byte, mà gồm nhiều sector có thể đánh address, thường có kích thước 512 byte. Vì vậy, để fetch block inode chứa inode 32, file system phát lệnh read tới sector (20×1024)/512, tức 40, để lấy inode block mong muốn. Tổng quát hơn, sector address iaddr của inode block được tính như sau:
 
 ```
 blk    = (inumber * sizeof(inode_t)) / blockSize;
@@ -106,11 +106,13 @@ Một trong những quyết định quan trọng nhất khi thiết kế inode l
 
 > MẸO: CÂN NHẮC CÁCH EXTENT-BASED
 >
-> Một cách khác là dùng extent thay pointer. Extent đơn giản là một disk pointer cộng độ dài (tính bằng block); vì vậy, thay vì cần pointer cho mỗi block của file, chỉ cần pointer và độ dài để chỉ định vị trí on-disk của file. Chỉ có một extent sẽ hạn chế, vì có thể khó tìm vùng free space on-disk liên tục khi cấp phát file. Do đó, file system extent-based thường cho phép nhiều hơn một extent, tạo thêm tự do khi cấp phát file. So sánh hai cách, phương pháp pointer-based linh hoạt nhất nhưng dùng nhiều metadata cho mỗi file (đặc biệt file lớn). Phương pháp Extent-based ít linh hoạt hơn nhưng gọn hơn; đặc biệt hoạt động tốt khi disk đủ free space và có thể bố trí file liên tục (dù sao đây cũng là mục tiêu của hầu như mọi file allocation policy).
+> Một cách khác là dùng extent thay pointer. Extent đơn giản là một disk pointer cộng độ dài (tính bằng block); vì vậy, thay vì cần pointer cho mỗi block của file, chỉ cần pointer và độ dài để chỉ định vị trí on-disk của file. Chỉ có một extent sẽ hạn chế, vì có thể khó tìm vùng free space on-disk liên tục khi cấp phát file. Do đó, file system extent-based thường cho phép nhiều hơn một extent, tạo thêm tự do khi cấp phát file.
+>
+> So sánh hai cách, phương pháp pointer-based linh hoạt nhất nhưng dùng nhiều metadata cho mỗi file (đặc biệt file lớn). Phương pháp Extent-based ít linh hoạt hơn nhưng gọn hơn; đặc biệt hoạt động tốt khi disk đủ free space và có thể bố trí file liên tục (dù sao đây cũng là mục tiêu của hầu như mọi file allocation policy).
 
 Không ngạc nhiên khi với cách này bạn vẫn có thể muốn hỗ trợ file lớn hơn nữa. Chỉ cần thêm pointer vào inode: double indirect pointer. Nó trỏ tới block chứa pointer tới indirect block, mỗi indirect block lại chứa pointer tới data block. Do đó double indirect block cho phép tăng thêm 1024 · 1024, tức 1-million block 4KB, hay hỗ trợ file lớn hơn 4GB. Có thể bạn còn muốn hơn nữa, và chúng tôi cá bạn biết hướng tiếp theo: triple indirect pointer.
 
-Nhìn chung, tree không cân bằng này được gọi là cách multi-level index để trỏ tới file block. Hãy xét ví dụ có mười hai direct pointer cùng cả single và double indirect block. Giả sử block size 4 KB và pointer 4-byte, structure này chứa được file lớn hơn 4 GB một chút (tức (12 + 1024 + 1024<sup>2</sup>) × 4 K B). Bạn có tính được file lớn tối đa thế nào khi thêm triple-indirect block không? (gợi ý: khá lớn)
+Nhìn chung, tree không cân bằng này được gọi là cách multi-level index để trỏ tới file block. Hãy xét ví dụ có mười hai direct pointer cùng cả single và double indirect block. Giả sử block size 4 KB và pointer 4-byte, structure này chứa được file lớn hơn 4 GB một chút (tức (12 + 1024 + 1024<sup>2</sup>) × 4 KB). Bạn có tính được file lớn tối đa thế nào khi thêm triple-indirect block không? (gợi ý: khá lớn)
 
 Nhiều file system dùng multi-level index, gồm các hệ thống commonly-used như Linux ext2 [P09] và ext3, WAFL của NetApp, cùng file system UNIX ban đầu. Hệ thống khác, gồm SGI XFS và Linux ext4, dùng extent thay pointer đơn giản; xem phần bên lề trước để biết cách extent-based hoạt động (tương tự segment khi thảo luận virtual memory).
 
@@ -118,7 +120,11 @@ Bạn có thể tự hỏi: tại sao dùng tree không cân bằng như vậy? 
 
 > THÔNG TIN THÊM: CÁCH LINKED-BASED
 >
-> Một cách thiết kế inode khác đơn giản hơn là dùng linked list. Vì vậy, bên trong inode, thay vì nhiều pointer, chỉ cần một pointer tới block đầu của file. Để xử lý file lớn hơn, thêm pointer ở cuối data block đó, rồi tiếp tục như vậy để hỗ trợ file lớn. Như có thể bạn đã đoán, linked file allocation có hiệu năng kém với vài workload; chẳng hạn hãy nghĩ tới đọc block cuối file hoặc thực hiện random access. Do đó, để cải thiện linked allocation, một số hệ thống giữ bảng thông tin liên kết in-memory, thay vì lưu next pointer cùng chính data block. Bảng được index bằng address của data block D; nội dung entry chỉ là next pointer của D, tức address block kế tiếp D trong file. Entry cũng có thể chứa null-value (chỉ end-of-file), hoặc marker khác cho biết một block cụ thể đang free. Bảng next pointer như vậy cho phép linked allocation thực hiện random file access hiệu quả: trước tiên quét bảng (trong memory) để tìm block mong muốn, rồi truy cập trực tiếp nó (trên disk). Bảng này nghe quen không? Chúng ta vừa mô tả structure cơ bản của file allocation table, hay file system FAT. Đúng vậy, file system Windows cũ kinh điển trước NTFS [C94] này dựa trên cách cấp phát linked-based đơn giản. Nó còn khác file system UNIX tiêu chuẩn ở những điểm khác; chẳng hạn không có inode đúng nghĩa, mà có directory entry lưu metadata file và tham chiếu trực tiếp block đầu, khiến không thể tạo hard link. Xem Brouwer [B02] để biết thêm những chi tiết kém thanh nhã.
+> Một cách thiết kế inode khác đơn giản hơn là dùng linked list. Vì vậy, bên trong inode, thay vì nhiều pointer, chỉ cần một pointer tới block đầu của file. Để xử lý file lớn hơn, thêm pointer ở cuối data block đó, rồi tiếp tục như vậy để hỗ trợ file lớn.
+>
+> Như có thể bạn đã đoán, linked file allocation có hiệu năng kém với vài workload; chẳng hạn hãy nghĩ tới đọc block cuối file hoặc thực hiện random access. Do đó, để cải thiện linked allocation, một số hệ thống giữ bảng thông tin liên kết in-memory, thay vì lưu next pointer cùng chính data block. Bảng được index bằng address của data block D; nội dung entry chỉ là next pointer của D, tức address block kế tiếp D trong file. Entry cũng có thể chứa null-value (chỉ end-of-file), hoặc marker khác cho biết một block cụ thể đang free. Bảng next pointer như vậy cho phép linked allocation thực hiện random file access hiệu quả: trước tiên quét bảng (trong memory) để tìm block mong muốn, rồi truy cập trực tiếp nó (trên disk).
+>
+> Bảng này nghe quen không? Chúng ta vừa mô tả structure cơ bản của file allocation table, hay file system FAT. Đúng vậy, file system Windows cũ kinh điển trước NTFS [C94] này dựa trên cách cấp phát linked-based đơn giản. Nó còn khác file system UNIX tiêu chuẩn ở những điểm khác; chẳng hạn không có inode đúng nghĩa, mà có directory entry lưu metadata file và tham chiếu trực tiếp block đầu, khiến không thể tạo hard link. Xem Brouwer [B02] để biết thêm những chi tiết kém thanh nhã.
 
 Tất nhiên, thiết kế inode còn nhiều khả năng khác; suy cho cùng inode chỉ là data structure, và bất cứ data structure nào lưu được thông tin liên quan, cho phép truy vấn hiệu quả, đều đủ. Vì software file system dễ thay đổi, bạn nên sẵn sàng khám phá thiết kế khác khi workload hoặc công nghệ thay đổi.
 
@@ -162,7 +168,9 @@ File system phải theo dõi inode và data block nào đang free, block nào kh
 
 > THÔNG TIN THÊM: FREE SPACE MANAGEMENT
 >
-> Có nhiều cách quản lý free space; bitmap chỉ là một cách. Một số file system thời đầu dùng free list: một pointer trong super block trỏ tới free block đầu; bên trong block đó lưu pointer tới free block tiếp theo, tạo list nối các free block của hệ thống. Khi cần block, sử dụng head block rồi cập nhật list tương ứng. File system hiện đại dùng data structure tinh vi hơn. Chẳng hạn XFS của SGI [S+96] dùng một dạng B-tree để biểu diễn gọn những vùng disk đang free. Như với mọi data structure, có thể có các trade-offs time-space khác nhau.
+> Có nhiều cách quản lý free space; bitmap chỉ là một cách. Một số file system thời đầu dùng free list: một pointer trong super block trỏ tới free block đầu; bên trong block đó lưu pointer tới free block tiếp theo, tạo list nối các free block của hệ thống. Khi cần block, sử dụng head block rồi cập nhật list tương ứng.
+>
+> File system hiện đại dùng data structure tinh vi hơn. Chẳng hạn XFS của SGI [S+96] dùng một dạng B-tree để biểu diễn gọn những vùng disk đang free. Như với mọi data structure, có thể có các trade-offs time-space khác nhau.
 
 Chẳng hạn, khi tạo file, phải cấp phát inode cho file đó. Vì vậy file system tìm trong bitmap một inode free rồi cấp cho file; phải đánh dấu inode đã dùng (bằng 1), và cuối cùng cập nhật bitmap on-disk bằng thông tin đúng. Các hoạt động tương tự diễn ra khi cấp phát data block.
 
@@ -180,23 +188,7 @@ Trong ví dụ đơn giản này, trước tiên giả sử bạn chỉ muốn m
 
 Khi gọi open("/foo/bar", O_RDONLY), file system trước tiên cần tìm inode của file bar để lấy thông tin cơ bản (permission, file size, v.v.). Để làm vậy phải tìm được inode, nhưng hiện tại chỉ có pathname đầy đủ. File system phải duyệt pathname để tìm inode mong muốn.
 
-| data inode root foo bar root foo bar bar bar |
-|---|
-| bitmap bitmap inode inode inode data data data[0] data[1] data[2] |
-| read |
-| read |
-| open(bar) read |
-| read |
-| read |
-| read |
-| read() read |
-| write |
-| read |
-| read() read |
-| write |
-| read |
-| read() read |
-| write |
+![p0488_t1](images/ch40_file_system_implementation/p0488_t1.png)
 
 Hình 40.3: Timeline đọc file (thời gian tăng từ trên xuống)
 
@@ -226,34 +218,7 @@ Khác với đọc, ghi file còn có thể cấp phát block (trừ khi chẳng
 
 Lượng write traffic còn tệ hơn khi xét thao tác đơn giản phổ biến như tạo file. Để tạo file, file system không chỉ cấp inode mà còn cấp chỗ trong directory chứa file mới. Tổng I/O khá cao: một lần đọc inode bitmap (tìm inode free), một lần ghi inode bitmap (đánh dấu đã cấp), một lần ghi inode mới (khởi tạo), một lần ghi data của directory (liên kết tên high-level của file với inode number), và một lần đọc cùng một lần ghi directory inode để cập nhật. Nếu directory cần lớn thêm để chứa entry mới, còn cần I/O bổ sung (tới data bitmap và directory block mới). Tất cả chỉ để tạo một file!
 
-| data inode root foo bar root foo bar bar bar |
-|---|
-| bitmap bitmap inode inode inode data data data[0] data[1] data[2] |
-| read |
-| read |
-| read |
-| read |
-| create read |
-| (/foo/bar) write |
-| write |
-| read |
-| write |
-| write |
-| read |
-| read |
-| write() write |
-| write |
-| write |
-| read |
-| read |
-| write() write |
-| write |
-| write |
-| read |
-| read |
-| write() write |
-| write |
-| write |
+![p0490_t2](images/ch40_file_system_implementation/p0490_t2.png)
 
 Hình 40.4: Timeline tạo file (thời gian tăng từ trên xuống)
 
@@ -283,7 +248,9 @@ Hãy xét thêm tác động của caching lên write. Read I/O có thể đư�
 
 > MẸO: HIỂU STATIC VÀ DYNAMIC PARTITIONING
 >
-> Khi chia resource giữa các client/người dùng khác nhau, có thể dùng static partitioning hoặc dynamic partitioning. Cách static chỉ chia resource theo tỷ lệ cố định một lần; chẳng hạn nếu memory có hai người dùng, có thể cấp một tỷ lệ cố định cho người này, phần còn lại cho người kia. Cách dynamic linh hoạt hơn, cấp lượng resource khác nhau theo thời gian; chẳng hạn một người được tỷ lệ disk bandwidth cao hơn trong một khoảng thời gian, nhưng sau đó hệ thống có thể đổi và cấp phần available disk bandwidth lớn hơn cho người khác. Mỗi cách có ưu điểm. Static partitioning bảo đảm mỗi người nhận một phần resource, thường cho hiệu năng dễ dự đoán hơn và dễ triển khai hơn. Dynamic partitioning có thể đạt utilization tốt hơn (cho người dùng resource-hungry sử dụng resource vốn đang idle), nhưng có thể khó triển khai hơn và làm hiệu năng kém đi với những người có resource idle bị người khác dùng mất, rồi cần nhiều thời gian thu hồi khi cần. Như thường lệ, không có phương pháp tốt nhất; thay vào đó hãy xét vấn đề trước mắt để quyết định cách phù hợp. Thật vậy, chẳng phải bạn luôn nên làm thế sao?
+> Khi chia resource giữa các client/người dùng khác nhau, có thể dùng static partitioning hoặc dynamic partitioning. Cách static chỉ chia resource theo tỷ lệ cố định một lần; chẳng hạn nếu memory có hai người dùng, có thể cấp một tỷ lệ cố định cho người này, phần còn lại cho người kia. Cách dynamic linh hoạt hơn, cấp lượng resource khác nhau theo thời gian; chẳng hạn một người được tỷ lệ disk bandwidth cao hơn trong một khoảng thời gian, nhưng sau đó hệ thống có thể đổi và cấp phần available disk bandwidth lớn hơn cho người khác.
+>
+> Mỗi cách có ưu điểm. Static partitioning bảo đảm mỗi người nhận một phần resource, thường cho hiệu năng dễ dự đoán hơn và dễ triển khai hơn. Dynamic partitioning có thể đạt utilization tốt hơn (cho người dùng resource-hungry sử dụng resource vốn đang idle), nhưng có thể khó triển khai hơn và làm hiệu năng kém đi với những người có resource idle bị người khác dùng mất, rồi cần nhiều thời gian thu hồi khi cần. Như thường lệ, không có phương pháp tốt nhất; thay vào đó hãy xét vấn đề trước mắt để quyết định cách phù hợp. Thật vậy, chẳng phải bạn luôn nên làm thế sao?
 
 Vì những lý do trên, phần lớn file system hiện đại buffer write trong memory khoảng năm đến ba mươi giây, thể hiện một trade-off nữa: nếu hệ thống crash trước khi cập nhật được chuyển xuống disk, những cập nhật đó sẽ mất; tuy nhiên, giữ write trong memory lâu hơn có thể cải thiện hiệu năng bằng batching, scheduling và thậm chí tránh write.
 

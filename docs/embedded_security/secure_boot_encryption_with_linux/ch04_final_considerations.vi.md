@@ -4,11 +4,11 @@ Rodolfo Giometti
 
 LUCCA, Italy
 
-Trong các chương trước, chúng ta đã thấy Secure Boot hoạt động thế nào và cách chúng ta có thể hiện thực một hệ thống hoạt động được theo hai boot schema khác nhau. Tuy nhiên, trước khi khép lại cuốn sách này, chúng ta nên dành vài lời để đưa ra một số ví dụ thực tế về cách tạo ra các encryption key và signing key một cách hiệu quả, cũng như về một số vấn đề giấy phép mà chúng ta phải cân nhắc khi thiết kế một hệ thống bảo mật.
+Trong các chương trước, chúng ta đã thấy Secure Boot hoạt động thế nào và cách chúng ta có thể triển khai một hệ thống hoạt động được theo hai boot schema khác nhau. Tuy nhiên, trước khi khép lại cuốn sách này, chúng ta nên dành vài lời để đưa ra một số ví dụ thực tế về cách tạo ra các encryption key và signing key một cách hiệu quả, cũng như về một số vấn đề giấy phép mà chúng ta phải cân nhắc khi thiết kế một hệ thống bảo mật.
 
 ## 4.1 Tạo key để mã hóa và ký
 
-Trong cuốn sách này, chúng ta đã thấy nhiều kỹ thuật để hiện thực một Chain-of-Trust tốt nhằm chắc chắn rằng Secure Boot được phần cứng và software quản lý đúng cách. Tuy nhiên, chúng ta chưa bao giờ nói về cách thực sự thực hiện việc mã hóa và ký cho từng image cấu thành nên Chain-of-Trust.
+Trong cuốn sách này, chúng ta đã thấy nhiều kỹ thuật để triển khai một Chain-of-Trust tốt nhằm chắc chắn rằng Secure Boot được phần cứng và software quản lý đúng cách. Tuy nhiên, chúng ta chưa bao giờ nói về cách thực sự thực hiện việc mã hóa và ký cho từng image cấu thành nên Chain-of-Trust.
 
 Về root filesystem, các thao tác này khá đơn giản; thực tế, như đã thấy trong phần “Thực hiện Factory-Reset” ở Chương [3](ch03_real_implementations.vi.md), chẳng hạn, một root filesystem có thể được mã hóa hoặc ký bằng OpenSSL (hoặc bất kỳ công cụ mã hóa nào khác) trong trường hợp tĩnh, còn đối với trường hợp lúc runtime, block-level encryption là giải pháp (xem phần “Mã hóa Block-Level” trong Chương [1](ch01_linux_cryptography.vi.md)).
 
@@ -45,7 +45,7 @@ $ STM32_KeyGen_CLI -abs stm32mp13-key/ \
 
 trong đó tham số tùy chọn `-n` được dùng để chỉ định số cặp key chúng ta muốn tạo, và `-pwd` chỉ định mật khẩu cho mỗi cặp.
 
-> Họ STM32MP1x hỗ trợ tám cặp key, và trong ví dụ trên, chúng tôi đã dùng tám mật khẩu giống hệt nhau, đặt là `azerty`. Tuy nhiên, khi hiện thực thật, chúng ta nên dùng tám mật khẩu khác nhau!
+> Họ STM32MP1x hỗ trợ tám cặp key, và trong ví dụ trên, chúng tôi đã dùng tám mật khẩu giống hệt nhau, đặt là `azerty`. Tuy nhiên, khi triển khai thật, chúng ta nên dùng tám mật khẩu khác nhau!
 
 Đối với encryption key, chúng ta có thể dùng lệnh sau:
 
@@ -227,26 +227,26 @@ Trước khi kết thúc phần này, chúng ta phải nêu ra một số lưu �
 
 ## 4.2 Các vấn đề về giấy phép
 
-Chiến lược hiện thực được chọn cho secure boot đặt ra những thách thức đáng kể liên quan đến các giấy phép mã nguồn mở, cụ thể là **GNU General Public License version 3**, còn được gọi là **GPLv3** cho đơn giản ([`https://www.gnu.org/licenses/gpl-3.0.en.html`](https://www.gnu.org/licenses/gpl-3.0.en.html)), trong đó có nêu rằng
+Chiến lược triển khai được chọn cho secure boot đặt ra những thách thức đáng kể liên quan đến các giấy phép mã nguồn mở, cụ thể là **GNU General Public License version 3**, còn được gọi là **GPLv3** cho đơn giản ([`https://www.gnu.org/licenses/gpl-3.0.en.html`](https://www.gnu.org/licenses/gpl-3.0.en.html)), trong đó có nêu rằng
 
 > *“Installation Information” (Thông tin cài đặt) cho một User Product nghĩa là mọi phương pháp, thủ tục, khóa ủy quyền, hoặc thông tin khác cần thiết để cài đặt và thực thi các phiên bản đã sửa đổi của một tác phẩm được bảo hộ trong User Product đó từ một phiên bản đã sửa đổi của Corresponding Source của nó. Thông tin này phải đủ để bảo đảm rằng việc tiếp tục hoạt động của object code đã sửa đổi trong mọi trường hợp không bị ngăn cản hay can thiệp chỉ vì việc sửa đổi đã được thực hiện.* [Section 6—Conveying Non-Source Forms]
 
-Vì mọi hiện thực Secure Boot chỉ chấp nhận các binary manufacturer-signed và không cung cấp một cơ chế đơn giản để người dùng cuối đăng ký các cryptographic key của riêng họ (hoặc cài đặt kernel đã ký của riêng họ), nó có thể bị coi là xung đột!
+Vì mọi bản triển khai Secure Boot chỉ chấp nhận các binary manufacturer-signed và không cung cấp một cơ chế đơn giản để người dùng cuối đăng ký các cryptographic key của riêng họ (hoặc cài đặt kernel đã ký của riêng họ), nó có thể bị coi là xung đột!
 
-Một hiện thực hạn chế như vậy có khả năng xung đột với Section 6 của GPLv3 vì nó không cung cấp *Installation Information* cần thiết để người dùng thực hiện quyền sửa đổi của họ
+Một cách triển khai hạn chế như vậy có khả năng xung đột với Section 6 của GPLv3 vì nó không cung cấp *Installation Information* cần thiết để người dùng thực hiện quyền sửa đổi của họ
 
 Hoạt động phân phối software theo một giấy phép copyleft (như GPL) trên một sản phẩm phần cứng có dùng các biện pháp bảo mật (như Secure Boot) để ngăn người dùng cuối cài đặt và chạy các phiên bản đã sửa đổi của software đó trên thiết bị được gọi là **Tivoization**. Cái tên này do Richard Stallman (và Free Software Foundation—FSF) đặt ra, liên quan đến việc TiVo dùng software GNU GPL-licensed trên các đầu ghi video kỹ thuật số (DVR) mang thương hiệu TiVo, vốn chủ động chặn software đã sửa đổi theo thiết kế (xem FAQ cụ thể tại [`https://www.gnu.org/licenses/gpl-faq.html.en#Tivoization`](https://www.gnu.org/licenses/gpl-faq.html.en#Tivoization)). Stallman tin rằng hoạt động này tước đi của người dùng một phần quyền tự do mà GNU GPL được thiết kế để bảo vệ. Vì vậy, FSF gọi phần cứng bị tivoize là *proprietary tyrants* (những kẻ bạo chúa độc quyền).
 
 Trong kịch bản này, các developer embedded nên kiểm tra cẩn thận software họ dùng trong hệ thống của mình hoặc cung cấp một cơ chế để tôn trọng GPLv3!
 
-Hiện tại, các thành phần nền tảng như U-Boot, TFA, OP-TEE, và Linux chủ yếu được cấp phép theo GPLv2. Trusted Firmware và OP-TEE (chẳng hạn) được cấp phép theo BSD hoặc MIT, vốn không áp đặt các yêu cầu copyleft và, do đó, không xung đột với một hiện thực Secure Boot hạn chế. Điều này là thiết yếu vì chúng ta có thể dùng chúng trong các hệ thống đã được bảo mật của mình.
+Hiện tại, các thành phần nền tảng như U-Boot, TFA, OP-TEE, và Linux chủ yếu được cấp phép theo GPLv2. Trusted Firmware và OP-TEE (chẳng hạn) được cấp phép theo BSD hoặc MIT, vốn không áp đặt các yêu cầu copyleft và, do đó, không xung đột với một cách triển khai Secure Boot hạn chế. Điều này là thiết yếu vì chúng ta có thể dùng chúng trong các hệ thống đã được bảo mật của mình.
 
 Mặt khác, có nhiều ứng dụng user space được phát hành theo GPLv3 hoặc, nói chung, theo các giấy phép hạn chế hơn. Trong kịch bản này, chúng ta có hai lựa chọn chính:
 
 1) Chúng ta có thể quyết định hoàn toàn không dùng các ứng dụng như vậy (hoặc viết lại chúng).
 2) Chúng ta phải cung cấp một cách để tuân thủ GPLv3 bằng cách cho phép người dùng cuối **sửa đổi software và re-run nó trên phần cứng**.
 
-Bước cuối cùng này có thể được hiện thực dễ dàng bằng cách thay thế bootloader đã được bảo mật của chúng ta bằng một bootloader khác cho phép nạp một kernel dạng plain text, đến lượt kernel này nạp một root filesystem dạng plain text. Điều then chốt là, nếu hệ thống đã được bảo mật có chứa một ứng dụng độc quyền, thì root filesystem dạng plain text cung cấp cho người dùng này chỉ được chứa các thành phần software GPLv3 và phải loại trừ ứng dụng độc quyền. Sự tách biệt này bảo đảm rằng người dùng cuối sẽ có thể sửa đổi và re-run software GPLv3 được cung cấp trong hệ thống đã được bảo mật, đáp ứng các yêu cầu của Section 6 của GPLv3 mà không làm lộ code độc quyền.
+Bước cuối cùng này có thể được thực hiện dễ dàng bằng cách thay thế bootloader đã được bảo mật của chúng ta bằng một bootloader khác cho phép nạp một kernel dạng plain text, đến lượt kernel này nạp một root filesystem dạng plain text. Điều then chốt là, nếu hệ thống đã được bảo mật có chứa một ứng dụng độc quyền, thì root filesystem dạng plain text cung cấp cho người dùng này chỉ được chứa các thành phần software GPLv3 và phải loại trừ ứng dụng độc quyền. Sự tách biệt này bảo đảm rằng người dùng cuối sẽ có thể sửa đổi và re-run software GPLv3 được cung cấp trong hệ thống đã được bảo mật, đáp ứng các yêu cầu của Section 6 của GPLv3 mà không làm lộ code độc quyền.
 
 Trong Hình 4-3, cả bootloader đã được bảo mật lẫn bootloader đã sửa đổi đều được nạp dưới Chain-of-Trust, nhưng chỉ ở nhánh bên trái thì Chain-of-Trust mới tiếp tục. Ở nhánh bên phải, chuỗi dừng lại, cho phép người dùng cuối nạp bất cứ thứ gì có trong root filesystem. Mặt khác, ở nhánh bên trái, code độc quyền được Chain-of-trust bảo vệ, còn ở nhánh bên phải, không có gì để bảo vệ.
 

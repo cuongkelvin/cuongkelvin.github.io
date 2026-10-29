@@ -422,7 +422,7 @@ Có thể liệt kê mọi bước thiết lập Regmap, từ cấu hình tới 
 
 - Khi dùng xong register map, giả sử dùng resource-managed API, không cần làm gì khác vì devres core đảm nhận giải phóng Regmap resource; nếu không, phải gọi `regmap_exit()` để giải phóng register map cấp phát trong probe.
 
-Bây giờ hãy hiện thực các bước trong ví dụ driver thực tế dùng Regmap framework.
+Bây giờ hãy triển khai các bước trong ví dụ driver thực tế dùng Regmap framework.
 
 ## Ví dụ Regmap
 
@@ -434,9 +434,9 @@ Bây giờ hãy hiện thực các bước trong ví dụ driver thực tế dù
 
 - Write mask là `0x80`, và address range hợp lệ như sau:
 
-- `0x20` tới `0x4F`
+  - `0x20` tới `0x4F`
 
-- `0x60` tới `0x7F`
+  - `0x60` tới `0x7F`
 
 - Vì device hỗ trợ SPI read/write operation đơn giản, không cần cung cấp read/write function tùy chỉnh.
 
@@ -592,10 +592,9 @@ root@jetson-nano-devkit:~#
 
 Trong mỗi directory có thể có một hoặc nhiều file sau:
 
-- `access`: Biểu diễn mã hóa các access permission khác nhau cho mỗi register theo mẫu `readable writable`
+- `access`: Biểu diễn mã hóa các access permission khác nhau cho mỗi register theo mẫu `readable writable` `volatile precious`:
 
 ```
-volatile precious:
 root@jetson-nano-devkit:~# cat /sys/kernel/debug/regmap/4-003c-power-slave/access
 00: y y y n
 01: y y y n

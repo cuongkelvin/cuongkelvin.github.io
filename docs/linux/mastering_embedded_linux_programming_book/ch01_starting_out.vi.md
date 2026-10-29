@@ -66,7 +66,7 @@ Phần mềm open source đến từ đâu? Ai viết ra nó? Đặc biệt, nó
 
 - Cộng đồng open source: Rốt cuộc, đây là động cơ tạo ra phần mềm mà bạn sẽ dùng. Cộng đồng là một liên minh lỏng lẻo của các developer, nhiều người trong số họ được tài trợ theo cách nào đó bởi một tổ chức non-profit, một tổ chức học thuật hoặc một công ty thương mại. Họ làm việc cùng nhau để thúc đẩy mục tiêu của các project khác nhau. Có rất nhiều project – có cái nhỏ, có cái lớn. Một số project mà chúng ta sẽ dùng là chính Linux, U-Boot, BusyBox, Buildroot, The Yocto Project, và nhiều project dưới chiếc ô GNU.
 
-- Các nhà thiết kế kiến trúc CPU: Đây là các tổ chức thiết kế những CPU mà chúng ta dùng. Những tổ chức quan trọng ở đây là Arm/Linaro (Arm Cortex-A), Intel (x86 và x86-64), SiFive (RISC-V) và IBM (PowerPC). Họ hiện thực, hoặc ít nhất là ảnh hưởng đến, việc hỗ trợ kiến trúc CPU cơ bản.
+- Các nhà thiết kế kiến trúc CPU: Đây là các tổ chức thiết kế những CPU mà chúng ta dùng. Những tổ chức quan trọng ở đây là Arm/Linaro (Arm Cortex-A), Intel (x86 và x86-64), SiFive (RISC-V) và IBM (PowerPC). Họ triển khai, hoặc ít nhất là ảnh hưởng đến, việc hỗ trợ kiến trúc CPU cơ bản.
 
 - Các nhà cung cấp SoC: Bao gồm Broadcom, Intel, Microchip, NXP, Qualcomm, TI và nhiều hãng khác. Họ lấy kernel và toolchain từ các nhà thiết kế kiến trúc CPU và sửa đổi chúng để hỗ trợ chip của mình. Họ cũng tạo ra các reference board: các thiết kế được cấp tiếp theo dùng để tạo ra development board và sản phẩm hoàn chỉnh.
 

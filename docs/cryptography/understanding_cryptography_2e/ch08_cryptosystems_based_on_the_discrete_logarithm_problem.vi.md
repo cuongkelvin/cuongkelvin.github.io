@@ -18,7 +18,7 @@ Ngoài trao đổi key Diffie–Hellman và scheme mã hóa Elgamal được gi�
 
 Trao đổi key Diffie–Hellman (DHKE), được Whitfield Diffie và Martin Hellman đề xuất năm 1976, là scheme asymmetric đầu tiên được công bố trong tài liệu mở. Hai nhà phát minh đã chịu ảnh hưởng từ công trình của Ralph Merkle. Nó cung cấp một giải pháp thực tế cho vấn đề phân phối key, tức là nó cho phép hai bên suy ra một key bí mật chung bằng cách liên lạc qua một kênh không an toàn[^1].
 
-Kỹ thuật thỏa thuận key nền tảng này được hiện thực cho nhiều protocol cryptographic mở và được dùng rộng rãi như Secure Shell (SSH), Transport Layer Security (TLS) và Internet Protocol Security (IPSec). DHKE là một ứng dụng rất ấn tượng của bài toán logarit rời rạc, mà chúng ta sẽ nghiên cứu trong các mục tiếp theo.
+Kỹ thuật thỏa thuận key nền tảng này được triển khai cho nhiều protocol cryptographic mở và được dùng rộng rãi như Secure Shell (SSH), Transport Layer Security (TLS) và Internet Protocol Security (IPSec). DHKE là một ứng dụng rất ấn tượng của bài toán logarit rời rạc, mà chúng ta sẽ nghiên cứu trong các mục tiếp theo.
 
 Ý tưởng cơ bản đằng sau DHKE là, với một số nguyên tố p, phép lũy thừa trong ℤ<sub>p</sub><sup>∗</sup> là một one-way function và phép lũy thừa có tính giao hoán, tức là
 
@@ -825,7 +825,7 @@ trong đó 1 ≤ j ≤ n. Giả sử plaintext cuối cùng x<sub>n</sub> và m�
 
 Đưa ra một công thức mà Oscar có thể dùng để tính bất kỳ thông điệp x<sub>j</sub> nào, 1 ≤ j ≤ n − 1. Tất nhiên, theo nguyên lý Kerckhoffs, Oscar biết phương pháp xây dựng được trình bày ở trên, bao gồm hàm f ().
 
-8.16. Cho một scheme mã hóa Elgamal với các tham số công khai k<sub>pub</sub> = (p,α,β) và một private key chưa biết k<sub>pr</sub> = d. Do một hiện thực sai của bộ sinh số ngẫu nhiên của bên mã hóa, hệ thức sau đúng cho hai key tạm thời:
+8.16. Cho một scheme mã hóa Elgamal với các tham số công khai k<sub>pub</sub> = (p,α,β) và một private key chưa biết k<sub>pr</sub> = d. Do một bản triển khai sai của bộ sinh số ngẫu nhiên của bên mã hóa, hệ thức sau đúng cho hai key tạm thời:
 
 k<sub>M,j+1</sub> ≡ k<sub>M,j</sub><sup>2</sup> mod p
 

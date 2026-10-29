@@ -454,6 +454,10 @@ Gọi một lần, trả về hai lần. Hàm fork được parent gọi một l
 
 Thực thi concurrent. Parent và child là hai process riêng biệt chạy concurrently. Instruction trong logical control flow của chúng có thể được kernel xen kẽ tùy ý. Khi chạy chương trình trên hệ thống của chúng ta, parent process hoàn tất câu lệnh printf trước, rồi đến child. Tuy nhiên, trên hệ thống khác thứ tự có thể ngược lại. Nhìn chung, lập trình viên không bao giờ được giả định cách xen kẽ instruction giữa các process khác nhau.
 
+Address space giống nhau nhưng riêng biệt. Nếu có thể dừng cả parent và child ngay sau khi hàm fork trả về trong mỗi process, chúng ta thấy address space của chúng giống hệt nhau. Mỗi process có cùng user stack, giá trị local variable, heap, giá trị global variable và code. Vì vậy, trong chương trình ví dụ, local variable x có giá trị 1 trong cả parent và child khi hàm fork trả về ở dòng 6. Tuy nhiên, vì parent và child là các process riêng, mỗi process có private address space riêng. Mọi thay đổi tiếp theo mà parent hoặc child thực hiện với x là riêng tư và không được phản ánh trong bộ nhớ process còn lại. Đó là lý do variable x có giá trị khác nhau trong parent và child khi chúng gọi câu lệnh printf tương ứng.
+
+File dùng chung. Khi chạy chương trình ví dụ, chúng ta thấy cả parent và child đều in đầu ra lên màn hình. Lý do là child kế thừa mọi file đang mở của parent. Khi parent gọi fork, file stdout đang mở và hướng tới màn hình. Child kế thừa file này, do đó đầu ra của nó cũng hướng tới màn hình.
+
 ```
                                                           code/ecf/fork.c
  1   int main()
@@ -475,10 +479,6 @@ Thực thi concurrent. Parent và child là hai process riêng biệt chạy con
 ```
 
 **Hình 8.15 Sử dụng fork để tạo process mới.**
-
-Address space giống nhau nhưng riêng biệt. Nếu có thể dừng cả parent và child ngay sau khi hàm fork trả về trong mỗi process, chúng ta thấy address space của chúng giống hệt nhau. Mỗi process có cùng user stack, giá trị local variable, heap, giá trị global variable và code. Vì vậy, trong chương trình ví dụ, local variable x có giá trị 1 trong cả parent và child khi hàm fork trả về ở dòng 6. Tuy nhiên, vì parent và child là các process riêng, mỗi process có private address space riêng. Mọi thay đổi tiếp theo mà parent hoặc child thực hiện với x là riêng tư và không được phản ánh trong bộ nhớ process còn lại. Đó là lý do variable x có giá trị khác nhau trong parent và child khi chúng gọi câu lệnh printf tương ứng.
-
-File dùng chung. Khi chạy chương trình ví dụ, chúng ta thấy cả parent và child đều in đầu ra lên màn hình. Lý do là child kế thừa mọi file đang mở của parent. Khi parent gọi fork, file stdout đang mở và hướng tới màn hình. Child kế thừa file này, do đó đầu ra của nó cũng hướng tới màn hình.
 
 Khi mới học hàm fork, việc phác họa process graph thường hữu ích. Đây là một loại precedence graph đơn giản nắm bắt thứ tự bộ phận của các câu lệnh chương trình. Mỗi đỉnh a tương ứng với việc thực thi một câu lệnh. Cạnh có hướng a → b biểu thị câu lệnh a “xảy ra trước” câu lệnh b. Cạnh có thể được gắn nhãn thông tin như giá trị hiện tại của variable. Đỉnh tương ứng câu lệnh printf có thể được gắn nhãn bằng đầu ra printf. Mỗi graph bắt đầu bằng một đỉnh tương ứng parent process gọi main. Đỉnh này không có cạnh vào và có đúng một cạnh ra. Dãy đỉnh của mỗi process kết thúc bằng đỉnh tương ứng lời gọi exit. Đỉnh này có một cạnh vào và không có cạnh ra.
 
@@ -603,18 +603,18 @@ Liệt kê mọi dãy đầu ra có thể có của chương trình sau:
 
 ```
                                                 code/ecf/global-waitprob0.c
-1   int main()
-2   {
-3       if (Fork() == 0) {
-4           printf("9"); fflush(stdout);
-5       }
-6       else {
-            7           printf("0"); fflush(stdout);
-            8           waitpid(-1, NULL, 0);
-            9       }
-           10       printf("3"); fflush(stdout);
-           11       printf("6"); exit(0);
-           12   }
+ 1   int main()
+ 2   {
+ 3       if (Fork() == 0) {
+ 4           printf("9"); fflush(stdout);
+ 5       }
+ 6       else {
+ 7           printf("0"); fflush(stdout);
+ 8           waitpid(-1, NULL, 0);
+ 9       }
+10       printf("3"); fflush(stdout);
+11       printf("6"); exit(0);
+12   }
                                                            code/ecf/global-waitprob0.c
 ```
 
@@ -635,7 +635,7 @@ Gọi wait(&status) tương đương gọi waitpid(-1, &status, 0).
 
 ### Ví dụ sử dụng waitpid
 
-Vì hàm waitpid tương đối phức tạp, xem một vài ví dụ sẽ hữu ích. Hình 8.18 thể hiện chương trình sử dụng waitpid để chờ mọi child trong số N child kết thúc mà không theo thứ tự cụ thể. Tại dòng 11, parent tạo từng child trong số N child, và tại dòng 12 mỗi child thoát với exit status riêng. Trước khi tiếp tục, hãy bảo đảm bạn hiểu vì sao dòng 12 được từng child thực thi nhưng parent không thực thi.
+Vì hàm waitpid tương đối phức tạp, xem một vài ví dụ sẽ hữu ích. Hình 8.18 thể hiện chương trình sử dụng waitpid để chờ mọi child trong số N child kết thúc mà không theo thứ tự cụ thể. Tại dòng 11, parent tạo từng child trong số N child, và tại dòng 12 mỗi child thoát với exit status riêng.
 
 #### Thông tin thêm: Hằng số liên quan đến hàm Unix
 
@@ -689,6 +689,8 @@ Man page của mỗi hàm Unix liệt kê các header file cần include mỗi k
 ```
 
 **Hình 8.18 Sử dụng hàm waitpid để reap zombie child không theo thứ tự cụ thể.**
+
+Trước khi tiếp tục, hãy bảo đảm bạn hiểu vì sao dòng 12 được từng child thực thi nhưng parent không thực thi.
 
 Tại dòng 15, parent chờ mọi child kết thúc bằng cách dùng waitpid làm điều kiện kiểm tra của vòng lặp while. Vì đối số đầu tiên là −1, lời gọi waitpid block cho đến khi một child bất kỳ kết thúc. Khi mỗi child kết thúc, lời gọi waitpid trả về PID khác không của child đó. Dòng 16 kiểm tra exit status của child. Nếu child kết thúc bình thường—trong trường hợp này bằng cách gọi hàm exit—parent trích xuất exit status và in lên stdout.
 
@@ -1433,8 +1435,6 @@ Hình 8.34 thể hiện cách triển khai gói Sio, sử dụng hai hàm reentr
 
 Hình 8.35 thể hiện phiên bản an toàn của SIGINT handler trong Hình 8.30.
 
-G2. Lưu và khôi phục errno. Nhiều hàm async-signal-safe của Linux đặt errno khi trả về lỗi. Gọi các hàm này trong handler có thể ảnh hưởng đến phần khác của chương trình dựa vào errno.
-
 ```
                                                               code/src/csapp.c
  1   ssize_t sio_puts(char s[]) /* Put string */
@@ -1474,11 +1474,15 @@ G2. Lưu và khôi phục errno. Nhiều hàm async-signal-safe của Linux đ�
 
 **Hình 8.35 Phiên bản an toàn của SIGINT handler trong Hình 8.30.**
 
+G2. Lưu và khôi phục errno. Nhiều hàm async-signal-safe của Linux đặt errno khi trả về lỗi. Gọi các hàm này trong handler có thể ảnh hưởng đến phần khác của chương trình dựa vào errno.
+
 Cách khắc phục là lưu errno vào local variable khi vào handler và khôi phục nó trước khi handler trả về. Chú ý điều này chỉ cần thiết nếu handler trả về. Không cần nếu handler kết thúc process bằng cách gọi _exit.
 
 G3. Bảo vệ truy cập global data structure dùng chung bằng cách block mọi signal. Nếu handler dùng chung global data structure với chương trình chính hoặc handler khác, handler và chương trình chính cần tạm thời block mọi signal khi truy cập (đọc hoặc ghi) cấu trúc dữ liệu đó. Lý do là truy cập data structure d từ chương trình chính thường đòi hỏi một dãy instruction. Nếu dãy instruction bị handler truy cập d ngắt, handler có thể thấy d ở trạng thái không nhất quán, cho kết quả không thể dự đoán. Tạm thời block signal khi truy cập d bảo đảm handler không ngắt dãy instruction.
 
-G4. Khai báo global variable với volatile. Xét handler và routine main dùng chung global variable g. Handler cập nhật g, còn main đọc g định kỳ. Với optimizing compiler, dường như giá trị g không bao giờ thay đổi trong main, nên có thể an toàn dùng bản sao g được cache trong register để đáp ứng mọi reference tới g. Trong trường hợp này, hàm main không bao giờ thấy giá trị được handler cập nhật. Bạn có thể yêu cầu compiler không cache variable bằng cách khai báo nó với type qualifier volatile. Ví dụ:
+G4. Khai báo global variable với volatile. Xét handler và routine main dùng chung global variable g. Handler cập nhật g, còn main đọc g định kỳ. Với optimizing compiler, dường như giá trị g không bao giờ thay đổi trong main, nên có thể an toàn dùng bản sao g được cache trong register để đáp ứng mọi reference tới g. Trong trường hợp này, hàm main không bao giờ thấy giá trị được handler cập nhật.
+
+Bạn có thể yêu cầu compiler không cache variable bằng cách khai báo nó với type qualifier volatile. Ví dụ:
 
 ```
 volatile int g;
@@ -1621,42 +1625,42 @@ Parent processing input
 
 ```
                                                     code/ecf/signalprob0.c
-1   volatile long counter = 2;
-2
-3   void handler1(int sig)
-4   {
-5       sigset_t mask, prev_mask;
-6
-7       Sigfillset(&mask);
-8       Sigprocmask(SIG_BLOCK, &mask, &prev_mask);  /* Block sigs */
-            9       Sio_putl(--counter);
-           10       Sigprocmask(SIG_SETMASK, &prev_mask, NULL); /* Restore sigs */
-           11
-           12       _exit(0);
-           13   }
-           14
-           15   int main()
-           16   {
-           17       pid_t pid;
-           18       sigset_t mask, prev_mask;
-           19
-           20       printf("%ld", counter);
-           21       fflush(stdout);
-           22
-           23       signal(SIGUSR1, handler1);
-           24       if ((pid = Fork()) == 0) {
-           25           while(1) {};
-           26       }
-           27       Kill(pid, SIGUSR1);
-           28       Waitpid(-1, NULL, 0);
-           29
-           30       Sigfillset(&mask);
-           31       Sigprocmask(SIG_BLOCK, &mask, &prev_mask);  /* Block sigs */
-           32       printf("%ld", ++counter);
-           33       Sigprocmask(SIG_SETMASK, &prev_mask, NULL); /* Restore sigs */
-           34
-           35       exit(0);
-           36   }
+ 1   volatile long counter = 2;
+ 2
+ 3   void handler1(int sig)
+ 4   {
+ 5       sigset_t mask, prev_mask;
+ 6
+ 7       Sigfillset(&mask);
+ 8       Sigprocmask(SIG_BLOCK, &mask, &prev_mask);  /* Block sigs */
+ 9       Sio_putl(--counter);
+10       Sigprocmask(SIG_SETMASK, &prev_mask, NULL); /* Restore sigs */
+11
+12       _exit(0);
+13   }
+14
+15   int main()
+16   {
+17       pid_t pid;
+18       sigset_t mask, prev_mask;
+19
+20       printf("%ld", counter);
+21       fflush(stdout);
+22
+23       signal(SIGUSR1, handler1);
+24       if ((pid = Fork()) == 0) {
+25           while(1) {};
+26       }
+27       Kill(pid, SIGUSR1);
+28       Waitpid(-1, NULL, 0);
+29
+30       Sigfillset(&mask);
+31       Sigprocmask(SIG_BLOCK, &mask, &prev_mask);  /* Block sigs */
+32       printf("%ld", ++counter);
+33       Sigprocmask(SIG_SETMASK, &prev_mask, NULL); /* Restore sigs */
+34
+35       exit(0);
+36   }
                                                                 code/ecf/signalprob0.c
 ```
 
@@ -1666,7 +1670,7 @@ Một khía cạnh khó chịu khác của Unix signal handling là các hệ th
 
 - Ngữ nghĩa của hàm signal khác nhau. Một số hệ thống Unix cũ khôi phục hành động mặc định cho signal k sau khi handler catch signal k. Trên các hệ thống này, handler phải chủ động cài lại chính nó bằng cách gọi signal mỗi lần chạy.
 
-- System call có thể bị ngắt. System call như read, wait và accept có khả năng block process trong thời gian dài được gọi là slow system call. Trên một số phiên bản Unix cũ, slow system call bị ngắt khi handler catch signal không tiếp tục khi signal handler trả về, mà trả về ngay cho người dùng với điều kiện lỗi và errno bằng EINTR. Trên các hệ thống này, lập trình viên phải thêm code khởi động lại thủ công system call bị ngắt. Để giải quyết, chuẩn Posix định nghĩa hàm sigaction, cho phép người dùng chỉ định rõ ngữ nghĩa signal-handling mong muốn khi cài handler.
+- System call có thể bị ngắt. System call như read, wait và accept có khả năng block process trong thời gian dài được gọi là slow system call. Trên một số phiên bản Unix cũ, slow system call bị ngắt khi handler catch signal không tiếp tục khi signal handler trả về, mà trả về ngay cho người dùng với điều kiện lỗi và errno bằng EINTR. Trên các hệ thống này, lập trình viên phải thêm code khởi động lại thủ công system call bị ngắt.
 
 ```
                                                                           code/src/csapp.c
@@ -1686,6 +1690,8 @@ Một khía cạnh khó chịu khác của Unix signal handling là các hệ th
 ```
 
 **Hình 8.38 Signal . Wrapper cho sigaction cung cấp signal handling portable trên hệ thống Posix-compliant.**
+
+Để giải quyết, chuẩn Posix định nghĩa hàm sigaction, cho phép người dùng chỉ định rõ ngữ nghĩa signal-handling mong muốn khi cài handler.
 
 ```
 #include <signal.h>
@@ -1926,10 +1932,6 @@ Hình 8.42 thể hiện cách sử dụng sigsuspend thay spin loop trong Hình 
 
 Phiên bản sigsuspend ít lãng phí hơn spin loop ban đầu, tránh race do pause gây ra và hiệu quả hơn sleep.
 
-## 8.6 Nonlocal Jump
-
-C cung cấp một dạng exceptional control flow user-level gọi là nonlocal jump, chuyển quyền điều khiển trực tiếp từ một hàm sang hàm khác hiện đang thực thi mà không phải đi qua trình tự call-and-return thông thường. Nonlocal jump được cung cấp bởi hàm setjmp và longjmp.
-
 ```
                                                      code/ecf/sigsuspend.c
  1   #include "csapp.h"
@@ -1978,6 +1980,10 @@ C cung cấp một dạng exceptional control flow user-level gọi là nonlocal
 ```
 
 **Hình 8.42 Chờ signal bằng sigsuspend .**
+
+## 8.6 Nonlocal Jump
+
+C cung cấp một dạng exceptional control flow user-level gọi là nonlocal jump, chuyển quyền điều khiển trực tiếp từ một hàm sang hàm khác hiện đang thực thi mà không phải đi qua trình tự call-and-return thông thường. Nonlocal jump được cung cấp bởi hàm setjmp và longjmp.
 
 ```
 #include <setjmp.h>
@@ -2097,10 +2103,6 @@ Khả năng của longjmp bỏ qua mọi lời gọi trung gian có thể gây h
 
 Lời gọi sigsetjmp ban đầu lưu calling environment và signal context (gồm vector signal pending và blocked) khi chương trình mới bắt đầu. Routine main sau đó vào vòng lặp xử lý vô hạn. Khi người dùng gõ Ctrl+C, kernel gửi SIGINT tới process để được catch. Thay vì trả về từ signal handler, vốn sẽ chuyển quyền điều khiển về vòng lặp xử lý bị ngắt, handler thực hiện nonlocal jump về đầu chương trình chính. Khi chạy chương trình trên hệ thống, chúng ta nhận đầu ra sau:
 
-### Thông tin thêm: Software exception trong C++ và Java
-
-Cơ chế exception do C++ và Java cung cấp là phiên bản higher-level, có cấu trúc hơn của hàm setjmp và longjmp trong C. Bạn có thể xem mệnh đề catch trong câu lệnh try tương tự hàm setjmp. Tương tự, câu lệnh throw giống hàm longjmp.
-
 ```
 linux> ./restart
 starting
@@ -2115,6 +2117,10 @@ processing...
 ```
 
 Chương trình có một số điểm thú vị. Thứ nhất, để tránh race, chúng ta phải cài handler sau khi gọi sigsetjmp. Nếu không, có nguy cơ handler chạy trước khi lời gọi sigsetjmp ban đầu thiết lập calling environment cho siglongjmp. Thứ hai, bạn có thể nhận thấy sigsetjmp và siglongjmp không nằm trong danh sách hàm async-signal-safe ở Hình 8.33. Lý do là nhìn chung siglongjmp có thể nhảy vào code bất kỳ, nên phải cẩn thận chỉ gọi hàm an toàn trong mọi code có thể được thực thi sau siglongjmp. Trong ví dụ, chúng ta gọi các hàm an toàn sio_puts và sleep. Hàm không an toàn exit không thể tới được.
+
+### Thông tin thêm: Software exception trong C++ và Java
+
+Cơ chế exception do C++ và Java cung cấp là phiên bản higher-level, có cấu trúc hơn của hàm setjmp và longjmp trong C. Bạn có thể xem mệnh đề catch trong câu lệnh try tương tự hàm setjmp. Tương tự, câu lệnh throw giống hàm longjmp.
 
 ## 8.7 Các công cụ thao tác process
 
@@ -2242,24 +2248,24 @@ C. Được gọi một lần, trả về pointer hoặc NULL
 
 ```
                                                 code/ecf/global-forkprob5.c
-1   #include "csapp.h"
-2
-3   void try()
-4   {
-            5       if (Fork() != 0) {
-            6           Fork();
-            7           printf("Example\n");
-            8           exit(0);
-            9       }
-           10       return;
-           11   }
-           12
-           13   int main()
-           14   {
-           15       try();
-           16       fork(); printf("Example\n");
-           17       exit(0);
-           18   }
+ 1   #include "csapp.h"
+ 2
+ 3   void try()
+ 4   {
+ 5       if (Fork() != 0) {
+ 6           Fork();
+ 7           printf("Example\n");
+ 8           exit(0);
+ 9       }
+10       return;
+11   }
+12
+13   int main()
+14   {
+15       try();
+16       fork(); printf("Example\n");
+17       exit(0);
+18   }
                                                            code/ecf/global-forkprob5.c
 ```
 
@@ -2294,7 +2300,7 @@ C. Được gọi một lần, trả về pointer hoặc NULL
                                                 code/ecf/global-forkprob7.c
  1   #include "csapp.h"
  2   int counter = 1;
-3
+ 3
  4   int main()
  5   {
  6       if (fork() == 0) {
@@ -2484,12 +2490,6 @@ Gợi ý: Đọc man page của psignal(3).
 
 Hình 8.46 thể hiện một phiên làm việc shell ví dụ.
 
-## Lời giải các bài tập thực hành
-
-Lời giải Bài toán 8.1 (trang 770) Process A và B concurrent với nhau, cũng như B và C, vì thời gian thực thi tương ứng chồng lấn—tức process này bắt đầu trước khi process kia kết thúc. Process A và C không concurrent vì thời gian thực thi không chồng lấn; A kết thúc trước khi C bắt đầu.
-
-Lời giải Bài toán 8.2 (trang 779) Trong chương trình ví dụ ở Hình 8.15, parent và child thực thi các tập instruction rời nhau. Tuy nhiên, trong chương trình này, parent và child thực thi các tập instruction không rời nhau, có thể xảy ra vì parent và child có code segment giống hệt. Đây có thể là trở ngại khó về mặt khái niệm, nên hãy bảo đảm bạn hiểu lời giải. Hình 8.47 thể hiện process graph.
-
 ```
 linux> ./shell                            Run your shell program
 >bogus
@@ -2519,9 +2519,15 @@ Job 5036 terminated by signal: Terminated
 linux>                                    Back to the Unix shell
 ```
 
-![p0833_19](images/ch08_exceptional_control_flow/p0833_19.png)
-
 **Hình 8.46 Phiên làm việc shell mẫu cho Bài toán 8.26.**
+
+## Lời giải các bài tập thực hành
+
+Lời giải Bài toán 8.1 (trang 770) Process A và B concurrent với nhau, cũng như B và C, vì thời gian thực thi tương ứng chồng lấn—tức process này bắt đầu trước khi process kia kết thúc. Process A và C không concurrent vì thời gian thực thi không chồng lấn; A kết thúc trước khi C bắt đầu.
+
+Lời giải Bài toán 8.2 (trang 779) Trong chương trình ví dụ ở Hình 8.15, parent và child thực thi các tập instruction rời nhau. Tuy nhiên, trong chương trình này, parent và child thực thi các tập instruction không rời nhau, có thể xảy ra vì parent và child có code segment giống hệt. Đây có thể là trở ngại khó về mặt khái niệm, nên hãy bảo đảm bạn hiểu lời giải. Hình 8.47 thể hiện process graph.
+
+![p0833_19](images/ch08_exceptional_control_flow/p0833_19.png)
 
 **Hình 8.47 Process graph cho Bài tập thực hành 8.2.**
 
@@ -2571,23 +2577,23 @@ Lời giải Bài toán 8.6 (trang 788)
 
 ```
                                                        code/ecf/myecho.c
-1   #include "csapp.h"
-2
-3   int main(int argc, char *argv[], char *envp[])
-4   {
-5       int i;
-6
-7       printf("Command-line arguments:\n");
-            8       for (i=0; argv[i] != NULL; i++)
-            9           printf("    argv[%2d]: %s\n", i, argv[i]);
-           10
-           11       printf("\n");
-           12       printf("Environment variables:\n");
-           13       for (i=0; envp[i] != NULL; i++)
-           14           printf("    envp[%2d]: %s\n", i, envp[i]);
-           15
-           16       exit(0);
-           17   }
+ 1   #include "csapp.h"
+ 2
+ 3   int main(int argc, char *argv[], char *envp[])
+ 4   {
+ 5       int i;
+ 6
+ 7       printf("Command-line arguments:\n");
+ 8       for (i=0; argv[i] != NULL; i++)
+ 9           printf("    argv[%2d]: %s\n", i, argv[i]);
+10
+11       printf("\n");
+12       printf("Environment variables:\n");
+13       for (i=0; envp[i] != NULL; i++)
+14           printf("    envp[%2d]: %s\n", i, envp[i]);
+15
+16       exit(0);
+17   }
                                                                    code/ecf/myecho.c
 ```
 

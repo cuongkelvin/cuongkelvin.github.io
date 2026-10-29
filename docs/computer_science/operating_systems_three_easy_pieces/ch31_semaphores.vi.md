@@ -168,20 +168,9 @@ Trường hợp hai (Hình 31.8, trang 6), child hoàn tất trước khi parent
 | 0 |  | Ready | Interrupt; Chuyển→Parent | Ready |
 | 0 | sem_wait() trả về | Running |  | Ready |
 
-| Hình 31.7: Thread Trace: Parent chờ Child (Trường hợp 1) |
-|---|
-| Giá trị Parent State Child State |
-| 0 create(Child) Running (Child tồn tại; có thể chạy) Ready |
-| 0 Interrupt; Chuyển→Child Ready child chạy Running |
-| 0 Ready gọi sem_post() Running |
-| 1 Ready tăng sem Running |
-| 1 Ready wake(không ai) Running |
-| 1 Ready sem_post() trả về Running |
-| 1 parent chạy Running Interrupt; Chuyển→Parent Ready |
-| 1 gọi sem_wait() Running Ready |
-| 0 giảm sem Running Ready |
-| 0 (sem≥0)→awake Running Ready |
-| 0 sem_wait() trả về Running Ready |
+Hình 31.7: Thread Trace: Parent chờ Child (Trường hợp 1)
+
+![p0366_t1](images/ch31_semaphores/p0366_t1.png)
 
 Hình 31.8: Thread Trace: Parent chờ Child (Trường hợp 2)
 
@@ -409,7 +398,9 @@ Cách này hoạt động đúng mong muốn, nhưng có nhược điểm, đặ
 
 > MẸO: ĐƠN GIẢN VÀ NGỐC CÓ THỂ TỐT HƠN (ĐỊNH LUẬT HILL)
 >
-> Đừng đánh giá thấp khả năng cách đơn giản và ngốc là tốt nhất. Với locking, đôi khi spin lock đơn giản tốt nhất vì dễ triển khai và nhanh. Reader/writer lock nghe hay nhưng phức tạp, mà phức tạp có thể chậm. Vì vậy luôn thử cách đơn giản trước. Ý tưởng chuộng đơn giản có ở nhiều nơi. Nguồn sớm là luận án Mark Hill [H87], nghiên cứu thiết kế CPU cache. Hill thấy cache direct-mapped đơn giản tốt hơn thiết kế set-associative cầu kỳ (một lý do: cache đơn giản lookup nhanh hơn). Hill tóm tắt: “Lớn và ngốc tốt hơn.” Vì vậy gọi lời khuyên tương tự là định luật Hill.
+> Đừng đánh giá thấp khả năng cách đơn giản và ngốc là tốt nhất. Với locking, đôi khi spin lock đơn giản tốt nhất vì dễ triển khai và nhanh. Reader/writer lock nghe hay nhưng phức tạp, mà phức tạp có thể chậm. Vì vậy luôn thử cách đơn giản trước.
+>
+> Ý tưởng chuộng đơn giản có ở nhiều nơi. Nguồn sớm là luận án Mark Hill [H87], nghiên cứu thiết kế CPU cache. Hill thấy cache direct-mapped đơn giản tốt hơn thiết kế set-associative cầu kỳ (một lý do: cache đơn giản lookup nhanh hơn). Hill tóm tắt: “Lớn và ngốc tốt hơn.” Vì vậy gọi lời khuyên tương tự là định luật Hill.
 
 Cuối cùng cần thận trọng dùng reader-writer lock. Chúng thường thêm overhead (nhất là triển khai tinh vi), nên không tăng hiệu năng so với locking primitive đơn giản nhanh [CB08]. Dù sao chúng minh họa lần nữa cách dùng semaphore thú vị hữu ích.
 
@@ -531,7 +522,9 @@ Thú vị là xây lock và condition variable từ semaphore khó hơn nhiều.
 
 > MẸO: THẬN TRỌNG TỔNG QUÁT HÓA
 >
-> Kỹ thuật trừu tượng tổng quát hóa khá hữu ích trong thiết kế hệ thống: mở rộng chút ý tưởng tốt giải quyết lớp vấn đề lớn hơn. Nhưng cẩn thận; Lampson cảnh báo “Đừng tổng quát hóa; những tổng quát hóa thường sai” [L83]. Có thể xem semaphore là tổng quát lock và condition variable; nhưng có cần không? Với khó khăn triển khai condition variable trên semaphore, có lẽ tổng quát này không tổng quát như tưởng.
+> Kỹ thuật trừu tượng tổng quát hóa khá hữu ích trong thiết kế hệ thống: mở rộng chút ý tưởng tốt giải quyết lớp vấn đề lớn hơn. Nhưng cẩn thận; Lampson cảnh báo “Đừng tổng quát hóa; những tổng quát hóa thường sai” [L83].
+>
+> Có thể xem semaphore là tổng quát lock và condition variable; nhưng có cần không? Với khó khăn triển khai condition variable trên semaphore, có lẽ tổng quát này không tổng quát như tưởng.
 
 ## 31.8 Tổng kết
 

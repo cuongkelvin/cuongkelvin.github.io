@@ -94,7 +94,7 @@ Flash NAND rẻ hơn nhiều so với flash NOR và có dung lượng cao hơn. 
 
 Giống như flash NOR, flash NAND được tổ chức thành các erase block có kích thước từ 16 KB đến 512 KB và, một lần nữa, xóa một block sẽ đặt tất cả các bit thành 1. Tuy nhiên, số chu kỳ xóa trước khi block trở nên không đáng tin cậy thấp hơn. Thường chỉ có khoảng 1 K chu kỳ cho chip TLC và lên tới 100 K cho SLC. Flash NAND chỉ có thể được đọc và ghi theo page (thường là 2 hoặc 4 KB). Vì chúng không thể được truy cập từng byte, chúng không thể được map vào không gian địa chỉ, vì vậy code và dữ liệu phải được copy vào RAM trước khi có thể được truy cập.
 
-Việc truyền dữ liệu tới và từ chip dễ bị bit flip, có thể được phát hiện và sửa bằng error-correction code (ECC). Chip SLC thường dùng một mã hamming đơn giản, có thể được hiện thực hiệu quả bằng phần mềm và có thể sửa một lỗi single-bit trong một lần đọc page. Chip MLC và TLC cần các mã tinh vi hơn như Bose-Chaudhuri-Hocquenghem (BCH), có thể sửa tới 8 bit lỗi mỗi page. Sửa nhiều lỗi như vậy cần hỗ trợ phần cứng bên trong flash controller.
+Việc truyền dữ liệu tới và từ chip dễ bị bit flip, có thể được phát hiện và sửa bằng error-correction code (ECC). Chip SLC thường dùng một mã hamming đơn giản, có thể được triển khai hiệu quả bằng phần mềm và có thể sửa một lỗi single-bit trong một lần đọc page. Chip MLC và TLC cần các mã tinh vi hơn như Bose-Chaudhuri-Hocquenghem (BCH), có thể sửa tới 8 bit lỗi mỗi page. Sửa nhiều lỗi như vậy cần hỗ trợ phần cứng bên trong flash controller.
 
 Các ECC cần được lưu ở đâu đó, vì vậy có thêm một vùng nhớ mỗi page được gọi là vùng out-of-band (OOB) hay spare area. Các thiết kế SLC thường có 1 byte OOB cho mỗi 32 byte lưu trữ chính. Vì vậy, với một thiết bị page 2 KB, OOB là 64 byte mỗi page, và với page 4 KB, nó là 128 byte. Chip MLC và TLC có vùng OOB lớn hơn tương ứng để chứa các ECC phức tạp hơn. Sơ đồ sau cho thấy cách tổ chức của một chip với erase block 128 KB và page 2 KB:
 
@@ -128,7 +128,7 @@ Có một tập lệnh để đọc và ghi bộ nhớ theo sector 512 byte. Bê
 
 Hình 9.2 – Gói thẻ SD
 
-Vi điều khiển hiện thực tập lệnh và quản lý bộ nhớ flash, thực hiện chức năng của một flash translation layer, như được mô tả ở phần sau của chương này. Chúng được format sẵn với một filesystem FAT: FAT16 trên thẻ SDSC, FAT32 trên SDHC và exFAT trên SDXC. Chất lượng của các chip flash NAND và phần mềm trên vi điều khiển khác nhau rất nhiều giữa các thẻ. Còn đáng nghi ngờ liệu thẻ nào trong số đó đủ đáng tin cậy cho việc dùng nhúng sâu. Chắc chắn là không với một filesystem FAT, vốn dễ bị hỏng file. Hãy nhớ rằng trường hợp sử dụng chính của thẻ MMC và SD là bộ lưu trữ tháo rời trên máy ảnh, tablet và điện thoại.
+Vi điều khiển triển khai tập lệnh và quản lý bộ nhớ flash, thực hiện chức năng của một flash translation layer, như được mô tả ở phần sau của chương này. Chúng được format sẵn với một filesystem FAT: FAT16 trên thẻ SDSC, FAT32 trên SDHC và exFAT trên SDXC. Chất lượng của các chip flash NAND và phần mềm trên vi điều khiển khác nhau rất nhiều giữa các thẻ. Còn đáng nghi ngờ liệu thẻ nào trong số đó đủ đáng tin cậy cho việc dùng nhúng sâu. Chắc chắn là không với một filesystem FAT, vốn dễ bị hỏng file. Hãy nhớ rằng trường hợp sử dụng chính của thẻ MMC và SD là bộ lưu trữ tháo rời trên máy ảnh, tablet và điện thoại.
 
 #### eMMC
 
@@ -138,7 +138,7 @@ Embedded MMC hay eMMC đơn giản là bộ nhớ MMC được đóng gói để
 
 Một trong những công nghệ managed flash đầu tiên là CompactFlash (CF), dùng một tập con của giao diện phần cứng Personal Computer Memory Card International Association (PCMCIA). CF cung cấp bộ nhớ qua giao diện Parallel Advanced Technology Attachment (PATA) và xuất hiện với hệ điều hành như một ổ cứng chuẩn. Chúng từng phổ biến trong các single-board computer x86-based và thiết bị video, máy ảnh chuyên nghiệp.
 
-Một định dạng khác mà chúng ta dùng hằng ngày là ổ flash USB. Trong trường hợp này, bộ nhớ được truy cập qua giao diện USB và controller hiện thực đặc tả USB mass storage cũng như flash translation layer và giao diện tới (các) chip flash. Giao thức USB mass storage dựa trên tập lệnh đĩa SCSI. Giống như thẻ MMC và SD, chúng thường được format sẵn với filesystem FAT. Trường hợp sử dụng chính của chúng trong hệ thống nhúng là trao đổi dữ liệu với PC.
+Một định dạng khác mà chúng ta dùng hằng ngày là ổ flash USB. Trong trường hợp này, bộ nhớ được truy cập qua giao diện USB và controller triển khai đặc tả USB mass storage cũng như flash translation layer và giao diện tới (các) chip flash. Giao thức USB mass storage dựa trên tập lệnh đĩa SCSI. Giống như thẻ MMC và SD, chúng thường được format sẵn với filesystem FAT. Trường hợp sử dụng chính của chúng trong hệ thống nhúng là trao đổi dữ liệu với PC.
 
 Một bổ sung gần đây vào danh sách lựa chọn bộ lưu trữ managed flash là Universal Flash Storage (UFS). Giống như eMMC, nó được đóng gói trong một chip gắn trên bo mạch chủ. Nó có giao diện serial high-speed và có thể đạt tốc độ dữ liệu lớn hơn eMMC. Nó hỗ trợ tập lệnh đĩa SCSI.
 
@@ -343,7 +343,7 @@ Hãy xem character device trước vì nó được dùng phổ biến hơn tron
 
 #### Character device MTD, mtd
 
-Các character device là quan trọng nhất: chúng cho phép bạn truy cập bộ nhớ flash bên dưới như một mảng byte để có thể đọc và ghi (lập trình) flash. Nó cũng hiện thực một số hàm `ioctl` cho phép bạn xóa block và quản lý vùng OOB trên chip NAND. Danh sách sau được lấy từ `include/uapi/mtd/mtd-abi.h`:
+Các character device là quan trọng nhất: chúng cho phép bạn truy cập bộ nhớ flash bên dưới như một mảng byte để có thể đọc và ghi (lập trình) flash. Nó cũng triển khai một số hàm `ioctl` cho phép bạn xóa block và quản lý vùng OOB trên chip NAND. Danh sách sau được lấy từ `include/uapi/mtd/mtd-abi.h`:
 
 - `MEMGETINFO`: Lấy thông tin đặc tính MTD cơ bản.
 
@@ -433,7 +433,7 @@ Một flash translation layer có các tính năng sau:
 
 - Sub allocation: Filesystem hoạt động tốt nhất với đơn vị cấp phát nhỏ, theo truyền thống là một sector 512 byte. Đơn vị này nhỏ hơn nhiều so với một erase block flash 128 KB trở lên. Vì vậy, erase block cần được chia nhỏ thành các đơn vị nhỏ hơn để tránh lãng phí lượng lớn không gian.
 
-- Garbage collection: Một hệ quả của sub allocation là một erase block sẽ chứa lẫn dữ liệu tốt và dữ liệu cũ sau khi filesystem được dùng một thời gian. Vì chúng ta chỉ có thể giải phóng toàn bộ erase block, cách duy nhất để thu hồi không gian trống này là gom dữ liệu tốt vào một chỗ rồi trả erase block giờ đã trống về danh sách trống. Việc này được gọi là garbage collection, và nó thường được hiện thực dưới dạng một background thread.
+- Garbage collection: Một hệ quả của sub allocation là một erase block sẽ chứa lẫn dữ liệu tốt và dữ liệu cũ sau khi filesystem được dùng một thời gian. Vì chúng ta chỉ có thể giải phóng toàn bộ erase block, cách duy nhất để thu hồi không gian trống này là gom dữ liệu tốt vào một chỗ rồi trả erase block giờ đã trống về danh sách trống. Việc này được gọi là garbage collection, và nó thường được triển khai dưới dạng một background thread.
 
 - Wear leveling: Có giới hạn về số chu kỳ xóa cho mỗi block. Để tối đa hóa tuổi thọ của chip, điều quan trọng là di chuyển dữ liệu xung quanh để mỗi block được xóa với số lần gần như nhau.
 
@@ -445,7 +445,7 @@ Có nhiều cách triển khai flash translation layer:
 
 - Trong filesystem: Như với JFFS2, YAFFS2 và UBIFS.
 
-- Trong block device driver: Driver UBI, mà UBIFS phụ thuộc vào, hiện thực một số khía cạnh của flash translation layer.
+- Trong block device driver: Driver UBI, mà UBIFS phụ thuộc vào, triển khai một số khía cạnh của flash translation layer.
 
 - Trong device controller: Như với các thiết bị managed flash.
 
@@ -593,7 +593,7 @@ Nhân tiện đang nói về chủ đề filesystem cho flash NOR và NAND thô,
 
 ### UBI và UBIFS
 
-Driver Unsorted Block Image (UBI) là một volume manager cho bộ nhớ flash, đảm nhận việc xử lý bad block và wear leveling. Nó được Artem Bityutskiy hiện thực và xuất hiện lần đầu trong Linux 2.6.22. Song song với đó, các kỹ sư tại Nokia đang làm một filesystem tận dụng các tính năng của UBI, mà họ gọi là UBIFS. Nó xuất hiện trong Linux 2.6.27. Tách flash translation layer theo cách này làm code module hóa hơn và cũng cho phép các filesystem khác tận dụng driver UBI, như chúng ta sẽ thấy ở phần sau.
+Driver Unsorted Block Image (UBI) là một volume manager cho bộ nhớ flash, đảm nhận việc xử lý bad block và wear leveling. Nó được Artem Bityutskiy triển khai và xuất hiện lần đầu trong Linux 2.6.22. Song song với đó, các kỹ sư tại Nokia đang làm một filesystem tận dụng các tính năng của UBI, mà họ gọi là UBIFS. Nó xuất hiện trong Linux 2.6.27. Tách flash translation layer theo cách này làm code module hóa hơn và cũng cho phép các filesystem khác tận dụng driver UBI, như chúng ta sẽ thấy ở phần sau.
 
 #### UBI
 

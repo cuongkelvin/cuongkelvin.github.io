@@ -147,18 +147,12 @@ Cuối cùng CPU phải tạo exception khi user program truy cập memory trái
 
 | Yêu cầu hardware | Ghi chú |
 |---|---|
-| Privileged mode | Cần để ngăn process user-mode |
-|  | thực hiện privileged operation |
-| Base/bounds register | Cần cặp register mỗi CPU hỗ trợ |
-|  | address translation và kiểm tra bounds |
-| Khả năng dịch virtual address | Mạch thực hiện translation và kiểm tra |
-| và kiểm tra trong bounds | giới hạn; ở đây khá đơn giản |
-| Privileged instruction để | OS phải đặt được các giá trị này |
-| cập nhật base/bounds | trước khi cho user program chạy |
-| Privileged instruction đăng ký | OS phải báo hardware chạy |
-| exception handler | code nào khi exception xảy ra |
-| Khả năng phát sinh exception | Khi process cố truy cập privileged |
-|  | instruction hoặc memory out-of-bounds |
+| Privileged mode | Cần để ngăn process user-mode thực hiện privileged operation |
+| Base/bounds register | Cần cặp register mỗi CPU hỗ trợ address translation và kiểm tra bounds |
+| Khả năng dịch virtual address và kiểm tra trong bounds | Mạch thực hiện translation và kiểm tra giới hạn; ở đây khá đơn giản |
+| Privileged instruction để cập nhật base/bounds | OS phải đặt được các giá trị này trước khi cho user program chạy |
+| Privileged instruction đăng ký exception handler | OS phải báo hardware chạy code nào khi exception xảy ra |
+| Khả năng phát sinh exception | Khi process cố truy cập privileged instruction hoặc memory out-of-bounds |
 
 Hình 15.3: Dynamic Relocation: Yêu cầu hardware
 
@@ -176,12 +170,9 @@ Thứ ba, OS thực hiện bước bổ sung khi context switch. Mỗi CPU chỉ
 
 | Yêu cầu OS | Ghi chú |
 |---|---|
-| Memory management | Cần cấp phát memory cho process mới; |
-|  | Thu hồi memory từ process đã kết thúc; |
-|  | Quản lý memory chung qua free list |
+| Memory management | Cần cấp phát memory cho process mới;<br>Thu hồi memory từ process đã kết thúc;<br>Quản lý memory chung qua free list |
 | Quản lý base/bounds | Phải đặt base/bounds đúng khi context switch |
-| Exception handling | Code chạy khi exception phát sinh; |
-|  | thường kết thúc process vi phạm |
+| Exception handling | Code chạy khi exception phát sinh;<br>thường kết thúc process vi phạm |
 
 Hình 15.4: Dynamic Relocation: Trách nhiệm OS
 

@@ -46,7 +46,7 @@ int fd = open("foo", O_CREAT | O_WRONLY | O_TRUNC);
 
 Routine open() nhận nhiều flag khác nhau. Trong ví dụ, chương trình tạo file (O_CREAT), chỉ có thể ghi file khi mở theo cách này (O_WRONLY), và nếu file đã có, trước tiên truncate kích thước về không byte, xóa mọi nội dung cũ (O_TRUNC).
 
-> BỔ SUNG: SYSTEM CALL C R E A T()
+> BỔ SUNG: SYSTEM CALL CREAT()
 >
 > Cách tạo file cũ hơn là gọi creat(), như sau:
 >
@@ -73,9 +73,11 @@ Trong code này, redirect output của echo tới file foo, sau đó chứa từ
 
 Để tìm hiểu, dùng công cụ cực hữu ích trace system call chương trình thực hiện. Trên Linux gọi strace; hệ thống khác có công cụ tương tự (xem dtruss trên Mac OS X hay truss ở UNIX cũ hơn). strace trace mọi system call chương trình thực hiện khi chạy, xuất trace ra màn hình cho bạn xem.
 
-> MẸO: DÙNG S T R A C E (VÀ CÔNG CỤ TƯƠNG TỰ)
+> MẸO: DÙNG STRACE (VÀ CÔNG CỤ TƯƠNG TỰ)
 >
-> strace cung cấp cách tuyệt vời xem chương trình làm gì. Chạy nó có thể trace system call, thấy argument và return code, nhìn chung hiểu rất rõ điều diễn ra. Công cụ cũng nhận argument hữu ích. Ví dụ -f theo dõi cả child được fork; -t báo giờ trong ngày mỗi call; -e trace=open,close,read,write chỉ trace những system call đó và bỏ các call khác. Còn nhiều flag mạnh hơn — đọc man page để biết khai thác công cụ tuyệt vời này.
+> strace cung cấp cách tuyệt vời xem chương trình làm gì. Chạy nó có thể trace system call, thấy argument và return code, nhìn chung hiểu rất rõ điều diễn ra.
+>
+> Công cụ cũng nhận argument hữu ích. Ví dụ -f theo dõi cả child được fork; -t báo giờ trong ngày mỗi call; -e trace=open,close,read,write chỉ trace những system call đó và bỏ các call khác. Còn nhiều flag mạnh hơn — đọc man page để biết khai thác công cụ tuyệt vời này.
 
 Đây là ví dụ dùng strace tìm hiểu cat làm gì (bỏ vài call cho dễ đọc):
 
@@ -126,7 +128,7 @@ the file plus offset bytes.
 
 Như mô tả, với mỗi file process mở, OS theo dõi offset “hiện tại”, xác định read hay write tiếp bắt đầu ở đâu trong file. Vì thế một phần abstraction open file là có current offset, cập nhật theo hai cách. Thứ nhất khi read hoặc write N byte, cộng N vào current offset; mỗi read hay write ngầm cập nhật offset. Thứ hai, tường minh dùng lseek, đổi offset như quy định trên.
 
-> BỔ SUNG: GỌI L S E E K() KHÔNG THỰC HIỆN DISK SEEK
+> BỔ SUNG: GỌI LSEEK() KHÔNG THỰC HIỆN DISK SEEK
 >
 > System call poorly-named lseek() khiến nhiều sinh viên cố hiểu disk và file system bên trên nhầm lẫn. Đừng nhầm hai thứ! lseek() chỉ đổi biến trong OS memory, theo dõi offset mà read hay write tiếp theo của process cụ thể sẽ bắt đầu. Disk seek xảy ra khi read hoặc write phát tới disk khác track với lần trước nên phải di chuyển head. Còn gây nhầm hơn là gọi lseek() để đọc ghi phần ngẫu nhiên của file, rồi thực sự đọc ghi những phần đó, đúng là dẫn tới nhiều disk seek hơn. Vì vậy lseek() chắc chắn có thể dẫn tới seek ở read hoặc write sắp tới, nhưng bản thân tuyệt đối không gây disk I/O.
 
@@ -258,7 +260,9 @@ prompt>
 > prompt> rm -rf *
 > ```
 >
-> Rắc rối với chuỗi ký tự nhỏ này xảy ra nếu vô tình thực hiện command từ root directory file system, xóa mọi file và directory. Ôi! Vì vậy nhớ con dao double-edged của command mạnh; dù cho làm rất nhiều với ít phím gõ, chúng cũng nhanh chóng và dễ dàng gây hại lớn.
+> Rắc rối với chuỗi ký tự nhỏ này xảy ra nếu vô tình thực hiện command từ root directory file system, xóa mọi file và directory. Ôi!
+>
+> Vì vậy nhớ con dao double-edged của command mạnh; dù cho làm rất nhiều với ít phím gõ, chúng cũng nhanh chóng và dễ dàng gây hại lớn.
 
 Khi directory đó tạo xong, được xem “rỗng”, dù vẫn có nội dung tối thiểu. Cụ thể directory rỗng có hai entry: một tham chiếu chính nó, một tham chiếu parent. Đầu gọi directory “.” (dot), sau “..” (dot-dot). Có thể thấy bằng truyền flag (-a) cho ls:
 

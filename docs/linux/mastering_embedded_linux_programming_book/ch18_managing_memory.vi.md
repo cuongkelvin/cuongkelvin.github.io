@@ -393,7 +393,7 @@ Chia sẻ bộ nhớ qua `mmap` cũng cung cấp một cách đơn giản để 
 
 ### Dùng mmap để truy cập bộ nhớ thiết bị
 
-Như tôi đã đề cập trong Chương 11, một driver có thể cho phép device node của nó được memory map và chia sẻ một phần bộ nhớ thiết bị với một ứng dụng. Cách hiện thực chính xác phụ thuộc vào driver.
+Như tôi đã đề cập trong Chương 11, một driver có thể cho phép device node của nó được memory map và chia sẻ một phần bộ nhớ thiết bị với một ứng dụng. Cách triển khai chính xác phụ thuộc vào driver.
 
 Một ví dụ là Linux framebuffer, `/dev/fb0`. Các FPGA như dòng Xilinx Zynq cũng được truy cập như bộ nhớ qua `mmap` từ Linux. Giao diện framebuffer được định nghĩa trong `/usr/include/linux/fb.h`, bao gồm một hàm `ioctl` để lấy kích thước màn hình và số bit trên mỗi pixel. Sau đó bạn có thể dùng `mmap` để yêu cầu video driver chia sẻ framebuffer với ứng dụng và đọc, ghi pixel:
 
@@ -442,7 +442,7 @@ Lệnh `free` cho chúng ta biết bao nhiêu bộ nhớ đang được dùng v�
 
 ## Mức sử dụng bộ nhớ Per-process
 
-Có một số thước đo để đo lượng bộ nhớ mà một process đang dùng. Tôi sẽ bắt đầu với hai thước đo dễ lấy nhất: virtual set size (VSS) và resident memory size (RSS), cả hai đều có sẵn trong hầu hết các bản hiện thực của lệnh `ps` và `top`:
+Có một số thước đo để đo lượng bộ nhớ mà một process đang dùng. Tôi sẽ bắt đầu với hai thước đo dễ lấy nhất: virtual set size (VSS) và resident memory size (RSS), cả hai đều có sẵn trong hầu hết các bản triển khai của lệnh `ps` và `top`:
 
 - VSS: Được gọi là `VSZ` trong lệnh `ps` và `VIRT` trong `top`, đây là tổng lượng bộ nhớ được một process ánh xạ. Nó là tổng của tất cả các vùng được hiển thị trong `/proc/<PID>/map`. Con số này ít được quan tâm vì chỉ một phần virtual memory được gắn vào bộ nhớ vật lý tại bất kỳ thời điểm nào.
 
@@ -688,7 +688,7 @@ Output từ Valgrind cho thấy hai memory leak đã được tìm thấy trong 
 
 ## Hết bộ nhớ
 
-Chính sách cấp phát bộ nhớ chuẩn là overcommit, nghĩa là kernel sẽ cho phép các ứng dụng cấp phát nhiều bộ nhớ hơn lượng bộ nhớ vật lý có. Phần lớn thời gian, điều này hoạt động tốt vì các ứng dụng thường yêu cầu nhiều bộ nhớ hơn mức chúng thực sự cần. Điều này cũng giúp ích trong việc hiện thực `fork(2)`: việc tạo một bản sao của một chương trình lớn là an toàn vì các trang bộ nhớ được chia sẻ với cờ copy-on-write được đặt. Trong phần lớn các trường hợp, `fork` được theo sau bởi một lời gọi hàm `exec`, vốn hủy chia sẻ bộ nhớ rồi nạp một chương trình mới.
+Chính sách cấp phát bộ nhớ chuẩn là overcommit, nghĩa là kernel sẽ cho phép các ứng dụng cấp phát nhiều bộ nhớ hơn lượng bộ nhớ vật lý có. Phần lớn thời gian, điều này hoạt động tốt vì các ứng dụng thường yêu cầu nhiều bộ nhớ hơn mức chúng thực sự cần. Điều này cũng giúp ích trong việc triển khai `fork(2)`: việc tạo một bản sao của một chương trình lớn là an toàn vì các trang bộ nhớ được chia sẻ với cờ copy-on-write được đặt. Trong phần lớn các trường hợp, `fork` được theo sau bởi một lời gọi hàm `exec`, vốn hủy chia sẻ bộ nhớ rồi nạp một chương trình mới.
 
 Tuy nhiên, luôn có khả năng một workload cụ thể sẽ khiến một nhóm process cùng lúc cố đòi các cấp phát mà chúng đã được hứa và vì vậy đòi nhiều hơn lượng thực sự có. Đây là một tình huống out-of-memory, hay OOM. Tại thời điểm này, không còn lựa chọn nào khác ngoài việc kill các process cho đến khi vấn đề biến mất. Đây là công việc của out-of-memory killer.
 

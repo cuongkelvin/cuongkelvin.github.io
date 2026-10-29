@@ -8,7 +8,7 @@ Chương này phụ thuộc rất nhiều vào lý thuyết được giải thí
 
 Sau đây là các chủ đề sẽ được giải thích trong suốt chương này:
 
-- Như đã giải thích trước đó, quan hệ inheritance là chủ đề đầu tiên chúng ta thảo luận. Các phương pháp hiện thực quan hệ inheritance trong C sẽ được trình bày, và chúng ta sẽ tiến hành so sánh giữa chúng.
+- Như đã giải thích trước đó, quan hệ inheritance là chủ đề đầu tiên chúng ta thảo luận. Các phương pháp triển khai quan hệ inheritance trong C sẽ được trình bày, và chúng ta sẽ tiến hành so sánh giữa chúng.
 - Chủ đề lớn tiếp theo là *polymorphism*. Polymorphism cho phép chúng ta có các phiên bản khác nhau của cùng một behavior trong các class con, trong trường hợp có một quan hệ inheritance giữa những class đó. Chúng ta sẽ thảo luận các phương pháp để có một hàm polymorphic trong C; đây sẽ là bước đầu tiên trong việc hiểu cách C++ cung cấp polymorphism.
 
 Hãy bắt đầu thảo luận với quan hệ inheritance.
@@ -19,7 +19,7 @@ Hãy bắt đầu thảo luận với quan hệ inheritance.
 
 Chúng ta đã khép lại chương<a id="_idIndexMarker574"></a> trước bằng việc nói về các quan hệ *to-have*, rốt cuộc dẫn chúng ta tới các quan hệ composition và aggregation. Trong phần này, chúng ta sẽ nói về các quan hệ *to-be* hay *is-a*. Quan hệ inheritance là một quan hệ to-be.
 
-Một quan hệ inheritance cũng có thể được gọi là một *extension relationship* (quan hệ mở rộng) vì nó chỉ thêm các attribute và behavior bổ sung vào một object hay class hiện có. Trong các phần sau, chúng ta sẽ giải thích inheritance có nghĩa là gì và nó có thể được hiện thực như thế nào trong C.
+Một quan hệ inheritance cũng có thể được gọi là một *extension relationship* (quan hệ mở rộng) vì nó chỉ thêm các attribute và behavior bổ sung vào một object hay class hiện có. Trong các phần sau, chúng ta sẽ giải thích inheritance có nghĩa là gì và nó có thể được triển khai như thế nào trong C.
 
 Có những tình huống khi một object cần có cùng các attribute tồn tại trong một object khác. Nói cách khác, object mới là một sự mở rộng của object kia.
 
@@ -130,11 +130,11 @@ typedef struct {
 
 Dòng khai báo trường `person`<a id="_idIndexMarker578"></a> sinh ra một lỗi vì bạn không thể tạo một biến từ một *incomplete type*. Bạn nên nhớ rằng forward declaration của một structure (tương tự dòng đầu tiên trong *Code Box 8-4*) dẫn đến việc khai báo một incomplete type. Bạn chỉ có thể có pointer của các incomplete type, *không phải* biến. Như bạn đã thấy trước đây, bạn thậm chí không thể cấp phát memory Heap cho một incomplete type.
 
-Vậy, điều này có nghĩa là gì? Nó có nghĩa là nếu bạn định dùng các biến structure lồng nhau để hiện thực inheritance, structure `student_t` phải thấy được định nghĩa thực sự của `person_t`, vốn, dựa trên những gì chúng ta đã học về encapsulation, nên là private và không hiển thị với bất kỳ class nào khác.
+Vậy, điều này có nghĩa là gì? Nó có nghĩa là nếu bạn định dùng các biến structure lồng nhau để triển khai inheritance, structure `student_t` phải thấy được định nghĩa thực sự của `person_t`, vốn, dựa trên những gì chúng ta đã học về encapsulation, nên là private và không hiển thị với bất kỳ class nào khác.
 
-Do đó, bạn có hai cách tiếp cận để hiện thực quan hệ inheritance:
+Do đó, bạn có hai cách tiếp cận để triển khai quan hệ inheritance:
 
-- Làm sao cho class con có quyền truy cập hiện thực private (định nghĩa thực sự) của class base.
+- Làm sao cho class con có quyền truy cập bản triển khai private (định nghĩa thực sự) của class base.
 - Làm sao cho class con chỉ có quyền truy cập public interface của class base.
 
 <a id="_idParaDest-124"></a>
@@ -188,7 +188,7 @@ typedef struct {
 
 *Code Box 8-6 [ExtremeC_examples_chapter8_2_person_p.h]: Private header file chứa định nghĩa thực sự của person_t*
 
-Như bạn thấy, nó chỉ chứa<a id="_idIndexMarker581"></a> định nghĩa của structure `person_t` và không gì hơn. Đây là phần của class `Person` nên giữ private, nhưng nó cần trở nên public đối với class `Student`. Chúng ta sẽ cần định nghĩa này để định nghĩa attribute structure `student_t`. Code box tiếp theo minh họa hiện thực private của class `Person`:
+Như bạn thấy, nó chỉ chứa<a id="_idIndexMarker581"></a> định nghĩa của structure `person_t` và không gì hơn. Đây là phần của class `Person` nên giữ private, nhưng nó cần trở nên public đối với class `Student`. Chúng ta sẽ cần định nghĩa này để định nghĩa attribute structure `student_t`. Code box tiếp theo minh họa bản triển khai private của class `Person`:
 
 ```
 #include <stdlib.h>
@@ -258,7 +258,7 @@ Như bạn có thể thấy, constructor của class nhận các argument tươn
 
 Lưu ý rằng chúng ta chỉ có thêm hai behavior function trong class `Student`, và đó là vì chúng ta có thể dùng các behavior function của class `Person` cho các object `student` nữa.
 
-Code box tiếp theo chứa hiện thực private của class `Student`:
+Code box tiếp theo chứa bản triển khai private của class `Student`:
 
 ```
 #include <stdlib.h>
@@ -374,17 +374,17 @@ $
 
 *Shell Box 8-2: Build và chạy ví dụ 8.2*
 
-Ví dụ sau, *ví dụ 8.3*, sẽ đề cập cách tiếp cận thứ hai để hiện thực các quan hệ inheritance trong C. Output sẽ rất giống *ví dụ 8.2*.
+Ví dụ sau, *ví dụ 8.3*, sẽ đề cập cách tiếp cận thứ hai để triển khai các quan hệ inheritance trong C. Output sẽ rất giống *ví dụ 8.2*.
 
 <a id="_idParaDest-125"></a>
 
 #### Cách tiếp cận thứ hai để có inheritance trong C
 
-Dùng cách tiếp cận thứ nhất<a id="_idIndexMarker587"></a>, chúng ta đã giữ một biến structure làm trường đầu tiên trong attribute structure của con. Giờ, dùng cách tiếp cận thứ hai, chúng ta sẽ giữ một pointer tới biến structure của cha. Bằng cách này, class con có thể độc lập với hiện thực của class cha, đây là một điều tốt, xét về các mối lo ngại information-hiding.
+Dùng cách tiếp cận thứ nhất<a id="_idIndexMarker587"></a>, chúng ta đã giữ một biến structure làm trường đầu tiên trong attribute structure của con. Giờ, dùng cách tiếp cận thứ hai, chúng ta sẽ giữ một pointer tới biến structure của cha. Bằng cách này, class con có thể độc lập với bản triển khai của class cha, đây là một điều tốt, xét về các mối lo ngại information-hiding.
 
 Chúng ta được một số ưu điểm, và mất một số khi chọn cách tiếp cận thứ hai. Sau khi minh họa *ví dụ 8.3*, chúng ta sẽ tiến hành so sánh giữa hai cách tiếp cận, và bạn sẽ thấy ưu điểm và nhược điểm của việc dùng mỗi kỹ thuật này.
 
-*Ví dụ 8.3*, dưới đây, rất giống *ví dụ 8.2*, đặc biệt là về output và kết quả cuối cùng. Tuy nhiên, khác biệt chính là trong ví dụ này, class `Student` chỉ dựa vào public interface của class `Person`, chứ không dựa vào định nghĩa private của nó. Điều này rất tốt vì nó tách rời các class và cho phép chúng ta dễ dàng thay đổi hiện thực của class cha mà không phải thay đổi hiện thực của class con.
+*Ví dụ 8.3*, dưới đây, rất giống *ví dụ 8.2*, đặc biệt là về output và kết quả cuối cùng. Tuy nhiên, khác biệt chính là trong ví dụ này, class `Student` chỉ dựa vào public interface của class `Person`, chứ không dựa vào định nghĩa private của nó. Điều này rất tốt vì nó tách rời các class và cho phép chúng ta dễ dàng thay đổi bản triển khai của class cha mà không phải thay đổi bản triển khai của class con.
 
 Trong ví dụ trước, class `Student` không vi phạm nghiêm ngặt các nguyên tắc information-hiding, nhưng nó đã có thể làm điều đó vì nó có quyền truy cập định nghĩa thực sự của `person_t` và các trường của nó. Kết quả là, nó có thể đọc hay sửa đổi các trường mà không dùng các behavior function của `Person`.
 
@@ -419,7 +419,7 @@ unsigned int student_get_passed_credits(struct student_t*);
 
 Vì những lý do bạn sẽ <a id="_idIndexMarker589"></a>nhận ra ngay sau đây, class `Student` phải lặp lại mọi behavior function được khai báo trong class `Person`. Đó là do thực tế rằng chúng ta không còn có thể cast một pointer `student_t` sang một pointer `person_t`. Nói cách khác, upcasting không còn hoạt động đối với các pointer `Student` và `Person`.
 
-Dù public interface của class `Person` không thay đổi so với *ví dụ 8.2*, hiện thực của nó đã thay đổi. Code box sau minh họa hiện thực của class `Person` trong *ví dụ 8.3*:
+Dù public interface của class `Person` không thay đổi so với *ví dụ 8.2*, bản triển khai của nó đã thay đổi. Code box sau minh họa bản triển khai của class `Person` trong *ví dụ 8.3*:
 
 ```
 #include <stdlib.h>
@@ -459,11 +459,11 @@ unsigned int person_get_birth_year(person_t* person) {
 }
 ```
 
-*Code Box 8-12 [ExtremeC_examples_chapter8_3_person.c]: Hiện thực mới của class Person*
+*Code Box 8-12 [ExtremeC_examples_chapter8_3_person.c]: Bản triển khai mới của class Person*
 
-Như bạn thấy, định nghĩa<a id="_idIndexMarker590"></a> private của `person_t` được đặt bên trong source file và chúng ta không còn dùng private header nữa. Điều này có nghĩa là chúng ta sẽ hoàn toàn không chia sẻ định nghĩa với các class khác như class `Student`. Chúng ta muốn thực hiện một encapsulation hoàn chỉnh cho class `Person` và che giấu mọi chi tiết hiện thực của nó.
+Như bạn thấy, định nghĩa<a id="_idIndexMarker590"></a> private của `person_t` được đặt bên trong source file và chúng ta không còn dùng private header nữa. Điều này có nghĩa là chúng ta sẽ hoàn toàn không chia sẻ định nghĩa với các class khác như class `Student`. Chúng ta muốn thực hiện một encapsulation hoàn chỉnh cho class `Person` và che giấu mọi chi tiết triển khai của nó.
 
-Sau đây là hiện thực private của class `Student`:
+Sau đây là bản triển khai private của class `Student`:
 
 ```
 #include <stdlib.h>
@@ -529,9 +529,9 @@ unsigned int student_get_passed_credits(student_t* student) {
 }
 ```
 
-*Code Box 8-13 [ExtremeC_examples_chapter8_3_student.c]: Hiện thực mới của class Student*
+*Code Box 8-13 [ExtremeC_examples_chapter8_3_student.c]: Bản triển khai mới của class Student*
 
-Như đã minh họa trong code box trên, chúng ta đã dùng public interface của class `Person` bằng cách include header file của nó. Ngoài ra, trong định nghĩa của `student_t`, chúng ta đã thêm một trường pointer, trỏ tới object `Person` cha. Điều này hẳn nhắc bạn nhớ về hiện thực của một quan hệ composition được thực hiện trong chương trước.
+Như đã minh họa trong code box trên, chúng ta đã dùng public interface của class `Person` bằng cách include header file của nó. Ngoài ra, trong định nghĩa của `student_t`, chúng ta đã thêm một trường pointer, trỏ tới object `Person` cha. Điều này hẳn nhắc bạn nhớ về bản triển khai của một quan hệ composition được thực hiện trong chương trước.
 
 Lưu ý rằng không cần<a id="_idIndexMarker591"></a> trường pointer này là mục đầu tiên trong attribute structure. Điều này trái ngược với những gì chúng ta đã thấy trong cách tiếp cận thứ nhất. Các pointer thuộc kiểu `student_t` và `person_t` không còn có thể thay thế cho nhau, và chúng đang trỏ tới các address khác nhau trong memory vốn không nhất thiết nằm kề nhau. Điều này một lần nữa trái ngược với những gì chúng ta đã làm trong cách tiếp cận trước.
 
@@ -594,23 +594,23 @@ $
 
 *Shell Box 8-3: Build và chạy ví dụ 8.3*
 
-Trong phần sau, chúng ta sẽ so sánh các cách tiếp cận đã nêu để hiện thực một quan hệ inheritance trong C.
+Trong phần sau, chúng ta sẽ so sánh các cách tiếp cận đã nêu để triển khai một quan hệ inheritance trong C.
 
 <a id="_idParaDest-126"></a>
 
 #### So sánh hai cách tiếp cận
 
-Giờ bạn đã thấy hai<a id="_idIndexMarker594"></a> cách tiếp cận khác nhau mà chúng ta có thể chọn để hiện thực inheritance trong C, chúng ta có thể so sánh chúng. Các gạch đầu dòng sau nêu ra những điểm tương đồng và khác biệt giữa hai cách tiếp cận:
+Giờ bạn đã thấy hai<a id="_idIndexMarker594"></a> cách tiếp cận khác nhau mà chúng ta có thể chọn để triển khai inheritance trong C, chúng ta có thể so sánh chúng. Các gạch đầu dòng sau nêu ra những điểm tương đồng và khác biệt giữa hai cách tiếp cận:
 
 - Cả hai cách tiếp cận về bản chất đều thể hiện các quan hệ composition.
-- Cách tiếp cận thứ nhất giữ một biến structure trong attribute structure của con và dựa vào việc có quyền truy cập hiện thực private của class cha. Tuy nhiên, cách tiếp cận thứ hai giữ một structure pointer từ incomplete type của attribute structure của cha, và do đó, nó không dựa vào hiện thực private của class cha.
-- Trong cách tiếp cận thứ nhất, các kiểu cha và con phụ thuộc chặt chẽ vào nhau. Trong cách tiếp cận thứ hai, các class độc lập với nhau, và mọi thứ bên trong hiện thực của cha đều được che giấu khỏi con.
-- Trong cách tiếp cận thứ nhất, bạn chỉ có thể có một cha. Nói cách khác, nó là một cách để hiện thực *single inheritance* trong C. Tuy nhiên, trong cách tiếp cận thứ hai, bạn có thể có bao nhiêu cha tùy thích, qua đó minh họa khái niệm *multiple inheritance*.
+- Cách tiếp cận thứ nhất giữ một biến structure trong attribute structure của con và dựa vào việc có quyền truy cập bản triển khai private của class cha. Tuy nhiên, cách tiếp cận thứ hai giữ một structure pointer từ incomplete type của attribute structure của cha, và do đó, nó không dựa vào bản triển khai private của class cha.
+- Trong cách tiếp cận thứ nhất, các kiểu cha và con phụ thuộc chặt chẽ vào nhau. Trong cách tiếp cận thứ hai, các class độc lập với nhau, và mọi thứ bên trong bản triển khai của cha đều được che giấu khỏi con.
+- Trong cách tiếp cận thứ nhất, bạn chỉ có thể có một cha. Nói cách khác, nó là một cách để triển khai *single inheritance* trong C. Tuy nhiên, trong cách tiếp cận thứ hai, bạn có thể có bao nhiêu cha tùy thích, qua đó minh họa khái niệm *multiple inheritance*.
 - Trong cách tiếp cận thứ nhất, biến structure của cha phải là trường đầu tiên trong attribute structure của class con, nhưng trong cách tiếp cận thứ hai, các pointer tới object cha có thể được đặt ở bất cứ đâu trong structure.
 - Trong cách tiếp cận thứ nhất, không có hai object cha và con riêng biệt. Object cha được bao gồm trong object con, và một pointer tới object con thực ra là một pointer tới object cha.
 - Trong cách tiếp cận thứ nhất, chúng ta <a id="_idIndexMarker595"></a>có thể dùng các behavior function của class cha, nhưng trong cách tiếp cận thứ hai, chúng ta cần chuyển tiếp các behavior function của cha thông qua các behavior function mới trong class con.
 
-Cho đến giờ, chúng ta chỉ nói về bản thân inheritance và chưa đi qua các cách dùng của nó. Một trong những cách dùng quan trọng nhất của inheritance là để có *polymorphism* trong object model của bạn. Trong phần sau, chúng ta sẽ nói về polymorphism và cách nó có thể được hiện thực trong C.
+Cho đến giờ, chúng ta chỉ nói về bản thân inheritance và chưa đi qua các cách dùng của nó. Một trong những cách dùng quan trọng nhất của inheritance là để có *polymorphism* trong object model của bạn. Trong phần sau, chúng ta sẽ nói về polymorphism và cách nó có thể được triển khai trong C.
 
 <a id="_idParaDest-127"></a>
 
@@ -618,7 +618,7 @@ Cho đến giờ, chúng ta chỉ nói về bản thân inheritance và chưa đ
 
 Polymorphism <a id="_idIndexMarker596"></a>thực ra không phải là một quan hệ giữa hai class. Nó chủ yếu là một kỹ thuật để giữ cùng một đoạn code trong khi có các behavior khác nhau. Nó cho phép chúng ta mở rộng code hay thêm chức năng mà không phải biên dịch lại toàn bộ code base.
 
-Trong phần này, chúng ta cố gắng trình bày polymorphism là gì và làm thế nào chúng ta có thể có nó trong C. Điều này cũng cho chúng ta một cái nhìn tốt hơn về cách các ngôn ngữ lập trình hiện đại như C++ hiện thực polymorphism. Chúng ta sẽ bắt đầu bằng việc định nghĩa polymorphism.
+Trong phần này, chúng ta cố gắng trình bày polymorphism là gì và làm thế nào chúng ta có thể có nó trong C. Điều này cũng cho chúng ta một cái nhìn tốt hơn về cách các ngôn ngữ lập trình hiện đại như C++ triển khai polymorphism. Chúng ta sẽ bắt đầu bằng việc định nghĩa polymorphism.
 
 <a id="_idParaDest-128"></a>
 
@@ -626,7 +626,7 @@ Trong phần này, chúng ta cố gắng trình bày polymorphism là gì và l�
 
 Polymorphism <a id="_idIndexMarker597"></a>đơn giản có nghĩa là có các behavior khác nhau chỉ bằng cách dùng cùng một public interface (hay tập behavior function).
 
-Giả sử rằng chúng ta có hai class, `Cat` và `Duck`, và mỗi class có một behavior function, `sound`, khiến chúng in ra tiếng kêu đặc trưng của mình. Giải thích polymorphism không phải là một việc dễ làm và chúng ta sẽ cố gắng chọn một cách tiếp cận top-down để giải thích nó. Trước tiên, chúng tôi sẽ cố gắng cho bạn một ý niệm về việc code polymorphic trông như thế nào và hoạt động ra sao, và sau đó chúng ta sẽ đi sâu vào việc hiện thực nó trong C. Một khi bạn nắm được ý tưởng, sẽ dễ dàng hơn để chuyển sang hiện thực. Trong các code box sau, trước tiên chúng ta tạo một số object, và sau đó chúng ta xem chúng ta sẽ kỳ vọng một hàm polymorphic hoạt động như thế nào nếu có polymorphism. Trước tiên, hãy tạo ba object. Chúng ta đã giả định rằng cả hai class `Cat` và `Duck` đều là con của class `Animal`:
+Giả sử rằng chúng ta có hai class, `Cat` và `Duck`, và mỗi class có một behavior function, `sound`, khiến chúng in ra tiếng kêu đặc trưng của mình. Giải thích polymorphism không phải là một việc dễ làm và chúng ta sẽ cố gắng chọn một cách tiếp cận top-down để giải thích nó. Trước tiên, chúng tôi sẽ cố gắng cho bạn một ý niệm về việc code polymorphic trông như thế nào và hoạt động ra sao, và sau đó chúng ta sẽ đi sâu vào việc triển khai nó trong C. Một khi bạn nắm được ý tưởng, sẽ dễ dàng hơn để chuyển sang phần triển khai. Trong các code box sau, trước tiên chúng ta tạo một số object, và sau đó chúng ta xem chúng ta sẽ kỳ vọng một hàm polymorphic hoạt động như thế nào nếu có polymorphism. Trước tiên, hãy tạo ba object. Chúng ta đã giả định rằng cả hai class `Cat` và `Duck` đều là con của class `Animal`:
 
 ```
 struct animal_t* animal = animal_malloc();
@@ -687,9 +687,9 @@ Như bạn thấy trong *Code Box 8-17*, chúng ta đã dùng cùng một hàm, 
 >
 > Xin đừng đi tiếp nếu bạn gặp khó khăn trong việc hiểu code trên; nếu vậy, hãy ôn lại phần trước.
 
-Code polymorphic trên ngụ ý rằng phải có một quan hệ inheritance giữa các class `Cat` và `Duck` với một class thứ ba, `Animal`, vì chúng ta muốn có thể cast các pointer `duck_t` và `cat_t` sang một pointer `animal_t`. Điều này cũng ngụ ý một điều khác: chúng ta phải dùng cách tiếp cận thứ nhất để hiện thực inheritance trong C nhằm tận dụng cơ chế polymorphism mà chúng ta đã giới thiệu trước đây.
+Code polymorphic trên ngụ ý rằng phải có một quan hệ inheritance giữa các class `Cat` và `Duck` với một class thứ ba, `Animal`, vì chúng ta muốn có thể cast các pointer `duck_t` và `cat_t` sang một pointer `animal_t`. Điều này cũng ngụ ý một điều khác: chúng ta phải dùng cách tiếp cận thứ nhất để triển khai inheritance trong C nhằm tận dụng cơ chế polymorphism mà chúng ta đã giới thiệu trước đây.
 
-Bạn có thể nhớ lại rằng trong cách tiếp cận thứ nhất để hiện thực inheritance, class con có quyền truy cập hiện thực private của class cha, và ở đây một biến structure từ kiểu `animal_t` phải được đặt làm trường đầu tiên trong định nghĩa của các attribute structure `duck_t` và `cat_t`. Code sau cho thấy quan hệ giữa ba class này:
+Bạn có thể nhớ lại rằng trong cách tiếp cận thứ nhất để triển khai inheritance, class con có quyền truy cập phần triển khai private của class cha, và ở đây một biến structure từ kiểu `animal_t` phải được đặt làm trường đầu tiên trong định nghĩa của các attribute structure `duck_t` và `cat_t`. Code sau cho thấy quan hệ giữa ba class này:
 
 ```
 typedef struct {
@@ -740,13 +740,13 @@ Vậy, cơ chế bên dưới cho phép các behavior function polymorphic là g
 
 ### Tại sao chúng ta cần polymorphism?
 
-Trước khi nói<a id="_idIndexMarker601"></a> thêm về cách mà chúng ta sẽ hiện thực polymorphism trong C, chúng ta nên dành chút thời gian nói về những lý do đằng sau nhu cầu về polymorphism. Lý do chính tại sao cần polymorphism là chúng ta muốn giữ một mẩu code "nguyên trạng" (as is), ngay cả khi dùng nó với các subtype khác nhau của một kiểu base. Bạn sẽ thấy một số minh họa cho điều này ngay sau đây trong các ví dụ.
+Trước khi nói<a id="_idIndexMarker601"></a> thêm về cách mà chúng ta sẽ triển khai polymorphism trong C, chúng ta nên dành chút thời gian nói về những lý do đằng sau nhu cầu về polymorphism. Lý do chính tại sao cần polymorphism là chúng ta muốn giữ một mẩu code "nguyên trạng" (as is), ngay cả khi dùng nó với các subtype khác nhau của một kiểu base. Bạn sẽ thấy một số minh họa cho điều này ngay sau đây trong các ví dụ.
 
 Chúng ta không muốn sửa đổi logic hiện tại quá thường xuyên khi chúng ta thêm các subtype mới vào hệ thống, hay khi behavior của một subtype đang bị thay đổi. Việc không có thay đổi nào khi một tính năng mới được thêm vào là không thực tế – sẽ luôn có một số thay đổi – nhưng dùng polymorphism, chúng ta có thể giảm đáng kể số lượng thay đổi cần thiết.
 
-Một động lực khác để có polymorphism là do khái niệm *abstraction*. Khi chúng ta có các kiểu (hay class) trừu tượng, chúng thường có một số behavior function mơ hồ hay chưa được hiện thực cần được *override* trong các class con và polymorphism là cách then chốt để làm điều này.
+Một động lực khác để có polymorphism là do khái niệm *abstraction*. Khi chúng ta có các kiểu (hay class) trừu tượng, chúng thường có một số behavior function mơ hồ hay chưa được triển khai cần được *override* trong các class con và polymorphism là cách then chốt để làm điều này.
 
-Vì chúng ta muốn dùng các kiểu trừu tượng để viết logic của mình, chúng ta cần một cách để gọi đúng hiện thực khi làm việc với pointer của các kiểu rất trừu tượng. Đây là một chỗ khác mà polymorphism xuất hiện. Bất kể ngôn ngữ là gì, chúng ta cần một cách để có các behavior polymorphic, nếu không chi phí bảo trì một dự án lớn có thể tăng nhanh, chẳng hạn khi chúng ta sắp thêm một subtype mới vào code.
+Vì chúng ta muốn dùng các kiểu trừu tượng để viết logic của mình, chúng ta cần một cách để gọi đúng bản triển khai khi làm việc với pointer của các kiểu rất trừu tượng. Đây là một chỗ khác mà polymorphism xuất hiện. Bất kể ngôn ngữ là gì, chúng ta cần một cách để có các behavior polymorphic, nếu không chi phí bảo trì một dự án lớn có thể tăng nhanh, chẳng hạn khi chúng ta sắp thêm một subtype mới vào code.
 
 Giờ chúng ta đã xác lập tầm quan trọng của polymorphism, đã đến lúc giải thích làm thế nào chúng ta có thể có nó trong C.
 
@@ -754,9 +754,9 @@ Giờ chúng ta đã xác lập tầm quan trọng của polymorphism, đã đ�
 
 ### Làm thế nào để có behavior polymorphic trong C
 
-Nếu chúng ta muốn có<a id="_idIndexMarker602"></a> polymorphism trong C, chúng ta cần dùng cách tiếp cận thứ nhất mà chúng ta đã khám phá để hiện thực inheritance trong C. Để đạt được behavior polymorphic, chúng ta có thể tận dụng *function pointer*. Tuy nhiên, lần này, những function pointer này cần được giữ như một số trường trong attribute structure. Hãy hiện thực ví dụ tiếng kêu động vật để minh họa điều này.
+Nếu chúng ta muốn có<a id="_idIndexMarker602"></a> polymorphism trong C, chúng ta cần dùng cách tiếp cận thứ nhất mà chúng ta đã khám phá để triển khai inheritance trong C. Để đạt được behavior polymorphic, chúng ta có thể tận dụng *function pointer*. Tuy nhiên, lần này, những function pointer này cần được giữ như một số trường trong attribute structure. Hãy triển khai ví dụ tiếng kêu động vật để minh họa điều này.
 
-Chúng ta có ba class, `Animal`, `Cat` và `Duck`, và `Cat` và `Duck` là các subtype của `Animal`. Mỗi class có một header và một source. Class `Animal` có thêm một private header file chứa định nghĩa thực sự của attribute structure của nó. Private header này là cần thiết vì chúng ta đang chọn cách tiếp cận thứ nhất để hiện thực inheritance. Private header sẽ được dùng bởi các class `Cat` và `Duck`.
+Chúng ta có ba class, `Animal`, `Cat` và `Duck`, và `Cat` và `Duck` là các subtype của `Animal`. Mỗi class có một header và một source. Class `Animal` có thêm một private header file chứa định nghĩa thực sự của attribute structure của nó. Private header này là cần thiết vì chúng ta đang chọn cách tiếp cận thứ nhất để triển khai inheritance. Private header sẽ được dùng bởi các class `Cat` và `Duck`.
 
 Code box sau thể hiện public interface của class `Animal`:
 
@@ -854,7 +854,7 @@ Và bước cuối cùng, bên trong behavior function `animal_sound`, chúng ta
 
 Dùng thiết lập này, nếu trường `sound_func` đang trỏ tới một hàm khác, thì hàm đó sẽ được gọi nếu `animal_sound` được gọi. Đó là mánh mà chúng ta sẽ dùng trong các class `Cat` và `Duck` để override định nghĩa mặc định của behavior `sound`.
 
-Giờ, đã đến lúc <a id="_idIndexMarker606"></a>trình bày các class `Cat` và `Duck`. Các code box sau sẽ thể hiện public interface và hiện thực private của class `Cat`. Trước tiên, chúng tôi thể hiện public interface của class `Cat`:
+Giờ, đã đến lúc <a id="_idIndexMarker606"></a>trình bày các class `Cat` và `Duck`. Các code box sau sẽ thể hiện public interface và bản triển khai private của class `Cat`. Trước tiên, chúng tôi thể hiện public interface của class `Cat`:
 
 ```
 #ifndef EXTREME_C_EXAMPLES_CHAPTER_8_4_CAT_H
@@ -909,7 +909,7 @@ void cat_dtor(cat_t* cat) {
 }
 ```
 
-*Code Box 8-24 [ExtremeC_examples_chapter8_4_cat.c]: Hiện thực private của class Cat*
+*Code Box 8-24 [ExtremeC_examples_chapter8_4_cat.c]: Bản triển khai private của class Cat*
 
 Như bạn thấy trong <a id="_idIndexMarker607"></a>code box trước, chúng ta đã định nghĩa một hàm mới cho tiếng kêu của mèo, `__cat_sound`. Sau đó bên trong constructor, chúng ta làm cho pointer `sound_func` trỏ tới hàm này.
 
@@ -968,7 +968,7 @@ void duck_dtor(duck_t* duck) {
 }
 ```
 
-*Code Box 8-26 [ExtremeC_examples_chapter8_4_duck.c]: Hiện thực private của class Duck*
+*Code Box 8-26 [ExtremeC_examples_chapter8_4_duck.c]: Bản triển khai private của class Duck*
 
 Như bạn có thể thấy, <a id="_idIndexMarker609"></a>kỹ thuật này đã được dùng để override định nghĩa mặc định của behavior `sound`. Một behavior function private mới, `__duck_sound`, đã được định nghĩa để tạo ra tiếng kêu duck-specific (đặc trưng của vịt), và pointer `sound_func` được cập nhật để trỏ tới hàm này. Về cơ bản đây là cách polymorphism được đưa vào C++. Chúng ta sẽ nói thêm về điều này trong chương tiếp theo.
 
@@ -1004,7 +1004,7 @@ int main(int argc, char** argv) {
 
 *Code Box 8-27 [ExtremeC_examples_chapter8_4_main.c]: Kịch bản chính của ví dụ 8.4*
 
-Như bạn thấy trong code box trên, chúng ta chỉ dùng public interface của các class `Animal`, `Cat` và `Duck`. Vì vậy, hàm `main` không biết gì về hiện thực bên trong của <a id="_idIndexMarker610"></a>các class. Việc gọi hàm `animal_sound` với việc truyền các pointer khác nhau minh họa cách một behavior polymorphic nên hoạt động. Hãy xem output của ví dụ.
+Như bạn thấy trong code box trên, chúng ta chỉ dùng public interface của các class `Animal`, `Cat` và `Duck`. Vì vậy, hàm `main` không biết gì về bản triển khai bên trong của <a id="_idIndexMarker610"></a>các class. Việc gọi hàm `animal_sound` với việc truyền các pointer khác nhau minh họa cách một behavior polymorphic nên hoạt động. Hãy xem output của ví dụ.
 
 Shell box sau cho thấy cách biên dịch và chạy *ví dụ 8.4*:
 
@@ -1025,7 +1025,7 @@ $
 
 Như bạn có thể thấy trong *ví dụ 8.4*, trong các ngôn ngữ lập trình class-based, các behavior function mà chúng ta muốn là polymorphic cần được chăm sóc đặc biệt và nên được đối xử khác đi. Nếu không, một behavior function đơn giản không có cơ chế bên dưới mà chúng ta đã thảo luận trong *ví dụ 8.4* không thể là polymorphic. Đó là lý do tại sao chúng ta có một cái tên đặc biệt cho những behavior function này, và tại sao chúng ta dùng các từ khóa cụ thể để đánh dấu một hàm là polymorphic trong một ngôn ngữ như C++. Những hàm này được gọi là các hàm *virtual*. Hàm virtual là các behavior function có thể bị override bởi các class con. Hàm virtual cần được compiler theo dõi, và các pointer phù hợp nên được đặt trong các object tương ứng để trỏ tới các định nghĩa thực sự khi bị override. Những pointer này được dùng vào lúc runtime để thực thi đúng phiên bản của hàm.
 
-Trong chương tiếp theo, chúng ta sẽ thấy cách C++ xử lý các quan hệ object-oriented giữa các class. Ngoài ra, chúng ta sẽ tìm hiểu cách C++ hiện thực polymorphism. Chúng ta cũng sẽ thảo luận về *Abstraction*, vốn là một kết quả trực tiếp của polymorphism.
+Trong chương tiếp theo, chúng ta sẽ thấy cách C++ xử lý các quan hệ object-oriented giữa các class. Ngoài ra, chúng ta sẽ tìm hiểu cách C++ triển khai polymorphism. Chúng ta cũng sẽ thảo luận về *Abstraction*, vốn là một kết quả trực tiếp của polymorphism.
 
 <a id="_idParaDest-131"></a>
 
@@ -1033,7 +1033,7 @@ Trong chương tiếp theo, chúng ta sẽ thấy cách C++ xử lý các quan h
 
 Trong chương này, chúng ta đã tiếp tục khám phá các chủ đề trong OOP, tiếp nối từ nơi chúng ta đã dừng lại trong chương trước. Các chủ đề sau đã được thảo luận trong chương này:
 
-- Chúng ta đã giải thích inheritance hoạt động như thế nào và xem xét hai cách tiếp cận mà chúng ta có thể dùng để hiện thực inheritance trong C.
+- Chúng ta đã giải thích inheritance hoạt động như thế nào và xem xét hai cách tiếp cận mà chúng ta có thể dùng để triển khai inheritance trong C.
 - Cách tiếp cận thứ nhất cho phép truy cập trực tiếp mọi attribute private của class cha, nhưng cách tiếp cận thứ hai có một cách làm thận trọng hơn, che giấu các attribute private của class cha.
 - Chúng ta đã so sánh các cách tiếp cận này, và chúng ta đã thấy rằng mỗi cách có thể phù hợp trong một số trường hợp sử dụng.
 - Polymorphism là chủ đề tiếp theo mà chúng ta đã khám phá. Nói đơn giản, nó cho phép chúng ta có các phiên bản khác nhau của cùng một behavior và gọi đúng behavior bằng public API của một supertype trừu tượng.

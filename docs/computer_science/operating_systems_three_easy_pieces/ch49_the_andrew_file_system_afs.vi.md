@@ -176,7 +176,13 @@ Giống như khi Berkeley FFS ra đời (bổ sung symbolic link và nhiều tí
 
 > BÊN LỀ: TẦM QUAN TRỌNG CỦA WORKLOAD
 >
-> Một thách thức khi đánh giá hệ thống bất kỳ là chọn workload. Vì hệ thống máy tính được dùng theo rất nhiều cách, có vô số workload để lựa chọn. Nhà thiết kế storage system nên quyết định workload nào quan trọng như thế nào để có quyết định thiết kế hợp lý? Các nhà thiết kế AFS, dựa trên kinh nghiệm đo cách file system được sử dụng, đưa ra một số giả định về workload; cụ thể, họ giả sử phần lớn file không thường xuyên được chia sẻ và được truy cập tuần tự toàn bộ. Với những giả định đó, thiết kế AFS hoàn toàn hợp lý. Tuy nhiên, chúng không phải lúc nào cũng đúng. Chẳng hạn, hình dung ứng dụng định kỳ nối thêm thông tin vào log. Những lần ghi log nhỏ này thêm ít data vào file lớn hiện có, rất bất lợi với AFS. Còn nhiều workload khó khác, như cập nhật ngẫu nhiên trong transaction database. Một nguồn thông tin về các loại workload phổ biến là những nghiên cứu đã được thực hiện. Xem bất kỳ nghiên cứu nào sau đây để có ví dụ tốt về phân tích workload [B+91, H+11, R+00, V99], bao gồm bài nhìn lại AFS [H+88].
+> Một thách thức khi đánh giá hệ thống bất kỳ là chọn workload. Vì hệ thống máy tính được dùng theo rất nhiều cách, có vô số workload để lựa chọn. Nhà thiết kế storage system nên quyết định workload nào quan trọng như thế nào để có quyết định thiết kế hợp lý?
+>
+> Các nhà thiết kế AFS, dựa trên kinh nghiệm đo cách file system được sử dụng, đưa ra một số giả định về workload; cụ thể, họ giả sử phần lớn file không thường xuyên được chia sẻ và được truy cập tuần tự toàn bộ. Với những giả định đó, thiết kế AFS hoàn toàn hợp lý.
+>
+> Tuy nhiên, chúng không phải lúc nào cũng đúng. Chẳng hạn, hình dung ứng dụng định kỳ nối thêm thông tin vào log. Những lần ghi log nhỏ này thêm ít data vào file lớn hiện có, rất bất lợi với AFS. Còn nhiều workload khó khác, như cập nhật ngẫu nhiên trong transaction database.
+>
+> Một nguồn thông tin về các loại workload phổ biến là những nghiên cứu đã được thực hiện. Xem bất kỳ nghiên cứu nào sau đây để có ví dụ tốt về phân tích workload [B+91, H+11, R+00, V99], bao gồm bài nhìn lại AFS [H+88].
 
 AFS còn coi trọng security và tích hợp cơ chế authenticate user, bảo đảm có thể giữ riêng tư một tập file nếu user muốn. Ngược lại, NFS chỉ hỗ trợ security khá sơ khai trong nhiều năm.
 

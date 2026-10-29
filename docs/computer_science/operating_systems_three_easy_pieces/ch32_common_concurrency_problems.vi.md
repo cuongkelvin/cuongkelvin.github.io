@@ -201,7 +201,9 @@ Cả total và partial ordering đòi thiết kế chiến lược locking cẩn
 
 > MẸO: CƯỠNG CHẾ LOCK ORDERING BẰNG LOCK ADDRESS
 >
-> Đôi khi hàm phải lấy hai (hoặc nhiều) lock; phải cẩn thận kẻo deadlock. Tưởng tượng hàm gọi: do_something(mutex_t *m1, mutex_t *m2). Nếu luôn lấy m1 trước m2 (hoặc luôn m2 trước m1), có thể deadlock vì thread này gọi do_something(L1, L2), thread kia gọi do_something(L2, L1). Để tránh, lập trình viên khéo dùng address lock sắp acquire. Acquire theo address high-to-low hoặc low-to-high bảo đảm do_something() luôn acquire cùng thứ tự, bất kể thứ tự truyền vào. Code như sau:
+> Đôi khi hàm phải lấy hai (hoặc nhiều) lock; phải cẩn thận kẻo deadlock. Tưởng tượng hàm gọi: do_something(mutex_t *m1, mutex_t *m2). Nếu luôn lấy m1 trước m2 (hoặc luôn m2 trước m1), có thể deadlock vì thread này gọi do_something(L1, L2), thread kia gọi do_something(L2, L1).
+>
+> Để tránh, lập trình viên khéo dùng address lock sắp acquire. Acquire theo address high-to-low hoặc low-to-high bảo đảm do_something() luôn acquire cùng thứ tự, bất kể thứ tự truyền vào. Code như sau:
 >
 > ```
 > if (m1 > m2) {  // grab locks in high-to-low address order

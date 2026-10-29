@@ -52,11 +52,11 @@ module sillyfunction(input  logic a, b, c,
 endmodule
 ```
 
-Module SystemVerilog bắt đầu bằng tên và danh sách input/output. Câu `assign` mô tả combinational logic. `~` chỉ NOT, `&` chỉ AND, `|` chỉ OR.
+Một module SystemVerilog bắt đầu bằng tên module cùng danh sách các input và output. Câu lệnh `assign` mô tả combinational logic. `~` biểu thị NOT, `&` biểu thị AND và `|` biểu thị OR.
 
 Signal `logic` như input/output là Boolean variable (0 hoặc 1). Chúng cũng có thể floating và undefined như Mục 4.2.8.
 
-Type `logic` xuất hiện trong SystemVerilog, thay `reg` vốn gây nhầm lẫn dai dẳng trong Verilog. Nên dùng `logic` mọi nơi trừ signal nhiều driver. Signal nhiều driver gọi net, sẽ giải thích Mục 4.7.
+Kiểu `logic` được giới thiệu trong SystemVerilog. Nó thay thế kiểu `reg`, vốn là nguồn gây nhầm lẫn dai dẳng trong Verilog. Nên sử dụng `logic` ở mọi nơi, ngoại trừ các signal có nhiều driver. Các signal có nhiều driver được gọi là net và sẽ được giải thích trong Mục 4.7.
 
 VHDL
 
@@ -76,7 +76,7 @@ end;
 
 Code VHDL có ba phần: mệnh đề dùng `library`, declaration `entity` và phần thân `architecture`. Mệnh đề `library` `use` sẽ bàn Mục 4.7.2. Declaration `entity` liệt kê tên module, input/output. Thân `architecture` định nghĩa module làm gì.
 
-Signal VHDL như input/output phải có type declaration. Digital signal nên là `STD_LOGIC`. Signal `STD_LOGIC` nhận `'0'`, `'1'` cùng floating/undefined sẽ mô tả Mục 4.2.8. Type `STD_LOGIC` định nghĩa trong library `IEEE.STD_LOGIC_1164`, vì thế phải dùng library.
+Các signal VHDL, chẳng hạn input và output, phải có khai báo kiểu. Các digital signal nên được khai báo là kiểu `STD_LOGIC`. Các signal `STD_LOGIC` có thể nhận giá trị `'0'` hoặc `'1'`, cũng như các giá trị floating và chưa xác định sẽ được mô tả trong Mục 4.2.8. Kiểu `STD_LOGIC` được định nghĩa trong thư viện `IEEE.STD_LOGIC_1164`, vì vậy thư viện này phải được sử dụng.
 
 VHDL thiếu một thứ tự operation mặc định hợp lý giữa AND và OR, nên cần đặt ngoặc trong Boolean equation.
 
@@ -106,41 +106,41 @@ VHDL
 
 VHDL viết tắt VHSIC Hardware Description Language. VHSIC lại viết tắt chương trình Very High Speed Integrated Circuits của Bộ Quốc phòng Mỹ.
 
-Bộ Quốc phòng phát triển VHDL năm 1981 mô tả cấu trúc và chức năng hardware, bắt nguồn Ada. Ban đầu nhằm tài liệu hóa nhưng nhanh chóng dùng simulation/synthesis. IEEE chuẩn hóa năm 1987 rồi cập nhật nhiều lần. Chương dựa bản sửa 2008 (IEEE STD 1076-2008), đơn giản hóa nhiều mặt. Để dùng VHDL 2008 trong ModelSim, có thể cần đặt VHDL93 = 2008 trong modelsim.ini. File thường kết thúc `.vhd`.
+VHDL ban đầu được Bộ Quốc phòng phát triển vào năm 1981 để mô tả cấu trúc và chức năng của hardware. Ngôn ngữ này bắt nguồn từ ngôn ngữ lập trình Ada. Ban đầu, VHDL được hình dung là công cụ để lập tài liệu, nhưng nhanh chóng được sử dụng cho simulation và synthesis. IEEE đã chuẩn hóa VHDL vào năm 1987 và cập nhật tiêu chuẩn nhiều lần kể từ đó. Chương này dựa trên bản sửa đổi năm 2008 của tiêu chuẩn VHDL (IEEE STD 1076-2008), giúp đơn giản hóa ngôn ngữ theo nhiều cách. Để sử dụng VHDL 2008 trong ModelSim, bạn có thể cần đặt VHDL93 = 2008 trong file cấu hình modelsim.ini. Tên file VHDL thường kết thúc bằng `.vhd`.
 
 ![fig4_01](images/ch04/fig4_01.png)
 
 Hình 4.1 Waveform simulation
 
-Hình 4.1 là waveform simulation[^2] module `sillyfunction` trước, chứng minh hoạt động đúng. `y` TRUE khi `a`, `b`, `c` là 000, 100 hoặc 101 như Boolean equation.
+Hình 4.1 trình bày các waveform từ simulation[^2] của module `sillyfunction` ở trên, cho thấy module hoạt động chính xác. `y` là TRUE khi `a`, `b` và `c` có giá trị 000, 100 hoặc 101, đúng như Boolean equation quy định.
 
 Synthesis
 
-Logic synthesis chuyển HDL code thành netlist mô tả hardware (logic gate và dây nối). Logic synthesizer có thể tối ưu giảm hardware cần. Netlist có thể là text file hoặc schematic giúp nhìn circuit. Hình 4.2 cho synthesis module `sillyfunction`.[^3] Chú ý ba AND gate three-input được đơn giản thành hai AND two-input, như tìm được bằng Boolean algebra trong Ví dụ 2.6.
+Logic synthesis chuyển code HDL thành một netlist mô tả hardware (ví dụ, các logic gate và dây nối giữa chúng). Logic synthesizer có thể thực hiện tối ưu hóa để giảm lượng hardware cần thiết. Netlist có thể là một file văn bản hoặc được vẽ dưới dạng schematic để giúp hình dung circuit. Hình 4.2 minh họa kết quả synthesis của module `sillyfunction`.[^3] Lưu ý cách ba gate AND three-input được đơn giản hóa thành hai gate AND two-input, như chúng ta đã tìm ra trong Ví dụ 2.6 bằng Boolean algebra.
 
-> Synthesis tool gắn nhãn từng gate. Hình 4.2 là un5\_y, un8\_y và y.
+> Synthesis tool gắn nhãn từng gate. Hình 4.2 là un5_y, un8_y và y.
 
-Mô tả circuit bằng HDL giống code trong ngôn ngữ lập trình. Tuy nhiên, phải nhớ code nhằm biểu diễn hardware. SystemVerilog và VHDL là ngôn ngữ phong phú với nhiều command; không phải command nào cũng synthesize thành hardware được. Ví dụ, command in kết quả lên màn hình trong simulation không chuyển thành hardware. Vì mối quan tâm chính là xây hardware, chúng ta nhấn mạnh synthesizable subset của ngôn ngữ. Cụ thể, chia code thành synthesizable module và testbench. Module mô tả hardware. Testbench chứa code áp input, kiểm output đúng không, và in chênh lệch giữa output kỳ vọng với thực tế. Code testbench chỉ nhằm simulation, không synthesize được.
+Mô tả circuit bằng HDL trông giống code trong một ngôn ngữ lập trình. Tuy nhiên, bạn phải nhớ rằng code này dùng để biểu diễn hardware. SystemVerilog và VHDL là những ngôn ngữ phong phú với nhiều câu lệnh. Không phải tất cả các câu lệnh này đều có thể được synthesize thành hardware. Ví dụ, câu lệnh in kết quả lên màn hình trong quá trình simulation không chuyển thành hardware. Vì mục tiêu chính của chúng ta là xây dựng hardware, chúng ta sẽ tập trung vào phần ngôn ngữ có thể synthesize được. Cụ thể, chúng ta sẽ chia code HDL thành các module có thể synthesize được và một testbench. Các module có thể synthesize được mô tả hardware. Testbench chứa code để đưa input vào một module, kiểm tra xem kết quả output có chính xác hay không và in ra những khác biệt giữa output mong đợi và output thực tế. Code của testbench chỉ dùng cho simulation và không thể được synthesize.
 
 ![fig4_02](images/ch04/fig4_02.png)
 
 Hình 4.2 Circuit đã synthesize
 
-Một trong những lỗi phổ biến nhất của người mới là coi HDL như chương trình máy tính thay vì cách viết gọn để mô tả digital hardware. Nếu không biết gần đúng HDL của mình phải synthesize thành hardware nào, có lẽ bạn sẽ không thích kết quả nhận được. Bạn có thể tạo hardware nhiều hơn cần thiết rất nhiều, hoặc viết code simulation đúng nhưng không triển khai thành hardware được. Thay vào đó, hãy suy nghĩ về hệ thống theo các khối combinational logic, register và finite state machine. Phác các khối trên giấy và chỉ cách nối trước khi bắt đầu viết code.
+Một trong những lỗi phổ biến nhất của người mới là coi HDL như chương trình máy tính thay vì cách viết gọn để mô tả digital hardware. Nếu không biết gần đúng HDL của mình phải synthesize thành hardware nào, có lẽ bạn sẽ không thích kết quả nhận được. Bạn có thể tạo hardware nhiều hơn cần thiết rất nhiều, hoặc viết code simulation đúng nhưng không triển khai thành hardware được. Thay vào đó, hãy suy nghĩ về hệ thống theo các khối combinational logic, register và finite state machine. Phác thảo các khối trên giấy và chỉ cách nối trước khi bắt đầu viết code.
 
 Theo kinh nghiệm chúng tôi, cách tốt nhất học HDL là qua ví dụ. HDL có các cách cụ thể mô tả từng lớp logic, gọi là idiom. Chương này dạy viết idiom đúng cho mỗi loại khối, rồi ghép chúng thành hệ thống hoạt động. Khi cần mô tả loại hardware cụ thể, tìm ví dụ tương tự và điều chỉnh theo mục đích. Chúng tôi không cố định nghĩa chặt chẽ toàn bộ syntax vì điều đó cực kỳ nhàm chán và thường khiến người học coi HDL là ngôn ngữ lập trình thay vì cách viết gọn hardware. Specification IEEE SystemVerilog/VHDL cùng nhiều sách khô khan nhưng toàn diện có đầy đủ chi tiết nếu bạn cần thêm về một chủ đề. (Xem phần Đọc thêm cuối sách.)
 
 ## 4.2 COMBINATIONAL LOGIC
 
-Nhớ rằng chúng ta tự giới hạn thiết kế synchronous sequential circuit gồm combinational logic và register. Output combinational logic chỉ tùy input hiện tại. Phần này mô tả viết behavioral model bằng HDL.
+Hãy nhớ rằng chúng ta tự giới hạn thiết kế ở các synchronous sequential circuit, gồm combinational logic và register. Các output của combinational logic chỉ phụ thuộc vào input hiện tại. Mục này mô tả cách viết behavioral model của combinational logic bằng HDL.
 
 ### 4.2.1 Bitwise operator
 
 Bitwise operator tác động signal single-bit hoặc bus nhiều bit. Ví dụ module `inv` trong Ví dụ HDL 4.2 mô tả bốn inverter nối bus 4-bit.
 
-Endianness bus hoàn toàn tùy ý. (Nguồn thuật ngữ ở hộp bên Mục 6.6.1.) Ở đây cũng không quan trọng vì dãy inverter không quan tâm thứ tự bit. Nó chỉ quan trọng với operator như cộng, tổng một cột carry sang cột tiếp. Thứ tự nào cũng được miễn nhất quán. Sách dùng little-endian, `[N − 1:0]` trong SystemVerilog, `(N − 1 downto 0)` trong VHDL cho bus N-bit.
+Endianness của một bus hoàn toàn do người thiết kế lựa chọn. (Xem hộp thông tin bên lề trong Mục 6.6.1 để biết nguồn gốc của thuật ngữ này.) Thực tế, endianness cũng không liên quan đến ví dụ này vì một dãy inverter không phụ thuộc vào thứ tự của các bit. Endianness chỉ quan trọng đối với các phép toán như phép cộng, trong đó tổng ở một cột có thể tạo carry sang cột tiếp theo. Cả hai thứ tự đều chấp nhận được, miễn là được sử dụng nhất quán. Chúng ta sẽ nhất quán sử dụng thứ tự little-endian, `[N − 1:0]` trong SystemVerilog và `(N − 1 downto 0)` trong VHDL, cho bus N-bit.
 
-Sau mỗi ví dụ code là schematic do Synplify Premier synthesis tool tạo từ SystemVerilog. Hình 4.3 cho module `inv` thành dãy bốn inverter, symbol nhãn `y[3:0]`. Dãy nối bus input/output 4-bit. VHDL cũng tạo hardware tương tự.
+Sau mỗi ví dụ code trong chương này là một schematic được công cụ synthesis Synplify Premier tạo ra từ code SystemVerilog. Hình 4.3 cho thấy module `inv` được synthesize thành một dãy bốn inverter, được biểu thị bằng ký hiệu inverter mang nhãn `y[3:0]`. Dãy inverter kết nối với các bus input và output 4-bit. Code VHDL sau khi được synthesize cũng tạo ra hardware tương tự.
 
 Module `gates` trong Ví dụ HDL 4.3 minh họa bitwise operation trên bus 4-bit cho logic function cơ bản khác.
 
@@ -156,7 +156,7 @@ module  inv(input  logic [3:0] a,
 endmodule
 ```
 
-`a[3:0]` biểu diễn bus 4-bit. Từ most significant tới least significant là `a[3]`, `a[2]`, `a[1]`, `a[0]`. Đây gọi little-endian vì least significant có số bit nhỏ nhất. Có thể gọi `a[4:1],` khi đó `a[4]` most significant; hoặc `a[0:3]`, thứ tự most đến least là `a[0]`, `a[1]`, `a[2]`, `a[3]`. Đó gọi big-endian.
+`a[3:0]` biểu diễn một bus 4-bit. Các bit, từ most significant đến least significant, là `a[3]`, `a[2]`, `a[1]` và `a[0]`. Đây được gọi là thứ tự little-endian, vì least significant bit có chỉ số bit nhỏ nhất. Chúng ta có thể đặt tên bus là `a[4:1],` khi đó `a[4]` sẽ là most significant bit. Hoặc có thể sử dụng `a[0:3]`, khi đó các bit, từ most significant đến least significant, sẽ là `a[0]`, `a[1]`, `a[2]` và `a[3]`. Đây được gọi là thứ tự big-endian.
 
 VHDL
 
@@ -172,7 +172,7 @@ begin
 end;
 ```
 
-VHDL dùng `STD_LOGIC_VECTOR` chỉ bus `STD_LOGIC`. `STD_LOGIC_VECTOR(3 downto 0)` là bus 4-bit. Most đến least significant là `a(3)`, `a(2)`, `a(1)`, `a(0)`. Đây là little-endian vì least significant có số nhỏ nhất. Có thể khai báo `STD_LOGIC_VECTOR(4 downto 1)`, bit 4 most significant; hoặc `STD_LOGIC_VECTOR(0 to 3)`, thứ tự là `a(0), a(1), a(2), and a(3)`. Đây gọi big-endian.
+VHDL sử dụng `STD_LOGIC_VECTOR` để biểu thị các bus gồm các bit `STD_LOGIC`. `STD_LOGIC_VECTOR(3 downto 0)` biểu diễn một bus 4-bit. Các bit, từ most significant đến least significant, là `a(3)`, `a(2)`, `a(1)` và `a(0)`. Đây được gọi là thứ tự little-endian, vì least significant bit có chỉ số bit nhỏ nhất. Chúng ta có thể khai báo bus là `STD_LOGIC_VECTOR(4 downto 1)`, khi đó bit 4 sẽ là most significant bit. Hoặc chúng ta có thể viết `STD_LOGIC_VECTOR(0 to 3)`, khi đó các bit, từ most significant đến least significant, sẽ là `a(0), a(1), a(2), and a(3)`. Đây được gọi là thứ tự big-endian.
 
 ![fig4_03](images/ch04/fig4_03.png)
 
@@ -197,9 +197,9 @@ module gates(input  logic [3:0] a, b,
 endmodule
 ```
 
-`~`, `^`, `|` là SystemVerilog operator, còn `a`, `b`, `y1` là operand. Kết hợp như `a & b` hoặc `~(a | b)` gọi expression. Command đầy đủ như `assign y4 = ~(a & b);` gọi statement.
+`~`, `^` và `|` là các ví dụ về toán tử SystemVerilog, còn `a`, `b` và `y1` là các toán hạng. Một tổ hợp toán tử và toán hạng, chẳng hạn `a & b` hoặc `~(a | b)`, được gọi là một biểu thức. Một câu lệnh hoàn chỉnh như `assign y4 = ~(a & b);` được gọi là statement.
 
-`assign out = in1 op in2;` gọi continuous assignment statement, kết thúc dấu chấm phẩy. Khi input bên phải `=` đổi, output bên trái được tính lại. Vì vậy chúng mô tả combinational logic.
+`assign out = in1 op in2;` được gọi là continuous assignment statement. Các continuous assignment statement kết thúc bằng dấu chấm phẩy. Mỗi khi các input ở bên phải dấu `=` trong một continuous assignment statement thay đổi, output ở bên trái được tính lại. Vì vậy, các continuous assignment statement mô tả combinational logic.
 
 VHDL
 
@@ -222,9 +222,9 @@ begin
 end;
 ```
 
-`not`, `xor`, `or` là VHDL operator, còn `a`, `b`, `y1` là operand. Kết hợp như `a and b` hoặc `a nor b` gọi expression. Command đầy đủ `y4 <= a nand b;` gọi statement.
+`not`, `xor` và `or` là các ví dụ về toán tử VHDL, còn `a`, `b` và `y1` là các toán hạng. Một tổ hợp toán tử và toán hạng, chẳng hạn `a and b` hoặc `a nor b`, được gọi là một biểu thức. Một câu lệnh hoàn chỉnh như `y4 <= a nand b;` được gọi là statement.
 
-`out <= in1 op in2;` gọi concurrent signal assignment statement. VHDL assignment kết thúc chấm phẩy. Khi input bên phải `<=` đổi, output bên trái tính lại. Vì vậy chúng mô tả combinational logic.
+`out <= in1 op in2;` được gọi là concurrent signal assignment statement. Các câu lệnh gán VHDL kết thúc bằng dấu chấm phẩy. Mỗi khi các input ở bên phải dấu `<=` trong một concurrent signal assignment statement thay đổi, output ở bên trái được tính lại. Vì vậy, các concurrent signal assignment statement mô tả combinational logic.
 
 ![fig4_04](images/ch04/fig4_04.png)
 
@@ -236,19 +236,19 @@ Ví dụ `gates` đã cho cách định dạng comment. SystemVerilog và VHDL k
 
 ### 4.2.3 Reduction operator
 
-Reduction operator ngụ ý gate multiple-input trên một bus. Ví dụ HDL 4.4 mô tả AND eight-input với input `a`<sub>`7`</sub>`, a`<sub>`6`</sub>`,...,a`<sub>`0`</sub>. Tương tự có OR, XOR, NAND, NOR, XNOR. Nhớ XOR multiple-input làm parity, TRUE nếu số input TRUE lẻ.
+Reduction operator mô tả một gate multiple-input hoạt động trên một bus duy nhất. Ví dụ HDL 4.4 mô tả một AND gate eight-input với các input `a`<sub>`7`</sub>`, a`<sub>`6`</sub>`,...,a`<sub>`0`</sub>. Các reduction operator tương tự cũng có cho OR, XOR, NAND, NOR và XNOR gate. Hãy nhớ rằng XOR multiple-input thực hiện phép kiểm tra parity, trả về TRUE nếu số lượng input có giá trị TRUE là số lẻ.
 
 SystemVerilog
 
-Comment SystemVerilog như C/Java. Bắt đầu `/*` tiếp tục, có thể nhiều dòng, đến `*/`. Bắt đầu `//` tiếp tục đến cuối dòng.
+Comment trong SystemVerilog giống như trong C hoặc Java. Comment bắt đầu bằng `/*` kéo dài, có thể qua nhiều dòng, đến `*/` tiếp theo. Comment bắt đầu bằng `//` kéo dài đến cuối dòng.
 
-SystemVerilog case-sensitive. `y1` và `Y1` là signal khác nhau. Nhưng dùng signal chỉ khác case gây nhầm.
+SystemVerilog là ngôn ngữ case-sensitive. `y1` và `Y1` là các signal khác nhau trong SystemVerilog. Tuy nhiên, việc sử dụng nhiều signal chỉ khác nhau ở chữ hoa và chữ thường sẽ gây nhầm lẫn.
 
 VHDL
 
 Comment bắt đầu `/*` tiếp tục, có thể nhiều dòng, tới `*/`. Bắt đầu `––` tiếp tục đến cuối dòng.
 
-VHDL không case-sensitive. `y1`, `Y1` cùng signal. Nhưng tool khác đọc file có thể case-sensitive, tạo bug khó chịu nếu tùy tiện trộn hoa/thường.
+VHDL không có tính case-sensitive. `y1` và `Y1` là cùng một signal trong VHDL. Tuy nhiên, các tool khác có thể đọc file của bạn lại có thể có tính case-sensitive, dẫn đến những bug khó chịu nếu bạn tùy tiện dùng lẫn chữ hoa và chữ thường.
 
 ### 4.2.4 Conditional assignment
 
@@ -295,9 +295,9 @@ Hình 4.5 Circuit synthesize từ `and8`
 
 SystemVerilog
 
-Conditional operator `?:` dựa expression đầu chọn expression thứ hai hoặc ba. Expression đầu gọi condition. Nếu 1 chọn thứ hai; nếu 0 chọn thứ ba.
+Toán tử điều kiện `?:` lựa chọn giữa biểu thức thứ hai và biểu thức thứ ba dựa trên biểu thức thứ nhất. Biểu thức thứ nhất được gọi là điều kiện. Nếu điều kiện bằng 1, toán tử chọn biểu thức thứ hai. Nếu điều kiện bằng 0, toán tử chọn biểu thức thứ ba.
 
-`?:` rất hữu ích mô tả multiplexer vì dựa input đầu chọn hai input còn lại. Code sau là idiom multiplexer 2:1 input/output 4-bit dùng conditional operator.
+`?:` đặc biệt hữu ích để mô tả multiplexer vì dựa trên input thứ nhất, nó lựa chọn một trong hai input còn lại. Code sau minh họa idiom cho một multiplexer 2:1 có input và output 4-bit, sử dụng toán tử điều kiện.
 
 ```
 module mux2(input   logic [3:0] d0, d1,
@@ -314,7 +314,7 @@ Nếu `s` bằng 1 thì `y = d1`. Nếu `s` bằng 0 thì `y = d0`.
 
 VHDL
 
-Conditional signal assignment thực hiện operation khác tùy condition, rất hữu ích mô tả multiplexer. Ví dụ multiplexer 2:1 chọn một trong hai input 4-bit.
+Conditional signal assignment thực hiện các phép toán khác nhau tùy theo một điều kiện nào đó. Chúng đặc biệt hữu ích để mô tả multiplexer. Ví dụ, một multiplexer 2:1 có thể sử dụng conditional signal assignment để lựa chọn một trong hai input 4-bit.
 
 ```
 library IEEE; use IEEE.STD_LOGIC_1164.all;
@@ -335,11 +335,11 @@ Conditional signal assignment đặt `y` bằng `d1` nếu `s` bằng 1; nếu k
 
 Hình 4.6 Circuit synthesize từ `mux2`
 
-Ví dụ HDL 4.6 là multiplexer 4:1 cùng nguyên tắc 2:1 Ví dụ 4.5. Hình 4.7 là schematic multiplexer 4:1 do synthesis tool tạo. Software dùng symbol khác sách trước đó: nhiều data input `(d)` và enable one-hot `(e)`. Khi một enable được assert, data tương ứng đi ra output. Ví dụ `s[1] = s[0] = 0`, AND dưới cùng `un1_s_5` cho 1, enable input dưới multiplexer, chọn `d0[3:0]`.
+Ví dụ HDL 4.6 minh họa một multiplexer 4:1 dựa trên cùng nguyên lý với multiplexer 2:1 trong Ví dụ HDL 4.5. Hình 4.7 minh họa schematic của multiplexer 4:1 do công cụ synthesis tạo ra. Software sử dụng một ký hiệu multiplexer khác với ký hiệu được sử dụng trong sách cho đến lúc này. Multiplexer có nhiều input data `(d)` và input enable one-hot `(e)`. Khi một trong các enable được assert, data tương ứng được truyền đến output. Ví dụ, khi `s[1] = s[0] = 0`, gate AND ở dưới cùng, `un1_s_5`, tạo ra giá trị 1, enable input dưới cùng của multiplexer và khiến nó lựa chọn `d0[3:0]`.
 
 ### 4.2.5 Internal variable
 
-Thường tiện chia function phức tạp thành bước trung gian. Ví dụ full adder ở Mục 5.2.1 là circuit ba input, hai output theo phương trình:
+Việc chia một chức năng phức tạp thành các bước trung gian thường rất thuận tiện. Ví dụ, full adder, sẽ được mô tả trong Mục 5.2.1, là một circuit có ba input và hai output được định nghĩa bởi các phương trình sau:
 
 #### Ví dụ HDL 4.6 MULTIPLEXER 4:1
 
@@ -357,7 +357,7 @@ module mux4(input    logic [3:0] d0, d1, d2, d3,
 endmodule
 ```
 
-Nếu `s[1]` bằng 1, chọn expression đầu `(s[0] ? d3 : d2)`, nó chọn `d3` hoặc `d2` theo `s[0]` (`y = d3` khi `s[0]` là 1, `d2` khi `s[0]` là 0). Nếu `s[1]` bằng 0, tương tự chọn expression hai, cho `d1` hoặc `d0` theo `s[0]`.
+Nếu `s[1]` bằng 1, multiplexer chọn biểu thức thứ nhất, `(s[0] ? d3 : d2)`. Đến lượt mình, biểu thức này chọn `d3` hoặc `d2` dựa trên `s[0]` (`y = d3` nếu `s[0]` bằng 1 và chọn `d2` nếu `s[0]` bằng 0). Nếu `s[1]` bằng 0, tương tự, multiplexer chọn biểu thức thứ hai, cho kết quả là `d1` hoặc `d0` dựa trên `s[0]`.
 
 VHDL
 
@@ -380,7 +380,7 @@ begin
 end;
 ```
 
-VHDL cũng hỗ trợ selected signal assignment viết gọn chọn nhiều khả năng. Tương tự `switch/case` thay nhiều `if/else` trong một số ngôn ngữ. Multiplexer 4:1 có thể viết lại:
+VHDL cũng hỗ trợ các câu lệnh selected signal assignment để viết ngắn gọn việc lựa chọn một trong nhiều khả năng. Điều này tương tự như sử dụng câu lệnh `switch/case` thay cho nhiều câu lệnh `if/else` trong một số ngôn ngữ lập trình. Có thể viết lại multiplexer 4:1 bằng selected signal assignment như sau:
 
 ```
 architecture synth2 of mux4 is
@@ -407,19 +407,19 @@ P = A ⊕ B (4.2) G = AB
 
 có thể viết lại full adder như sau:
 
-> Kiểm bằng điền truth table để tự xác nhận đúng.
+> Hãy kiểm tra điều này bằng cách điền đầy đủ truth table để tự xác nhận rằng nó chính xác.
 
 S = P ⊕ C<sub>in</sub> (4.3)
 
 C<sub>out</sub> = G + PC<sub>in</sub>
 
-P, G gọi internal variable vì không input/output mà chỉ dùng bên trong module. Tương tự local variable ngôn ngữ lập trình. Ví dụ HDL 4.7 cho cách dùng.
+P và G được gọi là các biến nội bộ vì chúng không phải input hoặc output; thay vào đó, chúng chỉ được sử dụng bên trong module. Chúng tương tự các biến cục bộ trong ngôn ngữ lập trình. Ví dụ HDL 4.7 minh họa cách sử dụng chúng trong HDL.
 
-Assignment HDL (`assign` SystemVerilog, `<=` VHDL) diễn ra đồng thời, khác C/Java evaluate theo thứ tự viết. Trong ngôn ngữ thường, S = P⊕ C<sub>in</sub> phải sau P = A⊕B vì chạy tuần tự. Trong HDL thứ tự không quan trọng. Như hardware, assignment được evaluate khi input, signal right-hand side, đổi giá trị bất kể thứ tự xuất hiện trong module.
+Các câu lệnh gán HDL (`assign` trong SystemVerilog và `<=` trong VHDL) diễn ra đồng thời. Điều này khác với các ngôn ngữ lập trình thông thường như C hoặc Java, trong đó các câu lệnh được thực hiện theo thứ tự được viết. Trong một ngôn ngữ thông thường, S = P⊕ C<sub>in</sub> phải nằm sau P = A⊕B vì các câu lệnh được thực thi tuần tự. Trong HDL, thứ tự không quan trọng. Giống như hardware, các câu lệnh gán HDL được thực hiện mỗi khi input, tức các signal ở phía right-hand side, thay đổi giá trị, bất kể thứ tự xuất hiện của các câu lệnh gán trong module.
 
 ### 4.2.6 Độ ưu tiên
 
-Chú ý ngoặc trong tính `cout` Ví dụ HDL 4.7 cho C<sub>out</sub> = G + (P · C<sub>in</sub>) thay C<sub>out</sub> = (G + P) · C<sub>in</sub>. Không ngoặc thì thứ tự do ngôn ngữ. Ví dụ HDL 4.8 chỉ ưu tiên cao đến thấp, gồm arithmetic, shift, comparison operator sẽ định nghĩa Chương 5.
+Lưu ý rằng chúng ta đã đặt dấu ngoặc đơn trong phép tính `cout` ở Ví dụ HDL 4.7 để xác định thứ tự phép toán là C<sub>out</sub> = G + (P · C<sub>in</sub>) thay vì C<sub>out</sub> = (G + P) · C<sub>in</sub>. Nếu không sử dụng dấu ngoặc đơn, thứ tự phép toán mặc định sẽ do ngôn ngữ quy định. Ví dụ HDL 4.8 chỉ rõ thứ tự ưu tiên của toán tử từ cao xuống thấp cho từng ngôn ngữ. Các bảng bao gồm các toán tử arithmetic, shift và comparison sẽ được định nghĩa trong Chương 5.
 
 #### Ví dụ HDL 4.7 FULL ADDER
 
@@ -495,13 +495,13 @@ Bảng 4.2 Độ ưu tiên operator VHDL
 
 ### 4.2.7 Số
 
-Có thể chỉ số bằng binary, octal, decimal, hexadecimal (cơ số 2, 8, 10, 16). Kích thước, tức số bit, tùy chọn; thêm zero đầu cho đủ. Underscore bị bỏ qua, giúp chia số dài thành nhóm dễ đọc. Ví dụ HDL 4.9 giải thích từng ngôn ngữ.
+Có thể chỉ định số ở dạng binary, octal, decimal hoặc hexadecimal (tương ứng với cơ số 2, 8, 10 và 16). Kích thước, tức số bit, là tùy chọn; các bit 0 được thêm vào đầu để đạt kích thước này. Dấu gạch dưới trong số được bỏ qua và có thể giúp chia các số dài thành những nhóm dễ đọc hơn. Ví dụ HDL 4.9 giải thích cách viết số trong từng ngôn ngữ.
 
 #### Ví dụ HDL 4.8 ĐỘ ƯU TIÊN OPERATOR
 
 SystemVerilog
 
-Độ ưu tiên SystemVerilog giống mong đợi ở ngôn ngữ khác. Cụ thể AND ưu tiên hơn OR. Có thể tận dụng bỏ ngoặc:
+Thứ tự ưu tiên của các toán tử trong SystemVerilog phần lớn giống như bạn thường thấy trong các ngôn ngữ lập trình khác. Cụ thể, AND có độ ưu tiên cao hơn OR. Chúng ta có thể tận dụng thứ tự ưu tiên này để loại bỏ các dấu ngoặc đơn:
 
 ```
 assign cout = g | p & cin;
@@ -541,7 +541,7 @@ Bảng 4.4 Số VHDL
 
 ### 4.2.8 Z và X
 
-HDL dùng `z` chỉ floating value. `z` đặc biệt hữu ích cho tristate buffer có output float khi enable 0. Nhớ Mục 2.6.2: bus có thể do nhiều tristate buffer lái, chỉ một nên enable. Ví dụ HDL 4.10 cho idiom. Enable thì output như input, disable thì output gán floating (`z`).
+HDL sử dụng `z` để biểu thị một giá trị floating. `z` đặc biệt hữu ích khi mô tả tristate buffer, có output ở trạng thái floating khi enable bằng 0. Hãy nhớ lại từ Mục 2.6.2 rằng một bus có thể được điều khiển bởi nhiều tristate buffer, trong đó chỉ đúng một buffer được enable. Ví dụ HDL 4.10 minh họa idiom cho tristate buffer. Nếu buffer được enable, output giống input. Nếu buffer bị disable, output được gán một giá trị floating (`z`).
 
 Tương tự HDL dùng `x` chỉ logic level không hợp lệ. Nếu hai tristate buffer enable (hoặc gate khác) cùng lái bus về 0 và 1, kết quả `x`, chỉ contention. Nếu mọi tristate buffer
 
@@ -549,19 +549,19 @@ Tương tự HDL dùng `x` chỉ logic level không hợp lệ. Nếu hai trista
 
 SystemVerilog
 
-Định dạng constant là `N'Bvalue`: `N` số bit, `B` chữ chỉ cơ số, `value` giá trị. Ví dụ `9'h25` chỉ số 9-bit giá trị 25<sub>16</sub> = 37<sub>10</sub> = 000100101<sub>2</sub>. SystemVerilog dùng `'b` binary, `'o` octal, `'d` decimal, `'h` hexadecimal.
+Định dạng khai báo hằng số là `N'Bvalue`, trong đó `N` là kích thước tính bằng bit, `B` là chữ cái biểu thị cơ số và `value` cung cấp giá trị. Ví dụ, `9'h25` biểu thị một số 9-bit có giá trị 25<sub>16</sub> = 37<sub>10</sub> = 000100101<sub>2</sub>. SystemVerilog hỗ trợ `'b` cho binary, `'o` cho octal, `'d` cho decimal và `'h` cho hexadecimal.
 
-Bỏ cơ số mặc định decimal. Bỏ kích thước, số có số bit bằng expression đang dùng nó. Zero tự thêm trước cho đủ. Ví dụ bus `w` 6-bit, `assign w = 'b11` cho `w` giá trị 000011. Tốt hơn chỉ tường minh kích thước. Ngoại lệ `'0`, `'1` là idiom điền mọi bit lần lượt 0, 1.
+Nếu bỏ qua cơ số, cơ số mặc định là decimal. Nếu không chỉ định kích thước, số đó được giả định có số bit bằng số bit của biểu thức đang sử dụng nó. Các bit 0 được tự động thêm vào phía trước để số đó có đủ kích thước. Ví dụ, nếu `w` là bus 6-bit, `assign w = 'b11` sẽ gán cho `w` giá trị 000011. Cách thực hành tốt hơn là chỉ định kích thước một cách tường minh. Một ngoại lệ là `'0` và `'1` là các idiom của SystemVerilog dùng để điền tất cả các bit lần lượt bằng 0 và 1.
 
 VHDL
 
-Trong VHDL, số STD\_LOGIC viết binary trong nháy đơn: `'0'`, `'1'` chỉ logic 0, 1. Constant STD\_LOGIC\_VECTOR dạng `NB"value"`, `N` số bit, `B` chữ chỉ cơ số, `value` giá trị. Ví dụ `9X"25"` là 9-bit giá trị 25<sub>16</sub> =37<sub>10</sub> =000100101<sub>2</sub>. VHDL 2008 hỗ trợ `B` binary, `O` octal, `D` decimal, `X` hexadecimal.
+Trong VHDL, các số STD_LOGIC được viết ở dạng binary và đặt trong dấu nháy đơn: `'0'` và `'1'` biểu thị logic 0 và 1. Định dạng khai báo hằng số STD_LOGIC_VECTOR là `NB"value"`, trong đó `N` là kích thước tính bằng bit, `B` là chữ cái biểu thị cơ số và `value` cung cấp giá trị. Ví dụ, `9X"25"` biểu thị một số 9-bit có giá trị 25<sub>16</sub> =37<sub>10</sub> =000100101<sub>2</sub>. VHDL 2008 hỗ trợ `B` cho binary, `O` cho octal, `D` cho decimal và `X` cho hexadecimal.
 
-Bỏ cơ số mặc định binary. Bỏ kích thước thì khớp số bit chỉ trong giá trị. Ví dụ `y <= X"7B"` đòi `y` signal 8-bit. Nếu `y` nhiều bit hơn, không thêm 0 bên trái mà compilation error. `others => '0'`, `others => '1'` là idiom điền mọi bit lần lượt 0, 1.
+Nếu bỏ qua cơ số, cơ số mặc định là binary. Nếu không chỉ định kích thước, số đó được giả định có kích thước bằng số bit được chỉ định trong giá trị. Ví dụ, `y <= X"7B"` đòi hỏi `y` phải là một signal 8-bit. Nếu `y` có nhiều bit hơn, VHDL không thêm các bit 0 vào bên trái số đó. Thay vào đó, một lỗi sẽ xảy ra trong quá trình biên dịch. `others => '0'` và `others => '1'` là các idiom của VHDL dùng để điền tất cả các bit lần lượt bằng 0 và 1.
 
-Đầu simulation, state node như output flip-flop được khởi tạo unknown (`x` SystemVerilog, `u` VHDL). Hữu ích tìm lỗi quên reset flip-flop trước khi dùng output.
+Khi simulation bắt đầu, các state node như output của flip-flop được khởi tạo ở trạng thái chưa biết (`x` trong SystemVerilog và `u` trong VHDL). Điều này hữu ích để tìm các lỗi do quên reset flip-flop trước khi sử dụng output của nó.
 
-Gate nhận floating input có thể cho output `x` khi không xác định được giá trị đúng. Tương tự illegal/uninitialized input có thể cho `x`. Ví dụ HDL 4.11 cho cách kết hợp giá trị trong gate.
+Nếu một gate nhận floating input, nó có thể tạo ra output `x` khi không xác định được giá trị output chính xác. Tương tự, nếu nhận input không hợp lệ hoặc chưa được khởi tạo, nó có thể tạo ra output `x`. Ví dụ HDL 4.11 minh họa cách SystemVerilog và VHDL kết hợp những giá trị signal khác nhau này trong các logic gate.
 
 #### Ví dụ HDL 4.10 TRISTATE BUFFER
 
@@ -576,7 +576,7 @@ module  tristate(input    logic  [3:0]  a,
 endmodule
 ```
 
-Chú ý `y` khai báo `tri` thay `logic`. Signal `logic` chỉ một driver. Tristate bus nhiều driver nên khai báo net. Hai loại net là `tri`, `trireg`. Thường chỉ một driver active mỗi lúc, net nhận giá trị đó. Không driver active, `tri` float (`z`), `trireg` giữ giá trị trước. Không chỉ type input/output thì giả định `tri`. Output `tri` module này có thể làm input `logic` module khác. Mục 4.7 bàn net nhiều driver.
+Lưu ý rằng `y` được khai báo là `tri` thay vì `logic`. Các signal `logic` chỉ có thể có một driver. Tristate bus có thể có nhiều driver, nên chúng cần được khai báo là net. Hai loại net trong SystemVerilog được gọi là `tri` và `trireg`. Thông thường, tại mỗi thời điểm chỉ có đúng một driver trên net hoạt động, và net nhận giá trị đó. Nếu không có driver nào hoạt động, `tri` ở trạng thái floating (`z`), còn `trireg` giữ giá trị trước đó. Nếu không chỉ định kiểu cho một input hoặc output, kiểu `tri` được giả định. Cũng lưu ý rằng output `tri` từ một module có thể được sử dụng làm input `logic` cho module khác. Mục 4.7 sẽ thảo luận thêm về các net có nhiều driver.
 
 VHDL
 
@@ -622,15 +622,15 @@ Bảng 4.6 Truth table AND VHDL với `z`, `x`, `u`
 
 SystemVerilog
 
-Signal value SystemVerilog là `0`, `1`, `z`, `x`. Constant bắt đầu `z` hoặc `x` được thêm `z` hoặc `x` phía trước thay 0 để đủ độ dài khi cần.
+Các giá trị signal của SystemVerilog là `0`, `1`, `z` và `x`. Khi cần thiết, các hằng số SystemVerilog bắt đầu bằng `z` hoặc `x` được thêm các giá trị `z` hoặc `x` vào phía trước (thay vì các bit 0) để đạt đủ độ dài.
 
-Bảng 4.5 là truth table AND dùng cả bốn giá trị. Gate đôi khi xác định được output dù một số input unknown. Ví dụ `0 & z` trả `0` vì AND luôn `0` nếu một input `0`. Nếu không, input floating/invalid gây output invalid, hiển thị `x`.
+Bảng 4.5 minh họa truth table cho một gate AND sử dụng tất cả bốn giá trị signal có thể có. Lưu ý rằng đôi khi gate vẫn xác định được output dù một số input chưa biết. Ví dụ, `0 & z` trả về `0` vì output của gate AND luôn bằng `0` nếu một trong hai input bằng `0`. Trong các trường hợp khác, input floating hoặc không hợp lệ dẫn đến output không hợp lệ, được hiển thị là `x` trong SystemVerilog.
 
 VHDL
 
-Signal STD\_LOGIC VHDL là `'0'`, `'1'`, `'z', 'x'` và `'u'`.
+Signal STD_LOGIC VHDL là `'0'`, `'1'`, `'z', 'x'` và `'u'`.
 
-Bảng 4.6 cho AND với cả năm giá trị. Đôi khi gate xác định output dù có input unknown. Ví dụ `'0' and 'z'` trả `'0'` vì AND luôn `'0'` nếu một input `'0'`. Nếu không input floating/invalid cho output invalid, hiển thị `'x'`. Input chưa khởi tạo cho output chưa khởi tạo, hiển thị `'u'`.
+Bảng 4.6 minh họa truth table cho một gate AND sử dụng tất cả năm giá trị signal có thể có. Lưu ý rằng đôi khi gate vẫn xác định được output dù một số input chưa biết. Ví dụ, `'0' and 'z'` trả về `'0'` vì output của gate AND luôn bằng `'0'` nếu một trong hai input bằng `'0'`. Trong các trường hợp khác, input floating hoặc không hợp lệ dẫn đến output không hợp lệ, được hiển thị là `'x'` trong VHDL. Các input chưa được khởi tạo dẫn đến output chưa được khởi tạo, được hiển thị là `'u'` trong VHDL.
 
 Thấy `x` hoặc `u` trong simulation gần như luôn báo bug hoặc code chưa tốt. Trong circuit synthesize, tương ứng floating gate input, state chưa khởi tạo hoặc contention. Circuit có thể diễn giải `x` hoặc `u` ngẫu nhiên thành 0 hay 1, gây hành vi khó đoán.
 
@@ -652,7 +652,7 @@ assign y = {c[2:1], {3{d[0]}}, c[0], 3'b101};
 
 Operator {} nối bus. `{3{d[0]}}` chỉ ba bản sao `d[0]`.
 
-Đừng nhầm binary constant 3-bit `3'b101` với bus tên `b`. Phải chỉ độ dài 3 bit; nếu không có số zero đầu chưa biết có thể xuất hiện giữa `y`.
+Đừng nhầm hằng số binary 3-bit `3'b101` với một bus có tên `b`. Lưu ý rằng việc chỉ định độ dài 3 bit cho hằng số này là rất quan trọng. Nếu không, nó sẽ có một số lượng bit 0 ở đầu chưa xác định, và những bit đó có thể xuất hiện ở giữa `y`.
 
 Nếu `y` rộng hơn 9 bit, zero được đặt ở most significant bit.
 
@@ -695,7 +695,7 @@ module example(input  logic a, b, c,
 endmodule
 ```
 
-File SystemVerilog có thể có timescale directive chỉ giá trị mỗi time unit, dạng `'timescale unit/precision`. Ở đây mỗi unit 1 ns, precision 1 ps. Không có directive thì dùng mặc định (thường cả hai 1 ns). Symbol `#` chỉ số đơn vị delay, đặt trong `assign`, cũng như nonblocking (`<=`) và blocking (`=`) assignment sẽ bàn Mục 4.5.4.
+File SystemVerilog có thể chứa timescale directive chỉ định giá trị của mỗi đơn vị thời gian. Câu lệnh có dạng `'timescale unit/precision`. Trong file này, mỗi đơn vị là 1 ns và simulation có độ chính xác 1 ps. Nếu file không có timescale directive, đơn vị và độ chính xác mặc định (thường đều là 1 ns) sẽ được sử dụng. Trong SystemVerilog, ký hiệu `#` được sử dụng để chỉ số đơn vị delay. Nó có thể được đặt trong câu lệnh `assign`, cũng như trong nonblocking assignment (`<=`) và blocking assignment (`=`), sẽ được thảo luận trong Mục 4.5.4.
 
 VHDL
 
@@ -724,7 +724,7 @@ Trong VHDL, mệnh đề `after` chỉ delay, ở đây đơn vị nanosecond.
 
 Phần trước trình bày behavioral modeling, mô tả module theo quan hệ input/output. Phần này xem structural modeling, mô tả module theo cách nó được cấu thành từ những module đơn giản hơn.
 
-Ví dụ HDL 4.14 ghép multiplexer 4:1 từ ba multiplexer 2:1. Mỗi bản sao 2:1 gọi instance. Nhiều instance phân biệt bằng tên, ở đây `lowmux, highmux`, `finalmux`. Đây là regularity, tái dùng 2:1 nhiều lần.
+Ví dụ HDL 4.14 minh họa cách ghép một multiplexer 4:1 từ ba multiplexer 2:1. Mỗi bản sao của multiplexer 2:1 được gọi là một instance. Nhiều instance của cùng một module được phân biệt bằng các tên riêng, trong trường hợp này là `lowmux, highmux` và `finalmux`. Đây là một ví dụ về regularity, trong đó multiplexer 2:1 được tái sử dụng nhiều lần.
 
 Ví dụ HDL 4.15 dùng structural modeling xây multiplexer 2:1 từ cặp tristate buffer. Tuy nhiên không khuyến nghị xây logic bằng tristate.
 
@@ -772,9 +772,9 @@ begin
 end;
 ```
 
-Architecture trước tiên khai báo port `mux2` bằng component declaration, cho tool VHDL kiểm component có cùng port với entity khai báo nơi khác, tránh lỗi đổi entity nhưng không đổi instance. Tuy nhiên declaration làm VHDL cồng kềnh.
+Architecture trước tiên phải khai báo các port của `mux2` bằng câu lệnh component declaration. Điều này cho phép các công cụ VHDL kiểm tra xem component mà bạn muốn sử dụng có cùng các port với entity đã được khai báo ở nơi khác bằng một câu lệnh entity khác hay không. Nhờ đó, có thể tránh các lỗi do thay đổi entity nhưng không thay đổi instance. Tuy nhiên, component declaration khiến code VHDL khá cồng kềnh.
 
-Architecture của `mux4` tên `struct`, còn module behavioral Mục 4.2 tên `synth`. VHDL cho nhiều architecture (implementation) cùng entity, phân biệt theo tên. Tên không có ý nghĩa với CAD tool, nhưng `struct`, `synth` phổ biến. Code synthesizable thường chỉ một architecture/entity nên không bàn syntax cấu hình chọn architecture khi có nhiều.
+Lưu ý rằng architecture này của `mux4` được đặt tên là `struct`, trong khi các architecture của những module có mô tả hành vi trong Mục 4.2 được đặt tên là `synth`. VHDL cho phép có nhiều architecture (cách triển khai) cho cùng một entity; các architecture được phân biệt bằng tên. Bản thân các tên không có ý nghĩa đối với các công cụ CAD, nhưng `struct` và `synth` là những tên thường dùng. Code VHDL có thể synthesize thường chỉ chứa một architecture cho mỗi entity, nên chúng ta sẽ không thảo luận cú pháp VHDL để cấu hình architecture nào được sử dụng khi nhiều architecture được định nghĩa.
 
 ![fig4_11](images/ch04/fig4_11.png)
 
@@ -784,7 +784,7 @@ Ví dụ HDL 4.16 cho module truy cập phần bus. Multiplexer 2:1 rộng 8-bit
 
 Nói chung, hệ thống phức tạp được thiết kế theo hierarchy. Hệ thống tổng thể được mô tả structural bằng instantiate các component chính. Mỗi component lại được mô tả structural từ building block của nó, tiếp tục đệ quy đến khi các phần đủ đơn giản để mô tả behavioral. Phong cách tốt là tránh, hoặc ít nhất giảm tối đa, trộn mô tả structural và behavioral trong cùng module.
 
-#### Ví dụ HDL 4.15 STRUCTURAL MODEL CỦA MULTIPLEXER 2:1
+### Ví dụ HDL 4.15 STRUCTURAL MODEL CỦA MULTIPLEXER 2:1
 
 SystemVerilog
 
@@ -798,7 +798,7 @@ module mux2(input   logic [3:0] d0, d1,
 endmodule
 ```
 
-SystemVerilog cho expression như `~s` trong port list instance. Expression phức tạp tùy ý hợp lệ nhưng không khuyến khích vì khó đọc.
+Trong SystemVerilog, các biểu thức như `~s` được phép xuất hiện trong port list của một instance. Các biểu thức phức tạp tùy ý đều hợp lệ nhưng không được khuyến khích vì chúng khiến code khó đọc.
 
 VHDL
 
@@ -835,11 +835,11 @@ HDL synthesizer nhận ra một số idiom và chuyển chúng thành sequential
 
 ### 4.4.1 Register
 
-Đại đa số hệ thương mại hiện đại dùng register với D flip-flop positive edge-triggered. Ví dụ HDL 4.17 cho idiom.
+Phần lớn các hệ thống thương mại hiện đại được xây dựng với các register sử dụng D flip-flops positive edge-triggered. Ví dụ HDL 4.17 minh họa idiom cho những flip-flops như vậy.
 
-Trong câu `always` SystemVerilog và `process` VHDL, signal giữ giá trị cũ tới khi event trong sensitivity list rõ ràng làm đổi. Vì thế code với sensitivity list phù hợp mô tả sequential circuit có memory. Ví dụ flip-flop chỉ có `clk` trong list, nhớ `q` cũ tới rising edge tiếp của `clk` dù `d` đổi giữa chừng.
+Trong các câu lệnh `always` của SystemVerilog và `process` của VHDL, các signal giữ giá trị cũ cho đến khi một sự kiện trong sensitivity list xảy ra và chỉ định rõ việc thay đổi giá trị của chúng. Vì vậy, code như vậy, với sensitivity list phù hợp, có thể được sử dụng để mô tả sequential circuit có memory. Ví dụ, flip-flop chỉ đưa `clk` vào sensitivity list. Nó ghi nhớ giá trị cũ của `q` cho đến rising edge tiếp theo của `clk`, ngay cả khi `d` thay đổi trong khoảng thời gian đó.
 
-Ngược lại continuous assignment SystemVerilog (`assign`) và concurrent assignment VHDL (`<=`) evaluate lại khi input right-hand side đổi, nên nhất thiết mô tả combinational logic.
+Ngược lại, các continuous assignment statement của SystemVerilog (`assign`) và concurrent assignment statement của VHDL (`<=`) được thực hiện lại mỗi khi bất kỳ input nào ở right-hand side thay đổi. Vì vậy, code như vậy nhất thiết mô tả combinational logic.
 
 #### Ví dụ HDL 4.16 TRUY CẬP PHẦN BUS
 
@@ -886,7 +886,7 @@ Hình 4.13 Circuit synthesize từ `mux2_8`
 
 ### 4.4.2 Resettable register
 
-Khi simulation bắt đầu hoặc mới cấp điện, output flop/register unknown, thể hiện `x` SystemVerilog, `u` VHDL. Nên dùng resettable register để powerup đặt hệ vào state biết trước. Reset có thể asynchronous hoặc synchronous. Nhớ rằng asynchronous reset cạnh lên kế tiếp của clock. Ví dụ HDL 4.18 cho idiom flip-flops reset asynchronous/synchronous. Phân biệt trên schematic có thể khó.
+Khi simulation bắt đầu hoặc circuit vừa được cấp nguồn lần đầu, output của flop hoặc register là chưa xác định. Trạng thái này được biểu thị bằng `x` trong SystemVerilog và `u` trong VHDL. Nhìn chung, nên sử dụng các resettable register để có thể đưa hệ thống về một trạng thái đã biết khi cấp nguồn. Reset có thể là asynchronous hoặc synchronous. Hãy nhớ rằng asynchronous reset cạnh lên tiếp theo của clock. Ví dụ HDL 4.18 minh họa các idiom cho flip-flops với reset asynchronous và synchronous. Lưu ý rằng việc phân biệt reset synchronous và asynchronous trên schematic có thể khó khăn.
 
 #### Ví dụ HDL 4.17 REGISTER
 
@@ -909,11 +909,11 @@ always @(sensitivity list)
   statement;
 ```
 
-`statement` chỉ chạy khi event chỉ trong `sensitivity list` xảy ra. Ở đây là `q <= d` (đọc “`q` nhận `d`”). flip-flop copy `d` sang `q` tại positive edge, còn lại nhớ state cũ `q`. Sensitivity list còn gọi stimulus list.
+`statement` chỉ được thực thi khi sự kiện được chỉ định trong `sensitivity list` xảy ra. Trong ví dụ này, câu lệnh là `q <= d` (đọc là “`q` nhận `d`”). Vì vậy, flip-flop sao chép `d` sang `q` tại positive edge của clock; ở những thời điểm khác, nó ghi nhớ state cũ của `q`. Lưu ý rằng sensitivity list cũng được gọi là stimulus list.
 
-`<=` gọi nonblocking assignment. Tạm coi như dấu `=` thường; Mục 4.5.4 trở lại điểm tinh tế hơn. Chú ý dùng `<=` thay `assign` trong câu `always`.
+`<=` được gọi là nonblocking assignment. Tạm thời, hãy xem nó như một dấu `=` thông thường; chúng ta sẽ trở lại những điểm tinh tế hơn trong Mục 4.5.4. Lưu ý rằng `<=` được sử dụng thay cho `assign` bên trong một câu lệnh `always`.
 
-Như sẽ thấy, câu `always` có thể ngụ ý flip-flops, latch hoặc combinational logic tùy sensitivity list và statement. Linh hoạt nên dễ vô tình tạo sai hardware. SystemVerilog thêm `always_ff,` `always_latch`, `always_comb` giảm lỗi phổ biến. `always_ff` giống `always` nhưng chỉ ngụ ý flip-flops, cho tool cảnh báo nếu ngụ ý thứ khác.
+Như sẽ thấy trong các mục tiếp theo, câu lệnh `always` có thể suy ra flip-flops, latch hoặc combinational logic, tùy theo sensitivity list và câu lệnh. Vì tính linh hoạt này, người viết dễ vô tình tạo ra hardware không đúng. SystemVerilog giới thiệu `always_ff,` `always_latch` và `always_comb` để giảm nguy cơ mắc các lỗi phổ biến. `always_ff` hoạt động giống `always` nhưng chỉ được sử dụng để suy ra flip-flops, cho phép các công cụ đưa ra cảnh báo nếu suy ra bất kỳ loại hardware nào khác.
 
 VHDL
 
@@ -942,7 +942,7 @@ process(sensitivity list) begin
 end process;
 ```
 
-`statement` chạy khi variable trong `sensitivity list` đổi. Ở đây câu `if` kiểm đổi có phải rising edge của `clk`. Nếu có `q <= d` (“`q` nhận `d`”). Vì thế flip-flop copy `d` sang `q` ở positive edge, còn lại nhớ state cũ `q`.
+`statement` được thực thi khi bất kỳ biến nào trong `sensitivity list` thay đổi. Trong ví dụ này, câu lệnh `if` kiểm tra xem sự thay đổi đó có phải là rising edge trên `clk` hay không. Nếu đúng, câu lệnh `q <= d` được thực thi (đọc là “`q` nhận `d`”). Vì vậy, flip-flop sao chép `d` sang `q` tại positive edge của clock; ở những thời điểm khác, nó ghi nhớ state cũ của `q`.
 
 Idiom VHDL khác cho flip-flop là
 
@@ -996,9 +996,9 @@ module flopr(input   logic           clk,
 endmodule
 ```
 
-Nhiều signal trong sensitivity list câu `always` ngăn bằng phẩy hoặc `or`. Chú ý `posedge` `reset` có trong flop asynchronous, không trong synchronous. Vậy asynchronous đáp ngay rising edge `reset`; synchronous đáp `reset` chỉ tại rising edge clock.
+Nhiều signal trong sensitivity list của câu lệnh `always` được phân cách bằng dấu phẩy hoặc từ `or`. Lưu ý rằng `posedge` `reset` nằm trong sensitivity list của flop có asynchronous reset, nhưng không nằm trong sensitivity list của flop có synchronous reset. Do đó, flop có asynchronous reset phản hồi ngay khi có rising edge trên `reset`, còn flop có synchronous reset chỉ phản hồi với `reset` tại rising edge của clock.
 
-Vì module cùng tên `flopr`, chỉ đưa một trong hai vào thiết kế. Muốn cả hai phải đổi tên một module.
+Vì các module có cùng tên là `flopr`, bạn chỉ có thể đưa một trong hai vào thiết kế. Nếu muốn sử dụng cả hai, bạn cần đổi tên một trong các module.
 
 VHDL
 
@@ -1037,9 +1037,9 @@ begin
 end;
 ```
 
-Nhiều signal trong sensitivity list `process` ngăn bằng phẩy. `reset` có trong flop asynchronous, không trong synchronous. Asynchronous đáp ngay rising edge `reset`, còn synchronous đáp `reset` chỉ tại rising edge clock.
+Nhiều signal trong sensitivity list của `process` được phân cách bằng dấu phẩy. Lưu ý rằng `reset` nằm trong sensitivity list của flop có asynchronous reset, nhưng không nằm trong sensitivity list của flop có synchronous reset. Do đó, flop có asynchronous reset phản hồi ngay khi có rising edge trên `reset`, còn flop có synchronous reset chỉ phản hồi với `reset` tại rising edge của clock.
 
-Như đã nói, tên architecture (`asynchronous`, `synchronous` ở đây) bị tool bỏ qua nhưng hữu ích người đọc. Cả hai mô tả entity `flopr`, chỉ chọn một. Muốn cả hai phải đổi tên một module.
+Như đã đề cập trước đó, các công cụ VHDL bỏ qua tên của architecture (`asynchronous` hoặc `synchronous` trong ví dụ này), nhưng tên đó có thể hữu ích cho người đọc code. Vì cả hai architecture đều mô tả entity `flopr`, bạn chỉ có thể đưa một trong hai vào thiết kế. Nếu muốn sử dụng cả hai, bạn cần đổi tên một trong các module.
 
 ![fig4_15](images/ch04/fig4_15.png)
 
@@ -1051,7 +1051,7 @@ Hình 4.15 Circuit synthesize từ `flopr`: (a) asynchronous reset, (b) synchron
 
 Hình 4.17 Synchronizer circuit
 
-Một câu `always/process` mô tả được nhiều phần hardware. Ví dụ synchronizer Mục 3.5.5 gồm hai flip-flops back-to-back như Hình 4.17. Ví dụ HDL 4.20 mô tả. Tại rising edge `clk`, copy `d` sang `n1`; đồng thời `n1` sang `q`.
+Có thể sử dụng một câu lệnh `always/process` duy nhất để mô tả nhiều phần hardware. Ví dụ, hãy xét synchronizer trong Mục 3.5.5 được tạo từ hai flip-flops mắc back-to-back, như trong Hình 4.17. Ví dụ HDL 4.20 mô tả synchronizer này. Tại rising edge của `clk`, `d` được sao chép sang `n1`. Đồng thời, `n1` được sao chép sang `q`.
 
 #### Ví dụ HDL 4.19 RESETTABLE ENABLED REGISTER
 
@@ -1120,7 +1120,7 @@ module sync(input  logic  clk,
 endmodule
 ```
 
-Chú ý cần cấu trúc `begin/end` vì nhiều statement nằm trong câu `always`. Tương tự `{}` trong C hoặc Java. Không cần `begin/end` ở ví dụ `flopr` vì `if/else` tính là một statement.
+Lưu ý rằng cấu trúc `begin/end` là cần thiết vì có nhiều statement xuất hiện trong statement `always`. Cấu trúc này tương tự `{}` trong C hoặc Java. Không cần `begin/end` trong ví dụ `flopr` vì `if/else` được tính là một statement duy nhất.
 
 VHDL
 
@@ -1151,13 +1151,13 @@ Hình 4.18 Circuit synthesize từ `sync`
 
 ### 4.4.5 Latch
 
-Nhớ Mục 3.2.2: D latch transparent khi clock HIGH, data đi input sang output; opaque khi LOW, giữ state cũ. Ví dụ HDL 4.21 cho idiom.
+Hãy nhớ lại từ Mục 3.2.2 rằng D latch ở trạng thái transparent khi clock là HIGH, cho phép data truyền từ input đến output. Latch trở thành opaque khi clock là LOW và giữ lại state cũ. Ví dụ HDL 4.21 minh họa idiom cho D latch.
 
 Không phải synthesis tool nào cũng hỗ trợ latch tốt. Trừ khi biết tool hỗ trợ và có lý do chính đáng để dùng, hãy tránh latch, dùng flip-flops edge-triggered thay thế. Cũng cần bảo đảm HDL không ngụ ý latch ngoài ý muốn, điều rất dễ xảy ra khi bất cẩn. Nhiều tool cảnh báo khi tạo latch; nếu bạn không chờ đợi nó, hãy tìm bug trong HDL. Nếu không biết mình có định dùng latch hay không, có lẽ bạn đang tiếp cận HDL như ngôn ngữ lập trình và còn những vấn đề lớn hơn đang ẩn phía sau.
 
 ## 4.5 THÊM VỀ COMBINATIONAL LOGIC
 
-Mục 4.2 dùng assignment mô tả behavioral combinational logic. Câu `always` SystemVerilog và `process` VHDL mô tả sequential circuit vì nhớ state cũ nếu không chỉ state mới. Nhưng `always/process` cũng mô tả behavioral combinational nếu sensitivity list đáp mọi input đổi và body cho output ở mọi tổ hợp. Ví dụ HDL 4.22 dùng `always/process` mô tả dãy bốn inverter (circuit Hình 4.3).
+Trong Mục 4.2, chúng ta đã sử dụng các câu lệnh gán để mô tả hành vi của combinational logic. Các câu lệnh `always` của SystemVerilog và `process` của VHDL được sử dụng để mô tả sequential circuit vì chúng ghi nhớ state cũ khi không có state mới được chỉ định. Tuy nhiên, cũng có thể sử dụng các câu lệnh `always/process` để mô tả hành vi của combinational logic nếu sensitivity list được viết để phản hồi với thay đổi ở tất cả các input và phần thân chỉ định giá trị output cho mọi tổ hợp input có thể có. Ví dụ HDL 4.22 sử dụng các câu lệnh `always/process` để mô tả một dãy bốn inverter (xem circuit sau synthesis trong Hình 4.3).
 
 ### Ví dụ HDL 4.21 D LATCH
 
@@ -1173,7 +1173,7 @@ module latch(input  logic          clk,
 endmodule
 ```
 
-`always_latch` tương đương `always @(clk, d)`, là idiom ưu tiên mô tả latch. Evaluate khi `clk` hoặc `d` đổi. Nếu `clk` HIGH, `d` đi sang `q`, mô tả positive level-sensitive latch. Nếu không `q` giữ cũ. SystemVerilog có thể cảnh báo nếu khối `always_latch` không ngụ ý latch.
+`always_latch` tương đương với `always @(clk, d)` và là idiom được ưu tiên dùng để mô tả latch trong SystemVerilog. Nó được đánh giá mỗi khi `clk` hoặc `d` thay đổi. Nếu `clk` là HIGH, `d` được truyền qua tới `q`, nên đoạn code này mô tả một positive level-sensitive latch. Nếu không, `q` giữ nguyên giá trị cũ. SystemVerilog có thể đưa ra cảnh báo nếu khối `always_latch` không mô tả một latch.
 
 VHDL
 
@@ -1200,13 +1200,13 @@ Sensitivity list gồm `clk` và `d` nên `process` evaluate khi `clk` hoặc `d
 
 Hình 4.19 Circuit synthesize từ `latch`
 
-HDL hỗ trợ blocking/nonblocking assignment trong `always/process`. Nhóm blocking evaluate theo thứ tự code như ngôn ngữ lập trình thường. Nhóm nonblocking evaluate đồng thời; mọi statement evaluate trước khi bất kỳ signal left-hand side được cập nhật.
+HDL hỗ trợ blocking assignment và nonblocking assignment trong một câu lệnh `always/process`. Một nhóm blocking assignment được thực hiện theo thứ tự xuất hiện trong code, đúng như trong một ngôn ngữ lập trình thông thường. Một nhóm nonblocking assignment được thực hiện đồng thời; tất cả các câu lệnh đều được tính toán trước khi bất kỳ signal nào ở left-hand side được cập nhật.
 
-Ví dụ HDL 4.23 định nghĩa full adder dùng signal trung gian `p`, `g` tính `s`, `cout`. Tạo cùng circuit Hình 4.8 nhưng dùng `always/process` thay assignment.
+Ví dụ HDL 4.23 định nghĩa một full adder sử dụng các signal trung gian `p` và `g` để tính `s` và `cout`. Ví dụ này tạo ra cùng circuit như trong Hình 4.8, nhưng sử dụng các statement `always/process` thay cho các assignment statement.
 
-Ví dụ 4.22, 4.23 dùng `always/` `process` chưa tốt cho combinational vì tốn dòng hơn assignment tương đương Ví dụ 4.2, 4.7. Nhưng `case`, `if` tiện cho logic phức tạp. Câu `case`, `if` phải trong `always/process`, sẽ xét mục tiếp.
+Ví dụ HDL 4.22 và 4.23 là những cách áp dụng chưa tốt các câu lệnh `always/` `process` để mô hình hóa combinational logic, vì chúng cần nhiều dòng code hơn cách tương đương sử dụng các câu lệnh gán trong Ví dụ HDL 4.2 và 4.7. Tuy nhiên, các câu lệnh `case` và `if` thuận tiện cho việc mô hình hóa combinational logic phức tạp hơn. Các câu lệnh `case` và `if` phải nằm bên trong câu lệnh `always/process` và sẽ được xem xét trong những mục tiếp theo.
 
-#### Ví dụ HDL 4.22 INVERTER DÙNG `always/process`
+### Ví dụ HDL 4.22 INVERTER DÙNG `always/process`
 
 SystemVerilog
 
@@ -1219,9 +1219,9 @@ module  inv(input   logic   [3:0]  a,
 endmodule
 ```
 
-`always_comb` evaluate lại statement bên trong `always` khi signal right-hand side của `<=` hoặc `=` trong `always` đổi. Ở đây tương đương `always @(a)` nhưng tốt hơn vì tránh lỗi đổi tên/thêm signal trong `always`. Nếu code trong `always` không combinational, cảnh báo. `always_comb` tương đương `always @(*)` nhưng được ưu tiên.
+`always_comb` thực hiện lại các câu lệnh bên trong câu lệnh `always` mỗi khi bất kỳ signal nào ở right-hand side của `<=` hoặc `=` trong câu lệnh `always` thay đổi. Trong trường hợp này, nó tương đương với `always @(a)` nhưng tốt hơn vì tránh được lỗi khi đổi tên hoặc thêm signal trong câu lệnh `always`. Nếu code bên trong khối `always` không phải combinational logic, SystemVerilog sẽ đưa ra cảnh báo. `always_comb` tương đương với `always @(*)` nhưng được ưu tiên trong SystemVerilog.
 
-`=` trong `always` gọi blocking assignment, khác nonblocking `<=`. Nên dùng blocking cho combinational, nonblocking cho sequential; Mục 4.5.4 bàn tiếp.
+Dấu `=` trong câu lệnh `always` được gọi là blocking assignment, khác với nonblocking assignment `<=`. Trong SystemVerilog, cách thực hành tốt là sử dụng blocking assignment cho combinational logic và nonblocking assignment cho sequential logic. Chúng ta sẽ thảo luận thêm về điều này trong Mục 4.5.4.
 
 VHDL
 
@@ -1247,15 +1247,15 @@ SystemVerilog
 
 Trong `always` SystemVerilog, `=` chỉ blocking, `<=` nonblocking (còn gọi concurrent assignment).
 
-Đừng nhầm với continuous assignment, tức `assign`. Câu `assign` phải ngoài `always`, cũng evaluate đồng thời.
+Đừng nhầm lẫn một trong hai loại này với continuous assignment, tức câu lệnh `assign`. Các câu lệnh `assign` phải được sử dụng bên ngoài các câu lệnh `always` và cũng được thực hiện đồng thời.
 
 VHDL
 
-Trong `process` VHDL, `:=` blocking, `<=` nonblocking (concurrent). Đây là mục đầu giới thiệu `:=`.
+Trong câu lệnh `process` của VHDL, `:=` biểu thị blocking assignment, còn `<=` biểu thị nonblocking assignment (cũng được gọi là concurrent assignment). Đây là mục đầu tiên giới thiệu `:=`.
 
-Nonblocking gán cho output/signal. Blocking gán variable khai báo trong `process` (Ví dụ 4.23). `<=` cũng có thể ngoài `process`, khi đó evaluate đồng thời.
+Nonblocking assignment được thực hiện đối với output và signal. Blocking assignment được thực hiện đối với các biến được khai báo trong câu lệnh `process` (xem Ví dụ HDL 4.23). `<=` cũng có thể xuất hiện bên ngoài câu lệnh `process`, và khi đó nó cũng được thực hiện đồng thời.
 
-#### Ví dụ HDL 4.23 FULL ADDER DÙNG `always/process`
+### Ví dụ HDL 4.23 FULL ADDER DÙNG `always/process`
 
 SystemVerilog
 
@@ -1274,9 +1274,9 @@ module fulladder(input   logic a, b, cin,
 endmodule
 ```
 
-Ở đây `always @(a, b, cin)` tương đương `always_comb`, nhưng `always_comb` tốt hơn vì tránh lỗi thiếu signal sensitivity list.
+Trong trường hợp này, `always @(a, b, cin)` sẽ tương đương với `always_comb`. Tuy nhiên, `always_comb` tốt hơn vì tránh được lỗi thường gặp là bỏ sót signal trong sensitivity list.
 
-Vì lý do Mục 4.5.4, tốt nhất dùng blocking cho combinational. Ví dụ dùng blocking, tính `p`, rồi `g`, `s`, cuối `cout`.
+Vì những lý do sẽ được thảo luận trong Mục 4.5.4, tốt nhất nên sử dụng blocking assignment cho combinational logic. Ví dụ này sử dụng blocking assignment, trước tiên tính `p`, sau đó tính `g`, rồi `s` và cuối cùng là `cout`.
 
 VHDL
 
@@ -1299,27 +1299,27 @@ begin
 end;
 ```
 
-Ở đây `process(a, b, cin)` tương đương `process(all)`, nhưng `process(all)` tốt hơn vì tránh thiếu signal sensitivity list.
+Trong trường hợp này, `process(a, b, cin)` sẽ tương đương với `process(all)`. Tuy nhiên, `process(all)` tốt hơn vì tránh được lỗi thường gặp là bỏ sót signal trong sensitivity list.
 
-Vì lý do Mục 4.5.4, tốt nhất blocking cho intermediate variable trong combinational. Ví dụ blocking cho `p`, `g` để nhận mới trước khi dùng tính `s`, `cout` phụ thuộc chúng.
+Vì những lý do sẽ được thảo luận trong Mục 4.5.4, tốt nhất nên sử dụng blocking assignment cho các biến trung gian trong combinational logic. Ví dụ này sử dụng blocking assignment cho `p` và `g` để chúng nhận giá trị mới trước khi được sử dụng để tính `s` và `cout`, là những giá trị phụ thuộc vào chúng.
 
-Vì `p`, `g` ở left-hand side blocking (`:=`) trong `process`, phải khai báo `variable` thay `signal`. Declaration `variable` ở trước `begin` trong process dùng nó.
+Vì `p` và `g` xuất hiện ở left-hand side của một blocking assignment (`:=`) trong câu lệnh `process`, chúng phải được khai báo là `variable` thay vì `signal`. Khai báo `variable` xuất hiện trước `begin` trong process sử dụng biến đó.
 
 ### 4.5.1 Câu lệnh case
 
-Ứng dụng tốt hơn của `always/process` cho combinational là decoder seven-segment display, tận dụng `case` phải nằm trong `always/process`.
+Một ứng dụng phù hợp hơn của câu lệnh `always/process` cho combinational logic là decoder cho màn hình seven-segment, tận dụng câu lệnh `case`, vốn phải nằm bên trong một câu lệnh `always/process`.
 
-Như thấy trong decoder seven-segment Ví dụ 2.10, thiết kế combinational lớn tẻ nhạt, dễ lỗi. HDL cải thiện lớn: chỉ function ở abstraction cao rồi tự synthesize thành gate. Ví dụ HDL 4.24 dùng `case` mô tả decoder seven-segment theo truth table. `case` làm action khác tùy input. Câu `case` ngụ ý combinational nếu mọi tổ hợp được định nghĩa; nếu không ngụ ý sequential vì output giữ cũ ở trường hợp undefined.
+Như bạn có thể đã nhận thấy ở decoder cho màn hình seven-segment trong Ví dụ 2.10, quy trình thiết kế các khối combinational logic lớn rất tẻ nhạt và dễ phát sinh lỗi. HDL mang lại một cải tiến lớn, cho phép bạn chỉ định chức năng ở mức abstraction cao hơn rồi tự động synthesize chức năng đó thành các gate. Ví dụ HDL 4.24 sử dụng các câu lệnh `case` để mô tả decoder cho màn hình seven-segment dựa trên truth table của nó. Câu lệnh `case` thực hiện những thao tác khác nhau tùy theo giá trị input. Một câu lệnh `case` biểu thị combinational logic nếu tất cả các tổ hợp input có thể có đều được định nghĩa. Nếu không, nó biểu thị sequential logic, vì output sẽ giữ giá trị cũ trong các trường hợp chưa được định nghĩa.
 
-HDL decoder seven-segment synthesize thành read-only memory (ROM) chứa 7 output cho mỗi trong 16 input. Mục 5.5.6 bàn ROM.
+HDL cho decoder của màn hình seven-segment được synthesize thành một read-only memory (ROM) chứa 7 output cho mỗi tổ hợp trong số 16 tổ hợp input có thể có. ROM sẽ được thảo luận thêm trong Mục 5.5.6.
 
-Nếu bỏ `default` hoặc `others` khỏi `case`, decoder nhớ output cũ mỗi khi data 10–15. Hành vi này lạ với hardware.
+Nếu bỏ mệnh đề `default` hoặc `others` khỏi câu lệnh `case`, decoder sẽ ghi nhớ output trước đó mỗi khi data nằm trong khoảng 10–15. Đây là một hành vi bất thường đối với hardware.
 
 Decoder thường cũng viết `case`. Ví dụ HDL 4.25 mô tả decoder 3:8.
 
 ### 4.5.2 Câu lệnh if
 
-Câu `always/process` cũng có thể chứa `if`. Câu `if` có thể theo sau bởi `else`. Nếu xử lý mọi tổ hợp, ngụ ý combinational; nếu không tạo sequential như latch Mục 4.4.5.
+Các câu lệnh `always/process` cũng có thể chứa các câu lệnh `if`. Sau câu lệnh `if` có thể là một câu lệnh `else`. Nếu tất cả các tổ hợp input có thể có đều được xử lý, câu lệnh biểu thị combinational logic. Nếu không, nó tạo ra sequential logic (giống như latch trong Mục 4.4.5).
 
 #### Ví dụ HDL 4.24 DECODER SEVEN-SEGMENT DISPLAY
 
@@ -1346,7 +1346,7 @@ module sevenseg(input   logic [3:0] data,
   endmodule
 ```
 
-`case` kiểm giá trị `data`. Khi `data` là 0, làm action sau dấu hai chấm, đặt `segments` thành 1111110. Tương tự kiểm tới 9 (chú ý cơ số mặc định 10).
+Câu lệnh `case` kiểm tra giá trị của `data`. Khi `data` bằng 0, câu lệnh thực hiện thao tác sau dấu hai chấm, đặt `segments` thành 1111110. Tương tự, câu lệnh case kiểm tra các giá trị data khác cho đến 9 (chú ý rằng cơ số mặc định được sử dụng là cơ số 10).
 
 Mệnh đề `default` tiện định nghĩa output mọi trường hợp chưa liệt kê, bảo đảm combinational.
 
@@ -1381,9 +1381,9 @@ begin
 end;
 ```
 
-`case` kiểm giá trị `data`. Khi `data` bằng `0`, làm action sau `=>`, đặt `segments` thành 1111110. `case` tương tự kiểm tới 9 (chú ý `X` chỉ hexadecimal). `others` tiện định nghĩa output mọi trường hợp khác, bảo đảm combinational.
+Câu lệnh `case` kiểm tra giá trị của `data`. Khi `data` bằng `0`, câu lệnh thực hiện thao tác sau `=>`, đặt `segments` thành 1111110. Tương tự, câu lệnh `case` kiểm tra các giá trị data khác cho đến 9 (chú ý cách dùng `X` cho các số hexadecimal). Mệnh đề `others` là một cách thuận tiện để định nghĩa output cho tất cả các trường hợp không được liệt kê tường minh, bảo đảm tạo ra combinational logic.
 
-Khác SystemVerilog, VHDL hỗ trợ selected signal assignment (Ví dụ 4.6), như `case` nhưng có thể ngoài process. Vì vậy ít lý do dùng process cho combinational.
+Khác với SystemVerilog, VHDL hỗ trợ các câu lệnh selected signal assignment (xem Ví dụ HDL 4.6), rất giống câu lệnh `case` nhưng có thể xuất hiện bên ngoài process. Vì vậy, ít có lý do hơn để sử dụng process nhằm mô tả combinational logic.
 
 ![fig4_20](images/ch04/fig4_20.png)
 
@@ -1412,7 +1412,7 @@ module  decoder3_8(input    logic   [2:0]   a,
 endmodule
 ```
 
-Ở đây `default` không tuyệt đối cần cho synthesis vì đã định nghĩa mọi input, nhưng thận trọng cho simulation nếu input `x` hay `z`.
+Trong trường hợp này, câu lệnh `default` không thực sự bắt buộc đối với logic synthesis vì tất cả các tổ hợp input có thể có đều được định nghĩa. Tuy nhiên, việc đưa nó vào là thận trọng đối với simulation, phòng trường hợp một trong các input là `x` hoặc `z`.
 
 VHDL
 
@@ -1440,7 +1440,7 @@ begin
 end;
 ```
 
-Ở đây `others` không tuyệt đối cần cho synthesis vì mọi input đã định nghĩa, nhưng thận trọng simulation nếu input `x`, `z` hoặc `u`.
+Trong trường hợp này, mệnh đề `others` không thực sự bắt buộc đối với logic synthesis vì tất cả các tổ hợp input có thể có đều được định nghĩa. Tuy nhiên, việc đưa nó vào là thận trọng đối với simulation, phòng trường hợp một trong các input là `x`, `z` hoặc `u`.
 
 ![fig4_21](images/ch04/fig4_21.png)
 
@@ -1485,23 +1485,23 @@ begin
 end;
 ```
 
-Khác SystemVerilog, VHDL hỗ trợ conditional signal assignment (Ví dụ 4.6), như `if` nhưng có thể ngoài process. Vì vậy ít lý do dùng process mô tả combinational.
+Khác với SystemVerilog, VHDL hỗ trợ các câu lệnh conditional signal assignment (xem Ví dụ HDL 4.6), rất giống câu lệnh `if` nhưng có thể xuất hiện bên ngoài process. Vì vậy, ít có lý do hơn để sử dụng process nhằm mô tả combinational logic.
 
 ![fig4_22](images/ch04/fig4_22.png)
 
 Hình 4.22 Circuit synthesize từ `priorityckt`
 
-Ví dụ HDL 4.26 dùng `if` mô tả priority circuit Mục 2.4. Nhớ priority circuit N-input đặt output TRUE tương ứng input most significant TRUE.
+Ví dụ HDL 4.26 sử dụng các câu lệnh `if` để mô tả một priority circuit, được định nghĩa trong Mục 2.4. Hãy nhớ rằng priority circuit N-input đặt output thành TRUE tương ứng với input có độ quan trọng cao nhất đang có giá trị TRUE.
 
 ### 4.5.3 Truth table có don’t care
 
-Như Mục 2.7.3, truth table có thể có don’t care để đơn giản logic hơn. Ví dụ HDL 4.27 mô tả priority circuit có don’t care.
+Như đã xem xét trong Mục 2.7.3, truth table có thể bao gồm don’t care để cho phép đơn giản hóa logic nhiều hơn. Ví dụ HDL 4.27 minh họa cách mô tả một priority circuit có don’t care.
 
-Synthesis tool tạo circuit hơi khác cho module này, Hình 4.23 so với Hình 4.22. Nhưng chúng tương đương logic.
+Công cụ synthesis tạo ra circuit trong Hình 4.23 cho module này, hơi khác so với priority circuit mà nó đã tạo ra trong Hình 4.22. Tuy nhiên, hai circuit tương đương nhau về mặt logic.
 
 ### 4.5.4 Blocking và nonblocking assignment
 
-Hướng dẫn trang 204 giải thích khi nào, cách dùng mỗi loại assignment. Không theo có thể viết code simulation có vẻ đúng nhưng synthesis hardware sai. Phần còn lại tùy chọn giải thích nguyên tắc phía sau.
+Các hướng dẫn ở trang 204 giải thích khi nào và cách sử dụng từng loại phép gán. Nếu không tuân theo những hướng dẫn này, bạn có thể viết code có vẻ hoạt động đúng trong simulation nhưng lại được synthesize thành hardware không chính xác. Phần còn lại của mục này là nội dung đọc tùy chọn, giải thích các nguyên lý đằng sau những hướng dẫn đó.
 
 #### Ví dụ HDL 4.27 PRIORITY CIRCUIT DÙNG DON’T CARE
 
@@ -1555,9 +1555,7 @@ HƯỚNG DẪN BLOCKING VÀ NONBLOCKING ASSIGNMENT
 
 SystemVerilog
 
-1\. Dùng `always_ff @(posedge clk)` và nonblocking assignment
-
-để mô hình hóa synchronous sequential logic.
+1\. Dùng `always_ff @(posedge clk)` và nonblocking assignment để mô hình hóa synchronous sequential logic.
 
 ```
 always_ff @(posedge clk)
@@ -1567,17 +1565,13 @@ always_ff @(posedge clk)
   end
 ```
 
-2\. Dùng continuous assignment mô hình hóa combinational
-
-logic đơn giản.
+2\. Dùng continuous assignment mô hình hóa combinational logic đơn giản.
 
 ```
 assign y = s ? d1 : d0;
 ```
 
-3\. Dùng `always_comb` và blocking assignment mô hình hóa
-
-combinational logic phức tạp hơn, nơi câu
+3\. Dùng `always_comb` và blocking assignment mô hình hóa combinational logic phức tạp hơn, nơi câu
 
 `always` hữu ích.
 
@@ -1590,15 +1584,11 @@ always_comb
   else                 y = 4’b0000;
 ```
 
-4\. Không gán cùng signal trong nhiều hơn
-
-một câu `always` hoặc continuous assignment.
+4\. Không gán cùng signal trong nhiều hơn một câu `always` hoặc continuous assignment.
 
 VHDL
 
-1\. Dùng `process(clk)` và nonblocking assignment mô hình hóa
-
-synchronous sequential logic.
+1\. Dùng `process(clk)` và nonblocking assignment mô hình hóa synchronous sequential logic.
 
 ```
 process(clk) begin
@@ -1609,19 +1599,13 @@ process(clk) begin
 end process;
 ```
 
-2\. Dùng concurrent assignment ngoài `process` để
-
-mô hình hóa combinational logic đơn giản.
+2\. Dùng concurrent assignment ngoài `process` để mô hình hóa combinational logic đơn giản.
 
 ```
 y <= d0 when s = '0' else d1;
 ```
 
-3\. Dùng `process(all)` mô hình hóa combinational
-
-logic phức tạp hơn, nơi `process` hữu ích. Dùng blocking
-
-assignment cho internal variable.
+3\. Dùng `process(all)` mô hình hóa combinational logic phức tạp hơn, nơi `process` hữu ích. Dùng blocking assignment cho internal variable.
 
 ```
 process(all)
@@ -1634,15 +1618,13 @@ begin
 end process;
 ```
 
-4\. Không gán cùng variable trong nhiều hơn
-
-một `process` hoặc concurrent assignment.
+4\. Không gán cùng variable trong nhiều hơn một `process` hoặc concurrent assignment.
 
 Combinational logic\*
 
-Full adder Ví dụ HDL 4.23 mô hình đúng bằng blocking. Phần này xem hoạt động và khác biệt nếu dùng nonblocking.
+Full adder trong Ví dụ HDL 4.23 được mô hình hóa chính xác bằng blocking assignment. Mục này tìm hiểu cách nó hoạt động và những khác biệt sẽ xuất hiện nếu sử dụng nonblocking assignment.
 
-Giả sử `a`, `b`, `cin` ban đầu 0. `p`, `g`, `s`, `cout` cũng 0. Lúc nào đó `a` đổi thành 1, kích `always/process`. Bốn blocking assignment evaluate theo thứ tự đây. (Trong VHDL, `s`, `cout` được gán đồng thời.) Chú ý `p`, `g` nhận mới trước khi tính `s`, `cout` do blocking. Quan trọng vì muốn tính `s`, `cout` bằng giá trị mới `p`, `g`.
+Giả sử ban đầu `a`, `b` và `cin` đều bằng 0. Vì vậy, `p`, `g`, `s` và `cout` cũng bằng 0. Tại một thời điểm nào đó, `a` thay đổi thành 1, kích hoạt câu lệnh `always/process`. Bốn blocking assignment được thực hiện theo thứ tự trình bày ở đây. (Trong code VHDL, `s` và `cout` được gán đồng thời.) Lưu ý rằng `p` và `g` nhận giá trị mới trước khi `s` và `cout` được tính, nhờ các blocking assignment. Điều này quan trọng vì chúng ta muốn tính `s` và `cout` bằng các giá trị mới của `p` và `g`.
 
 1\. `p` ← 1 ⊕ 0 = 1 2. `g` ← 1 ∙ 0 = 0
 
@@ -1698,13 +1680,13 @@ begin
 end;
 ```
 
-Vì `p`, `g` ở left-hand side nonblocking trong `process`, phải khai báo `signal` thay `variable`. Declaration `signal` trước `begin` trong `architecture`, không trong `process`.
+Vì `p` và `g` xuất hiện ở left-hand side của nonblocking assignment trong câu lệnh `process`, chúng phải được khai báo là `signal` thay vì `variable`. Khai báo `signal` xuất hiện trước `begin` trong `architecture`, không phải trong `process`.
 
-Chú ý `s` tính đồng thời `p`, nên dùng giá trị cũ `p`, không mới. Vì vậy `s` còn 0 thay vì 1. Nhưng `p` đổi 0 thành 1, kích `always/process` evaluate lần hai:
+Lưu ý rằng `s` được tính đồng thời với `p`. Vì vậy, nó sử dụng giá trị cũ của `p`, chứ không phải giá trị mới. Do đó, `s` vẫn bằng 0 thay vì trở thành 1. Tuy nhiên, `p` thay đổi từ 0 thành 1. Sự thay đổi này kích hoạt câu lệnh `always/process` thực hiện tính toán lần thứ hai, như sau:
 
 `p` ← 1 ⊕ 0 = 1 `g` ← 1 ∙ 0 = 0 `s` ← 1 ⊕ 0 = 1 `cout` ← 0 + 1 ∙ 0 = 0
 
-Lần này `p` đã 1, nên `s` đổi đúng thành 1. Nonblocking cuối cùng đúng nhưng `always/process` phải evaluate hai lần, làm simulation chậm dù synthesis cùng hardware.
+Lần này, `p` đã bằng 1, nên `s` thay đổi chính xác thành 1. Các nonblocking assignment cuối cùng cũng cho kết quả đúng, nhưng câu lệnh `always/process` phải thực hiện tính toán hai lần. Điều này khiến simulation chậm hơn, mặc dù kết quả synthesis vẫn là cùng một hardware.
 
 Một nhược điểm khác của nonblocking assignment khi mô hình combinational logic là HDL cho kết quả sai nếu quên đưa intermediate variable vào sensitivity list.
 
@@ -1712,11 +1694,11 @@ Tệ hơn, một số synthesis tool vẫn tạo hardware đúng dù sensitivity
 
 Sequential logic\*
 
-Synchronizer Ví dụ HDL 4.20 mô hình đúng bằng nonblocking. Rising edge copy `d` sang `n1` đồng thời `n1` sang `q`, mô tả đúng hai register. Ví dụ ban đầu `d` = 0, `n1` = 1, `q` = 0. Tại rising edge, hai assignment sau đồng thời, nên sau edge `n1` = 0, `q` = 1.
+Synchronizer trong Ví dụ HDL 4.20 được mô hình hóa chính xác bằng nonblocking assignment. Tại rising edge của clock, `d` được sao chép sang `n1` đồng thời với việc `n1` được sao chép sang `q`, nên code mô tả đúng hai register. Ví dụ, giả sử ban đầu `d` = 0, `n1` = 1 và `q` = 0. Tại rising edge của clock, hai phép gán sau diễn ra đồng thời, vì vậy sau clock edge, `n1` = 0 và `q` = 1.
 
 `n1`←`d` = 0 `q`←`n1` = 1
 
-Ví dụ HDL 4.29 thử cùng module với blocking. Rising edge `clk` copy `d` sang `n1`, rồi giá trị mới `n1` sang `q`, khiến `d` xuất hiện sai tại cả `n1`, `q`. Assignment nối tiếp nên sau edge `q = n1` = 0.
+Ví dụ HDL 4.29 thử mô tả cùng module đó bằng blocking assignment. Tại rising edge của `clk`, `d` được sao chép sang `n1`. Sau đó, giá trị mới này của `n1` được sao chép sang `q`, khiến `d` xuất hiện không đúng ở cả `n1` và `q`. Các phép gán diễn ra lần lượt, nên sau clock edge, `q = n1` = 0.
 
 1\. `n1` ←`d` = 0
 
@@ -1724,11 +1706,11 @@ Ví dụ HDL 4.29 thử cùng module với blocking. Rising edge `clk` copy `d` 
 
 SystemVerilog
 
-Nếu sensitivity list `always` Ví dụ 4.28 viết `always @(a, b, cin)` thay `always_comb`, không evaluate lại khi `p` hoặc `g` đổi. Khi đó `s` sai ở 0 thay 1.
+Nếu sensitivity list của câu lệnh `always` trong Ví dụ HDL 4.28 được viết là `always @(a, b, cin)` thay vì `always_comb`, câu lệnh sẽ không được thực hiện lại khi `p` hoặc `g` thay đổi. Trong trường hợp đó, `s` sẽ bị giữ sai ở giá trị 0 thay vì 1.
 
 VHDL
 
-Nếu sensitivity list process Ví dụ 4.28 viết `process(a, b, cin)` thay `process(all)`, không evaluate lại khi `p` hoặc `g` đổi. Khi đó `s` sai ở 0 thay 1.
+Nếu sensitivity list của câu lệnh process trong Ví dụ HDL 4.28 được viết là `process(a, b, cin)` thay vì `process(all)`, câu lệnh sẽ không được thực hiện lại khi `p` hoặc `g` thay đổi. Trong trường hợp đó, `s` sẽ bị giữ sai ở giá trị 0 thay vì 1.
 
 Vì `n1` vô hình với ngoài, không ảnh hưởng `q`, synthesizer bỏ hoàn toàn như Hình 4.24.
 
@@ -1736,7 +1718,7 @@ Bài học của ví dụ là chỉ dùng nonblocking assignment trong câu `alw
 
 ## 4.6 FINITE STATE MACHINE
 
-Nhớ FSM gồm state register và hai khối combinational tính next state, output từ current state/input, như Hình 3.22. Mô tả HDL tương ứng chia ba phần: state register, next state logic, output logic.
+Hãy nhớ lại rằng finite state machine (FSM) gồm một state register và hai khối combinational logic để tính next state và output từ current state và input, như đã minh họa trong Hình 3.22. Tương ứng, mô tả HDL của state machine được chia thành ba phần để mô hình hóa state register, next state logic và output logic.
 
 ### Ví dụ HDL 4.29 SYNCHRONIZER SAI VỚI BLOCKING ASSIGNMENT
 
@@ -1791,11 +1773,11 @@ end;
 
 Hình 4.24 Circuit synthesize từ `syncbad`
 
-Ví dụ HDL 4.30 mô tả FSM divide-by-3 Mục 3.4.2, có asynchronous reset khởi tạo. State register dùng idiom flip-flop thường. Khối next state và output là combinational.
+Ví dụ HDL 4.30 mô tả FSM divide-by-3 trong Mục 3.4.2. Nó cung cấp asynchronous reset để khởi tạo FSM. State register sử dụng idiom thông thường cho flip-flops. Các khối next state logic và output logic đều là combinational logic.
 
-Synthesis tool chỉ tạo block diagram và state transition diagram cho state machine, không hiển thị gate hoặc input/output trên cung/state. Vì vậy cẩn thận chỉ FSM đúng. Hình 4.25 FSM divide-by-3 tương tự Hình 3.28(b). Vòng đôi chỉ S0 là reset state. Implementation Gate-level của divide-by-3 đã cho Mục 3.4.2.
+Đối với state machine, các công cụ synthesis chỉ tạo block diagram và state transition diagram; chúng không hiển thị các logic gate hoặc các input và output trên những cung và state. Vì vậy, hãy cẩn thận để chỉ định chính xác FSM trong code HDL của bạn. State transition diagram trong Hình 4.25 cho FSM divide-by-3 tương tự sơ đồ trong Hình 3.28(b). Vòng tròn kép biểu thị rằng S0 là reset state. Các cách triển khai Gate-level của FSM divide-by-3 đã được minh họa trong Mục 3.4.2.
 
-#### Ví dụ HDL 4.30 FINITE STATE MACHINE DIVIDE-BY-3
+### Ví dụ HDL 4.30 FINITE STATE MACHINE DIVIDE-BY-3
 
 SystemVerilog
 
@@ -1827,16 +1809,16 @@ endmodule
 
 `typedef` định nghĩa `statetype` là logic value two-bit với ba khả năng `S0`, `S1`, `S2`. `state`, `nextstate` là signal `statetype`.
 
-Enumerated encoding mặc định theo số: `S0`=00, `S1`=01, `S2`=10. Người dùng có thể đặt tường minh nhưng tool coi là gợi ý, không bắt buộc. Ví dụ đoạn sau encode state bằng one-hot 3-bit:
+Các giá trị encoding của kiểu enumeration mặc định theo thứ tự số: `S0`=00, `S1`=01 và `S2`=10. Người dùng có thể chỉ định tường minh các giá trị encoding; tuy nhiên, công cụ synthesis xem chúng là gợi ý, không phải yêu cầu bắt buộc. Ví dụ, đoạn code sau encode các state thành giá trị one-hot 3-bit:
 
 ```
 typedef enum logic [2:0] {S0 = 3'b001, S1 = 3'b010, S2 = 3'b100}
 statetype;
 ```
 
-Chú ý dùng `case` định nghĩa state transition table. Vì next state combinational nên cần `default` dù state `2'b11` không nên xảy ra.
+Lưu ý cách sử dụng câu lệnh `case` để định nghĩa state transition table. Vì next state logic phải là combinational logic, cần có `default`, mặc dù state `2'b11` không bao giờ được xuất hiện.
 
-Output `y` bằng 1 khi state `S0`. Comparison `a = = b` là 1 nếu `a` bằng `b`, còn lại 0. Inequality `a != b` ngược lại: 1 nếu `a` khác `b`.
+Output `y` bằng 1 khi state là `S0`. Phép so sánh bằng `a = = b` cho giá trị 1 nếu `a` bằng `b`, và bằng 0 trong trường hợp ngược lại. Phép so sánh khác `a != b` thực hiện điều ngược lại, cho giá trị 1 nếu `a` không bằng `b`.
 
 VHDL
 
@@ -1866,9 +1848,9 @@ begin
 end;
 ```
 
-Ví dụ định nghĩa enumeration data type mới `statetype`, ba khả năng `S0`, `S1`, `S2`. `state`, `nextstate` là signal `statetype`. Dùng enumeration thay chọn encoding cho synthesizer tự tìm nhiều encoding chọn tốt nhất.
+Ví dụ này định nghĩa một enumeration data type mới, `statetype`, với ba giá trị có thể có: `S0`, `S1` và `S2`. `state` và `nextstate` là các signal có kiểu `statetype`. Bằng cách sử dụng enumeration thay vì tự chọn state encoding, VHDL cho phép synthesizer khảo sát nhiều state encoding khác nhau để chọn ra cách tốt nhất.
 
-Trong HDL trên, output `y` là 1 khi `state` là `S0`. Inequality dùng `/=`. Muốn output 1 khi state bất cứ gì trừ `S0`, đổi thành `state /= S0`.
+Trong HDL ở trên, output `y` bằng 1 khi `state` là `S0`. Phép so sánh khác sử dụng `/=`. Để tạo output bằng 1 khi state là bất kỳ giá trị nào khác `S0`, hãy đổi phép so sánh thành `state /= S0`.
 
 ![fig4_25](images/ch04/fig4_25.png)
 
@@ -1876,11 +1858,11 @@ Hình 4.25 Circuit synthesize từ `divideby3fsm`
 
 > Tool dùng encoding 3-bit `(Q[2:0])` thay 2-bit gợi ý trong SystemVerilog.
 
-State đặt tên bằng enumeration thay tham chiếu binary value, giúp code dễ đọc và đổi.
+Lưu ý rằng các state được đặt tên bằng một kiểu dữ liệu enumeration, thay vì được tham chiếu bằng các giá trị binary. Điều này giúp code dễ đọc và dễ thay đổi hơn.
 
 Nếu vì lý do nào muốn HIGH ở S0, S1, sửa output logic như sau.
 
-Hai ví dụ tiếp mô tả FSM nhận dạng mẫu ốc sên Mục 3.4.3. Code dùng `case`, `if` xử lý next state/output phụ thuộc input và current state. Có cả Moore và Mealy. Moore (Ví dụ 4.31) output chỉ theo current state; Mealy (4.32) theo cả state và input.
+Hai ví dụ tiếp theo mô tả FSM nhận dạng mẫu của ốc sên trong Mục 3.4.3. Code minh họa cách sử dụng các câu lệnh `case` và `if` để xử lý next state logic và output logic phụ thuộc vào cả input lẫn current state. Chúng ta trình bày cả module Moore và module Mealy. Trong Moore machine (Ví dụ HDL 4.31), output chỉ phụ thuộc vào current state, còn trong Mealy machine (Ví dụ HDL 4.32), output logic phụ thuộc vào cả current state và input.
 
 SystemVerilog
 
@@ -1896,7 +1878,7 @@ VHDL
 y <= '1' when (state = S0 or state = S1) else '0';
 ```
 
-#### Ví dụ HDL 4.31 MOORE FSM NHẬN DẠNG MẪU
+### Ví dụ HDL 4.31 MOORE FSM NHẬN DẠNG MẪU
 
 SystemVerilog
 
@@ -1931,7 +1913,7 @@ module  patternMoore(input     logic  clk,
 endmodule
 ```
 
-Nonblocking (`<=`) dùng trong state register mô tả sequential, blocking (`=`) trong next state mô tả combinational.
+Lưu ý cách sử dụng nonblocking assignment (`<=`) trong state register để mô tả sequential logic, trong khi blocking assignment (`=`) được sử dụng trong next state logic để mô tả combinational logic.
 
 VHDL
 
@@ -2062,11 +2044,11 @@ Hình 4.27 Circuit synthesize từ `patternMealy`
 
 ### 4.7.1 SystemVerilog
 
-Trước SystemVerilog, Verilog chủ yếu dùng `reg`, `wire`. Dù tên như vậy, signal `reg` có thể gắn register hoặc không, gây nhầm lớn người học. SystemVerilog đưa `logic` loại nhầm; sách nhấn mạnh `logic`. Phần này giải thích kỹ `reg`, `wire` cho người cần đọc code cũ.
+Trước SystemVerilog, Verilog chủ yếu sử dụng hai kiểu: `reg` và `wire`. Mặc dù có tên như vậy, một signal `reg` có thể liên quan hoặc không liên quan đến register. Điều này gây ra nhiều nhầm lẫn cho những người học ngôn ngữ này. SystemVerilog giới thiệu kiểu `logic` để loại bỏ sự nhầm lẫn đó; vì vậy, cuốn sách này tập trung vào kiểu `logic`. Mục này giải thích chi tiết hơn các kiểu `reg` và `wire` dành cho những người cần đọc code Verilog cũ.
 
-Trong Verilog, signal ở left-hand side `<=` hoặc `=` trong `always` phải khai báo `reg`. Nếu không nên `wire`. Vì vậy signal `reg` có thể là output flip-flop, latch hoặc combinational tùy sensitivity list và statement khối `always`.
+Trong Verilog, nếu một signal xuất hiện ở left-hand side của `<=` hoặc `=` trong một khối `always`, signal đó phải được khai báo là `reg`. Nếu không, nó nên được khai báo là `wire`. Do đó, một signal `reg` có thể là output của một flip-flop, một latch hoặc combinational logic, tùy thuộc vào sensitivity list và statement của khối `always`.
 
-Input/output port mặc định `wire` trừ khi type định nghĩa `reg`. Ví dụ sau là flip-flop Verilog thường. `clk`, `d` mặc định `wire`, `q` tường minh `reg` vì ở left-hand side `<=` trong `always`.
+Các port input và output mặc định có kiểu `wire`, trừ khi kiểu của chúng được định nghĩa tường minh là `reg`. Ví dụ sau minh họa cách mô tả một flip-flop trong Verilog truyền thống. Lưu ý rằng `clk` và `d` mặc định có kiểu `wire`, còn `q` được định nghĩa tường minh là `reg` vì nó xuất hiện ở left-hand side của `<=` trong khối `always`.
 
 ```
 module flop(input            clk,
@@ -2078,13 +2060,13 @@ module flop(input            clk,
 endmodule
 ```
 
-SystemVerilog đưa type `logic`. `logic` đồng nghĩa `reg`, tránh gây hiểu nhầm có thật là flip-flop không. Cũng nới rule `assign` và hierarchical port instantiation để `logic` dùng ngoài `always` nơi trước cần `wire`. Gần mọi signal có thể `logic`. Ngoại lệ nhiều driver (tristate bus) phải net như Ví dụ 4.10, để báo error thay giá trị `x` khi signal `logic` vô tình nối nhiều driver.
+SystemVerilog giới thiệu kiểu `logic`. `logic` đồng nghĩa với `reg` và tránh khiến người dùng hiểu nhầm rằng nó nhất thiết là một flip-flop. Hơn nữa, SystemVerilog nới lỏng các quy tắc đối với câu lệnh `assign` và hierarchical port instantiation để có thể sử dụng `logic` bên ngoài các khối `always`, tại những nơi trước đây bắt buộc phải dùng `wire`. Vì vậy, gần như tất cả các signal trong SystemVerilog đều có thể là `logic`. Ngoại lệ là các signal có nhiều driver (ví dụ, một tristate bus) phải được khai báo là net, như mô tả trong Ví dụ HDL 4.10. Quy tắc này cho phép SystemVerilog tạo thông báo lỗi thay vì giá trị `x` khi một signal `logic` vô tình được nối với nhiều driver.
 
-Net phổ biến nhất `wire` hoặc `tri`, đồng nghĩa nhưng `wire` thường khi một driver, `tri` khi nhiều. Vì vậy `wire` lỗi thời trong SystemVerilog do `logic` được ưu tiên một driver.
+Loại net phổ biến nhất được gọi là `wire` hoặc `tri`. Hai kiểu này đồng nghĩa, nhưng theo quy ước, `wire` được sử dụng khi có một driver, còn `tri` được sử dụng khi có nhiều driver. Vì vậy, `wire` đã trở nên lỗi thời trong SystemVerilog vì `logic` được ưu tiên sử dụng cho các signal có một driver.
 
-Net `tri` do một/nhiều driver lái cùng giá trị sẽ nhận giá trị đó. Không lái thì float (`z`). Nhiều driver lái giá trị khác (`0`, `1`, `x`) thì contention (`x`).
+Khi net `tri` được một hoặc nhiều driver điều khiển đến cùng một giá trị, nó nhận giá trị đó. Khi không có driver nào điều khiển, nó ở trạng thái floating (`z`). Khi nhiều driver điều khiển nó đến các giá trị khác nhau (`0`, `1` hoặc `x`), nó ở trạng thái contention (`x`).
 
-Net type khác có cách resolve khác khi không driver hoặc nhiều nguồn, hiếm dùng nhưng có thể thay nơi thường có `tri` (như signal nhiều driver). Bảng 4.7 mô tả từng loại.
+Có những kiểu net khác có cách resolve giá trị khác nhau khi không được điều khiển hoặc được điều khiển bởi nhiều nguồn. Những kiểu này hiếm khi được sử dụng, nhưng có thể thay thế tại bất kỳ vị trí nào thường sử dụng net `tri` (ví dụ, cho các signal có nhiều driver). Từng kiểu được mô tả trong Bảng 4.7.
 
 Bảng 4.7 Net resolution
 
@@ -2101,11 +2083,11 @@ Bảng 4.7 Net resolution
 
 Khác SystemVerilog, VHDL cưỡng chế type system chặt, bảo vệ khỏi vài lỗi nhưng đôi lúc cồng kềnh.
 
-Dù quan trọng căn bản, `STD_LOGIC` không tích hợp trong VHDL mà thuộc library `IEEE.STD_LOGIC_1164`. Vì vậy mỗi file phải có library statement như ví dụ trước.
+Mặc dù có vai trò quan trọng nền tảng, kiểu `STD_LOGIC` không được tích hợp sẵn trong VHDL. Thay vào đó, nó là một phần của library `IEEE.STD_LOGIC_1164`. Vì vậy, mỗi file phải chứa các library statement được trình bày trong những ví dụ trước.
 
 Hơn nữa `IEEE.STD_LOGIC_1164` thiếu operation cơ bản cộng, so sánh, shift, chuyển integer cho data `STD_` `LOGIC_VECTOR`. Cuối cùng chúng thêm vào VHDL 2008 trong `IEEE.NUMERIC_STD_UNSIGNED`.
 
-VHDL còn có `BOOLEAN` hai giá trị `true`, `false`. `BOOLEAN` trả từ comparison như `s ='0'`, dùng conditional như `when`, `if`. Dù dễ nghĩ `BOOLEAN true` tương đương `STD_LOGIC '1'`, `BOOLEAN false` nghĩa `STD_LOGIC` '`0`', trước 2008 không thay nhau. Ví dụ code cũ phải viết
+VHDL cũng có kiểu `BOOLEAN` với hai giá trị: `true` và `false`. Các giá trị `BOOLEAN` được trả về từ các phép so sánh (chẳng hạn phép so sánh bằng `s ='0'`), và các giá trị này được sử dụng trong các câu lệnh điều kiện như `when` và `if`. Mặc dù dễ cho rằng giá trị `BOOLEAN true` tương đương với `STD_LOGIC '1'` và `BOOLEAN false` có nghĩa là `STD_LOGIC` '`0`', các kiểu này không thể sử dụng thay thế cho nhau trước VHDL 2008. Ví dụ, trong code VHDL cũ, ta phải viết
 
 ```
 y <= d1 when (s = '1') else d0;
@@ -2131,13 +2113,13 @@ q  <=  (state = S2);
 
 vì `(state = S2)` trả `BOOLEAN`, không gán trực tiếp cho signal `STD_LOGIC` `y` được.
 
-Dù không khai báo signal `BOOLEAN`, comparison tự ngụ ý và conditional dùng chúng. Tương tự VHDL có `INTEGER` biểu diễn cả dương/âm. Signal type `INTEGER` bao ít nhất –(2<sup>31</sup> – 1) đến 2<sup>31</sup> – 1. Integer làm index bus. Ví dụ câu
+Mặc dù chúng ta không khai báo bất kỳ signal nào có kiểu `BOOLEAN`, kiểu này tự động được suy ra từ các phép so sánh và được sử dụng trong các câu lệnh điều kiện. Tương tự, VHDL có kiểu `INTEGER` để biểu diễn cả số nguyên dương lẫn số nguyên âm. Các signal có kiểu `INTEGER` bao phủ ít nhất khoảng giá trị từ –(2<sup>31</sup> – 1) đến 2<sup>31</sup> – 1. Các giá trị số nguyên được sử dụng làm chỉ số của bus. Ví dụ, trong câu lệnh
 
 ```
 y <= a(3) and a(2) and a(1) and a(0);
 ```
 
-0, 1, 2, 3 là integer làm index chọn bit signal `a`. Không index bus trực tiếp bằng `STD_LOGIC` hoặc `STD_LOGIC_VECTOR`; phải chuyển thành `INTEGER`. Ví dụ dưới multiplexer 8:1 chọn bit bằng index 3-bit. Function `TO_INTEGER` trong `IEEE.NUMERIC_STD_UNSIGNED` chuyển `STD_LOGIC_VECTOR` sang `INTEGER` cho giá trị dương (unsigned).
+0, 1, 2 và 3 là những số nguyên đóng vai trò chỉ số để chọn các bit của signal `a`. Chúng ta không thể trực tiếp dùng một signal `STD_LOGIC` hoặc `STD_LOGIC_VECTOR` làm chỉ số của bus. Thay vào đó, phải chuyển signal thành `INTEGER`. Điều này được minh họa trong ví dụ dưới đây về multiplexer 8:1 chọn một bit từ vector bằng một chỉ số 3-bit. Hàm `TO_INTEGER` được định nghĩa trong thư viện `IEEE.NUMERIC_STD_UNSIGNED` và thực hiện chuyển đổi từ `STD_LOGIC_VECTOR` sang `INTEGER` đối với các giá trị dương (unsigned).
 
 ```
 library IEEE;
@@ -2154,7 +2136,7 @@ begin
 end;
 ```
 
-VHDL nghiêm việc port `out` chỉ output. Ví dụ code AND two- và three-input sau bất hợp lệ vì `v` là output, cũng dùng tính `w`.
+VHDL cũng quy định chặt chẽ rằng các port `out` chỉ được sử dụng làm output. Ví dụ, code sau cho các gate AND two- và three-input không hợp lệ trong VHDL vì `v` là output nhưng đồng thời được sử dụng để tính `w`.
 
 ```
 library IEEE; use IEEE.STD_LOGIC_1164.all;
@@ -2170,7 +2152,7 @@ begin
 end;
 ```
 
-VHDL có port đặc biệt `buffer` giải quyết. Signal nối `buffer` hành xử output nhưng cũng dùng được trong module. Entity sửa như sau. Verilog/SystemVerilog không hạn chế này, không cần port `buffer`. VHDL 2008 bỏ hạn chế, cho đọc port `out`.
+VHDL định nghĩa một kiểu port đặc biệt, `buffer`, để giải quyết vấn đề này. Signal nối với port `buffer` hoạt động như output nhưng cũng có thể được sử dụng bên trong module. Định nghĩa entity đã được sửa được trình bày dưới đây. Verilog và SystemVerilog không có hạn chế này và không cần các port `buffer`. VHDL 2008 loại bỏ hạn chế này bằng cách cho phép đọc các port `out`.
 
 ![fig4_28](images/ch04/fig4_28.png)
 
@@ -2184,7 +2166,7 @@ entity and23 is
 end;
 ```
 
-Phần lớn operation như cộng, trừ, Boolean giống nhau dù signed/unsigned. Nhưng so độ lớn, nhân, arithmetic right shift khác giữa signed two’s complement và unsigned binary. Chương 5 xét các operation. Ví dụ HDL 4.33 cho cách chỉ signal là signed.
+Phần lớn các phép toán như cộng, trừ và Boolean logic đều giống nhau, bất kể số đó là signed hay unsigned. Tuy nhiên, phép so sánh độ lớn, phép nhân và arithmetic right shift được thực hiện khác nhau đối với số signed two’s complement và số unsigned binary. Chúng ta sẽ xem xét các phép toán này trong Chương 5. Ví dụ HDL 4.33 mô tả cách chỉ định rằng một signal biểu diễn một số signed.
 
 ## 4.8 PARAMETERIZED MODULE\*
 
@@ -2239,7 +2221,7 @@ use IEEE.NUMERIC_STD_UNSIGNED.all;
 
 VHDL cũng định nghĩa type `UNSIGNED`, `SIGNED` trong `IEEE.NUMERIC_STD`, nhưng cần type conversion ngoài phạm vi chương.
 
-#### Ví dụ HDL 4.34 MULTIPLEXER 2:1 N-BIT PARAMETERIZED
+### Ví dụ HDL 4.34 MULTIPLEXER 2:1 N-BIT PARAMETERIZED
 
 SystemVerilog
 
@@ -2254,7 +2236,7 @@ module mux2
 endmodule
 ```
 
-SystemVerilog cho câu `#(parameter . . .)` trước input/output định nghĩa parameter. Câu `parameter` gồm mặc định (`8`) của parameter tên `width`. Số bit input/output có thể theo parameter.
+SystemVerilog cho phép đặt câu lệnh `#(parameter . . .)` trước các input và output để định nghĩa parameter. Câu lệnh `parameter` bao gồm giá trị mặc định (`8`) của parameter, trong trường hợp này có tên là `width`. Số bit của các input và output có thể phụ thuộc vào parameter này.
 
 ```
 module mux4_8(input   logic [7:0] d0, d1, d2, d3,
@@ -2348,11 +2330,11 @@ outmux: mux2 generic map(12)
 
 Hình 4.29 Circuit synthesize từ `mux4_12`
 
-Ví dụ HDL 4.35 cho decoder, ứng dụng parameterized module tốt hơn nữa. Decoder N:2<sup>N</sup> lớn khó chỉ bằng `case`, nhưng dễ bằng parameterized code đặt bit output đúng thành 1. Cụ thể blocking đặt tất cả 0, rồi đổi bit đúng thành 1.
+Ví dụ HDL 4.35 minh họa một decoder, là ứng dụng còn phù hợp hơn của parameterized module. Một decoder N:2<sup>N</sup> lớn khó được chỉ định bằng các câu lệnh `case`, nhưng có thể dễ dàng được mô tả bằng parameterized code chỉ cần đặt bit output thích hợp thành 1. Cụ thể, decoder sử dụng blocking assignment để đặt tất cả các bit thành 0, rồi thay đổi bit thích hợp thành 1.
 
-HDL cũng có `generate` tạo lượng hardware biến đổi theo parameter. `generate` hỗ trợ loop `for`, câu `if` xác định bao nhiêu loại hardware. Ví dụ HDL 4.36 dùng `generate` tạo AND N-input từ chuỗi AND two-input. Reduction operator dĩ nhiên gọn hơn nhưng ví dụ minh họa nguyên tắc hardware generator.
+HDL cũng cung cấp các câu lệnh `generate` để tạo ra lượng hardware thay đổi tùy theo giá trị của một parameter. `generate` hỗ trợ vòng lặp `for` và câu lệnh `if` để xác định cần tạo bao nhiêu phần tử hardware thuộc những loại nào. Ví dụ HDL 4.36 minh họa cách sử dụng các câu lệnh `generate` để tạo chức năng AND N-input từ một chuỗi các gate AND two-input. Dĩ nhiên, reduction operator sẽ gọn gàng và đơn giản hơn cho ứng dụng này, nhưng ví dụ minh họa nguyên lý chung của hardware generator.
 
-#### Ví dụ HDL 4.35 DECODER N:2<sup>N</sup> PARAMETERIZED
+### Ví dụ HDL 4.35 DECODER N:2<sup>N</sup> PARAMETERIZED
 
 SystemVerilog
 
@@ -2400,11 +2382,11 @@ Hãy thận trọng với câu `generate`; rất dễ vô tình tạo một lư�
 
 ## 4.9 TESTBENCH
 
-Testbench là HDL module kiểm module khác gọi device under test (DUT). Nó áp input vào DUT và lý tưởng là kiểm output đúng. Pattern input/output mong muốn gọi test vector.
+Testbench là một module HDL dùng để kiểm tra một module khác, được gọi là device under test (DUT). Testbench chứa các câu lệnh để đưa input vào DUT và, lý tưởng nhất, kiểm tra xem các output được tạo ra có chính xác hay không. Các mẫu input và output mong muốn được gọi là test vector.
 
-> Một số tool gọi module cần kiểm là unit under test (UUT).
+> Một số công cụ cũng gọi module cần được kiểm tra là unit under test (UUT).
 
-Xét kiểm module `sillyfunction` Mục 4.1.1 tính `y` = $\overline{\texttt{a}}$ $\overline{\texttt{b}}$ $\overline{\texttt{c}}$ + `a`$\overline{\texttt{b}}$ $\overline{\texttt{c}}$ + `a`$\overline{\texttt{b}}$`c`. Module đơn giản, có thể exhaustive testing bằng cả tám test vector.
+Hãy xét việc kiểm tra module `sillyfunction` trong Mục 4.1.1, thực hiện tính `y` = $\overline{\texttt{a}}$ $\overline{\texttt{b}}$ $\overline{\texttt{c}}$ + `a`$\overline{\texttt{b}}$ $\overline{\texttt{c}}$ + `a`$\overline{\texttt{b}}$`c`. Đây là một module đơn giản, vì vậy chúng ta có thể thực hiện exhaustive testing bằng cách đưa vào tất cả tám test vector có thể có.
 
 ### Ví dụ HDL 4.36 AND GATE N-INPUT PARAMETERIZED
 
@@ -2459,13 +2441,13 @@ Không cần khai báo generate loop variable `i`.
 
 Hình 4.30 Circuit synthesize từ `andN`
 
-Ví dụ HDL 4.37 minh họa testbench đơn giản. Nó instantiate DUT rồi áp input. Blocking assignment và delay được dùng để áp input đúng thứ tự. Người dùng phải xem kết quả simulation và tự kiểm tra output đúng. Testbench được mô phỏng như HDL module khác, nhưng không synthesize được.
+Ví dụ HDL 4.37 minh họa một testbench đơn giản. Testbench này tạo một instance của DUT, sau đó đưa các input vào. Blocking assignment và delay được sử dụng để đưa các input vào theo đúng thứ tự. Người dùng phải xem kết quả simulation và kiểm tra trực tiếp để xác nhận rằng các output được tạo ra là chính xác. Testbench được mô phỏng giống như các HDL module khác. Tuy nhiên, chúng không thể được synthesize.
 
-Kiểm tra output đúng rất tẻ nhạt và error-prone. Hơn nữa, xác định output đúng dễ hơn nhiều khi còn nhớ rõ thiết kế. Nếu sửa nhỏ và phải kiểm lại vài tuần sau, xác định output đúng trở nên phiền phức. Cách tốt hơn nhiều là viết self-checking testbench như Ví dụ HDL 4.38.
+Việc kiểm tra tính chính xác của output rất tẻ nhạt và error-prone. Hơn nữa, xác định output chính xác sẽ dễ dàng hơn nhiều khi bạn vẫn còn nhớ rõ thiết kế. Nếu bạn thực hiện những thay đổi nhỏ và cần kiểm tra lại sau vài tuần, việc xác định output chính xác sẽ trở nên phiền phức. Một cách tốt hơn nhiều là viết self-checking testbench, như trong Ví dụ HDL 4.38.
 
-Viết code cho từng test vector cũng tẻ nhạt, nhất là module cần nhiều vector. Cách còn tốt hơn là đặt test vector trong file riêng. Testbench chỉ đọc từ file, áp input test vector lên DUT, đợi, kiểm output DUT khớp output vector và lặp tới cuối file.
+Việc viết code cho từng test vector cũng trở nên tẻ nhạt, đặc biệt đối với các module cần nhiều vector. Một cách còn tốt hơn là đặt các test vector trong một file riêng. Testbench chỉ cần đọc các test vector từ file, đưa test vector đầu vào vào DUT, chờ, kiểm tra xem các giá trị output của DUT có khớp với vector đầu ra hay không, rồi lặp lại cho đến cuối file test vector.
 
-#### Ví dụ HDL 4.37 TESTBENCH
+### Ví dụ HDL 4.37 TESTBENCH
 
 SystemVerilog
 
@@ -2490,7 +2472,7 @@ module testbench1();
 endmodule
 ```
 
-Câu `initial` chạy body khi simulation bắt đầu. Ở đây áp 000 rồi đợi 10 time unit; áp 001 đợi thêm 10, tiếp tới đủ tám input. Chỉ nên dùng `initial` trong testbench simulation, không module cần synthesize hardware thực. Hardware không thể kỳ diệu chạy chuỗi bước đặc biệt lúc bật.
+Câu lệnh `initial` thực thi các câu lệnh trong phần thân của nó khi simulation bắt đầu. Trong trường hợp này, trước tiên nó đưa mẫu input 000 vào và chờ 10 đơn vị thời gian. Sau đó, nó đưa mẫu 001 vào và chờ thêm 10 đơn vị thời gian, rồi tiếp tục như vậy cho đến khi đã đưa vào tất cả tám tổ hợp input có thể có. Chỉ nên sử dụng các câu lệnh `initial` trong testbench phục vụ simulation, không nên sử dụng trong các module dự định synthesize thành hardware thực tế. Hardware không có cách nào tự động thực thi một chuỗi bước đặc biệt một cách kỳ diệu ngay khi được bật lên.
 
 VHDL
 
@@ -2525,13 +2507,13 @@ begin
 end;
 ```
 
-`process` đầu áp pattern 000 đợi 10 ns, rồi 001 đợi thêm 10 ns, tiếp tới đủ tám input.
+Câu lệnh `process` trước tiên đưa mẫu input 000 vào và chờ 10 ns. Sau đó, nó đưa mẫu 001 vào và chờ thêm 10 ns, rồi tiếp tục như vậy cho đến khi đã đưa vào tất cả tám tổ hợp input có thể có.
 
 Cuối cùng process đợi vô hạn, nếu không sẽ bắt đầu lại và lặp pattern test vector.
 
-Ví dụ HDL 4.39 minh họa testbench đó. Nó tạo clock bằng `always/process` không sensitivity list để evaluate liên tục. Đầu simulation đọc vector từ text file và pulse `reset` hai cycle. Dù clock/reset không cần cho combinational, vẫn có vì quan trọng với sequential DUT. `example.txt` là file test vector, input và output kỳ vọng binary:
+Ví dụ HDL 4.39 minh họa một testbench như vậy. Testbench tạo clock bằng câu lệnh `always/process` không có sensitivity list, để câu lệnh này liên tục được thực hiện lại. Khi simulation bắt đầu, nó đọc các test vector từ một file văn bản và tạo pulse `reset` trong hai chu kỳ. Mặc dù clock và reset không cần thiết để kiểm tra combinational logic, chúng vẫn được đưa vào vì sẽ quan trọng khi kiểm tra một sequential DUT. `example.txt` là một file văn bản chứa các test vector, gồm input và output mong đợi được viết ở dạng binary:
 
-#### Ví dụ HDL 4.38 SELF-CHECKING TESTBENCH
+### Ví dụ HDL 4.38 SELF-CHECKING TESTBENCH
 
 SystemVerilog
 
@@ -2565,9 +2547,9 @@ module testbench2();
 endmodule
 ```
 
-Câu `assert` SystemVerilog kiểm condition true không. Nếu không, chạy `else`. System task `$error` trong `else` in thông báo assertion failure. Synthesis bỏ qua `assert`.
+Câu lệnh `assert` của SystemVerilog kiểm tra xem một điều kiện được chỉ định có đúng hay không. Nếu không, nó thực thi câu lệnh `else`. System task `$error` trong câu lệnh `else` in ra thông báo lỗi mô tả assertion failure. Câu lệnh `assert` được bỏ qua trong quá trình synthesis.
 
-SystemVerilog so `==` hoặc `!=` hiệu quả giữa signal không có `x`, `z`. Testbench dùng `== =`, `!= =` lần lượt so bằng/khác vì đúng với operand có thể `x`, `z`.
+Trong SystemVerilog, phép so sánh bằng `==` hoặc `!=` có hiệu lực giữa các signal không nhận các giá trị `x` và `z`. Testbench sử dụng các toán tử `== =` và `!= =` tương ứng để so sánh bằng và khác, vì các toán tử này hoạt động chính xác với các toán hạng có thể nhận giá trị `x` hoặc `z`.
 
 VHDL
 
@@ -2608,7 +2590,7 @@ begin
 end;
 ```
 
-Câu `assert` kiểm condition, in message trong `report` nếu không thỏa. `assert` chỉ có ý nghĩa simulation, không synthesis.
+Câu lệnh `assert` kiểm tra một điều kiện và in thông báo được cung cấp trong mệnh đề `report` nếu điều kiện không được thỏa mãn. `assert` chỉ có ý nghĩa trong simulation, không có ý nghĩa trong synthesis.
 
 ```
 000_1
@@ -2621,9 +2603,9 @@ Câu `assert` kiểm condition, in message trong `report` nếu không thỏa. `
 111_0
 ```
 
-Input mới áp tại rising edge, output kiểm tại falling edge. Error báo ngay khi xảy ra. Cuối simulation in tổng test vector đã áp và số lỗi.
+Các input mới được đưa vào tại rising edge của clock, và output được kiểm tra tại falling edge của clock. Các lỗi được báo ngay khi chúng xảy ra. Khi simulation kết thúc, testbench in ra tổng số test vector đã được đưa vào và số lỗi đã phát hiện.
 
-Testbench Ví dụ 4.39 quá mức cho circuit đơn giản này. Nhưng dễ đổi kiểm circuit phức tạp: sửa `example.txt`, instantiate DUT mới, đổi vài dòng đặt input/kiểm output.
+Testbench trong Ví dụ HDL 4.39 phức tạp hơn mức cần thiết đối với một circuit đơn giản như vậy. Tuy nhiên, bạn có thể dễ dàng sửa đổi nó để kiểm tra các circuit phức tạp hơn bằng cách thay đổi file `example.txt`, tạo instance của DUT mới và thay đổi một vài dòng code để thiết lập input và kiểm tra output.
 
 ## 4.10 TÓM TẮT
 
@@ -2684,13 +2666,13 @@ endmodule
 
 `$readmemb` đọc file binary vào array `testvectors`. `$readmemh` tương tự nhưng đọc hexadecimal.
 
-Khối code tiếp đợi một time unit sau rising edge (tránh nhầm clock/data cùng đổi), rồi đặt ba input và output kỳ vọng theo bốn bit test vector hiện tại.
+Khối code tiếp theo chờ một đơn vị thời gian sau rising edge của clock (để tránh nhầm lẫn nếu clock và data thay đổi đồng thời), rồi thiết lập ba input và output mong đợi dựa trên bốn bit trong test vector hiện tại.
 
-Testbench so output tạo ra `y` với kỳ vọng `yexpected`, in error nếu không khớp. `%b`, `%d` chỉ in binary, decimal. `$display` là system task in cửa sổ simulator. Ví dụ `$display ("%b %b",` `y, yexpected);` in hai giá trị `y`, `yexpected` binary. `%h` in hexadecimal.
+Testbench so sánh output được tạo ra, `y`, với output mong đợi, `yexpected`, và in thông báo lỗi nếu chúng không khớp. `%b` và `%d` chỉ định việc in các giá trị lần lượt ở dạng binary và decimal. `$display` là một system task dùng để in trong cửa sổ simulator. Ví dụ, `$display ("%b %b",` `y, yexpected);` in hai giá trị `y` và `yexpected` ở dạng binary. `%h` in một giá trị ở dạng hexadecimal.
 
 Lặp đến khi hết vector hợp lệ trong array `testvectors`. `$stop` dừng simulation.
 
-Dù module hỗ trợ đến 10,001 test vector, sẽ dừng sau tám vector trong file.
+Lưu ý rằng mặc dù module SystemVerilog hỗ trợ đến 10,001 test vector, nó sẽ kết thúc simulation sau khi thực thi tám vector trong file.
 
 VHDL
 
@@ -2778,17 +2760,17 @@ end;
 
 Code VHDL dùng lệnh đọc file ngoài phạm vi chương nhưng cho hình dung self-checking testbench.
 
-HDL được dùng cho cả simulation và synthesis. Logic simulation là cách mạnh mẽ kiểm thử hệ thống trên máy tính trước khi chuyển thành hardware. Simulator cho kiểm giá trị signal nội bộ có thể không đo được trên hardware vật lý. Logic synthesis chuyển HDL code thành digital logic circuit.
+HDL được sử dụng cho cả simulation và synthesis. Logic simulation là một phương pháp mạnh mẽ để kiểm tra một hệ thống trên máy tính trước khi chuyển nó thành hardware. Simulator cho phép bạn kiểm tra giá trị của các signal bên trong hệ thống mà có thể không đo được trên hardware vật lý. Logic synthesis chuyển code HDL thành các digital logic circuit.
 
-Điều quan trọng nhất khi viết HDL code là bạn đang mô tả hardware thực, không viết chương trình máy tính. Lỗi người mới phổ biến nhất là viết code mà không nghĩ hardware định tạo. Nếu không biết hardware mình ngụ ý, gần như chắc chắn không nhận được điều mong muốn. Hãy bắt đầu bằng block diagram hệ thống, xác định phần combinational logic, phần sequential circuit hoặc finite state machine, v.v. Sau đó viết HDL từng phần, dùng idiom đúng để ngụ ý loại hardware cần.
+Điều quan trọng nhất cần nhớ khi viết HDL code là bạn đang mô tả hardware thực, chứ không phải viết một chương trình máy tính. Lỗi phổ biến nhất của người mới là viết HDL code mà không suy nghĩ về hardware mình định tạo ra. Nếu không biết code của mình đang mô tả hardware nào, gần như chắc chắn bạn sẽ không nhận được kết quả mong muốn. Thay vào đó, hãy bắt đầu bằng cách phác thảo block diagram của hệ thống, xác định phần nào là combinational logic, phần nào là sequential circuit hoặc finite state machine, v.v. Sau đó, viết HDL code cho từng phần, sử dụng idiom phù hợp để mô tả loại hardware bạn cần.
 
 ## Bài tập
 
-Bài sau có thể làm bằng HDL ưa thích. Nếu có simulator, kiểm thiết kế, in waveform và giải thích chứng minh hoạt động. Nếu có synthesizer, synthesize code, in circuit diagram và giải thích vì sao đúng kỳ vọng.
+Bạn có thể làm các bài tập sau bằng HDL mà mình ưa thích. Nếu có simulator, hãy kiểm tra thiết kế của bạn. In các waveform và giải thích cách chúng chứng minh rằng thiết kế hoạt động chính xác. Nếu có synthesizer, hãy synthesize code của bạn. In circuit diagram được tạo ra và giải thích vì sao nó phù hợp với mong đợi của bạn.
 
-Bài tập 4.1 Phác schematic circuit mô tả bởi HDL sau. Đơn giản hóa để có ít gate nhất.
+Bài tập 4.1 Phác thảo schematic circuit mô tả bởi HDL sau. Đơn giản hóa để có ít gate nhất.
 
-Bài tập 4.2 Phác schematic circuit mô tả bởi HDL sau. Đơn giản hóa để có ít gate nhất.
+Bài tập 4.2 Phác thảo schematic circuit mô tả bởi HDL sau. Đơn giản hóa để có ít gate nhất.
 
 SystemVerilog
 
@@ -2819,7 +2801,7 @@ end;
 
 Bài tập 4.3 Viết HDL module tính XOR four-input. Input `a`<sub>`3:0`</sub>, output `y`.
 
-Bài tập 4.4 Viết self-checking testbench cho Bài 4.3. Tạo file chứa đủ 16 test case. Mô phỏng chứng minh đúng. Thêm lỗi vào file, cho thấy testbench báo mismatch.
+Bài tập 4.4 Viết một self-checking testbench cho Bài tập 4.3. Tạo file test vector chứa tất cả 16 trường hợp kiểm tra. Mô phỏng circuit và chứng minh rằng nó hoạt động chính xác. Cố ý thêm một lỗi vào file test vector và cho thấy testbench báo cáo sự không khớp.
 
 SystemVerilog
 
@@ -2856,19 +2838,19 @@ begin
 end;
 ```
 
-Bài tập 4.5 Viết module `minority`, ba input `a`, `b`, `c`, một output `y` TRUE nếu ít nhất hai input FALSE.
+Bài tập 4.5 Viết một module HDL có tên `minority`. Module nhận ba input là `a`, `b` và `c`. Nó tạo ra một output `y`, có giá trị TRUE nếu ít nhất hai trong số các input là FALSE.
 
 Bài tập 4.6 Viết module decoder hexadecimal seven-segment display, xử lý A, B, C, D, E, F và 0–9.
 
-Bài tập 4.7 Viết self-checking testbench cho Bài 4.6. File chứa đủ 16 case. Mô phỏng chứng minh đúng, thêm lỗi vào file và cho thấy báo mismatch.
+Bài tập 4.7 Viết một self-checking testbench cho Bài tập 4.6. Tạo file test vector chứa tất cả 16 trường hợp kiểm tra. Mô phỏng circuit và chứng minh rằng nó hoạt động chính xác. Cố ý thêm một lỗi vào file test vector và cho thấy testbench báo cáo sự không khớp.
 
 Bài tập 4.8 Viết module multiplexer 8:1 tên `mux8`, input `s`<sub>`2:0`</sub>, `d0`, `d1`, `d2`, `d3`, `d4`, `d5`, `d6`, `d7`, output `y`.
 
-Bài tập 4.9 Viết structural module tính `y` = `a`$\overline{\texttt{b}}$ + $\overline{\texttt{b}}$$\overline{\texttt{c}}$ + $\overline{\texttt{a}}$`bc` bằng multiplexer logic. Dùng multiplexer 8:1 Bài 4.8.
+Bài tập 4.9 Viết structural module tính `y` = `a`$\overline{\texttt{b}}$ + $\overline{\texttt{b}}\overline{\texttt{c}}$ + $\overline{\texttt{a}}$`bc` bằng multiplexer logic. Dùng multiplexer 8:1 Bài 4.8.
 
 Bài tập 4.10 Làm lại Bài 4.9 bằng multiplexer 4:1 và số NOT gate tùy cần.
 
-Bài tập 4.11 Mục 4.5.4 nói synchronizer mô tả đúng bằng blocking nếu đúng thứ tự. Nghĩ một sequential circuit đơn giản không thể mô tả đúng bằng blocking bất kể thứ tự.
+Bài tập 4.11 Mục 4.5.4 đã chỉ ra rằng có thể mô tả chính xác một synchronizer bằng blocking assignment nếu các phép gán được sắp xếp đúng thứ tự. Hãy nghĩ ra một sequential circuit đơn giản không thể được mô tả chính xác bằng blocking assignment, bất kể thứ tự các phép gán.
 
 Bài tập 4.12 Viết module priority circuit eight-input.
 
@@ -2894,7 +2876,7 @@ Bài tập 4.22 Viết module triển khai converter binary-to-thermometer Bài 
 
 Bài tập 4.23 Viết module triển khai function days-in-month Câu hỏi 2.2.
 
-Bài tập 4.24 Phác state transition diagram cho FSM trong HDL sau.
+Bài tập 4.24 Phác thảo state transition diagram cho FSM trong HDL sau.
 
 SystemVerilog
 
@@ -2974,7 +2956,7 @@ begin
 end;
 ```
 
-Bài tập 4.25 Phác state transition diagram cho FSM trong HDL sau. FSM kiểu này dùng trong branch predictor của một số microprocessor.
+Bài tập 4.25 Phác thảo state transition diagram cho FSM trong HDL sau. FSM kiểu này dùng trong branch predictor của một số microprocessor.
 
 SystemVerilog
 
@@ -3070,13 +3052,13 @@ end;
 
 Bài tập 4.26 Viết module cho SR latch.
 
-Bài tập 4.27 Viết module JK flip-flop, input clk, J, K, output Q. Rising edge giữ Q cũ nếu J = K = 0; đặt Q = 1 nếu J = 1, reset Q = 0 nếu K = 1, đảo Q nếu J = K = 1.
+Bài tập 4.27 Viết một module HDL cho JK flip-flop. Flip-flop có các input clk, J và K, cùng output Q. Tại rising edge của clock, flip-flop giữ giá trị cũ của Q nếu J = K = 0. Nó đặt Q thành 1 nếu J = 1, reset Q về 0 nếu K = 1 và đảo Q nếu J = K = 1.
 
-Bài tập 4.28 Viết module latch Hình 3.18. Một assignment mỗi gate. Delay mỗi gate 1 unit hoặc 1 ns. Simulation chứng minh đúng. Rồi tăng delay inverter. Delay dài bao nhiêu thì race condition gây latch sai?
+Bài tập 4.28 Viết một module HDL cho latch trong Hình 3.18. Sử dụng một câu lệnh gán cho mỗi gate. Chỉ định delay bằng 1 đơn vị hoặc 1 ns cho mỗi gate. Mô phỏng latch và chứng minh rằng nó hoạt động chính xác. Sau đó, tăng delay của inverter. Delay phải dài đến mức nào thì race condition mới khiến latch hoạt động sai?
 
 Bài tập 4.29 Viết module traffic light controller Mục 3.4.1.
 
-Bài tập 4.30 Viết ba module cho traffic light controller chế độ diễu hành đã phân rã ở Ví dụ 3.8. Tên `controller`, `mode`, `lights`, input/output như Hình 3.33(b).
+Bài tập 4.30 Viết ba module HDL cho traffic light controller có chế độ diễu hành đã được phân rã trong Ví dụ 3.8. Các module phải có tên `controller`, `mode` và `lights`, cùng các input và output như trong Hình 3.33(b).
 
 Bài tập 4.31 Viết module mô tả circuit Hình 3.42.
 
@@ -3114,9 +3096,9 @@ Các bài sau riêng cho SystemVerilog.
 
 Bài tập 4.46 Khai báo signal `tri` trong SystemVerilog nghĩa là gì?
 
-Bài tập 4.47 Viết lại module `syncbad` Ví dụ 4.29. Dùng nonblocking nhưng sửa code để có synchronizer đúng với hai flip-flop.
+Bài tập 4.47 Viết lại module `syncbad` trong Ví dụ HDL 4.29. Sử dụng nonblocking assignment, nhưng thay đổi code để tạo ra một synchronizer hoạt động chính xác với hai flip-flops.
 
-Bài tập 4.48 Xét hai module SystemVerilog sau. Function giống nhau không? Phác hardware từng cái ngụ ý.
+Bài tập 4.48 Xét hai module SystemVerilog sau. Function giống nhau không? Phác thảo hardware từng cái ngụ ý.
 
 ```
 module code1(input  logic clk, a, b, c,
@@ -3140,9 +3122,9 @@ module code2(input  logic a, b, c, clk,
 endmodule
 ```
 
-Bài tập 4.49 Làm lại Bài 4.48 nếu thay \<= bằng = ở mọi assignment.
+Bài tập 4.49 Làm lại Bài 4.48 nếu thay <= bằng = ở mọi assignment.
 
-Bài tập 4.50 Các module sau chứa lỗi tác giả từng thấy sinh viên mắc trong lab. Giải thích và sửa từng lỗi.
+Bài tập 4.50 Các module SystemVerilog sau minh họa những lỗi mà các tác giả từng thấy sinh viên mắc phải trong phòng thực hành. Hãy giải thích lỗi trong từng module và chỉ ra cách sửa lỗi đó.
 
 (a)
 
@@ -3320,7 +3302,7 @@ thay vì chỉ
 q <= (state = S0);
 ```
 
-Bài tập 4.52 Mỗi module VHDL sau chứa lỗi. Cho gọn chỉ cho architecture; giả định mệnh đề dùng `library` và declaration `entity` đúng. Giải thích lỗi và sửa.
+Bài tập 4.52 Mỗi module VHDL sau đều chứa lỗi. Để ngắn gọn, chỉ phần architecture được trình bày; hãy giả định rằng mệnh đề sử dụng `library` và khai báo `entity` đều chính xác. Giải thích các lỗi và chỉ ra cách sửa chúng.
 
 (a)
 
@@ -3453,6 +3435,6 @@ assign result = |(data[15:0] & 16'hC820);
 
 [^1]: Institute of Electrical and Electronics Engineers (IEEE) là hội nghề nghiệp chịu trách nhiệm nhiều chuẩn máy tính, gồm Wi-Fi (802.11), Ethernet (802.3), floating-point (754).
 
-[^2]: Simulation chương dùng ModelSim PE Student Edition Version 10.3c. Chọn vì dùng thương mại nhưng có bản sinh viên miễn phí dung lượng 10,000 dòng code.
+[^2]: Các simulation trong chương này được thực hiện bằng ModelSim PE Student Edition Version 10.3c. ModelSim được chọn vì nó được sử dụng trong thương mại, đồng thời có một phiên bản dành cho sinh viên được cung cấp miễn phí với khả năng xử lý 10,000 dòng code.
 
-[^3]: Synthesis chương dùng Synplify Premier của Synopsys. Nhưng có nhiều tool khác như trong Vivado và Quartus, công cụ Xilinx/Intel miễn phí synthesize HDL sang field programmable
+[^3]: Trong toàn bộ chương này, synthesis được thực hiện bằng Synplify Premier của Synopsys. Tuy nhiên, có nhiều synthesis tool khác, chẳng hạn những tool đi kèm Vivado và Quartus, các design tool được Xilinx và Intel cung cấp miễn phí để synthesize HDL thành field programmable

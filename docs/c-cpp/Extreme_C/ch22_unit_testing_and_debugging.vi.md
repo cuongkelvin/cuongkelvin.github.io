@@ -229,7 +229,7 @@ Dùng stub function trên, chúng ta có thể cô lập `calc_factorial` và ki
 
 Trong C, một *stub* là một định nghĩa hàm tuân theo một khai báo hàm mà đơn vị đích sẽ dùng như một phần logic của nó, và quan trọng hơn, stub không có logic phức tạp và nó chỉ trả về một giá trị sẽ chỉ được test case dùng.
 
-Trong C++, một stub vẫn có thể là một định nghĩa hàm tuân theo một khai báo hàm, hay một class<a id="_idIndexMarker1628"></a> hiện thực một interface. Trong các ngôn ngữ object-oriented khác nơi bạn không thể có các hàm độc lập, chẳng hạn Java, một stub chỉ có thể là một class hiện thực một interface. Khi đó, một stub object là một đối tượng từ những stub class như vậy. Lưu ý rằng trong mọi trường hợp, một stub nên có một định nghĩa đơn giản chỉ dùng được trong test, và không dùng trong production.
+Trong C++, một stub vẫn có thể là một định nghĩa hàm tuân theo một khai báo hàm, hay một class<a id="_idIndexMarker1628"></a> triển khai một interface. Trong các ngôn ngữ object-oriented khác nơi bạn không thể có các hàm độc lập, chẳng hạn Java, một stub chỉ có thể là một class triển khai một interface. Khi đó, một stub object là một đối tượng từ những stub class như vậy. Lưu ý rằng trong mọi trường hợp, một stub nên có một định nghĩa đơn giản chỉ dùng được trong test, và không dùng trong production.
 
 Cuối cùng, chúng ta cần có khả năng chạy các test case. Như chúng tôi đã nói trước đây, chúng ta cần một test runner để chạy test. Do đó, chúng ta cần một source file cụ thể với một hàm `main` chỉ chạy các test case lần lượt từng cái một. Code box sau chứa code của test runner:
 
@@ -324,7 +324,7 @@ int64_t calc_factorial() {
 
 Code trên ít testable hơn. Không có cách nào để kiểm thử `calc_factorial` mà không gọi `next_even_number` – tức là, nếu không dùng một số mẹo để thay đổi định nghĩa đằng sau symbol `next_even_number` như một phần của executable cuối cùng, như chúng ta làm trong *ví dụ 22.2*.
 
-Thực tế, cả hai phiên bản của `calc_factorial` đều làm cùng một việc, nhưng định nghĩa trong *Code Box 22-2* testable hơn vì chúng ta có thể kiểm thử nó trong sự cô lập. Viết code testable không dễ, và bạn nên luôn suy nghĩ cẩn thận để hiện thực code và làm cho nó testable.
+Thực tế, cả hai phiên bản của `calc_factorial` đều làm cùng một việc, nhưng định nghĩa trong *Code Box 22-2* testable hơn vì chúng ta có thể kiểm thử nó trong sự cô lập. Viết code testable không dễ, và bạn nên luôn suy nghĩ cẩn thận để triển khai code và làm cho nó testable.
 
 Viết code testable thường đòi hỏi nhiều công sức hơn. Có nhiều ý kiến khác nhau về tỉ lệ phần trăm chi phí phụ của việc viết code testable nhưng chắc chắn rằng việc viết test mang lại một số chi phí thêm về <a id="_idIndexMarker1632"></a>thời gian và công sức. Nhưng chi phí thêm này chắc chắn có những lợi ích lớn. Không có test cho một đơn vị, bạn sẽ mất dấu nó theo thời gian khi có thêm nhiều thay đổi được đưa vào đơn vị.
 
@@ -342,11 +342,11 @@ Chúng tôi đã giải thích stub là một hàm rất đơn giản, thường
 
 Các hàm mock, hay nói chung là các mock object trong các ngôn ngữ object-oriented, có thể được thao tác bằng cách chỉ định output cho một input nhất định. Bằng cách này, bạn đặt bất cứ thứ gì nên được trả về từ một hàm mock cho một input nhất định trước khi chạy logic test và trong quá trình logic chạy nó sẽ hành động như bạn đã đặt trước đó. Các mock object nói chung cũng có thể có kỳ vọng và chúng thực hiện các assertion cần thiết tương ứng. Như đã nêu trong link trên, đối với mock object, chúng ta đặt kỳ vọng trước khi chạy test. Chúng tôi sẽ đưa ra một ví dụ C về các hàm mock trong phần component testing.
 
-Cuối cùng, một hàm fake có thể được dùng để cung cấp một chức năng rất đơn giản hóa thay cho một chức năng thật và có lẽ phức tạp trong test đang chạy. Ví dụ, thay vì dùng một filesystem thật, người ta có thể dùng một số kho lưu trữ in-memory (trong memory) đơn giản hóa. Trong component testing, chẳng hạn, các component khác có chức năng phức tạp có thể được thay bằng các hiện thực fake trong test.
+Cuối cùng, một hàm fake có thể được dùng để cung cấp một chức năng rất đơn giản hóa thay cho một chức năng thật và có lẽ phức tạp trong test đang chạy. Ví dụ, thay vì dùng một filesystem thật, người ta có thể dùng một số kho lưu trữ in-memory (trong memory) đơn giản hóa. Trong component testing, chẳng hạn, các component khác có chức năng phức tạp có thể được thay bằng các bản triển khai fake trong test.
 
 Trước khi kết thúc phần này, tôi muốn nói về *code coverage*. Về lý thuyết, mọi đơn vị nên có các test suite tương ứng và mỗi test suite nên chứa mọi test case đi qua mọi nhánh code khả dĩ. Như chúng tôi đã nói, đây là về lý thuyết, nhưng trên thực tế bạn thường chỉ có test cho một tỉ lệ phần trăm đơn vị. Thường thì bạn không có test case bao quát mọi nhánh code khả dĩ.
 
-Tỉ lệ các đơn vị có test case phù hợp được gọi là code coverage hay *test coverage*. Tỉ lệ càng cao, bạn càng ở vị trí tốt hơn để được thông báo về các sửa đổi không mong muốn. Những sửa đổi không mong muốn này thường không được đưa vào bởi các developer tồi. Thực tế, những thay đổi gây hỏng này thường được đưa vào khi ai đó đang làm việc trên một đoạn code để sửa một bug hay hiện thực một tính năng mới.
+Tỉ lệ các đơn vị có test case phù hợp được gọi là code coverage hay *test coverage*. Tỉ lệ càng cao, bạn càng ở vị trí tốt hơn để được thông báo về các sửa đổi không mong muốn. Những sửa đổi không mong muốn này thường không được đưa vào bởi các developer tồi. Thực tế, những thay đổi gây hỏng này thường được đưa vào khi ai đó đang làm việc trên một đoạn code để sửa một bug hay triển khai một tính năng mới.
 
 Sau khi đã trình bày test double, chúng ta nói về component testing trong phần tiếp theo.
 
@@ -867,9 +867,9 @@ $ ./ex22_1_gtests.out
 [ RUN      ] next_even_number.even_numbers_should_be_returned
 .../ExtremeC_examples_chapter22_1_gtests.cpp:34: Failure
 Expected equality of these values:
- next_even_number()
- Which is: 0
- 1
+  next_even_number()
+    Which is: 0
+  1
 [  FAILED  ] next_even_number.even_numbers_should_be_returned (0 ms)
 [ RUN      ] next_even_number.numbers_should_rotate
 [       OK ] next_even_number.numbers_should_rotate (0 ms)
@@ -946,14 +946,14 @@ Chúng ta đã nói về debugger, đặc biệt là `gdb`, trong *Chương 4*, 
 
 Một danh sách các debugger có thể <a id="_idIndexMarker1675"></a>được tìm thấy trên Wikipedia tại link sau: https://en.wikipedia.org/wiki/List_of_debuggers. Từ danh sách này, các debugger sau là eye-catching (nổi bật):
 
-1. **Advanced Debugger** (**adb**): Debugger mặc định<a id="_idIndexMarker1676"></a> của Unix. Nó có các hiện thực khác nhau dựa trên hiện thực Unix thực tế. Nó đã là debugger mặc định trên Solaris Unix.
+1. **Advanced Debugger** (**adb**): Debugger mặc định<a id="_idIndexMarker1676"></a> của Unix. Nó có các cách triển khai khác nhau dựa trên bản triển khai Unix thực tế. Nó đã là debugger mặc định trên Solaris Unix.
 2. **GNU Debugger** (**gdb**): Phiên bản GNU của Unix debugger, vốn là debugger mặc định trên<a id="_idIndexMarker1677"></a> nhiều hệ điều hành Unix-like bao gồm Linux.
 3. **LLDB**: Một debugger chủ yếu<a id="_idIndexMarker1678"></a> được thiết kế để debug các object file được tạo ra bởi các compiler LLVM.
 4. **Python Debugger**: Được dùng trong<a id="_idIndexMarker1679"></a> Python để debug Python script.
 5. **Java Platform Debugger Architecture** (**JPDA**): Đây không phải là một debugger, mà nó là một API được thiết kế <a id="_idIndexMarker1680"></a>để debug các chương trình chạy bên trong một instance JVM.
 6. **OllyDbg**: Một debugger<a id="_idIndexMarker1681"></a> và disassembler được dùng trong Microsoft Windows để debug các ứng dụng GUI.
 
-1. **Microsoft Visual Studio Debugger**: Debugger chính <a id="_idIndexMarker1682"></a>được Microsoft Visual Studio dùng.
+7. **Microsoft Visual Studio Debugger**: Debugger chính <a id="_idIndexMarker1682"></a>được Microsoft Visual Studio dùng.
 
 Ngoài `gdb`, người ta có thể dùng `cgdb`. Chương trình `cgdb` hiển thị một trình soạn thảo code trên terminal bên cạnh shell tương tác `gdb` cho phép bạn di chuyển giữa các dòng code dễ hơn.
 
@@ -980,7 +980,7 @@ Các memory checker đều làm cùng một việc, nhưng kỹ thuật bên dư
 2. **Link-time overriding**: Nhóm memory checker này giống nhóm memory checker trước, nhưng khác biệt là bạn không cần thay đổi source code. Thay vào đó, bạn chỉ phải link các binary thu được với các library được cung cấp từ memory checker và không có thay đổi nào được thực hiện đối với source code. Tiện ích *heap checker* trong *gperftools* có thể được dùng như một memory checker link-time.
 3. **Runtime interception**: Một memory checker dùng kỹ thuật này nằm giữa chương trình và OS và cố chặn bắt và theo dõi mọi thao tác memory-related và báo cáo bất cứ khi nào thấy một hành vi sai hay truy cập không hợp lệ. Nó cũng có thể đưa ra báo cáo leak dựa trên tổng các khối memory đã cấp phát và đã giải phóng. Ưu điểm chính của việc dùng kỹ thuật này là bạn không cần biên dịch lại hay link lại chương trình để dùng memory checker. Nhược điểm lớn là chi phí phụ đáng kể mà nó đưa vào việc thực thi chương trình. Ngoài ra, memory footprint sẽ cao hơn nhiều so với khi chạy chương trình không có memory checker. Đây chắc chắn không phải là một môi trường lý tưởng để debug các chương trình high-performance và embedded. Công cụ Memcheck trong Valgrind có thể được dùng như một memory checker chặn bắt runtime. Những memory profiler này nên được dùng với một debug build của code base.
 
-1. **Preloading library**: Một số memory checker dùng *inter-positioning* để bọc các hàm memory chuẩn. Do đó, bằng việc preload các shared library của memory checker bằng biến môi trường `LD_PRELOAD`, chương trình có thể dùng các wrapper function và memory checker có thể chặn bắt các lời gọi tới các hàm memory chuẩn bên dưới. Tiện ích *heap checker* trong *gperftools* có thể được dùng như vậy.
+4. **Preloading library**: Một số memory checker dùng *inter-positioning* để bọc các hàm memory chuẩn. Do đó, bằng việc preload các shared library của memory checker bằng biến môi trường `LD_PRELOAD`, chương trình có thể dùng các wrapper function và memory checker có thể chặn bắt các lời gọi tới các hàm memory chuẩn bên dưới. Tiện ích *heap checker* trong *gperftools* có thể được dùng như vậy.
 
 Thông thường, dùng một công cụ cụ thể cho mọi vấn đề memory là không đủ vì mỗi công cụ có ưu điểm và<a id="_idIndexMarker1689"></a> nhược điểm riêng, khiến công cụ đó đặc thù cho một ngữ cảnh nhất định.
 
@@ -1025,7 +1025,7 @@ Những performance debugger này thường cung cấp một tập con các tín
 
 Sau đây là danh sách các chương trình và bộ công cụ well-known nhất có thể được dùng để profile hiệu năng:
 
-- **Google Performance Tools** (**gperftools**): Đây thực ra là một hiện thực `malloc` hiệu năng cao, nhưng như<a id="_idIndexMarker1702"></a> trang chủ của nó nói, nó cung cấp một số công cụ phân tích hiệu năng như *heap checker*, vốn đã được giới thiệu trong các phần trước như một memory profiler. Nó nên được link với binary cuối cùng để có thể dùng được.
+- **Google Performance Tools** (**gperftools**): Đây thực ra là một bản triển khai `malloc` hiệu năng cao, nhưng như<a id="_idIndexMarker1702"></a> trang chủ của nó nói, nó cung cấp một số công cụ phân tích hiệu năng như *heap checker*, vốn đã được giới thiệu trong các phần trước như một memory profiler. Nó nên được link với binary cuối cùng để có thể dùng được.
 - **Callgrind** (**thuộc Valgrind**): Chủ yếu thu thập thống kê về các lời gọi hàm và quan hệ caller/callee (bên gọi/bên được gọi) giữa hai hàm. Không cần thay đổi source code hay link các binary cuối cùng và nó có thể được dùng ngay lập tức, dĩ nhiên với một debug build.
 - **Intel VTune**: Đây là một bộ profile hiệu năng từ Intel, là một tập hoàn chỉnh mọi tính năng được đưa ra trong danh sách trên. Phải mua license phù hợp để dùng nó.
 

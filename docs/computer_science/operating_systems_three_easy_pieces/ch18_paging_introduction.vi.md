@@ -256,7 +256,9 @@ Trong bài tập này, bạn dùng program đơn giản paging-linear-translate.
 
 ### Câu hỏi
 
-1. Trước khi translation, dùng simulator nghiên cứu linear page table đổi kích thước theo parameter khác nhau thế nào. Tính kích thước linear page table khi parameter thay đổi. Vài input gợi ý bên dưới; dùng flag -v sẽ thấy bao nhiêu entry page-table được điền. Đầu tiên, để hiểu kích thước linear page table đổi thế nào khi address space lớn lên:
+1. Trước khi translation, dùng simulator nghiên cứu linear page table đổi kích thước theo parameter khác nhau thế nào. Tính kích thước linear page table khi parameter thay đổi. Vài input gợi ý bên dưới; dùng flag -v sẽ thấy bao nhiêu entry page-table được điền.
+
+Đầu tiên, để hiểu kích thước linear page table đổi thế nào khi address space lớn lên:
 
 ```
 paging-linear-translate.py -P 1k -a 1m -p 512m -v -n 0

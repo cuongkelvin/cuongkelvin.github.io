@@ -831,7 +831,7 @@ Bên trong hàm `print_bytes`, chúng ta phải sử dụng một pointer `unsig
 
 Như một lưu ý cuối cùng về ví dụ này, `size_t` là một kiểu dữ liệu không dấu tiêu chuẩn thường được sử dụng để lưu trữ kích thước trong C.
 
-> `size_t` được định nghĩa trong mục 6.5.3.4 của tiêu chuẩn ISO/ICE 9899:TC3. Tiêu chuẩn ISO này là đặc tả kỹ thuật C99 nổi tiếng được sửa đổi vào năm 2007. Tiêu chuẩn này đã là cơ sở cho tất cả các hiện thực C cho [đến tận ngày nay. Liên kết đến ISO/ICE 9899:TC3 (2007)](http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf) là [http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf](http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf).
+> `size_t` được định nghĩa trong mục 6.5.3.4 của tiêu chuẩn ISO/ICE 9899:TC3. Tiêu chuẩn ISO này là đặc tả kỹ thuật C99 nổi tiếng được sửa đổi vào năm 2007. Tiêu chuẩn này đã là cơ sở cho tất cả các bản triển khai C cho [đến tận ngày nay. Liên kết đến ISO/ICE 9899:TC3 (2007)](http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf) là [http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf](http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1256.pdf).
 
 <a id="_idParaDest-24"></a>
 
@@ -943,7 +943,7 @@ Trong phần này, chúng ta muốn<a id="_idIndexMarker061"></a> tóm tắt m�
 
 Một function là một hộp logic có một tên gọi, một danh sách các tham số đầu vào (input parameter), và một danh sách các kết quả đầu ra. Trong C và nhiều ngôn ngữ lập trình khác chịu ảnh hưởng của C, các function chỉ trả về một giá trị duy nhất. Trong các ngôn ngữ object-oriented chẳng hạn như C++ và Java, các function (thường được gọi là các *method*) cũng có thể<a id="_idIndexMarker062"></a> ném ra một *exception* (ngoại lệ), điều này không có trong C. Các function được kích hoạt bằng một lệnh gọi hàm (function call), đơn giản là việc sử dụng tên của function để thực thi logic của nó. Một function call chính xác phải truyền tất cả các đối số (argument) bắt buộc tới function và đợi nó thực thi. Lưu ý rằng các function luôn ở trạng thái *blocking* (chặn) trong C. Điều này có nghĩa là bên gọi (caller) phải đợi function được gọi (callee) hoàn thành và chỉ khi đó nó mới có thể thu nhận kết quả trả về.
 
-Trái ngược với một blocking function, chúng ta có thể có một *non-blocking* function. Khi gọi một non-blocking function, caller không phải đợi function hoàn thành và nó có thể tiếp tục quá trình thực thi của mình. Trong mô hình<a id="_idIndexMarker063"></a> này, thường có một cơ chế *callback* được kích hoạt khi function được gọi (callee) hoàn tất. Một non-blocking function cũng có thể<a id="_idIndexMarker064"></a> được gọi là một *asynchronous function* (hàm bất đồng bộ) hoặc đơn giản là một *async function*. Vì chúng ta không có các async function trong C, chúng ta cần hiện thực<a id="_idIndexMarker065"></a> chúng bằng các giải pháp multithreading. Chúng tôi sẽ giải thích các khái niệm này chi tiết hơn trong phần thứ năm của cuốn sách, *Concurrency*.
+Trái ngược với một blocking function, chúng ta có thể có một *non-blocking* function. Khi gọi một non-blocking function, caller không phải đợi function hoàn thành và nó có thể tiếp tục quá trình thực thi của mình. Trong mô hình<a id="_idIndexMarker063"></a> này, thường có một cơ chế *callback* được kích hoạt khi function được gọi (callee) hoàn tất. Một non-blocking function cũng có thể<a id="_idIndexMarker064"></a> được gọi là một *asynchronous function* (hàm bất đồng bộ) hoặc đơn giản là một *async function*. Vì chúng ta không có các async function trong C, chúng ta cần triển khai<a id="_idIndexMarker065"></a> chúng bằng các giải pháp multithreading. Chúng tôi sẽ giải thích các khái niệm này chi tiết hơn trong phần thứ năm của cuốn sách, *Concurrency*.
 
 Điều thú vị cần nói thêm là ngày nay, ngày càng có nhiều sự quan tâm đến việc sử dụng các non-blocking function thay vì blocking function. Nó thường được gọi là *event-oriented programming* (lập trình hướng sự kiện). Non-blocking <a id="_idIndexMarker066"></a>function là trung tâm trong phương pháp lập trình này, và hầu hết các function được viết đều là non-blocking.
 
@@ -1064,7 +1064,7 @@ Bây giờ chúng ta đã nắm được một số chi tiết liên quan đến
 
 Sở hữu function pointer là một tính năng siêu việt khác của ngôn ngữ lập trình C. Hai phần trước đã nói về<a id="_idIndexMarker080"></a> variable pointer và function, và phần này sẽ kết hợp chúng lại để bàn luận về một chủ đề thú vị hơn: pointer tới function (pointer to function).
 
-Chúng có rất nhiều ứng dụng, nhưng việc chia nhỏ một binary lớn thành các binary nhỏ hơn và nạp lại chúng trong một file thực thi nhỏ khác là một trong những ứng dụng quan trọng nhất. Điều này đã dẫn đến tính mô-đun hóa (*modularization*) và thiết kế phần mềm. Function pointer là các building block để hiện thực<a id="_idIndexMarker081"></a> tính đa hình (polymorphism) trong C++ và cho phép chúng ta mở rộng logic hiện có của mình. Trong phần này, chúng ta sẽ đề cập đến chúng và chuẩn bị cho bạn những chủ đề nâng cao hơn mà chúng ta sẽ khám phá trong các chương tiếp theo.
+Chúng có rất nhiều ứng dụng, nhưng việc chia nhỏ một binary lớn thành các binary nhỏ hơn và nạp lại chúng trong một file thực thi nhỏ khác là một trong những ứng dụng quan trọng nhất. Điều này đã dẫn đến tính mô-đun hóa (*modularization*) và thiết kế phần mềm. Function pointer là các building block để triển khai<a id="_idIndexMarker081"></a> tính đa hình (polymorphism) trong C++ và cho phép chúng ta mở rộng logic hiện có của mình. Trong phần này, chúng ta sẽ đề cập đến chúng và chuẩn bị cho bạn những chủ đề nâng cao hơn mà chúng ta sẽ khám phá trong các chương tiếp theo.
 
 Giống như một variable pointer address một biến, một function pointer address một function và cho phép bạn gọi gián tiếp function đó. Ví dụ sau đây, *ví dụ 1.19*, có thể là một khởi đầu tốt cho chủ đề này:
 
@@ -1077,7 +1077,7 @@ int subtract(int a, int b) {
   return a - b;
 }
 int main() {
- int (*func_ptr)(int, int);
+  int (*func_ptr)(int, int);
   func_ptr = NULL;
   func_ptr = &sum;
   int result = func_ptr(5, 4);
@@ -1337,12 +1337,12 @@ typedef struct {
   int y;
 } point_t;
 typedef struct {
- point_t center;
+  point_t center;
   int radius;
 } circle_t;
 typedef struct {
- point_t start;
- point_t end;
+  point_t start;
+  point_t end;
 } line_t;
 ```
 
@@ -1374,9 +1374,9 @@ typedef struct {
 } circle_t;
 int main(int argc, char** argv) {
   circle_t c;
- circle_t* p1 = &c;
- point_t*  p2 = (point_t*)&c;
- int*      p3 = (int*)&c;
+  circle_t* p1 = &c;
+  point_t*  p2 = (point_t*)&c;
+  int*      p3 = (int*)&c;
   printf("p1: %p\n", (void*)p1);
   printf("p2: %p\n", (void*)p2);
   printf("p3: %p\n", (void*)p3);
@@ -1399,7 +1399,7 @@ $
 
 *Shell Box 1-15: Output của ví dụ 1.24*
 
-Như bạn thấy, tất cả<a id="_idIndexMarker108"></a> các pointer đều đang address cùng một byte, nhưng kiểu của chúng lại khác nhau. Điều này thường được sử dụng để mở rộng các structure đến từ các thư viện khác bằng cách thêm nhiều trường hơn. Đây cũng là<a id="_idIndexMarker109"></a> cách chúng ta hiện thực tính kế thừa (*inheritance*) trong C. Chúng ta sẽ thảo luận điều này trong *Chương 8*, *Inheritance và Polymorphism*.
+Như bạn thấy, tất cả<a id="_idIndexMarker108"></a> các pointer đều đang address cùng một byte, nhưng kiểu của chúng lại khác nhau. Điều này thường được sử dụng để mở rộng các structure đến từ các thư viện khác bằng cách thêm nhiều trường hơn. Đây cũng là<a id="_idIndexMarker109"></a> cách chúng ta triển khai tính kế thừa (*inheritance*) trong C. Chúng ta sẽ thảo luận điều này trong *Chương 8*, *Inheritance và Polymorphism*.
 
 Đây là phần cuối cùng trong chương này. Trong chương sắp tới, chúng ta sẽ đi sâu vào C compilation pipeline và cách biên dịch cũng như liên kết (link) một dự án C đúng cách.
 

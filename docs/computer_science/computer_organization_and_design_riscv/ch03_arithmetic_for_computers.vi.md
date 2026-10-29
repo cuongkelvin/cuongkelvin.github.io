@@ -88,11 +88,11 @@ May mắn là compiler có thể dễ dàng kiểm tra unsigned overflow bằng 
 
 Phụ lục A mô tả phần cứng thực hiện phép cộng và phép trừ, gọi là Arithmetic Logic Unit hay ALU.
 
-#### Arithmetic Logic Unit (ALU)
+### Arithmetic Logic Unit (ALU)
 
 Phần cứng thực hiện phép cộng, phép trừ và thường cả những phép toán logic như AND và OR.
 
-#### Giao diện phần cứng/phần mềm
+### Giao diện phần cứng/phần mềm
 
 Người thiết kế máy tính phải quyết định cách xử lý arithmetic overflow. Mặc dù một số ngôn ngữ như C và Java bỏ qua integer overflow, các ngôn ngữ như Ada và Fortran yêu cầu thông báo cho chương trình. Khi đó, lập trình viên hoặc môi trường lập trình phải quyết định làm gì khi overflow xảy ra.
 
@@ -238,15 +238,15 @@ Hai toán hạng của phép chia, gọi là dividend và divisor, cùng kết q
 
 Một số được chia.
 
-#### divisor
+### divisor
 
 Một số dùng để chia dividend.
 
-#### quotient
+### quotient
 
 Kết quả chính của phép chia; số mà khi nhân với divisor rồi cộng remainder sẽ tạo ra dividend.
 
-#### remainder
+### remainder
 
 Kết quả phụ của phép chia; số mà khi cộng với tích của quotient và divisor sẽ tạo ra dividend.
 
@@ -394,7 +394,7 @@ Chú ý trong trường hợp cuối, số này không biểu diễn một phân
 
 Một cách biểu diễn số với một chữ số duy nhất ở bên trái dấu thập phân.
 
-#### normalized
+### normalized
 
 Một số ở dạng floating-point không có các chữ số 0 đầu.
 
@@ -410,7 +410,7 @@ Số học máy tính hỗ trợ những số như vậy gọi là floating poin
 
 (Mặc dù máy tính biểu diễn exponent ở cơ số 2 cũng như phần còn lại của số, để đơn giản ký hiệu, ta viết exponent ở dạng thập phân.)
 
-#### floating point
+### floating point
 
 Số học máy tính biểu diễn những số mà binary point không cố định.
 
@@ -1181,7 +1181,7 @@ Mặc dù người viết compiler cuối cùng có thể thường xuyên sinh 
 
 **HÌNH 3.22 Assembly language x86 cho thân các vòng lặp lồng nhau sinh bằng cách biên dịch code C tối ưu trong Hình 3.21. Chú ý sự tương đồng với Hình 3.20, khác biệt chính là năm phép toán floating-point giờ dùng YMM register và phiên bản instruction pd cho packed double precision thay phiên bản sd cho scalar double precision.**
 
-Khai báo ở dòng 6 Hình 3.21 dùng kiểu dữ liệu __m256d, báo cho compiler rằng biến giữ bốn giá trị floating-point double-precision. Intrinsic _mm256_load_pd() cũng ở dòng 6 dùng instruction AVX để load song song (_pd) bốn số floating-point double-precision từ ma trận C vào c0. Phép tính địa chỉ C+i+j*n ở dòng 6 biểu diễn phần tử C[i+j*n]. Đối xứng với nó, bước cuối ở dòng 11 dùng intrinsic _mm256_store_pd() để store bốn số floating-point double-precision từ c0 vào ma trận C. Vì mỗi vòng lặp đi qua bốn phần tử, vòng lặp for ngoài cùng ở dòng 4 tăng i thêm 4 thay vì 1 như dòng 3 Hình 3.19.
+Khai báo ở dòng 6 Hình 3.21 dùng kiểu dữ liệu \_\_m256d, báo cho compiler rằng biến giữ bốn giá trị floating-point double-precision. Intrinsic \_mm256\_load\_pd() cũng ở dòng 6 dùng instruction AVX để load song song (\_pd) bốn số floating-point double-precision từ ma trận C vào c0. Phép tính địa chỉ C+i+j\*n ở dòng 6 biểu diễn phần tử C[i+j\*n]. Đối xứng với nó, bước cuối ở dòng 11 dùng intrinsic \_mm256\_store\_pd() để store bốn số floating-point double-precision từ c0 vào ma trận C. Vì mỗi vòng lặp đi qua bốn phần tử, vòng lặp for ngoài cùng ở dòng 4 tăng i thêm 4 thay vì 1 như dòng 3 Hình 3.19.
 
 Bên trong các vòng lặp, ở dòng 9 trước tiên ta load bốn phần tử A, cũng dùng _mm256_load_pd(). Để nhân những phần tử này với một phần tử B, ở dòng 10 trước tiên dùng intrinsic _mm256_broadcast_sd(), tạo bốn bản sao giống hệt của số scalar double precision—trong trường hợp này là phần tử B—trong một YMM register. Sau đó dùng _mm256_mul_pd() ở dòng 9 để nhân song song bốn kết quả double-precision. Cuối cùng, _mm256_add_pd() ở dòng 8 cộng bốn product vào bốn tổng trong c0.
 

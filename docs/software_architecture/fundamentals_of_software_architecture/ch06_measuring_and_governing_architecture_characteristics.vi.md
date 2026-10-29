@@ -85,7 +85,7 @@ Các loại characteristic mà team đo lường tiến hóa nhanh chóng cùng 
 
 <a id="id940"></a>Kiến trúc sư và developer đều nhất trí rằng code quá phức tạp là một “code smell”—thứ xuất hiện trong code tệ đến mức có một mùi hôi tưởng tượng. Nó gây hại cho hầu như mọi characteristic đáng mong muốn của code base: modularity, testability, deployability, v.v. Nếu các team không để mắt đến độ phức tạp tăng dần, nó sẽ thống trị code base.
 
-Cyclomatic Complexity là một ví dụ tuyệt vời về sự thô sơ của các metric mà kiến trúc sư có trong tay. Dù nó đo độ phức tạp của code, nó không thể xác định độ phức tạp đó là *thiết yếu* (essential) (vì chúng ta đang giải quyết một vấn đề phức tạp) hay *ngẫu nhiên* (accidental) (vì chúng ta đã hiện thực một thiết kế tồi). Các metric như CC cực kỳ hữu ích để đánh giá code, dù code đó được viết bởi developer hay generative AI. Generative AI có xu hướng giải quyết vấn đề bằng vũ lực (brute force), thường dẫn đến độ phức tạp ngẫu nhiên.
+Cyclomatic Complexity là một ví dụ tuyệt vời về sự thô sơ của các metric mà kiến trúc sư có trong tay. Dù nó đo độ phức tạp của code, nó không thể xác định độ phức tạp đó là *thiết yếu* (essential) (vì chúng ta đang giải quyết một vấn đề phức tạp) hay *ngẫu nhiên* (accidental) (vì chúng ta đã triển khai một thiết kế tồi). Các metric như CC cực kỳ hữu ích để đánh giá code, dù code đó được viết bởi developer hay generative AI. Generative AI có xu hướng giải quyết vấn đề bằng vũ lực (brute force), thường dẫn đến độ phức tạp ngẫu nhiên.
 
 > **Giá trị tốt cho Cyclomatic Complexity là bao nhiêu? (What’s a Good Value for Cyclomatic Complexity?)**
 >
@@ -139,7 +139,7 @@ Fitness function không phải là một framework mới nào đó để kiến 
 
 *Hình 6-2. Các cơ chế của fitness function*
 
-Nhiều công cụ khác nhau có thể được dùng để hiện thực fitness function, tùy thuộc vào các architecture characteristic. Hãy xem một vài ví dụ về fitness function kiểm tra các khía cạnh khác nhau của modularity.
+Nhiều công cụ khác nhau có thể được dùng để triển khai fitness function, tùy thuộc vào các architecture characteristic. Hãy xem một vài ví dụ về fitness function kiểm tra các khía cạnh khác nhau của modularity.
 
 #### Phụ thuộc vòng (Cyclic dependencies)
 
@@ -204,7 +204,7 @@ void AllPackages() {
 }
 ```
 
-Code này dùng JDepend để thiết lập một ngưỡng cho các giá trị chấp nhận được, làm test thất bại nếu một class nằm ngoài khoảng đó. (Công cụ ArchUnit, được giới thiệu trong mục tiếp theo, cho phép kiến trúc sư tạo các fitness function tương tự.) Ví dụ về một thước đo khách quan cho một architecture characteristic này minh họa tầm quan trọng của sự cộng tác giữa developer và kiến trúc sư khi thiết kế và hiện thực fitness function. Ý định không phải là để một nhóm kiến trúc sư leo lên tháp ngà và phát triển những fitness function khó hiểu mà developer không thể hiểu—mà là hiện thực các quy tắc quản trị tự động bảo đảm chất lượng của code base.
+Code này dùng JDepend để thiết lập một ngưỡng cho các giá trị chấp nhận được, làm test thất bại nếu một class nằm ngoài khoảng đó. (Công cụ ArchUnit, được giới thiệu trong mục tiếp theo, cho phép kiến trúc sư tạo các fitness function tương tự.) Ví dụ về một thước đo khách quan cho một architecture characteristic này minh họa tầm quan trọng của sự cộng tác giữa developer và kiến trúc sư khi thiết kế và triển khai fitness function. Ý định không phải là để một nhóm kiến trúc sư leo lên tháp ngà và phát triển những fitness function khó hiểu mà developer không thể hiểu—mà là triển khai các quy tắc quản trị tự động bảo đảm chất lượng của code base.
 
 > **Mẹo**
 >

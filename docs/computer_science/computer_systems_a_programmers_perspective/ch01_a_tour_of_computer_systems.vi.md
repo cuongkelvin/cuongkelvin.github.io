@@ -73,13 +73,13 @@ Chương trình hello bắt đầu tồn tại dưới dạng chương trình C 
 
 Trên hệ thống Unix, việc chuyển từ source file sang object file được thực hiện bởi một compiler driver:
 
-![p0042_1](images/ch01_a_tour_of_computer_systems/p0042_1.png)
-
-**Hình 1.3 Compilation system.**
-
 ```
 linux> gcc -o hello hello.c
 ```
+
+![p0042_1](images/ch01_a_tour_of_computer_systems/p0042_1.png)
+
+**Hình 1.3 Compilation system.**
 
 Ở đây, compiler driver gcc đọc source file hello.c và chuyển nó thành executable object file hello. Việc chuyển đổi được thực hiện theo chuỗi bốn giai đoạn trong Hình 1.3. Các chương trình thực hiện bốn giai đoạn đó (preprocessor, compiler, assembler và linker) được gọi chung là compilation system.
 
@@ -101,19 +101,21 @@ Mỗi dòng từ 2–7 trong định nghĩa này mô tả một machine-language
 
 - Giai đoạn assembly. Tiếp theo, assembler (as) chuyển hello.s thành các machine-language instruction, đóng gói chúng dưới dạng relocatable object program và lưu kết quả vào object file hello.o. Đây là một binary file chứa 17 byte để mã hóa các instruction cho function main. Nếu xem hello.o bằng text editor, nội dung của nó sẽ trông như những ký tự vô nghĩa.
 
+- Giai đoạn linking. Lưu ý rằng chương trình hello gọi function printf, là một phần của standard C library do mọi compiler C cung cấp. Function printf nằm trong một precompiled object file riêng có tên printf.o, cần được hợp nhất với chương trình hello.o của chúng ta bằng cách nào đó. Linker (ld) xử lý việc hợp nhất này. Kết quả là file hello, một executable object file (hoặc đơn giản là executable) sẵn sàng được hệ thống load vào bộ nhớ và thực thi.
+
 ### Ghi chú Dự án GNU
 
 Gcc là một trong nhiều tool hữu ích do dự án GNU (viết tắt của GNU’s Not Unix) phát triển. Dự án GNU là một tổ chức từ thiện tax-exempt do Richard Stallman khởi xướng năm 1984, với mục tiêu đầy tham vọng là phát triển một hệ thống Unix-like hoàn chỉnh có source code không bị ràng buộc bởi các hạn chế về cách sửa đổi hoặc phân phối. Dự án GNU đã phát triển một môi trường có mọi thành phần chính của Unix operating system, ngoại trừ kernel được dự án Linux phát triển riêng. Môi trường GNU gồm editor emacs, compiler gcc, debugger gdb, assembler, linker, các tiện ích thao tác binary và những thành phần khác. Compiler gcc đã phát triển để hỗ trợ nhiều ngôn ngữ, với khả năng tạo code cho nhiều loại máy khác nhau. Các ngôn ngữ được hỗ trợ gồm C, C++, Fortran, Java, Pascal, Objective-C và Ada.
 
 Dự án GNU là một thành tựu đáng kể nhưng thường bị bỏ qua. Phong trào open-source hiện đại (thường gắn với Linux) có nguồn gốc tư tưởng từ khái niệm free software của dự án GNU (“free” theo nghĩa “tự do ngôn luận”, không phải “bia miễn phí”). Hơn nữa, Linux có được phần lớn sự phổ biến nhờ các GNU tool cung cấp môi trường cho Linux kernel.
 
-- Giai đoạn linking. Lưu ý rằng chương trình hello gọi function printf, là một phần của standard C library do mọi compiler C cung cấp. Function printf nằm trong một precompiled object file riêng có tên printf.o, cần được hợp nhất với chương trình hello.o của chúng ta bằng cách nào đó. Linker (ld) xử lý việc hợp nhất này. Kết quả là file hello, một executable object file (hoặc đơn giản là executable) sẵn sàng được hệ thống load vào bộ nhớ và thực thi.
-
 ## 1.3 Hiểu cách compilation system hoạt động mang lại lợi ích
 
 Với các chương trình đơn giản như hello.c, chúng ta có thể dựa vào compilation system để tạo machine code chính xác và hiệu quả. Tuy nhiên, có một số lý do quan trọng khiến lập trình viên cần hiểu cách compilation system hoạt động:
 
-- Tối ưu hiệu năng chương trình. Compiler hiện đại là những tool tinh vi, thường tạo ra code tốt. Là lập trình viên, chúng ta không cần biết hoạt động bên trong compiler để viết code hiệu quả. Tuy nhiên, để đưa ra những quyết định viết code đúng đắn trong chương trình C, chúng ta cần hiểu cơ bản về code machine-level và cách compiler chuyển các câu lệnh C khác nhau thành machine code. Ví dụ, câu lệnh switch có luôn hiệu quả hơn một chuỗi câu lệnh if-else không? Một function call gây ra bao nhiêu overhead? Vòng lặp while có hiệu quả hơn vòng lặp for không? Tham chiếu pointer có hiệu quả hơn dùng array index không? Vì sao vòng lặp chạy nhanh hơn nhiều nếu cộng dồn vào local variable thay vì một argument được truyền bằng reference? Làm sao một function có thể chạy nhanh hơn khi chúng ta chỉ sắp xếp lại dấu ngoặc trong arithmetic expression? Trong Chương 3, chúng ta giới thiệu x86-64, machine language của những thế hệ máy tính Linux, Macintosh và Windows gần đây. Chúng ta mô tả cách compiler chuyển các cấu trúc C khác nhau sang ngôn ngữ này. Trong Chương 5, bạn sẽ học cách điều chỉnh hiệu năng chương trình C bằng những biến đổi đơn giản đối với code C, giúp compiler thực hiện công việc tốt hơn. Trong Chương 6, bạn sẽ tìm hiểu tính phân cấp của hệ thống bộ nhớ, cách compiler C lưu data array trong bộ nhớ và cách chương trình C khai thác kiến thức đó để chạy hiệu quả hơn.
+- Tối ưu hiệu năng chương trình. Compiler hiện đại là những tool tinh vi, thường tạo ra code tốt. Là lập trình viên, chúng ta không cần biết hoạt động bên trong compiler để viết code hiệu quả. Tuy nhiên, để đưa ra những quyết định viết code đúng đắn trong chương trình C, chúng ta cần hiểu cơ bản về code machine-level và cách compiler chuyển các câu lệnh C khác nhau thành machine code. Ví dụ, câu lệnh switch có luôn hiệu quả hơn một chuỗi câu lệnh if-else không? Một function call gây ra bao nhiêu overhead? Vòng lặp while có hiệu quả hơn vòng lặp for không? Tham chiếu pointer có hiệu quả hơn dùng array index không? Vì sao vòng lặp chạy nhanh hơn nhiều nếu cộng dồn vào local variable thay vì một argument được truyền bằng reference? Làm sao một function có thể chạy nhanh hơn khi chúng ta chỉ sắp xếp lại dấu ngoặc trong arithmetic expression?
+
+  Trong Chương 3, chúng ta giới thiệu x86-64, machine language của những thế hệ máy tính Linux, Macintosh và Windows gần đây. Chúng ta mô tả cách compiler chuyển các cấu trúc C khác nhau sang ngôn ngữ này. Trong Chương 5, bạn sẽ học cách điều chỉnh hiệu năng chương trình C bằng những biến đổi đơn giản đối với code C, giúp compiler thực hiện công việc tốt hơn. Trong Chương 6, bạn sẽ tìm hiểu tính phân cấp của hệ thống bộ nhớ, cách compiler C lưu data array trong bộ nhớ và cách chương trình C khai thác kiến thức đó để chạy hiệu quả hơn.
 
 - Hiểu các lỗi link-time. Theo kinh nghiệm của chúng tôi, một số lỗi lập trình gây bối rối nhất có liên quan đến hoạt động của linker, đặc biệt khi bạn cố gắng build những hệ thống software lớn. Ví dụ, linker báo không thể resolve một reference có nghĩa là gì? Static variable khác global variable như thế nào? Điều gì xảy ra nếu bạn định nghĩa hai global variable trùng tên trong những file C khác nhau? Static library khác dynamic library như thế nào? Vì sao thứ tự liệt kê library trên command line lại quan trọng? Và đáng sợ nhất, vì sao một số lỗi linker-related chỉ xuất hiện khi chạy? Bạn sẽ tìm thấy câu trả lời cho những câu hỏi này trong Chương 7.
 

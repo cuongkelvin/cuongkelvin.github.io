@@ -10,7 +10,7 @@ Khi kernel đã boot xong, nó khởi động process đầu tiên với PID b�
 
 Cụ thể, process so-called init này (hay đơn giản là init) chịu trách nhiệm khởi động mọi service cần thiết trong hệ thống, và như mọi embedded developer giỏi đều biết, trong mọi ứng dụng embedded đều có ít nhất một service chạy trên embedded machine. Vì vậy, điều thiết yếu là biết cách developer có thể thêm một service mới vào hệ thống Yocto của mình.
 
-Ngày nay, có hai hiện thực chính của init process này: Initd và Systemd. Yocto Project hỗ trợ cả hai, vì vậy trong sách này chúng ta sẽ trình bày cả hai, dù tập trung vào hiện thực mới hơn và được dùng nhiều nhất, tức là Systemd.
+Ngày nay, có hai bản triển khai chính của init process này: Initd và Systemd. Yocto Project hỗ trợ cả hai, vì vậy trong sách này chúng ta sẽ trình bày cả hai, dù tập trung vào bản triển khai mới hơn và được dùng nhiều nhất, tức là Systemd.
 
 ### 11.1.1 Ghi chú về Initd (Notes on Initd)
 
@@ -109,7 +109,7 @@ Những điều thú vị cần nhấn mạnh ở đây là như sau:
 
 - Thiết lập biến `CONFFILES` được dùng để chỉ định file cấu hình của package như mô tả trong Mục 6.3.4.
 
-Vì mọi service thường chạy dưới dạng daemon (dù có một số ngoại lệ), chúng ta cần một cách để dừng, khởi động hoặc truy vấn trạng thái của service; để làm vậy, Initd dùng các file đặc biệt, thường được gọi chính là service, được định nghĩa theo một định dạng đặc biệt, và `skeleton` được hiện thực theo cách đó.
+Vì mọi service thường chạy dưới dạng daemon (dù có một số ngoại lệ), chúng ta cần một cách để dừng, khởi động hoặc truy vấn trạng thái của service; để làm vậy, Initd dùng các file đặc biệt, thường được gọi chính là service, được định nghĩa theo một định dạng đặc biệt, và `skeleton` được triển khai theo cách đó.
 
 Nếu xem cấu trúc file, chúng ta có thể thấy đoạn code sau:
 
@@ -213,7 +213,7 @@ Và đây cũng chính là các lệnh mà Initd thực thi trong quy trình boo
 
 ### 11.1.2 Một ví dụ Systemd đơn giản (A Systemd Simple Example)
 
-Phạm vi của mục này là cung cấp một service mới cho Systemd, làm cùng công việc như Initd nhưng theo một cách hoàn toàn khác. Và điều này cũng được khẳng định qua cách một recipe cho Systemd phải được hiện thực.
+Phạm vi của mục này là cung cấp một service mới cho Systemd, làm cùng công việc như Initd nhưng theo một cách hoàn toàn khác. Và điều này cũng được khẳng định qua cách một recipe cho Systemd phải được triển khai.
 
 Trong meta layer của mình, chúng ta có thể thêm một recipe mới như dưới đây:
 
@@ -230,7 +230,7 @@ recipes-daemons/service/
 1 directory, 4 files
 ```
 
-Dù có vẻ như không có gì thay đổi, thực ra có rất nhiều khác biệt, bắt đầu từ cách hiện thực daemon. Thật vậy, chúng ta có như sau:
+Dù có vẻ như không có gì thay đổi, thực ra có rất nhiều khác biệt, bắt đầu từ cách triển khai daemon. Thật vậy, chúng ta có như sau:
 
 ```
 $ cd recipes-daemons/service/
@@ -299,7 +299,7 @@ Những directive quan trọng nhất là
 
 Giờ hẳn đã rõ vì sao chúng ta dùng các thiết lập trên để định nghĩa service Systemd mới.
 
-OK, giờ ở bước cuối cùng, chúng ta phải định nghĩa một recipe phù hợp trong một file `.bb` để tạo service mới. Một hiện thực khả dĩ được trình bày dưới đây:
+OK, giờ ở bước cuối cùng, chúng ta phải định nghĩa một recipe phù hợp trong một file `.bb` để tạo service mới. Một bản triển khai khả dĩ được trình bày dưới đây:
 
 ```
 $ cat service_0.2.bb
@@ -1818,7 +1818,7 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-Đây là một chương trình C đọc một số dữ liệu từ stdin rồi ghi dữ liệu đó ra stream stdout. Nói đơn giản, nó là một hiện thực khác của `cat`.
+Đây là một chương trình C đọc một số dữ liệu từ stdin rồi ghi dữ liệu đó ra stream stdout. Nói đơn giản, nó là một cách triển khai khác của `cat`.
 
 Tuy nhiên, chúng ta có thể giả sử rằng nó phải được dùng để tạo một chương trình mới cho target machine theo cách này:
 

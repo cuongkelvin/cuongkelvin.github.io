@@ -58,7 +58,7 @@ Mỗi pattern được mô tả trong chương này được chia thành ba ph�
 >
 > **Architecture story (Architecture Stories)**
 >
-> Xuyên suốt chương này, chúng tôi sẽ dùng architecture story như một <a id="idm45798387350136"></a><a id="idm45798387348840"></a><a id="idm45798387347608"></a><a id="idm45798387346360"></a><a id="idm45798387345128"></a>cách ghi lại và mô tả việc refactor code tác động đến khía cạnh cấu trúc của ứng dụng trong mỗi saga Sysops Squad. Khác với *user story*, vốn mô tả một tính năng cần được hiện thực hoặc thay đổi, một *architecture story* mô tả việc refactor code cụ thể tác động đến cấu trúc tổng thể của một ứng dụng và đáp ứng một loại động lực nghiệp vụ nào đó (như scalability gia tăng, time-to-market tốt hơn, v.v.). Ví dụ, nếu một kiến trúc sư thấy cần tách một payment service để hỗ trợ extensibility tổng thể tốt hơn cho việc thêm các loại thanh toán bổ sung, một architecture story mới sẽ được tạo ra và có nội dung như sau:
+> Xuyên suốt chương này, chúng tôi sẽ dùng architecture story như một <a id="idm45798387350136"></a><a id="idm45798387348840"></a><a id="idm45798387347608"></a><a id="idm45798387346360"></a><a id="idm45798387345128"></a>cách ghi lại và mô tả việc refactor code tác động đến khía cạnh cấu trúc của ứng dụng trong mỗi saga Sysops Squad. Khác với *user story*, vốn mô tả một tính năng cần được triển khai hoặc thay đổi, một *architecture story* mô tả việc refactor code cụ thể tác động đến cấu trúc tổng thể của một ứng dụng và đáp ứng một loại động lực nghiệp vụ nào đó (như scalability gia tăng, time-to-market tốt hơn, v.v.). Ví dụ, nếu một kiến trúc sư thấy cần tách một payment service để hỗ trợ extensibility tổng thể tốt hơn cho việc thêm các loại thanh toán bổ sung, một architecture story mới sẽ được tạo ra và có nội dung như sau:
 >
 > *Với vai trò kiến trúc sư, tôi cần decouple payment service để hỗ trợ extensibility và agility tốt hơn khi thêm các loại thanh toán bổ sung*.
 >
@@ -100,7 +100,7 @@ Một tên mô tả và định danh của component<a id="idm45798387299512"></
 
 **Namespace của component (Component namespace)**
 
-Định danh vật lý (hoặc logic) của component, biểu thị nơi <a id="idm45798387295320"></a><a id="idm45798387294344"></a>các file source code hiện thực component đó được nhóm và lưu trữ. Định danh này thường được ký hiệu qua một namespace, cấu trúc package (Java), hoặc cấu trúc thư mục. Khi một cấu trúc thư mục được dùng để ký hiệu component, chúng tôi thường chuyển ký tự phân cách file thành dấu chấm (.) và tạo một namespace logic tương ứng. Ví dụ, namespace của component cho các file source code trong cấu trúc thư mục *ss/customer/notification* sẽ có giá trị namespace `ss.customer.notification`. Một số ngôn ngữ đòi hỏi namespace khớp với cấu trúc thư mục (như Java với *package*), trong khi các ngôn ngữ khác (như C# với *namespace*) không áp đặt ràng buộc này. Dù dùng định danh namespace nào, hãy bảo đảm loại định danh nhất quán trên tất cả các component trong ứng dụng.
+Định danh vật lý (hoặc logic) của component, biểu thị nơi <a id="idm45798387295320"></a><a id="idm45798387294344"></a>các file source code triển khai component đó được nhóm và lưu trữ. Định danh này thường được ký hiệu qua một namespace, cấu trúc package (Java), hoặc cấu trúc thư mục. Khi một cấu trúc thư mục được dùng để ký hiệu component, chúng tôi thường chuyển ký tự phân cách file thành dấu chấm (.) và tạo một namespace logic tương ứng. Ví dụ, namespace của component cho các file source code trong cấu trúc thư mục *ss/customer/notification* sẽ có giá trị namespace `ss.customer.notification`. Một số ngôn ngữ đòi hỏi namespace khớp với cấu trúc thư mục (như Java với *package*), trong khi các ngôn ngữ khác (như C# với *namespace*) không áp đặt ràng buộc này. Dù dùng định danh namespace nào, hãy bảo đảm loại định danh nhất quán trên tất cả các component trong ứng dụng.
 
 **Phần trăm (Percent)**
 
@@ -122,11 +122,11 @@ Khi định cỡ lại một component lớn, chúng tôi khuyến nghị dùng 
 
 Một khi decomposition pattern này đã được áp dụng và các component<a id="ch05-pff14"></a><a id="ch05-pff13"></a><a id="ch05-pff12"></a> đã được xác định và định cỡ đúng, điều quan trọng là áp dụng một loại governance tự động nào đó để xác định các component mới và bảo đảm các component không trở nên quá lớn trong quá trình bảo trì ứng dụng thông thường và không tạo ra các phụ thuộc không mong muốn hoặc ngoài ý định. Các fitness function tổng thể tự động có thể được kích hoạt trong quá trình deployment để cảnh báo kiến trúc sư nếu vượt quá các ràng buộc đã chỉ định (như metric phần trăm đã thảo luận trước đó hoặc việc dùng độ lệch chuẩn để xác định các điểm ngoại lai).
 
-Fitness function có thể được hiện thực thông qua code custom-written (tự viết) hoặc thông qua việc dùng các công cụ open source hoặc COTS như một phần của CI/CD pipeline. Một số fitness function tự động có thể được dùng để giúp quản trị decomposition pattern này như sau.
+Fitness function có thể được triển khai thông qua code custom-written (tự viết) hoặc thông qua việc dùng các công cụ open source hoặc COTS như một phần của CI/CD pipeline. Một số fitness function tự động có thể được dùng để giúp quản trị decomposition pattern này như sau.
 
 #### Fitness function: Duy trì danh mục component (Maintain component inventory)
 
-Fitness function tổng thể tự động này, thường được kích hoạt khi deployment thông qua một CI/CD pipeline, giúp giữ cho danh mục component luôn cập nhật. Nó được dùng để cảnh báo kiến trúc sư về các component có thể đã được development team thêm vào hoặc gỡ bỏ. Việc xác định các component mới hoặc bị gỡ bỏ không chỉ then chốt cho pattern này, mà còn cho các decomposition pattern khác. [Ví dụ 5-1](#source-ff-inventory) thể hiện pseudocode và thuật toán cho một cách hiện thực khả dĩ của fitness function này.
+Fitness function tổng thể tự động này, thường được kích hoạt khi deployment thông qua một CI/CD pipeline, giúp giữ cho danh mục component luôn cập nhật. Nó được dùng để cảnh báo kiến trúc sư về các component có thể đã được development team thêm vào hoặc gỡ bỏ. Việc xác định các component mới hoặc bị gỡ bỏ không chỉ then chốt cho pattern này, mà còn cho các decomposition pattern khác. [Ví dụ 5-1](#source-ff-inventory) thể hiện pseudocode và thuật toán cho một cách triển khai khả dĩ của fitness function này.
 
 <a id="source-ff-inventory"></a>
 
@@ -154,7 +154,7 @@ IF removed_list NOT EMPTY {
 
 #### Fitness function: Không component nào được vượt quá một tỉ lệ phần trăm nhất định của toàn bộ codebase (No component shall exceed \<some percent> of the overall codebase)
 
-Fitness function tổng thể tự động này, thường được kích hoạt khi deployment thông qua một CI/CD pipeline, xác định các component vượt quá một ngưỡng nhất định về tỉ lệ phần trăm tổng source code mà component đó đại diện, và cảnh báo kiến trúc sư nếu có component nào vượt quá ngưỡng đó. Như đã đề cập trước đó trong chương này, giá trị ngưỡng phần trăm sẽ thay đổi tùy theo kích thước của ứng dụng, nhưng nên được đặt sao cho xác định được các điểm ngoại lai đáng kể. Ví dụ, với một ứng dụng tương đối nhỏ chỉ có 10 component, đặt ngưỡng phần trăm ở mức khoảng 30% sẽ đủ để xác định một component quá lớn, trong khi với một ứng dụng lớn có 50 component, ngưỡng 10% sẽ phù hợp hơn. [Ví dụ 5-2](#source-ff-percent) thể hiện pseudocode và thuật toán cho một cách hiện thực khả dĩ của fitness function này.
+Fitness function tổng thể tự động này, thường được kích hoạt khi deployment thông qua một CI/CD pipeline, xác định các component vượt quá một ngưỡng nhất định về tỉ lệ phần trăm tổng source code mà component đó đại diện, và cảnh báo kiến trúc sư nếu có component nào vượt quá ngưỡng đó. Như đã đề cập trước đó trong chương này, giá trị ngưỡng phần trăm sẽ thay đổi tùy theo kích thước của ứng dụng, nhưng nên được đặt sao cho xác định được các điểm ngoại lai đáng kể. Ví dụ, với một ứng dụng tương đối nhỏ chỉ có 10 component, đặt ngưỡng phần trăm ở mức khoảng 30% sẽ đủ để xác định một component quá lớn, trong khi với một ứng dụng lớn có 50 component, ngưỡng 10% sẽ phù hợp hơn. [Ví dụ 5-2](#source-ff-percent) thể hiện pseudocode và thuật toán cho một cách triển khai khả dĩ của fitness function này.
 
 <a id="source-ff-percent"></a>
 
@@ -275,7 +275,7 @@ Addison nhận thấy rằng hầu hết các component được liệt kê tron
 
 *Hình 5-2. Component Reporting quá lớn và nên được tách ra*
 
-Sau khi phân tích, Addison phát hiện rằng component báo cáo chứa source code hiện thực ba loại báo cáo:
+Sau khi phân tích, Addison phát hiện rằng component báo cáo chứa source code triển khai ba loại báo cáo:
 
 - Báo cáo ticket (báo cáo nhân khẩu học ticket, báo cáo ticket theo ngày/tuần/tháng, báo cáo thời gian giải quyết ticket, v.v.)
 - Báo cáo chuyên gia (báo cáo mức sử dụng chuyên gia, báo cáo phân bố chuyên gia, v.v.)
@@ -489,7 +489,7 @@ Addison viết một architecture story để gộp toàn bộ chức năng thô
 
 *Hình 5-5. Chức năng thông báo được hợp nhất vào một component duy nhất mới tên Notification*
 
-[Bảng 5-7](#table-ss-result-common) thể hiện các component kết quả sau khi Sydney hiện thực architecture story mà Addison đã tạo. Lưu ý rằng component Customer Notification (`ss.customer.notification`), component Ticket Notify (`ss.ticket.notify`), và component Survey Notify (`ss.survey.notify`) đã bị gỡ bỏ, và source code được chuyển sang component Notification hợp nhất mới ( `ss.notification`).
+[Bảng 5-7](#table-ss-result-common) thể hiện các component kết quả sau khi Sydney triển khai architecture story mà Addison đã tạo. Lưu ý rằng component Customer Notification (`ss.customer.notification`), component Ticket Notify (`ss.ticket.notify`), và component Survey Notify (`ss.survey.notify`) đã bị gỡ bỏ, và source code được chuyển sang component Notification hợp nhất mới ( `ss.notification`).
 
 <a id="table-ss-result-common"></a>
 
@@ -521,7 +521,7 @@ Addison viết một architecture story để gộp toàn bộ chức năng thô
 
 ## Pattern làm phẳng component (Flatten Components Pattern)
 
-Như đã đề cập trước đó, component—các khối xây dựng <a id="ch05-flat"></a><a id="ch05-flat2"></a><a id="ch05-flat4"></a><a id="ch05-flat5"></a><a id="ch05-flat6"></a>của một ứng dụng—thường được xác định thông qua namespace, cấu trúc package, hoặc cấu trúc thư mục và được hiện thực thông qua các file class (hay file source code) chứa trong các cấu trúc này. Tuy nhiên, khi component được xây dựng chồng lên các component khác, mà những component đó lại được xây dựng chồng lên các component khác nữa, chúng bắt đầu mất bản sắc và không còn là component theo định nghĩa của chúng tôi. Pattern *Flatten Components* (làm phẳng component) được dùng để bảo đảm rằng các component không được xây dựng chồng lên nhau, mà được làm phẳng và biểu thị dưới dạng leaf node trong một cấu trúc thư mục hoặc namespace.
+Như đã đề cập trước đó, component—các khối xây dựng <a id="ch05-flat"></a><a id="ch05-flat2"></a><a id="ch05-flat4"></a><a id="ch05-flat5"></a><a id="ch05-flat6"></a>của một ứng dụng—thường được xác định thông qua namespace, cấu trúc package, hoặc cấu trúc thư mục và được triển khai thông qua các file class (hay file source code) chứa trong các cấu trúc này. Tuy nhiên, khi component được xây dựng chồng lên các component khác, mà những component đó lại được xây dựng chồng lên các component khác nữa, chúng bắt đầu mất bản sắc và không còn là component theo định nghĩa của chúng tôi. Pattern *Flatten Components* (làm phẳng component) được dùng để bảo đảm rằng các component không được xây dựng chồng lên nhau, mà được làm phẳng và biểu thị dưới dạng leaf node trong một cấu trúc thư mục hoặc namespace.
 
 <a id="idm45798382396264"></a>
 
@@ -665,7 +665,7 @@ Sau khi áp dụng [“Gather Common Domain Components Pattern”](#sec-pattern-
 
 Addison quyết định xử lý các component ticket trước. Biết rằng làm phẳng component nghĩa là loại bỏ source code ở các node không phải leaf, Addison có hai lựa chọn: hợp nhất code chứa trong các component giao ticket và định tuyến ticket vào component `ss.ticket`, hoặc chia 45 class trong component `ss.ticket` thành các component riêng biệt, nhờ đó biến `ss.ticket` thành một subdomain. Addison thảo luận các phương án này với Sydney (một trong các developer của Sysops Squad), và dựa trên độ phức tạp và các thay đổi thường xuyên trong chức năng giao ticket, quyết định giữ các component đó riêng biệt và chuyển orphaned code từ root namespace `ss.ticket` sang các namespace khác, từ đó hình thành các component mới.
 
-Với sự giúp đỡ của Sydney, Addison phát hiện rằng 45 orphaned class chứa trong namespace `ss.ticket` hiện thực các chức năng ticket sau:
+Với sự giúp đỡ của Sydney, Addison phát hiện rằng 45 orphaned class chứa trong namespace `ss.ticket` triển khai các chức năng ticket sau:
 
 - Tạo và duy trì ticket (tạo ticket, cập nhật ticket, hủy ticket, v.v.)
 - Logic hoàn tất ticket
@@ -896,7 +896,7 @@ Sau khi đọc về pattern Determine Component Dependencies,<a id="ch05-sosd"><
 
 *Hình 5-16. Phụ thuộc component trong ứng dụng Sysops Squad*
 
-Tuy nhiên, sau khi phân tích thêm, Addison thấy rằng component Notification có nhiều phụ thuộc nhất, điều không đáng ngạc nhiên vì nó là một component dùng chung. Tuy nhiên, Addison cũng thấy rất nhiều phụ thuộc bên trong các component Ticketing và Reporting. Cả hai vùng domain này đều có một component riêng cho code dùng chung (interface, helper class, entity class, v.v.). Nhận ra rằng code dùng chung của cả ticket và báo cáo chủ yếu chứa các tham chiếu class compile-based (dựa trên biên dịch) và nhiều khả năng sẽ được hiện thực dưới dạng thư viện dùng chung thay vì service, Addison lọc bỏ các component này để có cái nhìn tốt hơn về các phụ thuộc giữa chức năng cốt lõi của ứng dụng, như minh họa trong [Hình 5-17](#fig-decomposition-patterns-dependencies-ss-filtered).
+Tuy nhiên, sau khi phân tích thêm, Addison thấy rằng component Notification có nhiều phụ thuộc nhất, điều không đáng ngạc nhiên vì nó là một component dùng chung. Tuy nhiên, Addison cũng thấy rất nhiều phụ thuộc bên trong các component Ticketing và Reporting. Cả hai vùng domain này đều có một component riêng cho code dùng chung (interface, helper class, entity class, v.v.). Nhận ra rằng code dùng chung của cả ticket và báo cáo chủ yếu chứa các tham chiếu class compile-based (dựa trên biên dịch) và nhiều khả năng sẽ được triển khai dưới dạng thư viện dùng chung thay vì service, Addison lọc bỏ các component này để có cái nhìn tốt hơn về các phụ thuộc giữa chức năng cốt lõi của ứng dụng, như minh họa trong [Hình 5-17](#fig-decomposition-patterns-dependencies-ss-filtered).
 
 <a id="fig-decomposition-patterns-dependencies-ss-filtered"></a>
 
@@ -930,7 +930,7 @@ Các component domain được thể hiện vật lý trong một ứng dụng t
 
 *Hình 5-18. Các component domain được xác định thông qua các node namespace*
 
-Vì nhiều ứng dụng monolith cũ được hiện thực trước khi [domain-driven design](https://oreil.ly/AaKR2) được dùng<a id="idm45798381727240"></a><a id="idm45798381726248"></a><a id="idm45798381725272"></a><a id="idm45798381724024"></a> rộng rãi, trong nhiều trường hợp cần refactor các namespace để xác định domain về mặt cấu trúc trong ứng dụng. Ví dụ, hãy xét các component được liệt kê trong [Bảng 5-13](#table-customer-before) tạo nên domain Customer trong ứng dụng Sysops Squad.
+Vì nhiều ứng dụng monolith cũ được triển khai trước khi [domain-driven design](https://oreil.ly/AaKR2) được dùng<a id="idm45798381727240"></a><a id="idm45798381726248"></a><a id="idm45798381725272"></a><a id="idm45798381724024"></a> rộng rãi, trong nhiều trường hợp cần refactor các namespace để xác định domain về mặt cấu trúc trong ứng dụng. Ví dụ, hãy xét các component được liệt kê trong [Bảng 5-13](#table-customer-before) tạo nên domain Customer trong ứng dụng Sysops Squad.
 
 <a id="table-customer-before"></a>
 

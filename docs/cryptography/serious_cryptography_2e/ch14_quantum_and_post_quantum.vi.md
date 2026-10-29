@@ -346,7 +346,7 @@ Nhưng còn key agreement, với Diffie–Hellman (DH) và đối tác elliptic 
 
 ### Vấn đề implementation (Implementation Issues)
 
-Trong thực tế, các post-quantum scheme gồm code—phần mềm chạy trên một bộ xử lý vật lý nào đó—chứ không chỉ là các algorithm trừu tượng. Dù các algorithm có mạnh đến đâu trên giấy, chúng sẽ không miễn nhiễm với lỗi implementation, bug phần mềm, hay side-channel attack. Một algorithm có thể hoàn toàn post-quantum trên lý thuyết nhưng vẫn có thể bị phá khi được hiện thực—ví dụ, bởi một chương trình máy tính cổ điển vì một lập trình viên quên gõ dấu chấm phẩy.
+Trong thực tế, các post-quantum scheme gồm code—phần mềm chạy trên một bộ xử lý vật lý nào đó—chứ không chỉ là các algorithm trừu tượng. Dù các algorithm có mạnh đến đâu trên giấy, chúng sẽ không miễn nhiễm với lỗi implementation, bug phần mềm, hay side-channel attack. Một algorithm có thể hoàn toàn post-quantum trên lý thuyết nhưng vẫn có thể bị phá khi được triển khai—ví dụ, bởi một chương trình máy tính cổ điển vì một lập trình viên quên gõ dấu chấm phẩy.
 
 Hơn nữa, các scheme như các algorithm code-based và lattice-based dựa nhiều vào các phép toán, mà implementation của chúng dùng nhiều thủ thuật để làm các phép toán đó nhanh nhất có thể. Cũng vì lẽ đó, độ phức tạp của code trong các algorithm này khiến implementation dễ bị side-channel attack hơn, như timing attack, thứ suy ra thông tin về các giá trị bí mật dựa trên việc đo thời gian thực thi. Thực tế, chúng ta đã áp dụng những attack như vậy lên code-based encryption (xem https://eprint.iacr.org/2010/479) và lên các signature scheme lattice-based (xem https://eprint.iacr.org/2016/300).
 

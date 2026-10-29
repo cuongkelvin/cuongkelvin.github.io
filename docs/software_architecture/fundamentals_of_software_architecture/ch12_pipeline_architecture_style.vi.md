@@ -4,7 +4,7 @@
 
 <a id="ix_ch12-style-pipeline-asciidoc0"></a>Một trong những style nền tảng trong software architecture là *pipeline* architecture (còn được biết đến là *pipes and filters* architecture). Ngay khi developer và kiến trúc sư quyết định chia chức năng thành các phần rời rạc, style architecture này đã theo sau. Hầu hết developer biết architecture này như nguyên lý nền tảng đằng sau các ngôn ngữ shell của terminal Unix, như [Bash](https://oreil.ly/uP2Bo) và [Zsh](https://oreil.ly/40UyF).
 
-Developer trong nhiều ngôn ngữ lập trình hàm sẽ thấy sự tương đồng giữa các cấu trúc ngôn ngữ và các phần tử của architecture này. Thực tế, nhiều công cụ dùng mô hình lập trình [MapReduce](https://oreil.ly/veX6W) tuân theo topology cơ bản này. Dù các ví dụ trong chương này thể hiện các hiện thực low-level của pipeline architecture style, nó cũng có thể được dùng cho các ứng dụng nghiệp vụ higher-level.
+Developer trong nhiều ngôn ngữ lập trình hàm sẽ thấy sự tương đồng giữa các cấu trúc ngôn ngữ và các phần tử của architecture này. Thực tế, nhiều công cụ dùng mô hình lập trình [MapReduce](https://oreil.ly/veX6W) tuân theo topology cơ bản này. Dù các ví dụ trong chương này thể hiện các bản triển khai low-level của pipeline architecture style, nó cũng có thể được dùng cho các ứng dụng nghiệp vụ higher-level.
 
 <a id="id322"></a>
 
@@ -24,7 +24,7 @@ Do đó, “hình dạng” đẳng cấu của pipeline architecture là *một
 
 ## Đặc thù của style (Style Specifics)
 
-Dù hầu hết các hiện thực của pipeline architecture là monolith, có thể deploy mỗi filter (hoặc một tập filter) như một service, tạo ra một architecture phân tán với các lời gọi từ xa đồng bộ hoặc bất đồng bộ tới mỗi service. Bất kể topology deployment là gì, architecture này chỉ gồm hai component kiến trúc, filter và pipe, mà chúng tôi mô tả chi tiết trong các mục sau.
+Dù hầu hết các bản triển khai của pipeline architecture là monolith, có thể deploy mỗi filter (hoặc một tập filter) như một service, tạo ra một architecture phân tán với các lời gọi từ xa đồng bộ hoặc bất đồng bộ tới mỗi service. Bất kể topology deployment là gì, architecture này chỉ gồm hai component kiến trúc, filter và pipe, mà chúng tôi mô tả chi tiết trong các mục sau.
 
 <a id="id102"></a>
 
@@ -32,7 +32,7 @@ Dù hầu hết các hiện thực của pipeline architecture là monolith, có
 
 <a id="id1169"></a><a id="id1170"></a>*Filter* là các mẩu chức năng self-contained, độc lập với các filter khác. Chúng nhìn chung là stateless, và chỉ nên thực hiện một tác vụ duy nhất. Các tác vụ tổng hợp thường được xử lý bởi một chuỗi filter thay vì một filter đơn lẻ.
 
-Vì filter có thể được hiện thực bởi nhiều hơn một file class, chúng được coi là các *component* của architecture (xem [Chương 8](ch08_component_based_thinking.vi.md#ch08-component-based-thinking)). Ngay cả khi một filter đơn giản và chỉ được hiện thực bằng một file class duy nhất, nó vẫn là một component.
+Vì filter có thể được triển khai bởi nhiều hơn một file class, chúng được coi là các *component* của architecture (xem [Chương 8](ch08_component_based_thinking.vi.md#ch08-component-based-thinking)). Ngay cả khi một filter đơn giản và chỉ được triển khai bằng một file class duy nhất, nó vẫn là một component.
 
 Có bốn loại filter trong pipeline architecture style:
 
@@ -93,7 +93,7 @@ Ví dụ trong [Hình 12-2](#fig-style-pipeline-data) thể hiện một pipelin
 
 <a id="ix_ch12-style-pipeline-asciidoc1"></a><a id="ix_ch12-style-pipeline-asciidoc2"></a>Pipeline architecture style rất phù hợp cho các deployment cloud-based nhờ mức modularity cao và các loại filter tách biệt. Vì hầu hết các pipeline architecture không quá phức tạp và đồ sộ, chúng hoạt động tốt khi được deploy dưới dạng monolithic architecture, nơi tất cả các filter được deploy trong cùng một deployment unit.
 
-Tuy nhiên, filter cũng hoạt động tốt trong môi trường cloud dưới dạng các hàm phân tán. <a id="id1177"></a>Trên AWS, pipeline architecture có thể được deploy dưới dạng [AWS Step Functions](https://oreil.ly/G-MYV), trong đó mỗi filter được deploy như một lambda riêng trong workflow. AWS Step Functions cung cấp hai loại workflow: *Standard*, trong đó mỗi bước được thực thi đúng một lần, và *Express*, trong đó mỗi bước có thể thực thi nhiều hơn một lần. Pipeline architecture style hoạt động với cả hai. Đoạn code sau minh họa ví dụ continuous fitness function trong [Hình 12-2](#fig-style-pipeline-data) như một deployment cloud điển hình cho pipeline architecture, được hiện thực dưới dạng một AWS Step Function:
+Tuy nhiên, filter cũng hoạt động tốt trong môi trường cloud dưới dạng các hàm phân tán. <a id="id1177"></a>Trên AWS, pipeline architecture có thể được deploy dưới dạng [AWS Step Functions](https://oreil.ly/G-MYV), trong đó mỗi filter được deploy như một lambda riêng trong workflow. AWS Step Functions cung cấp hai loại workflow: *Standard*, trong đó mỗi bước được thực thi đúng một lần, và *Express*, trong đó mỗi bước có thể thực thi nhiều hơn một lần. Pipeline architecture style hoạt động với cả hai. Đoạn code sau minh họa ví dụ continuous fitness function trong [Hình 12-2](#fig-style-pipeline-data) như một deployment cloud điển hình cho pipeline architecture, được triển khai dưới dạng một AWS Step Function:
 
 ```json
 {
@@ -148,7 +148,7 @@ Mỗi loại trong bốn loại filter cơ bản (producer, transformer, tester 
 
 Rất khó viết một fitness function tự động để quản trị việc một producer filter có thực sự là điểm khởi đầu của pipeline hay không, hoặc việc một tester filter có thực sự đang thực hiện một phép kiểm tra điều kiện để xác định tiếp tục hay kết thúc luồng hay không. Các kỹ thuật governance giúp kiến trúc sư hướng dẫn development team tuân thủ vai trò của mỗi loại filter và trách nhiệm của một loại filter cụ thể.
 
-<a id="ix_ch12-style-pipeline-asciidoc5"></a>Một kỹ thuật như vậy là tận dụng *tag*. (Trong ngôn ngữ Java, tag được hiện thực dưới dạng *annotation*, và trong C# là *custom attribute*.) Tag không thực sự thực hiện chức năng nào; chúng cung cấp metadata về component hoặc service theo cách lập trình. Sử dụng tag trong class khởi đầu của filter component cho developer biết về loại filter họ đang tạo hoặc sửa đổi, giúp ngăn họ trao cho filter đó quá nhiều trách nhiệm hoặc thực hiện một chức năng không gắn với loại của nó.
+<a id="ix_ch12-style-pipeline-asciidoc5"></a>Một kỹ thuật như vậy là tận dụng *tag*. (Trong ngôn ngữ Java, tag được triển khai dưới dạng *annotation*, và trong C# là *custom attribute*.) Tag không thực sự thực hiện chức năng nào; chúng cung cấp metadata về component hoặc service theo cách lập trình. Sử dụng tag trong class khởi đầu của filter component cho developer biết về loại filter họ đang tạo hoặc sửa đổi, giúp ngăn họ trao cho filter đó quá nhiều trách nhiệm hoặc thực hiện một chức năng không gắn với loại của nó.
 
 Để minh họa kỹ thuật này, hãy xét source code sau định nghĩa tag cho bốn loại filter cơ bản. Đây là định nghĩa annotation tag bằng Java:
 
@@ -184,7 +184,7 @@ class Filter : System.Attribute {
 }
 ```
 
-Vì filter về cơ bản là một component kiến trúc, chúng có thể được hiện thực thông qua nhiều file class. Ví dụ, trong ví dụ continuous fitness function ở [Hình 12-2](#fig-style-pipeline-data), filter Trend Analyzer khá phức tạp và có thể có nhiều file class. Vì vậy, chúng ta sẽ định nghĩa thêm một tag để xác định class đại diện cho điểm vào của filter, để có thể gắn các tag khác vào nó.
+Vì filter về cơ bản là một component kiến trúc, chúng có thể được triển khai thông qua nhiều file class. Ví dụ, trong ví dụ continuous fitness function ở [Hình 12-2](#fig-style-pipeline-data), filter Trend Analyzer khá phức tạp và có thể có nhiều file class. Vì vậy, chúng ta sẽ định nghĩa thêm một tag để xác định class đại diện cho điểm vào của filter, để có thể gắn các tag khác vào nó.
 
 Đây là định nghĩa tag điểm vào bằng Java:
 
@@ -251,7 +251,7 @@ Các platform team làm việc trên một pipeline architecture có thể tận
 
 <a id="ix_ch12-style-pipeline-asciidoc6"></a>Đánh giá one-star (một sao) trong bảng đánh giá characteristic ([Hình 12-3](#fig-style-pipeline-ratings)) có nghĩa là architecture characteristic cụ thể không được hỗ trợ tốt trong architecture, trong khi đánh giá five-star (năm sao) có nghĩa là architecture characteristic đó là một trong những đặc điểm mạnh nhất của architecture style. Các characteristic có trong bảng điểm được mô tả và định nghĩa trong [Chương 4](ch04_architectural_characteristics_defined.vi.md#ch04-architecture-characteristics-defined).
 
-<a id="id1186"></a>Pipeline architecture style là một architecture *được phân vùng theo kỹ thuật* (technically partitioned) vì logic ứng dụng của nó được tách thành các loại filter. Ngoài ra, vì pipeline architecture thường được hiện thực dưới dạng một deployment monolith, architectural quantum của nó luôn là 1.
+<a id="id1186"></a>Pipeline architecture style là một architecture *được phân vùng theo kỹ thuật* (technically partitioned) vì logic ứng dụng của nó được tách thành các loại filter. Ngoài ra, vì pipeline architecture thường được triển khai dưới dạng một deployment monolith, architectural quantum của nó luôn là 1.
 
 <a id="fig-style-pipeline-ratings"></a>
 
@@ -263,9 +263,9 @@ Chi phí tổng thể, sự đơn giản và modularity là những điểm mạ
 
 Deployability và testability, dù chỉ ở mức trung bình, được đánh giá cao hơn một chút so với layered architecture nhờ mức modularity mà các filter có thể đạt được. Tuy nhiên, pipeline architecture vẫn *thường* là monolith, nên nhược điểm của chúng bao gồm thủ tục, rủi ro, tần suất deployment và mức độ đầy đủ của testing.
 
-Elasticity và scalability được đánh giá rất thấp (một sao) trong pipeline architecture, chủ yếu do deployment dạng monolith. Hiện thực architecture style này dưới dạng một architecture phân tán dùng giao tiếp bất đồng bộ có thể cải thiện đáng kể các characteristic này, nhưng trade-off là một cú giáng vào chi phí tổng thể và sự đơn giản.
+Elasticity và scalability được đánh giá rất thấp (một sao) trong pipeline architecture, chủ yếu do deployment dạng monolith. Triển khai architecture style này dưới dạng một architecture phân tán dùng giao tiếp bất đồng bộ có thể cải thiện đáng kể các characteristic này, nhưng trade-off là một cú giáng vào chi phí tổng thể và sự đơn giản.
 
-Pipeline architecture không hỗ trợ fault tolerance vì chúng thường được deploy dưới dạng các hệ thống monolith. Nếu một phần nhỏ của một pipeline architecture gây ra tình trạng out-of-memory, toàn bộ unit ứng dụng bị ảnh hưởng và crash. <a id="id1187"></a><a id="id1188"></a>Hơn nữa, availability tổng thể bị ảnh hưởng bởi mean time to recovery (MTTR) cao vốn phổ biến ở hầu hết các ứng dụng monolith, với thời gian khởi động được đo bằng phút. Như với elasticity và scalability, hiện thực architecture style này dưới dạng một architecture phân tán dùng giao tiếp bất đồng bộ có thể cải thiện đáng kể fault tolerance, một lần nữa phải trả giá bằng chi phí và độ phức tạp.
+Pipeline architecture không hỗ trợ fault tolerance vì chúng thường được deploy dưới dạng các hệ thống monolith. Nếu một phần nhỏ của một pipeline architecture gây ra tình trạng out-of-memory, toàn bộ unit ứng dụng bị ảnh hưởng và crash. <a id="id1187"></a><a id="id1188"></a>Hơn nữa, availability tổng thể bị ảnh hưởng bởi mean time to recovery (MTTR) cao vốn phổ biến ở hầu hết các ứng dụng monolith, với thời gian khởi động được đo bằng phút. Như với elasticity và scalability, triển khai architecture style này dưới dạng một architecture phân tán dùng giao tiếp bất đồng bộ có thể cải thiện đáng kể fault tolerance, một lần nữa phải trả giá bằng chi phí và độ phức tạp.
 
 Như chúng tôi đã đề cập, hầu hết các characteristic vận hành low-scoring có thể được nâng lên bằng cách biến đây thành một architecture phân tán với giao tiếp bất đồng bộ, trong đó mỗi filter là một deployment unit riêng và các pipe là các lời gọi từ xa. Tuy nhiên, làm vậy sẽ ảnh hưởng tiêu cực đến các thuộc tính khác như sự đơn giản và chi phí, minh họa một trong những trade-offs kinh điển của software architecture.
 

@@ -16,7 +16,7 @@ DOI: [10.1201/9781003598145-16](https://doi.org/10.1201/9781003598145-16)
 
 ## 16.1 Tà thuyết nền tảng
 
-Nội dung của chương này bị nhiều người trong thế giới các hệ thống safety-critical coi là tà thuyết. Nhiều tiêu chuẩn functional safety đưa ra giả định rằng, mặc dù các failure phần cứng có thể xảy ra ngẫu nhiên, mọi failure phần mềm đều mang tính hệ thống, biểu thị các vấn đề với thiết kế, chứ không phải các vấn đề với phần hiện thực. Niềm tin này dựa trên nguyên lý rằng phần cứng thì hao mòn, còn phần mềm thì không. Như đã đề cập trong ngụy biện 3 ở trang 79, không phải tiêu chuẩn nào cũng rơi vào cái bẫy này, vì IEC 61513 nói rõ: *“Vì các tác nhân kích hoạt software fault được gặp phải một cách ngẫu nhiên trong quá trình hệ thống hoạt động, nên các software failure cũng xảy ra một cách ngẫu nhiên.”*
+Nội dung của chương này bị nhiều người trong thế giới các hệ thống safety-critical coi là tà thuyết. Nhiều tiêu chuẩn functional safety đưa ra giả định rằng, mặc dù các failure phần cứng có thể xảy ra ngẫu nhiên, mọi failure phần mềm đều mang tính hệ thống, biểu thị các vấn đề với thiết kế, chứ không phải các vấn đề với phần triển khai. Niềm tin này dựa trên nguyên lý rằng phần cứng thì hao mòn, còn phần mềm thì không. Như đã đề cập trong ngụy biện 3 ở trang 79, không phải tiêu chuẩn nào cũng rơi vào cái bẫy này, vì IEC 61513 nói rõ: *“Vì các tác nhân kích hoạt software fault được gặp phải một cách ngẫu nhiên trong quá trình hệ thống hoạt động, nên các software failure cũng xảy ra một cách ngẫu nhiên.”*
 
 IEC 61508 coi failure phần mềm là mang tính hệ thống và điều này được phản ánh trong việc gán systematic capability level thay vì SIL cho phần mềm. Annex D của [phần 7](part7_appendices.vi.md) có tên, *“Statistical evaluation techniques for in service software elements,”* nhưng phụ lục này có một lời cảnh báo tường minh rằng *“Nó nhìn chung không áp dụng được cho phần mềm phức tạp, như hệ điều hành hoặc compiler.”*
 
@@ -113,7 +113,7 @@ Có lẽ ngoại trừ các startup chưa có lịch sử doanh nghiệp, mọi 
 
 Điều này cho phép thực hiện một mức phân tích mà các kỹ sư phần cứng chỉ có thể mơ tới: *“Khi Joe viết một module bằng C dài 500-750 dòng non-comment trong subsystem XYZ, và các thay đổi của anh ấy được Ethel phê duyệt trước khi đưa vào repository, thì trong 73% trường hợp, phải thực hiện một thay đổi bug-fix trong vòng 3 tháng để sửa một bug trong module đó.”* Thông tin sẵn có thậm chí còn cho phép xác định xác suất của một lần sửa bug tiếp theo.
 
-Thông tin này không được dùng để chỉ trích Joe vì thiết kế và viết code kém — có thể Joe là người cấp cao nhất trong nhóm và luôn được giao những phần khó nhất của thiết kế để hiện thực. Thay vào đó, thông tin này cho phép chúng ta ước lượng khá chính xác failure rate có khả năng của một đoạn code khác trong subsystem XYZ mà Joe đang viết.
+Thông tin này không được dùng để chỉ trích Joe vì thiết kế và viết code kém — có thể Joe là người cấp cao nhất trong nhóm và luôn được giao những phần khó nhất của thiết kế để triển khai. Thay vào đó, thông tin này cho phép chúng ta ước lượng khá chính xác failure rate có khả năng của một đoạn code khác trong subsystem XYZ mà Joe đang viết.
 
 Kiểu data mining trên source code repository và problem report database này giống với kiểu được mô tả trong phần thảo luận về đánh giá fault density trong [Mục 21.3.3](ch21_static_analysis.vi.md#sec21_3_3) và việc cải thiện phân tích code tĩnh được mô tả trong [Mục 21.3.1](ch21_static_analysis.vi.md#sec21_3_1). Cùng một dữ liệu đang được khai thác, bằng các công cụ tương tự, nhưng cho các mục đích khác nhau.
 
@@ -181,7 +181,7 @@ Như đã đề cập ở trang 38, IEC 62304 có một câu rất khó hiểu: 
 
 ## 16.8 Các công ty ví dụ
 
-Hãy xem một trong các công ty tiêu biểu được giới thiệu trong [Chương 4](ch04_representative_companies.vi.md), Alpha Device Corporation (ADC), có thể hiện thực chiến lược này trong thực tế như thế nào.
+Hãy xem một trong các công ty tiêu biểu được giới thiệu trong [Chương 4](ch04_representative_companies.vi.md), Alpha Device Corporation (ADC), có thể triển khai chiến lược này trong thực tế như thế nào.
 
 <a id="p197"></a>Đây không phải lần đầu ADC chế tạo một thiết bị ô tô, và công ty là người dùng nhiều mô hình COCOMO II<a id="fn16_116b"></a>[<sup>1</sup>](#fn16_1) cho việc lập kế hoạch dự án. Điều này đã khiến các kỹ sư của ADC rút ra một số yếu tố từ COCOMO để mở rộng các mô hình Bayes được minh họa trong [Hình 16.2](#fig16_2) và [16.3](#fig16_3) cho khớp chính xác hơn với hoạt động và lịch sử thực tế của ADC.
 
@@ -189,7 +189,7 @@ Ví dụ, node “Design Process Quality” đã được làm cho phụ thuộc
 
 Trong “giai đoạn concept” của dự án (dùng thuật ngữ của ISO 26262), cấu trúc chung của mô hình Bayes đã được ban quản lý dự án và nhóm phát triển chấp nhận. Các prior sau đó được điền từ thông tin lịch sử của các sản phẩm trước.
 
-Một khi dự án chuyển sang các giai đoạn thiết kế và hiện thực, dữ liệu được thu thập từ ngày đầu tiên và được dùng để điều chỉnh các tham số và hình dạng của các phân phối khác nhau, đặc biệt là phân phối liên quan đến “Defects found in Verification”. Nhóm quản lý của ADC, bao gồm các project manager, được cung cấp thông tin này hằng ngày và dùng nó để sớm nhận diện các thay đổi tiến độ tiềm tàng.
+Một khi dự án chuyển sang các giai đoạn thiết kế và triển khai, dữ liệu được thu thập từ ngày đầu tiên và được dùng để điều chỉnh các tham số và hình dạng của các phân phối khác nhau, đặc biệt là phân phối liên quan đến “Defects found in Verification”. Nhóm quản lý của ADC, bao gồm các project manager, được cung cấp thông tin này hằng ngày và dùng nó để sớm nhận diện các thay đổi tiến độ tiềm tàng.
 
 Khi việc phát triển sản phẩm gần kết thúc, các dự đoán từ mô hình được dùng để quyết định khi nào nên dừng kiểm chứng: theo thuật ngữ của ISO 29119, khi rủi ro đã được giảm thiểu đủ.
 

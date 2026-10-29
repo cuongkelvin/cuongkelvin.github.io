@@ -10,7 +10,7 @@ DOI: [10.1201/9781003598145-13](https://doi.org/10.1201/9781003598145-13)
 >
 > Dionysius Lardner, 1834
 
-Chương này mô tả một số architectural pattern dựa trên replication (nhân bản: hai hoặc nhiều hệ thống giống hệt nhau) và diversification (đa dạng hóa: hai hoặc nhiều hiện thực khác nhau của hệ thống).
+Chương này mô tả một số architectural pattern dựa trên replication (nhân bản: hai hoặc nhiều hệ thống giống hệt nhau) và diversification (đa dạng hóa: hai hoặc nhiều cách triển khai khác nhau của hệ thống).
 
 Replication hoặc diversification được dùng để tăng hoặc availability hoặc reliability của một hệ thống — xem trang 16 để biết giải thích về sự phân biệt này. Như được mô tả trong [Mục 10.1](ch10_balancing_design_aspects.vi.md#sec10_1), tăng availability hoặc reliability nhìn chung làm giảm cái còn lại.
 
@@ -18,7 +18,7 @@ Câu trích năm 1837 của Babbage ở trang 16 về thiết kế phần mềm 
 
 ## 13.1 Replication và diversification trong các tiêu chuẩn
 
-Replication và diversification được khuyến nghị trong cả IEC 61508 lẫn ISO 26262. IEC 61508-7 và EN 50716 mô tả một kỹ thuật rất gần với N-version programming ([Mục 13.4.2.3](#sec13_4_2_3)). IEC 61508-7 cũng khuyến nghị cụ thể sự đa dạng trong hiện thực để giảm xác suất xảy ra các common-cause failure, mặc dù nó thừa nhận rằng một fault trong đặc tả chung có thể dẫn đến một common-cause failure.
+Replication và diversification được khuyến nghị trong cả IEC 61508 lẫn ISO 26262. IEC 61508-7 và EN 50716 mô tả một kỹ thuật rất gần với N-version programming ([Mục 13.4.2.3](#sec13_4_2_3)). IEC 61508-7 cũng khuyến nghị cụ thể sự đa dạng trong triển khai để giảm xác suất xảy ra các common-cause failure, mặc dù nó thừa nhận rằng một fault trong đặc tả chung có thể dẫn đến một common-cause failure.
 
 Khái niệm một external monitor diversely-implemented ([Mục 13.7](#sec13_7)) được liệt kê là một kỹ thuật được khuyến nghị trong IEC 61508-3 và được mô tả chi tiết hơn trong IEC 61508-7. Trong phiên bản 1 của IEC 61508, external monitor được gọi là “safety bag”; trong các phiên bản sau, tên của nó đổi thành “diverse monitor”, cái tên có ưu điểm <a id="p145"></a>là mang tính mô tả hơn phần nào. EN 50716 vẫn dùng thuật ngữ “safety bag” và khuyến nghị nó như một software architecture ở mọi SIL. ISO 26262-6 cũng khuyến nghị diverse monitor.
 
@@ -264,7 +264,7 @@ Nếu một thông điệp *s*<sub>1</sub> khiến một chương trình gửi t
 
 Nếu bất kỳ thành viên group nào nhận được *s*<sub>1</sub> trước *s*<sub>2</sub>, thì mọi thành viên group đều vậy. Đây là thứ tự được mô tả ở trên và là thứ tự được giả định trong các ví dụ dưới đây.
 
-Làm ví dụ, hãy xem <a id="b13fig13_3"></a>[Hình 13.3](#fig13_3). Group này có bốn instance server, mỗi instance được liên kết với middleware virtual synchrony. Các instance có thể là bản sao hoặc các hiện thực diverse.
+Làm ví dụ, hãy xem <a id="b13fig13_3"></a>[Hình 13.3](#fig13_3). Group này có bốn instance server, mỗi instance được liên kết với middleware virtual synchrony. Các instance có thể là bản sao hoặc các bản triển khai diverse.
 
 <a id="fig13_3"></a>
 
@@ -340,11 +340,11 @@ Việc dựa trên một điều bất khả có vẻ là một nhược điểm
 
 Tóm lại, pattern virtual synchrony là một cách đã được kiểm thử, chứng minh và tiêu chuẩn hóa để cung cấp replication theo cách mà hệ thống chịu được Heisenbug. Nó đặc biệt hữu ích khi dependability phải được “thêm vào” một hệ thống hiện có.
 
-Có một số hiện thực thương mại và open-source của middleware, bao gồm *Spread* (xem [http://www.spread.org](http://www.spread.org)), được thiết kế riêng để hoạt động trên WAN.
+Có một số bản triển khai thương mại và open-source của middleware, bao gồm *Spread* (xem [http://www.spread.org](http://www.spread.org)), được thiết kế riêng để hoạt động trên WAN.
 
-Các thuật toán được dùng để duy trì một góc nhìn nhất quán về thành phần group trên mọi thành viên của group khi các thành viên hỏng và phục hồi thì đơn giản, nhưng rất tinh tế. Nhiều thuật toán đã được công bố bị phát hiện có chứa những khiếm khuyết có thể ảnh hưởng đến hoạt động của hệ thống trong những tình huống khó xảy ra. Tài liệu tham khảo [<a id="b13refbib13_14"></a>[14](#refbib13_14)] của Massimo Franceschetti và Jehoshua Bruck chứa một thuật toán đơn giản, và chưa bị thách thức, mà tôi đã hiện thực thành công. Tài liệu tham khảo [[14](#refbib13_14)] thừa nhận sự bất khả về mặt logic của điều nó đang cố làm (tài liệu tham khảo [[13](#refbib13_13)]), và giảm thiểu, dù hiển nhiên là không loại bỏ, các ảnh hưởng của điều này.
+Các thuật toán được dùng để duy trì một góc nhìn nhất quán về thành phần group trên mọi thành viên của group khi các thành viên hỏng và phục hồi thì đơn giản, nhưng rất tinh tế. Nhiều thuật toán đã được công bố bị phát hiện có chứa những khiếm khuyết có thể ảnh hưởng đến hoạt động của hệ thống trong những tình huống khó xảy ra. Tài liệu tham khảo [<a id="b13refbib13_14"></a>[14](#refbib13_14)] của Massimo Franceschetti và Jehoshua Bruck chứa một thuật toán đơn giản, và chưa bị thách thức, mà tôi đã triển khai thành công. Tài liệu tham khảo [[14](#refbib13_14)] thừa nhận sự bất khả về mặt logic của điều nó đang cố làm (tài liệu tham khảo [[13](#refbib13_13)]), và giảm thiểu, dù hiển nhiên là không loại bỏ, các ảnh hưởng của điều này.
 
-PAXOS của Leslie Lamport (tài liệu tham khảo [<a id="b13refbib13_15"></a>[15](#refbib13_15)]: xuất bản năm 1998, nhưng được viết năm 1990) là một thuật toán khác để duy trì sự đồng thuận về thành phần group khi <a id="p158"></a>đường truyền không đáng tin cậy. Thuật ngữ PAXOS bắt nguồn từ óc hài hước của Lamport: ông kể về một khám phá khảo cổ hoàn toàn hư cấu trên hòn đảo Paxos của Hy Lạp, cho biết *“rằng quốc hội đã hoạt động bất chấp thói quen hay đi lại của các nhà lập pháp part-time. Các nhà lập pháp duy trì các bản sao nhất quán của hồ sơ quốc hội, bất chấp việc họ thường xuyên rời khỏi phòng họp và sự đãng trí của những người đưa tin. Protocol của quốc hội Paxon cung cấp một cách mới để hiện thực cách tiếp cận state-machine cho việc thiết kế các hệ thống phân tán.”*
+PAXOS của Leslie Lamport (tài liệu tham khảo [<a id="b13refbib13_15"></a>[15](#refbib13_15)]: xuất bản năm 1998, nhưng được viết năm 1990) là một thuật toán khác để duy trì sự đồng thuận về thành phần group khi <a id="p158"></a>đường truyền không đáng tin cậy. Thuật ngữ PAXOS bắt nguồn từ óc hài hước của Lamport: ông kể về một khám phá khảo cổ hoàn toàn hư cấu trên hòn đảo Paxos của Hy Lạp, cho biết *“rằng quốc hội đã hoạt động bất chấp thói quen hay đi lại của các nhà lập pháp part-time. Các nhà lập pháp duy trì các bản sao nhất quán của hồ sơ quốc hội, bất chấp việc họ thường xuyên rời khỏi phòng họp và sự đãng trí của những người đưa tin. Protocol của quốc hội Paxon cung cấp một cách mới để triển khai cách tiếp cận state-machine cho việc thiết kế các hệ thống phân tán.”*
 
 ## 13.6 Bộ xử lý Locked-Step
 
@@ -380,7 +380,7 @@ Hệ thống chính thực hiện chức năng của mình là đọc các giá 
 
 Hệ thống chính phức tạp hơn monitor *rất nhiều*. Ví dụ, trong một ứng dụng phanh đường sắt, hệ thống chính có thể nhận input tốc độ và quãng đường từ các cảm biến và các giới hạn di chuyển (“bạn được phép đi thêm 34 km từ vị trí này”) từ thiết bị bên đường ray. Có tính đến độ dốc và các khúc cua của đường ray phía trước, tốc độ hiện tại và nhiều yếu tố khác, nó tính toán điểm tối ưu mà tại đó nên phanh nếu không nhận được giới hạn di chuyển nào thêm. Nó thông báo cho người lái điều này bằng một hệ thống đồ họa tinh vi và, nếu người lái không phản ứng phù hợp, nó tiếp quản quyền điều khiển và đạp phanh. Có nhiều chỗ có thể hỏng trong chuỗi này.
 
-Ngược lại, monitor *rất* đơn giản. Trong nhiều hệ thống, nó có thể được hiện thực bằng phần cứng mà không có phần mềm nào, có thể dùng một field-programmable gate array (FPGA). Trong ví dụ phanh tàu, nó cũng có thể đọc các giới hạn di chuyển và <a id="p160"></a>tốc độ, nhưng các phép tính của nó đơn giản hơn nhiều. Ví dụ, nếu đoàn tàu còn cách giới hạn di chuyển của nó trong vòng hai phút, monitor sẽ đạp phanh.
+Ngược lại, monitor *rất* đơn giản. Trong nhiều hệ thống, nó có thể được triển khai bằng phần cứng mà không có phần mềm nào, có thể dùng một field-programmable gate array (FPGA). Trong ví dụ phanh tàu, nó cũng có thể đọc các giới hạn di chuyển và <a id="p160"></a>tốc độ, nhưng các phép tính của nó đơn giản hơn nhiều. Ví dụ, nếu đoàn tàu còn cách giới hạn di chuyển của nó trong vòng hai phút, monitor sẽ đạp phanh.
 
 Nếu có thể chứng tỏ rằng, dù hệ thống chính làm gì, monitor vẫn giữ cho đoàn tàu an toàn, thì có thể chỉ cần chứng nhận monitor là đủ. Điều này dựa vào việc monitor hoàn toàn độc lập với hệ thống chính, và điều này có thể khó lập luận, đặc biệt trong một môi trường ảo hóa, nơi monitor và hệ thống chính có thể dùng chung một thành phần phần cứng.
 

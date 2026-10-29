@@ -1466,7 +1466,7 @@ options:
                         recipe. E.g. virtual/libgl
 ```
 
-Lệnh này khá phức tạp và đầy đủ, nhưng để làm một ví dụ đơn giản về cách thêm một recipe mới, chúng ta có thể lấy một dự án công khai như NetTest tại `https://github.com/giometti/nettest`. Đây là một dự án đơn giản hiện thực một cặp chương trình client/server để kiểm tra và phân tích khả năng kết nối mạng và các vòng lặp; hai chương trình có tên là `nettestc` (client) và `nettests` (server).
+Lệnh này khá phức tạp và đầy đủ, nhưng để làm một ví dụ đơn giản về cách thêm một recipe mới, chúng ta có thể lấy một dự án công khai như NetTest tại `https://github.com/giometti/nettest`. Đây là một dự án đơn giản triển khai một cặp chương trình client/server để kiểm tra và phân tích khả năng kết nối mạng và các vòng lặp; hai chương trình có tên là `nettestc` (client) và `nettests` (server).
 
 Để thêm code này vào workspace, chúng ta có thể dùng lệnh dưới đây:
 

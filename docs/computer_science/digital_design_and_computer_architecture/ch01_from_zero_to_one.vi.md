@@ -20,7 +20,7 @@ Microprocessor đã cách mạng hóa thế giới của chúng ta trong ba th�
 
 Chúng tôi giả định bạn có hiểu biết cơ bản về điện, một chút kinh nghiệm lập trình và sự quan tâm thực sự đến những gì diễn ra bên trong máy tính. Sách tập trung thiết kế digital system, hoạt động trên 1 và 0. Bắt đầu với digital logic gate nhận 1 và 0 làm input, tạo 1 và 0 làm output. Tiếp đó tìm hiểu kết hợp logic gate thành module phức tạp hơn như adder và memory. Rồi chuyển sang lập trình assembly language, ngôn ngữ bản địa của microprocessor. Cuối cùng kết hợp gate thành microprocessor chạy các chương trình assembly này.
 
-Ưu điểm lớn của digital system là các khối cấu thành khá đơn giản: chỉ 1 và 0. Chúng không đòi toán học rắc rối hay kiến thức vật lý sâu sắc. Thách thức của designer là kết hợp những khối đơn giản thành hệ thống phức tạp. Microprocessor có thể là hệ thống đầu tiên bạn xây dựng phức tạp đến mức không thể nắm toàn bộ trong đầu cùng lúc. Một chủ đề lớn xuyên suốt sách là cách quản lý độ phức tạp.
+Ưu điểm lớn của digital system là các khối cấu thành khá đơn giản: chỉ 1 và 0. Chúng không đòi hỏi toán học rắc rối hay kiến thức vật lý sâu sắc. Thách thức của designer là kết hợp những khối đơn giản thành hệ thống phức tạp. Microprocessor có thể là hệ thống đầu tiên bạn xây dựng phức tạp đến mức không thể nắm toàn bộ trong đầu cùng lúc. Một chủ đề lớn xuyên suốt sách là cách quản lý độ phức tạp.
 
 ## 1.2 NGHỆ THUẬT QUẢN LÝ ĐỘ PHỨC TẠP
 
@@ -40,23 +40,23 @@ Microarchitecture nối mức logic với mức architecture. Mức architecture
 
 Sang software, operating system xử lý chi tiết low-level như truy cập ổ cứng hoặc quản lý memory. Cuối cùng application software dùng các tiện ích operating system cung cấp để giải bài toán người dùng. Nhờ abstraction, bà của bạn có thể lướt Web mà không bận tâm dao động lượng tử electron hay tổ chức memory trong máy.
 
-Sách tập trung mức abstraction từ digital circuit đến computer architecture. Khi làm ở một mức, nên biết đôi chút về mức ngay trên và dưới. Ví dụ nhà khoa học máy tính không thể tối ưu hoàn toàn code nếu không hiểu architecture đích. Device engineer không thể có trade-offs sáng suốt trong thiết kế transistor nếu không hiểu circuit sẽ dùng nó. Chúng tôi hy vọng sau khi đọc hết, bạn chọn được mức abstraction phù hợp bài toán và đánh giá ảnh hưởng lựa chọn thiết kế lên mức khác.
+Cuốn sách này tập trung vào các mức abstraction từ digital circuit đến computer architecture. Khi làm việc ở một mức abstraction, bạn nên hiểu đôi chút về các mức abstraction ngay phía trên và phía dưới mức đó. Ví dụ, một nhà khoa học máy tính không thể tối ưu hóa hoàn toàn code nếu không hiểu architecture mà chương trình đang được viết cho nó. Một kỹ sư thiết bị không thể đưa ra các lựa chọn trade-offs sáng suốt khi thiết kế transistor nếu không hiểu các circuit sẽ sử dụng những transistor đó. Chúng tôi hy vọng rằng sau khi đọc xong cuốn sách này, bạn có thể chọn mức abstraction phù hợp để giải quyết bài toán của mình và đánh giá ảnh hưởng của các lựa chọn thiết kế đến những mức abstraction khác.
 
-> Mỗi chương bắt đầu bằng icon abstraction, màu xanh đậm chỉ trọng tâm, các sắc xanh nhạt hơn chỉ chủ đề phụ.
+> Mỗi chương trong cuốn sách này bắt đầu bằng một biểu tượng abstraction, trong đó trọng tâm của chương được thể hiện bằng màu xanh đậm, còn các chủ đề phụ được thể hiện bằng những sắc xanh nhạt hơn.
 
 > Ford giới thiệu Model T với tuyên ngôn táo bạo:
 >
-> Tôi sẽ xây ô tô cho số đông. Nó đủ lớn cho gia đình nhưng đủ nhỏ để cá nhân vận hành và chăm sóc. Nó sẽ làm bằng vật liệu tốt nhất, bởi những người giỏi nhất có thể thuê, theo thiết kế đơn giản nhất mà kỹ thuật hiện đại nghĩ ra. Nhưng giá sẽ thấp đến mức không người có lương khá nào không thể sở hữu—và cùng gia đình tận hưởng những giờ vui thú trong không gian rộng lớn của Chúa. \[My Life and Work, Samuel Crowther và Henry Ford, 1922\]
+> Tôi sẽ xây ô tô cho số đông. Nó đủ lớn cho gia đình nhưng đủ nhỏ để cá nhân vận hành và chăm sóc. Nó sẽ làm bằng vật liệu tốt nhất, bởi những người giỏi nhất có thể thuê, theo thiết kế đơn giản nhất mà kỹ thuật hiện đại nghĩ ra. Nhưng giá sẽ thấp đến mức không người có lương khá nào không thể sở hữu—và cùng gia đình tận hưởng những giờ vui thú trong không gian rộng lớn của Chúa. [My Life and Work, Samuel Crowther và Henry Ford, 1922]
 
 ### 1.2.2 Discipline
 
 Discipline là chủ ý giới hạn lựa chọn thiết kế để làm việc năng suất hơn ở mức abstraction cao hơn. Dùng bộ phận có thể thay thế lẫn nhau là ứng dụng quen thuộc. Ví dụ nổi tiếng ban đầu là sản xuất ô tô. Dù ô tô gas-powered hiện đại bắt nguồn từ Benz Patent-Motorwagen của Đức năm 1886, xe đời đầu được thợ lành nghề làm thủ công, quá trình time-consuming và đắt đỏ. Henry Ford tạo bước tiến then chốt năm 1908 bằng cách tập trung sản xuất hàng loạt với bộ phận thay thế lẫn nhau và dây chuyền lắp ráp chuyển động.
 
-Discipline dùng bộ phận thay thế lẫn nhau cách mạng hóa ngành. Giới hạn component ở một tập chuẩn hóa với dung sai well-defined cho phép lắp ráp, sửa xe nhanh hơn nhiều, ít đòi kỹ năng hơn. Người chế tạo không còn bận tâm mức abstraction thấp như lắp cửa vào lỗ mở chưa chuẩn hóa. Model T Ford trở thành xe most-produced thời đó, bán hơn 15 triệu chiếc. Ví dụ discipline khác là câu nói nổi tiếng của Ford: “Khách hàng muốn xe sơn màu nào cũng được, miễn là màu đen.”
+Discipline dùng bộ phận thay thế lẫn nhau cách mạng hóa ngành. Giới hạn component ở một tập chuẩn hóa với dung sai well-defined cho phép lắp ráp, sửa xe nhanh hơn nhiều, ít đòi hỏi kỹ năng hơn. Người chế tạo không còn bận tâm mức abstraction thấp như lắp cửa vào lỗ mở chưa chuẩn hóa. Model T Ford trở thành xe most-produced thời đó, bán hơn 15 triệu chiếc. Ví dụ discipline khác là câu nói nổi tiếng của Ford: “Khách hàng muốn xe sơn màu nào cũng được, miễn là màu đen.”
 
 > ![note_p029](images/ch01/note_p029.png)
 >
-> Model T Ford Ảnh từ https://commons.wikimedia.org/wiki/File: TModel\_launch\_Geelong.jpg.
+> Model T Ford Ảnh từ https://commons.wikimedia.org/wiki/File: TModel_launch_Geelong.jpg.
 
 Trong sách, digital discipline rất quan trọng. Digital circuit dùng điện áp rời rạc, analog circuit dùng điện áp liên tục. Vì vậy digital circuit là tập con của analog circuit, theo nghĩa nào đó khả năng phải hạn chế hơn lớp analog rộng hơn. Tuy nhiên digital circuit dễ thiết kế hơn nhiều. Giới hạn ở digital circuit giúp dễ kết hợp component thành hệ thống tinh vi, cuối cùng vượt hệ thống analog trong nhiều application. Ví dụ TV số, compact disk (CD) và điện thoại di động đang thay thế tiền thân analog.
 
@@ -72,11 +72,11 @@ Ngoài abstraction và discipline, designer dùng ba “-y” quản lý độ p
 
 Để minh họa ba “-y”, quay lại sản xuất ô tô. Ô tô là một trong những vật dụng phổ biến phức tạp nhất đầu thế kỷ 20. Theo hierarchy, có thể chia Model T Ford thành chassis, động cơ, ghế. Động cơ gồm bốn cylinder, carburetor, magneto và hệ làm mát. Carburetor gồm cửa nhiên liệu/không khí, choke, throttle, needle valve, v.v., như Hình 1.2. Cửa nhiên liệu làm từ khuỷu nối ren và coupling nut. Như vậy hệ thống phức tạp được chia đệ quy thành component đơn giản thay thế lẫn nhau, có thể sản xuất hàng loạt.
 
-Modularity dạy rằng mỗi component nên có function và interface well-defined. Ví dụ coupling nut giữ đường cấp nhiên liệu với khuỷu nạp sao cho không rò nhưng dễ tháo khi thay đường cấp. Nó có đường kính, bước ren chuẩn, siết theo torque chuẩn bằng cờ lê chuẩn. Nhà sản xuất xe có thể mua từ nhiều nhà cung cấp miễn chỉ đúng kích thước. Modularity đòi không có side effect: nut không làm biến dạng khuỷu và tốt nhất nằm nơi siết/tháo được mà không tháo thiết bị khác trong động cơ.
+Modularity chỉ ra rằng mỗi component nên có chức năng và interface được xác định rõ ràng (well-defined). Ví dụ, đai ốc nối có chức năng giữ đường cấp nhiên liệu vào khuỷu nạp sao cho không bị rò rỉ, nhưng vẫn có thể dễ dàng tháo ra khi cần thay đường cấp. Đai ốc có đường kính và bước ren theo tiêu chuẩn, được siết đến torque tiêu chuẩn bằng một cờ lê tiêu chuẩn. Nhà sản xuất ô tô có thể mua đai ốc từ nhiều nhà cung cấp khác nhau, miễn là chỉ định đúng kích thước. Modularity đòi hỏi không có side effect: đai ốc nối không được làm biến dạng khuỷu nạp và tốt nhất nên được đặt ở nơi có thể siết hoặc tháo nó mà không cần tháo các thiết bị khác trong động cơ.
 
 ![fig1_02](images/ch01/fig1_02.png)
 
-Hình 1.2 Mặt cắt hệ nhiên liệu Model T, bên trái là nguồn nhiên liệu, bên phải là carburetor. (https://en.wikipedia.org/wiki/Ford\_Model\_T\_engine#/media/File:Pagé\_1917\_Model\_T\_ Ford\_Car\_Figure\_14.png)
+Hình 1.2 Mặt cắt hệ nhiên liệu Model T, bên trái là nguồn nhiên liệu, bên phải là carburetor. (https://en.wikipedia.org/wiki/Ford_Model_T_engine#/media/File:Pagé\_1917_Model_T\_ Ford_Car_Figure_14.png)
 
 Regularity dạy rằng bộ phận thay thế lẫn nhau là ý tưởng tốt. Carburetor rò có thể thay bằng bộ phận giống hệt. Carburetor được chế tạo hiệu quả trên dây chuyền thay vì làm thủ công tỉ mỉ.
 
@@ -90,11 +90,11 @@ Chúng ta sẽ quay lại hierarchy, modularity và regularity xuyên suốt sá
 
 ## 1.3 DIGITAL ABSTRACTION
 
-Phần lớn đại lượng vật lý liên tục. Ví dụ điện áp trên dây, tần số dao động hay vị trí khối vật đều liên tục. Ngược lại, digital system biểu diễn thông tin bằng variable discrete-valued—có số hữu hạn giá trị phân biệt.
+Phần lớn các biến vật lý là liên tục. Ví dụ, điện áp trên dây, tần số của dao động hoặc vị trí của một khối vật đều là những đại lượng liên tục. Ngược lại, digital system biểu diễn thông tin bằng các biến discrete-valued, tức là những biến có hữu hạn giá trị phân biệt.
 
 Digital system đời đầu dùng variable mười giá trị rời rạc là Analytical Engine của Charles Babbage. Từ 1834 đến 1871, ông thiết kế và cố xây máy tính cơ học này. Nó dùng bánh răng mười vị trí đánh 0 đến 9, giống đồng hồ quãng đường cơ học ô tô. Hình 1.3 là prototype, mỗi row xử lý một digit. Ông chọn 25 row bánh răng, nên máy có độ chính xác 25-digit.
 
-Khác máy Babbage, phần lớn máy tính điện tử dùng biểu diễn binary (two-valued): điện áp cao chỉ “1”, thấp chỉ “0”, vì phân biệt hai điện áp dễ hơn mười.
+Khác với cỗ máy của Babbage, phần lớn máy tính điện tử sử dụng cách biểu diễn binary (two-valued), trong đó điện áp cao biểu thị “1” và điện áp thấp biểu thị “0”, vì phân biệt hai mức điện áp dễ hơn phân biệt mười mức điện áp.
 
 ![fig1_03](images/ch01/fig1_03.png)
 
@@ -110,27 +110,27 @@ Lượng thông tin D trong variable rời rạc có N trạng thái phân biệ
 
 D = log<sub>2</sub>N bits (1.1)
 
-Binary variable mang log<sub>2</sub>2 = 1 bit thông tin. Thực vậy bit viết tắt binary digit. Mỗi bánh răng Babbage mang log<sub>2</sub>10 = 3.322 bit vì có một trong 2<sup>3.322</sup> = 10 vị trí. Signal liên tục về lý thuyết chứa lượng thông tin vô hạn vì nhận vô hạn giá trị. Thực tế noise và sai số đo giới hạn phần lớn signal liên tục ở 10 đến 16 bit. Nếu cần đo nhanh, lượng thông tin thấp hơn (ví dụ 8 bit).
+Một biến binary mang log<sub>2</sub>2 = 1 bit thông tin. Thực tế, từ bit là dạng viết tắt của binary digit. Mỗi bánh răng của Babbage mang log<sub>2</sub>10 = 3.322 bit thông tin vì nó có thể ở một trong 2<sup>3.322</sup> = 10 vị trí khác nhau. Một signal liên tục về lý thuyết chứa lượng thông tin vô hạn vì nó có thể nhận vô hạn giá trị. Trong thực tế, noise và sai số đo giới hạn lượng thông tin ở mức chỉ từ 10 đến 16 bit đối với phần lớn signal liên tục. Nếu phép đo phải được thực hiện nhanh, lượng thông tin sẽ thấp hơn (ví dụ, 8 bit).
 
 Sách tập trung digital circuit dùng binary variable: 1 và 0. George Boole phát triển hệ logic thao tác binary variable, nay gọi Boolean logic. Mỗi variable là TRUE hoặc FALSE. Máy tính điện tử thường dùng điện áp dương biểu diễn “1”, zero volt biểu diễn “0”. Sách dùng “1”, “TRUE”, “HIGH” đồng nghĩa; tương tự “0”, “FALSE”, “LOW” thay nhau.
 
-Điểm đẹp của digital abstraction là digital designer tập trung vào 1, 0, bỏ qua variable Boolean thực hiện bằng điện áp, bánh răng quay hay thậm chí mức chất lỏng thủy lực. Programmer làm việc không cần biết chi tiết hardware. Mặt khác hiểu hardware cho phép tối ưu software tốt hơn cho máy cụ thể.
+Ưu điểm của digital abstraction là người thiết kế digital có thể tập trung vào các giá trị 1 và 0 mà không cần quan tâm các biến Boolean được biểu diễn vật lý bằng những mức điện áp cụ thể, các bánh răng quay hay thậm chí các mức chất lỏng thủy lực. Lập trình viên máy tính có thể làm việc mà không cần biết những chi tiết bên trong hardware của máy tính. Mặt khác, việc hiểu các chi tiết của hardware cho phép lập trình viên tối ưu hóa software tốt hơn cho máy tính cụ thể đó.
 
-Một bit không mang nhiều thông tin. Mục tiếp xem nhóm bit biểu diễn số. Các chương sau dùng nhóm bit biểu diễn chữ và chương trình.
+Một bit riêng lẻ không mang nhiều thông tin. Trong mục tiếp theo, chúng ta sẽ xem xét cách sử dụng các nhóm bit để biểu diễn số. Trong những chương sau, chúng ta cũng sẽ sử dụng các nhóm bit để biểu diễn chữ cái và chương trình.
 
 ## 1.4 HỆ ĐẾM
 
-Bạn quen số decimal. Trong digital system gồm 1, 0, số binary hoặc hexadecimal thường thuận tiện hơn. Mục này giới thiệu các hệ đếm dùng suốt phần còn lại.
+Bạn đã quen làm việc với các số decimal. Trong digital system gồm các giá trị 1 và 0, số binary hoặc hexadecimal thường thuận tiện hơn. Mục này giới thiệu các hệ biểu diễn số sẽ được sử dụng trong suốt phần còn lại của cuốn sách.
 
 ### 1.4.1 Số decimal
 
-Ở tiểu học bạn học đếm và tính decimal. Như bạn (có lẽ) có mười ngón tay, có mười decimal digit: 0, 1, 2, …, 9. Ghép digit thành số dài hơn. Mỗi cột có trọng số gấp mười cột trước. Từ phải sang trái là 1, 10, 100, 1000, v.v. Decimal gọi cơ số 10. Cơ số viết bằng subscript sau số tránh nhầm khi dùng nhiều cơ số. Ví dụ Hình 1.4 cho số decimal 9742<sub>10</sub> viết thành tổng từng digit nhân trọng số cột tương ứng.
+Ở trường tiểu học, bạn đã học đếm và thực hiện phép tính ở hệ decimal. Cũng như bạn (có lẽ) có mười ngón tay, có mười digit decimal: 0, 1, 2, …, 9. Các digit decimal được ghép lại để tạo thành những số decimal dài hơn. Mỗi cột của một số decimal có trọng số gấp mười lần cột trước đó. Từ phải sang trái, trọng số các cột là 1, 10, 100, 1000, v.v. Số decimal được gọi là số cơ số 10. Cơ số được ghi bằng chỉ số dưới sau số để tránh nhầm lẫn khi làm việc với nhiều cơ số. Ví dụ, Hình 1.4 minh họa cách viết số decimal 9742<sub>10</sub> thành tổng của từng digit nhân với trọng số của cột tương ứng.
 
 Số decimal N-digit biểu diễn một trong 10<sup>N</sup> khả năng: 0, 1, 2, 3, …, 10<sup>N</sup>− 1. Đây là range. Ví dụ số decimal three-digit biểu diễn một trong 1000 khả năng từ 0 đến 999.
 
 ### 1.4.2 Số binary
 
-Bit biểu diễn 0 hoặc 1, ghép thành số binary. Mỗi cột có trọng số gấp đôi trước, nên binary cơ số 2. Từ phải sang trái, trọng số là 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, v.v. Nếu thường dùng binary, nhớ các lũy thừa hai đến 2<sup>16</sup> sẽ tiết kiệm thời gian.
+Mỗi bit biểu diễn một trong hai giá trị, 0 hoặc 1, và các bit được ghép lại để tạo thành số binary. Mỗi cột của một số binary có trọng số gấp đôi cột trước đó, nên số binary có cơ số 2. Trong hệ binary, trọng số các cột (một lần nữa, từ phải sang trái) là 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, v.v. Nếu thường xuyên làm việc với số binary, bạn sẽ tiết kiệm thời gian bằng cách ghi nhớ các lũy thừa này của hai cho đến 2<sup>16</sup>.
 
 ![fig1_04](images/ch01/fig1_04.png)
 
@@ -175,9 +175,9 @@ Chuyển số decimal 84<sub>10</sub> sang binary.
 
 Lời giải Xác định mỗi cột kết quả binary là 1 hay 0. Có thể bắt đầu từ cột trái hoặc phải.
 
-Từ trái, bắt đầu lũy thừa 2 lớn nhất không vượt số (ở đây 64). 84 ≥ 64 nên cột 64 là 1, còn 84 − 64 = 20. 20 \< 32 nên cột 32 là 0. 20 ≥ 16 nên cột 16 là 1, còn 20 − 16 = 4. 4 \< 8 nên cột 8 là 0. 4 ≥ 4 nên cột 4 là 1, còn 4 − 4 = 0. Vì vậy cột 2 và 1 phải là 0. Ghép lại, 84<sub>10</sub> = 1010100<sub>2</sub>.
+Bắt đầu từ bên trái, chọn lũy thừa lớn nhất của 2 nhỏ hơn hoặc bằng số cần chuyển đổi (trong trường hợp này là 64). 84 ≥ 64, nên cột hàng 64 có bit 1, và phần còn lại là 84 − 64 = 20. 20 < 32, nên cột hàng 32 có bit 0. 20 ≥ 16, nên cột hàng 16 có bit 1, và phần còn lại là 20 − 16 = 4. 4 < 8, nên cột hàng 8 có bit 0. 4 ≥ 4, nên cột hàng 4 có bit 1, và phần còn lại là 4 − 4 = 0. Vì vậy, cột hàng 2 và hàng đơn vị đều phải có bit 0. Ghép tất cả lại, ta được 84<sub>10</sub> = 1010100<sub>2</sub>.
 
-Từ phải, chia liên tiếp cho 2, số dư đi vào từng cột. 84/2 = 42 nên cột 1 là 0. 42/2 = 21 nên cột 2 là 0. 21/2 = 10 dư 1 ở cột 4. 10/2 = 5 nên cột 8 là 0. 5/2 = 2 dư 1 ở cột 16. 2/2 = 1 nên cột 32 là 0. Cuối cùng 1/2 = 0 dư 1 ở cột 64. Một lần nữa, 84<sub>10</sub> = 1010100<sub>2</sub>.
+Bắt đầu từ bên phải, liên tiếp chia số đó cho 2. Số dư được ghi vào từng cột tương ứng. 84/2 = 42, nên ghi 0 vào cột hàng đơn vị. 42/2 = 21, nên ghi 0 vào cột hàng 2. 21/2 = 10 với số dư 1 được ghi vào cột hàng 4. 10/2 = 5, nên ghi 0 vào cột hàng 8. 5/2 = 2 với số dư 1 được ghi vào cột hàng 16. 2/2 = 1, nên ghi 0 vào cột hàng 32. Cuối cùng, 1/2 = 0 với số dư 1 được ghi vào cột hàng 64. Một lần nữa, 84<sub>10</sub> = 1010100<sub>2</sub>.
 
 ### 1.4.3 Số hexadecimal
 
@@ -228,9 +228,9 @@ Chuyển số decimal 333<sub>10</sub> sang hexadecimal và binary.
 
 Lời giải Như chuyển decimal sang binary, chuyển decimal sang hexadecimal có thể từ trái hoặc phải.
 
-Từ trái, bắt đầu lũy thừa 16 lớn nhất không vượt số (256). 333 chứa một lần 256 nên cột 256 là 1, còn 333 − 256 = 77. 77 chứa bốn lần 16 nên cột 16 là 4, còn 77 − 16 × 4 = 13. 13<sub>10</sub> = D<sub>16</sub> nên cột 1 là D. Tóm lại 333<sub>10</sub> = 14D<sub>16</sub>. Chuyển tiếp sang binary dễ như Ví dụ 1.3: 14D<sub>16</sub> = 101001101<sub>2</sub>.
+Bắt đầu từ bên trái, chọn lũy thừa lớn nhất của 16 nhỏ hơn hoặc bằng số cần chuyển đổi (trong trường hợp này là 256). 333 chia cho 256 được một lần, nên cột hàng 256 có digit 1, và phần còn lại là 333 − 256 = 77. 77 chia cho 16 được bốn lần, nên cột hàng 16 có digit 4, và phần còn lại là 77 − 16 × 4 = 13. 13<sub>10</sub> = D<sub>16</sub>, nên cột hàng đơn vị có digit D. Tóm lại, 333<sub>10</sub> = 14D<sub>16</sub>. Bây giờ có thể dễ dàng chuyển từ hexadecimal sang binary, như trong Ví dụ 1.3: 14D<sub>16</sub> = 101001101<sub>2</sub>.
 
-Từ phải, chia liên tiếp 16; số dư đi vào từng cột. 333/16 = 20 dư 13<sub>10</sub> = D<sub>16</sub> ở cột 1. 20/16 = 1 dư 4 ở cột 16. 1/16 = 0 dư 1 ở cột 256. Kết quả vẫn 14D<sub>16</sub>.
+Bắt đầu từ bên phải, liên tiếp chia số đó cho 16. Số dư được ghi vào từng cột tương ứng. 333/16 = 20, với số dư 13<sub>10</sub> = D<sub>16</sub> được ghi vào cột hàng đơn vị. 20/16 = 1, với số dư 4 được ghi vào cột hàng 16. 1/16 = 0, với số dư 1 được ghi vào cột hàng 256. Một lần nữa, kết quả là 14D<sub>16</sub>.
 
 ### 1.4.4 Byte, nibble và những thứ liên quan
 
@@ -240,9 +240,9 @@ Nhóm bốn bit, nửa byte, gọi nibble; biểu diễn một trong 2<sup>4</su
 
 > Microprocessor là processor xây trên một chip. Trước thập niên 1970, processor quá phức tạp để vừa một chip, nên mainframe processor làm từ board nhiều chip. Intel giới thiệu microprocessor 4-bit đầu tiên, 4004, năm 1971. Nay cả supercomputer tinh vi nhất cũng xây bằng microprocessor. Sách dùng microprocessor và processor thay nhau.
 
-Microprocessor xử lý data theo nhóm gọi word. Kích thước word tùy architecture. Khi viết chương năm 2021, phần lớn máy có processor 64-bit, thao tác word 64-bit. Máy cũ xử lý word 32-bit cũng phổ biến. Microprocessor đơn giản hơn, nhất là trong đồ gia dụng như máy nướng bánh, dùng word 8- hoặc 16-bit.
+Microprocessor xử lý data theo từng nhóm được gọi là word. Kích thước của word phụ thuộc vào architecture của microprocessor. Khi chương này được viết vào năm 2021, phần lớn máy tính sử dụng processor 64-bit, nghĩa là chúng thao tác trên các word 64-bit. Vào thời điểm đó, các máy tính cũ xử lý word 32-bit cũng vẫn được sử dụng rộng rãi. Những microprocessor đơn giản hơn, đặc biệt là loại dùng trong các thiết bị như máy nướng bánh mì, sử dụng word 8- hoặc 16-bit.
 
-Trong nhóm bit, bit cột 1 gọi least significant bit (lsb), đầu kia gọi most significant bit (msb), như Hình 1.7(a) với số binary 6-bit. Tương tự trong word, byte gọi từ least significant byte (LSB) đến most significant byte (MSB), như Hình 1.7(b) với số 4-byte viết bằng tám hexadecimal digit.
+Trong một nhóm bit, bit ở cột hàng đơn vị được gọi là least significant bit (lsb), còn bit ở đầu đối diện được gọi là most significant bit (msb), như minh họa trong Hình 1.7(a) đối với một số binary 6-bit. Tương tự, trong một word, các byte được xác định từ least significant byte (LSB) đến most significant byte (MSB), như minh họa trong Hình 1.7(b) đối với một số 4-byte được viết bằng tám digit hexadecimal.
 
 Trùng hợp tiện lợi: 2<sup>10</sup> = 1024 ≈ 10<sup>3</sup>. Vì vậy kilo (tiếng Hy Lạp là nghìn) chỉ 2<sup>10</sup>. Ví dụ 2<sup>10</sup> byte là một kilobyte (1 KB). Tương tự mega (triệu) chỉ 2<sup>20</sup> ≈ 10<sup>6</sup>, giga (tỷ) chỉ 2<sup>30</sup> ≈ 10<sup>9</sup>. Biết 2<sup>10</sup> ≈ 1 nghìn, 2<sup>20</sup> ≈ 1 triệu, 2<sup>30</sup> ≈ 1 tỷ và nhớ lũy thừa hai đến 2<sup>9</sup>, bạn dễ nhẩm mọi lũy thừa hai.
 
@@ -260,7 +260,7 @@ Lời giải Tách số mũ thành bội mười và phần dư.
 
 2<sup>24</sup> = 2<sup>20</sup> × 2<sup>4</sup>. 2<sup>20</sup> ≈ 1 triệu. 2<sup>4</sup> = 16. Vậy 2<sup>24</sup> ≈ 16 triệu. Chính xác là 2<sup>24</sup> = 16,777,216, nhưng 16 triệu đủ gần cho marketing.
 
-> Memory On-chip và RAM đo theo lũy thừa hai, ổ cứng theo lũy thừa mười. Ví dụ RAM 32 GB (GiB) thực là 34,359,738,368 byte, còn 32 GB ổ cứng là 32,000,000 byte.
+> Memory On-chip và RAM được đo theo các lũy thừa của hai, nhưng ổ cứng được đo theo các lũy thừa của mười. Ví dụ, RAM 32 GB (GiB) thực tế có 34,359,738,368 byte bộ nhớ, trong khi 32 GB trên ổ cứng là 32,000,000 byte bộ nhớ.
 
 1024 byte gọi kilobyte (KB) hoặc kibibyte (KiB). 1024 bit gọi kilobit (Kb hay Kbit) hoặc kibibit (Kib hay Kibit). Tương tự MB / MiB, Mb/Mib, GB/GiB và Gb/Gib dùng cho hàng triệu, tỷ byte và bit. Memory capacity thường đo bằng byte. Tốc độ giao tiếp thường đo theo lũy thừa mười bit/giây. Ví dụ modem dial-up tối đa thường 56 kbit/giây, tức 56,000 bit/giây.
 
@@ -282,7 +282,7 @@ Tính 0111<sub>2</sub> + 0101<sub>2</sub>.
 
 Lời giải Hình 1.9 cho tổng 1100<sub>2</sub>, carry màu xanh. Có thể kiểm tra bằng decimal: 0111<sub>2</sub> = 7<sub>10</sub>, 0101<sub>2</sub> = 5<sub>10</sub>. Tổng 12<sub>10</sub> = 1100<sub>2</sub>.
 
-Digital system thường thao tác số digit cố định. Phép cộng overflow nếu kết quả quá lớn để vừa. Ví dụ số 4-bit có range \[0, 15\]. Cộng binary 4-bit overflow nếu vượt 15. Bit thứ năm bị bỏ, tạo kết quả sai trong bốn bit còn lại. Phát hiện overflow bằng kiểm carry ra khỏi cột most significant.
+Digital system thường hoạt động với một số lượng digit cố định. Phép cộng được gọi là overflow nếu kết quả quá lớn, không thể biểu diễn bằng số digit hiện có. Ví dụ, một số 4-bit có range [0, 15]. Phép cộng binary 4-bit bị overflow nếu kết quả vượt quá 15. Bit thứ năm của tổng bị loại bỏ, khiến bốn bit còn lại biểu diễn một kết quả không chính xác. Có thể phát hiện overflow bằng cách kiểm tra xem có carry ra khỏi cột most significant hay không.
 
 #### Ví dụ 1.8 PHÉP CỘNG CÓ OVERFLOW
 
@@ -292,17 +292,17 @@ Tính 1101<sub>2</sub> + 0101<sub>2</sub>. Có overflow không?
 
 Hình 1.10 Ví dụ cộng binary có overflow
 
-Lời giải Hình 1.10 cho tổng 10010<sub>2</sub>, vượt range số binary 4-bit. Nếu phải lưu bốn bit, bỏ most significant bit, còn kết quả sai 0010<sub>2</sub>. Nếu tính bằng số từ năm bit, kết quả 10010<sub>2</sub> đã đúng.
+Lời giải Hình 1.10 cho thấy tổng bằng 10010<sub>2</sub>. Kết quả này vượt quá range của một số binary 4-bit. Nếu phải lưu dưới dạng bốn bit, most significant bit bị loại bỏ, để lại kết quả không chính xác là 0010<sub>2</sub>. Nếu phép tính được thực hiện bằng các số có năm bit trở lên, kết quả 10010<sub>2</sub> sẽ chính xác.
 
 ### 1.4.6 Số binary có dấu
 
-Đến đây chỉ xét unsigned binary biểu diễn lượng dương. Thường muốn biểu diễn cả dương và âm, cần hệ binary khác. Có nhiều cách biểu diễn signed binary. Hai cách dùng rộng nhất là sign/magnitude và two’s complement.
+Cho đến đây, chúng ta chỉ xem xét các số unsigned binary biểu diễn những đại lượng dương. Chúng ta thường muốn biểu diễn cả số dương lẫn số âm, nên cần một hệ biểu diễn số binary khác. Có nhiều cách biểu diễn số signed binary. Hai cách được sử dụng rộng rãi nhất được gọi là sign/magnitude và two’s complement.
 
 Số Sign/Magnitude
 
-Sign/magnitude trực quan vì giống cách viết số âm bằng dấu trừ rồi độ lớn. Số sign/magnitude N-bit dùng most significant bit làm dấu, N − 1 bit còn lại làm độ lớn (giá trị tuyệt đối). Sign bit 0 chỉ dương, 1 chỉ âm.
+Các số sign/magnitude có tính trực quan vì chúng phù hợp với cách chúng ta thường viết số âm bằng một dấu trừ theo sau bởi độ lớn. Một số sign/magnitude N-bit sử dụng most significant bit làm dấu và N − 1 bit còn lại làm độ lớn (giá trị tuyệt đối). Sign bit bằng 0 biểu thị số dương và sign bit bằng 1 biểu thị số âm.
 
-> Tên lửa Ariane 5 trị giá 7 tỷ USD phóng ngày 4 tháng 6 năm 1996 lệch hướng sau 40 giây, vỡ và nổ. Nguyên nhân là máy tính điều khiển overflow range 16-bit rồi crash.
+> Tên lửa Ariane 5 trị giá \$7 tỷ, được phóng vào ngày 4 tháng 6 năm 1996, đã lệch khỏi quỹ đạo 40 giây sau khi phóng, vỡ ra và phát nổ. Sự cố xảy ra khi máy tính điều khiển tên lửa vượt quá phạm vi 16-bit và bị crash.
 >
 > Code đã được kiểm thử kỹ trên Ariane 4. Nhưng Ariane 5 có động cơ nhanh hơn, tạo giá trị lớn hơn cho máy tính điều khiển, gây overflow.
 >
@@ -318,29 +318,27 @@ Lời giải Cả hai có độ lớn 5<sub>10</sub> = 101<sub>2</sub>. Vì vậ
 
 Đáng tiếc cộng binary thường không đúng cho sign/magnitude. Ví dụ cộng thường −5<sub>10</sub> + 5<sub>10</sub> cho 1101<sub>2</sub> + 0101<sub>2</sub> = 10010<sub>2</sub>, vô nghĩa.
 
-Số sign/magnitude N-bit bao range \[−2<sup>N−1</sup> + 1, 2<sup>N−1</sup> − 1\]. Nó hơi lạ vì có cả +0 và −0, đều chỉ zero. Như dự đoán, hai biểu diễn cho cùng số có thể phiền phức.
+Một số sign/magnitude N-bit có range [−2<sup>N−1</sup> + 1, 2<sup>N−1</sup> − 1]. Các số sign/magnitude hơi khác thường vì tồn tại cả +0 lẫn −0. Cả hai đều biểu thị số không. Như bạn có thể hình dung, việc có hai cách biểu diễn khác nhau cho cùng một số có thể gây phiền phức.
 
 Số Two’s Complement
 
-Two’s complement giống unsigned binary, trừ trọng số most significant bit là −2<sup>N−1</sup> thay 2<sup>N−1</sup>. Nó khắc phục sign/magnitude: zero chỉ một biểu diễn, cộng thường hoạt động.
+Các số two’s complement giống các số unsigned binary, ngoại trừ vị trí most significant bit có trọng số −2<sup>N−1</sup> thay vì 2<sup>N−1</sup>. Chúng khắc phục các hạn chế của số sign/magnitude: số không chỉ có một cách biểu diễn, và phép cộng thông thường hoạt động chính xác.
 
 Trong two’s complement, zero viết toàn zero: 00…000<sub>2</sub>. Số dương lớn nhất có 0 ở most significant và 1 nơi khác: 01…111<sub>2</sub> = 2<sup>N−1</sup> − 1. Số âm nhỏ nhất có 1 ở most significant, 0 nơi khác: 10…000<sub>2</sub> = −2<sup>N−1</sup>. −1 viết toàn một: 11…111<sub>2</sub>.
 
-Chú ý số dương có 0 ở most significant, số âm có 1, nên bit đó có thể xem là sign bit. Nhưng toàn số được diễn giải khác nhau giữa two’s complement và sign/magnitude.
+Lưu ý rằng các số dương có bit 0 ở vị trí most significant, còn các số âm có bit 1 ở vị trí này, nên có thể xem most significant bit là sign bit. Tuy nhiên, toàn bộ số được diễn giải khác nhau đối với số two’s complement và số sign/magnitude.
 
-> Kết quả đảo bit trong số gọi one’s complement. Ví dụ one’s complement của 0110111 là 1001000. Gọi vậy vì cộng hai số cho toàn 1: 0110111 + 1001000 = 1111111.
+> Kết quả của việc đảo các bit trong một số được gọi là one’s complement của số đó. Ví dụ, one’s complement của 0110111 là 1001000. Cách gọi one’s complement xuất phát từ việc khi cộng hai số này với nhau, kết quả gồm toàn các bit 1. Ví dụ, 0110111 + 1001000 = 1111111.
 
-Đổi dấu số two’s complement (ví dụ +5 sang −5, −17 sang +17) bằng đảo mọi bit rồi cộng 1 vào least significant bit. Đây là phương pháp đổi dấu, hữu ích tìm biểu diễn số âm hoặc độ lớn số âm.
+Dấu của một số two’s complement được đảo (ví dụ, từ +5 thành −5 hoặc từ −17 thành +17) bằng cách đảo các bit trong số đó rồi cộng 1 vào vị trí least significant bit. Quy trình này được gọi là phương pháp đảo dấu. Nó hữu ích khi tìm cách biểu diễn một số âm hoặc xác định độ lớn của một số âm.
 
-#### Ví dụ 1.10 BIỂU DIỄN TWO’S COMPLEMENT
-
-CỦA SỐ ÂM
+#### Ví dụ 1.10 BIỂU DIỄN TWO’S COMPLEMENT CỦA SỐ ÂM
 
 Tìm biểu diễn −2<sub>10</sub> dưới dạng two’s complement 4-bit.
 
 Lời giải Bắt đầu biểu diễn độ lớn: +2<sub>10</sub> = 0010<sub>2</sub>. Để có −2<sub>10</sub>, đổi dấu bằng đảo bit rồi cộng 1. Đảo 0010<sub>2</sub> cho 1101<sub>2</sub>. 1101<sub>2</sub> + 1 = 1110<sub>2</sub>. Vậy −2<sub>10</sub> là 1110<sub>2</sub>.
 
-> Trước đây đổi dấu được gọi “lấy two’s complement”. Nhưng chúng tôi thấy thuật ngữ đôi lúc khiến người đọc tưởng luôn phải “lấy two’s complement” khi dùng số two’s complement; không đúng! Đổi dấu chỉ đôi khi được dùng khi làm việc với số âm two’s complement.
+> Trước đây, quy trình đảo dấu thường được gọi là “lấy two’s complement”. Tuy nhiên, chúng tôi nhận thấy thuật ngữ này đôi khi khiến mọi người nghĩ rằng họ luôn phải “lấy two’s complement” khi làm việc với các số two’s complement, nhưng điều đó không đúng! Quy trình đảo dấu này chỉ đôi khi được sử dụng khi làm việc với các số two’s complement âm.
 
 #### Ví dụ 1.11 GIÁ TRỊ SỐ ÂM TWO’S COMPLEMENT
 
@@ -348,7 +346,7 @@ Tìm giá trị decimal của số two’s complement 4-bit 0x9 (tức 1001<sub>
 
 Lời giải 1001<sub>2</sub> bắt đầu bằng 1 nên phải âm. Tìm độ lớn bằng đổi dấu: đảo bit rồi cộng 1. Đảo 1001<sub>2</sub> = 0110<sub>2</sub>. 0110<sub>2</sub> + 1 = 0111<sub>2</sub> = 7<sub>10</sub>. Vậy 1001<sub>2</sub> = −7<sub>10</sub>.
 
-Two’s complement có ưu điểm nổi bật: cộng đúng cho cả số dương và âm. Nhớ rằng cộng số N-bit thì carry ra khỏi bit N (tức bit kết quả N + 1<sup>th</sup>) bị bỏ.
+Các số two’s complement có ưu điểm nổi bật là phép cộng hoạt động chính xác cho cả số dương lẫn số âm. Hãy nhớ rằng khi cộng các số N-bit, carry ra khỏi bit thứ N (tức bit kết quả thứ N + 1<sup>th</sup>) bị loại bỏ.
 
 #### Ví dụ 1.12 CỘNG SỐ TWO’S COMPLEMENT
 
@@ -368,43 +366,41 @@ Tính (a) 5<sub>10</sub> − 3<sub>10</sub> và (b) 3<sub>10</sub> − 5<sub>10<
 
 Lời giải (a) 3<sub>10</sub> = 0011<sub>2</sub>. Lấy two’s complement được −3<sub>10</sub> = 1101<sub>2</sub>. Cộng 5<sub>10</sub> + (−3<sub>10</sub>) = 0101<sub>2</sub> + 1101<sub>2</sub> = 0010<sub>2</sub> = 2<sub>10</sub>. Bỏ carry khỏi vị trí most significant vì lưu bốn bit. (b) Lấy two’s complement của 5<sub>10</sub> được −5<sub>10</sub> = 1011. Cộng 3<sub>10</sub> + (−5<sub>10</sub>) = 0011<sub>2</sub> + 1011<sub>2</sub> = 1110<sub>2</sub> = −2<sub>10</sub>.
 
-Two’s complement của 0 tìm bằng đảo mọi bit (thành 11…111<sub>2</sub>) rồi cộng 1, được toàn 0, bỏ carry khỏi most significant bit. Vì vậy zero luôn biểu diễn toàn 0. Khác sign/magnitude, không có −0 riêng. Zero được coi dương vì sign bit bằng 0.
+Two’s complement của 0 được tìm bằng cách đảo tất cả các bit (thu được 11…111<sub>2</sub>) rồi cộng 1, cho kết quả gồm toàn bit 0 nếu bỏ qua carry ra khỏi vị trí most significant bit. Vì vậy, số không luôn được biểu diễn bằng toàn bit 0. Khác với hệ sign/magnitude, hệ two’s complement không có cách biểu diễn −0 riêng. Số không được xem là dương vì sign bit của nó bằng 0.
 
-Như unsigned, số two’s complement N-bit biểu diễn một trong 2<sup>N</sup> giá trị, nhưng chia giữa dương và âm. Ví dụ unsigned 4-bit biểu diễn 16 giá trị 0 đến 15; two’s complement 4-bit cũng 16 giá trị, −8 đến 7. Tổng quát range N-bit là \[−2<sup>N−1</sup>, 2<sup>N−1</sup> − 1\]. Có thêm một số âm là hợp lý vì không có −0. Số âm nhỏ nhất 10…000<sub>2</sub> = −2<sup>N−1</sup> đôi khi gọi số kỳ lạ. Đảo bit thành 01…111<sub>2</sub> rồi cộng 1 lại cho 10…000<sub>2</sub>. Vậy số âm này không có số dương tương ứng.
+Giống như các số unsigned, số two’s complement N-bit biểu diễn một trong 2<sup>N</sup> giá trị có thể có. Tuy nhiên, các giá trị được chia thành số dương và số âm. Ví dụ, một số unsigned 4-bit biểu diễn 16 giá trị từ 0 đến 15. Một số two’s complement 4-bit cũng biểu diễn 16 giá trị, nhưng từ −8 đến 7. Tổng quát, range của một số two’s complement N-bit là [−2<sup>N−1</sup>, 2<sup>N−1</sup> − 1]. Việc có nhiều hơn một số âm so với số dương là hợp lý vì không có −0. Số âm nhỏ nhất 10…000<sub>2</sub> = −2<sup>N−1</sup> đôi khi được gọi là weird number. Để tìm two’s complement của nó, ta đảo các bit (thu được 01…111<sub>2</sub>) rồi cộng 1, và lại thu được 10…000<sub>2</sub>, chính là weird number. Vì vậy, số âm này không có số dương tương ứng.
 
 Cộng hai số dương hoặc hai số âm N-bit có thể overflow nếu kết quả lớn hơn 2<sup>N−1</sup> − 1 hoặc nhỏ hơn −2<sup>N−1</sup>. Cộng một dương với một âm không bao giờ overflow. Khác unsigned, carry khỏi cột most significant không báo overflow. Thay vào đó overflow khi hai số có cùng sign bit nhưng kết quả có sign bit ngược lại.
 
-#### Ví dụ 1.14 CỘNG SỐ TWO’S COMPLEMENT
-
-CÓ OVERFLOW
+#### Ví dụ 1.14 CỘNG SỐ TWO’S COMPLEMENT CÓ OVERFLOW
 
 Tính 4<sub>10</sub> + 5<sub>10</sub> bằng two’s complement 4-bit. Kết quả có overflow không?
 
-Lời giải 4<sub>10</sub> + 5<sub>10</sub> = 0100<sub>2</sub> + 0101<sub>2</sub> = 1001<sub>2</sub> = −7<sub>10</sub>. Kết quả overflow range số dương two’s complement 4-bit, tạo số âm sai. Nếu dùng từ năm bit, 01001<sub>2</sub> = 9<sub>10</sub> là đúng.
+Lời giải 4<sub>10</sub> + 5<sub>10</sub> = 0100<sub>2</sub> + 0101<sub>2</sub> = 1001<sub>2</sub> = −7<sub>10</sub>. Kết quả vượt quá phạm vi biểu diễn số dương two’s complement 4-bit, tạo ra một kết quả âm không chính xác. Nếu phép tính được thực hiện bằng năm bit trở lên, kết quả 01001<sub>2</sub> = 9<sub>10</sub> sẽ chính xác.
 
-Khi mở rộng two’s complement thêm bit, phải copy sign bit vào các vị trí most significant. Đây là sign extension. Ví dụ 3, −3 là two’s complement 4-bit 0011, 1101. Chúng được sign-extended thành bảy bit bằng copy sign bit vào ba bit mới phía trên: 0000011, 1111101, là biểu diễn 7-bit của 3, –3.
+Khi mở rộng một số two’s complement thành nhiều bit hơn, sign bit phải được sao chép vào các vị trí most significant bit. Quy trình này được gọi là sign extension. Ví dụ, các số 3 và −3 được viết thành các số two’s complement 4-bit lần lượt là 0011 và 1101. Chúng được sign-extended thành bảy bit bằng cách sao chép sign bit vào ba bit mới ở phía trên để tạo thành 0000011 và 1111101, tương ứng là các cách biểu diễn 7-bit của 3 và –3.
 
 So sánh hệ đếm
 
-Ba hệ binary dùng phổ biến nhất là unsigned, two’s complement, sign/magnitude. Bảng 1.3 so range N-bit. Two’s complement tiện vì biểu diễn cả integer dương và âm, cộng thường đúng cho mọi số. Trừ bằng đổi dấu số thứ hai rồi cộng. Trừ khi nói khác, giả định mọi signed binary dùng two’s complement.
+Ba hệ biểu diễn số binary được sử dụng phổ biến nhất là unsigned, two’s complement và sign/magnitude. Bảng 1.3 so sánh range của các số N-bit trong từng hệ này. Các số two’s complement thuận tiện vì chúng biểu diễn được cả số nguyên dương lẫn số nguyên âm, và phép cộng thông thường có thể áp dụng cho mọi số. Phép trừ được thực hiện bằng cách lấy số đối của số thứ hai (tức là đảo dấu), rồi thực hiện phép cộng. Trừ khi có chỉ dẫn khác, hãy giả định rằng tất cả các số signed binary đều sử dụng cách biểu diễn two’s complement.
 
 Bảng 1.3 Range số N-bit
 
 | Hệ | Range |
 |---|---|
-| Unsigned | \[0, 2<sup>N</sup> – 1\] |
-| Two’s Complement | \[–2<sup>N–1</sup>, 2<sup>N–1</sup> – 1\] |
-| Sign/Magnitude | \[–2<sup>N–1</sup> + 1, 2<sup>N–1</sup> – 1\] |
+| Unsigned | [0, 2<sup>N</sup> – 1] |
+| Two’s Complement | [–2<sup>N–1</sup>, 2<sup>N–1</sup> – 1] |
+| Sign/Magnitude | [–2<sup>N–1</sup> + 1, 2<sup>N–1</sup> – 1] |
 
 ![fig1_11](images/ch01/fig1_11.png)
 
 Hình 1.11 Trục số và encoding binary 4-bit
 
-Hình 1.11 là trục giá trị 4-bit mỗi hệ. Unsigned trải \[0, 15\] theo thứ tự binary thường. Two’s complement trải \[−8, 7\]. Số không âm \[0, 7\] có cùng encoding unsigned. Số âm \[−8, −1\] được encode sao cho unsigned binary value lớn hơn biểu diễn số gần 0 hơn. Số kỳ lạ 1000 biểu diễn −8, không có dương tương ứng. Sign/magnitude trải \[−7, 7\]. Most significant bit làm dấu. Số dương \[1, 7\] cùng encoding unsigned. Số âm đối xứng nhưng sign bit được đặt. 0 biểu diễn cả 0000 và 1000. Vì hai biểu diễn 0, sign/magnitude N-bit chỉ biểu diễn 2<sup>N</sup> − 1 integer. Unsigned binary hoặc two's complement N-bit biểu diễn 2<sup>N</sup> integer.
+Hình 1.11 minh họa một trục số biểu thị giá trị của các số 4-bit trong từng hệ. Các số unsigned có range [0, 15] theo thứ tự binary thông thường. Các số two’s complement có range [−8, 7]. Các số không âm [0, 7] có cùng encoding với số unsigned. Các số âm [−8, −1] được encode sao cho giá trị unsigned binary lớn hơn biểu diễn một số gần 0 hơn. Lưu ý rằng weird number 1000 biểu diễn −8 và không có số dương tương ứng. Các số sign/magnitude có range [−7, 7]. Most significant bit là sign bit. Các số dương [1, 7] có cùng encoding với số unsigned. Các số âm đối xứng nhưng có sign bit được đặt bằng 1. Số 0 được biểu diễn bằng cả 0000 lẫn 1000. Vì vậy, các số sign/magnitude N-bit chỉ biểu diễn được 2<sup>N</sup> − 1 số nguyên vì có hai cách biểu diễn cho 0. Các số unsigned binary hoặc two's complement N-bit biểu diễn được 2<sup>N</sup> số nguyên.
 
 ## 1.5 LOGIC GATE
 
-Đã biết binary variable biểu diễn thông tin, nay tìm hiểu digital system thao tác chúng. Logic gate là digital circuit đơn giản nhận một hoặc nhiều binary input và tạo binary output. Symbol thể hiện input và output. Input thường bên trái (hoặc trên), output bên phải (hoặc dưới). Digital designer thường dùng chữ đầu bảng chữ cái cho input, Y cho output. Quan hệ input/output mô tả bằng truth table hoặc Boolean equation. Truth table liệt kê input trái, output tương ứng phải; mỗi row cho một tổ hợp input. Boolean equation là biểu thức toán dùng binary variable.
+Bây giờ, khi đã biết cách sử dụng biến binary để biểu diễn thông tin, chúng ta sẽ tìm hiểu các digital system thực hiện phép toán trên những biến binary này. Logic gate là các digital circuit đơn giản nhận một hoặc nhiều input binary và tạo ra một output binary. Logic gate được vẽ bằng ký hiệu thể hiện input (hoặc các input) và output. Input thường được vẽ bên trái (hoặc phía trên), còn output bên phải (hoặc phía dưới). Người thiết kế digital thường sử dụng các chữ cái gần đầu bảng chữ cái cho input của gate và chữ Y cho output của gate. Quan hệ giữa các input và output có thể được mô tả bằng truth table hoặc phương trình Boolean. Truth table liệt kê các input ở bên trái và output tương ứng ở bên phải. Nó có một hàng cho mỗi tổ hợp input có thể có. Phương trình Boolean là một biểu thức toán học sử dụng các biến binary.
 
 ![fig1_12](images/ch01/fig1_12.png)
 
@@ -412,7 +408,7 @@ Hình 1.12 NOT gate
 
 ### 1.5.1 NOT gate
 
-NOT gate có input A, output Y như Hình 1.12. Output ngược input. Nếu A FALSE, Y TRUE; A TRUE, Y FALSE. Truth table và Boolean equation trong hình tóm tắt quan hệ. Gạch trên A đọc NOT, nên Y = $\overline{A}$ đọc “Y bằng NOT A”. NOT gate còn gọi inverter.
+Gate NOT có một input A và một output Y, như trong Hình 1.12. Output của gate NOT là giá trị đảo của input. Nếu A là FALSE thì Y là TRUE. Nếu A là TRUE thì Y là FALSE. Quan hệ này được tóm tắt bằng truth table và phương trình Boolean trong hình. Dấu gạch trên A trong phương trình Boolean được đọc là NOT, nên Y = $\overline{A}$ được đọc là “Y bằng NOT A”. Gate NOT cũng được gọi là inverter.
 
 Sách khác dùng các notation NOT như Y = A′, Y = ¬A, Y = !A hoặc Y = \~A. Chúng ta chỉ dùng Y = $\overline{A}$, nhưng đừng bối rối nếu gặp notation khác.
 
@@ -424,7 +420,7 @@ Hình 1.13 Buffer
 
 Logic gate one-input khác gọi buffer, như Hình 1.13. Nó chỉ copy input sang output.
 
-Xét logic, buffer không khác dây, có vẻ vô dụng. Nhưng xét analog, có thể có đặc tính mong muốn như cấp dòng lớn cho động cơ hoặc nhanh chóng đưa output tới nhiều gate. Đây là ví dụ cần xét nhiều mức abstraction để hiểu đầy đủ; digital abstraction giấu mục đích thật của buffer.
+Xét về mặt logic, buffer không khác một dây nối, nên nó có vẻ vô dụng. Tuy nhiên, xét về mặt analog, buffer có thể có những đặc tính mong muốn, chẳng hạn khả năng cung cấp dòng điện lớn cho motor hoặc khả năng nhanh chóng truyền output của nó đến nhiều gate. Đây là một ví dụ cho thấy vì sao chúng ta cần xem xét nhiều mức abstraction để hiểu đầy đủ một hệ thống; digital abstraction che giấu mục đích thực sự của buffer.
 
 ![fig1_14](images/ch01/fig1_14.png)
 
@@ -434,7 +430,7 @@ Symbol tam giác chỉ buffer. Vòng tròn ở output gọi bubble, chỉ invers
 
 ### 1.5.3 AND gate
 
-Logic gate Two-input thú vị hơn. AND gate Hình 1.14 tạo output Y TRUE khi và chỉ khi cả A, B TRUE; nếu không FALSE. Theo quy ước, input liệt kê 00, 01, 10, 11 như đếm binary. Boolean equation viết Y = A • B, Y = AB hoặc Y = A ∩ B. Symbol ∩ đọc “giao”, được nhà logic học ưa dùng. Chúng tôi thích Y = AB, đọc “Y bằng A AND B”, vì lười.
+Các logic gate Two-input thú vị hơn. Gate AND trong Hình 1.14 tạo ra output Y bằng TRUE khi và chỉ khi cả A lẫn B đều là TRUE. Nếu không, output là FALSE. Theo quy ước, các input được liệt kê theo thứ tự 00, 01, 10, 11, như khi bạn đếm ở hệ binary. Phương trình Boolean cho gate AND có thể được viết theo một số cách: Y = A • B, Y = AB hoặc Y = A ∩ B. Ký hiệu ∩ được đọc là “intersection” và được các nhà logic học ưa dùng. Chúng tôi thích Y = AB, đọc là “Y bằng A AND B”, vì chúng tôi lười.
 
 > Theo Larry Wall, người phát minh Perl, “ba đức tính chính của programmer là Lười biếng, Nóng ruột và Kiêu ngạo.”
 
@@ -444,11 +440,11 @@ Logic gate Two-input thú vị hơn. AND gate Hình 1.14 tạo output Y TRUE khi
 
 Hình 1.15 OR gate
 
-OR gate Hình 1.15 cho output Y TRUE nếu A hoặc B (hoặc cả hai) TRUE. Boolean equation là Y = A + B hoặc Y = A ∪ B. Symbol ∪ đọc hợp, nhà logic học ưa dùng. Digital designer thường dùng +; Y = A + B đọc “Y bằng A OR B”.
+Gate OR trong Hình 1.15 tạo ra output Y bằng TRUE nếu A hoặc B (hoặc cả hai) là TRUE. Phương trình Boolean cho gate OR được viết là Y = A + B hoặc Y = A ∪ B. Ký hiệu ∪ được đọc là union và được các nhà logic học ưa dùng. Người thiết kế digital thường sử dụng ký hiệu +; Y = A + B được đọc là “Y bằng A OR B”.
 
 ### 1.5.5 Các gate Two-Input khác
 
-Hình 1.16 cho logic gate two-input phổ biến khác. XOR (exclusive OR, đọc “ex-OR”) TRUE nếu A hoặc B TRUE nhưng không cả hai. Operation XOR ký hiệu ⊕, dấu cộng có vòng tròn. Gate nào cũng có thể thêm bubble để đảo. NAND làm NOT AND: TRUE trừ khi cả hai input TRUE. NOR làm NOT OR: TRUE nếu cả A, B không TRUE. XOR N-input đôi khi gọi parity gate, cho TRUE nếu số input TRUE là lẻ. Như gate two-input, các tổ hợp truth table được liệt kê theo thứ tự đếm.
+Hình 1.16 trình bày các logic gate two-input phổ biến khác. XOR (exclusive OR, đọc là “ex-OR”) có output TRUE nếu A hoặc B là TRUE, nhưng không phải cả hai cùng TRUE. Phép toán XOR được ký hiệu bằng ⊕, một dấu cộng có vòng tròn bao quanh. Có thể thêm bubble sau bất kỳ gate nào để đảo hoạt động của nó. NAND gate thực hiện NOT AND. Output của nó là TRUE trừ khi cả hai input đều TRUE. NOR gate thực hiện NOT OR. Output của nó là TRUE nếu cả A lẫn B đều không phải TRUE. XOR gate N-input đôi khi được gọi là parity gate và tạo output TRUE nếu số lượng input có giá trị TRUE là số lẻ. Tương tự các gate two-input, các tổ hợp input trong truth table được liệt kê theo thứ tự đếm.
 
 > Cách ngớ ngẩn để nhớ symbol OR: bên input cong như miệng Pacman, nên gate đói và sẵn sàng ăn bất kỳ input TRUE nào tìm được!
 
@@ -466,11 +462,11 @@ Hình 1.17 cho symbol và Boolean equation của XNOR two-input (đọc ex-NOR),
 
 Hình 1.17 XNOR gate
 
-Lời giải Hình 1.18 cho truth table. XNOR TRUE nếu cả input FALSE hoặc cả TRUE. XNOR two-input đôi khi gọi equality gate vì output TRUE khi input bằng nhau.
+Lời giải Hình 1.18 minh họa truth table. Output của XNOR là TRUE nếu cả hai input đều là FALSE hoặc cả hai input đều là TRUE. Gate XNOR two-input đôi khi được gọi là equality gate vì output của nó là TRUE khi các input bằng nhau.
 
 ### 1.5.6 Gate Multiple-Input
 
-Có nhiều Boolean function từ ba input. Phổ biến nhất AND, OR, XOR, NAND, NOR, XNOR. AND N-input cho TRUE khi toàn N input TRUE. OR N-input cho TRUE khi ít nhất một input TRUE.
+Có nhiều hàm Boolean với ba input trở lên. Các hàm phổ biến nhất là AND, OR, XOR, NAND, NOR và XNOR. Một gate AND N-input tạo ra output TRUE khi tất cả N input đều là TRUE. Một gate OR N-input tạo ra output TRUE khi ít nhất một input là TRUE.
 
 ![fig1_18](images/ch01/fig1_18.png)
 
@@ -500,7 +496,7 @@ Digital system dùng variable discrete-valued. Nhưng variable được biểu d
 
 Hình 1.20 Truth table NOR Three-input
 
-Ví dụ biểu diễn binary signal A bằng điện áp dây. Cho 0 volt (V) chỉ A = 0, 5 V chỉ A = 1. Hệ thực phải chịu một ít noise nên 4.97 V có lẽ cũng nên là A = 1. Nhưng 4.3 V? 2.8 V? 2.500000 V?
+Ví dụ, hãy xét việc biểu diễn một signal binary A bằng điện áp trên dây. Quy ước 0 volt (V) biểu thị A = 0 và 5 V biểu thị A = 1. Mọi hệ thống thực tế đều phải chịu được một lượng noise, nên có lẽ 4.97 V cũng cần được diễn giải là A = 1. Nhưng còn 4.3 V thì sao? Hay 2.8 V? Hay 2.500000 V?
 
 ### 1.6.1 Supply voltage
 
@@ -512,7 +508,7 @@ Hình 1.21 AND gate Four-input
 
 ### 1.6.2 Logic level
 
-Ánh xạ continuous variable sang discrete binary variable bằng định nghĩa logic level như Hình 1.23. Gate đầu gọi driver, gate hai receiver. Output driver nối input receiver. Driver tạo output LOW (0) trong 0 đến V<sub>OL</sub>, hoặc HIGH (1) trong V<sub>OH</sub> đến V<sub>DD</sub>. Receiver nhận input 0 đến V<sub>IL</sub> coi LOW; nhận V<sub>IH</sub> đến V<sub>DD</sub> coi HIGH. Nếu vì noise hoặc component hỏng mà input vào forbidden zone giữa V<sub>IL</sub>, V<sub>IH</sub>, hành vi gate khó dự đoán. V<sub>OH</sub>, V<sub>OL</sub>, V<sub>IH</sub>, V<sub>IL</sub> gọi logic level high/low của output/input.
+Việc ánh xạ một biến liên tục sang một biến binary rời rạc được thực hiện bằng cách định nghĩa các logic level, như trong Hình 1.23. Gate thứ nhất được gọi là driver và gate thứ hai được gọi là receiver. Output của driver được nối với input của receiver. Driver tạo output LOW (0) trong khoảng từ 0 đến V<sub>OL</sub> hoặc output HIGH (1) trong khoảng từ V<sub>OH</sub> đến V<sub>DD</sub>. Nếu receiver nhận input trong khoảng từ 0 đến V<sub>IL</sub>, nó sẽ xem input là LOW. Nếu receiver nhận input trong khoảng từ V<sub>IH</sub> đến V<sub>DD</sub>, nó sẽ xem input là HIGH. Nếu vì một lý do nào đó, chẳng hạn noise hoặc component bị lỗi, input của receiver rơi vào forbidden zone giữa V<sub>IL</sub> và V<sub>IH</sub>, hành vi của gate sẽ không thể dự đoán được. V<sub>OH</sub>, V<sub>OL</sub>, V<sub>IH</sub> và V<sub>IL</sub> được gọi là các logic level high và low của output và input.
 
 ![fig1_22](images/ch01/fig1_22.png)
 
@@ -520,7 +516,7 @@ Hình 1.22 Truth table AND Four-input
 
 ### 1.6.3 Noise margin
 
-Để receiver diễn giải đúng output driver, phải chọn V<sub>OL</sub> \< V<sub>IL</sub> và V<sub>OH</sub> \> V<sub>IH</sub>. Dù output nhiễm noise, input vẫn nhận đúng logic level. Noise margin (NM) là lượng noise có thể thêm vào output worst-case mà signal vẫn được coi input hợp lệ. Như Hình 1.23, noise margin low và high lần lượt là
+Để output của driver được diễn giải chính xác tại input của receiver, chúng ta phải chọn V<sub>OL</sub> < V<sub>IL</sub> và V<sub>OH</sub> > V<sub>IH</sub>. Nhờ đó, ngay cả khi output của driver bị nhiễm một lượng noise, input của receiver vẫn phát hiện đúng logic level. Noise margin (NM) là lượng noise có thể thêm vào output trong trường hợp worst-case mà signal vẫn có thể được diễn giải là một input hợp lệ. Như có thể thấy trong Hình 1.23, các noise margin low và high lần lượt là
 
 NM<sub>L</sub> = V<sub>IL</sub> − V<sub>OL</sub> (1.2)
 
@@ -544,29 +540,29 @@ Lời giải Noise margin inverter: NM<sub>L</sub> = V<sub>IL</sub> – V<sub>OL
 
 ### 1.6.4 DC transfer characteristic
 
-> DC chỉ hành vi khi input voltage giữ nguyên hoặc đổi đủ chậm để phần còn lại theo kịp. Tên bắt nguồn direct current, cách truyền điện trên đường dây điện áp không đổi. Ngược lại transient response là hành vi khi input đổi nhanh. Mục 2.9 tìm hiểu thêm transient response.
+> DC biểu thị hành vi khi điện áp input được giữ không đổi hoặc thay đổi đủ chậm để phần còn lại của hệ thống theo kịp. Nguồn gốc lịch sử của thuật ngữ này là direct current, một phương pháp truyền tải điện trên đường dây với điện áp không đổi. Ngược lại, transient response của một circuit là hành vi khi điện áp input thay đổi nhanh. Mục 2.9 sẽ tìm hiểu thêm về transient response.
 
-Để hiểu giới hạn digital abstraction phải đi sâu hành vi analog của gate. DC transfer characteristic mô tả output voltage theo input voltage khi input thay đổi đủ chậm để output theo kịp. Tên transfer characteristic vì mô tả quan hệ input/output voltage.
+Để hiểu các giới hạn của digital abstraction, chúng ta phải tìm hiểu kỹ hành vi analog của gate. Các DC transfer characteristic của gate mô tả điện áp output như một hàm của điện áp input khi input thay đổi đủ chậm để output có thể theo kịp. Chúng được gọi là transfer characteristic vì mô tả quan hệ giữa điện áp input và output.
 
-Inverter lý tưởng chuyển đột ngột tại V<sub>DD</sub>/2 như Hình 1.25(a). Với V(A) \< V<sub>DD</sub>/2, V(Y) = V<sub>DD</sub>. Với V(A) \> V<sub>DD</sub>/2, V(Y) = 0. Khi đó V<sub>IH</sub> = V<sub>IL</sub> = V<sub>DD</sub>/2. V<sub>OH</sub> = V<sub>DD</sub>, V<sub>OL</sub> = 0.
+Inverter lý tưởng chuyển đột ngột tại V<sub>DD</sub>/2 như Hình 1.25(a). Với V(A) < V<sub>DD</sub>/2, V(Y) = V<sub>DD</sub>. Với V(A) > V<sub>DD</sub>/2, V(Y) = 0. Khi đó V<sub>IH</sub> = V<sub>IL</sub> = V<sub>DD</sub>/2. V<sub>OH</sub> = V<sub>DD</sub>, V<sub>OL</sub> = 0.
 
-Inverter thực chuyển dần hơn giữa hai cực như Hình 1.25(b). Khi V(A) = 0, V(Y) = V<sub>DD</sub>. Khi V(A) = V<sub>DD</sub>, V(Y) = 0. Nhưng chuyển tiếp trơn và có thể không tập trung đúng V<sub>DD</sub>/2. Vậy định nghĩa logic level thế nào?
+Một inverter thực tế thay đổi dần dần hơn giữa hai cực trị, như trong Hình 1.25(b). Khi điện áp input V(A) bằng 0, điện áp output V(Y) = V<sub>DD</sub>. Khi V(A) = V<sub>DD</sub>, V(Y) = 0. Tuy nhiên, sự chuyển tiếp giữa hai điểm đầu cuối này diễn ra liên tục và có thể không có tâm chính xác tại V<sub>DD</sub>/2. Điều này đặt ra câu hỏi nên định nghĩa các logic level như thế nào.
 
-Vị trí hợp lý là nơi độ dốc dV(Y)/dV(A) bằng −1. Hai điểm gọi unity gain point. Chọn logic level ở đó thường tối đa noise margin. Nếu giảm V<sub>IL</sub>, V<sub>OH</sub> chỉ tăng ít. Nhưng tăng V<sub>IL</sub>, V<sub>OH</sub> giảm mạnh.
+Một vị trí hợp lý để chọn các logic level là nơi độ dốc của transfer characteristic dV(Y)/dV(A) bằng −1. Hai điểm này được gọi là unity gain point. Việc chọn logic level tại các unity gain point thường tối đa hóa noise margin. Nếu giảm V<sub>IL</sub>, V<sub>OH</sub> chỉ tăng một lượng nhỏ. Nhưng nếu tăng V<sub>IL</sub>, V<sub>OH</sub> sẽ giảm mạnh.
 
 ### 1.6.5 Static discipline
 
-Để tránh input vào forbidden zone, digital logic gate được thiết kế tuân static discipline: với input hợp lệ logic, mọi circuit element tạo output hợp lệ logic.
+Để tránh các input rơi vào forbidden zone, các digital logic gate được thiết kế tuân theo static discipline. Static discipline đòi hỏi rằng khi được cung cấp input hợp lệ về mặt logic, mọi phần tử circuit đều phải tạo ra output hợp lệ về mặt logic.
 
-Tuân static discipline, digital designer hy sinh tự do dùng analog circuit element tùy ý để đổi sự đơn giản, vững chắc của digital circuit. Nâng abstraction analog sang digital tăng năng suất bằng giấu chi tiết không cần.
+Bằng cách tuân theo static discipline, người thiết kế digital hy sinh quyền tự do sử dụng tùy ý các phần tử analog circuit để đổi lấy sự đơn giản và độ vững chắc của digital circuit. Họ nâng mức abstraction từ analog lên digital, tăng năng suất thiết kế bằng cách che giấu những chi tiết không cần thiết.
 
 ![fig1_25](images/ch01/fig1_25.png)
 
 Hình 1.25 DC transfer characteristic và logic level
 
-Lựa chọn V<sub>DD</sub> và logic level tùy ý, nhưng gate giao tiếp phải tương thích. Vì vậy chia thành logic family, mọi gate trong family tuân static discipline khi dùng với gate cùng family. Chúng ráp như Lego nhờ supply voltage và logic level nhất quán.
+Việc lựa chọn V<sub>DD</sub> và các logic level là tùy ý, nhưng tất cả các gate giao tiếp với nhau phải có logic level tương thích. Vì vậy, các gate được chia thành những logic family sao cho mọi gate trong một logic family đều tuân theo static discipline khi được sử dụng với những gate khác trong cùng family. Các logic gate trong cùng một logic family có thể ghép với nhau như Lego vì chúng sử dụng điện áp nguồn và logic level nhất quán.
 
-Bốn logic family chính thập niên 1970–1990 là Transistor-Transistor Logic (TTL), Complementary Metal-Oxide-Semiconductor Logic (CMOS, đọc sea-moss), Low Voltage TTL Logic (LVTTL), Low Voltage CMOS Logic (LVCMOS). Bảng 1.4 so logic level. Từ đó family phân mảnh theo nhiều supply voltage thấp hơn. Phụ lục A.6 xem kỹ family phổ biến.
+Bốn logic family chính chiếm ưu thế từ thập niên 1970 đến thập niên 1990 là Transistor-Transistor Logic (TTL), Complementary Metal-Oxide-Semiconductor Logic (CMOS, đọc là sea-moss), Low Voltage TTL Logic (LVTTL) và Low Voltage CMOS Logic (LVCMOS). Bảng 1.4 so sánh các logic level của chúng. Kể từ đó, các logic family đã phân thành nhiều nhóm với sự xuất hiện ngày càng nhiều mức điện áp nguồn thấp hơn nữa. Phụ lục A.6 sẽ trình bày lại các logic family phổ biến một cách chi tiết hơn.
 
 Bảng 1.4 Logic level của family 5 V và 3.3 V
 
@@ -582,10 +578,10 @@ Bảng 1.5 Compatibility của logic family
 |  |  | Receiver |  |  |
 |---|---|---|---|---|
 | Driver | TTL | CMOS | LVTTL | LVCMOS |
-| TTL | OK | KHÔNG: V<sub>OH</sub> \< V<sub>IH</sub> | CÓ THỂ<sup>a</sup> | CÓ THỂ<sup>a</sup> |
+| TTL | OK | KHÔNG: V<sub>OH</sub> < V<sub>IH</sub> | CÓ THỂ<sup>a</sup> | CÓ THỂ<sup>a</sup> |
 | CMOS | OK | OK | CÓ THỂ<sup>a</sup> | CÓ THỂ<sup>a</sup> |
-| LVTTL | OK | KHÔNG: V<sub>OH</sub> \< V<sub>IH</sub> | OK | OK |
-| LVCMOS | OK | KHÔNG: V<sub>OH</sub> \< V<sub>IH</sub> | OK | OK |
+| LVTTL | OK | KHÔNG: V<sub>OH</sub> < V<sub>IH</sub> | OK | OK |
+| LVCMOS | OK | KHÔNG: V<sub>OH</sub> < V<sub>IH</sub> | OK | OK |
 
 <sup>a</sup>Miễn là mức HIGH 5 V không làm hỏng receiver input
 
@@ -611,15 +607,15 @@ Analytical Engine làm từ bánh răng; máy tính điện đời đầu dùng 
 
 Năm 1958 Jack Kilby ở Texas Instruments xây integrated circuit đầu tiên chứa hai transistor. Năm 1959 Robert Noyce ở Fairchild Semiconductor đăng ký phương pháp nối nhiều transistor trên một silicon chip. Khi đó mỗi transistor khoảng 10 USD.
 
-Nhờ hơn ba thập kỷ tiến bộ chế tạo chưa từng có, engineer nay đặt khoảng một tỷ MOSFET trên silicon chip 1-cm<sup>2</sup>, mỗi transistor dưới 10 microcent. Mật độ và chi phí tiếp tục cải thiện một bậc mười khoảng mỗi 8 năm. MOSFET nay cấu thành gần mọi digital system. Phần này nhìn dưới digital abstraction xem logic gate xây từ MOSFET thế nào.
+Nhờ hơn ba thập kỷ tiến bộ chưa từng có trong công nghệ chế tạo, các kỹ sư hiện có thể đặt khoảng một tỷ MOSFET lên một silicon chip 1-cm<sup>2</sup>, và mỗi transistor này có giá dưới 10 microcent. Khả năng tích hợp và chi phí tiếp tục cải thiện khoảng một bậc mười sau mỗi 8 năm. MOSFET hiện là thành phần cấu tạo của gần như tất cả các digital system. Trong phần này, chúng ta sẽ tìm hiểu bên dưới digital abstraction để xem logic gate được xây dựng từ MOSFET như thế nào.
 
 ### 1.7.1 Semiconductor
 
-MOS transistor làm từ silicon, nguyên tử chủ yếu trong đá và cát. Silicon (Si) nhóm IV có bốn valence electron, liên kết bốn nguyên tử kề tạo crystal lattice. Hình 1.26(a) vẽ hai chiều cho dễ, nhưng lattice thực là tinh thể lập phương. Đường biểu thị covalent bond. Silicon tinh khiết dẫn kém vì mọi electron gắn trong bond. Nó dẫn tốt hơn khi thêm cẩn thận lượng nhỏ tạp chất gọi dopant atom. Dopant nhóm V như arsenic (As) có electron thừa không liên kết; electron dễ di chuyển, để lại dopant ion hóa As<sup>+</sup> như Hình 1.26(b). Electron mang điện âm nên arsenic gọi dopant n-type. Ngược lại dopant nhóm III như boron (B) thiếu electron, Hình 1.26(c). Electron thiếu gọi hole. Electron silicon lân cận có thể lấp bond thiếu, tạo dopant ion B<sup>−</sup>, để hole ở silicon lân cận. Hole tương tự di chuyển trong lattice. Vì thiếu điện âm nên hành xử như hạt điện dương, do đó boron gọi dopant p-type. Conductivity silicon thay đổi nhiều bậc mười theo nồng độ dopant, nên gọi semiconductor.
+Transistor MOS được chế tạo từ silicon, nguyên tử chiếm phần lớn trong đá và cát. Silicon (Si) là nguyên tử thuộc nhóm IV, nên có bốn electron ở lớp vỏ hóa trị và tạo liên kết với bốn nguyên tử lân cận, hình thành một mạng tinh thể. Hình 1.26(a) minh họa mạng tinh thể theo hai chiều để dễ vẽ, nhưng hãy nhớ rằng mạng này thực sự tạo thành một tinh thể lập phương. Trong hình, mỗi đường biểu diễn một liên kết cộng hóa trị. Bản thân silicon dẫn điện kém vì tất cả các electron đều bị giữ trong các liên kết cộng hóa trị. Tuy nhiên, nó dẫn điện tốt hơn khi được bổ sung cẩn thận một lượng nhỏ tạp chất, được gọi là các nguyên tử dopant. Nếu bổ sung dopant nhóm V như arsenic (As), các nguyên tử dopant có một electron dư không tham gia liên kết. Electron đó có thể dễ dàng di chuyển trong mạng tinh thể, để lại nguyên tử dopant đã bị ion hóa (As<sup>+</sup>), như trong Hình 1.26(b). Electron mang điện tích âm, nên chúng ta gọi arsenic là dopant n-type. Ngược lại, nếu bổ sung dopant nhóm III như boron (B), các nguyên tử dopant thiếu một electron, như trong Hình 1.26(c). Electron bị thiếu này được gọi là hole. Một electron từ nguyên tử silicon lân cận có thể di chuyển đến để lấp liên kết còn thiếu, tạo thành nguyên tử dopant đã bị ion hóa (B<sup>−</sup>) và để lại một hole tại nguyên tử silicon lân cận. Tương tự, hole có thể di chuyển trong mạng tinh thể. Hole là sự thiếu hụt điện tích âm, nên nó hoạt động như một hạt mang điện tích dương. Do đó, chúng ta gọi boron là dopant p-type. Vì độ dẫn điện của silicon thay đổi qua nhiều bậc độ lớn tùy theo nồng độ dopant, silicon được gọi là semiconductor.
 
 ### 1.7.2 Diode
 
-Junction giữa silicon p-type và n-type gọi diode. Vùng p-type là anode, n-type cathode như Hình 1.27. Điện áp anode cao hơn cathode thì forward biased, dòng từ anode qua cathode. Khi anode thấp hơn cathode thì reverse biased, không có dòng. Symbol diode trực quan cho thấy dòng chỉ một hướng.
+Tiếp giáp giữa silicon p-type và n-type được gọi là diode. Vùng p-type được gọi là anode, còn vùng n-type được gọi là cathode, như minh họa trong Hình 1.27. Khi điện áp tại anode cao hơn điện áp tại cathode, diode được phân cực thuận (forward biased), và dòng điện chạy qua diode từ anode đến cathode. Nhưng khi điện áp tại anode thấp hơn điện áp tại cathode, diode được phân cực ngược (reverse biased) và không có dòng điện chạy qua. Ký hiệu diode thể hiện trực quan rằng dòng điện chỉ chạy theo một hướng.
 
 ![fig1_26](images/ch01/fig1_26.png)
 
@@ -635,7 +631,7 @@ Hình 1.27 Cấu trúc và symbol diode p-n junction
 
 Hình 1.28 Symbol capacitor
 
-Capacitor gồm hai conductor cách bởi insulator. Đặt điện áp V vào một conductor, nó tích điện Q, conductor kia tích −Q. Capacitance C là tỷ số điện tích/điện áp: C = Q/V. Capacitance tỷ lệ kích thước conductor, nghịch khoảng cách giữa chúng. Symbol như Hình 1.28.
+Capacitor gồm hai conductor được ngăn cách bởi một insulator. Khi đặt điện áp V lên một conductor, conductor đó tích lũy điện tích Q và conductor còn lại tích lũy điện tích trái dấu −Q. Capacitance C của capacitor là tỷ số giữa điện tích và điện áp: C = Q/V. Capacitance tỷ lệ thuận với kích thước của các conductor và tỷ lệ nghịch với khoảng cách giữa chúng. Ký hiệu capacitor được minh họa trong Hình 1.28.
 
 > ![note_p051](images/ch01/note_p051.png)
 >
@@ -645,29 +641,29 @@ Capacitance quan trọng vì nạp/xả conductor cần thời gian và năng l�
 
 ### 1.7.4 Transistor nMOS và pMOS
 
-MOSFET gồm nhiều lớp vật liệu dẫn/cách điện. Chế tạo trên silicon wafer mỏng phẳng đường kính khoảng 15 đến 30 cm. Bắt đầu wafer trần, qua các bước cấy dopant, tạo lớp mỏng silicon dioxide và silicon, lắng đọng kim loại. Giữa các bước tạo pattern để vật liệu chỉ ở nơi mong muốn. Vì transistor dài một phần micron[^1] và xử lý toàn wafer cùng lúc, chế tạo hàng tỷ transistor một lần không đắt. Xong thì cắt wafer thành hình chữ nhật gọi chip hoặc die chứa hàng nghìn, triệu, tỷ transistor. Kiểm thử rồi đóng package nhựa hoặc gốm có chân kim loại nối circuit board.
+MOSFET có cấu trúc gồm nhiều lớp vật liệu dẫn điện và cách điện xếp chồng lên nhau. MOSFET được chế tạo trên các wafer silicon mỏng, phẳng, có đường kính khoảng 15 đến 30 cm. Quy trình sản xuất bắt đầu với một wafer trần. Quy trình gồm một chuỗi bước cấy dopant vào silicon, phát triển các lớp màng mỏng silicon dioxide và silicon, và lắng đọng kim loại. Giữa các bước, wafer được tạo pattern để vật liệu chỉ xuất hiện tại những vị trí mong muốn. Vì transistor có chiều dài chỉ bằng một phần micron[^1] và toàn bộ wafer được xử lý cùng lúc, việc sản xuất hàng tỷ transistor mỗi lần có chi phí thấp. Sau khi xử lý xong, wafer được cắt thành các hình chữ nhật gọi là chip hoặc die, chứa hàng nghìn, hàng triệu hoặc thậm chí hàng tỷ transistor. Chip được kiểm thử rồi đặt trong package bằng nhựa hoặc gốm có các chân kim loại để nối với circuit board.
 
 > ![note_p051_2](images/ch01/note_p051_2.png)
 >
 > Package dual-inline (DIP) 40-pin chứa chip nhỏ gần như khó thấy ở giữa, nối 40 chân kim loại, mỗi bên 20, bằng dây vàng mảnh hơn tóc (ảnh Kevin Mapp. © Harvey Mudd College).
 
-MOSFET gồm lớp dẫn gọi gate trên insulator silicon dioxide (SiO<sub>2</sub>), trên silicon wafer gọi substrate. Ban đầu gate làm bằng kim loại nên tên metal-oxide-semiconductor. Quy trình hiện đại dùng polycrystalline silicon vì không chảy trong bước high-temperature sau. Silicon dioxide quen gọi thủy tinh, trong ngành thường chỉ gọi oxide. Cấu trúc metal-oxide-semiconductor tạo capacitor, lớp oxide mỏng cách điện gọi dielectric ngăn bản kim loại và semiconductor.
+Cấu trúc nhiều lớp của MOSFET gồm một lớp dẫn điện gọi là gate nằm trên lớp cách điện silicon dioxide (SiO<sub>2</sub>), lớp này nằm trên wafer silicon được gọi là substrate. Trước đây, gate được làm bằng kim loại, nên có tên gọi metal-oxide-semiconductor. Các quy trình sản xuất hiện đại sử dụng polycrystalline silicon cho gate vì nó không nóng chảy trong các bước xử lý high-temperature tiếp theo. Silicon dioxide được biết đến nhiều hơn với tên gọi thủy tinh và thường được gọi đơn giản là oxide trong ngành công nghiệp bán dẫn. Cấu trúc metal-oxide-semiconductor này tạo thành một capacitor, trong đó một lớp oxide cách điện mỏng gọi là dielectric ngăn cách các bản kim loại và semiconductor.
 
 ![fig1_29](images/ch01/fig1_29.png)
 
 Hình 1.29 Transistor nMOS và pMOS
 
-> Source và drain đối xứng vật lý. Nhưng nói điện tích từ source sang drain. nMOS mang electron, từ điện áp âm sang dương. pMOS mang hole, từ dương sang âm. Nếu vẽ sơ đồ điện áp dương nhất trên, âm nhất dưới, source điện tích âm nMOS là terminal dưới; source điện tích dương pMOS là terminal trên.
+> Các terminal source và drain đối xứng nhau về mặt vật lý. Tuy nhiên, chúng ta quy ước rằng điện tích di chuyển từ source đến drain. Trong transistor nMOS, điện tích được mang bởi các electron, di chuyển từ điện áp âm đến điện áp dương. Trong transistor pMOS, điện tích được mang bởi các hole, di chuyển từ điện áp dương đến điện áp âm. Nếu chúng ta vẽ schematic với điện áp dương nhất ở phía trên và điện áp âm nhất ở phía dưới, terminal phía dưới là nguồn cung cấp điện tích âm trong transistor nMOS, còn terminal phía trên là nguồn cung cấp điện tích dương trong transistor pMOS.
 
-Có hai MOSFET: nMOS và pMOS (đọc “n-moss”, “p-moss”). Hình 1.29 cho cross-sections bằng cắt wafer rồi nhìn bên. Transistor n-type, gọi nMOS, có vùng dopant n-type cạnh gate gọi source và drain, xây trên substrate p-type. pMOS ngược lại: source và drain p-type trong substrate n-type.
+Có hai loại MOSFET: nMOS và pMOS (đọc là “n-moss” và “p-moss”). Hình 1.29 minh họa cross-sections của từng loại, thu được bằng cách cưa xuyên qua wafer rồi quan sát từ bên cạnh. Các transistor n-type, được gọi là nMOS, có những vùng pha tạp n-type nằm cạnh gate, được gọi là source và drain, và được xây dựng trên substrate bán dẫn p-type. Transistor pMOS có cấu trúc ngược lại, gồm các vùng source và drain p-type trong substrate n-type.
 
-MOSFET hành xử như switch voltage-controlled, gate voltage tạo điện trường bật/tắt kết nối source–drain. Tên field effect transistor bắt nguồn nguyên lý này. Bắt đầu tìm hiểu nMOS.
+MOSFET hoạt động như một switch voltage-controlled, trong đó điện áp gate tạo ra điện trường làm ON hoặc OFF kết nối giữa source và drain. Thuật ngữ field effect transistor bắt nguồn từ nguyên lý hoạt động này. Hãy bắt đầu bằng việc tìm hiểu hoạt động của một transistor nMOS.
 
 > ![note_p052](images/ch01/note_p052.png)
 >
 > Kỹ thuật viên cầm wafer 12-inch chứa hàng trăm microprocessor chip (ảnh © 2006, Intel Corporation. Được phép tái bản).
 
-Substrate nMOS thường nối GND, điện áp thấp nhất. Xét gate cũng 0 V như Hình 1.30(a). Diode giữa source/drain và substrate reverse biased vì source/drain không âm. Không có đường dòng giữa source, drain nên transistor OFF. Nâng gate lên V<sub>DD</sub> như Hình 1.30(b): điện áp dương trên bản capacitor tạo điện trường hút điện dương trên bản trên, điện âm về bản dưới. Nếu đủ lớn, điện âm dưới gate nhiều đến mức vùng đảo p-type thành n-type, gọi channel. Nay có đường liên tục từ source n-type qua channel n-type tới drain n-type, electron đi từ source sang drain: transistor ON. Gate voltage cần để bật gọi threshold voltage V<sub>t</sub>, thường 0.3 đến 0.7 V.
+Substrate của transistor nMOS thường được nối với GND, là điện áp thấp nhất trong hệ thống. Trước tiên, xét trường hợp gate cũng ở 0 V, như trong Hình 1.30(a). Các diode giữa source hoặc drain và substrate đều được phân cực ngược vì điện áp source hoặc drain không âm. Vì vậy, không có đường cho dòng điện chạy giữa source và drain, nên transistor ở trạng thái OFF. Bây giờ, xét trường hợp điện áp gate được nâng lên V<sub>DD</sub>, như trong Hình 1.30(b). Khi đặt điện áp dương lên bản trên của một capacitor, nó tạo ra điện trường thu hút điện tích dương về bản trên và điện tích âm về bản dưới. Nếu điện áp đủ lớn, lượng điện tích âm bị thu hút đến mặt dưới của gate lớn đến mức vùng này đảo từ p-type và thực chất trở thành n-type. Vùng bị đảo này được gọi là channel. Lúc này, transistor có một đường liên tục từ source n-type, qua channel n-type đến drain n-type, nên electron có thể di chuyển từ source đến drain. Transistor ở trạng thái ON. Điện áp gate cần thiết để bật transistor được gọi là threshold voltage, V<sub>t</sub>, và thường nằm trong khoảng 0.3 đến 0.7 V.
 
 ![fig1_30](images/ch01/fig1_30.png)
 
@@ -677,19 +673,19 @@ Hình 1.30 Hoạt động transistor nMOS
 >
 > Gordon Moore, 1929–
 >
-> Sinh ở San Francisco. B.S. hóa học UC Berkeley, Ph.D. hóa học và vật lý Caltech. Đồng sáng lập Intel năm 1968 với Robert Noyce. Năm 1965 quan sát số transistor trên chip gấp đôi mỗi năm, gọi Moore’s Law. Từ 1975 số transistor gấp đôi mỗi hai năm.
+> Sinh tại San Francisco. Nhận bằng B.S. về hóa học tại UC Berkeley và bằng Ph.D. về hóa học và vật lý tại Caltech. Đồng sáng lập Intel vào năm 1968 cùng Robert Noyce. Năm 1965, ông quan sát thấy số lượng transistor trên một chip máy tính tăng gấp đôi mỗi năm. Xu hướng này được biết đến với tên gọi Moore’s Law. Từ năm 1975, số lượng transistor tăng gấp đôi sau mỗi hai năm.
 >
 > Hệ quả Moore’s Law là performance microprocessor gấp đôi mỗi 18 đến 24 tháng. Doanh số semiconductor cũng tăng hàm mũ; tiếc rằng công suất tiêu thụ cũng vậy.
 >
-> Moore’s Law thúc đẩy tiến bộ khó tin suốt 50 năm khi feature size giảm từ hơn 10 μm xuống 5 nm. Nhưng tiến bộ chậm lại vì tạo transistor nhỏ hơn nhiều bước sóng ánh sáng rất đắt. (Ảnh © 2006, Intel Corporation. Được phép tái bản.)
+> Moore’s Law đã thúc đẩy những tiến bộ đáng kinh ngạc của ngành công nghiệp bán dẫn trong 50 năm khi feature size của transistor giảm từ hơn 10 μm xuống chỉ còn 5 nm. Tuy nhiên, tiến trình này đã chậm lại vì việc chế tạo transistor nhỏ hơn nhiều so với bước sóng ánh sáng rất tốn kém. (Ảnh © 2006, Intel Corporation. Được tái bản với sự cho phép.)
 
-pMOS hoạt động ngược, có thể đoán từ bubble trên symbol Hình 1.31. Substrate nối V<sub>DD</sub>. Gate ở V<sub>DD</sub> thì pMOS OFF; gate ở GND, channel đảo thành p-type, pMOS ON.
+Transistor pMOS hoạt động theo cách hoàn toàn ngược lại, như có thể suy ra từ vòng tròn nhỏ trên ký hiệu của nó trong Hình 1.31. Substrate được nối với V<sub>DD</sub>. Khi gate cũng ở V<sub>DD</sub>, transistor pMOS ở trạng thái OFF. Khi gate ở GND, channel đảo thành p-type và transistor pMOS ở trạng thái ON.
 
-MOSFET không phải switch hoàn hảo. nMOS truyền 0 tốt, 1 kém. Cụ thể gate nMOS ở V<sub>DD</sub>, source chỉ dao động 0 đến V<sub>DD</sub> − V<sub>t</sub> khi drain từ 0 đến V<sub>DD</sub>. Tương tự pMOS truyền 1 tốt, 0 kém. Nhưng sẽ thấy xây được logic gate chỉ dùng transistor ở chế độ tốt.
+Đáng tiếc là MOSFET không phải các switch hoàn hảo. Cụ thể, transistor nMOS truyền giá trị 0 tốt nhưng truyền giá trị 1 kém. Khi gate của một transistor nMOS ở V<sub>DD</sub>, source chỉ thay đổi trong khoảng từ 0 đến V<sub>DD</sub> − V<sub>t</sub> khi drain thay đổi từ 0 đến V<sub>DD</sub>. Tương tự, transistor pMOS truyền giá trị 1 tốt nhưng truyền giá trị 0 kém. Tuy nhiên, chúng ta sẽ thấy rằng có thể xây dựng các logic gate chỉ sử dụng transistor trong chế độ hoạt động tốt của chúng.
 
-nMOS cần substrate p-type; pMOS cần substrate n-type. Để có cả hai trên chip, thường bắt đầu wafer p-type rồi cấy vùng n-type gọi well nơi đặt pMOS. Quy trình cung cấp cả hai gọi Complementary MOS hay CMOS, dùng chế tạo đại đa số transistor ngày nay.
+Transistor nMOS cần substrate p-type, còn transistor pMOS cần substrate n-type. Để chế tạo cả hai loại transistor trên cùng một chip, quy trình sản xuất thường bắt đầu với wafer p-type, sau đó cấy các vùng n-type được gọi là well tại những vị trí sẽ đặt transistor pMOS. Những quy trình cung cấp cả hai loại transistor này được gọi là Complementary MOS, hay CMOS. Các quy trình CMOS được sử dụng để chế tạo phần lớn transistor được sản xuất ngày nay.
 
-Tóm lại CMOS cho hai switch điều khiển điện như Hình 1.31. Điện áp gate (g) điều khiển dòng giữa source (s), drain (d). nMOS OFF khi gate 0, ON khi 1. pMOS ngược: ON khi 0, OFF khi 1.
+Tóm lại, các quy trình CMOS cung cấp hai loại switch được điều khiển bằng điện, như trong Hình 1.31. Điện áp tại gate (g) điều chỉnh dòng điện chạy giữa source (s) và drain (d). Transistor nMOS ở trạng thái OFF khi gate bằng 0 và ON khi gate bằng 1. Transistor pMOS hoạt động ngược lại: ON khi gate bằng 0 và OFF khi gate bằng 1.
 
 ![fig1_31](images/ch01/fig1_31.png)
 
@@ -697,13 +693,13 @@ Hình 1.31 Switch model của MOSFET
 
 ### 1.7.5 CMOS NOT gate
 
-Hình 1.32 là schematic NOT gate CMOS. Tam giác chỉ GND, thanh ngang V<sub>DD</sub>; nhãn sẽ bỏ ở schematic sau. nMOS N1 nối GND với output Y. pMOS P1 nối V<sub>DD</sub> với Y. Cả hai gate được điều khiển bởi input A.
+Hình 1.32 minh họa schematic của một gate NOT được xây dựng bằng các transistor CMOS. Hình tam giác biểu thị GND, còn thanh ngang biểu thị V<sub>DD</sub>; các nhãn này sẽ được lược bỏ trong những schematic tiếp theo. Transistor nMOS N1 được nối giữa GND và output Y. Transistor pMOS P1 được nối giữa V<sub>DD</sub> và output Y. Gate của cả hai transistor đều được điều khiển bởi input A.
 
 ![fig1_32](images/ch01/fig1_32.png)
 
 Hình 1.32 Schematic NOT gate
 
-Nếu A = 0, N1 OFF, P1 ON. Y nối V<sub>DD</sub>, không nối GND, được kéo lên logic 1. P1 truyền 1 tốt. Nếu A = 1, N1 ON, P1 OFF, Y kéo xuống logic 0. N1 truyền 0 tốt. Đối chiếu truth table Hình 1.12, circuit đúng là NOT gate.
+Nếu A = 0, N1 OFF và P1 ON. Do đó, Y được nối với V<sub>DD</sub> nhưng không được nối với GND, và được kéo lên logic 1. P1 truyền giá trị 1 tốt. Nếu A = 1, N1 ON và P1 OFF, và Y được kéo xuống logic 0. N1 truyền giá trị 0 tốt. Đối chiếu với truth table trong Hình 1.12, chúng ta thấy circuit này thực sự là một gate NOT.
 
 ![fig1_33](images/ch01/fig1_33.png)
 
@@ -711,13 +707,13 @@ Hình 1.33 Schematic NAND gate Two-input
 
 ### 1.7.6 Các CMOS logic gate khác
 
-Hình 1.33 cho schematic NAND two-input. Trên sơ đồ, dây luôn nối ở junction three-way, chỉ nối tại four-way nếu có dấu chấm. nMOS N1, N2 nối tiếp, cả hai phải ON để kéo output xuống GND. pMOS P1, P2 song song, chỉ cần một ON để kéo lên V<sub>DD</sub>. Bảng 1.6 liệt kê hoạt động mạng pull-down, pull-up và output, chứng minh NAND. Ví dụ A = 1, B = 0: N1 ON, N2 OFF chặn đường Y–GND. P1 OFF, P2 ON tạo đường V<sub>DD</sub>–Y. Vậy Y kéo lên 1.
+Hình 1.33 minh họa schematic của một gate NAND two-input. Trong schematic, các dây luôn được nối với nhau tại junction three-way. Tại junction four-way, chúng chỉ được nối với nhau nếu có dấu chấm. Các transistor nMOS N1 và N2 mắc nối tiếp; cả hai phải ON để kéo output xuống GND. Các transistor pMOS P1 và P2 mắc song song; chỉ cần một transistor pMOS ON để kéo output lên V<sub>DD</sub>. Bảng 1.6 liệt kê hoạt động của các mạng pull-down và pull-up cùng với trạng thái của output, chứng minh rằng gate thực sự thực hiện chức năng NAND. Ví dụ, khi A = 1 và B = 0, N1 ON nhưng N2 OFF, chặn đường từ Y đến GND. P1 OFF nhưng P2 ON, tạo ra đường từ V<sub>DD</sub> đến Y. Vì vậy, Y được kéo lên 1.
 
 ![fig1_34](images/ch01/fig1_34.png)
 
 Hình 1.34 Dạng tổng quát của inverting logic gate
 
-Hình 1.34 là dạng tổng quát xây inverting logic gate như NOT, NAND, NOR. nMOS truyền 0 tốt nên mạng pull-down nMOS giữa output và GND kéo xuống 0. pMOS truyền 1 tốt nên mạng pull-up pMOS giữa output và V<sub>DD</sub> kéo lên 1. Mạng gồm transistor nối tiếp hoặc song song. Song song thì ON nếu một transistor ON. Nối tiếp chỉ ON khi cả hai ON. Gạch chéo trên dây input chỉ gate có thể nhận nhiều input.
+Hình 1.34 minh họa cấu trúc tổng quát để xây dựng bất kỳ inverting logic gate nào, chẳng hạn NOT, NAND hoặc NOR. Transistor nMOS truyền giá trị 0 tốt, vì vậy một mạng pull-down gồm các transistor nMOS được đặt giữa output và GND để kéo output xuống 0. Transistor pMOS truyền giá trị 1 tốt, vì vậy một mạng pull-up gồm các transistor pMOS được đặt giữa output và V<sub>DD</sub> để kéo output lên 1. Các mạng này có thể gồm những transistor mắc nối tiếp hoặc song song. Khi các transistor mắc song song, mạng ON nếu một trong hai transistor ON. Khi các transistor mắc nối tiếp, mạng chỉ ON nếu cả hai transistor đều ON. Dấu gạch chéo trên dây input biểu thị rằng gate có thể nhận nhiều input.
 
 Bảng 1.6 Hoạt động NAND gate
 
@@ -728,13 +724,13 @@ Bảng 1.6 Hoạt động NAND gate
 | 1 | 0 | OFF | ON | 1 |
 | 1 | 1 | ON | OFF | 0 |
 
-> Designer kinh nghiệm cho rằng thiết bị điện tử chạy vì chứa khói ma thuật. Bằng chứng là khi khói thoát ra, thiết bị ngừng chạy.
+> Những người thiết kế giàu kinh nghiệm cho rằng thiết bị điện tử hoạt động được vì chúng chứa khói ma thuật. Họ xác nhận lý thuyết này bằng quan sát rằng nếu khói ma thuật thoát ra khỏi thiết bị, thiết bị sẽ ngừng hoạt động.
 
 ![img_p055](images/ch01/img_p055.png)
 
-Nếu cả mạng pull-up và pull-down cùng ON, có short circuit giữa V<sub>DD</sub>, GND. Output có thể ở forbidden zone, transistor tiêu thụ công suất lớn có thể cháy. Ngược lại cả pull-up và pull-down cùng OFF, output không nối V<sub>DD</sub> hay GND: gọi floating. Giá trị lại undefined. Floating output thường không mong muốn nhưng Mục 2.6 cho cách đôi khi tận dụng.
+Nếu cả hai mạng pull-up và pull-down cùng ON, sẽ xuất hiện ngắn mạch giữa V<sub>DD</sub> và GND. Output của gate có thể nằm trong forbidden zone và các transistor sẽ tiêu thụ công suất lớn, có thể đủ để làm chúng cháy hỏng. Ngược lại, nếu cả hai mạng pull-up và pull-down cùng OFF, output sẽ không được nối với V<sub>DD</sub> lẫn GND. Chúng ta gọi output này là floating. Giá trị của nó một lần nữa không xác định. Floating output thường không được mong muốn, nhưng trong Mục 2.6, chúng ta sẽ thấy đôi khi có thể tận dụng chúng như thế nào trong thiết kế.
 
-Gate đúng phải có một mạng ON, mạng kia OFF mọi lúc để output HIGH hoặc LOW, không short/floating. Bảo đảm bằng quy tắc conduction complements: nMOS nối tiếp thì pMOS song song; nMOS song song thì pMOS nối tiếp.
+Trong một logic gate hoạt động chính xác, tại mọi thời điểm, một mạng phải ON và mạng còn lại phải OFF để output được kéo lên HIGH hoặc xuống LOW mà không bị ngắn mạch hoặc floating. Chúng ta có thể bảo đảm điều này bằng quy tắc conduction complements. Khi các transistor nMOS mắc nối tiếp, các transistor pMOS phải mắc song song. Khi các transistor nMOS mắc song song, các transistor pMOS phải mắc nối tiếp.
 
 ![fig1_35](images/ch01/fig1_35.png)
 
@@ -744,7 +740,7 @@ Hình 1.35 Schematic NAND gate Three-input
 
 Vẽ schematic NAND gate three-input bằng CMOS transistor.
 
-Lời giải NAND chỉ cho 0 khi cả ba input 1. Vậy mạng pull-down gồm ba nMOS nối tiếp. Theo conduction complements, pMOS song song. Gate như Hình 1.35; kiểm function bằng truth table.
+Lời giải Gate NAND chỉ được tạo ra output bằng 0 khi cả ba input đều bằng 1. Do đó, mạng pull-down phải gồm ba transistor nMOS mắc nối tiếp. Theo quy tắc conduction complements, các transistor pMOS phải mắc song song. Hình 1.35 minh họa gate như vậy; bạn có thể xác minh chức năng của nó bằng cách kiểm tra xem truth table có đúng hay không.
 
 ![fig1_36](images/ch01/fig1_36.png)
 
@@ -754,7 +750,7 @@ Hình 1.36 Schematic NOR gate Two-input
 
 Vẽ schematic NOR gate two-input bằng CMOS transistor.
 
-Lời giải NOR cho 0 nếu một input 1. Vậy pull-down hai nMOS song song. Theo conduction complements, pMOS nối tiếp. Hình 1.36 cho gate này.
+Lời giải Gate NOR phải tạo ra output bằng 0 nếu một trong hai input bằng 1. Vì vậy, mạng pull-down phải gồm hai transistor nMOS mắc song song. Theo quy tắc conduction complements, các transistor pMOS phải mắc nối tiếp. Hình 1.36 minh họa gate như vậy.
 
 #### Ví dụ 1.22 SCHEMATIC AND TWO-INPUT
 
@@ -764,11 +760,11 @@ Hình 1.37 Schematic AND gate Two-input
 
 Vẽ schematic cho AND gate two-input.
 
-Lời giải Không thể xây AND bằng một CMOS gate đơn. Nhưng NAND và NOT dễ xây. Vì vậy cách tốt nhất xây AND bằng CMOS transistor là NAND theo sau bởi NOT như Hình 1.37.
+Lời giải Không thể xây dựng một gate AND bằng một gate CMOS duy nhất. Tuy nhiên, việc xây dựng các gate NAND và NOT lại đơn giản. Vì vậy, cách tốt nhất để xây dựng gate AND bằng các transistor CMOS là sử dụng một NAND theo sau bởi một NOT, như trong Hình 1.37.
 
 ### 1.7.7 Transmission gate
 
-Đôi khi designer thấy tiện dùng switch lý tưởng truyền tốt cả 0 và 1. Nhớ rằng nMOS truyền 0 tốt, pMOS truyền 1 tốt, nên ghép song song truyền tốt cả hai. Hình 1.38 là circuit gọi transmission gate hoặc pass gate. Hai phía gọi A, B vì switch hai chiều, không có phía input/output ưu tiên. Control signal gọi enable, EN và $\overline{EN}$. Khi EN = 0, $\overline{EN}$ = 1, cả transistor OFF: gate OFF hay disabled, A và B không nối. Khi EN = 1, $\overline{EN}$ = 0, gate ON hay enabled, mọi logic value truyền được giữa A và B.
+Đôi khi, người thiết kế thấy thuận tiện khi sử dụng một switch lý tưởng có thể truyền tốt cả giá trị 0 lẫn 1. Hãy nhớ rằng transistor nMOS truyền giá trị 0 tốt và transistor pMOS truyền giá trị 1 tốt, nên việc ghép song song hai loại sẽ truyền tốt cả hai giá trị. Hình 1.38 minh họa một circuit như vậy, được gọi là transmission gate hoặc pass gate. Hai phía của switch được gọi là A và B vì switch hoạt động hai chiều và không có phía input hoặc output ưu tiên. Các control signal được gọi là enable, EN và $\overline{EN}$. Khi EN = 0 và $\overline{EN}$ = 1, cả hai transistor đều OFF. Vì vậy, transmission gate OFF hay bị disable, nên A và B không được nối với nhau. Khi EN = 1 và $\overline{EN}$ = 0, transmission gate ON hay được enable, và mọi giá trị logic đều có thể truyền giữa A và B.
 
 ![fig1_38](images/ch01/fig1_38.png)
 
@@ -776,59 +772,59 @@ Hình 1.38 Transmission gate
 
 ### 1.7.8 Logic Pseudo-nMOS
 
-CMOS NOR N-input dùng N nMOS song song và N pMOS nối tiếp. Transistor nối tiếp chậm hơn song song, như resistor nối tiếp có resistance lớn hơn. Hơn nữa pMOS chậm hơn nMOS vì hole di chuyển trong silicon lattice chậm hơn electron. Vì vậy nMOS song song nhanh, pMOS nối tiếp chậm, nhất là nhiều transistor nối tiếp.
+Một gate CMOS NOR N-input sử dụng N transistor nMOS mắc song song và N transistor pMOS mắc nối tiếp. Các transistor mắc nối tiếp chậm hơn các transistor mắc song song, cũng giống như các resistor mắc nối tiếp có resistance lớn hơn các resistor mắc song song. Hơn nữa, transistor pMOS chậm hơn transistor nMOS vì hole không thể di chuyển trong mạng tinh thể silicon nhanh bằng electron. Vì vậy, các transistor nMOS mắc song song hoạt động nhanh, còn các transistor pMOS mắc nối tiếp hoạt động chậm, đặc biệt khi có nhiều transistor mắc nối tiếp.
 
 ![fig1_39](images/ch01/fig1_39.png)
 
 Hình 1.39 Gate pseudo-nMOS tổng quát
 
-Logic Pseudo-nMOS thay chuỗi pMOS chậm bằng một pMOS yếu luôn ON, như Hình 1.39. Transistor này thường gọi weak pull-up. Kích thước vật lý được chọn để kéo Y HIGH yếu—chỉ khi không nMOS nào ON. Nếu bất kỳ nMOS ON, nó thắng weak pull-up và kéo Y đủ gần GND tạo logic 0.
+Logic Pseudo-nMOS thay thế chuỗi transistor pMOS chậm bằng một transistor pMOS yếu luôn ở trạng thái ON, như trong Hình 1.39. Transistor pMOS này thường được gọi là weak pull-up. Kích thước vật lý của transistor pMOS được chọn sao cho nó chỉ kéo output Y lên HIGH một cách yếu, tức là chỉ khi không có transistor nMOS nào ON. Nhưng nếu bất kỳ transistor nMOS nào ON, nó sẽ thắng weak pull-up và kéo Y xuống đủ gần GND để tạo ra logic 0.
 
 ![fig1_40](images/ch01/fig1_40.png)
 
 Hình 1.40 NOR gate Pseudo-nMOS four-input
 
-Ưu điểm pseudo-nMOS là xây NOR nhanh nhiều input. Ví dụ Hình 1.40 là NOR pseudo-nMOS four-input. Gate Pseudo-nMOS hữu ích cho một số memory và logic array trong Chương 5. Nhược điểm là có short circuit giữa V<sub>DD</sub> và GND khi output LOW; pMOS yếu và nMOS đều ON. Short circuit tiêu thụ công suất liên tục nên phải dùng pseudo-nMOS tiết chế.
+Ưu điểm của pseudo-nMOS logic là có thể dùng nó để xây dựng các NOR gate tốc độ cao với nhiều input. Ví dụ, Hình 1.40 trình bày một NOR gate pseudo-nMOS four-input. Các gate Pseudo-nMOS hữu ích cho một số memory array và logic array được thảo luận trong Chương 5. Nhược điểm là có một short circuit giữa V<sub>DD</sub> và GND khi output là LOW; cả transistor pMOS yếu lẫn transistor nMOS đều ON. Short circuit này tiêu thụ công suất liên tục, vì vậy cần hạn chế sử dụng pseudo-nMOS logic.
 
-Gate Pseudo-nMOS mang tên từ thập niên 1970 khi quy trình chế tạo chỉ có nMOS. Một nMOS yếu kéo output HIGH vì chưa có pMOS.
+Các gate Pseudo-nMOS có tên gọi bắt nguồn từ thập niên 1970, khi các quy trình sản xuất chỉ có transistor nMOS. Một transistor nMOS yếu được sử dụng để kéo output lên HIGH vì chưa có transistor pMOS.
 
 ## 1.8 CÔNG SUẤT TIÊU THỤ\*
 
-Công suất tiêu thụ là năng lượng dùng mỗi đơn vị thời gian, rất quan trọng trong digital system. Thời lượng pin hệ di động như điện thoại và laptop bị giới hạn bởi công suất. Ví dụ pin điện thoại chứa khoảng 10 watt-hours (W-hr), cung cấp 1 watt (W) trong 10 giờ hoặc 2 W trong 5 giờ, v.v. Để pin dùng cả ngày, tiêu thụ trung bình dưới 1 W. Laptop thường có pin 50 đến 100 W-hr, tiêu thụ dưới 10 W khi chạy bình thường, màn hình chiếm phần lớn. Công suất cũng quan trọng với hệ cắm điện vì tốn tiền, gây phát thải, và quá nóng nếu dùng quá nhiều. Desktop 200 W trong 8 giờ/ngày dùng khoảng 600 kilowatt-hours (kW-hr) mỗi năm. Giá trung bình 12 cent và phát thải một pound CO<sub>2</sub> mỗi kW-hr tương đương 72 USD/năm cùng 600 pound CO<sub>2</sub>.
+Công suất tiêu thụ là lượng năng lượng được sử dụng trong một đơn vị thời gian. Công suất tiêu thụ có vai trò rất quan trọng trong digital system. Thời lượng pin của các hệ thống di động như điện thoại và máy tính xách tay bị giới hạn bởi công suất tiêu thụ. Ví dụ, pin điện thoại chứa khoảng 10 watt-hours (W-hr) năng lượng, nghĩa là nó có thể cung cấp 1 watt (W) trong 10 giờ hoặc 2 W trong 5 giờ, v.v. Để pin điện thoại dùng được trọn một ngày, công suất tiêu thụ trung bình cần dưới 1 W. Máy tính xách tay thường có pin từ 50 đến 100 W-hr và tiêu thụ dưới 10 W khi hoạt động bình thường, trong đó màn hình chiếm một phần lớn. Công suất cũng quan trọng đối với các hệ thống được cắm điện vì việc sử dụng điện tốn tiền và gây phát thải, đồng thời hệ thống sẽ quá nóng nếu tiêu thụ quá nhiều công suất. Một máy tính để bàn tiêu thụ 200 W trong 8 giờ mỗi ngày sẽ sử dụng khoảng 600 kilowatt-hours (kW-hr) điện mỗi năm. Với chi phí trung bình 12 cent và mức phát thải một pound CO<sub>2</sub> trên mỗi kW-hr, mức sử dụng này tương đương \$72 tiền điện mỗi năm cùng 600 pound CO<sub>2</sub> phát thải.
 
 > Bạn giúp hành tinh bằng cách bảo đảm máy tính sleep khi không dùng.
 
 Digital system dùng cả dynamic power và static power. Dynamic power nạp capacitance khi signal đổi giữa 0, 1. Static power tiêu thụ ngay cả khi signal không đổi, hệ idle.
 
-Logic gate và dây nối có capacitance. Năng lượng lấy từ nguồn để nạp capacitance C lên V<sub>DD</sub> là CV<sub>DD</sub><sup>2</sup>. Nếu chạy tần số f, tỷ phần cycle capacitor nạp/xả là α (activity factor), dynamic power là
+Các logic gate và dây nối giữa chúng đều có capacitance. Năng lượng lấy từ nguồn điện để nạp một capacitance C đến điện áp V<sub>DD</sub> là CV<sub>DD</sub><sup>2</sup>. Nếu hệ thống hoạt động ở tần số f và tỷ lệ các chu kỳ mà capacitor nạp và xả là α (được gọi là activity factor), công suất tiêu thụ động là
 
 P<sub>dynamic</sub> = αCV<sub>DD</sub><sup>2</sup>f (1.4)
 
-Hình 1.41 minh họa activity factor. Hình 1.41(a) là clock signal tăng/giảm mỗi cycle, activity factor 1. Clock period giữa hai rising edge gọi T<sub>c</sub> (cycle time), nghịch đảo clock frequency f. Hình 1.41(b) là data signal chuyển một lần mỗi clock cycle. Đường song song trên timing diagram chỉ signal có thể high hoặc low; không quan tâm giá trị. Chỗ giao chỉ signal đổi một lần đầu mỗi cycle. Vậy activity factor 0.5 (tăng ở nửa cycle, giảm nửa còn lại). Hình 1.41(c) là random data đổi ở nửa cycle, giữ nguyên nửa kia, nên activity factor 0.25. Hệ thực thường có component idle không chuyển nên 0.1 điển hình hơn.
+Hình 1.41 minh họa các activity factor. Hình 1.41(a) biểu diễn một clock signal tăng và giảm một lần trong mỗi chu kỳ, nên có activity factor bằng 1. Clock period từ một rising edge đến rising edge tiếp theo được gọi là T<sub>c</sub> (cycle time), và là nghịch đảo của clock frequency f. Hình 1.41(b) biểu diễn một data signal chuyển trạng thái một lần trong mỗi clock cycle. Các đường song song trên timing diagram biểu thị rằng signal có thể là high hoặc low; chúng ta không quan tâm đến giá trị của nó. Chỗ giao nhau biểu thị rằng signal thay đổi một lần vào đầu mỗi clock cycle. Do đó, activity factor bằng 0.5 (tăng trong một nửa số chu kỳ và giảm trong nửa số chu kỳ còn lại). Hình 1.41(c) biểu diễn một data signal ngẫu nhiên chuyển trạng thái trong một nửa số chu kỳ và giữ nguyên trong nửa số chu kỳ còn lại. Vì vậy, nó có activity factor bằng 0.25. Digital system thực tế thường có những component không hoạt động và không chuyển trạng thái, nên activity factor bằng 0.1 là điển hình hơn.
 
 ![fig1_41](images/ch01/fig1_41.png)
 
 Hình 1.41 Minh họa activity factor
 
-Hệ điện vẫn dùng ít dòng khi idle. Transistor OFF rò ít dòng. Một số circuit như gate pseudo-nMOS Mục 1.7.8 có đường V<sub>DD</sub>–GND cho dòng liên tục. Tổng static current I<sub>DD</sub> còn gọi leakage current hoặc quiescent supply current giữa V<sub>DD</sub>, GND. Static power tỷ lệ dòng này:
+Các hệ thống điện vẫn tiêu thụ một lượng dòng điện ngay cả khi không hoạt động. Khi transistor OFF, chúng làm rò một lượng dòng điện nhỏ. Một số circuit, chẳng hạn gate pseudo-nMOS được thảo luận trong Mục 1.7.8, có một đường từ V<sub>DD</sub> đến GND mà dòng điện liên tục chạy qua. Tổng static current, I<sub>DD</sub>, còn được gọi là leakage current hoặc quiescent supply current chạy giữa V<sub>DD</sub> và GND. Công suất tiêu thụ tĩnh tỷ lệ thuận với static current này:
 
 P<sub>static</sub> = I<sub>DD</sub>V<sub>DD</sub> (1.5)
 
 ### Ví dụ 1.23 CÔNG SUẤT TIÊU THỤ
 
-Điện thoại có pin 8 W-hr, chạy 0.707 V. Giả sử khi dùng chạy 2 GHz. Tổng capacitance circuit là 10 nF (10<sup>−8</sup> Farad), activity factor 0.05. Khi thoại hoặc data hoạt động (10% thời gian sử dụng), nó phát thêm 3 W qua antenna. Khi không dùng, dynamic power gần zero vì tắt signal processing. Nhưng luôn dùng 100 mA quiescent current. Tìm thời lượng pin (a) không dùng, (b) dùng liên tục.
+Một điện thoại di động có pin 8 W-hr và hoạt động ở điện áp 0.707 V. Giả sử khi được sử dụng, điện thoại hoạt động ở tần số 2 GHz. Tổng capacitance của circuit là 10 nF (10<sup>−8</sup> Farad) và activity factor là 0.05. Khi truyền thoại hoặc data (10% thời gian sử dụng), nó còn phát công suất 3 W qua antenna. Khi điện thoại không được sử dụng, dynamic power giảm xuống gần bằng 0 vì chức năng xử lý signal được tắt. Nhưng điện thoại vẫn tiêu thụ quiescent current 100 mA bất kể có được sử dụng hay không. Hãy xác định thời lượng pin của điện thoại (a) khi không được sử dụng và (b) khi được sử dụng liên tục.
 
 Lời giải Static power P<sub>static</sub> = (0.100 A)(0.707 V) = 71 milliwatt (mW).
 
 (a) Không dùng thì đây là công suất duy nhất, thời lượng (8 W-hr)/(0.071 W) = 113 giờ (khoảng 5 ngày). (b) Khi dùng, dynamic power P<sub>dynamic</sub> = (0.05)(10<sup>−8</sup> F)(0.707 V)<sup>2</sup>(2 × 10<sup>9</sup> Hz) = 0.5 W. Công suất phát trung bình (3 W)(0.1) = 0.3 W.
 
-Cộng static và công suất phát, tổng khi hoạt động 0.5 W + 0.071 W + 0.3 W = 0.871 W, thời lượng 8 W-hr/0.0871 W = 9.2 giờ. Ví dụ đơn giản hóa phần nào hoạt động thực nhưng minh họa ý chính về công suất.
+Cộng thêm công suất static và công suất phát, tổng công suất khi hoạt động là 0.5 W + 0.071 W + 0.3 W = 0.871 W, nên thời lượng pin là 8 W-hr/0.0871 W = 9.2 giờ. Ví dụ này đơn giản hóa phần nào hoạt động thực tế của điện thoại di động, nhưng minh họa những ý chính về mức tiêu thụ công suất.
 
 ## 1.9 TÓM TẮT VÀ NHÌN VỀ PHÍA TRƯỚC
 
 Có 10 loại người trên đời: người biết đếm binary và người không biết.
 
-Chương giới thiệu nguyên tắc hiểu và thiết kế hệ phức tạp. Dù thế giới thực analog, digital designer tự giới hạn vào tập con rời rạc các signal. Cụ thể binary variable chỉ có 0, 1, còn gọi FALSE, TRUE hoặc LOW, HIGH. Logic gate tính binary output từ một hay nhiều binary input. Một số gate phổ biến:
+Chương này đã giới thiệu các nguyên tắc để hiểu và thiết kế những hệ thống phức tạp. Mặc dù thế giới thực là analog, các nhà thiết kế digital tự giới hạn việc sử dụng signal trong một tập con rời rạc của các signal có thể có. Cụ thể, binary variable chỉ có hai trạng thái: 0 và 1, còn được gọi là FALSE và TRUE hoặc LOW và HIGH. Logic gate tính một binary output từ một hoặc nhiều binary input. Một số logic gate phổ biến gồm:
 
 - NOT: Output TRUE khi input FALSE
 
@@ -838,13 +834,13 @@ Chương giới thiệu nguyên tắc hiểu và thiết kế hệ phức tạp.
 
 - XOR: Output TRUE khi số input TRUE là lẻ
 
-Logic gate thường xây từ CMOS transistor, hành xử như switch điều khiển điện. nMOS ON khi gate 1; pMOS ON khi gate 0.
+Logic gate thường được xây dựng từ các transistor CMOS, hoạt động như những switch được điều khiển bằng điện. Transistor nMOS chuyển sang ON khi gate bằng 1. Transistor pMOS chuyển sang ON khi gate bằng 0.
 
-Chương 2 đến 5 tiếp tục digital logic. Chương 2 bàn combinational logic, output chỉ phụ thuộc input hiện tại. Các gate đã giới thiệu là ví dụ. Bạn sẽ học thiết kế nhiều gate thực hiện quan hệ input/output theo truth table hoặc Boolean equation. Chương 3 bàn sequential logic, output phụ thuộc cả input hiện tại và quá khứ. Register là sequential element phổ biến nhớ input trước. Finite state machine xây bằng register và combinational logic là cách mạnh để xây hệ phức tạp có hệ thống. Cũng học timing để phân tích tốc độ hệ. Chương 4 mô tả hardware description language (HDL), liên quan ngôn ngữ lập trình thường nhưng dùng mô phỏng/xây hardware thay software. Phần lớn digital system nay thiết kế bằng HDL. SystemVerilog và VHDL là hai ngôn ngữ phổ biến, được trình bày side-by-side. Chương 5 học khối combinational/sequential khác như adder, multiplier, memory.
+Trong Chương 2 đến Chương 5, chúng ta tiếp tục nghiên cứu digital logic. Chương 2 trình bày combinational logic, trong đó các output chỉ phụ thuộc vào input hiện tại. Các logic gate đã được giới thiệu là những ví dụ về combinational logic. Bạn sẽ học cách thiết kế các circuit gồm nhiều gate để triển khai quan hệ giữa input và output được chỉ định bằng truth table hoặc phương trình Boolean. Chương 3 trình bày sequential logic, trong đó các output phụ thuộc vào cả input hiện tại lẫn input trong quá khứ. Register là các sequential element phổ biến ghi nhớ input trước đó. Finite state machine, được xây dựng từ register và combinational logic, là một phương pháp mạnh mẽ để xây dựng các hệ thống phức tạp một cách có hệ thống. Chúng ta cũng nghiên cứu timing của digital system để phân tích tốc độ mà một hệ thống có thể hoạt động. Chương 4 mô tả hardware description language (HDL). HDL có liên hệ với các ngôn ngữ lập trình thông thường nhưng được sử dụng để mô phỏng và xây dựng hardware thay vì software. Phần lớn digital system ngày nay được thiết kế bằng HDL. SystemVerilog và VHDL là hai ngôn ngữ phổ biến; chúng được trình bày side-by-side trong cuốn sách này. Chương 5 nghiên cứu những building block combinational và sequential khác, chẳng hạn adder, multiplier và memory.
 
 Chương 6 chuyển computer architecture, mô tả processor RISC-V, microprocessor open-source mới phát triển, bắt đầu được phát triển rộng trong công nghiệp và học thuật. Architecture RISC-V định nghĩa bằng register và assembly language instruction set. Bạn học viết assembly cho RISC-V để giao tiếp bằng ngôn ngữ bản địa của processor.
 
-Chương 7, 8 nối digital logic và computer architecture. Chương 7 khảo sát microarchitecture, cách bố trí digital building block như adder, register cần để tạo processor. Bạn học xây processor RISC-V riêng, thực tế ba microarchitecture minh họa trade-offs performance/chi phí. Performance tăng hàm mũ đòi memory system tinh vi hơn đáp ứng nhu cầu data vô tận. Chương 8 đi sâu memory system architecture. Chương 9 (web supplement—xem Lời nói đầu) mô tả giao tiếp peripheral như màn hình, Bluetooth radio, động cơ.
+Chương 7 và 8 kết nối digital logic với computer architecture. Chương 7 tìm hiểu microarchitecture, tức cách sắp xếp các digital building block như adder và register cần thiết để xây dựng một processor. Trong chương đó, bạn sẽ học cách xây dựng processor RISC-V của riêng mình. Thực tế, bạn sẽ học ba microarchitecture minh họa những trade-offs khác nhau giữa hiệu năng và chi phí. Hiệu năng processor đã tăng theo hàm mũ, đòi hỏi các memory system ngày càng tinh vi để đáp ứng nhu cầu data không ngừng tăng. Chương 8 tìm hiểu sâu về memory system architecture. Chương 9 (có dưới dạng web supplement—xem Lời nói đầu) mô tả cách máy tính giao tiếp với các thiết bị peripheral, chẳng hạn màn hình, bộ thu phát Bluetooth và motor.
 
 ## Bài tập
 
@@ -1088,7 +1084,7 @@ Bài tập 1.47 Nhà sản xuất ổ cứng dùng “megabyte” là 10<sup>6</
 
 Bài tập 1.48 Ước lượng 2<sup>31</sup> không dùng máy tính.
 
-Bài tập 1.49 Memory trên Pentium II tổ chức array bit chữ nhật 2<sup>8</sup> row, 2<sup>9</sup> column. Ước lượng số bit không dùng máy tính.
+Bài tập 1.49 Một memory trên microprocessor Pentium II được tổ chức thành một array bit hình chữ nhật với 2<sup>8</sup> hàng và 2<sup>9</sup> cột. Hãy ước lượng số bit mà nó chứa mà không sử dụng máy tính.
 
 Bài tập 1.50 Vẽ trục số như Hình 1.11 cho unsigned, two’s complement, sign/magnitude 3-bit.
 
@@ -1178,7 +1174,7 @@ Bài tập 1.61 Chuyển decimal sau sang binary two’s complement 6-bit rồi 
 
 (d) −16<sub>10</sub> −21<sub>10</sub>
 
-Bài tập 1.62 Trong hệ binary N-bit biased có bias B, số dương và âm biểu diễn bằng giá trị cộng B. Ví dụ 5-bit bias 15 biểu diễn 0 bằng 01111, 1 bằng 10000, v.v. Biased number đôi khi dùng trong toán floating-point, bàn Chương 5. Xét hệ binary biased 8-bit có bias 127<sub>10</sub>.
+Bài tập 1.62 Trong một hệ biểu diễn số biased binary N-bit có bias B, các số dương và âm được biểu diễn bằng giá trị của chúng cộng với bias B. Ví dụ, với số 5-bit có bias bằng 15, số 0 được biểu diễn là 01111, số 1 là 10000, v.v. Các hệ biểu diễn số biased đôi khi được sử dụng trong phép tính floating-point, sẽ được thảo luận trong Chương 5. Hãy xét một hệ biểu diễn số biased binary 8-bit có bias bằng 127<sub>10</sub>.
 
 (a) Binary 10000010<sub>2</sub> biểu diễn decimal nào?
 
@@ -1212,13 +1208,13 @@ Bài tập 1.65 Trả lời câu sau về BCD (định nghĩa Bài tập 1.64).
 
 Bài tập 1.66 Đĩa bay rơi trên đồng ngô Nebraska. FBI điều tra xác tìm thấy engineering manual có phương trình theo hệ đếm sao Hỏa: 325 + 42 = 411. Nếu đúng, bạn dự đoán người sao Hỏa có bao nhiêu ngón tay?
 
-Bài tập 1.67 Ben Bitdiddle và Alyssa P. Hacker tranh luận. Ben: “Mọi integer lớn hơn zero chia hết sáu đều có đúng hai bit 1 trong binary.” Alyssa: “Không, nhưng mọi số đó có số bit 1 chẵn.” Bạn đồng ý Ben, Alyssa, cả hai hay không ai? Giải thích.
+Bài tập 1.67 Ben Bitdiddle và Alyssa P. Hacker đang tranh luận. Ben nói: “Mọi số nguyên lớn hơn không và chia hết cho sáu đều có đúng hai bit 1 trong cách biểu diễn binary của chúng.” Alyssa không đồng ý. Cô nói: “Không, nhưng tất cả những số như vậy đều có số lượng bit 1 chẵn trong cách biểu diễn.” Bạn đồng ý với Ben, Alyssa, cả hai hay không đồng ý với ai? Hãy giải thích.
 
 Bài tập 1.68 Ben Bitdiddle và Alyssa P. Hacker lại tranh luận. Ben nói: “Tôi có thể lấy two’s complement của một số bằng cách trừ 1 rồi đảo mọi bit của kết quả.” Alyssa nói: “Không, tôi có thể làm bằng cách xét từng bit của số, bắt đầu từ least significant bit. Khi tìm thấy bit 1 đầu tiên, đảo mọi bit tiếp sau.” Bạn đồng ý với Ben, Alyssa, cả hai hay không ai? Giải thích.
 
 Bài tập 1.69 Viết chương trình bằng ngôn ngữ ưa thích (C, Java, Perl) chuyển binary sang decimal. Người dùng nhập unsigned binary, chương trình in decimal tương đương.
 
-Bài tập 1.70 Làm lại Bài tập 1.69 nhưng chuyển cơ số b<sub>1</sub> bất kỳ sang b<sub>2</sub> theo người dùng. Hỗ trợ đến cơ số 16, dùng chữ cho digit lớn hơn 9. Người dùng nhập b<sub>1</sub>, b<sub>2</sub> rồi số cơ số b<sub>1</sub>. In số tương đương cơ số b<sub>2.</sub>
+Bài tập 1.70 Làm lại Bài tập 1.69 nhưng chuyển từ một cơ số tùy ý b<sub>1</sub> sang cơ số khác b<sub>2</sub>, do người dùng chỉ định. Hỗ trợ các cơ số đến 16, sử dụng các chữ cái trong bảng chữ cái cho những digit lớn hơn 9. Người dùng cần nhập b<sub>1</sub>, b<sub>2</sub>, rồi số cần chuyển đổi ở cơ số b<sub>1</sub>. Chương trình cần in số tương đương ở cơ số b<sub>2.</sub>
 
 Bài tập 1.71 Vẽ symbol, Boolean equation và truth table cho
 
@@ -1242,19 +1238,19 @@ Bài tập 1.73 Majority gate cho TRUE khi và chỉ khi hơn nửa input TRUE. 
 
 Hình 1.42 Majority gate Three-input
 
-Bài tập 1.74 AND-OR (AO) gate three-input Hình 1.43 cho TRUE nếu cả A, B TRUE hoặc C TRUE. Hoàn thành truth table.
+Bài tập 1.74 Gate AND-OR (AO) three-input trong Hình 1.43 tạo ra output TRUE nếu cả A lẫn B đều là TRUE hoặc nếu C là TRUE. Hãy hoàn thành truth table cho gate này.
 
 ![fig1_43](images/ch01/fig1_43.png)
 
 Hình 1.43 AND-OR gate Three-input
 
-Bài tập 1.75 OR-AND-INVERT (OAI) gate three-input Hình 1.44 cho FALSE nếu C TRUE và A hoặc B TRUE. Nếu không cho TRUE. Hoàn thành truth table.
+Bài tập 1.75 Gate OR-AND-INVERT (OAI) three-input trong Hình 1.44 tạo ra output FALSE nếu C là TRUE và A hoặc B là TRUE. Trong các trường hợp khác, nó tạo ra output TRUE. Hãy hoàn thành truth table cho gate này.
 
 ![fig1_44](images/ch01/fig1_44.png)
 
 Hình 1.44 OR-AND-INVERT gate Three-input
 
-Bài tập 1.76 Có 16 truth table khác nhau cho Boolean function hai variable. Liệt kê từng bảng. Đặt tên mô tả ngắn (OR, NAND, v.v.).
+Bài tập 1.76 Có 16 truth table khác nhau cho các Boolean function của hai variable. Hãy liệt kê từng truth table. Đặt cho mỗi bảng một tên mô tả ngắn gọn (chẳng hạn OR, NAND, v.v.).
 
 Bài tập 1.77 Có bao nhiêu truth table khác nhau cho Boolean function N variable?
 
@@ -1282,7 +1278,7 @@ Bài tập 1.81 Ben Bitdiddle phát minh một circuit có transfer characterist
 
 Hình 1.48 DC transfer characteristic buffer của Ben
 
-Bài tập 1.82 Đi trong ngõ tối, Ben gặp gate two-input có transfer function Hình 1.49. Input A, B; output Y.
+Bài tập 1.82 Khi đi bộ trong một con ngõ tối, Ben Bitdiddle gặp một gate two-input có transfer function như trong Hình 1.49. Các input là A và B, còn output là Y.
 
 ![fig1_49](images/ch01/fig1_49.png)
 
@@ -1298,7 +1294,7 @@ Bài tập 1.83 Làm lại Bài tập 1.82 cho Hình 1.50.
 
 Hình 1.50 DC transfer characteristic Two-input
 
-Bài tập 1.84 Phác circuit transistor-level cho CMOS gate sau. Dùng ít transistor nhất.
+Bài tập 1.84 Phác thảo circuit transistor-level cho CMOS gate sau. Dùng ít transistor nhất.
 
 (a) NAND gate four-input
 
@@ -1306,7 +1302,7 @@ Bài tập 1.84 Phác circuit transistor-level cho CMOS gate sau. Dùng ít tran
 
 (c) AND-OR gate three-input (Bài tập 1.74)
 
-Bài tập 1.85 Phác circuit transistor-level cho CMOS gate sau. Dùng ít transistor nhất.
+Bài tập 1.85 Phác thảo circuit transistor-level cho CMOS gate sau. Dùng ít transistor nhất.
 
 (a) NOR gate three-input
 
@@ -1314,9 +1310,9 @@ Bài tập 1.85 Phác circuit transistor-level cho CMOS gate sau. Dùng ít tran
 
 (c) OR gate two-input
 
-Bài tập 1.86 Minority gate TRUE khi và chỉ khi dưới nửa input TRUE, còn lại FALSE. Phác circuit transistor-level cho CMOS minority gate three-input, dùng ít transistor nhất.
+Bài tập 1.86 Minority gate tạo ra output TRUE khi và chỉ khi ít hơn một nửa số input của nó là TRUE. Trong các trường hợp khác, nó tạo ra output FALSE. Hãy phác thảo một circuit transistor-level cho gate CMOS minority three-input. Sử dụng số lượng transistor ít nhất.
 
-Bài tập 1.87 Viết truth table cho function gate Hình 1.51, hai input A, B. Function tên gì?
+Bài tập 1.87 Viết truth table cho chức năng được thực hiện bởi gate trong Hình 1.51. Truth table phải có hai input là A và B. Chức năng này được gọi là gì?
 
 ![fig1_51](images/ch01/fig1_51.png)
 
@@ -1328,7 +1324,7 @@ Bài tập 1.88 Viết truth table cho function gate Hình 1.52, ba input A, B, 
 
 Hình 1.52 Schematic bí ẩn
 
-Bài tập 1.89 Triển khai các gate three-input sau chỉ bằng logic gate pseudo-nMOS. Input A, B, C. Dùng ít transistor nhất.
+Bài tập 1.89 Triển khai các gate three-input sau chỉ bằng các logic gate pseudo-nMOS. Các gate của bạn nhận ba input là A, B và C. Sử dụng số lượng transistor ít nhất.
 
 (a) NOR gate three-input
 
@@ -1336,7 +1332,7 @@ Bài tập 1.89 Triển khai các gate three-input sau chỉ bằng logic gate p
 
 (c) AND gate three-input
 
-Bài tập 1.90 Resistor-Transistor Logic (RTL) dùng nMOS kéo output LOW, resistor yếu kéo HIGH khi không đường xuống ground hoạt động. NOT RTL như Hình 1.53. Phác RTL NOR three-input, dùng ít transistor nhất.
+Bài tập 1.90 Resistor-Transistor Logic (RTL) sử dụng các transistor nMOS để kéo output của gate xuống LOW và một resistor yếu để kéo output lên HIGH khi không có đường nào xuống ground hoạt động. Một gate NOT được xây dựng bằng RTL được minh họa trong Hình 1.53. Hãy phác thảo một gate RTL NOR three-input. Sử dụng số lượng transistor ít nhất.
 
 ![fig1_53](images/ch01/fig1_53.png)
 
@@ -1346,10 +1342,10 @@ Hình 1.53 RTL NOT gate
 
 Các câu này từng xuất hiện khi phỏng vấn việc digital design.
 
-Câu hỏi 1.1 Phác circuit transistor-level cho CMOS NOR four-input.
+Câu hỏi 1.1 Phác thảo circuit transistor-level cho CMOS NOR four-input.
 
-Câu hỏi 1.2 Vua nhận 64 đồng vàng tiền thuế nhưng nghi một đồng giả. Ông gọi bạn tìm đồng giả. Bạn có cân hai đĩa đặt đồng mỗi bên. Cần cân bao nhiêu lần để tìm đồng giả nhẹ hơn?
+Câu hỏi 1.2 Nhà vua nhận được 64 đồng tiền vàng từ thuế, nhưng có lý do để tin rằng một đồng là tiền giả. Ông triệu bạn đến để xác định đồng tiền giả. Bạn có một chiếc cân thăng bằng có thể đặt các đồng tiền ở mỗi bên. Bạn cần sử dụng cân bao nhiêu lần để tìm ra đồng tiền giả nhẹ hơn?
 
-Câu hỏi 1.3 Giáo sư, trợ giảng, sinh viên digital design và tân sinh viên ngôi sao chạy bộ cần qua cầu ọp ẹp đêm tối. Cầu chỉ chịu hai người mỗi lượt. Chỉ có một đèn pin, cầu quá dài để ném nên phải có người mang trở lại. Ngôi sao chạy qua trong 1 phút, sinh viên digital design 2 phút, trợ giảng 5 phút, giáo sư hay phân tâm mất 10 phút. Thời gian nhanh nhất để mọi người qua cầu?
+Câu hỏi 1.3 Giáo sư, trợ giảng, sinh viên digital design và tân sinh viên ngôi sao điền kinh cần băng qua một cây cầu ọp ẹp trong đêm tối. Cây cầu yếu đến mức mỗi lần chỉ có hai người có thể đi qua. Họ chỉ có một chiếc đèn pin, và cầu quá dài để ném đèn pin sang bên kia, nên phải có người mang đèn trở lại cho những người còn lại. Tân sinh viên ngôi sao điền kinh có thể qua cầu trong 1 phút. Sinh viên digital design có thể qua cầu trong 2 phút. Trợ giảng có thể qua cầu trong 5 phút. Giáo sư luôn bị phân tâm và mất 10 phút để qua cầu. Thời gian ngắn nhất để đưa tất cả mọi người qua cầu là bao lâu?
 
 [^1]: 1 μm = 1 micron = 10<sup>−6</sup> m.

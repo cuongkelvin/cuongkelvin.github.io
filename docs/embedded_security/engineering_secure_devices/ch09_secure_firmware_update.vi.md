@@ -6,7 +6,7 @@ Các bản cập nhật bảo mật thật phiền phức, đối với người
 
 Tuy nhiên, việc xử lý cập nhật phần mềm không phải là một quá trình tầm thường. Chỉ các thực thể được ủy quyền mới có thể cung cấp bản cập nhật cho thiết bị, và các bản cập nhật không được phá vỡ chức năng của thiết bị hay biến nó thành một viên gạch đắt tiền. Ngoài ra, các chuyên gia safety thường khá ngần ngại đưa bản vá vào các thiết bị đã được chứng nhận của họ, trong khi các tổ chức chứng nhận tương ứng ngày càng nhận ra tầm quan trọng của các bản cập nhật bảo mật ngay cả trong các lĩnh vực safety-critical.
 
-Chương này đi qua các lựa chọn cho các cách tiếp cận cập nhật an toàn và lý do đằng sau chúng. Một cân nhắc trung tâm là việc hiện thực an toàn việc xác minh bản cập nhật và việc áp dụng nó một cách đáng tin cậy trên chính thiết bị. Chương kết thúc với một case study thực tế về cập nhật firmware dựa trên framework SWUpdate phổ biến và một toolchain Yocto-based.
+Chương này đi qua các lựa chọn cho các cách tiếp cận cập nhật an toàn và lý do đằng sau chúng. Một cân nhắc trung tâm là việc triển khai an toàn việc xác minh bản cập nhật và việc áp dụng nó một cách đáng tin cậy trên chính thiết bị. Chương kết thúc với một case study thực tế về cập nhật firmware dựa trên framework SWUpdate phổ biến và một toolchain Yocto-based.
 
 <a id="ch00lev1_72"></a>
 
@@ -58,13 +58,13 @@ Một giao tiếp được xác thực lẫn nhau và được mã hóa giữa t
 
 Điều này khá phức tạp. Việc rollback phiên bản phần mềm của một thiết bị về trạng thái cũ hơn đôi khi tuyệt đối hữu ích—ví dụ, nếu một bản cập nhật gây ra các vấn đề nghiêm trọng chưa từng tồn tại trước đó. Mặt khác, kẻ tấn công có thể dùng tính năng này để đưa phần mềm của thiết bị về một phiên bản chứa các lỗ hổng đã biết mà các bản vá sau đó đã sửa. Trong trường hợp đó, việc vận hành các thiết bị có lỗ hổng và việc khai thác chúng trở nên khả thi, mặc dù nhà sản xuất đã cung cấp các bản cập nhật bảo mật.
 
-<a id="page_162"></a>Nếu bạn quyết định hiện thực rollback protection, bạn cần hỗ trợ phần cứng tương ứng, như một bộ đếm phiên bản đơn điệu, nonvolatile bên trong CPU chính.
+<a id="page_162"></a>Nếu bạn quyết định triển khai rollback protection, bạn cần hỗ trợ phần cứng tương ứng, như một bộ đếm phiên bản đơn điệu, nonvolatile bên trong CPU chính.
 
 <a id="ch00lev2_97"></a>
 
 ### *Giám sát phân bố phiên bản*
 
-Việc giám sát mức độ áp dụng các bản cập nhật bảo mật ngoài hiện trường có thể rất có giá trị, vì làm như vậy cho bạn một cái nhìn tổng quan về tình hình và bối cảnh mối đe dọa tương ứng đối với thiết bị và khách hàng của bạn. Bạn có thể hiện thực việc giám sát này bằng một thông báo xác nhận từ mỗi thiết bị sau khi một phiên bản firmware mới đã được cài đặt thành công.
+Việc giám sát mức độ áp dụng các bản cập nhật bảo mật ngoài hiện trường có thể rất có giá trị, vì làm như vậy cho bạn một cái nhìn tổng quan về tình hình và bối cảnh mối đe dọa tương ứng đối với thiết bị và khách hàng của bạn. Bạn có thể triển khai việc giám sát này bằng một thông báo xác nhận từ mỗi thiết bị sau khi một phiên bản firmware mới đã được cài đặt thành công.
 
 <a id="ch00lev1_74"></a>
 
@@ -76,7 +76,7 @@ Một câu hỏi trung tâm về cập nhật firmware là, “Làm thế nào f
 
 ### *Cập nhật cục bộ so với từ xa*
 
-Kể từ những năm 1990, các thiết bị hiện thực một cơ chế cập nhật cung cấp một dạng interface nào đó để upload hay lưu một file firmware đã được tải trước từ website của nhà sản xuất. File cập nhật thậm chí có thể bị giới hạn chỉ được nạp tại một interface cục bộ, như qua phương tiện USB. Mặc dù việc phải có mặt tại chỗ để cập nhật có thể là một tính năng bảo mật, cách tiếp cận này có khả năng mở rộng khá kém cho các kịch bản IoT. Hàng triệu thiết bị sẽ đòi hỏi hàng triệu khách hàng có nhận thức bảo mật và hàng triệu lần cài đặt cập nhật thủ công, điều khó có thể khả thi và dẫn đến việc rất ít bản cập nhật thực sự được áp dụng.
+Kể từ những năm 1990, các thiết bị triển khai một cơ chế cập nhật cung cấp một dạng interface nào đó để upload hay lưu một file firmware đã được tải trước từ website của nhà sản xuất. File cập nhật thậm chí có thể bị giới hạn chỉ được nạp tại một interface cục bộ, như qua phương tiện USB. Mặc dù việc phải có mặt tại chỗ để cập nhật có thể là một tính năng bảo mật, cách tiếp cận này có khả năng mở rộng khá kém cho các kịch bản IoT. Hàng triệu thiết bị sẽ đòi hỏi hàng triệu khách hàng có nhận thức bảo mật và hàng triệu lần cài đặt cập nhật thủ công, điều khó có thể khả thi và dẫn đến việc rất ít bản cập nhật thực sự được áp dụng.
 
 Ngành ô tô là một ví dụ thú vị về cập nhật firmware. Trong nhiều năm, việc phát lệnh thu hồi là phổ biến nếu xe có một bug phần mềm hay lỗ hổng đáng kể. Chủ xe phải mang xe của họ đến một xưởng sửa chữa ô tô, nơi thợ máy cài đặt bản cập nhật phần mềm do nhà sản xuất ô tô tương ứng cung cấp, nhà sản xuất này nhận nó từ các nhà cung cấp của bộ điều khiển cụ thể. Ngày nay, ô tô hiện đại có thể nhận bản cập nhật phần mềm qua kết nối với mạng di động. Cách tiếp cận này được gọi là *over-the-air (OTA) update*.
 
@@ -154,7 +154,7 @@ Danh sách sau đưa ra các giải pháp định dạng cập nhật khả dĩ 
 
 **Container** Các ứng dụng được container hóa ngày càng trở nên phổ biến trong các embedded system lớn hơn. Việc thay thế toàn bộ container image có thể hiệu quả cho việc quản lý cập nhật của chúng, nhưng chỉ dựa vào các bản cập nhật container-based sẽ bỏ qua các thành phần phần mềm quan trọng như host OS chạy việc quản lý container.
 
-**Image** Việc cập nhật toàn bộ partition image cho phép cập nhật nhiều thành phần phần mềm trong một embedded system và có ưu điểm về atomicity. Cách tiếp cận này có thể dẫn đến các bản cập nhật firmware lớn hơn so với các định dạng khác, nhưng một số hiện thực cũng hỗ trợ các file cập nhật được nén hay các bản cập nhật vi sai (differential update) để khắc phục vấn đề này.
+**Image** Việc cập nhật toàn bộ partition image cho phép cập nhật nhiều thành phần phần mềm trong một embedded system và có ưu điểm về atomicity. Cách tiếp cận này có thể dẫn đến các bản cập nhật firmware lớn hơn so với các định dạng khác, nhưng một số bản triển khai cũng hỗ trợ các file cập nhật được nén hay các bản cập nhật vi sai (differential update) để khắc phục vấn đề này.
 
 > **LƯU Ý**
 >
@@ -200,7 +200,7 @@ Bạn có thể tăng cường tính bền vững trước các bản cập nh�
 
 Trong bố cục này, tồn tại hai bản sao, A và B, của phân vùng hệ thống, cả hai đều chứa ít nhất OS kernel và root filesystem. Lúc boot, phân vùng được đánh dấu là “bootable” (phân vùng A trong [Hình 9-2](#ch09fig02)) được dùng để nạp OS và filesystem cơ bản. Điều này bao gồm một update client có thể nhận các bản cập nhật firmware, xác minh chúng và ghi chúng vào phân vùng hiện không được dùng ➊ (B trong [Hình 9-2](#ch09fig02)). Sau đó, bootloader được cấu hình để đổi phân vùng boot từ A sang B (hay ngược lại) ➋ trước khi khởi động lại vào phiên bản firmware mới.
 
-Trong trường hợp cập nhật thất bại hay phân vùng bị hỏng, phiên bản cũ vẫn có sẵn ở trạng thái ban đầu và có thể được boot lại. Một ưu điểm đáng kể so với việc dùng recovery partition là hoạt động tiêu chuẩn của thiết bị không bị gián đoạn trong quá trình tải về và cài đặt bản cập nhật. Ngoài ra, firmware mới tải về có thể được lưu trực tiếp trên phân vùng không hoạt động thay vì đòi hỏi thêm một vị trí lưu trữ để cache bản cập nhật. Trên các thiết bị Android, khái niệm này được gọi là *seamless system update*, và nó ngày càng được các nhà cung cấp điện thoại hiện thực.
+Trong trường hợp cập nhật thất bại hay phân vùng bị hỏng, phiên bản cũ vẫn có sẵn ở trạng thái ban đầu và có thể được boot lại. Một ưu điểm đáng kể so với việc dùng recovery partition là hoạt động tiêu chuẩn của thiết bị không bị gián đoạn trong quá trình tải về và cài đặt bản cập nhật. Ngoài ra, firmware mới tải về có thể được lưu trực tiếp trên phân vùng không hoạt động thay vì đòi hỏi thêm một vị trí lưu trữ để cache bản cập nhật. Trên các thiết bị Android, khái niệm này được gọi là *seamless system update*, và nó ngày càng được các nhà cung cấp điện thoại triển khai.
 
 Đối với các thiết bị có mức độ trọng yếu còn cao hơn, cả hai cách tiếp cận có thể được kết hợp, như được thể hiện trong [Hình 9-3](#ch09fig03).
 
@@ -246,9 +246,9 @@ Nhiều hệ thống cập nhật image-based thực hiện những nhiệm vụ
 
 ## <a id="page_170"></a>Case Study: Cập nhật firmware an toàn với SWUpdate
 
-Case study này đưa ra một ví dụ về các bước thực tế cần thiết để hiện thực hóa một architecture cập nhật firmware an toàn. Nó dựa trên tool-chain Yocto do ST cung cấp cho board STM32MP157F-DK2.
+Case study này đưa ra một ví dụ về các bước thực tế cần thiết để triển khai một architecture cập nhật firmware an toàn. Nó dựa trên tool-chain Yocto do ST cung cấp cho board STM32MP157F-DK2.
 
-Tôi đã chọn SWUpdate làm thành phần phần mềm trung tâm cho hiện thực này. Kết quả mong muốn là một quá trình cập nhật xác minh authenticity của bản cập nhật dựa trên digital signature và bảo đảm một thủ tục cập nhật đáng tin cậy theo cách tiếp cận A/B system.
+Tôi đã chọn SWUpdate làm thành phần phần mềm trung tâm cho bản triển khai này. Kết quả mong muốn là một quá trình cập nhật xác minh authenticity của bản cập nhật dựa trên digital signature và bảo đảm một thủ tục cập nhật đáng tin cậy theo cách tiếp cận A/B system.
 
 <a id="ch00lev2_106"></a>
 
@@ -337,7 +337,7 @@ CONFIG_ENCRYPTED_IMAGES=y
 
 *Listing 9-4: Kích hoạt các tính năng bảo mật quan trọng của SWUpdate*
 
-Hai tùy chọn `CONFIG_HASH_VERIFY` và `CONFIG_SIGNED_IMAGES` thêm vào SWUpdate các khả năng cho phép nó xác minh hash và digital signature của các image có trong một bản cập nhật phần mềm. Tùy chọn `CONFIG_ENCRYPTED_IMAGES` bật hỗ trợ cho các image AES-encrypted, thứ chúng ta chưa hiện thực lúc này, nhưng có thể là một tùy chọn có giá trị cho tương lai.
+Hai tùy chọn `CONFIG_HASH_VERIFY` và `CONFIG_SIGNED_IMAGES` thêm vào SWUpdate các khả năng cho phép nó xác minh hash và digital signature của các image có trong một bản cập nhật phần mềm. Tùy chọn `CONFIG_ENCRYPTED_IMAGES` bật hỗ trợ cho các image AES-encrypted, thứ chúng ta chưa triển khai lúc này, nhưng có thể là một tùy chọn có giá trị cho tương lai.
 
 #### Tạo key
 
@@ -546,7 +546,7 @@ Câu lệnh `if` đầu tiên ➊ kiểm tra xem file cấu hình U-Boot của b
 
 Sau đó, partition UUID trong file cấu hình của U-Boot được thay bằng UUID đại diện cho `rootfs-b` ➌. Điều này bảo đảm U-Boot khởi động Linux kernel với root filesystem mới. Nếu có gì đó thất bại trước thao tác này hay xảy ra mất điện, thiết bị sẽ chỉ boot vào firmware hiện có. Nhưng nếu mọi thứ suôn sẻ, phân vùng cho root filesystem được hoán đổi và thiết bị được cố ý khởi động lại ➍. Dĩ nhiên, thủ tục tương tự hoạt động theo chiều ngược lại nếu script phát hiện `rootfs-b` là phân vùng đang hoạt động.
 
-Hiển nhiên, đây chỉ là một hiện thực khả dĩ của một script post-update hoạt động cho architecture cụ thể trong case study này. Thiết bị của bạn có thể đòi hỏi các cấu hình lại hoàn toàn khác trước hay sau khi cài đặt một bản cập nhật firmware.
+Hiển nhiên, đây chỉ là một bản triển khai khả dĩ của một script post-update hoạt động cho architecture cụ thể trong case study này. Thiết bị của bạn có thể đòi hỏi các cấu hình lại hoàn toàn khác trước hay sau khi cài đặt một bản cập nhật firmware.
 
 <a id="ch00lev2_109"></a>
 

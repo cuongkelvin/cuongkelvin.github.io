@@ -40,7 +40,7 @@ Tài liệu này đặt ra các thực hành cụ thể cần tuân theo trong q
 
 Nếu bạn mua bất kỳ sản phẩm nào, bạn có thể sẽ thấy một safety manual kèm theo — đó là loại tài liệu đi kèm một chiếc máy cắt cỏ đã mua và bảo bạn đừng thử dùng nó để tỉa râu. Ngoài việc bao quát trách nhiệm pháp lý như vậy, trong một sản phẩm phần mềm nhúng, nó còn định nghĩa môi trường mà trong đó sản phẩm phải được sử dụng và cung cấp một danh sách các điều cấm: ví dụ, *“hàm* `abc()` *MUST NOT<a id="fn7_27b"></a>[<sup>2</sup>](#fn7_2) được gọi trừ khi hàm* `xyz()` *trước đó đã trả về EOK.”*
 
-Đây không phải là những phân tích duy nhất sẽ được thực hiện: xem [Chương 17](ch17_semi_formal_verification.vi.md) về phân tích thiết kế hệ thống, [Chương 22](ch22_integration_and_system_testing.vi.md) về phân tích phần hiện thực và [Chương 23](ch23_the_offline_tools.vi.md) về phân tích các công cụ được dùng trong quá trình phát triển.
+Đây không phải là những phân tích duy nhất sẽ được thực hiện: xem [Chương 17](ch17_semi_formal_verification.vi.md) về phân tích thiết kế hệ thống, [Chương 22](ch22_integration_and_system_testing.vi.md) về phân tích phần triển khai và [Chương 23](ch23_the_offline_tools.vi.md) về phân tích các công cụ được dùng trong quá trình phát triển.
 
 ## 7.2 Các mối quan hệ qua lại
 
@@ -356,7 +356,7 @@ Chúng ta sẽ giả sử rằng mỗi rủi ro được nhận diện ở trên
 
 > **BCI Safety Requirement 0734-A:** Mọi dữ liệu cấu hình SHALL được lưu trữ theo cách mà sự hỏng memory có thể được phát hiện.
 
-Trước yêu cầu này, nhóm thiết kế của BCI xem xét nhiều cách hiện thực nó và quyết định rằng việc đặt một checksum trên dữ liệu cấu hình và kiểm tra nó mỗi khi dữ liệu được sử dụng sẽ tạo ra một chi phí hiệu năng không thể chấp nhận được (sự cân bằng giữa an toàn và khả năng sử dụng — xem [Mục 10.2](ch10_balancing_design_aspects.vi.md#sec10_2)). Sau khi brainstorming thêm, nhóm quyết định lưu mỗi giá trị Boolean, không phải như một bit đơn, mà như một octet chứa các mẫu bit đặc trưng (0x55 và 0xAA), nhưng vẫn còn một mối lo ngại rằng một compiler tối ưu hóa tốt có thể nhận ra rằng các giá trị chỉ được dùng như Boolean và tối ưu chúng trở lại thành các bit đơn. Điều này tạo ra thêm hai yêu cầu an toàn:
+Trước yêu cầu này, nhóm thiết kế của BCI xem xét nhiều cách triển khai nó và quyết định rằng việc đặt một checksum trên dữ liệu cấu hình và kiểm tra nó mỗi khi dữ liệu được sử dụng sẽ tạo ra một chi phí hiệu năng không thể chấp nhận được (sự cân bằng giữa an toàn và khả năng sử dụng — xem [Mục 10.2](ch10_balancing_design_aspects.vi.md#sec10_2)). Sau khi brainstorming thêm, nhóm quyết định lưu mỗi giá trị Boolean, không phải như một bit đơn, mà như một octet chứa các mẫu bit đặc trưng (0x55 và 0xAA), nhưng vẫn còn một mối lo ngại rằng một compiler tối ưu hóa tốt có thể nhận ra rằng các giá trị chỉ được dùng như Boolean và tối ưu chúng trở lại thành các bit đơn. Điều này tạo ra thêm hai yêu cầu an toàn:
 
 > **BCI Safety Requirement 0734-B:** Giá trị của mỗi dữ liệu cấu hình SHALL được lưu trữ dưới dạng các giá trị nhiều bit đặc trưng sao cho không có sự hỏng một bit hoặc hai bit nào dẫn đến một giá trị hợp lệ khác.
 

@@ -178,7 +178,7 @@ Tác động của các architecture flaw đã được thảo luận và nghiê
 
 ## 23.8 Câu hỏi thảo luận (Discussion Questions)
 
-1. Bạn sẽ phân biệt một dự án có architecture debt với một dự án “bận rộn” nơi nhiều tính năng đang được hiện thực như thế nào?
+1. Bạn sẽ phân biệt một dự án có architecture debt với một dự án “bận rộn” nơi nhiều tính năng đang được triển khai như thế nào?
 2. Hãy tìm các ví dụ về những dự án đã trải qua các đợt refactoring lớn. Bằng chứng nào đã được dùng để thúc đẩy hoặc biện minh cho các đợt refactoring này?
 3. Trong những hoàn cảnh nào việc tích lũy nợ là một chiến lược hợp lý? Làm sao bạn biết rằng mình đã đạt đến điểm có quá nhiều nợ?
 4. Architecture debt có gây hại nhiều hơn hay ít hơn các loại nợ khác, như code debt, documentation debt hoặc testing debt không?

@@ -42,9 +42,13 @@ Tương tự, thao tác write sao chép n > 0 byte từ bộ nhớ vào file, b�
 
 Mỗi Linux file có type chỉ vai trò trong hệ thống:
 
-- Regular file chứa dữ liệu tùy ý. Chương trình ứng dụng thường phân biệt text file, tức regular file chỉ chứa ký tự ASCII hoặc Unicode, với binary file là mọi loại còn lại. Với kernel, text file và binary file không khác nhau. Linux text file gồm dãy dòng văn bản, mỗi dòng là dãy ký tự kết thúc bằng ký tự newline (‘\n’). Ký tự newline giống ký tự line feed (LF) ASCII và có giá trị số 0x0a.
+- Regular file chứa dữ liệu tùy ý. Chương trình ứng dụng thường phân biệt text file, tức regular file chỉ chứa ký tự ASCII hoặc Unicode, với binary file là mọi loại còn lại. Với kernel, text file và binary file không khác nhau.
+
+  Linux text file gồm dãy dòng văn bản, mỗi dòng là dãy ký tự kết thúc bằng ký tự newline (‘\n’). Ký tự newline giống ký tự line feed (LF) ASCII và có giá trị số 0x0a.
 
 - Directory là file gồm array link, mỗi link ánh xạ filename tới file, có thể là directory khác. Mỗi directory chứa ít nhất hai entry: . (dot) liên kết tới chính directory đó, còn .. (dot-dot) liên kết tới parent directory trong hệ thống phân cấp directory (xem dưới). Bạn có thể tạo directory bằng mkdir, xem nội dung bằng ls và xóa bằng rmdir.
+
+- Socket là file dùng để giao tiếp với process khác qua mạng (Mục 11.4).
 
 ### Thông tin thêm: Ký hiệu end of line (EOL)
 
@@ -53,8 +57,6 @@ Một khía cạnh bất tiện khi làm việc với text file là các hệ th
 ```
 linux> perl -pi -e "s/\r\n/\n/g" foo.txt
 ```
-
-- Socket là file dùng để giao tiếp với process khác qua mạng (Mục 11.4).
 
 Các loại file khác gồm named pipe, symbolic link, character device và block device, nằm ngoài phạm vi sách.
 
@@ -201,6 +203,12 @@ Hàm write sao chép tối đa n byte từ vị trí bộ nhớ buf tới curren
 
 Trong một số tình huống, read và write truyền ít byte hơn ứng dụng yêu cầu. Những short count như vậy không biểu thị lỗi. Chúng xảy ra vì một số lý do:
 
+Gặp EOF khi đọc. Giả sử sẵn sàng đọc file chỉ còn 20 byte tính từ current file position và đang đọc theo khối 50-byte. Lần read tiếp theo trả short count 20, và lần read sau đó báo EOF bằng cách trả short count 0.
+
+Đọc dòng văn bản từ terminal. Nếu file mở gắn với terminal (tức bàn phím và màn hình), mỗi lần gọi read truyền một dòng văn bản, trả short count bằng kích thước dòng.
+
+Đọc và ghi network socket. Nếu file mở tương ứng network socket (Mục 11.4), ràng buộc buffering nội bộ và độ trễ mạng dài có thể khiến read và write trả short count. Short count cũng có thể xảy ra khi gọi read và write trên Linux pipe, cơ chế interprocess communication nằm ngoài phạm vi sách.
+
 ### Thông tin thêm: ssize_t và size_t khác nhau thế nào?
 
 Bạn có thể nhận thấy read có đối số đầu vào size_t và giá trị trả về ssize_t. Vậy hai type khác nhau thế nào? Trên hệ thống x86-64, size_t được định nghĩa là unsigned long, còn ssize_t (signed size) là long. Hàm read trả signed size thay unsigned size vì phải trả −1 khi có lỗi. Điều thú vị là khả năng trả một giá trị −1 duy nhất làm giảm maximum read size đi 2 lần.
@@ -221,12 +229,6 @@ Bạn có thể nhận thấy read có đối số đầu vào size_t và giá t
 ```
 
 **Hình 10.3 Sử dụng read và write để sao chép standard input sang standard output, mỗi lần 1 byte.**
-
-Gặp EOF khi đọc. Giả sử sẵn sàng đọc file chỉ còn 20 byte tính từ current file position và đang đọc theo khối 50-byte. Lần read tiếp theo trả short count 20, và lần read sau đó báo EOF bằng cách trả short count 0.
-
-Đọc dòng văn bản từ terminal. Nếu file mở gắn với terminal (tức bàn phím và màn hình), mỗi lần gọi read truyền một dòng văn bản, trả short count bằng kích thước dòng.
-
-Đọc và ghi network socket. Nếu file mở tương ứng network socket (Mục 11.4), ràng buộc buffering nội bộ và độ trễ mạng dài có thể khiến read và write trả short count. Short count cũng có thể xảy ra khi gọi read và write trên Linux pipe, cơ chế interprocess communication nằm ngoài phạm vi sách.
 
 Trong thực tế, bạn không gặp short count khi đọc disk file trừ EOF, và không gặp short count khi ghi disk file. Tuy nhiên, nếu muốn xây dựng ứng dụng mạng robust (tin cậy) như Web server, phải xử lý short count bằng cách gọi read và write lặp lại đến khi truyền đủ mọi byte yêu cầu.
 
@@ -494,9 +496,8 @@ S_ISSOCK(m). Đây có phải network socket không?
 
 Hình 10.10 thể hiện cách dùng các macro này và stat để đọc, diễn giải các bit st_mode của file.
 
-statbuf.h (được sys/stat.h include)
-
 ```
+                                                 statbuf.h (included by sys/stat.h)
 /* Metadata returned by the stat and fstat functions */
 struct stat {
     dev_t         st_dev;      /* Device */
@@ -670,7 +671,7 @@ Giả sử disk file foobar.txt gồm sáu ký tự ASCII foobar. Khi đó đầ
 14   }
 ```
 
-#### Bài tập thực hành 10.3 (lời giải trang 951)
+### Bài tập thực hành 10.3 (lời giải trang 951)
 
 Như trước, giả sử disk file foobar.txt gồm sáu ký tự ASCII foobar. Khi đó đầu ra chương trình sau là gì?
 
@@ -720,7 +721,7 @@ Giả sử trước khi gọi dup2(4,1), có tình huống trong Hình 10.12, de
 
 Bạn dùng dup2 để redirect standard input tới descriptor 5 thế nào?
 
-#### Thông tin thêm: Hoinky phải và trái
+### Thông tin thêm: Hoinky phải và trái
 
 Để tránh nhầm với operator bracket-type khác như ‘]’ và ‘[’, chúng ta luôn gọi operator ‘>’ của shell là “right hoinky” và operator ‘<’ là “left hoinky”.
 
@@ -728,7 +729,7 @@ Bạn dùng dup2 để redirect standard input tới descriptor 5 thế nào?
 
 **Hình 10.15 Data structure kernel sau khi redirect standard output bằng dup2(4,1) . Tình huống ban đầu trong Hình 10.12.**
 
-#### Bài tập thực hành 10.5 (lời giải trang 952)
+### Bài tập thực hành 10.5 (lời giải trang 952)
 
 Giả sử disk file foobar.txt gồm sáu ký tự ASCII foobar, đầu ra chương trình sau là gì?
 

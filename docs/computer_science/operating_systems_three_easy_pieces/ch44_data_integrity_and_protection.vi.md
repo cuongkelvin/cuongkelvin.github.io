@@ -29,7 +29,9 @@ Prabhakaran và cộng sự mô tả cách nhìn hiện đại hơn này về l�
 
 Cả hai loại lỗi đều tương đối hiếm, nhưng hiếm đến mức nào? Hình 44.1 tóm tắt một số kết quả từ hai nghiên cứu của Bairavasundaram [B+07,B+08].
 
-Hình thể hiện tỷ lệ phần trăm drive xuất hiện ít nhất một LSE hoặc block corruption trong thời gian nghiên cứu (khoảng 3 năm, hơn 1.5 triệu disk drive). Hình còn sub-divides kết quả thành drive “giá rẻ” (thường là SATA) và drive “đắt tiền” (thường là SCSI hoặc FibreChannel). Như bạn có thể thấy, dù mua drive tốt hơn làm giảm tần suất cả hai loại vấn đề (khoảng một bậc độ lớn), chúng vẫn xảy ra đủ thường xuyên để bạn phải suy nghĩ cẩn thận về cách xử lý trong storage system. Một số kết quả bổ sung về LSE gồm:
+Hình thể hiện tỷ lệ phần trăm drive xuất hiện ít nhất một LSE hoặc block corruption trong thời gian nghiên cứu (khoảng 3 năm, hơn 1.5 triệu disk drive). Hình còn sub-divides kết quả thành drive “giá rẻ” (thường là SATA) và drive “đắt tiền” (thường là SCSI hoặc FibreChannel). Như bạn có thể thấy, dù mua drive tốt hơn làm giảm tần suất cả hai loại vấn đề (khoảng một bậc độ lớn), chúng vẫn xảy ra đủ thường xuyên để bạn phải suy nghĩ cẩn thận về cách xử lý trong storage system.
+
+Một số kết quả bổ sung về LSE gồm:
 
 • Drive đắt tiền có nhiều hơn một LSE có khả năng phát sinh thêm lỗi ngang với drive rẻ hơn
 
@@ -126,7 +128,7 @@ XOR là checksum hợp lý nhưng có hạn chế. Chẳng hạn, nếu hai bit 
 
 Một checksum function cơ bản khác là phép cộng. Cách này có ưu điểm nhanh; tính toán chỉ cần thực hiện phép cộng 2’s-complement trên từng phần data, bỏ qua overflow. Nó có thể phát hiện nhiều thay đổi trong data, nhưng không hiệu quả nếu chẳng hạn data bị dịch vị trí.
 
-Một thuật toán phức tạp hơn một chút được gọi là Fletcher checksum, đặt tên theo nhà phát minh John G. Fletcher [F82] (như có lẽ bạn đoán được). Nó khá đơn giản để tính, gồm tính hai check byte s1 và s2. Cụ thể, giả sử block D gồm các byte d1... dn; s1 được định nghĩa như sau: s1 = s1 + d<sub>i</sub> mod 255 (tính trên mọi d<sub>i</sub>); đến lượt s2 là: s2 = s2 + s1 mod 255 (cũng trên mọi d<sub>i</sub>) [F04]. Fletcher checksum được biết là gần mạnh bằng CRC (sẽ mô tả tiếp theo), phát hiện mọi lỗi single-bit, mọi lỗi double-bit và tỷ lệ lớn burst error [F04].
+Một thuật toán phức tạp hơn một chút được gọi là Fletcher checksum, đặt tên theo nhà phát minh John G. Fletcher [F82] (như có lẽ bạn đoán được). Nó khá đơn giản để tính, gồm tính hai check byte s1 và s2. Cụ thể, giả sử block D gồm các byte d<sub>1</sub> ... d<sub>n</sub>; s1 được định nghĩa như sau: s1 = s1 + d<sub>i</sub> mod 255 (tính trên mọi d<sub>i</sub>); đến lượt s2 là: s2 = s2 + s1 mod 255 (cũng trên mọi d<sub>i</sub>) [F04]. Fletcher checksum được biết là gần mạnh bằng CRC (sẽ mô tả tiếp theo), phát hiện mọi lỗi single-bit, mọi lỗi double-bit và tỷ lệ lớn burst error [F04].
 
 Một checksum commonly-used cuối cùng được gọi là cyclic redundancy check (CRC). Giả sử bạn muốn tính checksum cho data block D. Chỉ cần xem D như một số binary lớn (suy cho cùng nó chỉ là chuỗi bit) và chia cho một giá trị đã thống nhất (k). Phần dư của phép chia chính là giá trị CRC. Hóa ra có thể triển khai phép binary modulo này khá hiệu quả, vì thế CRC cũng phổ biến trong networking. Xem tài liệu khác để biết thêm chi tiết [M13].
 
@@ -168,7 +170,7 @@ Failure mode đầu tiên cần quan tâm gọi là misdirected write. Nó xuấ
 >
 > Storage system hoặc disk controller nên phát hiện misdirected write như thế nào? Checksum cần có thêm những tính năng gì?
 
-Không có gì ngạc nhiên, câu trả lời rất đơn giản: thêm một chút thông tin vào mỗi checksum. Trong trường hợp này, bổ sung physical identifier (physical ID) khá hữu ích. Chẳng hạn, nếu thông tin lưu trữ giờ chứa checksum C(D) cùng disk number và sector number của block, client dễ xác định thông tin chính xác có nằm trong block hay không. Cụ thể, nếu client đọc block 4 trên disk 10 (D<sub>10</sub><sub>,</sub><sub>4</sub>), thông tin lưu trữ phải chứa disk number và sector offset đó, như bên dưới. Nếu thông tin không khớp, một misdirected write đã xảy ra và giờ phát hiện được corruption. Sau đây là ví dụ về dạng của thông tin bổ sung này trong hệ thống two-disk. Lưu ý hình này, cũng như những hình trước, không theo tỷ lệ vì checksum thường nhỏ (chẳng hạn 8 byte), còn block lớn hơn nhiều (chẳng hạn 4 KB hoặc lớn hơn):
+Không có gì ngạc nhiên, câu trả lời rất đơn giản: thêm một chút thông tin vào mỗi checksum. Trong trường hợp này, bổ sung physical identifier (physical ID) khá hữu ích. Chẳng hạn, nếu thông tin lưu trữ giờ chứa checksum C(D) cùng disk number và sector number của block, client dễ xác định thông tin chính xác có nằm trong block hay không. Cụ thể, nếu client đọc block 4 trên disk 10 (D<sub>10,4</sub>), thông tin lưu trữ phải chứa disk number và sector offset đó, như bên dưới. Nếu thông tin không khớp, một misdirected write đã xảy ra và giờ phát hiện được corruption. Sau đây là ví dụ về dạng của thông tin bổ sung này trong hệ thống two-disk. Lưu ý hình này, cũng như những hình trước, không theo tỷ lệ vì checksum thường nhỏ (chẳng hạn 8 byte), còn block lớn hơn nhiều (chẳng hạn 4 KB hoặc lớn hơn):
 
 ![p0550_4](images/ch44_data_integrity_and_protection/p0550_4.png)
 

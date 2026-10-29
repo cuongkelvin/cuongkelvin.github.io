@@ -1981,7 +1981,7 @@ Trong recipe này, chúng ta sẽ bàn về hai trong số các framework đư�
 
 ### Chuẩn bị
 
-Linux hiện thực bảo mật file-level. Mỗi file có một tập thuộc tính truy cập cho user, group và others, và có thể được gán quyền đọc, ghi hoặc thực thi, cũng như một số mode đặc biệt.
+Linux triển khai bảo mật file-level. Mỗi file có một tập thuộc tính truy cập cho user, group và others, và có thể được gán quyền đọc, ghi hoặc thực thi, cũng như một số mode đặc biệt.
 
 Do đó việc truy cập filesystem dựa trên các user và group của hệ thống. Khi bạn liệt kê file bằng command `ls -l`, bạn thấy các thuộc tính file theo định dạng sau:
 
@@ -2009,9 +2009,9 @@ Các access mode của file thường được biểu diễn ở dạng octal, v
 
 Kiểu truy cập file này được phân loại là Discretionary Access Control (DAC) vì nó cho phép user thay đổi thuộc tính kiểm soát truy cập của các object mà họ sở hữu. Process có real user ID (bạn là ai) và effective user ID (bạn đang hành động với tư cách ai), quyết định xem chúng có được truy cập một file dựa trên quyền của file hay không.
 
-Mặt khác, Mandatory Access Control (MAC) hiện thực một cơ chế để giới hạn khả năng của user (subject) thực hiện thao tác trên object, trong đó cả subject lẫn object đều có một tập thuộc tính bảo mật và các quy tắc của hệ điều hành kiểm soát policy truy cập. User không thể sửa quyền truy cập. Trong mô hình này, subject thường là process hoặc thread, còn object là tài nguyên của hệ điều hành như file và thư mục, nhưng cũng có memory, socket, IPC và các thành phần khác.
+Mặt khác, Mandatory Access Control (MAC) triển khai một cơ chế để giới hạn khả năng của user (subject) thực hiện thao tác trên object, trong đó cả subject lẫn object đều có một tập thuộc tính bảo mật và các quy tắc của hệ điều hành kiểm soát policy truy cập. User không thể sửa quyền truy cập. Trong mô hình này, subject thường là process hoặc thread, còn object là tài nguyên của hệ điều hành như file và thư mục, nhưng cũng có memory, socket, IPC và các thành phần khác.
 
-Trong Linux, MAC được hiện thực bằng framework Linux Security Module (LSM), bên trên các policy DAC chuẩn. Khi DAC cho phép truy cập, LSM module được gọi để cuối cùng cho phép hoặc từ chối truy cập. Số lượng object mà LSM kiểm soát ngày càng tăng và bao gồm:
+Trong Linux, MAC được triển khai bằng framework Linux Security Module (LSM), bên trên các policy DAC chuẩn. Khi DAC cho phép truy cập, LSM module được gọi để cuối cùng cho phép hoặc từ chối truy cập. Số lượng object mà LSM kiểm soát ngày càng tăng và bao gồm:
 
 - Các thao tác filesystem
 

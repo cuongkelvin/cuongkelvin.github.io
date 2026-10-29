@@ -82,14 +82,20 @@ Hình 38.2: Striping với Chunk Size lớn hơn
 
 > BỔ SUNG: RAID MAPPING PROBLEM
 >
-> Trước khi nghiên cứu capacity, reliability và performance của RAID, ta bổ sung về điều gọi mapping problem. Vấn đề này xuất hiện ở mọi RAID array; đơn giản là với logical block cần đọc ghi, làm sao RAID biết chính xác physical disk và offset nào cần truy cập? Với RAID level đơn giản này, không cần quá phức tạp để map đúng logical block sang vị trí vật lý. Lấy ví dụ striping đầu tiên (chunk size = 1 block = 4KB). Khi có logical block address A, RAID dễ tính disk và offset mong muốn với hai phương trình đơn giản:
+> Trước khi nghiên cứu capacity, reliability và performance của RAID, ta bổ sung về điều gọi mapping problem. Vấn đề này xuất hiện ở mọi RAID array; đơn giản là với logical block cần đọc ghi, làm sao RAID biết chính xác physical disk và offset nào cần truy cập?
+>
+> Với RAID level đơn giản này, không cần quá phức tạp để map đúng logical block sang vị trí vật lý. Lấy ví dụ striping đầu tiên (chunk size = 1 block = 4KB). Khi có logical block address A, RAID dễ tính disk và offset mong muốn với hai phương trình đơn giản:
 >
 > ```
 > Disk   = A % number_of_disks
 > Offset = A / number_of_disks
 > ```
 >
-> Lưu ý đây đều là phép toán số nguyên (ví dụ 4 / 3 = 1 chứ không phải 1.33333...). Xem chúng hoạt động với ví dụ đơn giản. Tưởng tượng RAID đầu có request block 14. Vì có 4 disk, disk cần tìm là (14 % 4 = 2): disk 2. Block cụ thể tính là (14 / 4 = 3): block 3. Vì vậy block 14 nằm ở block thứ tư (block 3, bắt đầu từ 0) trên disk thứ ba (disk 2, bắt đầu từ 0), đúng vị trí của nó. Bạn có thể nghĩ cách sửa phương trình để hỗ trợ chunk size khác. Hãy thử! Không quá khó.
+> Lưu ý đây đều là phép toán số nguyên (ví dụ 4 / 3 = 1 chứ không phải 1.33333...).
+>
+> Xem chúng hoạt động với ví dụ đơn giản. Tưởng tượng RAID đầu có request block 14. Vì có 4 disk, disk cần tìm là (14 % 4 = 2): disk 2. Block cụ thể tính là (14 / 4 = 3): block 3. Vì vậy block 14 nằm ở block thứ tư (block 3, bắt đầu từ 0) trên disk thứ ba (disk 2, bắt đầu từ 0), đúng vị trí của nó.
+>
+> Bạn có thể nghĩ cách sửa phương trình để hỗ trợ chunk size khác. Hãy thử! Không quá khó.
 
 ### Chunk Sizes
 
@@ -170,17 +176,25 @@ Cuối cùng phân tích performance. Về latency một read request, thấy gi
 
 > BỔ SUNG: RAID CONSISTENT-UPDATE PROBLEM
 >
-> Trước khi phân tích RAID-1, hãy bàn vấn đề xảy ra trong mọi multi-disk RAID system, gọi consistent-update problem [DAA05]. Nó xảy ra khi ghi tới RAID phải cập nhật nhiều disk trong một logical operation. Ở đây giả sử xét mirrored disk array. Tưởng tượng write được phát tới RAID, RAID quyết định phải ghi tới disk 0 và disk 1. RAID phát write tới disk 0, nhưng ngay trước khi phát request tới disk 1 thì mất điện (hoặc system crash). Trong trường hợp không may này, giả sử request disk 0 hoàn tất (nhưng rõ ràng request disk 1 chưa, vì chưa được phát). Kết quả mất điện sai thời điểm là hai bản block không nhất quán: bản trên disk 0 là mới, trên disk 1 là cũ. Ta muốn state cả hai disk đổi atomically, tức hoặc cả hai là bản mới hoặc không bản nào. Cách giải tổng quát là dùng một loại write-ahead log để ghi trước việc RAID sắp làm (tức cập nhật hai disk với dữ liệu nào đó), rồi mới làm. Nhờ vậy có thể bảo đảm khi crash thì hành vi đúng vẫn xảy ra; chạy recovery procedure phát lại mọi transaction chờ tới RAID bảo đảm không có hai mirrored copy (trường hợp RAID-1) lệch nhau. Lưu ý cuối: vì logging xuống disk mỗi write tốn kém quá mức, đa số RAID hardware có chút non-volatile RAM (ví dụ battery-backed) để logging kiểu này. Vì vậy consistent update được cung cấp mà không chịu chi phí logging xuống disk cao.
+> Trước khi phân tích RAID-1, hãy bàn vấn đề xảy ra trong mọi multi-disk RAID system, gọi consistent-update problem [DAA05]. Nó xảy ra khi ghi tới RAID phải cập nhật nhiều disk trong một logical operation. Ở đây giả sử xét mirrored disk array.
+>
+> Tưởng tượng write được phát tới RAID, RAID quyết định phải ghi tới disk 0 và disk 1. RAID phát write tới disk 0, nhưng ngay trước khi phát request tới disk 1 thì mất điện (hoặc system crash). Trong trường hợp không may này, giả sử request disk 0 hoàn tất (nhưng rõ ràng request disk 1 chưa, vì chưa được phát).
+>
+> Kết quả mất điện sai thời điểm là hai bản block không nhất quán: bản trên disk 0 là mới, trên disk 1 là cũ. Ta muốn state cả hai disk đổi atomically, tức hoặc cả hai là bản mới hoặc không bản nào.
+>
+> Cách giải tổng quát là dùng một loại write-ahead log để ghi trước việc RAID sắp làm (tức cập nhật hai disk với dữ liệu nào đó), rồi mới làm. Nhờ vậy có thể bảo đảm khi crash thì hành vi đúng vẫn xảy ra; chạy recovery procedure phát lại mọi transaction chờ tới RAID bảo đảm không có hai mirrored copy (trường hợp RAID-1) lệch nhau.
+>
+> Lưu ý cuối: vì logging xuống disk mỗi write tốn kém quá mức, đa số RAID hardware có chút non-volatile RAM (ví dụ battery-backed) để logging kiểu này. Vì vậy consistent update được cung cấp mà không chịu chi phí logging xuống disk cao.
 
-Để phân tích steady-state throughput, bắt đầu sequential workload. Khi ghi disk sequential, mỗi logical write phải tạo hai physical write; ví dụ ghi logical block 0 (hình trên), RAID bên trong ghi cả disk 0 lẫn disk 1. Vì vậy maximum bandwidth khi sequential write tới mirrored array là ( N/2 · S), hay nửa peak bandwidth.
+Để phân tích steady-state throughput, bắt đầu sequential workload. Khi ghi disk sequential, mỗi logical write phải tạo hai physical write; ví dụ ghi logical block 0 (hình trên), RAID bên trong ghi cả disk 0 lẫn disk 1. Vì vậy maximum bandwidth khi sequential write tới mirrored array là ((N/2) · S), hay nửa peak bandwidth.
 
 Đáng tiếc, sequential read có đúng cùng performance. Có thể nghĩ sequential read tốt hơn vì chỉ cần đọc một bản dữ liệu. Nhưng hãy dùng ví dụ để thấy vì sao không giúp nhiều. Tưởng tượng cần đọc block 0, 1, 2, 3, 4, 5, 6 và 7. Giả sử phát read 0 tới disk 0, read 1 tới disk 2, read 2 tới disk 1, read 3 tới disk 3. Tiếp tục phát read 4, 5, 6, 7 lần lượt tới disk 0, 2, 1, 3. Có thể ngây thơ nghĩ dùng mọi disk nghĩa là đạt toàn bandwidth array.
 
-Nhưng để thấy không (nhất thiết) vậy, xét request một disk nhận (chẳng hạn disk 0). Đầu tiên request block 0; sau đó block 4 (bỏ block 2). Thực ra mỗi disk nhận request cách một block. Khi quay qua block bị bỏ, nó không cung cấp bandwidth hữu ích cho client. Vì vậy mỗi disk chỉ cho nửa peak bandwidth. Do đó sequential read chỉ đạt ( N/2 · S) MB/s.
+Nhưng để thấy không (nhất thiết) vậy, xét request một disk nhận (chẳng hạn disk 0). Đầu tiên request block 0; sau đó block 4 (bỏ block 2). Thực ra mỗi disk nhận request cách một block. Khi quay qua block bị bỏ, nó không cung cấp bandwidth hữu ích cho client. Vì vậy mỗi disk chỉ cho nửa peak bandwidth. Do đó sequential read chỉ đạt ((N/2) · S) MB/s.
 
 Random read là trường hợp tốt nhất của mirrored RAID. Có thể phân phối read trên mọi disk, đạt toàn bandwidth có thể. Vì vậy random read RAID-1 đạt N · R MB/s.
 
-Cuối cùng random write như bạn dự kiến: N/2 ·R MB/s. Mỗi logical write phải thành hai physical write, nên dù dùng mọi disk, client chỉ thấy nửa bandwidth sẵn có. Dù ghi logical block x thành hai parallel write tới hai physical disk khác, bandwidth nhiều small request chỉ đạt nửa kết quả striping. Như sắp thấy, nửa bandwidth sẵn có thực ra khá tốt!
+Cuối cùng random write như bạn dự kiến: (N/2) · R MB/s. Mỗi logical write phải thành hai physical write, nên dù dùng mọi disk, client chỉ thấy nửa bandwidth sẵn có. Dù ghi logical block x thành hai parallel write tới hai physical disk khác, bandwidth nhiều small request chỉ đạt nửa kết quả striping. Như sắp thấy, nửa bandwidth sẵn có thực ra khá tốt!
 
 ## 38.6 RAID Level 4: Tiết kiệm không gian bằng Parity
 
@@ -208,7 +222,7 @@ Hình 38.4: RAID-4 với Parity
 
 Từ ví dụ, có thể đoán cách dùng parity information phục hồi failure. Tưởng tượng mất cột C2. Để xác định giá trị trong cột, chỉ cần đọc mọi giá trị khác cùng hàng (kể cả parity bit đã XOR) và tái tạo đáp án đúng. Cụ thể giả sử mất giá trị hàng đầu cột C2 (là 1); đọc các giá trị khác (0 từ C0, 0 từ C1, 1 từ C3 và 0 từ cột parity P) thu được 0, 0, 1, 0. Vì biết XOR giữ số 1 chẵn ở mỗi hàng, biết dữ liệu thiếu phải là 1. Đó là reconstruction trong XOR-based parity scheme! Cũng lưu ý cách tính giá trị khôi phục: chỉ XOR data bit với parity bit, như lúc tính parity ban đầu.
 
-Giờ bạn có thể thắc mắc: đang XOR mọi bit, nhưng biết RAID đặt block 4KB (hoặc hơn) trên mỗi disk; áp dụng XOR cho các block để tính parity thế nào? Hóa ra cũng dễ. Chỉ thực hiện bitwise XOR trên mỗi bit các data block; đặt kết quả mỗi bit-wise XOR vào vị trí bit tương ứng trong parity block. Ví dụ nếu block có kích thước 4 bit (đúng, vẫn nhỏ hơn block 4KB nhiều, nhưng bạn hiểu ý), chúng có thể như sau:
+Giờ bạn có thể thắc mắc: đang XOR mọi bit, nhưng biết RAID đặt block 4KB (hoặc hơn) trên mỗi disk; áp dụng XOR cho các block để tính parity thế nào? Hóa ra cũng dễ. Chỉ thực hiện bitwise XOR trên mỗi bit các data block; đặt kết quả mỗi bitwise XOR vào vị trí bit tương ứng trong parity block. Ví dụ nếu block có kích thước 4 bit (đúng, vẫn nhỏ hơn block 4KB nhiều, nhưng bạn hiểu ý), chúng có thể như sau:
 
 | Block0 | Block1 | Block2 | Block3 | Parity |
 |---|---|---|---|---|
@@ -302,14 +316,12 @@ Random read performance tốt hơn chút vì giờ dùng được mọi disk. Cu
 |  | RAID-0 | RAID-1 | RAID-4 | RAID-5 |
 |---|---|---|---|---|
 | Dung lượng | N · B | (N · B)/2 | (N − 1) · B | (N − 1) · B |
-| Reliability | 0 | 1 (chắc chắn) | 1 | 1 |
-|  |  | N/2 (nếu may mắn) |  |  |
+| Reliability | 0 | 1 (chắc chắn)<br>N/2 (nếu may mắn) | 1 | 1 |
 | Throughput |  |  |  |  |
 | Sequential Read | N · S | (N/2) · S | (N − 1) · S | (N − 1) · S |
 | Sequential Write | N · S | (N/2) · S | (N − 1) · S | (N − 1) · S |
 | Random Read | N · R | N · R | (N − 1) · R | N · R |
-|  |  |  | 1 |  |
-| Random Write | N · R | (N/2) · R | <sub>2</sub> · R | N/4 R |
+| Random Write | N · R | (N/2) · R | 1/2 · R | N/4 R |
 | Latency |  |  |  |  |
 | Read | T | T | T | T |
 | Write | T | T | 2T | 2T |

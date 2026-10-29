@@ -58,7 +58,7 @@ DES là một cipher mã hóa các block độ dài 64 bit với một key kích
 
 DES là một symmetric cipher, tức là cùng một key được dùng cho mã hóa và giải mã. DES, như gần như mọi block cipher hiện đại, là một thuật toán round-based. Với mỗi block plaintext, phép mã hóa được xử lý trong 16 vòng, tất cả đều thực hiện phép toán giống hệt nhau. Hình 3.4 cho thấy cấu trúc vòng của DES. Ở mỗi vòng, một subkey khác được dùng và mọi subkey k<sub>i</sub> đều được suy ra từ key chính k.
 
-Bây giờ hãy xem chi tiết hơn bên trong DES, như được thể hiện trong Hình 3.5. Cấu trúc trong hình được gọi là một Feistel network. Nó có thể dẫn tới các cipher rất mạnh nếu được thiết kế cẩn thận. Feistel network cũng được dùng trong các block cipher hiện đại khác, nhưng chắc chắn không phải tất cả. (Thực tế, AES không phải là một Feistel cipher.) Ngoài sức mạnh mật mã tiềm năng, một ưu điểm của Feistel network là mã hóa và giải mã gần như là cùng một phép toán. Giải mã chỉ cần một key schedule đảo ngược, là một ưu điểm trong các hiện thực software và hardware. Chúng tôi thảo luận về Feistel network sau đây.
+Bây giờ hãy xem chi tiết hơn bên trong DES, như được thể hiện trong Hình 3.5. Cấu trúc trong hình được gọi là một Feistel network. Nó có thể dẫn tới các cipher rất mạnh nếu được thiết kế cẩn thận. Feistel network cũng được dùng trong các block cipher hiện đại khác, nhưng chắc chắn không phải tất cả. (Thực tế, AES không phải là một Feistel cipher.) Ngoài sức mạnh mật mã tiềm năng, một ưu điểm của Feistel network là mã hóa và giải mã gần như là cùng một phép toán. Giải mã chỉ cần một key schedule đảo ngược, là một ưu điểm trong các bản triển khai software và hardware. Chúng tôi thảo luận về Feistel network sau đây.
 
 ![p0094_3](images/ch03_the_data_encryption_standard_des_and_alternatives/p0094_3.png)
 
@@ -92,7 +92,7 @@ Cấu trúc của DES như được mô tả trong Hình 3.5 cho thấy các hà
 
 ### 3.3.1 Hoán vị ban đầu và hoán vị cuối
 
-Như được thể hiện trong Hình 3.6 và 3.7, hoán vị ban đầu IP và hoán vị cuối IP<sup>−1</sup> là các hoán vị theo bit. Một hoán vị theo bit có thể được xem như việc đi dây chéo đơn giản. Thú vị là các hoán vị có thể được hiện thực rất dễ bằng hardware nhưng không đặc biệt nhanh trong software. Lưu ý rằng cả hai hoán vị hoàn toàn không làm tăng bảo mật của DES. Lý do cho hai hoán vị này trong DES hoàn toàn là về hiện thực: Mục đích ban đầu là giúp sắp xếp các bit plaintext và ciphertext theo byte dễ hơn để việc lấy dữ liệu dễ hơn cho các data bus 8-bit, vốn là kích thước thanh ghi state-of-the-art vào đầu những năm 1970.
+Như được thể hiện trong Hình 3.6 và 3.7, hoán vị ban đầu IP và hoán vị cuối IP<sup>−1</sup> là các hoán vị theo bit. Một hoán vị theo bit có thể được xem như việc đi dây chéo đơn giản. Thú vị là các hoán vị có thể được triển khai rất dễ bằng hardware nhưng không đặc biệt nhanh trong software. Lưu ý rằng cả hai hoán vị hoàn toàn không làm tăng bảo mật của DES. Lý do cho hai hoán vị này trong DES hoàn toàn là về triển khai: Mục đích ban đầu là giúp sắp xếp các bit plaintext và ciphertext theo byte dễ hơn để việc lấy dữ liệu dễ hơn cho các data bus 8-bit, vốn là kích thước thanh ghi state-of-the-art vào đầu những năm 1970.
 
 ![p0097_6](images/ch03_the_data_encryption_standard_des_and_alternatives/p0097_6.png)
 
@@ -323,7 +323,7 @@ Bảng 3.14 Hoán vị round key PC–2
 | 51 45 33 48 44 49 39 56 |
 | 34 53 46 42 50 36 29 32 |
 
-Lưu ý rằng mỗi round key là một tuyển chọn 48 bit đã hoán vị của key input k. Key schedule chỉ là một phương pháp hiện thực 16 hoán vị một cách có hệ thống. Đặc biệt bằng hardware, key schedule rất dễ hiện thực. Key schedule cũng được thiết kế sao cho mỗi bit trong 56 bit key được dùng trong các round key khác nhau; mỗi bit được dùng trong khoảng 14 trong 16 round key.
+Lưu ý rằng mỗi round key là một tuyển chọn 48 bit đã hoán vị của key input k. Key schedule chỉ là một phương pháp triển khai 16 hoán vị một cách có hệ thống. Đặc biệt bằng hardware, key schedule rất dễ triển khai. Key schedule cũng được thiết kế sao cho mỗi bit trong 56 bit key được dùng trong các round key khác nhau; mỗi bit được dùng trong khoảng 14 trong 16 round key.
 
 ![p0105_12](images/ch03_the_data_encryption_standard_des_and_alternatives/p0105_12.png)
 
@@ -425,7 +425,7 @@ Chúng tôi thảo luận cả hai loại tấn công dưới đây và nêu k�
 
 ### 3.5.1 Exhaustive Key Search
 
-Chỉ trích đầu tiên ngày nay chắc chắn là có cơ sở. Cipher nguyên bản do IBM đề xuất có độ dài key 128 bit và thật đáng ngờ khi nó bị giảm xuống 56 bit. Tuyên bố chính thức rằng một cipher có độ dài key ngắn hơn giúp hiện thực thuật toán DES trên một chip duy nhất năm 1974 dễ hơn nghe không thuyết phục lắm. Để làm rõ, hãy nhớ lại nguyên lý của exhaustive key-search (hay brute-force attack).
+Chỉ trích đầu tiên ngày nay chắc chắn là có cơ sở. Cipher nguyên bản do IBM đề xuất có độ dài key 128 bit và thật đáng ngờ khi nó bị giảm xuống 56 bit. Tuyên bố chính thức rằng một cipher có độ dài key ngắn hơn giúp triển khai thuật toán DES trên một chip duy nhất năm 1974 dễ hơn nghe không thuyết phục lắm. Để làm rõ, hãy nhớ lại nguyên lý của exhaustive key-search (hay brute-force attack).
 
 > Định nghĩa 3.5.1 DES exhaustive key search
 >
@@ -477,21 +477,21 @@ Bảng 3.15 Lịch sử các tấn công nhắm vào DES full-round
 | Jan. 1999 | DES Challenge III bị phá bằng brute-force bởi nỗ lực internet phân tán kết hợp với Deep Crack và tổng thời gian tìm kiếm 22 giờ |
 | Apr. 2006 | Các trường đại học Bochum và Kiel (cả hai ở Đức) chế tạo máy COPACOBANA key-search dựa trên các FPGA low-cost với khoảng $10,000. Thời gian tìm kiếm trung bình là 7 ngày. |
 
-## 3.6 Hiện thực bằng Software và Hardware
+## 3.6 Triển khai bằng Software và Hardware
 
-Sau đây, chúng tôi đưa ra một đánh giá ngắn gọn về các đặc tính hiện thực DES bằng software và hardware. Khi nói về software, chúng tôi muốn nói tới các hiện thực DES chạy trên CPU desktop hoặc các vi xử lý nhúng như smart card hay thiết bị IoT. Hardware chỉ các hiện thực DES chạy trên IC như application-specific integrated circuit (ASIC) hay field programmable gate array (FPGA).
+Sau đây, chúng tôi đưa ra một đánh giá ngắn gọn về các đặc tính triển khai DES bằng software và hardware. Khi nói về software, chúng tôi muốn nói tới các bản triển khai DES chạy trên CPU desktop hoặc các vi xử lý nhúng như smart card hay thiết bị IoT. Hardware chỉ các bản triển khai DES chạy trên IC như application-specific integrated circuit (ASIC) hay field programmable gate array (FPGA).
 
 ### Software
 
-Một hiện thực software đơn giản bám theo luồng dữ liệu của hầu hết các mô tả DES, như được trình bày trong chương này, dẫn tới hiệu năng rất kém. Đó là do nhiều phép toán DES nguyên tử liên quan tới hoán vị bit, đặc biệt là các hoán vị E và P, vốn chậm trong software. Tương tự, các S-boxes nhỏ như dùng trong DES hiệu quả trong hardware nhưng chỉ hiệu quả ở mức vừa phải trên các CPU hiện đại. Đã có rất nhiều phương pháp được đề xuất để tăng tốc các hiện thực software DES. Ý tưởng chung là dùng các bảng có giá trị tính trước của vài phép toán DES, chẳng hạn của vài S-boxes và hoán vị. Các hiện thực tối ưu cần khoảng 240 chu kỳ để mã hóa một block trên CPU 32-bit. Trên một CPU 2-GHz, điều này tương ứng với throughput lý thuyết khoảng 533 Mbit/s. 3DES, an toàn hơn đáng kể so với single DES, chạy với tốc độ bằng một phần ba tốc độ DES. Lưu ý rằng các hiện thực non-optimized chậm hơn đáng kể, thường dưới 100 Mbit/s.
+Một bản triển khai software đơn giản bám theo luồng dữ liệu của hầu hết các mô tả DES, như được trình bày trong chương này, dẫn tới hiệu năng rất kém. Đó là do nhiều phép toán DES nguyên tử liên quan tới hoán vị bit, đặc biệt là các hoán vị E và P, vốn chậm trong software. Tương tự, các S-boxes nhỏ như dùng trong DES hiệu quả trong hardware nhưng chỉ hiệu quả ở mức vừa phải trên các CPU hiện đại. Đã có rất nhiều phương pháp được đề xuất để tăng tốc các bản triển khai software DES. Ý tưởng chung là dùng các bảng có giá trị tính trước của vài phép toán DES, chẳng hạn của vài S-boxes và hoán vị. Các bản triển khai tối ưu cần khoảng 240 chu kỳ để mã hóa một block trên CPU 32-bit. Trên một CPU 2-GHz, điều này tương ứng với throughput lý thuyết khoảng 533 Mbit/s. 3DES, an toàn hơn đáng kể so với single DES, chạy với tốc độ bằng một phần ba tốc độ DES. Lưu ý rằng các bản triển khai non-optimized chậm hơn đáng kể, thường dưới 100 Mbit/s.
 
-Một phương pháp đáng chú ý để tăng tốc các hiện thực software của DES là bit-slicing, được Eli Biham phát triển năm 1997. Tuy nhiên, hạn chế của bit-slicing là vài block được mã hóa song song, điều có thể là nhược điểm với một số mode of operation như mode Cipher Block Chaining (CBC) và Output Feedback (OFB) (xem Chương 5).
+Một phương pháp đáng chú ý để tăng tốc các bản triển khai software của DES là bit-slicing, được Eli Biham phát triển năm 1997. Tuy nhiên, hạn chế của bit-slicing là vài block được mã hóa song song, điều có thể là nhược điểm với một số mode of operation như mode Cipher Block Chaining (CBC) và Output Feedback (OFB) (xem Chương 5).
 
 ### Hardware
 
-Một tiêu chí thiết kế cho DES là hiệu quả trong hardware. Các hoán vị như E, P, IP và IP<sup>−1</sup> rất dễ hiện thực bằng hardware, vì chúng chỉ cần đi dây mà không cần logic. Các S-boxes 6-by-4 nhỏ cũng tương đối dễ hiện thực bằng hardware. Thông thường, chúng được hiện thực bằng logic Boolean, tức là các cổng logic. Trung bình, một S-box cần khoảng 100 cổng.
+Một tiêu chí thiết kế cho DES là hiệu quả trong hardware. Các hoán vị như E, P, IP và IP<sup>−1</sup> rất dễ triển khai bằng hardware, vì chúng chỉ cần đi dây mà không cần logic. Các S-boxes 6-by-4 nhỏ cũng tương đối dễ triển khai bằng hardware. Thông thường, chúng được triển khai bằng logic Boolean, tức là các cổng logic. Trung bình, một S-box cần khoảng 100 cổng.
 
-Một hiện thực tiết kiệm diện tích (area-efficient) của một vòng DES đơn lẻ có thể được làm với ít hơn 3000 cổng. Nếu muốn throughput cao, DES có thể được làm cho thực thi cực kỳ nhanh bằng cách đặt nhiều vòng trong một mạch, chẳng hạn bằng pipelining. Trên các ASIC và FPGA hiện đại, có thể đạt tốc độ throughput vài 100 Gbit/sec. Ở đầu kia của phổ hiệu năng, các hiện thực rất nhỏ với ít hơn 3000 cổng thậm chí vừa với các chip radio frequency identification (RFID) low-cost.
+Một bản triển khai tiết kiệm diện tích (area-efficient) của một vòng DES đơn lẻ có thể được làm với ít hơn 3000 cổng. Nếu muốn throughput cao, DES có thể được làm cho thực thi cực kỳ nhanh bằng cách đặt nhiều vòng trong một mạch, chẳng hạn bằng pipelining. Trên các ASIC và FPGA hiện đại, có thể đạt tốc độ throughput vài 100 Gbit/sec. Ở đầu kia của phổ hiệu năng, các bản triển khai rất nhỏ với ít hơn 3000 cổng thậm chí vừa với các chip radio frequency identification (RFID) low-cost.
 
 ## 3.7 Các lựa chọn thay thế DES
 
@@ -511,13 +511,13 @@ Triple DES, còn được ký hiệu là 3DES, TDES, Triple DEA hay TDEA, đã �
 
 y = DES<sub>k<sub>3</sub></sub>(DES<sub>k<sub>2</sub></sub><sup>−1</sup>(DES<sub>k<sub>1</sub></sub>(x)))
 
-như được thể hiện trong Hình 3.17. Lý do dùng 3DES ở mode EDE là nó thực hiện một phép mã hóa single DES nếu k<sub>3</sub> = k<sub>2</sub> = k<sub>1</sub>, điều đáng mong muốn cho các hiện thực cũng cần hỗ trợ single DES vì lý do tương thích ngược. Có hai cách chọn ba key. Phương pháp được ưa chuộng ngày nay (và tự nhiên hơn) là chọn ba key độc lập k<sub>1</sub>, k<sub>2</sub> và k<sub>3</sub>, được gọi là 3TDEA. Phương pháp thứ hai là chọn k<sub>2</sub> riêng biệt và các key k<sub>1</sub> = k<sub>3</sub>, được gọi là 2TDEA. Trong một số ứng dụng cũ, người ta coi là có lợi khi chỉ cần 112 bit vật liệu key cho 2TDEA, trái với 168 bit cho 3TDEA. Tuy nhiên, việc dùng 2TDEA không còn được khuyến khích.
+như được thể hiện trong Hình 3.17. Lý do dùng 3DES ở mode EDE là nó thực hiện một phép mã hóa single DES nếu k<sub>3</sub> = k<sub>2</sub> = k<sub>1</sub>, điều đáng mong muốn cho các bản triển khai cũng cần hỗ trợ single DES vì lý do tương thích ngược. Có hai cách chọn ba key. Phương pháp được ưa chuộng ngày nay (và tự nhiên hơn) là chọn ba key độc lập k<sub>1</sub>, k<sub>2</sub> và k<sub>3</sub>, được gọi là 3TDEA. Phương pháp thứ hai là chọn k<sub>2</sub> riêng biệt và các key k<sub>1</sub> = k<sub>3</sub>, được gọi là 2TDEA. Trong một số ứng dụng cũ, người ta coi là có lợi khi chỉ cần 112 bit vật liệu key cho 2TDEA, trái với 168 bit cho 3TDEA. Tuy nhiên, việc dùng 2TDEA không còn được khuyến khích.
 
 ![p0115_17](images/ch03_the_data_encryption_standard_des_and_alternatives/p0115_17.png)
 
 Hình 3.17 Triple DES (3DES-EDE)
 
-3DES chống được brute-force attack và hầu hết các tấn công phân tích. Có những điểm yếu bảo mật tinh vi khi lượng lớn dữ liệu được mã hóa dưới cùng một key. Để tránh các tấn công như vậy, NIST bắt buộc không được mã hóa quá 2<sup>20</sup> block plaintext bằng 3TDEA dưới cùng một key. Về đặc tính hiện thực, 3DES rất hiệu quả trong hardware nhưng không đặc biệt hiệu quả trong software.
+3DES chống được brute-force attack và hầu hết các tấn công phân tích. Có những điểm yếu bảo mật tinh vi khi lượng lớn dữ liệu được mã hóa dưới cùng một key. Để tránh các tấn công như vậy, NIST bắt buộc không được mã hóa quá 2<sup>20</sup> block plaintext bằng 3TDEA dưới cùng một key. Về đặc tính triển khai, 3DES rất hiệu quả trong hardware nhưng không đặc biệt hiệu quả trong software.
 
 Người ta có thể thắc mắc vì sao không có phiên bản DES dùng double-encryption (“2DES”). Điều này liên quan tới meet-in-the-middle attack, được thảo luận trong Mục 5.3.1. Nói ngắn gọn, 2DES — đáng ngạc nhiên — không an toàn hơn đáng kể so với single DES.
 
@@ -529,7 +529,7 @@ Sửa đổi đơn giản đến bất ngờ này khiến DES chống lại exha
 
 ### 3.7.3 Lightweight Cipher PRESENT
 
-Từ khoảng năm 2007, vài thuật toán mã hóa mới được xếp vào loại “lightweight cipher” đã được đề xuất. Lightweight thường chỉ các thuật toán có độ phức tạp hiện thực rất thấp, đặc biệt trong hardware. Trivium (Mục 2.4.3) là một ví dụ về lightweight stream cipher. Một ứng viên block cipher hứa hẹn là PRESENT, được thiết kế đặc biệt cho các ứng dụng như thẻ RFID hay các thiết bị internet-of-things (IoT) khác, vốn cực kỳ hạn chế về điện năng hay chi phí. (Một trong các tác giả của cuốn sách đã tham gia thiết kế PRESENT.) Về các lightweight cipher khác và các nỗ lực chuẩn hóa của NIST trong lĩnh vực này, chúng tôi giới thiệu tới Mục 3.8.
+Từ khoảng năm 2007, vài thuật toán mã hóa mới được xếp vào loại “lightweight cipher” đã được đề xuất. Lightweight thường chỉ các thuật toán có độ phức tạp triển khai rất thấp, đặc biệt trong hardware. Trivium (Mục 2.4.3) là một ví dụ về lightweight stream cipher. Một ứng viên block cipher hứa hẹn là PRESENT, được thiết kế đặc biệt cho các ứng dụng như thẻ RFID hay các thiết bị internet-of-things (IoT) khác, vốn cực kỳ hạn chế về điện năng hay chi phí. (Một trong các tác giả của cuốn sách đã tham gia thiết kế PRESENT.) Về các lightweight cipher khác và các nỗ lực chuẩn hóa của NIST trong lĩnh vực này, chúng tôi giới thiệu tới Mục 3.8.
 
 Khác với DES, PRESENT không dựa trên Feistel network. Thay vào đó, nó là một substitution-permutation network (SP-network) và gồm 31 vòng. Chúng tôi lưu ý rằng AES cũng dựa trên một SP-network. Độ dài block là 64 bit, và hỗ trợ hai độ dài key 80 và 128 bit. Một sơ đồ khối của cipher được thể hiện trong Hình 3.18. Mỗi vòng trong 31 vòng gồm một phép XOR để đưa vào một round key K<sub>i</sub>, một lớp thay thế phi tuyến (sBoxLayer) và một hoán vị theo bit tuyến tính (pLayer). Sau vòng cuối, subkey cuối k<sub>32</sub> được áp dụng vào đường dữ liệu. Lớp phi tuyến dùng một S-box 4-bit S, được áp dụng 16 lần song song ở mỗi vòng. Key schedule tạo 32 round key từ key user-supplied. Đây là mã giả:
 
@@ -555,7 +555,7 @@ Chúng tôi thảo luận chi tiết ba bước của PRESENT dưới đây. M�
 
 addRoundKey Ở đầu mỗi vòng, round key K<sub>i</sub> được XOR với STATE hiện tại.
 
-sBoxLayer PRESENT dùng một S-box 4-bit sang 4-bit duy nhất. Đây là hệ quả trực tiếp của việc theo đuổi hiệu quả hardware, vì một S-box như vậy cho phép hiện thực gọn hơn nhiều so với, chẳng hạn, một S-box 8-bit. Các mục S-box ở dạng hệ thập lục phân được cho trong Bảng 3.16.
+sBoxLayer PRESENT dùng một S-box 4-bit sang 4-bit duy nhất. Đây là hệ quả trực tiếp của việc theo đuổi hiệu quả hardware, vì một S-box như vậy cho phép triển khai gọn hơn nhiều so với, chẳng hạn, một S-box 8-bit. Các mục S-box ở dạng hệ thập lục phân được cho trong Bảng 3.16.
 
 Bảng 3.16 S-box của PRESENT ở dạng hệ thập lục phân
 
@@ -565,7 +565,7 @@ Bảng 3.16 S-box của PRESENT ở dạng hệ thập lục phân
 
 Đường dữ liệu 64-bit (b<sub>63</sub>...b<sub>0</sub>) được gọi là state. Với sBoxLayer, sẽ hữu ích khi xem state như gồm mười sáu nibble 4-bit (w<sub>15</sub>...w<sub>0</sub>), trong đó w<sub>i</sub> = b<sub>4·i+3</sub>||b<sub>4·i+2</sub>|| b<sub>4·i+1</sub>||b<sub>4·i</sub> với 0 ≤ i ≤ 15, và output gồm mười sáu nibble S[w<sub>i</sub>].
 
-pLayer Như trong DES, lớp trộn được chọn là một hoán vị bit, có thể được hiện thực cực kỳ gọn trong hardware. Hoán vị bit dùng trong PRESENT được cho bởi Bảng 3.17. Bit i của state input được chuyển tới vị trí bit P(i).
+pLayer Như trong DES, lớp trộn được chọn là một hoán vị bit, có thể được triển khai cực kỳ gọn trong hardware. Hoán vị bit dùng trong PRESENT được cho bởi Bảng 3.17. Bit i của state input được chuyển tới vị trí bit P(i).
 
 Bảng 3.17 Lớp hoán vị của PRESENT
 
@@ -617,9 +617,9 @@ Bước 3: [k<sub>123</sub>k<sub>122</sub>k<sub>121</sub>k<sub>120</sub>] = S[k<
 
 Bước 4: [k<sub>66</sub>k<sub>65</sub>k<sub>64</sub>k<sub>63</sub>k<sub>62</sub>] = [k<sub>66</sub>k<sub>65</sub>k<sub>64</sub>k<sub>63</sub>k<sub>62</sub>] ⊕ round_counter
 
-Hiện thực và bảo mật PRESENT-80 có thể được hiện thực bằng hardware với diện tích khoảng 1600 gate equivalence, trong đó việc mã hóa một block plaintext 64-bit cần 32 chu kỳ clock. Làm ví dụ, ngay cả ở tốc độ clock tương đối chậm 1 MHz, khá điển hình trên các thiết bị low-cost, low-energy, vẫn đạt được throughput cao đáng kể là 2 Mbit/s. Có thể hiện thực cipher với chỉ khoảng 1000 gate equivalence, trong đó việc mã hóa một plaintext 64-bit cần 547 chu kỳ clock. Một hiện thực fully pipelined của PRESENT với 31 tầng mã hóa đạt throughput 64 bit mỗi chu kỳ clock, có thể cho throughput mã hóa hơn 50 Gbit/s.
+Triển khai và bảo mật PRESENT-80 có thể được triển khai bằng hardware với diện tích khoảng 1600 gate equivalence, trong đó việc mã hóa một block plaintext 64-bit cần 32 chu kỳ clock. Làm ví dụ, ngay cả ở tốc độ clock tương đối chậm 1 MHz, khá điển hình trên các thiết bị low-cost, low-energy, vẫn đạt được throughput cao đáng kể là 2 Mbit/s. Có thể triển khai cipher với chỉ khoảng 1000 gate equivalence, trong đó việc mã hóa một plaintext 64-bit cần 547 chu kỳ clock. Một bản triển khai fully pipelined của PRESENT với 31 tầng mã hóa đạt throughput 64 bit mỗi chu kỳ clock, có thể cho throughput mã hóa hơn 50 Gbit/s.
 
-Là kết quả của thiết kế tối ưu hardware quyết liệt (aggressively hardware-optimized) của PRESENT, hiệu năng software của nó chậm hơn so với nhiều cipher hiện đại khác như AES. Một hiện thực software tối ưu trên CPU Pentium III bằng C đạt throughput khoảng 60 Mbit/s ở tần số 1 GHz. Tuy nhiên, nó hoạt động khá tốt trên các vi xử lý nhỏ, phổ biến trong các sản phẩm tiêu dùng rẻ tiền.
+Là kết quả của thiết kế tối ưu hardware quyết liệt (aggressively hardware-optimized) của PRESENT, hiệu năng software của nó chậm hơn so với nhiều cipher hiện đại khác như AES. Một bản triển khai software tối ưu trên CPU Pentium III bằng C đạt throughput khoảng 60 Mbit/s ở tần số 1 GHz. Tuy nhiên, nó hoạt động khá tốt trên các vi xử lý nhỏ, phổ biến trong các sản phẩm tiêu dùng rẻ tiền.
 
 Tại thời điểm viết sách, không có tấn công nào được biết nhắm vào phiên bản full-round của PRESENT tốt hơn brute-force attack.
 
@@ -631,9 +631,9 @@ Như chúng ta đã thấy trong chương này, DES không nên được dùng n
 
 Tháng Bảy năm 2017, NIST lần đầu nhắc tới việc cho 3DES nghỉ hưu [83], sau một phân tích bảo mật mới dựa trên các collision attack so-called. Nó được mô tả trong Tài liệu tham khảo [45]. Tấn công có thể được giảm nhẹ bằng cách giới hạn số block plaintext được mã hóa dưới một key. Tháng Mười Một năm 2017, NIST giới hạn việc dùng 3DES ở 2<sup>20</sup> block plaintext 64-bit (8 MB dữ liệu) với một bộ key duy nhất. Hệ quả là nó không nên được dùng cho TLS, IPsec hay các ứng dụng mã hóa file lớn nữa [26]. Tại thời điểm viết sách, 3DES (hay TDEA) đang bị NIST loại bỏ dần và sẽ chính thức bị ngừng như một tiêu chuẩn Mỹ sau năm 2023. Một hướng dẫn cho việc chuyển đổi khỏi 3DES được cung cấp trong [27].
 
-Hiện thực DES Về hiện thực software của DES, một tài liệu tham khảo sớm là [47]. Các kỹ thuật tiên tiến hơn được mô tả trong [167]. Phương pháp mạnh bit-slicing, mà chúng tôi đã mô tả trong Mục 3.6, không chỉ áp dụng được cho DES mà còn cho hầu hết các cipher khác.
+Bản triển khai DES Về triển khai software của DES, một tài liệu tham khảo sớm là [47]. Các kỹ thuật tiên tiến hơn được mô tả trong [167]. Phương pháp mạnh bit-slicing, mà chúng tôi đã mô tả trong Mục 3.6, không chỉ áp dụng được cho DES mà còn cho hầu hết các cipher khác.
 
-Về hiện thực hardware của DES, một tài liệu tham khảo sớm nhưng vẫn rất thú vị là [247]. Có nhiều mô tả về các hiện thực DES high-performance trên nhiều nền tảng hardware khác nhau, bao gồm FPGA [244], ASIC tiêu chuẩn cũng như các công nghệ bán dẫn kỳ lạ hơn [107].
+Về triển khai hardware của DES, một tài liệu tham khảo sớm nhưng vẫn rất thú vị là [247]. Có nhiều mô tả về các bản triển khai DES high-performance trên nhiều nền tảng hardware khác nhau, bao gồm FPGA [244], ASIC tiêu chuẩn cũng như các công nghệ bán dẫn kỳ lạ hơn [107].
 
 Các lựa chọn thay thế DES và Lightweight Cipher Cần lưu ý rằng hàng trăm block cipher đã được đề xuất kể từ khi DES ra đời vào mid-1970s. DES đã ảnh hưởng tới thiết kế của nhiều thuật toán mã hóa khác, đặc biệt là những thuật toán được đề xuất trong những năm 1980 và 1990. Một số block cipher phổ biến nhất cũng dựa trên Feistel network. Các ví dụ về các Feistel cipher khác từ thời kỳ này bao gồm Blowfish, CAST, KASUMI, Mars, MISTY1, Twofish và RC6. Một cipher từ giai đoạn pre-2000 nổi tiếng và khác biệt rõ rệt so với DES là IDEA; nó dùng số học trong ba cấu trúc đại số khác nhau làm các phép toán nguyên tử. Dù vậy, block cipher được chọn cho nhiều ứng dụng ngày nay là AES, được giới thiệu trong chương tiếp theo.
 
@@ -641,7 +641,7 @@ DES là một ví dụ tốt về một block cipher rất hiệu quả trong ha
 
 Năm 2015, NIST bắt đầu quá trình chuẩn hóa lightweight cipher. Năm 2019, 57 thuật toán ứng viên đã được nộp. Quá trình lựa chọn tiếp theo kéo dài qua ba vòng. Sau Vòng 2, mười thuật toán chung kết được công bố vào đầu năm 2021. Tháng Hai năm 2023, họ lightweight cipher Ascon được chọn làm tiêu chuẩn NIST tương lai. Thuật toán được thiết kế bởi một nhóm các nhà cryptographer châu Âu và mô tả cipher được cho trong [98]. Thú vị là Ascon không dùng cấu trúc Feistel (như DES) cũng không dùng substitution-permutation network (như AES và PRESENT) mà dùng cấu trúc sponge. Thêm về cấu trúc sponge sẽ được nói trong Mục 11.5.1 trong bối cảnh hash function SHA-3.
 
-Trong số nhiều đề xuất lightweight cipher, các thuật toán Simon và Speck [31] đóng một vai trò đặc biệt. Chúng hiệu quả khi được hiện thực bằng software và hardware nhưng có lẽ chúng nổi tiếng nhất vì được NSA thiết kế. Đã có những tranh cãi quanh các nỗ lực đưa Simon và Speck vào các tiêu chuẩn công nghiệp của ISO [19], vì một số quốc gia lo ngại về các điểm yếu có thể có trong các cipher này.
+Trong số nhiều đề xuất lightweight cipher, các thuật toán Simon và Speck [31] đóng một vai trò đặc biệt. Chúng hiệu quả khi được triển khai bằng software và hardware nhưng có lẽ chúng nổi tiếng nhất vì được NSA thiết kế. Đã có những tranh cãi quanh các nỗ lực đưa Simon và Speck vào các tiêu chuẩn công nghiệp của ISO [19], vì một số quốc gia lo ngại về các điểm yếu có thể có trong các cipher này.
 
 ## 3.9 Bài học rút ra (Lessons Learned)
 
@@ -763,7 +763,7 @@ A<sup>′</sup> ⊕ B = (A ⊕ B)<sup>′</sup>
 
 3.11. Giả sử chúng ta thực hiện một known-plaintext attack nhắm vào DES với một cặp plaintext và ciphertext. Chúng ta phải thử bao nhiêu key trong kịch bản worst-case nếu áp dụng exhaustive key search theo cách thẳng? Trung bình bao nhiêu key?
 
-3.12. Trong bài tập này, chúng ta muốn nghiên cứu yêu cầu tần số clock cho một hiện thực hardware của DES trong các ứng dụng real-world. Tốc độ của một hiện thực DES chủ yếu được xác định bởi thời gian cần để tính một vòng. Khối hardware cho một vòng được dùng 16 lần liên tiếp để tạo ra output đã mã hóa. (Một cách tiếp cận khác là xây dựng một pipeline hardware với 16 tầng, dẫn tới chi phí hardware tăng 16-fold, nhưng trong bài tập này chúng ta không xem xét một hiện thực pipelined như vậy.)
+3.12. Trong bài tập này, chúng ta muốn nghiên cứu yêu cầu tần số clock cho một bản triển khai hardware của DES trong các ứng dụng real-world. Tốc độ của một bản triển khai DES chủ yếu được xác định bởi thời gian cần để tính một vòng. Khối hardware cho một vòng được dùng 16 lần liên tiếp để tạo ra output đã mã hóa. (Một cách tiếp cận khác là xây dựng một pipeline hardware với 16 tầng, dẫn tới chi phí hardware tăng 16-fold, nhưng trong bài tập này chúng ta không xem xét một bản triển khai pipelined như vậy.)
 
 1. Giả sử việc tính hàm vòng có thể được thực hiện trong một chu kỳ clock. Hãy xây dựng một biểu thức cho tần số clock cần thiết để mã hóa một dòng dữ liệu với tốc độ dữ liệu r [bit/giây]. Bỏ qua thời gian cần cho hoán vị ban đầu và hoán vị cuối.
 
@@ -771,7 +771,7 @@ A<sup>′</sup> ⊕ B = (A ⊕ B)<sup>′</sup>
 
 3.13. Trong ví dụ này, chúng ta muốn cảm nhận việc thực hiện một brute-force attack trên một key 56-bit. Với mục đích này, chúng ta nghiên cứu máy key-search COPACOBANA (xem Mục 3.5.1).
 
-1. Tính thời gian chạy của một exhaustive key search trung bình trên DES với giả định các chi tiết hiện thực sau:
+1. Tính thời gian chạy của một exhaustive key search trung bình trên DES với giả định các chi tiết triển khai sau:
 
 ■ Chúng ta dùng máy COPACOBANA với 20 module FPGA.
 
@@ -787,7 +787,7 @@ A<sup>′</sup> ⊕ B = (A ⊕ B)<sup>′</sup>
 
 3. Vì sao bất kỳ thiết kế máy key-search nào cũng chỉ tạo thành một ngưỡng bảo mật trên? Ngưỡng bảo mật trên có nghĩa là một thước đo (độ phức tạp) mô tả mức bảo mật tối đa do một thuật toán cryptographic cho trước cung cấp.
 
-3.14. Trong bài tập này, chúng ta nghiên cứu một trường hợp real-world về việc dẫn xuất key password-based yếu. Một chương trình mã hóa file thương mại từ đầu những năm 1990 đã dùng DES tiêu chuẩn với 56 bit key. Thời đó, thực hiện exhaustive key search khó hơn đáng kể so với ngày nay, và do đó độ dài key là đủ cho một số ứng dụng. Đáng tiếc, việc hiện thực tạo key bị lỗi, điều chúng ta sẽ phân tích. Giả sử chúng ta có thể thử 10<sup>6</sup> key mỗi giây trên một PC thông thường.
+3.14. Trong bài tập này, chúng ta nghiên cứu một trường hợp real-world về việc dẫn xuất key password-based yếu. Một chương trình mã hóa file thương mại từ đầu những năm 1990 đã dùng DES tiêu chuẩn với 56 bit key. Thời đó, thực hiện exhaustive key search khó hơn đáng kể so với ngày nay, và do đó độ dài key là đủ cho một số ứng dụng. Đáng tiếc, việc triển khai tạo key bị lỗi, điều chúng ta sẽ phân tích. Giả sử chúng ta có thể thử 10<sup>6</sup> key mỗi giây trên một PC thông thường.
 
 Key được tạo từ một mật khẩu gồm 8 ký tự? Key là phép nối đơn giản của 8 ký tự ASCII, cho ra 64 = 8 · 8 bit key. Với hoán vị PC–1 trong key schedule, bit có trọng số thấp nhất (LSB) của mỗi ký tự 8-bit bị bỏ qua, cho ra 56 bit key.
 

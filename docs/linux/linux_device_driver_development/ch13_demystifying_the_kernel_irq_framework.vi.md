@@ -34,11 +34,11 @@ Exception là hệ quả của lỗi lập trình, được kernel xử lý bằ
 
 - Processor-detected exception: CPU tạo để đáp ứng điều kiện bất thường, được chia thành ba nhóm:
 
-- Fault, thường có thể sửa được (instruction sai).
+  - Fault, thường có thể sửa được (instruction sai).
 
-- Trap, xảy ra trong user process (memory access không hợp lệ, chia cho 0), cũng là cơ chế chuyển sang kernel mode để đáp ứng system call. Nếu kernel code gây trap, kernel lập tức panic.
+  - Trap, xảy ra trong user process (memory access không hợp lệ, chia cho 0), cũng là cơ chế chuyển sang kernel mode để đáp ứng system call. Nếu kernel code gây trap, kernel lập tức panic.
 
-- Abort – lỗi nghiêm trọng.
+  - Abort – lỗi nghiêm trọng.
 
 - Programmed exception: Được programmer yêu cầu và xử lý như trap.
 
@@ -62,11 +62,11 @@ Cả IRQ management và interrupt controller driver đều dựa trên khái ni�
 
 - `struct irqdomain`: Cung cấp những khả năng sau:
 
-- Pointer tới firmware node (`fwnode`) của interrupt controller
+  - Pointer tới firmware node (`fwnode`) của interrupt controller
 
-- Function chuyển firmware description của IRQ thành ID cục bộ của interrupt controller này (`hwirq`, còn gọi là hardware IRQ number)
+  - Function chuyển firmware description của IRQ thành ID cục bộ của interrupt controller này (`hwirq`, còn gọi là hardware IRQ number)
 
-- Cách lấy cách nhìn của Linux (`virq`, còn gọi là virtual IRQ number) về IRQ từ `hwirq`
+  - Cách lấy cách nhìn của Linux (`virq`, còn gọi là virtual IRQ number) về IRQ từ `hwirq`
 
 - `struct irq_desc`: Structure này là cách Linux nhìn nhận interrupt. Nó chứa mọi thông tin về interrupt cùng mapping one-to-one tới Linux interrupt number.
 
@@ -74,11 +74,11 @@ Cả IRQ management và interrupt controller driver đều dựa trên khái ni�
 
 - `struct irq_data`: Structure này được nhúng trong structure `struct irq_desc` và cung cấp thông tin sau:
 
-- Data liên quan IRQ chip quản lý interrupt này.
+  - Data liên quan IRQ chip quản lý interrupt này.
 
-- Cả `virq` lẫn `hwirq`.
+  - Cả `virq` lẫn `hwirq`.
 
-- Pointer tới `struct irq_chip` (IRQ chip data structure). Lưu ý phần lớn function call IRQ chip-related nhận `irq_data` làm parameter, từ đó có thể lấy `struct irq_desc` tương ứng.
+  - Pointer tới `struct irq_chip` (IRQ chip data structure). Lưu ý phần lớn function call IRQ chip-related nhận `irq_data` làm parameter, từ đó có thể lấy `struct irq_desc` tương ứng.
 
 Mọi data structure trên thuộc IRQ domain API. Interrupt controller được biểu diễn trong kernel bằng instance của structure `struct irq_chip`, mô tả hardware device thực tế và một số method do IRQ core dùng. Khối code sau thể hiện định nghĩa:
 
@@ -273,11 +273,11 @@ static int ativic32_irq_domain_map(
 
 - `xlate`: Với DT node có interrupt specifier, hook này decode hardware interrupt number trong specifier cùng Linux interrupt type value. Tùy giá trị `#interrupt-cells` chỉ định trong DT controller node, kernel cung cấp generic translation function:
 
-- `irq_domain_xlate_twocell()`: Generic translation function dùng cho direct two-cell binding. Nó làm việc với device tree IRQ specifier có two-cell binding, trong đó cell value map trực tiếp tới number `hwirq` và Linux IRQ flag.
+  - `irq_domain_xlate_twocell()`: Generic translation function dùng cho direct two-cell binding. Nó làm việc với device tree IRQ specifier có two-cell binding, trong đó cell value map trực tiếp tới number `hwirq` và Linux IRQ flag.
 
-- `irq_domain_xlate_onecell()`: Generic `xlate` cho direct one-cell binding.
+  - `irq_domain_xlate_onecell()`: Generic `xlate` cho direct one-cell binding.
 
-- `Irq_domain_xlate_onetwocell()`: Generic `xlate` cho one-cell hoặc two-cell binding.
+  - `Irq_domain_xlate_onetwocell()`: Generic `xlate` cho one-cell hoặc two-cell binding.
 
 Ví dụ domain operation được đưa ra trong khối code sau:
 
@@ -518,11 +518,7 @@ set_handle_irq(gic_handle_irq);
 
 `gic_handle_irq()` gọi `handle_domain_irq()`, thực thi `generic_handle_irq()`, đến lượt nó gọi `generic_handle_irq_desc()`, kết thúc bằng gọi `desc->handle_irq()`. Có thể xem toàn bộ chuỗi trong `arch/arm/kernel/irq.c`. Giờ `handle_irq` là lời gọi thực sự tới flow handler, đã đăng ký là `mcp23016_irq_handler` trong sơ đồ.
 
-`gic_hande_irq()` là GIC interrupt handler. `generic_handle_irq()` thực thi handler của GPIO4 IRQ trên SoC, tìm GPIO pin đã phát interrupt và gọi
-
-```
-generic_handle_irq_desc().
-```
+`gic_hande_irq()` là GIC interrupt handler. `generic_handle_irq()` thực thi handler của GPIO4 IRQ trên SoC, tìm GPIO pin đã phát interrupt và gọi `generic_handle_irq_desc()`.
 
 ## Chaining IRQ
 
@@ -542,9 +538,9 @@ Interrupt controller ARM phổ biến nhất, GIC trong ARM multi-core processor
 
 - CPU private interrupt: Những interrupt này là private cho từng CPU. Nếu được kích hoạt, per-CPU interrupt chỉ được phục vụ trên target CPU hoặc CPU mà nó được bind vào. Private interrupt có thể chia thành hai họ:
 
-- Private peripheral interrupt (PPI): Là private và chỉ có thể được hardware gắn với CPU tạo.
+  - Private peripheral interrupt (PPI): Là private và chỉ có thể được hardware gắn với CPU tạo.
 
-- Software-generated interrupt (SGI): Khác PPI, được software tạo. Nhờ vậy, SGI thường dùng làm interrupt IPI cho inter-core communication trên multi-core system, nghĩa là một CPU có thể tạo interrupt (bằng cách ghi message thích hợp gồm interrupt ID và target CPU vào GIC controller) tới một hoặc nhiều CPU khác. Đây là điều chúng ta bàn trong phần này.
+  - Software-generated interrupt (SGI): Khác PPI, được software tạo. Nhờ vậy, SGI thường dùng làm interrupt IPI cho inter-core communication trên multi-core system, nghĩa là một CPU có thể tạo interrupt (bằng cách ghi message thích hợp gồm interrupt ID và target CPU vào GIC controller) tới một hoặc nhiều CPU khác. Đây là điều chúng ta bàn trong phần này.
 
 - Shared peripheral interrupt (SPI) (không nhầm với SPI bus): Đây là interrupt thông thường đã bàn đến đây. Chúng có thể được route tới bất kỳ CPU nào.
 
@@ -556,9 +552,9 @@ GIC có thể hỗ trợ tối đa 8 CPU interface, mỗi interface xử lý t�
 
 - Interrupt number 0–31 là interrupt private cho CPU interface. Những private interrupt này được banked trong distributor block và chia như sau:
 
-- SGI dùng banked interrupt number 0–15.
+  - SGI dùng banked interrupt number 0–15.
 
-- PPI dùng banked interrupt number 16–31. Ví dụ, trong hệ thống SMP, per-CPU timer do clock event device cung cấp có thể tạo interrupt như vậy.
+  - PPI dùng banked interrupt number 16–31. Ví dụ, trong hệ thống SMP, per-CPU timer do clock event device cung cấp có thể tạo interrupt như vậy.
 
 - SPI dùng interrupt number 32–1.019.
 

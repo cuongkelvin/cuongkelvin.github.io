@@ -104,7 +104,7 @@ Cũng như với mọi cryptographic algorithm, bạn đo throughput của một
 
 Khả năng song song hóa của một cipher là thước đo khả năng xử lý nhiều data block cùng lúc mà không cần chờ việc xử lý block trước đó hoàn tất. Các thiết kế block cipher–based có thể dễ dàng song song hóa khi mỗi block có thể được xử lý độc lập với các block khác. Ví dụ, block cipher mode CTR trong Chương 4 có thể song song hóa, trong khi CBC encryption mode thì không, vì các block được xâu chuỗi với nhau.
 
-Cấu trúc bên trong của một authenticated cipher là một tiêu chí hiệu năng quan trọng khác. Có hai loại cấu trúc chính: one-layer và two-layer. Trong một cấu trúc two-layer (ví dụ, trong AES-GCM được dùng rộng rãi), một algorithm xử lý plaintext, rồi algorithm thứ hai xử lý kết quả. Thông thường, layer thứ nhất là encryption layer, và layer thứ hai là authentication layer. Nhưng như bạn có thể đoán, một cấu trúc two-layer làm phức tạp việc hiện thực và có xu hướng làm chậm tính toán.
+Cấu trúc bên trong của một authenticated cipher là một tiêu chí hiệu năng quan trọng khác. Có hai loại cấu trúc chính: one-layer và two-layer. Trong một cấu trúc two-layer (ví dụ, trong AES-GCM được dùng rộng rãi), một algorithm xử lý plaintext, rồi algorithm thứ hai xử lý kết quả. Thông thường, layer thứ nhất là encryption layer, và layer thứ hai là authentication layer. Nhưng như bạn có thể đoán, một cấu trúc two-layer làm phức tạp việc triển khai và có xu hướng làm chậm tính toán.
 
 Một authenticated cipher là streamable (còn gọi là online cipher) khi nó có thể xử lý một message theo từng block và loại bỏ mọi block already-processed. Ngược lại, các cipher nonstreamable phải lưu toàn bộ message, thường là vì chúng cần duyệt qua dữ liệu hai lượt liên tiếp: một lượt từ đầu đến cuối và lượt kia từ cuối về đầu dữ liệu thu được từ lượt thứ nhất.
 
@@ -114,7 +114,7 @@ Vì yêu cầu memory có thể cao, một số ứng dụng sẽ không làm vi
 
 Các tiêu chí chức năng là những tính năng của một cipher hoặc implementation của nó không liên quan trực tiếp đến security hay hiệu năng. Ví dụ, một số authenticated cipher chỉ cho phép associated data đứng trước dữ liệu cần mã hóa (vì chúng cần truy cập nó để bắt đầu mã hóa). Những cipher khác yêu cầu associated data đứng sau dữ liệu cần mã hóa hoặc hỗ trợ đưa associated data vào bất kỳ đâu—kể cả giữa các mẩu plaintext. Trường hợp cuối cùng này là tốt nhất, vì nó cho phép người dùng bảo vệ dữ liệu của họ trong mọi tình huống có thể, nhưng nó cũng khó thiết kế an toàn nhất: nhiều tính năng hơn thường mang lại nhiều độ phức tạp và lỗ hổng tiềm ẩn hơn.
 
-Một tiêu chí chức năng khác cần xét là liệu bạn có thể dùng cùng một core algorithm cho cả encryption lẫn decryption hay không. Ví dụ, nhiều authenticated cipher dựa trên block cipher AES, vốn quy định dùng hai algorithm tương tự nhau để mã hóa và giải mã một block. Như đã thảo luận trong Chương 4, block cipher mode CBC cần cả hai algorithm, nhưng CTR mode chỉ cần encryption algorithm. Tương tự, authenticated cipher có thể không cần cả hai algorithm. Dù chi phí bổ sung của việc hiện thực cả encryption algorithm lẫn decryption algorithm sẽ không ảnh hưởng đến phần lớn software, nó thường đáng kể trên hardware chuyên dụng low-cost, nơi bạn đo chi phí hiện thực theo số cổng logic, hay diện tích silicon mà phần cryptography chiếm.
+Một tiêu chí chức năng khác cần xét là liệu bạn có thể dùng cùng một core algorithm cho cả encryption lẫn decryption hay không. Ví dụ, nhiều authenticated cipher dựa trên block cipher AES, vốn quy định dùng hai algorithm tương tự nhau để mã hóa và giải mã một block. Như đã thảo luận trong Chương 4, block cipher mode CBC cần cả hai algorithm, nhưng CTR mode chỉ cần encryption algorithm. Tương tự, authenticated cipher có thể không cần cả hai algorithm. Dù chi phí bổ sung của việc triển khai cả encryption algorithm lẫn decryption algorithm sẽ không ảnh hưởng đến phần lớn software, nó thường đáng kể trên hardware chuyên dụng low-cost, nơi bạn đo chi phí triển khai theo số cổng logic, hay diện tích silicon mà phần cryptography chiếm.
 
 ## Tiêu chuẩn authenticated cipher AES-GCM
 
@@ -140,7 +140,7 @@ Do đó, bạn có thể biểu diễn giá trị của authentication tag là T
 
 GHASH dùng ký hiệu đa thức để nhân mỗi ciphertext block với authentication key H. Việc dùng phép nhân đa thức này giúp GHASH nhanh trong hardware và software, nhờ một instruction nhân đa thức đặc biệt có trong nhiều bộ vi xử lý thông dụng (CLMUL, viết tắt của carry-less multiplication).
 
-Đáng tiếc là GHASH còn xa mới lý tưởng. Trước hết, tốc độ của nó chưa tối ưu. Ngay cả khi dùng instruction CLMUL, layer AES-CTR mã hóa plaintext vẫn nhanh hơn MAC GHASH. Thứ hai, GHASH rất khó hiện thực đúng. Thực tế, ngay cả các developer giàu kinh nghiệm của dự án OpenSSL, phần mềm cryptography most-used trên thế giới, hơn hẳn các phần mềm khác, cũng đã làm sai GHASH của AES-GCM. Một commit có bug trong function gcm_ghash_clmul cho phép kẻ tấn công làm giả MAC hợp lệ cho AES-GCM. (May thay, các kỹ sư Intel đã phát hiện ra lỗi trước khi bug được đưa vào bản phát hành OpenSSL tiếp theo.)
+Đáng tiếc là GHASH còn xa mới lý tưởng. Trước hết, tốc độ của nó chưa tối ưu. Ngay cả khi dùng instruction CLMUL, layer AES-CTR mã hóa plaintext vẫn nhanh hơn MAC GHASH. Thứ hai, GHASH rất khó triển khai đúng. Thực tế, ngay cả các developer giàu kinh nghiệm của dự án OpenSSL, phần mềm cryptography most-used trên thế giới, hơn hẳn các phần mềm khác, cũng đã làm sai GHASH của AES-GCM. Một commit có bug trong function gcm_ghash_clmul cho phép kẻ tấn công làm giả MAC hợp lệ cho AES-GCM. (May thay, các kỹ sư Intel đã phát hiện ra lỗi trước khi bug được đưa vào bản phát hành OpenSSL tiếp theo.)
 
 > **PHÉP NHÂN ĐA THỨC (POLYNOMIAL MULTIPLICATION)**
 
@@ -196,7 +196,7 @@ trong đó OCB định nghĩa các offset khác với các offset được dùng
 
 Khác với GCM và encrypt-then-MAC, vốn kết hợp các ciphertext block để tạo thành tag, OCB tính authentication tag bằng cách kết hợp dữ liệu plaintext. Không có gì sai với cách tiếp cận này, và OCB được hỗ trợ bởi các security proof vững chắc.
 
-> **LƯU Ý** Để biết thêm về cách hiện thực OCB, hãy xem RFC 7253 hoặc bài báo năm 2011 “The Software Performance of Authenticated-Encryption Modes” của Ted Krovetz và Phillip Rogaway, đề cập phiên bản OCB mới nhất và tốt nhất, OCB3. Để biết thêm chi tiết về OCB, xem FAQ tại http://web.cs.ucdavis.edu/rogaway/ocb/ocb-faq.htm.
+> **LƯU Ý** Để biết thêm về cách triển khai OCB, hãy xem RFC 7253 hoặc bài báo năm 2011 “The Software Performance of Authenticated-Encryption Modes” của Ted Krovetz và Phillip Rogaway, đề cập phiên bản OCB mới nhất và tốt nhất, OCB3. Để biết thêm chi tiết về OCB, xem FAQ tại http://web.cs.ucdavis.edu/rogaway/ocb/ocb-faq.htm.
 
 ### Security của OCB (OCB Security)
 

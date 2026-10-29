@@ -139,13 +139,13 @@ LƯU Ý QUAN TRỌNG
 
 Có một động cơ khác để giảm tần số: quản lý nhiệt. Có thể cần thiết phải hoạt động ở tần số thấp hơn chỉ để giữ nhiệt độ của package trong giới hạn. Nhưng đó không phải là trọng tâm của chúng ta ở đây.
 
-Do đó, nếu muốn giảm mức tiêu thụ điện năng, chúng ta phải có khả năng thay đổi điện áp mà lõi CPU hoạt động. Nhưng với bất kỳ điện áp nào, luôn có một tần số tối đa mà vượt quá nó thì việc chuyển mạch của các gate trở nên không tin cậy. Tần số cao hơn cần điện áp cao hơn, và vì vậy cả hai cần được điều chỉnh cùng nhau. Nhiều SoC hiện thực một tính năng như vậy. Nó được gọi là Dynamic Voltage and Frequency Scaling (DVFS). Các nhà sản xuất tính toán các tổ hợp tối ưu của tần số lõi và điện áp. Mỗi tổ hợp được gọi là một Operating Performance Point (OPP). Đặc tả ACPI gọi chúng là P-states, với `P0` là OPP có tần số cao nhất. Mặc dù một OPP là tổ hợp của một tần số và một điện áp, nó thường được gọi chỉ bằng thành phần tần số.
+Do đó, nếu muốn giảm mức tiêu thụ điện năng, chúng ta phải có khả năng thay đổi điện áp mà lõi CPU hoạt động. Nhưng với bất kỳ điện áp nào, luôn có một tần số tối đa mà vượt quá nó thì việc chuyển mạch của các gate trở nên không tin cậy. Tần số cao hơn cần điện áp cao hơn, và vì vậy cả hai cần được điều chỉnh cùng nhau. Nhiều SoC triển khai một tính năng như vậy. Nó được gọi là Dynamic Voltage and Frequency Scaling (DVFS). Các nhà sản xuất tính toán các tổ hợp tối ưu của tần số lõi và điện áp. Mỗi tổ hợp được gọi là một Operating Performance Point (OPP). Đặc tả ACPI gọi chúng là P-states, với `P0` là OPP có tần số cao nhất. Mặc dù một OPP là tổ hợp của một tần số và một điện áp, nó thường được gọi chỉ bằng thành phần tần số.
 
 Cần một kernel driver để chuyển đổi giữa các P-states. Tiếp theo, chúng ta sẽ xem driver đó và các governor điều khiển nó.
 
 ### CPUFreq driver
 
-Linux có một thành phần tên là CPUFreq quản lý việc chuyển đổi giữa các OPP. Nó là một phần của board support cho package của từng SoC. CPUFreq gồm các driver thực hiện chuyển đổi từ OPP này sang OPP khác và một tập governor hiện thực chính sách khi nào thì chuyển. Nó được điều khiển theo từng CPU qua thư mục `/sys/devices/system/cpu/cpuN/cpufreq`, với `N` là số hiệu CPU. Trong đó, chúng ta tìm thấy một số file, những file thú vị nhất là:
+Linux có một thành phần tên là CPUFreq quản lý việc chuyển đổi giữa các OPP. Nó là một phần của board support cho package của từng SoC. CPUFreq gồm các driver thực hiện chuyển đổi từ OPP này sang OPP khác và một tập governor triển khai chính sách khi nào thì chuyển. Nó được điều khiển theo từng CPU qua thư mục `/sys/devices/system/cpu/cpuN/cpufreq`, với `N` là số hiệu CPU. Trong đó, chúng ta tìm thấy một số file, những file thú vị nhất là:
 
 - `cpuinfo_cur_freq`, `cpuinfo_max_freq` và `cpuinfo_min_freq`: Đây là các tần số hiện tại của CPU này, cùng với tần số tối đa và tối thiểu tính bằng KHz.
 
@@ -442,7 +442,7 @@ Runtime power management được trình bày qua một giao diện `sysfs`. M�
 
 - `runtime_status`: File này báo cáo trạng thái hiện tại của thiết bị. Nó có thể là `active`, `suspended` hoặc `unsupported`.
 
-- `autosuspend_delay_ms`: Đây là thời gian trước khi thiết bị bị suspend. `-1` nghĩa là chờ mãi mãi. Một số driver hiện thực điều này nếu việc suspend phần cứng thiết bị có chi phí đáng kể vì nó ngăn các chu kỳ suspend/resume nhanh liên tiếp.
+- `autosuspend_delay_ms`: Đây là thời gian trước khi thiết bị bị suspend. `-1` nghĩa là chờ mãi mãi. Một số driver triển khai điều này nếu việc suspend phần cứng thiết bị có chi phí đáng kể vì nó ngăn các chu kỳ suspend/resume nhanh liên tiếp.
 
 Lấy một ví dụ cụ thể, hãy xem MMC driver trên BeaglePlay:
 

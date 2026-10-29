@@ -433,7 +433,7 @@ Memory Heap<a id="_idIndexMarker392"></a> quan trọng vì các thuộc tính đ
 5. Đây là một rủi ro vì nó khiến việc quản lý memory khó hơn nhiều. Bạn không biết khi nào cần giải phóng biến, và bạn phải nghĩ ra <a id="_idIndexMarker396"></a>một số định nghĩa mới cho *scope* và *owner* (chủ sở hữu) của <a id="_idIndexMarker397"></a>khối memory để thực hiện việc quản lý memory một cách hiệu quả. Một số phương pháp này được trình bày trong các phần sắp tới.
 6. **Chúng ta chỉ có thể dùng pointer để trỏ tới một khối memory Heap**. Nói cách khác, không có khái niệm nào như biến Heap. Vùng Heap được truy cập qua pointer.
 
-1. **Vì segment Heap là private đối với process sở hữu nó, chúng ta cần dùng một debugger để thăm dò nó**. May mắn thay, pointer trong C làm việc với khối memory Heap giống hệt như cách chúng <a id="_idIndexMarker398"></a>làm việc với các khối memory Stack. C thực hiện sự trừu tượng hóa này rất tốt, và nhờ đó, chúng ta có thể dùng cùng các pointer để trỏ tới cả hai loại memory. Do đó, chúng ta có thể dùng cùng các phương pháp đã dùng để xem xét Stack để thăm dò memory Heap.
+7. **Vì segment Heap là private đối với process sở hữu nó, chúng ta cần dùng một debugger để thăm dò nó**. May mắn thay, pointer trong C làm việc với khối memory Heap giống hệt như cách chúng <a id="_idIndexMarker398"></a>làm việc với các khối memory Stack. C thực hiện sự trừu tượng hóa này rất tốt, và nhờ đó, chúng ta có thể dùng cùng các pointer để trỏ tới cả hai loại memory. Do đó, chúng ta có thể dùng cùng các phương pháp đã dùng để xem xét Stack để thăm dò memory Heap.
 
 Trong phần tiếp theo, chúng ta sẽ thảo luận cách cấp phát và giải phóng một khối memory heap.
 
@@ -559,7 +559,7 @@ Nếu bạn định viết một chương trình cross-platform, hãy luôn tuâ
 
 Ngay cả khi bạn đang viết chương trình chỉ cho Linux và không cho các hệ điều hành khác, hãy lưu ý rằng các compiler tương lai có thể hoạt động khác. Do đó, theo C specification, chúng ta phải luôn giả định rằng khối memory được cấp phát bởi `malloc` chưa được khởi tạo và nó nên được khởi tạo thủ công nếu cần.
 
-Lưu ý rằng vì `malloc` không khởi tạo memory được cấp phát, nó thường nhanh hơn `calloc`. Trong một số hiện thực, `malloc` không thực sự cấp phát khối memory và trì hoãn việc cấp phát cho đến khi khối memory được truy cập (đọc hoặc ghi). Bằng cách này, việc cấp phát memory diễn ra nhanh hơn.
+Lưu ý rằng vì `malloc` không khởi tạo memory được cấp phát, nó thường nhanh hơn `calloc`. Trong một số bản triển khai, `malloc` không thực sự cấp phát khối memory và trì hoãn việc cấp phát cho đến khi khối memory được truy cập (đọc hoặc ghi). Bằng cách này, việc cấp phát memory diễn ra nhanh hơn.
 
 Nếu bạn định khởi tạo memory sau `malloc`, bạn có thể dùng hàm `memset`. Đây là một ví dụ:
 
@@ -753,7 +753,7 @@ Một trong những chiến lược tốt nhất được đề xuất để vư
 
 Owner là thực thể duy nhất chịu trách nhiệm quản lý vòng đời của một khối memory Heap và là thực thể cấp phát khối ngay từ đầu và giải phóng nó khi khối không còn cần thiết.
 
-Có rất nhiều ví dụ kinh điển về cách dùng chiến lược này. Hầu hết các library C well-known đều dùng chiến lược này để xử lý các lần cấp phát memory Heap của chúng. *Ví dụ 5.5* là một hiện thực rất đơn giản của phương pháp này được dùng để quản lý vòng đời của một đối tượng queue được viết bằng C. Code<a id="_idIndexMarker431"></a> box sau cố gắng minh họa chiến lược *ownership* (quyền sở hữu):
+Có rất nhiều ví dụ kinh điển về cách dùng chiến lược này. Hầu hết các library C well-known đều dùng chiến lược này để xử lý các lần cấp phát memory Heap của chúng. *Ví dụ 5.5* là một bản triển khai rất đơn giản của phương pháp này được dùng để quản lý vòng đời của một đối tượng queue được viết bằng C. Code<a id="_idIndexMarker431"></a> box sau cố gắng minh họa chiến lược *ownership* (quyền sở hữu):
 
 ```
 #include <stdio.h> // For printf function
@@ -1085,7 +1085,7 @@ Có những memory allocator cho C khác với những allocator do thư viện 
 
 Đi qua mọi allocator ở đây nằm ngoài phạm vi của chương này, nhưng sẽ là một thực hành tốt nếu bạn tự đi qua chúng và thử dùng chúng.
 
-Giải pháp cho vấn đề âm thầm này là gì? Nó đơn giản: cấp phát và giải phóng ít thường xuyên hơn. Điều<a id="_idIndexMarker461"></a> này có vẻ bất khả thi trong một số chương trình được yêu cầu có tần suất cấp phát Heap cao. Những chương trình này thường cấp phát một khối memory Heap lớn và cố tự quản lý nó. Điều này giống như có thêm một lớp logic cấp phát và giải phóng khác (có lẽ đơn giản hơn các hiện thực của `malloc` và `free`) trên một khối memory Heap lớn.
+Giải pháp cho vấn đề âm thầm này là gì? Nó đơn giản: cấp phát và giải phóng ít thường xuyên hơn. Điều<a id="_idIndexMarker461"></a> này có vẻ bất khả thi trong một số chương trình được yêu cầu có tần suất cấp phát Heap cao. Những chương trình này thường cấp phát một khối memory Heap lớn và cố tự quản lý nó. Điều này giống như có thêm một lớp logic cấp phát và giải phóng khác (có lẽ đơn giản hơn các bản triển khai của `malloc` và `free`) trên một khối memory Heap lớn.
 
 Cũng có <a id="_idIndexMarker462"></a>một phương pháp khác, đó là dùng *memory pool*. Chúng tôi sẽ giải thích ngắn gọn kỹ thuật này trước khi đi đến cuối chương.
 

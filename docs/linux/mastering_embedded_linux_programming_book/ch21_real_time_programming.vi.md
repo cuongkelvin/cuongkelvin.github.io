@@ -94,7 +94,7 @@ Về cơ bản, lập trình real-time là việc bảo đảm rằng các threa
 
 - Scheduling latency: Kernel phải có khả năng lập lịch lại ngay khi một sự kiện như interrupt hoặc timer xảy ra và không phải chịu các độ trễ không giới hạn. Giảm scheduling latency là một chủ đề then chốt ở phần sau của chương này.
 
-- Priority inversion: Đây là hệ quả của lập lịch priority-based, dẫn đến các độ trễ không giới hạn khi một thread high-priority bị block trên một mutex do một thread low-priority giữ, như tôi đã mô tả trong Chương 17. User space có các mutex priority inheritance và priority ceiling; trong kernel space, chúng ta có RT-mutexes, hiện thực priority inheritance, và tôi sẽ nói về chúng trong phần về real-time kernel.
+- Priority inversion: Đây là hệ quả của lập lịch priority-based, dẫn đến các độ trễ không giới hạn khi một thread high-priority bị block trên một mutex do một thread low-priority giữ, như tôi đã mô tả trong Chương 17. User space có các mutex priority inheritance và priority ceiling; trong kernel space, chúng ta có RT-mutexes, triển khai priority inheritance, và tôi sẽ nói về chúng trong phần về real-time kernel.
 
 - Timer chính xác: Nếu bạn muốn quản lý các deadline ở mức vài mili giây hoặc micro giây, bạn cần các timer tương xứng. High-resolution timer là cực kỳ quan trọng và là một tùy chọn cấu hình trên hầu như mọi kernel.
 
@@ -224,7 +224,7 @@ Bạn có thể cần thử nghiệm với các mức ưu tiên khác nhau để
 
 Lệnh `pgrep` là một phần của package `procps`.
 
-Giờ chúng ta đã được giới thiệu về real-time Linux kernel thông qua threaded interrupt handler, hãy đi sâu hơn vào cách hiện thực của nó.
+Giờ chúng ta đã được giới thiệu về real-time Linux kernel thông qua threaded interrupt handler, hãy đi sâu hơn vào cách triển khai của nó.
 
 ## Kernel lock có thể preempt
 
@@ -242,7 +242,7 @@ Thread đang giữ spin lock không thể bị preempt vì làm vậy có thể 
 
 LƯU Ý QUAN TRỌNG
 
-Giải pháp được `PREEMPT_RT` áp dụng là thay thế gần như tất cả spin lock bằng RT-mutexes. Một mutex chậm hơn một spin lock, nhưng nó hoàn toàn có thể preempt được. Không chỉ vậy, RT-mutexes hiện thực priority inheritance và vì vậy không bị ảnh hưởng bởi priority inversion.
+Giải pháp được `PREEMPT_RT` áp dụng là thay thế gần như tất cả spin lock bằng RT-mutexes. Một mutex chậm hơn một spin lock, nhưng nó hoàn toàn có thể preempt được. Không chỉ vậy, RT-mutexes triển khai priority inheritance và vì vậy không bị ảnh hưởng bởi priority inversion.
 
 Giờ chúng ta đã có ý niệm về những gì có trong các patch `PREEMPT_RT`. Vậy, làm thế nào để lấy chúng?
 

@@ -242,7 +242,11 @@ Câu trả lời là có, OS thực sự cần quan tâm điều gì xảy ra n�
 
 > THÔNG TIN THÊM: CONTEXT SWITCH MẤT BAO LÂU
 >
-> Một câu hỏi tự nhiên mà bạn có thể đặt ra là: thao tác như context switch mất bao lâu? Hay thậm chí system call mất bao lâu? Nếu tò mò, có công cụ tên lmbench [MS96] đo chính xác những điều đó, cùng một số thước đo hiệu năng khác có thể liên quan. Kết quả đã cải thiện khá nhiều theo thời gian, gần tương ứng với hiệu năng processor. Ví dụ, năm 1996, khi chạy Linux 1.3.37 trên CPU P6 200-MHz, system call mất khoảng 4 microsecond và context switch khoảng 6 microsecond [MS96]. Hệ thống hiện đại có hiệu năng tốt hơn gần một bậc độ lớn, với kết quả sub-microsecond trên hệ thống có processor 2- hoặc 3-GHz. Cần lưu ý rằng không phải mọi hoạt động operating-system đều cải thiện theo hiệu năng CPU. Như Ousterhout nhận xét, nhiều thao tác OS sử dụng nhiều memory, và memory bandwidth không cải thiện mạnh như tốc độ processor theo thời gian [O90]. Vì vậy, tùy workload, mua processor mới nhất và tốt nhất có thể không làm OS nhanh hơn nhiều như bạn hy vọng.
+> Một câu hỏi tự nhiên mà bạn có thể đặt ra là: thao tác như context switch mất bao lâu? Hay thậm chí system call mất bao lâu? Nếu tò mò, có công cụ tên lmbench [MS96] đo chính xác những điều đó, cùng một số thước đo hiệu năng khác có thể liên quan.
+>
+> Kết quả đã cải thiện khá nhiều theo thời gian, gần tương ứng với hiệu năng processor. Ví dụ, năm 1996, khi chạy Linux 1.3.37 trên CPU P6 200-MHz, system call mất khoảng 4 microsecond và context switch khoảng 6 microsecond [MS96]. Hệ thống hiện đại có hiệu năng tốt hơn gần một bậc độ lớn, với kết quả sub-microsecond trên hệ thống có processor 2- hoặc 3-GHz.
+>
+> Cần lưu ý rằng không phải mọi hoạt động operating-system đều cải thiện theo hiệu năng CPU. Như Ousterhout nhận xét, nhiều thao tác OS sử dụng nhiều memory, và memory bandwidth không cải thiện mạnh như tốc độ processor theo thời gian [O90]. Vì vậy, tùy workload, mua processor mới nhất và tốt nhất có thể không làm OS nhanh hơn nhiều như bạn hy vọng.
 
 Để khơi gợi hứng thú, ta sẽ phác thảo vài điều cơ bản về cách OS xử lý những tình huống phức tạp này. Một việc đơn giản OS có thể làm là disable interrupt trong quá trình xử lý interrupt; điều này bảo đảm khi một interrupt đang được xử lý, không interrupt nào khác được chuyển đến CPU. Tất nhiên, OS phải cẩn thận khi làm vậy; disable interrupt quá lâu có thể làm mất interrupt, và điều này (nói theo thuật ngữ kỹ thuật) là tệ.
 
@@ -256,7 +260,11 @@ Cách tiếp cận tổng quát này cũng được áp dụng trong đời th�
 
 > MẸO: REBOOT RẤT HỮU ÍCH
 >
-> Trước đó, ta đã lưu ý rằng giải pháp duy nhất cho infinite loop (và hành vi tương tự) dưới cooperative preemption là reboot máy. Dù bạn có thể chế giễu thủ thuật này, các nhà nghiên cứu chỉ ra rằng reboot (hoặc nói chung là khởi động lại một phần software) có thể là công cụ cực kỳ hữu ích để xây dựng hệ thống vững chắc [C+04]. Cụ thể, reboot hữu ích vì đưa software trở lại trạng thái đã biết và có thể đã được kiểm tra nhiều hơn. Reboot còn thu hồi tài nguyên cũ không còn hữu ích hoặc bị leak (ví dụ memory) vốn có thể khó xử lý theo cách khác. Cuối cùng, reboot dễ tự động hóa. Vì tất cả lý do này, trong các dịch vụ Internet trên cluster large-scale, không hiếm khi software quản lý hệ thống định kỳ reboot các nhóm máy để reset và nhận những lợi ích kể trên. Vì vậy, lần sau khi reboot, bạn không chỉ đang thực hiện một thủ thuật xấu xí. Bạn đang dùng một cách tiếp cận time-tested để cải thiện hành vi hệ thống máy tính. Làm tốt lắm!
+> Trước đó, ta đã lưu ý rằng giải pháp duy nhất cho infinite loop (và hành vi tương tự) dưới cooperative preemption là reboot máy. Dù bạn có thể chế giễu thủ thuật này, các nhà nghiên cứu chỉ ra rằng reboot (hoặc nói chung là khởi động lại một phần software) có thể là công cụ cực kỳ hữu ích để xây dựng hệ thống vững chắc [C+04].
+>
+> Cụ thể, reboot hữu ích vì đưa software trở lại trạng thái đã biết và có thể đã được kiểm tra nhiều hơn. Reboot còn thu hồi tài nguyên cũ không còn hữu ích hoặc bị leak (ví dụ memory) vốn có thể khó xử lý theo cách khác. Cuối cùng, reboot dễ tự động hóa. Vì tất cả lý do này, trong các dịch vụ Internet trên cluster large-scale, không hiếm khi software quản lý hệ thống định kỳ reboot các nhóm máy để reset và nhận những lợi ích kể trên.
+>
+> Vì vậy, lần sau khi reboot, bạn không chỉ đang thực hiện một thủ thuật xấu xí. Bạn đang dùng một cách tiếp cận time-tested để cải thiện hành vi hệ thống máy tính. Làm tốt lắm!
 
 Theo cách tương tự, OS làm CPU “an toàn cho trẻ” bằng cách trước tiên (lúc boot) thiết lập trap handler và khởi động interrupt timer, sau đó chỉ chạy process trong mode bị giới hạn. Nhờ vậy, OS có thể khá yên tâm rằng process chạy hiệu quả, chỉ cần OS can thiệp để thực hiện privileged operation hoặc khi đã độc chiếm CPU quá lâu nên cần được chuyển ra.
 

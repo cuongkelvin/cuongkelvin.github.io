@@ -46,7 +46,7 @@ Cuốn sách này có 7 phần. Trong mỗi phần trong số 7 phần này, ch�
 
 *Chương 8*, *Inheritance và Polymorphism*: Inheritance là một trong những chủ đề quan trọng nhất trong **lập trình hướng đối tượng** (**object-oriented programming** - **OOP**). Trong chương này, chúng tôi chỉ ra cách thiết lập mối quan hệ inheritance giữa hai class và cách thực hiện điều đó trong C. Polymorphism cũng là một chủ đề lớn khác được thảo luận trong chương này.
 
-*Chương 9*, *Abstraction và OOP trong C++*: Là chương cuối cùng trong phần thứ ba của cuốn sách, chúng ta sẽ nói về abstraction. Chúng ta thảo luận về các abstract data type và cách hiện thực chúng trong C. Chúng ta thảo luận về cấu trúc nội bộ của C++ và chứng minh cách các khái niệm object-oriented được hiện thực trong C++.
+*Chương 9*, *Abstraction và OOP trong C++*: Là chương cuối cùng trong phần thứ ba của cuốn sách, chúng ta sẽ nói về abstraction. Chúng ta thảo luận về các abstract data type và cách triển khai chúng trong C. Chúng ta thảo luận về cấu trúc nội bộ của C++ và chứng minh cách các khái niệm object-oriented được triển khai trong C++.
 
 *Chương 10*, *Unix – Lịch sử và Architecture*: Bạn không thể nói về C mà lại quên đi Unix. Trong chương này, chúng tôi mô tả lý do tại sao chúng lại gắn kết chặt chẽ với nhau, và cách mà Unix và C đã hỗ trợ lẫn nhau để tồn tại cho đến tận ngày nay. Architecture của Unix cũng được nghiên cứu, và chúng ta sẽ thấy cách một chương trình sử dụng các chức năng được hệ điều hành cung cấp ra ngoài.
 
@@ -102,7 +102,7 @@ Bạn có thể tải về các file code bằng cách làm theo các bước sa
 2. Chọn tab **Support**.
 3. Nhấp vào **Code Downloads**.
 
-1. Nhập tên cuốn sách vào hộp **Search** và làm theo các hướng dẫn on-screen.
+4. Nhập tên cuốn sách vào hộp **Search** và làm theo các hướng dẫn on-screen.
 
 Sau khi file đã được tải về, vui lòng đảm bảo rằng bạn giải nén hoặc trích xuất thư mục bằng phiên bản mới nhất của:
 

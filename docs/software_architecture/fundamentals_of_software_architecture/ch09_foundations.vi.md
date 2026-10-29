@@ -102,7 +102,7 @@ Nhiều architecture style giải quyết cách tách các phần của hệ th�
 
 #### Ứng dụng JavaScript một trang (Single-page JavaScript applications)
 
-<a id="id1057"></a>Khi khả năng phản hồi của web được cải thiện, các hiện thực JavaScript trong trình duyệt cũng vậy. Một họ các ứng dụng kiểu client/server nổi lên, giống với biến thể desktop ban đầu, nhưng với rich client được viết bằng JavaScript trong trình duyệt, thay vì là một ứng dụng desktop.
+<a id="id1057"></a>Khi khả năng phản hồi của web được cải thiện, các bản triển khai JavaScript trong trình duyệt cũng vậy. Một họ các ứng dụng kiểu client/server nổi lên, giống với biến thể desktop ban đầu, nhưng với rich client được viết bằng JavaScript trong trình duyệt, thay vì là một ứng dụng desktop.
 
 Như mục này minh họa, sẽ luôn có các layer để tách các phần khác nhau của architecture, tùy thuộc vào nhu cầu của ứng dụng và năng lực của nền tảng.
 
@@ -118,7 +118,7 @@ Giống như developer ngày nay không lo lắng về cách các giao thức m�
 >
 > <a id="id1059"></a>Trong thập niên 1990s, khi ngôn ngữ Java được thiết kế, tính toán three-tier đang là cơn sốt. Người ta cho rằng, trong tương lai, mọi hệ thống sẽ có three-tier architecture. Một trong những cơn đau đầu phổ biến với các ngôn ngữ hiện có thời đó, như C++, là việc di chuyển các đối tượng qua mạng một cách nhất quán giữa các hệ thống cồng kềnh đến mức nào. <a id="id1060"></a>Vì vậy các nhà thiết kế Java quyết định xây dựng năng lực này vào lõi của nó, dùng một cơ chế gọi là *serialization*.
 >
-> Mọi đối tượng Java đều hiện thực một interface đòi hỏi nó hỗ trợ serialization. Các nhà thiết kế cho rằng vì three-tiered architecture sẽ tồn tại mãi mãi, việc đưa nó vào ngôn ngữ sẽ mang lại sự tiện lợi lớn. Tất nhiên, architectural style đó đã đến rồi đi—nhưng những thứ còn sót lại vẫn xuất hiện trong Java cho đến ngày nay. Dù hầu như không ai còn dùng serialization, các tính năng Java mới vẫn phải hỗ trợ nó để tương thích ngược, khiến các nhà thiết kế ngôn ngữ vô cùng bực bội.
+> Mọi đối tượng Java đều triển khai một interface đòi hỏi nó hỗ trợ serialization. Các nhà thiết kế cho rằng vì three-tiered architecture sẽ tồn tại mãi mãi, việc đưa nó vào ngôn ngữ sẽ mang lại sự tiện lợi lớn. Tất nhiên, architectural style đó đã đến rồi đi—nhưng những thứ còn sót lại vẫn xuất hiện trong Java cho đến ngày nay. Dù hầu như không ai còn dùng serialization, các tính năng Java mới vẫn phải hỗ trợ nó để tương thích ngược, khiến các nhà thiết kế ngôn ngữ vô cùng bực bội.
 >
 > Hiểu được những hệ quả long-term của các quyết định thiết kế luôn là điều nằm ngoài tầm với của chúng ta, trong phần mềm cũng như trong các ngành kỹ thuật khác. Lời khuyên muôn thuở là ưu tiên các thiết kế đơn giản, theo nhiều cách, chính là một chiến lược future-proofing (phòng xa cho tương lai)<a id="id1061"></a>.<a id="id1062"></a>
 
@@ -214,7 +214,7 @@ Cái nào tốt hơn? Còn tùy! Mỗi kiểu phân vùng mang lại những ưu
 
 **Ưu điểm**
 
-- Được mô hình hóa sát hơn với cách doanh nghiệp vận hành thay vì theo một chi tiết hiện thực
+- Được mô hình hóa sát hơn với cách doanh nghiệp vận hành thay vì theo một chi tiết triển khai
 - Dễ xây dựng các team cross-functional xoay quanh domain hơn
 - Phù hợp hơn với các architecture style modular monolith và microservices
 - Luồng message khớp với problem domain
@@ -393,7 +393,7 @@ Tám ngộ nhận đã liệt kê ở trên tạo thành một tập nhận xét
 
 #### Fallacy #9. Versioning thì dễ (Versioning is easy)
 
-<a id="id1098"></a><a id="id1099"></a>Khi hai service cần giao tiếp, chúng truyền thông tin trong một *contract*, bao gồm thông tin cần thiết cho việc giao tiếp. Thường thì hiện thực bên trong của một service tiến hóa theo thời gian, thay đổi các trường mà service chấp nhận và truyền cho các service khác. Một cách để giải quyết vấn đề này là dùng versioning cho contract—tức là tạo các phiên bản khác nhau cho contract cũ và mới bao gồm các tập thông tin khác nhau. Tuy nhiên, quyết định tưởng như đơn giản này dẫn đến hàng loạt trade-offs:
+<a id="id1098"></a><a id="id1099"></a>Khi hai service cần giao tiếp, chúng truyền thông tin trong một *contract*, bao gồm thông tin cần thiết cho việc giao tiếp. Thường thì bản triển khai bên trong của một service tiến hóa theo thời gian, thay đổi các trường mà service chấp nhận và truyền cho các service khác. Một cách để giải quyết vấn đề này là dùng versioning cho contract—tức là tạo các phiên bản khác nhau cho contract cũ và mới bao gồm các tập thông tin khác nhau. Tuy nhiên, quyết định tưởng như đơn giản này dẫn đến hàng loạt trade-offs:
 
 - Team nên đánh version ở mức từng service riêng lẻ hay cho toàn bộ hệ thống?
 - Versioning nên mở rộng đến đâu? Phần nào của architecture sẽ cần hỗ trợ nó?

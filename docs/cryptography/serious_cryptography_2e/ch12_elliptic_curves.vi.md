@@ -104,7 +104,7 @@ Hơn nữa, vì phép cộng có tính kết hợp, bạn có (P + Q) + R = P + 
 
 Trong thực tế, hầu hết các cryptosystem dựa trên elliptic curve–based làm việc với x-and y-coordinates là các số modulo một số nguyên tố, p (nói cách khác, các số trong finite field Z<sub>p</sub>). Cũng như security của RSA phụ thuộc vào kích thước của các số được dùng, security của một cryptosystem dựa trên elliptic curve–based phụ thuộc vào số điểm trên đường cong. Nhưng làm thế nào để biết số điểm trên một elliptic curve, hay cardinality của nó? Chà, điều đó phụ thuộc vào đường cong và giá trị của p.
 
-> **LƯU Ý** Prime field không phải là những field duy nhất được dùng trong elliptic curve cryptography. Còn có các binary field, là các mở rộng của two-element field (bao gồm 0 và 1), mà các phần tử của chúng được biểu diễn dưới dạng đa thức với hệ số nhị phân. Số học trên binary field có ưu điểm là thường dễ hiện thực hiệu quả hơn trong phần cứng dưới dạng mạch logic, so với trên một bộ vi xử lý general-purpose.
+> **LƯU Ý** Prime field không phải là những field duy nhất được dùng trong elliptic curve cryptography. Còn có các binary field, là các mở rộng của two-element field (bao gồm 0 và 1), mà các phần tử của chúng được biểu diễn dưới dạng đa thức với hệ số nhị phân. Số học trên binary field có ưu điểm là thường dễ triển khai hiệu quả hơn trong phần cứng dưới dạng mạch logic, so với trên một bộ vi xử lý general-purpose.
 
 Có cỡ p điểm trên một đường cong được định nghĩa trên Z<sub>p</sub>, nhưng bạn có thể tính chính xác số điểm bằng Schoof’s algorithm, algorithm đếm số điểm trên elliptic curve trên các finite field. Bạn sẽ thấy algorithm này được tích hợp sẵn trong SageMath. Ví dụ, Listing 12-1 dùng Schoof’s algorithm để đếm số điểm trên đường cong y<sup>2</sup> = x<sup>3</sup> – 4x trên Z<sub>191</sub> từ Hình 12-1.
 
@@ -327,7 +327,7 @@ Hãy điểm qua một số đường cong phổ biến nhất, đặc biệt l�
 
 ### Các đường cong NIST (NIST Curves)
 
-Năm 2000, NIST đã chuẩn hóa một số đường cong trong tài liệu FIPS 186 dưới mục “Recommended Elliptic Curves for Federal Government Use.” Năm đường cong NIST, gọi là prime curve, làm việc modulo một số nguyên tố (xem “Elliptic Curves over Integers” ở trang 233). Mười đường cong NIST khác làm việc với đa thức nhị phân (binary polynomial), các đối tượng toán học giúp việc hiện thực trong phần cứng hiệu quả hơn. (Tôi sẽ không đi sâu hơn vào binary polynomial vì chúng hiếm khi được dùng với elliptic curve.)
+Năm 2000, NIST đã chuẩn hóa một số đường cong trong tài liệu FIPS 186 dưới mục “Recommended Elliptic Curves for Federal Government Use.” Năm đường cong NIST, gọi là prime curve, làm việc modulo một số nguyên tố (xem “Elliptic Curves over Integers” ở trang 233). Mười đường cong NIST khác làm việc với đa thức nhị phân (binary polynomial), các đối tượng toán học giúp việc triển khai trong phần cứng hiệu quả hơn. (Tôi sẽ không đi sâu hơn vào binary polynomial vì chúng hiếm khi được dùng với elliptic curve.)
 
 Các đường cong NIST phổ biến nhất là các prime curve. Trong số đó, một trong những đường cong phổ biến nhất là P-256, một đường cong làm việc trên các số modulo số 256-bit p = 2<sup>256</sup> – 2<sup>224</sup> + 2<sup>192</sup> + 2<sup>96</sup> – 1. Phương trình của P-256 là y<sup>2</sup> = x<sup>3</sup> – 3x + b, trong đó b là một số 256-bit. NIST cũng cung cấp các prime curve 192 bit, 224 bit, 384 bit và 521 bit (đây không phải lỗi đánh máy; đó là 521, không phải 512).
 
@@ -337,7 +337,7 @@ Các đường cong NIST đôi khi bị chỉ trích vì chỉ NSA, tác giả c
 
 Daniel J. Bernstein đã giới thiệu Curve25519 (thường được phát âm là curve-twenty-five-five-nineteen) với thế giới năm 2006. Được thúc đẩy bởi hiệu năng, ông thiết kế Curve25519 để nhanh hơn và dùng key ngắn hơn các đường cong tiêu chuẩn. Nhưng Curve25519 cũng mang lại lợi ích về security; khác với các đường cong NIST, nó không có hằng số đáng ngờ nào và có thể dùng cùng một công thức thống nhất để cộng các điểm phân biệt hoặc để nhân đôi một điểm.
 
-Dạng phương trình của Curve25519, y<sup>2</sup> = x<sup>3</sup> + 486662x<sup>2</sup> + x, hơi khác so với các phương trình khác trong chương này, nhưng nó vẫn thuộc họ elliptic curve. Dạng khác thường của phương trình này cho phép các kỹ thuật hiện thực cụ thể giúp Curve25519 nhanh trong phần mềm.
+Dạng phương trình của Curve25519, y<sup>2</sup> = x<sup>3</sup> + 486662x<sup>2</sup> + x, hơi khác so với các phương trình khác trong chương này, nhưng nó vẫn thuộc họ elliptic curve. Dạng khác thường của phương trình này cho phép các kỹ thuật triển khai cụ thể giúp Curve25519 nhanh trong phần mềm.
 
 Curve25519 làm việc với các số modulo 2<sup>255</sup> – 19, một số nguyên tố gần 2<sup>255</sup> nhất có thể. Hệ số b 486662 là số nguyên nhỏ nhất thỏa mãn các tiêu chí security do Bernstein đặt ra. Gộp lại, những đặc điểm này khiến Curve25519 đáng tin cậy hơn các đường cong NIST và các hệ số đáng ngờ của chúng.
 
@@ -355,7 +355,7 @@ Cuối cùng, sáng kiến Ristretto (https://ristretto.group) là một kỹ th
 
 ## Những gì có thể sai (How Things Can Go Wrong)
 
-Một nhược điểm của elliptic curve là độ phức tạp tương đối của chúng. Số tham số nhiều hơn so với RSA hay Diffie–Hellman cổ điển để lại một attack surface lớn hơn và nhiều khả năng hơn cho lỗi thiết kế và bug hiện thực. Các implementation ECC cũng có thể dễ bị side-channel attack, đặc biệt là phần số học big-number (số lớn) của chúng—ví dụ, khi thời gian tính toán phụ thuộc vào các giá trị bí mật.
+Một nhược điểm của elliptic curve là độ phức tạp tương đối của chúng. Số tham số nhiều hơn so với RSA hay Diffie–Hellman cổ điển để lại một attack surface lớn hơn và nhiều khả năng hơn cho lỗi thiết kế và bug triển khai. Các implementation ECC cũng có thể dễ bị side-channel attack, đặc biệt là phần số học big-number (số lớn) của chúng—ví dụ, khi thời gian tính toán phụ thuộc vào các giá trị bí mật.
 
 Trong các mục sau, tôi thảo luận ba ví dụ về các lỗ hổng có thể xảy ra với elliptic curve, ngay cả khi implementation an toàn.
 

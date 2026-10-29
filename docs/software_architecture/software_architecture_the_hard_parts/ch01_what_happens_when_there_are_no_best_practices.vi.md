@@ -54,7 +54,7 @@ Tuy nhiên, trong những năm sau đó, open source và Linux trở thành nh�
 
 Điều này đặt ra một vấn đề age-old (lâu đời) cho tác giả của những cuốn sách về công nghệ nói chung và software architecture nói riêng—làm sao chúng ta viết được một thứ không lỗi thời ngay lập tức?
 
-Chúng tôi không tập trung vào công nghệ hay các chi tiết hiện thực khác trong cuốn sách này. Thay vào đó, chúng tôi tập trung vào *cách* kiến trúc sư đưa ra quyết định, và cách cân nhắc trade-offs một cách khách quan khi đối mặt với những tình huống mới. Chúng tôi dùng các kịch bản và ví dụ đương thời để cung cấp chi tiết và bối cảnh, nhưng các nguyên lý nền tảng tập trung vào phân tích trade-off và việc ra quyết định khi đối mặt với những vấn đề mới.
+Chúng tôi không tập trung vào công nghệ hay các chi tiết triển khai khác trong cuốn sách này. Thay vào đó, chúng tôi tập trung vào *cách* kiến trúc sư đưa ra quyết định, và cách cân nhắc trade-offs một cách khách quan khi đối mặt với những tình huống mới. Chúng tôi dùng các kịch bản và ví dụ đương thời để cung cấp chi tiết và bối cảnh, nhưng các nguyên lý nền tảng tập trung vào phân tích trade-off và việc ra quyết định khi đối mặt với những vấn đề mới.
 
 <a id="sec-data-in-arch"></a>
 
@@ -68,7 +68,7 @@ Với nhiều người trong ngành architecture, dữ liệu là tất cả. M�
 
 Người ta nói rằng *dữ liệu là tài sản quan trọng nhất của một công ty*. Các doanh nghiệp muốn khai thác giá trị từ dữ liệu họ có và đang tìm những cách mới để dùng dữ liệu trong việc ra quyết định. Mọi bộ phận của doanh nghiệp giờ đều dựa trên dữ liệu, từ phục vụ khách hàng hiện có, thu hút khách hàng mới, tăng tỉ lệ giữ chân khách hàng, cải thiện sản phẩm, dự đoán doanh số, và các xu hướng khác. Sự phụ thuộc vào dữ liệu này có nghĩa là mọi software architecture đều phục vụ dữ liệu, bảo đảm dữ liệu đúng có sẵn và dùng được cho mọi bộ phận của doanh nghiệp.
 
-Các tác giả đã xây dựng nhiều hệ thống phân tán từ vài thập kỷ trước khi chúng mới trở nên phổ biến, nhưng việc ra quyết định trong microservices hiện đại có vẻ khó khăn hơn, và chúng tôi muốn tìm hiểu vì sao. Cuối cùng chúng tôi nhận ra rằng, vào thời kỳ đầu của architecture phân tán, chúng tôi phần lớn vẫn lưu dữ liệu trong một relational database duy nhất. <a id="idm45798382710632"></a><a id="idm45798382709656"></a><a id="idm45798382709016"></a>Tuy nhiên, trong microservices và sự tuân thủ triết lý về *bounded context* từ [Domain-Driven Design](https://oreil.ly/bW8CH), như một cách giới hạn phạm vi coupling chi tiết hiện thực, dữ liệu đã chuyển thành một mối quan tâm kiến trúc, cùng với tính transaction. Nhiều phần khó của architecture hiện đại bắt nguồn từ căng thẳng giữa các mối quan tâm dữ liệu và kiến trúc, điều chúng tôi gỡ rối trong cả [Phần I](part1_pulling_things_apart.vi.md#part1-pulling-things-apart) lẫn [Phần II](part2_putting_things_back_together.vi.md#part2-putting-things-back-together).
+Các tác giả đã xây dựng nhiều hệ thống phân tán từ vài thập kỷ trước khi chúng mới trở nên phổ biến, nhưng việc ra quyết định trong microservices hiện đại có vẻ khó khăn hơn, và chúng tôi muốn tìm hiểu vì sao. Cuối cùng chúng tôi nhận ra rằng, vào thời kỳ đầu của architecture phân tán, chúng tôi phần lớn vẫn lưu dữ liệu trong một relational database duy nhất. <a id="idm45798382710632"></a><a id="idm45798382709656"></a><a id="idm45798382709016"></a>Tuy nhiên, trong microservices và sự tuân thủ triết lý về *bounded context* từ [Domain-Driven Design](https://oreil.ly/bW8CH), như một cách giới hạn phạm vi coupling chi tiết triển khai, dữ liệu đã chuyển thành một mối quan tâm kiến trúc, cùng với tính transaction. Nhiều phần khó của architecture hiện đại bắt nguồn từ căng thẳng giữa các mối quan tâm dữ liệu và kiến trúc, điều chúng tôi gỡ rối trong cả [Phần I](part1_pulling_things_apart.vi.md#part1-pulling-things-apart) lẫn [Phần II](part2_putting_things_back_together.vi.md#part2-putting-things-back-together).
 
 Một sự phân biệt quan trọng mà chúng tôi đề cập trong nhiều chương là sự tách biệt giữa dữ liệu *vận hành* (operational) và dữ liệu *phân tích* (analytical):<a id="idm45798382703576"></a><a id="idm45798382702600"></a><a id="idm45798382697400"></a>
 
@@ -113,7 +113,7 @@ Ghi tài liệu một quyết định là quan trọng đối với kiến trúc
 
 ## Architecture fitness function (Architecture Fitness Functions)
 
-Khi một kiến trúc sư đã xác định mối quan hệ giữa các component và hệ thống hóa điều đó thành một thiết kế, <a id="idm45798383011032"></a><a id="idm45798383010056"></a>làm sao họ có thể bảo đảm rằng những người hiện thực sẽ tuân thủ thiết kế đó? Rộng hơn, làm sao kiến trúc sư có thể bảo đảm rằng các nguyên lý thiết kế họ định nghĩa trở thành hiện thực nếu họ không phải là người hiện thực chúng?
+Khi một kiến trúc sư đã xác định mối quan hệ giữa các component và hệ thống hóa điều đó thành một thiết kế, <a id="idm45798383011032"></a><a id="idm45798383010056"></a>làm sao họ có thể bảo đảm rằng những người triển khai sẽ tuân thủ thiết kế đó? Rộng hơn, làm sao kiến trúc sư có thể bảo đảm rằng các nguyên lý thiết kế họ định nghĩa trở thành hiện thực nếu họ không phải là người triển khai chúng?
 
 Những câu hỏi này thuộc về chủ đề *architecture governance* (quản trị kiến trúc), áp dụng cho bất kỳ sự giám sát có tổ chức nào đối với một hoặc nhiều khía cạnh của phát triển phần mềm. Vì cuốn sách này chủ yếu đề cập cấu trúc architecture, chúng tôi đề cập cách tự động hóa các nguyên lý thiết kế và chất lượng thông qua fitness function ở nhiều nơi.
 
@@ -123,7 +123,7 @@ Hãy xét những môi trường và tình huống dẫn đến những đột p
 
 Cuộc cách mạng DevOps theo một con đường tương tự. Khi Linux và phần mềm open source khác trở nên “đủ tốt” cho doanh nghiệp, kết hợp với sự ra đời của các công cụ cho phép định nghĩa theo chương trình (cuối cùng là) các máy ảo, nhân sự vận hành nhận ra họ có thể tự động hóa việc định nghĩa máy và nhiều tác vụ lặp lại khác.
 
-Trong cả hai trường hợp, những tiến bộ về công nghệ và hiểu biết đã dẫn đến việc tự động hóa một công việc lặp lại vốn được xử lý bởi một vai trò tốn kém—điều mô tả trạng thái hiện tại của architecture governance ở hầu hết các tổ chức. Ví dụ, nếu một kiến trúc sư chọn một architecture style hoặc phương tiện giao tiếp cụ thể, làm sao họ có thể bảo đảm một developer hiện thực nó đúng? Khi làm thủ công, kiến trúc sư thực hiện code review hoặc có lẽ tổ chức các architecture review board để đánh giá trạng thái governance. Tuy nhiên, giống như việc cấu hình máy tính thủ công trong vận hành, những chi tiết quan trọng có thể dễ dàng lọt qua các buổi review hời hợt.
+Trong cả hai trường hợp, những tiến bộ về công nghệ và hiểu biết đã dẫn đến việc tự động hóa một công việc lặp lại vốn được xử lý bởi một vai trò tốn kém—điều mô tả trạng thái hiện tại của architecture governance ở hầu hết các tổ chức. Ví dụ, nếu một kiến trúc sư chọn một architecture style hoặc phương tiện giao tiếp cụ thể, làm sao họ có thể bảo đảm một developer triển khai nó đúng? Khi làm thủ công, kiến trúc sư thực hiện code review hoặc có lẽ tổ chức các architecture review board để đánh giá trạng thái governance. Tuy nhiên, giống như việc cấu hình máy tính thủ công trong vận hành, những chi tiết quan trọng có thể dễ dàng lọt qua các buổi review hời hợt.
 
 <a id="idm45798383055080"></a>
 
@@ -133,7 +133,7 @@ Trong cuốn sách năm 2017 *Building Evolutionary Architectures* (O’Reilly),
 
 **Bất kỳ cơ chế nào (Any mechanism)**
 
-Kiến trúc sư có thể dùng nhiều loại công cụ khác nhau để hiện thực fitness function; chúng tôi sẽ đưa ra nhiều ví dụ xuyên suốt cuốn sách. Ví dụ, có những thư viện testing chuyên dụng để test cấu trúc architecture, kiến trúc sư có thể dùng monitor để test các architecture characteristic vận hành như performance hoặc scalability, và các framework chaos engineering test reliability và resiliency.
+Kiến trúc sư có thể dùng nhiều loại công cụ khác nhau để triển khai fitness function; chúng tôi sẽ đưa ra nhiều ví dụ xuyên suốt cuốn sách. Ví dụ, có những thư viện testing chuyên dụng để test cấu trúc architecture, kiến trúc sư có thể dùng monitor để test các architecture characteristic vận hành như performance hoặc scalability, và các framework chaos engineering test reliability và resiliency.
 
 **Đánh giá khách quan về tính toàn vẹn (Objective integrity assessment)**
 
@@ -153,7 +153,7 @@ Những fitness function này xử lý một architecture characteristic duy nh�
 
 Fitness function *tổng thể* (holistic) kiểm chứng một tổ hợp <a id="idm45798397388328"></a>architecture characteristic. Một đặc điểm gây phức tạp của architecture characteristic là sự hiệp đồng mà chúng đôi khi thể hiện với các architecture characteristic khác. Ví dụ, nếu kiến trúc sư muốn cải thiện security, có khả năng cao là nó sẽ ảnh hưởng đến performance. Tương tự, scalability và elasticity đôi khi mâu thuẫn—hỗ trợ một số lượng lớn người dùng đồng thời có thể khiến việc xử lý những đợt bùng nổ đột ngột khó khăn hơn. Fitness function tổng thể thực thi một tổ hợp các architecture characteristic đan cài nhau để bảo đảm tác động kết hợp sẽ không ảnh hưởng tiêu cực đến architecture.
 
-Kiến trúc sư hiện thực fitness function để xây dựng sự bảo vệ trước những thay đổi bất ngờ trong architecture characteristic. Trong thế giới phát triển phần mềm Agile, developer hiện thực unit test, functional test và user acceptance test để kiểm chứng các chiều khác nhau của thiết kế *domain*. Tuy nhiên, cho đến nay, chưa có cơ chế tương tự nào để kiểm chứng phần *architecture characteristic* của thiết kế. Thực tế, sự phân tách giữa fitness function và unit test cung cấp một hướng dẫn phạm vi tốt cho kiến trúc sư. Fitness function kiểm chứng architecture characteristic, không phải tiêu chí domain; unit test thì ngược lại. Do đó, kiến trúc sư có thể quyết định cần một fitness function hay unit test bằng cách đặt câu hỏi: “Có cần kiến thức domain nào để thực thi bài test này không?” Nếu câu trả lời là “có,” thì một unit/functional/user acceptance test là phù hợp; nếu “không,” thì cần một fitness function.
+Kiến trúc sư triển khai fitness function để xây dựng sự bảo vệ trước những thay đổi bất ngờ trong architecture characteristic. Trong thế giới phát triển phần mềm Agile, developer triển khai unit test, functional test và user acceptance test để kiểm chứng các chiều khác nhau của thiết kế *domain*. Tuy nhiên, cho đến nay, chưa có cơ chế tương tự nào để kiểm chứng phần *architecture characteristic* của thiết kế. Thực tế, sự phân tách giữa fitness function và unit test cung cấp một hướng dẫn phạm vi tốt cho kiến trúc sư. Fitness function kiểm chứng architecture characteristic, không phải tiêu chí domain; unit test thì ngược lại. Do đó, kiến trúc sư có thể quyết định cần một fitness function hay unit test bằng cách đặt câu hỏi: “Có cần kiến thức domain nào để thực thi bài test này không?” Nếu câu trả lời là “có,” thì một unit/functional/user acceptance test là phù hợp; nếu “không,” thì cần một fitness function.
 
 Ví dụ, khi kiến trúc sư nói về *elasticity*, đó là khả năng của ứng dụng chịu được một đợt bùng nổ người dùng đột ngột. Lưu ý rằng kiến trúc sư không cần biết bất kỳ chi tiết nào về domain—đây có thể là một trang thương mại điện tử, một trò chơi trực tuyến, hoặc thứ gì khác. Do đó, *elasticity* là một mối quan tâm kiến trúc và nằm trong phạm vi của một fitness function. Mặt khác, nếu kiến trúc sư muốn kiểm chứng các phần đúng đắn của một địa chỉ gửi thư, điều đó được bao quát bởi một bài test truyền thống. Tất nhiên, sự phân tách này không hoàn toàn nhị phân—một số fitness function sẽ chạm đến domain và ngược lại, nhưng các mục tiêu khác nhau cung cấp một cách tốt để tách chúng về mặt tư duy.
 
@@ -199,7 +199,7 @@ public class CycleTest {
 
 Trong đoạn code, kiến trúc sư dùng công cụ metric [JDepend](https://oreil.ly/ozzzk) để <a id="idm45798382876168"></a><a id="idm45798389502168"></a><a id="idm45798389501496"></a><a id="idm45798389500280"></a>kiểm tra các phụ thuộc giữa các package. Công cụ này hiểu cấu trúc của các package Java và làm test thất bại nếu có bất kỳ vòng nào. Kiến trúc sư có thể gắn test này vào continuous build của dự án và thôi lo lắng về việc vô tình đưa vào các vòng bởi những developer trigger-happy. Đây là một ví dụ tuyệt vời về một fitness function bảo vệ các thực hành quan trọng hơn là cấp bách của phát triển phần mềm: đó là một mối quan tâm quan trọng đối với kiến trúc sư, nhưng ít tác động đến việc viết code day-to-day.
 
-[Ví dụ 1-1](#src_cycle_ff) thể hiện một fitness function rất low-level, code-centric. <a id="idm45798389496408"></a><a id="idm45798389495496"></a>Nhiều công cụ vệ sinh code phổ biến (như [SonarQube](https://www.sonarqube.org)) hiện thực sẵn nhiều fitness function phổ biến theo kiểu dùng ngay. <a id="idm45798389494040"></a>Tuy nhiên, kiến trúc sư cũng có thể muốn kiểm chứng cấu trúc vĩ mô của architecture cũng như cấu trúc vi mô. Khi thiết kế một layered architecture như trong<a id="idm45798389492504"></a> [Hình 1-2](#fig-arch-vs-design-layer_ff), kiến trúc sư định nghĩa các layer để bảo đảm sự tách biệt các mối quan tâm.
+[Ví dụ 1-1](#src_cycle_ff) thể hiện một fitness function rất low-level, code-centric. <a id="idm45798389496408"></a><a id="idm45798389495496"></a>Nhiều công cụ vệ sinh code phổ biến (như [SonarQube](https://www.sonarqube.org)) triển khai sẵn nhiều fitness function phổ biến theo kiểu dùng ngay. <a id="idm45798389494040"></a>Tuy nhiên, kiến trúc sư cũng có thể muốn kiểm chứng cấu trúc vĩ mô của architecture cũng như cấu trúc vi mô. Khi thiết kế một layered architecture như trong<a id="idm45798389492504"></a> [Hình 1-2](#fig-arch-vs-design-layer_ff), kiến trúc sư định nghĩa các layer để bảo đảm sự tách biệt các mối quan tâm.
 
 <a id="fig-arch-vs-design-layer_ff"></a>
 
@@ -207,7 +207,7 @@ Trong đoạn code, kiến trúc sư dùng công cụ metric [JDepend](https://o
 
 *Hình 1-2. Layered architecture truyền thống*
 
-Tuy nhiên, làm sao kiến trúc sư có thể bảo đảm developer sẽ tôn trọng các layer này? Một số developer có thể không hiểu tầm quan trọng của các pattern, trong khi những người khác có thể theo thái độ “thà xin tha thứ còn hơn xin phép” vì một mối quan tâm cục bộ lấn át nào đó, như performance. Nhưng để những người hiện thực làm xói mòn các lý do của architecture sẽ gây hại cho sức khỏe long-term của architecture.
+Tuy nhiên, làm sao kiến trúc sư có thể bảo đảm developer sẽ tôn trọng các layer này? Một số developer có thể không hiểu tầm quan trọng của các pattern, trong khi những người khác có thể theo thái độ “thà xin tha thứ còn hơn xin phép” vì một mối quan tâm cục bộ lấn át nào đó, như performance. Nhưng để những người triển khai làm xói mòn các lý do của architecture sẽ gây hại cho sức khỏe long-term của architecture.
 
 [ArchUnit](https://www.archunit.org) cho phép kiến trúc sư giải quyết vấn đề này thông qua một fitness function, như trong [Ví dụ 1-2](#src_archunitff).
 
@@ -275,11 +275,11 @@ Chúng tôi dùng fitness function xuyên suốt cuốn sách khi có cơ hội 
 
 Một vùng vật lộn thường trực của kiến trúc sư là giữ *architecture* và *thiết kế* là những hoạt động riêng biệt nhưng có liên quan.<a id="ch01-dva"></a><a id="ch01-dva2"></a> Dù chúng tôi không muốn lội vào cuộc tranh cãi never-ending (không hồi kết) về sự phân biệt này, trong cuốn sách này chúng tôi cố gắng đứng vững ở phía *architecture* của dải phổ đó vì một số lý do.
 
-Thứ nhất, kiến trúc sư phải hiểu các nguyên lý kiến trúc nền tảng để đưa ra các quyết định hiệu quả. Ví dụ, quyết định giữa giao tiếp *đồng bộ* và *bất đồng bộ* có nhiều trade-offs trước khi kiến trúc sư thêm vào các chi tiết hiện thực. <a id="idm45798388571176"></a><a id="idm45798388570232"></a>Trong cuốn sách *Fundamentals of Software Architecture*, các tác giả đã đặt ra định luật thứ hai của software architecture: *tại sao* quan trọng hơn *như thế nào*. Dù rốt cuộc kiến trúc sư phải hiểu cách hiện thực giải pháp, trước hết họ phải hiểu vì sao một lựa chọn có trade-offs tốt hơn lựa chọn khác.
+Thứ nhất, kiến trúc sư phải hiểu các nguyên lý kiến trúc nền tảng để đưa ra các quyết định hiệu quả. Ví dụ, quyết định giữa giao tiếp *đồng bộ* và *bất đồng bộ* có nhiều trade-offs trước khi kiến trúc sư thêm vào các chi tiết triển khai. <a id="idm45798388571176"></a><a id="idm45798388570232"></a>Trong cuốn sách *Fundamentals of Software Architecture*, các tác giả đã đặt ra định luật thứ hai của software architecture: *tại sao* quan trọng hơn *như thế nào*. Dù rốt cuộc kiến trúc sư phải hiểu cách triển khai giải pháp, trước hết họ phải hiểu vì sao một lựa chọn có trade-offs tốt hơn lựa chọn khác.
 
-Thứ hai, bằng cách tập trung vào các khái niệm kiến trúc, chúng tôi có thể tránh vô số cách hiện thực của những khái niệm đó. Kiến trúc sư có thể hiện thực giao tiếp bất đồng bộ theo nhiều cách khác nhau; chúng tôi tập trung vào lý do vì sao một kiến trúc sư chọn giao tiếp bất đồng bộ và để các chi tiết hiện thực cho chỗ khác.
+Thứ hai, bằng cách tập trung vào các khái niệm kiến trúc, chúng tôi có thể tránh vô số cách triển khai của những khái niệm đó. Kiến trúc sư có thể triển khai giao tiếp bất đồng bộ theo nhiều cách khác nhau; chúng tôi tập trung vào lý do vì sao một kiến trúc sư chọn giao tiếp bất đồng bộ và để các chi tiết triển khai cho chỗ khác.
 
-Thứ ba, nếu chúng tôi đi theo con đường hiện thực tất cả các biến thể của các lựa chọn chúng tôi trình bày, đây sẽ là cuốn sách dài nhất từng được viết. Tập trung vào các nguyên lý kiến trúc cho phép chúng tôi giữ mọi thứ chung nhất có thể.
+Thứ ba, nếu chúng tôi đi theo con đường triển khai tất cả các biến thể của các lựa chọn chúng tôi trình bày, đây sẽ là cuốn sách dài nhất từng được viết. Tập trung vào các nguyên lý kiến trúc cho phép chúng tôi giữ mọi thứ chung nhất có thể.
 
 Để giữ các chủ đề bám sát architecture nhất có thể, chúng tôi dùng các định nghĩa đơn giản nhất có thể cho các khái niệm then chốt. Ví dụ, *coupling* trong architecture có thể lấp đầy cả những cuốn sách (và đã từng như vậy). Vì vậy, chúng tôi dùng các định nghĩa đơn giản sau, gần như quá đơn giản:<a id="idm45798388565656"></a>
 
@@ -295,7 +295,7 @@ Hai artifact (bao gồm service) bị coupled nếu một thay đổi ở artifa
 
 **Component**
 
-Một khối xây dựng kiến trúc của ứng dụng thực hiện một loại chức năng nghiệp vụ hoặc hạ tầng nào đó,<a id="idm45798388523816"></a> thường được thể hiện thông qua cấu trúc package (Java), namespace (C#), hoặc một nhóm vật lý các file source code trong một loại cấu trúc thư mục nào đó. Ví dụ, component Order History có thể được hiện thực thông qua một tập file class nằm trong namespace `app.business.order.history`.
+Một khối xây dựng kiến trúc của ứng dụng thực hiện một loại chức năng nghiệp vụ hoặc hạ tầng nào đó,<a id="idm45798388523816"></a> thường được thể hiện thông qua cấu trúc package (Java), namespace (C#), hoặc một nhóm vật lý các file source code trong một loại cấu trúc thư mục nào đó. Ví dụ, component Order History có thể được triển khai thông qua một tập file class nằm trong namespace `app.business.order.history`.
 
 **Giao tiếp đồng bộ (Synchronous communication)**
 
@@ -321,7 +321,7 @@ Một workflow là *nguyên tử* (atomic) nếu mọi phần của workflow lu�
 
 Chúng tôi dùng thuật ngữ *contract* theo nghĩa rộng để định nghĩa interface giữa hai<a id="idm45798388496040"></a> phần phần mềm, có thể bao gồm các lời gọi method hoặc hàm, các lời gọi từ xa trong integration architecture, các phụ thuộc, v.v. Bất cứ nơi nào hai mảnh phần mềm nối với nhau, đều có một contract tham gia.
 
-Software architecture về bản chất là trừu tượng: chúng tôi không thể biết tổ hợp độc đáo của các nền tảng, công nghệ, phần mềm thương mại, và vô số khả năng chóng mặt khác mà độc giả có thể có, ngoại trừ việc không có hai tổ hợp nào hoàn toàn giống nhau. Chúng tôi đề cập nhiều ý tưởng trừu tượng, nhưng phải gắn chúng với một số chi tiết hiện thực để làm chúng cụ thể. Vì vậy, chúng tôi cần một vấn đề để minh họa các khái niệm kiến trúc—điều dẫn chúng tôi đến Sysops Squad.<a id="idm45798388493864"></a><a id="idm45798388493160"></a>
+Software architecture về bản chất là trừu tượng: chúng tôi không thể biết tổ hợp độc đáo của các nền tảng, công nghệ, phần mềm thương mại, và vô số khả năng chóng mặt khác mà độc giả có thể có, ngoại trừ việc không có hai tổ hợp nào hoàn toàn giống nhau. Chúng tôi đề cập nhiều ý tưởng trừu tượng, nhưng phải gắn chúng với một số chi tiết triển khai để làm chúng cụ thể. Vì vậy, chúng tôi cần một vấn đề để minh họa các khái niệm kiến trúc—điều dẫn chúng tôi đến Sysops Squad.<a id="idm45798388493864"></a><a id="idm45798388493160"></a>
 
 <a id="sec-sysops-squad"></a>
 

@@ -118,7 +118,7 @@ Như vậy, nếu biết độ dài job, các job chỉ dùng CPU và metric duy
 
 Response time được định nghĩa là khoảng thời gian từ khi job đến hệ thống cho đến lần đầu nó được schedule. Viết hình thức hơn:
 
-T<sub>response</sub> = T<sub>f irstrun</sub> − T<sub>arrival</sub> (7.2)
+T<sub>response</sub> = T<sub>firstrun</sub> − T<sub>arrival</sub> (7.2)
 
 Ví dụ, với schedule bên trên (A đến tại thời điểm 0, còn B và C tại thời điểm 10), response time của từng job như sau: 0 cho job A, 0 cho B và 10 cho C (trung bình: 3.33).
 

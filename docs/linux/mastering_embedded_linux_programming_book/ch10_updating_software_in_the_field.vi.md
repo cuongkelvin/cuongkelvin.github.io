@@ -46,7 +46,7 @@ Tôi sẽ bắt đầu bằng việc mô tả một số cách tiếp cận cậ
 
 ## Cập nhật những gì
 
-Các thiết bị embedded Linux rất đa dạng về thiết kế và hiện thực. Tuy nhiên, tất cả chúng đều có các thành phần cơ bản sau:
+Các thiết bị embedded Linux rất đa dạng về thiết kế và triển khai. Tuy nhiên, tất cả chúng đều có các thành phần cơ bản sau:
 
 - Bootloader
 
@@ -86,7 +86,7 @@ Kernel và DTB có thể được lưu trong root filesystem nếu bootloader đ
 
 ### Root filesystem
 
-Root filesystem chứa các thư viện hệ thống, tiện ích và script thiết yếu cần để hệ thống hoạt động. Rất mong muốn có thể thay thế và nâng cấp tất cả những thứ này. Cơ chế phụ thuộc vào bản hiện thực filesystem.
+Root filesystem chứa các thư viện hệ thống, tiện ích và script thiết yếu cần để hệ thống hoạt động. Rất mong muốn có thể thay thế và nâng cấp tất cả những thứ này. Cơ chế phụ thuộc vào bản triển khai filesystem.
 
 Các định dạng phổ biến cho root filesystem nhúng như sau:
 
@@ -98,7 +98,7 @@ Các định dạng phổ biến cho root filesystem nhúng như sau:
 
 ### Ứng dụng hệ thống
 
-Các ứng dụng hệ thống là phần tải chính của thiết bị; chúng hiện thực chức năng chính của nó. Vì vậy, chúng có khả năng được cập nhật thường xuyên để sửa bug và thêm tính năng. Chúng có thể được đóng gói cùng root filesystem, nhưng cũng phổ biến là chúng được đặt trong một filesystem riêng để việc cập nhật dễ hơn và để giữ sự tách biệt giữa các file hệ thống, thường là open source, và các file ứng dụng, thường là độc quyền.
+Các ứng dụng hệ thống là phần tải chính của thiết bị; chúng triển khai chức năng chính của nó. Vì vậy, chúng có khả năng được cập nhật thường xuyên để sửa bug và thêm tính năng. Chúng có thể được đóng gói cùng root filesystem, nhưng cũng phổ biến là chúng được đặt trong một filesystem riêng để việc cập nhật dễ hơn và để giữ sự tách biệt giữa các file hệ thống, thường là open source, và các file ứng dụng, thường là độc quyền.
 
 ### Dữ liệu Device-specific
 
@@ -174,11 +174,11 @@ Còn một điều cuối cùng cần đề cập trong phần này. Tăng boot 
 
 ### Làm cho cập nhật an toàn
 
-Vấn đề cuối cùng liên quan đến khả năng lạm dụng chính cơ chế cập nhật. Mục đích chính của bạn khi hiện thực một cơ chế cập nhật là cung cấp một phương pháp tự động hoặc semi-automated đáng tin cậy để cài đặt các bản vá bảo mật và tính năng mới. Tuy nhiên, người khác có thể dùng chính cơ chế đó để cài đặt các phiên bản phần mềm trái phép và chiếm quyền thiết bị. Chúng ta cần bảo đảm điều này không xảy ra.
+Vấn đề cuối cùng liên quan đến khả năng lạm dụng chính cơ chế cập nhật. Mục đích chính của bạn khi triển khai một cơ chế cập nhật là cung cấp một phương pháp tự động hoặc semi-automated đáng tin cậy để cài đặt các bản vá bảo mật và tính năng mới. Tuy nhiên, người khác có thể dùng chính cơ chế đó để cài đặt các phiên bản phần mềm trái phép và chiếm quyền thiết bị. Chúng ta cần bảo đảm điều này không xảy ra.
 
 Lỗ hổng lớn nhất là một bản cập nhật từ xa giả. Để ngăn điều này, chúng ta cần xác thực update server trước khi bắt đầu tải về. Chúng ta cũng cần một kênh truyền an toàn, như HTTPS, để phòng việc giả mạo luồng tải về. Checksum cung cấp tuyến phòng thủ thứ hai. Một checksum được tạo cho mỗi bản cập nhật và được công bố trên server. Bản cập nhật chỉ được áp dụng nếu checksum khớp với bản tải về. Tôi sẽ quay lại chủ đề xác thực server khi mô tả cập nhật OTA.
 
-Còn có câu hỏi về tính xác thực của image. Một cách phát hiện bản cập nhật giả là dùng giao thức Secure Boot trong bootloader. Nếu kernel image được ký tại nhà máy bằng một khóa số, bootloader có thể kiểm tra chữ ký trước khi nạp kernel và từ chối nạp nếu kiểm tra thất bại. Miễn là các khóa được nhà sản xuất giữ bí mật, sẽ không thể nạp một kernel không được ủy quyền. U-Boot hiện thực một cơ chế như vậy, được mô tả trong tài liệu trực tuyến tại `https://docs.u-boot.org/en/latest/usage/fit/verified-boot.html.`
+Còn có câu hỏi về tính xác thực của image. Một cách phát hiện bản cập nhật giả là dùng giao thức Secure Boot trong bootloader. Nếu kernel image được ký tại nhà máy bằng một khóa số, bootloader có thể kiểm tra chữ ký trước khi nạp kernel và từ chối nạp nếu kiểm tra thất bại. Miễn là các khóa được nhà sản xuất giữ bí mật, sẽ không thể nạp một kernel không được ủy quyền. U-Boot triển khai một cơ chế như vậy, được mô tả trong tài liệu trực tuyến tại `https://docs.u-boot.org/en/latest/usage/fit/verified-boot.html.`
 
 LƯU Ý QUAN TRỌNG
 
@@ -214,7 +214,7 @@ Symmetric image update hoạt động như sau:
 
 6\. Nếu một bản cập nhật thất bại trước khi boot flag được đổi, bootloader tiếp tục nạp hệ điều hành tốt.
 
-Có nhiều project open-source hiện thực symmetric image update. Một là Mender client hoạt động ở chế độ standalone, mà tôi sẽ mô tả trong phần Dùng Mender cho cập nhật cục bộ. Một project khác là SWUpdate (`https://github.com/sbabic/swupdate`), có thể nhận nhiều image update trong một package định dạng CPIO rồi triển khai các bản cập nhật đó tới các phần khác nhau của hệ thống. Nó cho phép bạn viết plugin bằng ngôn ngữ Lua để xử lý tùy chỉnh.
+Có nhiều project open-source triển khai symmetric image update. Một là Mender client hoạt động ở chế độ standalone, mà tôi sẽ mô tả trong phần Dùng Mender cho cập nhật cục bộ. Một project khác là SWUpdate (`https://github.com/sbabic/swupdate`), có thể nhận nhiều image update trong một package định dạng CPIO rồi triển khai các bản cập nhật đó tới các phần khác nhau của hệ thống. Nó cho phép bạn viết plugin bằng ngôn ngữ Lua để xử lý tùy chỉnh.
 
 SWUpdate cũng hỗ trợ filesystem cho bộ nhớ flash thô được truy cập dưới dạng phân vùng flash MTD, cho bộ lưu trữ được tổ chức thành UBI volume, và cho bộ lưu trữ SD/eMMC có bảng phân vùng đĩa. Ví dụ thứ ba là RAUC, Robust Auto-Update Controller (`https://github.com/rauc/rauc`). Nó cũng hỗ trợ bộ lưu trữ flash thô, UBI volume và thiết bị SD/eMMC. Các image có thể được ký và kiểm chứng bằng khóa OpenSSL. Ví dụ thứ tư là fwup (`https://github.com/fwup-home/fwup`) của Frank Hunleth, người đóng góp long-time cho Buildroot.
 
@@ -242,7 +242,7 @@ Hình 10.3 – Asymmetric image update
 
 5\. Phương án dự phòng trong trường hợp một bản cập nhật đúng nhưng có bug là đưa hệ thống trở lại chế độ recovery, chế độ này có thể thử các hành động khắc phục, có thể bằng cách yêu cầu một phiên bản cập nhật trước đó.
 
-Recovery OS thường nhỏ hơn nhiều so với hệ điều hành chính, có thể chỉ vài megabyte, vì vậy overhead lưu trữ không lớn. Như một điều đáng chú ý, đây là lược đồ mà Android dùng trước bản phát hành Nougat. Với các bản hiện thực open-source của asymmetric image update, hãy cân nhắc SWUpdate hoặc RAUC.
+Recovery OS thường nhỏ hơn nhiều so với hệ điều hành chính, có thể chỉ vài megabyte, vì vậy overhead lưu trữ không lớn. Như một điều đáng chú ý, đây là lược đồ mà Android dùng trước bản phát hành Nougat. Với các bản triển khai open-source của asymmetric image update, hãy cân nhắc SWUpdate hoặc RAUC.
 
 Một nhược điểm lớn của lược đồ này là trong khi recovery OS đang chạy, thiết bị không hoạt động. Lược đồ như vậy cũng không cho phép cập nhật chính recovery OS. Điều đó sẽ cần một thứ như A/B image update, như vậy làm mất hẳn mục đích ban đầu.
 
@@ -254,7 +254,7 @@ LƯU Ý QUAN TRỌNG
 
 Lệnh `chroot` chạy một chương trình trong một thư mục có sẵn. Chương trình thấy thư mục này là thư mục root của nó và vì vậy không thể truy cập bất kỳ file hoặc thư mục nào ở cấp cao hơn. Nó thường được dùng để chạy một chương trình trong một môi trường bị hạn chế, đôi khi được gọi là chroot jail.
 
-Project libostree (`https://github.com/ostreedev/ostree`), trước đây là OSTree, là bản hiện thực phổ biến nhất của ý tưởng này. OSTree bắt đầu khoảng năm 2011 như một cách triển khai cập nhật tới các developer GNOME desktop và cải thiện việc kiểm thử continuous integration của họ.
+Project libostree (`https://github.com/ostreedev/ostree`), trước đây là OSTree, là bản triển khai phổ biến nhất của ý tưởng này. OSTree bắt đầu khoảng năm 2011 như một cách triển khai cập nhật tới các developer GNOME desktop và cải thiện việc kiểm thử continuous integration của họ.
 
 Kể từ đó, nó đã được áp dụng như một giải pháp cập nhật cho các thiết bị nhúng. Nó là một trong các phương pháp cập nhật có trong Automotive Grade Linux (AGL), và có trong The Yocto Project thông qua layer `meta-updater`, được Advanced Telematic Systems (ATS) hỗ trợ.
 
@@ -286,13 +286,13 @@ bootargs=ostree=/ostree/deploy/os/deploy/29ff9...
 
 5\. Cuối cùng, OSTree install agent sẽ đổi boot flag của bootloader để ở lần reboot tiếp theo, nó sẽ `chroot` tới thư mục `deploy` mới.
 
-6\. Bootloader hiện thực việc kiểm tra boot count và quay về root trước đó nếu phát hiện boot loop.
+6\. Bootloader triển khai việc kiểm tra boot count và quay về root trước đó nếu phát hiện boot loop.
 
 Mặc dù một developer có thể vận hành updater hoặc cài đặt client thủ công trên một thiết bị target, rốt cuộc các bản cập nhật phần mềm cần diễn ra tự động OTA.
 
 ## Cập nhật OTA
 
-Cập nhật OTA có nghĩa là có khả năng đẩy phần mềm tới một thiết bị hoặc một nhóm thiết bị qua mạng, thường không cần bất kỳ tương tác nào của người dùng cuối với thiết bị. Để điều này xảy ra, chúng ta cần một server trung tâm để điều khiển quá trình cập nhật và một giao thức để tải bản cập nhật về update client. Trong một bản hiện thực điển hình, client thỉnh thoảng poll update server để kiểm tra xem có bản cập nhật nào đang chờ không. Khoảng thời gian poll cần đủ dài để lưu lượng poll không chiếm một phần đáng kể băng thông mạng, nhưng đủ ngắn để các bản cập nhật có thể được giao kịp thời. Khoảng từ hàng chục phút đến vài giờ thường là một sự thỏa hiệp tốt. Các thông điệp poll từ thiết bị chứa một loại định danh duy nhất nào đó, như số serial hoặc địa chỉ MAC, và phiên bản phần mềm hiện tại. Từ đó, update server có thể biết liệu có cần cập nhật không. Các thông điệp poll cũng có thể chứa thông tin trạng thái khác như uptime, các tham số môi trường, hoặc bất cứ thứ gì hữu ích cho việc quản lý tập trung các thiết bị.
+Cập nhật OTA có nghĩa là có khả năng đẩy phần mềm tới một thiết bị hoặc một nhóm thiết bị qua mạng, thường không cần bất kỳ tương tác nào của người dùng cuối với thiết bị. Để điều này xảy ra, chúng ta cần một server trung tâm để điều khiển quá trình cập nhật và một giao thức để tải bản cập nhật về update client. Trong một bản triển khai điển hình, client thỉnh thoảng poll update server để kiểm tra xem có bản cập nhật nào đang chờ không. Khoảng thời gian poll cần đủ dài để lưu lượng poll không chiếm một phần đáng kể băng thông mạng, nhưng đủ ngắn để các bản cập nhật có thể được giao kịp thời. Khoảng từ hàng chục phút đến vài giờ thường là một sự thỏa hiệp tốt. Các thông điệp poll từ thiết bị chứa một loại định danh duy nhất nào đó, như số serial hoặc địa chỉ MAC, và phiên bản phần mềm hiện tại. Từ đó, update server có thể biết liệu có cần cập nhật không. Các thông điệp poll cũng có thể chứa thông tin trạng thái khác như uptime, các tham số môi trường, hoặc bất cứ thứ gì hữu ích cho việc quản lý tập trung các thiết bị.
 
 Update server thường được liên kết với một hệ thống quản lý sẽ gán các phiên bản phần mềm mới cho các nhóm thiết bị khác nhau dưới sự kiểm soát của nó. Nếu số lượng thiết bị lớn, nó có thể gửi các bản cập nhật theo từng đợt để tránh quá tải mạng. Sẽ có một dạng màn hình trạng thái nào đó, nơi trạng thái hiện tại của các thiết bị có thể được hiển thị và các vấn đề được làm nổi bật.
 
@@ -326,7 +326,7 @@ $ git clone -b scarthgap https://github.com/mendersoftware/meta-mender
 
 Bạn nên đi tới thư mục ở cấp trên thư mục `poky` một bậc trước khi clone layer `meta-mender` để hai thư mục nằm cạnh nhau ở cùng một cấp.
 
-Mender client cần một số thay đổi đối với cấu hình U-Boot để xử lý boot flag và các biến boot count. Layer Mender client gốc có các sub-layers chứa các bản hiện thực mẫu của việc tích hợp U-Boot này mà chúng ta có thể dùng ngay, như `meta-mender-qemu` và `meta-mender-raspberrypi`. Chúng ta sẽ dùng QEMU.
+Mender client cần một số thay đổi đối với cấu hình U-Boot để xử lý boot flag và các biến boot count. Layer Mender client gốc có các sub-layers chứa các bản triển khai mẫu của việc tích hợp U-Boot này mà chúng ta có thể dùng ngay, như `meta-mender-qemu` và `meta-mender-raspberrypi`. Chúng ta sẽ dùng QEMU.
 
 Bước tiếp theo là tạo một thư mục build và thêm các layer cho cấu hình này:
 

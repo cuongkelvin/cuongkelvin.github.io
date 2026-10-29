@@ -10,7 +10,7 @@ Phần này trình bày lời giải cho tất cả các bài tập được đ�
 
 3. Vẽ black-box diagram trước khi viết bất kỳ code VHDL nào được xem là thói quen tốt, vì việc này giúp cung cấp một biểu diễn trực quan cho từng component. Ngoài ra, một sơ đồ tổng thể hệ thống tốt và gọn gàng giúp loại bỏ sự nhầm lẫn khi viết code, đặc biệt với các thiết kế lớn, và còn giúp tăng khả năng tái sử dụng code (re-usability).
 
-4. Các black-box drawing đã cho có thể được hiện thực bằng code VHDL sau.
+4. Các black-box drawing đã cho có thể được triển khai bằng code VHDL sau.
 
 a)
 
@@ -49,7 +49,9 @@ b)
 
 ![p0188_2](images/appC_exercise_solutions/p0188_2.png)
 
-6. Các lỗi của code đã cho là: a) Dòng 4 thiếu dấu chấm phẩy. Dấu chấm phẩy ở dòng 5 phải nằm sau dấu ngoặc đơn. Code đúng được trình bày ở đây.
+6. Các lỗi của code đã cho là:
+
+a) Dòng 4 thiếu dấu chấm phẩy. Dấu chấm phẩy ở dòng 5 phải nằm sau dấu ngoặc đơn. Code đúng được trình bày ở đây.
 
 ```vhdl
 ENTITY ckt_a IS
@@ -297,8 +299,6 @@ END ckt_c_selected;
 
 d)
 
-3.
-
 ```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
@@ -327,7 +327,11 @@ BEGIN
             '1' WHEN "0001"|"0010",
             '0' WHEN OTHERS;
 END ckt_d_selected;
+```
 
+3.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -749,11 +753,6 @@ END ckt_e;
 ARCHITECTURE ckt_e_case OF ckt_e IS
     SIGNAL ins  :   STD_LOGIC_VECTOR(0 TO 3);
 BEGIN
-```
-
-2.
-
-```vhdl
     ins <=  A & B & C & D;
     logic_process:  PROCESS(ins)
     BEGIN
@@ -781,7 +780,11 @@ BEGIN
         END IF;
     END PROCESS logic_process;
 END ckt_e_if;
+```
 
+2.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -817,11 +820,6 @@ BEGIN
             WHEN "00" =>
                 Bout    <=  '0';
             WHEN "01"|"10"|"11" =>
-```
-
-3.
-
-```vhdl
                 Bout    <=  '1';
         END CASE;
     END PROCESS devB;
@@ -873,7 +871,11 @@ BEGIN
         END IF;
     END PROCESS logic_process;
 END Exercise_5_2_if;
+```
 
+3.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -885,11 +887,6 @@ ENTITY Exercise_5_3 IS
 END Exercise_5_3;
 
 ARCHITECTURE Exercise_5_3_arc OF Exercise_5_3 IS
-```
-
-4. 5. 6.
-
-```vhdl
     SIGNAL Aout,Bout,Cout,Dout  :   STD_LOGIC;
 BEGIN
     Aout    <=  A(1) AND A(2);
@@ -898,7 +895,11 @@ BEGIN
     Dout    <=  NOT D;
     E_out   <=  Aout OR Bout OR Cout;
 END Exercise_5_3_arc;
+```
 
+4.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -919,7 +920,11 @@ BEGIN
         END IF;
     END PROCESS logic_process;
 END and8_arc;
+```
 
+5.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -940,7 +945,11 @@ BEGIN
         END IF;
     END PROCESS logic_process;
 END or8_arc;
+```
 
+6.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -950,11 +959,6 @@ ENTITY mux8to1 IS
         sel     :   IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
         out1    :   OUT STD_LOGIC);
 END mux8to1;
-```
-
-7.
-
-```vhdl
 ARCHITECTURE mux8to1_if OF mux8to1 IS
 BEGIN
     logic_process:  PROCESS(ins,sel) IS
@@ -1007,7 +1011,11 @@ BEGIN
         END CASE;
     END PROCESS logic_process;
 END mux8to1_cases;
+```
 
+7.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -1105,7 +1113,7 @@ END dff_1_arc;
 
 2. Xem lời giải của Bài tập 1, vì lời giải đã cho chạy đúng trong cả hai trường hợp.
 
-3. 4.
+3.
 
 ```vhdl
 LIBRARY IEEE;
@@ -1136,7 +1144,11 @@ BEGIN
     Q <= q_temp;
     NOTQ <= NOT q_temp;
 END dff_3_arc;
+```
 
+4.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -1148,11 +1160,6 @@ END dff_4;
 
 ARCHITECTURE dff_4_arc OF dff_4 IS
     SIGNAL q_temp   :   STD_LOGIC;
-```
-
-5.
-
-```vhdl
 BEGIN
     dff_process: PROCESS(CLK,S,R) IS
     BEGIN
@@ -1170,7 +1177,11 @@ BEGIN
     Q <= q_temp;
     NOTQ <= NOT q_temp;
 END dff_4_arc;
+```
 
+5.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -1514,11 +1525,6 @@ BEGIN
                 IF ( X = '0' ) THEN
                     NS  <=  ST101;
                 ELSIF ( X = '1' ) THEN
-```
-
-9.
-
-```vhdl
                     NS  <=  ST110;
                 END IF;
             WHEN ST110 =>
@@ -1552,7 +1558,11 @@ BEGIN
                 "111" WHEN ST111,
                 "000" WHEN OTHERS;
 END Exercise_8_8_arc;
+```
 
+9.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -1627,7 +1637,11 @@ BEGIN
                 "11" WHEN ST11,
                 "00" WHEN OTHERS;
 END Exercise_8_9_arc;
+```
 
+10.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -1645,11 +1659,6 @@ BEGIN
     sync_process:   PROCESS(CLK) IS
     BEGIN
         IF(RISING_EDGE(CLK)) THEN
-```
-
-10.
-
-```vhdl
             PS  <=  NS;
         END IF;
     END PROCESS sync_process;
@@ -1684,7 +1693,11 @@ BEGIN
                 "001" WHEN ST001,
                 "100" WHEN OTHERS;
 END Exercise_8_10_arc;
+```
 
+11.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -1713,11 +1726,6 @@ BEGIN
         CASE (PS) IS
             WHEN ST001 =>
                 IF ( X(1) = '0' ) THEN
-```
-
-11.
-
-```vhdl
                     Z   <=  '1';
                     NS  <=  ST010;
                 ELSIF ( X(1) = '1' ) THEN
@@ -1752,7 +1760,11 @@ BEGIN
                 "001" WHEN ST001,
                 "100" WHEN OTHERS;
 END Exercise_8_10_arc;
+```
 
+12.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -1781,11 +1793,6 @@ BEGIN
         CASE (PS) IS
             WHEN ST00 =>
                 Z(2)    <=  '1';
-```
-
-12.
-
-```vhdl
                 IF ( X(2) = '0' ) THEN
                     Z(1)    <=  '0';
                     NS      <=  ST11;
@@ -1823,7 +1830,11 @@ BEGIN
                 "11" WHEN ST11,
                 "00" WHEN OTHERS;
 END Exercise_8_12_arc;
+```
 
+13.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -1849,11 +1860,6 @@ BEGIN
     comb_process:   PROCESS(X,PS) IS
     BEGIN
         CS  <=  '0';
-```
-
-13.
-
-```vhdl
         RD  <=  '0';
         CASE (PS) IS
             WHEN ST001 =>
@@ -1893,7 +1899,11 @@ BEGIN
                 "001" WHEN ST001,
                 "100" WHEN OTHERS;
 END Exercise_8_13_arc;
+```
 
+14.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -1917,11 +1927,6 @@ BEGIN
     END PROCESS sync_process;
 
     comb_process:   PROCESS(X,PS) IS
-```
-
-14.
-
-```vhdl
     BEGIN
         Z   <=  "00";
         CASE (PS) IS
@@ -2526,11 +2531,6 @@ ARCHITECTURE muxreg_arc OF muxreg IS
     ----------------------
     --- 8-bit, 2:1 Mux ---
     ----------------------
-```
-
-2.
-
-```vhdl
     COMPONENT mux2i1o8w IS
         PORT(
             in1,in2 :   IN  STD_LOGIC_VECTOR(7 DOWNTO 0);
@@ -2555,7 +2555,11 @@ BEGIN
                             REG_OUT =>  F);
 
 END muxreg_arc;
+```
 
+2.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -2592,11 +2596,6 @@ ARCHITECTURE muxdec2r OF muxdec2r IS
 
     ----------------------
     --- 8-bit Register ---
-```
-
-3.
-
-```vhdl
     ----------------------
 
     COMPONENT reg8 IS
@@ -2641,7 +2640,11 @@ BEGIN
     RB <= regBout;
 
 END muxdec2r;
+```
 
+3.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -2659,11 +2662,6 @@ ARCHITECTURE DualMuxDualReg_Arc OF DualMuxDualReg IS
     ----------------------
     --- 8-bit Register ---
     ----------------------
-```
-
-4.
-
-```vhdl
     COMPONENT reg8 IS
         PORT(
             REG_IN  :   IN  STD_LOGIC_VECTOR(7 DOWNTO 0);
@@ -2718,7 +2716,11 @@ BEGIN
     RB  <=  RegBOut;
 
 END DualMuxDualReg_Arc;
+```
 
+4.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -2791,16 +2793,15 @@ BEGIN
         CLK     =>  CLK,
         LD      =>  And1Out,
         REG_OUT =>  RegBOut);
+    RA  <=  RegAOut;
+    RB  <=  RegBOut;
+
+END DualMuxDualReg_arc;
 ```
 
 5.
 
 ```vhdl
-    RA  <=  RegAOut;
-    RB  <=  RegBOut;
-
-END DualMuxDualReg_arc;
-
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
@@ -2858,11 +2859,6 @@ BEGIN
         in1     =>  SL1,
         out0    =>  decout0,
         out1    =>  decout1);
-```
-
-6.
-
-```vhdl
     mux:    mux2i1o8w PORT MAP(
         in1     =>  B,
         in2     =>  C,
@@ -2882,7 +2878,11 @@ BEGIN
         REG_OUT =>  RBX);
 
 END DualRegDecMux_arc;
+```
 
+6.
+
+```vhdl
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 

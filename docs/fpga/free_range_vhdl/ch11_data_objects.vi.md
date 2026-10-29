@@ -8,7 +8,7 @@ Nhiều khái niệm trình bày cho đến giờ đã được giới thiệu m
 
 Có bốn loại data object trong VHDL: signal, variable, constant và file. Một trong những mục đích của mục này là trình bày một số thông tin nền về variable, thứ sẽ được dùng sau này trong tutorial. Ý tưởng về constant cũng sẽ được nhắc qua, vì nói chung chúng dễ hiểu và dễ dùng một khi đã hiểu các khái niệm signal và variable. Data object file, chỉ dùng duy nhất trong simulation, không được thảo luận trong chương này.
 
-Hãy lưu ý rằng VHDL là một ngôn ngữ rộng lớn, vượt xa phần code VHDL dùng để lập trình một FPGA hay một CPLD. Thực tế, phần VHDL thực sự có thể được chuyển thành một bit-stream FPGA/CPLD được gọi là RTL VHDL và chỉ là một tập con nhỏ của những gì có trong chuẩn VHDL hiện tại. Data object file là một ví dụ về một data object không thể được hiện thực trong một thiết bị silicon.
+Hãy lưu ý rằng VHDL là một ngôn ngữ rộng lớn, vượt xa phần code VHDL dùng để lập trình một FPGA hay một CPLD. Thực tế, phần VHDL thực sự có thể được chuyển thành một bit-stream FPGA/CPLD được gọi là RTL VHDL và chỉ là một tập con nhỏ của những gì có trong chuẩn VHDL hiện tại. Data object file là một ví dụ về một data object không thể được triển khai trong một thiết bị silicon.
 
 Xin nói thêm bên lề, điều thú vị là cũng có thể compile code VHDL thành một file executable có thể được thực thi, thường cho mục đích simulation, trên bất kỳ PC Intel thông dụng nào. Để biết thêm chi tiết, hãy xem công trình open-source của T. Gingold tại: http://ghdl.free.fr.
 
@@ -26,7 +26,7 @@ Bảng 11.1: Các dạng khai báo data object.
 
 Lưu ý rằng mỗi data object đều có thể được gán giá trị ban đầu một cách tùy chọn. Các khai báo signal thường không có giá trị ban đầu, khác với constant thường có.
 
-Giá trị ban đầu của signal thực tế không thể được các công cụ synthesis hiện thực trên silicon nhưng được các công cụ simulation VHDL tính đến. Các khai báo ví dụ cho ba loại data object này được cung cấp trong Bảng 11.2. Các ví dụ này có một số kiểu dữ liệu mới sẽ được thảo luận trong mục tiếp theo.
+Giá trị ban đầu của signal thực tế không thể được các công cụ synthesis triển khai trên silicon nhưng được các công cụ simulation VHDL tính đến. Các khai báo ví dụ cho ba loại data object này được cung cấp trong Bảng 11.2. Các ví dụ này có một số kiểu dữ liệu mới sẽ được thảo luận trong mục tiếp theo.
 
 | Data object | Dạng khai báo |
 |---|---|
@@ -64,7 +64,7 @@ Dù các instruction bên trong một process được thực thi liên tiếp, 
 
 VHDL không chỉ có nhiều kiểu dữ liệu được định nghĩa sẵn mà còn cho phép bạn định nghĩa kiểu của riêng mình. Tuy nhiên, ở đây chúng ta sẽ chỉ làm việc với vài kiểu được dùng rộng rãi nhất. Trong số các kiểu dữ liệu VHDL phổ biến nhất, chúng tôi muốn nhắc đến các kiểu dữ liệu sau:
 
-bit: Là một enumerated type two-value. Được thay thế bởi kiểu std_logic. bit_vector: Được thay thế bởi kiểu std_logic_vector mạnh hơn. boolean: Như mong đợi, là một enumerated type two-value. boolean vector: Là dạng vector của kiểu boolean. integer: Xem mục Kiểu integer. natural: Là một subtype của integer vì nó là một integer non-negative. positive: Là một subtype của integer vì nó là một integer dương. integer_vector: Là dạng vector của kiểu integer. character: Một enumerated type 256-symbol. string: Là dạng vector của kiểu character.
+bit: Là một enumerated type two-value. Được thay thế bởi kiểu std_logic.<br>bit_vector: Được thay thế bởi kiểu std_logic_vector mạnh hơn.<br>boolean: Như mong đợi, là một enumerated type two-value.<br>boolean vector: Là dạng vector của kiểu boolean.<br>integer: Xem mục Kiểu integer.<br>natural: Là một subtype của integer vì nó là một integer non-negative.<br>positive: Là một subtype của integer vì nó là một integer dương.<br>integer_vector: Là dạng vector của kiểu integer.<br>character: Một enumerated type 256-symbol.<br>string: Là dạng vector của kiểu character.
 
 Trong các mục tiếp theo, một vài kiểu phổ biến và hữu ích khác được giới thiệu.
 
@@ -77,7 +77,7 @@ type my_type is range 0 to 100;
 constant my_const : my_type := 31;
 ```
 
-Hiển nhiên có thể định nghĩa những cấu trúc dữ liệu phức tạp hơn. Ví dụ, dùng một kiểu dữ liệu tùy biến là cách làm phổ biến khi bạn muốn hiện thực một ROM (read-only memory) trong VHDL.
+Hiển nhiên có thể định nghĩa những cấu trúc dữ liệu phức tạp hơn. Ví dụ, dùng một kiểu dữ liệu tùy biến là cách làm phổ biến khi bạn muốn triển khai một ROM (read-only memory) trong VHDL.
 
 ```vhdl
 -- typical custom data type for a 20-byte ROM
@@ -145,7 +145,7 @@ my_score  <= 110;        -- out of range
 
 Kiểu dữ liệu signed và unsigned dùng được khi bạn khai báo package chuẩn IEEE ieee.numeric_std. Hãy lưu ý rằng hai kiểu dữ liệu này cũng được định nghĩa trong package non-standard std_logic_arith. Tuy nhiên, rất không khuyến khích dùng các library non-standard.
 
-Một giá trị signed có phạm vi từ −2N<sup>−</sup><sup>1</sup> đến 2N<sup>−</sup><sup>1</sup> − 1 và một giá trị unsigned có phạm vi từ 0 đến 2N − 1, trong đó N là số bit.
+Một giá trị signed có phạm vi từ −2<sup>N−1</sup> đến 2<sup>N−1</sup> − 1 và một giá trị unsigned có phạm vi từ 0 đến 2<sup>N</sup> − 1, trong đó N là số bit.
 
 Kiểu signed và unsigned có thể được dùng tiện lợi cho các variable bên trong cũng như cho các port của entity. Ngoài ra, library ieee.numeric_signed và library ieee.numeric_unsigned cung cấp các phép toán số học và chuyển đổi kiểu cho cả hai kiểu.
 
@@ -267,7 +267,7 @@ Listing 11.3: Lời giải của Ví dụ 26.
 38   end my_clk_div;
 ```
 
-Bản hiện thực VHDL của frequency divider nhận một signal clock nhất định và tạo ra một signal clock thứ hai có tần số cao hơn hoặc thấp hơn là cách làm khá phổ biến trong VHDL. Một bản hiện thực như vậy thường được làm bằng các khối clock management có sẵn trong FPGA fabric, được xây dựng riêng cho mục đích này. Digital Clock Manager (DCM), Mixed Mode Clock Manager (MMCM) hay Phase Locked Loop (PLL) chỉ là một vài ví dụ.
+Bản triển khai VHDL của frequency divider nhận một signal clock nhất định và tạo ra một signal clock thứ hai có tần số cao hơn hoặc thấp hơn là cách làm khá phổ biến trong VHDL. Một bản triển khai như vậy thường được làm bằng các khối clock management có sẵn trong FPGA fabric, được xây dựng riêng cho mục đích này. Digital Clock Manager (DCM), Mixed Mode Clock Manager (MMCM) hay Phase Locked Loop (PLL) chỉ là một vài ví dụ.
 
 Việc dùng các khối clock management sẽ bảo đảm thiết kế của bạn đáp ứng các yêu cầu timing hoặc các ràng buộc clock phase noise, điều này về lâu dài sẽ giúp công việc của bạn dễ dàng hơn nhiều. Hãy cố nhớ điều này.
 

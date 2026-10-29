@@ -44,7 +44,7 @@ Khi hệ thống khởi động, ROM code kiểm tra chữ ký số của phần
 
 Ở bước cuối cùng, kernel dùng một encryption key để mount rootfs thực sự. Người đọc nên để ý rằng ở bước cuối này, bảo mật chỉ được bảo đảm bởi encryption key, vì không thể có một rootfs được ký!
 
-> Lý do chúng ta không thể có một rootfs được ký xuất phát từ thực tế là quy trình ký không hiệu quả bằng quy trình mã hóa. Như đã thấy ở phần “Mã hóa Block-Level” trong Chương [1](ch01_linux_cryptography.vi.md), một đĩa đã mã hóa được hiện thực bằng cách mã hóa từng block riêng lẻ, và thao tác này không thể thực hiện được đối với việc ký.
+> Lý do chúng ta không thể có một rootfs được ký xuất phát từ thực tế là quy trình ký không hiệu quả bằng quy trình mã hóa. Như đã thấy ở phần “Mã hóa Block-Level” trong Chương [1](ch01_linux_cryptography.vi.md), một đĩa đã mã hóa được triển khai bằng cách mã hóa từng block riêng lẻ, và thao tác này không thể thực hiện được đối với việc ký.
 
 > Để giải quyết vấn đề này, developer có thể cân nhắc dùng các cơ chế khác ngăn việc thực thi tất cả những file chương trình được ký đúng cách, chẳng hạn như Linux Integrity Measurement Architecture (IMA) tại [`https://sourceforge.net/p/linux-ima/wiki/Home/`](https://sourceforge.net/p/linux-ima/wiki/Home/), vốn không được đề cập trong cuốn sách này.
 
@@ -85,7 +85,7 @@ OP-TEE (dành cho ARM Cortex-A) được thiết kế chủ yếu để chạy n
 - *Secure World*: Đây là nơi TEE OP-TEE chạy. Nó được bảo vệ cao độ bằng các cơ chế phần cứng, bảo đảm rằng code và dữ liệu bên trong nó được giữ bí mật và được duy trì tính toàn vẹn, ngay cả khi thế giới bình thường bị xâm phạm.
 - *Normal World*: Đây là nơi Linux chạy. Nó có toàn quyền truy cập hầu hết tài nguyên của hệ thống nhưng không thể trực tiếp truy cập hoặc can thiệp vào tài nguyên của Secure World.
 
-Sự cô lập này đạt được thông qua việc phân tách memory hardware-enforced, các register được bảo vệ, và các điểm vào/ra được kiểm soát (thông qua Secure Monitor, thường được hiện thực bởi ARM Trusted Firmware). Rất phổ biến trường hợp OP-TEE chạy trên một CPU khác bên trong cùng một chip (xem [`https://optee.readthedocs.io/en/latest/`](https://optee.readthedocs.io/en/latest/) để có thêm thông tin chi tiết).
+Sự cô lập này đạt được thông qua việc phân tách memory hardware-enforced, các register được bảo vệ, và các điểm vào/ra được kiểm soát (thông qua Secure Monitor, thường được triển khai bởi ARM Trusted Firmware). Rất phổ biến trường hợp OP-TEE chạy trên một CPU khác bên trong cùng một chip (xem [`https://optee.readthedocs.io/en/latest/`](https://optee.readthedocs.io/en/latest/) để có thêm thông tin chi tiết).
 
 Các thuật ngữ ARM Trusted Firmware (ATF) và Trusted Firmware-A (TF-A) thực sự có thể dùng thay thế cho nhau, và chúng đều chỉ một phần firmware quan trọng dành cho các architecture ARMv8-A và ARMv9-A. Vai trò chính của nó là thiết lập và duy trì một Trusted Execution Environment (TEE) bằng cách chạy ở mức đặc quyền cao nhất, đóng vai trò một **secure monitor** (xem [`https://trustedfirmware-a.readthedocs.io/en/latest/`](https://trustedfirmware-a.readthedocs.io/en/latest/) để có thêm thông tin chi tiết).
 
@@ -335,9 +335,9 @@ init: entering rootfs on /dev/mapper/root...
 ...
 ```
 
-Như chúng ta có thể thấy, kernel khởi động `init`, rồi đến lượt nó mount rootfs trên `/dev/mapper/root`. Đây không phải là một block device thông thường (như `/dev/sda1`, `/dev/mmcblk2` hoặc `/dev/mtd5`), mà là một block device đặc biệt hiện thực việc mã hóa root filesystem.
+Như chúng ta có thể thấy, kernel khởi động `init`, rồi đến lượt nó mount rootfs trên `/dev/mapper/root`. Đây không phải là một block device thông thường (như `/dev/sda1`, `/dev/mmcblk2` hoặc `/dev/mtd5`), mà là một block device đặc biệt thực hiện việc mã hóa root filesystem.
 
-> Cách hiện thực nó sẽ được giải thích chi tiết trong Chương [3](ch03_real_implementations.vi.md).
+> Cách triển khai nó sẽ được giải thích chi tiết trong Chương [3](ch03_real_implementations.vi.md).
 
 Sau đó, quá trình boot tiếp tục như thường lệ, và `init` trong initramfs được thay thế bằng tiến trình init thực sự, trong ví dụ của chúng ta là `systemd`:
 
@@ -395,7 +395,7 @@ Nếu giai đoạn sản xuất tại nhà máy được thực hiện in-house,
 
 Về bước 1, chúng ta có thể lưu ý rằng mình có thể dùng một bootloader chưa được ký vì chính chúng ta là người thực sự thực hiện bước này, và chúng ta có thể giả định rằng không có software độc hại nào được dùng. Tuy nhiên, bước 2 tế nhị hơn một chút; thực tế, trong bước này có một số key quan trọng tham gia.
 
-Ví dụ, hãy xét encryption key của các bootloader và kernel. Ngay cả khi chúng ta ở trong một môi trường (tương đối) an toàn, khả năng encryption key bị lộ trên kênh truyền thông là có rủi ro (ví dụ, các bus serial có thể dễ dàng bị đọc bằng các thiết bị đo rẻ tiền). Trong tình huống này, chúng ta có thể hình dung việc hiện thực một **Key-Agreement Protocol** mật mã cụ thể bên trong bootloader để nó có thể trao đổi dữ liệu ở dạng an toàn với một server từ xa quản lý việc sản xuất tại nhà máy.
+Ví dụ, hãy xét encryption key của các bootloader và kernel. Ngay cả khi chúng ta ở trong một môi trường (tương đối) an toàn, khả năng encryption key bị lộ trên kênh truyền thông là có rủi ro (ví dụ, các bus serial có thể dễ dàng bị đọc bằng các thiết bị đo rẻ tiền). Trong tình huống này, chúng ta có thể hình dung việc triển khai một **Key-Agreement Protocol** mật mã cụ thể bên trong bootloader để nó có thể trao đổi dữ liệu ở dạng an toàn với một server từ xa quản lý việc sản xuất tại nhà máy.
 
 Một giao thức có thể dùng là giao thức trao đổi Diffie–Hellman, cho phép hai bên, vốn không biết gì trước về nhau, thiết lập một shared secret key qua một kênh truyền thông vốn không an toàn (xem Hình 2-3).
 
@@ -405,7 +405,7 @@ Một giao thức có thể dùng là giao thức trao đổi Diffie–Hellman, 
 
 Một khi dữ liệu nhạy cảm đã được truyền và được ghi cố định đúng cách vào hệ thống mới (bước 3), chúng ta có thể khởi động lại an toàn ở chế độ secure (bước 4), và mọi thứ có thể tiếp diễn mà không gặp vấn đề gì.
 
-Quy trình này có thể dễ dàng được hiện thực trên hầu hết mọi CPU, trong khi điểm then chốt là không có software hay phần cứng độc hại nào được dùng để đánh cắp bí mật trong quá trình lập trình các FUSE.
+Quy trình này có thể dễ dàng được triển khai trên hầu hết mọi CPU, trong khi điểm then chốt là không có software hay phần cứng độc hại nào được dùng để đánh cắp bí mật trong quá trình lập trình các FUSE.
 
 ### 2.3.2 Sản xuất trong môi trường Third-Party
 
@@ -468,7 +468,7 @@ Trước hết, mọi firmware image phải được ký và mã hóa đúng cá
 
 Để cập nhật rootfs, chúng ta phải truy cập được encryption key dùng để mã hóa archive TAR của rootfs và (trong một số trường hợp) cả encryption key dùng để mã hóa rootfs đang chạy, nơi các file này phải được cài đặt. Việc truy cập key thứ hai, tức là key dùng để mã hóa rootfs đang chạy, không phải là vấn đề vì nó ở dạng đã niêm phong trong thư mục `/boot`; tế nhị hơn một chút là vấn đề làm thế nào để truy cập encryption key của archive TAR rootfs theo cách mà key không bị lộ trong filesystem.
 
-Khó khăn này liên quan đến cách chúng ta quyết định hiện thực hệ thống, và mọi thứ sẽ rõ ràng hơn ở phần sau của cuốn sách này, khi chúng tôi trình bày các schema boot khác nhau mà hệ thống của chúng ta có thể có.
+Khó khăn này liên quan đến cách chúng ta quyết định triển khai hệ thống, và mọi thứ sẽ rõ ràng hơn ở phần sau của cuốn sách này, khi chúng tôi trình bày các schema boot khác nhau mà hệ thống của chúng ta có thể có.
 
 Tạm thời, người đọc nên ghi nhớ rằng key này phải được quản lý đúng cách để ngăn việc truy cập không mong muốn.
 
@@ -476,4 +476,4 @@ Tạm thời, người đọc nên ghi nhớ rằng key này phải được qu�
 
 Trong chương này, chúng ta đã thấy **Secure Boot** là gì thông qua việc giới thiệu khái niệm **Chain-of-Trust** và giải thích chi tiết chuỗi boot.
 
-Chúng tôi đã trình bày chi tiết chuỗi boot của Linux, tập trung vào các hệ thống ARM-based và vai trò của các thành phần như SPL, U-Boot, **ARM Trusted Firmware (TF-A)** đóng vai trò secure monitor, và **Open Portable Trusted Execution Environment (OP-TEE)** để cô lập Secure World. Chúng tôi cũng đã giới thiệu những điều chúng ta cần ghi nhớ khi muốn sản xuất một hệ thống được bảo mật (in-house hoặc tại một nhà máy third-party) hoặc khi phân phối một bản cập nhật hệ thống, nhằm ngăn khả năng Chain-of-Trust bị phá hỏng hoặc các bí mật của hệ thống bị khai thác. Bây giờ chúng ta đã sẵn sàng chuyển sang chương tiếp theo, nơi chúng tôi sẽ trình bày cách một hiện thực thực tế hoạt động, để hiểu rõ hơn cách chúng ta có thể hiện thực mọi khái niệm của Secure Boot trong hệ thống của mình.
+Chúng tôi đã trình bày chi tiết chuỗi boot của Linux, tập trung vào các hệ thống ARM-based và vai trò của các thành phần như SPL, U-Boot, **ARM Trusted Firmware (TF-A)** đóng vai trò secure monitor, và **Open Portable Trusted Execution Environment (OP-TEE)** để cô lập Secure World. Chúng tôi cũng đã giới thiệu những điều chúng ta cần ghi nhớ khi muốn sản xuất một hệ thống được bảo mật (in-house hoặc tại một nhà máy third-party) hoặc khi phân phối một bản cập nhật hệ thống, nhằm ngăn khả năng Chain-of-Trust bị phá hỏng hoặc các bí mật của hệ thống bị khai thác. Bây giờ chúng ta đã sẵn sàng chuyển sang chương tiếp theo, nơi chúng tôi sẽ trình bày cách một bản triển khai thực tế hoạt động, để hiểu rõ hơn cách chúng ta có thể triển khai mọi khái niệm của Secure Boot trong hệ thống của mình.

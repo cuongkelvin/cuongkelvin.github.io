@@ -138,7 +138,7 @@ BitBake hỗ trợ nhiều fetcher module khác nhau cho phép lấy về các f
 - HTTP(S)
 - Mercurial
 - NPM
-- NPMSW (bản hiện thực `npm shrinkwrap`)
+- NPMSW (bản triển khai `npm shrinkwrap`)
 - Client của openSUSE Build Service
 - Perforce
 - Rust Crate
@@ -187,7 +187,7 @@ Có hai trường hợp mà biến `SRCREV` có tác động. Chúng như sau:
 >
 > Chúng ta cần dùng tham số `branch=<branch name>` như sau – `SRC_URI = "git://myserver/myrepo.git;branch=mybranch"` – để chỉ định branch chứa revision mà chúng ta muốn dùng. Trong trường hợp hash được dùng trỏ tới một tag không có trên branch nào, chúng ta cần dùng tùy chọn `nobranch=1` như sau – `SRC_URI = "git://myserver/myrepo.git;nobranch=1"`.
 
-File từ xa và Git repository là những fetch backend được dùng phổ biến nhất của BitBake. Các hệ thống source code management-supported khác có cách hiện thực khác nhau, nhưng ý tưởng và khái niệm chung thì như nhau.
+File từ xa và Git repository là những fetch backend được dùng phổ biến nhất của BitBake. Các hệ thống source code management-supported khác có cách triển khai khác nhau, nhưng ý tưởng và khái niệm chung thì như nhau.
 
 ## Tối ưu việc tải source code
 
@@ -243,7 +243,7 @@ Nếu thành phần mong muốn không có trên source mirror, BitBake chuyển
 
 ## Tìm hiểu các task của BitBake
 
-BitBake dùng các đơn vị thực thi, về bản chất là một tập lệnh được nhóm lại và chạy tuần tự. Các đơn vị này được gọi là **task**. Trong mỗi lần build một recipe, BitBake, lập lịch, thực thi và kiểm tra nhiều task do các class cung cấp để tạo nên framework mà chúng ta dùng để build một recipe. Vì vậy, điều cần thiết là phải hiểu một số task trong đó, vì chúng ta thường tự dùng, mở rộng, hiện thực hoặc thay thế chúng khi viết một recipe.
+BitBake dùng các đơn vị thực thi, về bản chất là một tập lệnh được nhóm lại và chạy tuần tự. Các đơn vị này được gọi là **task**. Trong mỗi lần build một recipe, BitBake, lập lịch, thực thi và kiểm tra nhiều task do các class cung cấp để tạo nên framework mà chúng ta dùng để build một recipe. Vì vậy, điều cần thiết là phải hiểu một số task trong đó, vì chúng ta thường tự dùng, mở rộng, triển khai hoặc thay thế chúng khi viết một recipe.
 
 Khi chúng ta chạy lệnh sau, BitBake sẽ chạy một tập task đã được lập lịch:
 
@@ -274,7 +274,7 @@ Chúng ta sẽ mô tả ngắn gọn các task thường dùng nhất ở đây:
 - `do_fetch`: Bước đầu tiên khi build một recipe là fetch nguồn cần thiết bằng tính năng fetching backend mà chúng ta đã bàn ở phần trước trong chương này. Điều quan trọng cần lưu ý là việc fetch một nguồn hay một file không có nghĩa đó là một nguồn từ xa.
 - `do_unpack`: Task tự nhiên tiếp theo sau task `do_fetch` là `do_unpack`. Task này chịu trách nhiệm giải nén source code hoặc checkout revision hay branch được yêu cầu trong trường hợp nguồn được tham chiếu dùng một hệ thống SCM.
 - `do_patch`: Khi source code đã được giải nén đúng cách, BitBake bắt đầu điều chỉnh source code. Mọi file được `do_fetch` fetch về có phần mở rộng `.patch` đều được coi là một patch cần áp dụng. Task này áp danh sách các patch cần thiết. Source code đã được sửa đổi cuối cùng sẽ được dùng để build package.
-- `do_configure`, `do_compile` và `do_install`: Các task `do_configure`, `do_compile` và `do_install` được thực hiện theo thứ tự này. Điều quan trọng cần lưu ý là các biến môi trường được định nghĩa trong các task khác nhau giữa task này với task khác. Poky cung cấp một bộ sưu tập phong phú các task được định nghĩa sẵn trong các class, mà chúng ta nên dùng khi có thể – ví dụ, khi một recipe kế thừa class `autotools`, class này cung cấp một bản hiện thực đã biết của các task `do_configure`, `do_compile` và `do_install`.
+- `do_configure`, `do_compile` và `do_install`: Các task `do_configure`, `do_compile` và `do_install` được thực hiện theo thứ tự này. Điều quan trọng cần lưu ý là các biến môi trường được định nghĩa trong các task khác nhau giữa task này với task khác. Poky cung cấp một bộ sưu tập phong phú các task được định nghĩa sẵn trong các class, mà chúng ta nên dùng khi có thể – ví dụ, khi một recipe kế thừa class `autotools`, class này cung cấp một bản triển khai đã biết của các task `do_configure`, `do_compile` và `do_install`.
 - `do_package`: Task `do_package` chia các file được recipe cài đặt thành các thành phần logic, như debugging symbol, tài liệu và thư viện. Chúng ta sẽ đề cập chi tiết về đóng gói sâu hơn trong *Chương 7*, *Tìm hiểu cơ chế hỗ trợ đóng gói*.
 
 ## Tóm tắt

@@ -117,7 +117,7 @@ Người đọc tinh ý sẽ nhận thấy rằng, trong khi cách tiếp cận 
 
 ## Các cân nhắc về cloud (Cloud Considerations)
 
-<a id="id1154"></a><a id="id1155"></a>Dù các modular monolithic architecture có thể được deploy trong môi trường cloud (đặc biệt nếu đó là một hệ thống nhỏ), chúng nhìn chung không phù hợp lắm cho deployment trên cloud: bản chất monolith của chúng khiến chúng ít có khả năng tận dụng việc provisioning on-demand mà môi trường cloud cung cấp. Dù vậy, các hệ thống nhỏ hơn được hiện thực theo architectural style này vẫn có thể tận dụng nhiều dịch vụ cloud, như lưu trữ file, database và messaging.
+<a id="id1154"></a><a id="id1155"></a>Dù các modular monolithic architecture có thể được deploy trong môi trường cloud (đặc biệt nếu đó là một hệ thống nhỏ), chúng nhìn chung không phù hợp lắm cho deployment trên cloud: bản chất monolith của chúng khiến chúng ít có khả năng tận dụng việc provisioning on-demand mà môi trường cloud cung cấp. Dù vậy, các hệ thống nhỏ hơn được triển khai theo architectural style này vẫn có thể tận dụng nhiều dịch vụ cloud, như lưu trữ file, database và messaging.
 
 <a id="id97"></a>
 
@@ -272,7 +272,7 @@ Developer có thể tận dụng lợi ích của topology platform-teams bằng
 
 <a id="ix_ch11-style-modular-mono-asciidoc6"></a>Đánh giá one-star (một sao) trong bảng đánh giá characteristic [Hình 11-7](#fig-style-mm-ratings) có nghĩa là architecture characteristic cụ thể không được hỗ trợ tốt trong architecture, trong khi đánh giá five-star (năm sao) có nghĩa là architecture characteristic đó là một trong những đặc điểm mạnh nhất của architecture style. Các characteristic có trong bảng điểm được mô tả và định nghĩa trong [Chương 4](ch04_architectural_characteristics_defined.vi.md#ch04-architecture-characteristics-defined).
 
-Modular monolith architecture style là một architecture *domain-partitioned* vì logic ứng dụng của nó được phân vùng thành các module. Vì nó thường được hiện thực dưới dạng một deployment monolith, architectural quantum của nó thường là 1.
+Modular monolith architecture style là một architecture *domain-partitioned* vì logic ứng dụng của nó được phân vùng thành các module. Vì nó thường được triển khai dưới dạng một deployment monolith, architectural quantum của nó thường là 1.
 
 Chi phí tổng thể, sự đơn giản và modularity là những điểm mạnh chính của modular monolith architecture style. Vốn mang bản chất monolith, các architecture này không có những độ phức tạp gắn với các architecture style phân tán. Chúng đơn giản hơn và dễ hiểu hơn, và có chi phí tương đối thấp để xây dựng và bảo trì. Modularity kiến trúc đạt được thông qua sự tách biệt các mối quan tâm giữa các module khác nhau, đại diện cho các domain và subdomain.
 
@@ -333,7 +333,7 @@ com.easymeals.recipes
 com.easymeals.inventory
 ```
 
-Module `PlaceOrder` cho phép mỗi khách hàng xem thực đơn; chọn món; thêm tên, địa chỉ và thông tin thanh toán của họ; và gửi đơn hàng. Các component của module này có thể được đại diện thông qua các namespace sau, với source code hiện thực từng chức năng chính này:
+Module `PlaceOrder` cho phép mỗi khách hàng xem thực đơn; chọn món; thêm tên, địa chỉ và thông tin thanh toán của họ; và gửi đơn hàng. Các component của module này có thể được đại diện thông qua các namespace sau, với source code triển khai từng chức năng chính này:
 
 ```perl
 com.easymeals.placeorder.menu

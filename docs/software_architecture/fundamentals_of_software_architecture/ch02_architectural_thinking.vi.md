@@ -58,7 +58,7 @@ Dù những câu hỏi này hơi chủ quan, chúng vẫn giúp xác định m�
 
 ### Mức độ công sức (Level of Effort)
 
-<a id="id775"></a><a id="id776"></a>Trong bài báo nổi tiếng [“Who Needs an Architect?”](https://oreil.ly/MKCvQ), kiến trúc sư phần mềm Martin Fowler viết rằng architecture là “những thứ khó thay đổi.” Nhìn chung, một thứ càng khó thay đổi thì càng cần nhiều công sức, đặt quyết định hay hoạt động đó về phía kiến trúc của dải phổ. Ngược lại, một thứ chỉ cần công sức tối thiểu để hiện thực hoặc thay đổi thì nằm nhiều hơn về phía thiết kế của dải phổ.
+<a id="id775"></a><a id="id776"></a>Trong bài báo nổi tiếng [“Who Needs an Architect?”](https://oreil.ly/MKCvQ), kiến trúc sư phần mềm Martin Fowler viết rằng architecture là “những thứ khó thay đổi.” Nhìn chung, một thứ càng khó thay đổi thì càng cần nhiều công sức, đặt quyết định hay hoạt động đó về phía kiến trúc của dải phổ. Ngược lại, một thứ chỉ cần công sức tối thiểu để triển khai hoặc thay đổi thì nằm nhiều hơn về phía thiết kế của dải phổ.
 
 Ví dụ, chuyển từ một layered architecture dạng monolith sang microservices sẽ đòi hỏi công sức đáng kể, nên nó thiên về architecture hơn. Sắp xếp lại các trường trên một màn hình chỉ cần công sức tối thiểu, và do đó thiên về thiết kế hơn.
 
@@ -324,7 +324,7 @@ Một cách để tránh Bottleneck Trap là kiến trúc sư giao các phần t
 
 **Thường xuyên làm proofs-of-concept**
 
-<a id="id813"></a><a id="id814"></a>Thường xuyên làm proofs-of-concept (POC) đòi hỏi kiến trúc sư viết source code; nó cũng giúp kiểm chứng một architecture decision bằng cách tính đến các chi tiết hiện thực. Ví dụ, giả sử một kiến trúc sư bị kẹt khi cố chọn giữa hai giải pháp caching. Một cách hiệu quả để giúp đưa ra quyết định này là phát triển một ví dụ chạy được trên mỗi sản phẩm caching và so sánh kết quả. Điều này cho phép kiến trúc sư tận mắt thấy các chi tiết hiện thực và lượng công sức cần để phát triển toàn bộ giải pháp. Nó cũng cho phép họ so sánh tốt hơn các architectural characteristic giữa các giải pháp caching khác nhau, như scalability, performance và fault tolerance tổng thể.
+<a id="id813"></a><a id="id814"></a>Thường xuyên làm proofs-of-concept (POC) đòi hỏi kiến trúc sư viết source code; nó cũng giúp kiểm chứng một architecture decision bằng cách tính đến các chi tiết triển khai. Ví dụ, giả sử một kiến trúc sư bị kẹt khi cố chọn giữa hai giải pháp caching. Một cách hiệu quả để giúp đưa ra quyết định này là phát triển một ví dụ chạy được trên mỗi sản phẩm caching và so sánh kết quả. Điều này cho phép kiến trúc sư tận mắt thấy các chi tiết triển khai và lượng công sức cần để phát triển toàn bộ giải pháp. Nó cũng cho phép họ so sánh tốt hơn các architectural characteristic giữa các giải pháp caching khác nhau, như scalability, performance và fault tolerance tổng thể.
 
 Bất cứ khi nào có thể, kiến trúc sư nên viết code production-quality tốt nhất có thể. Chúng tôi khuyến nghị thực hành này vì hai lý do. Thứ nhất, rất thường xuyên, code proof-of-concept “dùng một lần” lại đi vào source code repository và trở thành reference architecture hoặc ví dụ dẫn đường cho những người khác làm theo. Điều cuối cùng mà bất kỳ kiến trúc sư nào muốn là code dùng một lần cẩu thả của mình bị coi là đại diện cho chất lượng công việc thường ngày của họ. Thứ hai, viết code proof-of-concept production-quality nghĩa là được luyện tập viết code chất lượng, well-structured, thay vì liên tục phát triển những thói quen viết code xấu bằng cách tạo ra những POC nhanh và cẩu thả.
 

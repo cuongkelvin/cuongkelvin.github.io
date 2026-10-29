@@ -604,11 +604,11 @@ Callback này phải return vị trí mới trong file. Sau đây là định ng
 
 - `whence` xác định nơi bắt đầu seek. Các giá trị có thể có như sau:
 
-- `SEEK_SET`: Đưa cursor tới vị trí tương đối so với đầu file
+  - `SEEK_SET`: Đưa cursor tới vị trí tương đối so với đầu file
 
-- `SEEK_CUR`: Đưa cursor tới vị trí tương đối so với vị trí file hiện tại
+  - `SEEK_CUR`: Đưa cursor tới vị trí tương đối so với vị trí file hiện tại
 
-- `SEEK_END`: Điều chỉnh cursor tới vị trí tương đối so với cuối file
+  - `SEEK_END`: Điều chỉnh cursor tới vị trí tương đối so với cuối file
 
 Khi triển khai operation này, nên dùng statement `switch` để kiểm tra từng trường hợp `whence` có thể có, vì số lượng của chúng hữu hạn, rồi điều chỉnh vị trí mới tương ứng:
 

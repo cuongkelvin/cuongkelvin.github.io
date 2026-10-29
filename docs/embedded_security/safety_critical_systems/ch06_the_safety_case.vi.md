@@ -235,7 +235,7 @@ Giai đoạn 2: khuyến khích mọi người liên quan tìm ra các lỗ hổ
 
 Giai đoạn 3: xác định cách xử lý những lỗ hổng đó.
 
-Giai đoạn 4: hiện thực các chiến lược đó và lặp lại từ Giai đoạn 1 cho đến khi không tìm thấy thêm lỗ hổng nào.
+Giai đoạn 4: triển khai các chiến lược đó và lặp lại từ Giai đoạn 1 cho đến khi không tìm thấy thêm lỗ hổng nào.
 
 Giai đoạn 5: đưa safety case qua review và phê duyệt độc lập. Lặp lại từ Giai đoạn 1 khi cần.
 
@@ -305,7 +305,7 @@ Lời phản bác là việc dùng một ký hiệu định lượng, như BBN, 
 
 Một điểm khác đôi khi được nêu ra để chống lại định dạng lập luận BBN là lập luận “dirty laundry” (vạch áo cho người xem lưng). Một safety case BBN phơi bày không thương tiếc những điểm yếu của một công ty. Nếu một assessor bên ngoài muốn tìm một điểm yếu để thăm dò, BBN cung cấp nó ở một dạng rất dễ tiếp cận. [Hình 6.2](#fig6_2) cho thấy rõ rằng chúng ta không tin chắc rằng các lập trình viên thực sự đang dùng coding standard. Đây có phải là thông tin chúng ta muốn phơi bày cho assessor không?
 
-Những câu trả lời đầu tiên cho câu hỏi đó đến từ phần thảo luận về văn hóa an toàn của một công ty trong [Mục 2.1.2](ch02_terminology_of_safety.vi.md#sec2_1_2) và việc xác định đối tượng hướng tới của safety case trong [Mục 6.8](#sec6_8). Assessor đứng ở vị trí thứ năm trong danh sách các đối tượng hướng tới. Khi được dùng trong một văn hóa an toàn vững mạnh, mục đích của safety case là để tổ chức phát triển tự thăm dò điểm yếu của chính mình, chứ không phải để thuyết phục một assessor bên ngoài về một lập luận đáng ngờ. Một assessor giàu kinh nghiệm sẽ không bao giờ mong đợi thiết kế, hiện thực và kiểm chứng của một sản phẩm là hoàn hảo, và không có lập luận nào như vậy là thuyết phục. Điều mà BBN cho phép chúng ta làm là nhận diện điểm yếu từ trước và quyết định liệu chúng có cần được củng cố để tạo ra một sản phẩm đủ an toàn hay không.
+Những câu trả lời đầu tiên cho câu hỏi đó đến từ phần thảo luận về văn hóa an toàn của một công ty trong [Mục 2.1.2](ch02_terminology_of_safety.vi.md#sec2_1_2) và việc xác định đối tượng hướng tới của safety case trong [Mục 6.8](#sec6_8). Assessor đứng ở vị trí thứ năm trong danh sách các đối tượng hướng tới. Khi được dùng trong một văn hóa an toàn vững mạnh, mục đích của safety case là để tổ chức phát triển tự thăm dò điểm yếu của chính mình, chứ không phải để thuyết phục một assessor bên ngoài về một lập luận đáng ngờ. Một assessor giàu kinh nghiệm sẽ không bao giờ mong đợi thiết kế, triển khai và kiểm chứng của một sản phẩm là hoàn hảo, và không có lập luận nào như vậy là thuyết phục. Điều mà BBN cho phép chúng ta làm là nhận diện điểm yếu từ trước và quyết định liệu chúng có cần được củng cố để tạo ra một sản phẩm đủ an toàn hay không.
 
 Tuy nhiên, tôi từng biết một assessor thiếu kinh nghiệm dùng sự định lượng này để chống lại nhà phân tích: *“Tại sao anh không tin tưởng 100% vào bằng chứng này? Nó có vấn đề gì?”* Với những assessor như vậy, có thể hữu ích nếu giữ cấu trúc của BBN, nhưng bỏ đi phần định lượng.
 

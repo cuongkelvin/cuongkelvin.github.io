@@ -4,7 +4,7 @@ Như bạn có thể còn nhớ, architecture VHDL mô tả hệ thống VHDL c�
 
 Có ba cách tiếp cận khác nhau để viết architecture VHDL. Các cách tiếp cận này được gọi là architecture kiểu data-flow, kiểu structural và kiểu behavioral. Cách tiếp cận chuẩn để học VHDL là giới thiệu riêng từng kiểu architecture này và thiết kế vài mạch dùng kiểu đó. Dù cách tiếp cận này tốt xét từ góc độ giữ mọi thứ đơn giản khi đang đắm mình trong quá trình học, nó cũng phần nào gây hiểu lầm, vì các mạch VHDL phức tạp hơn thường dùng kết hợp cả ba kiểu này. Hãy nhớ thực tế này trong phần thảo luận tiếp theo về các kiểu này. Tuy nhiên, chúng ta sẽ tập trung chủ yếu vào architecture data-flow và behavioral. Structural modeling về bản chất là một phương pháp để kết hợp một tập model VHDL có sẵn. Nói cách khác, structural modeling hỗ trợ việc kết nối các black box với nhau nhưng không có khả năng mô tả các hàm logic dùng để mô hình hóa hoạt động của mạch. Vì lý do này, nó ít là một phương pháp thiết kế mà nhiều hơn là một cách tiếp cận để ghép nối các module đã được thiết kế trước đó.
 
-Lý do chúng ta chọn chen phần thảo luận về các architecture khác nhau vào lúc này là bạn đã phần nào quen với một trong các kiểu đó. Cho đến lúc này, mọi mạch của chúng ta đều được hiện thực bằng kiểu data-flow. Giờ chúng ta đến lúc nói về kiểu architecture behavioral, kiểu chủ yếu xoay quanh một concurrent statement khác gọi là process statement. Nếu điều này có vẻ khó hiểu, phần nào sự khó hiểu sẽ biến mất khi chúng ta bắt đầu làm việc với các mạch thực tế và code VHDL thật.
+Lý do chúng ta chọn chen phần thảo luận về các architecture khác nhau vào lúc này là bạn đã phần nào quen với một trong các kiểu đó. Cho đến lúc này, mọi mạch của chúng ta đều được triển khai bằng kiểu data-flow. Giờ chúng ta đến lúc nói về kiểu architecture behavioral, kiểu chủ yếu xoay quanh một concurrent statement khác gọi là process statement. Nếu điều này có vẻ khó hiểu, phần nào sự khó hiểu sẽ biến mất khi chúng ta bắt đầu làm việc với các mạch thực tế và code VHDL thật.
 
 ## 5.1 Architecture kiểu Data-flow
 
@@ -14,7 +14,7 @@ Kiểu architecture data-flow có điểm mạnh và điểm yếu của nó. Đ
 
 ## 5.2 Architecture kiểu Behavioral
 
-So với architecture kiểu data-flow, architecture kiểu behavioral không cung cấp chi tiết nào về việc thiết kế được hiện thực trong phần cứng thực tế như thế nào. Code VHDL viết theo kiểu behavioral không nhất thiết phản ánh mạch được hiện thực như thế nào khi nó được synthesize. Thay vào đó, kiểu behavioral mô hình hóa cách các output của mạch sẽ phản ứng với các input của mạch. Trong khi với data-flow modeling bạn phần nào cần có cảm nhận về logic bên dưới trong mạch, các model behavioral cung cấp cho bạn nhiều công cụ để mô tả mạch sẽ hoạt động như thế nào và để các chi tiết hiện thực cho công cụ synthesis. Nói cách khác, data-flow modeling mô tả mạch nên trông như thế nào dưới dạng logic gate, còn behavioral modeling mô tả mạch nên hoạt động như thế nào. Vì những lý do này, behavioral modeling được xem là ở mức trừu tượng mạch cao hơn so với các model data-flow. Chính công cụ VHDL synthesizer quyết định bản hiện thực mạch thực tế. Theo một nghĩa nào đó, modeling kiểu behavioral là cách tiếp cận “black box” tối thượng để thiết kế mạch.
+So với architecture kiểu data-flow, architecture kiểu behavioral không cung cấp chi tiết nào về việc thiết kế được triển khai trong phần cứng thực tế như thế nào. Code VHDL viết theo kiểu behavioral không nhất thiết phản ánh mạch được triển khai như thế nào khi nó được synthesize. Thay vào đó, kiểu behavioral mô hình hóa cách các output của mạch sẽ phản ứng với các input của mạch. Trong khi với data-flow modeling bạn phần nào cần có cảm nhận về logic bên dưới trong mạch, các model behavioral cung cấp cho bạn nhiều công cụ để mô tả mạch sẽ hoạt động như thế nào và để các chi tiết triển khai cho công cụ synthesis. Nói cách khác, data-flow modeling mô tả mạch nên trông như thế nào dưới dạng logic gate, còn behavioral modeling mô tả mạch nên hoạt động như thế nào. Vì những lý do này, behavioral modeling được xem là ở mức trừu tượng mạch cao hơn so với các model data-flow. Chính công cụ VHDL synthesizer quyết định bản triển khai mạch thực tế. Theo một nghĩa nào đó, modeling kiểu behavioral là cách tiếp cận “black box” tối thượng để thiết kế mạch.
 
 Cốt lõi của architecture kiểu behavioral là process statement. Đây là loại concurrent statement thứ tư mà chúng ta sẽ làm việc. Như bạn sẽ thấy, process statement khác biệt đáng kể với ba concurrent statement kia ở nhiều điểm. Khác biệt chính nằm ở cách process statement tiếp cận concurrency, đây là điểm vướng mắc chủ yếu khi bạn làm việc với concurrent statement mới này.
 
@@ -93,7 +93,7 @@ Giờ khi đã có process statement trong tay, chúng ta có một cách để 
 
 Bên trong một process, việc thực thi các sequential statement được khởi động khi có thay đổi ở signal chứa trong process sensitivity list. Nói chung, việc thực thi các statement trong phần thân process tiếp tục cho đến khi đến cuối phần thân process. Sự kỳ lạ này gợi ra một tình thế khó xử mang tính triết học: process statement là một concurrent statement, vậy mà nó lại được tạo thành từ các sequential statement. Đây thực sự là một khái niệm khó nắm bắt. Sau nhiều năm suy ngẫm, tôi chỉ mới bắt đầu nắm được thực chất của mâu thuẫn kỳ lạ này.
 
-Chìa khóa để hiểu việc đánh giá tuần tự các statement diễn ra trong một concurrent statement vẫn ẩn trong cách synthesizer diễn giải code VHDL. Và vì những chi tiết ngóc ngách của cách diễn giải này không phải lúc nào cũng lộ rõ ngay, một số chi tiết hiện thực phải được tạm chấp nhận như vậy cho đến khi bạn thực sự cần hiểu đầy đủ quá trình đó. Giải pháp là giữ các process statement của bạn đơn giản nhất có thể. Người ta có xu hướng dùng process statement như một kho chứa một đống sequential statement loosely-related. Dù đúng về cú pháp, code như vậy không intelligible (dễ hiểu) trong ngữ cảnh tạo mạch số. Bạn nên cố gắng giữ các process statement đơn giản. Hãy chia chức năng bạn dự định thành nhiều process statement giao tiếp với nhau thay vì một process statement khổng lồ, phức tạp, kỳ quặc. Hãy nhớ, process statement là concurrent statement: tất cả chúng đều có thể được thực thi concurrent. Hãy cố tận dụng đặc điểm này để đơn giản hóa các mô tả mạch của bạn.
+Chìa khóa để hiểu việc đánh giá tuần tự các statement diễn ra trong một concurrent statement vẫn ẩn trong cách synthesizer diễn giải code VHDL. Và vì những chi tiết ngóc ngách của cách diễn giải này không phải lúc nào cũng lộ rõ ngay, một số chi tiết triển khai phải được tạm chấp nhận như vậy cho đến khi bạn thực sự cần hiểu đầy đủ quá trình đó. Giải pháp là giữ các process statement của bạn đơn giản nhất có thể. Người ta có xu hướng dùng process statement như một kho chứa một đống sequential statement loosely-related. Dù đúng về cú pháp, code như vậy không intelligible (dễ hiểu) trong ngữ cảnh tạo mạch số. Bạn nên cố gắng giữ các process statement đơn giản. Hãy chia chức năng bạn dự định thành nhiều process statement giao tiếp với nhau thay vì một process statement khổng lồ, phức tạp, kỳ quặc. Hãy nhớ, process statement là concurrent statement: tất cả chúng đều có thể được thực thi concurrent. Hãy cố tận dụng đặc điểm này để đơn giản hóa các mô tả mạch của bạn.
 
 Listing 5.4: Cách dùng process statement.
 
@@ -161,7 +161,7 @@ Một lần nữa, có một vài điều thú vị cần lưu ý về cú pháp
 
 Giờ chúng ta hãy xem một số ví dụ sẽ giúp chúng ta hiểu rõ hơn cách dùng if statement.
 
-> VÍ DỤ 9. Hãy viết code VHDL dùng một if statement để hiện thực hàm logic sau: F_OUT (A, B, C) = A$\overline{B}$$\overline{C}$+BC
+> VÍ DỤ 9. Hãy viết code VHDL dùng một if statement để triển khai hàm logic sau: F_OUT (A, B, C) = A$\overline{B}$$\overline{C}$+BC
 
 LỜI GIẢI. Dù không được nêu trực tiếp trong mô tả bài toán, code VHDL cho lời giải này phải dùng một architecture behavioral. Lý do là bài toán yêu cầu dùng một if statement. Code VHDL cho lời giải được trình bày trong Listing 5.6. Trong trường hợp này, chúng ta đã chọn bỏ qua sơ đồ black-box vì bài toán tương đối đơn giản và vì thế không thực sự thể hiện được sức mạnh của behavioral modeling.
 
@@ -192,7 +192,7 @@ begin
 end silly_example;
 ```
 
-Đây có lẽ không phải cách tốt nhất để hiện thực một hàm logic, nhưng nó cho thấy một if statement đang hoạt động. Một architecture khác cho lời giải của Ví dụ 9 được trình bày trong Listing 5.7.
+Đây có lẽ không phải cách tốt nhất để triển khai một hàm logic, nhưng nó cho thấy một if statement đang hoạt động. Một architecture khác cho lời giải của Ví dụ 9 được trình bày trong Listing 5.7.
 
 Listing 5.7: Lời giải khác cho Ví dụ 9.
 
@@ -213,7 +213,7 @@ end bad_example;
 
 Một nhận xét cuối cùng về process statement. Process statement có thể có một label tùy chọn đứng trước. Luôn nên đưa label vào process statement như một dạng self-description. Điều này tất nhiên có nghĩa là label phải có ý nghĩa xét về mặt mô tả mục đích của process statement. Đặt tên label tốt phần nào là một nghệ thuật, nhưng hãy nhớ rằng đặt một cái tên có ý nghĩa cho một process không cố làm quá nhiều thứ sẽ dễ hơn. Một cách dùng if statement thông minh hơn được minh họa trong ví dụ tiếp theo.
 
-> VÍ DỤ 10. Hãy viết code VHDL hiện thực MUX 8:1 dưới đây. Hãy dùng một if statement trong bản hiện thực của bạn.
+> VÍ DỤ 10. Hãy viết code VHDL triển khai MUX 8:1 dưới đây. Hãy dùng một if statement trong bản triển khai của bạn.
 
 ![p0072_1](images/ch05_standard_models_in_vhdl_architectures/p0072_1.png)
 
@@ -254,7 +254,7 @@ Lời giải của Ví dụ 10 trong Listing 5.8 dùng một số cú pháp mớ
 
 Một điều khác cần để ý về lời giải trong Ví dụ 10 là mọi tổ hợp có thể có của variable chọn đều được tính đến trong code. Có thể bỏ statement elsif cuối cùng trong code của Listing 5.8 và đặt signal assignment đi kèm vào mệnh đề else. Nhưng làm vậy không được xem là thói quen VHDL tốt và nên tránh bằng mọi giá. Lý do là nó sẽ thay đổi khả năng đọc của code nhưng không làm thay đổi phần cứng mà code tạo ra.
 
-> VÍ DỤ 11. Hãy viết code VHDL hiện thực MUX 8:1 trình bày ở đây. Hãy dùng bao nhiêu if statement mà bạn thấy cần để hiện thực thiết kế của mình. Trong sơ đồ black-box, input CE là một chip enable. Khi CE = ’1’, output hoạt động như MUX của Ví dụ 10. Khi CE là ’0’, output của MUX là ’0’.
+> VÍ DỤ 11. Hãy viết code VHDL triển khai MUX 8:1 trình bày ở đây. Hãy dùng bao nhiêu if statement mà bạn thấy cần để hiện thực thiết kế của mình. Trong sơ đồ black-box, input CE là một chip enable. Khi CE = ’1’, output hoạt động như MUX của Ví dụ 10. Khi CE là ’0’, output của MUX là ’0’.
 
 ![p0073_2](images/ch05_standard_models_in_vhdl_architectures/p0073_2.png)
 
@@ -315,9 +315,9 @@ end case;
 
 Một lần nữa, khái niệm case statement hẳn quen thuộc với bạn ở nhiều khía cạnh. Thứ nhất, nói chung nó có thể được xem như một dạng thu gọn của if statement. Tuy nhiên nó không linh hoạt về chức năng bằng, vì lý do đã mô tả ở trên. Thứ hai, case statement giống cả về hình thức lẫn chức năng với case statement hay switch statement trong các ngôn ngữ lập trình thuật toán khác. Và cuối cùng, case statement của VHDL là dạng sequential tương đương với selected signal assignment statement của VHDL. Hai statement này về bản chất có cùng khả năng, nhưng case statement là một sequential statement nằm trong phần thân process, còn selected signal assignment statement là một dạng concurrent signal assignment. Dòng when others không bắt buộc nhưng nên được dùng như một thói quen lập trình tốt.
 
-> VÍ DỤ 12. Hãy viết code VHDL hiện thực hàm sau bằng case statement: F_OUT(A, B, C) = A$\overline{B}$$\overline{C}$ + BC
+> VÍ DỤ 12. Hãy viết code VHDL triển khai hàm sau bằng case statement: F_OUT(A, B, C) = A$\overline{B}$$\overline{C}$ + BC
 
-LỜI GIẢI. Lời giải này thuộc loại không phải cách tốt nhất để hiện thực một mạch bằng VHDL. Tuy nhiên, nó minh họa một tính năng hữu ích khác của VHDL. Phần đầu của lời giải này đòi hỏi chúng ta liệt kê hàm dưới dạng tổng các minterm. Việc này được thực hiện bằng cách nhân product term non-minterm cho trong ví dụ với 1. Trong trường hợp này, 1 tương đương với (A + $\overline{A}$). Phép phân tích này được trình bày như sau:
+LỜI GIẢI. Lời giải này thuộc loại không phải cách tốt nhất để triển khai một mạch bằng VHDL. Tuy nhiên, nó minh họa một tính năng hữu ích khác của VHDL. Phần đầu của lời giải này đòi hỏi chúng ta liệt kê hàm dưới dạng tổng các minterm. Việc này được thực hiện bằng cách nhân product term non-minterm cho trong ví dụ với 1. Trong trường hợp này, 1 tương đương với (A + $\overline{A}$). Phép phân tích này được trình bày như sau:
 
 F_OUT(A, B, C) = A$\overline{B}$$\overline{C}$ + BC
 
@@ -325,7 +325,7 @@ F_OUT(A, B, C) = A$\overline{B}$$\overline{C}$ + BC(A + $\overline{A}$)
 
 F_OUT(A, B, C) = A$\overline{B}$$\overline{C}$ + ABC + $\overline{A}$BC
 
-Lời giải được trình bày trong Listing 5.11. Một đặc điểm thú vị của lời giải này là việc gom ba signal input lại, cho phép dùng case statement trong lời giải. Cách tiếp cận này đòi hỏi khai báo một intermediate signal được đặt tên thích hợp là “ABC”. Một lần nữa, đây có lẽ không phải phương pháp hiệu quả nhất để hiện thực một hàm, nhưng nó làm nổi bật nhu cầu phải tháo vát và sáng tạo khi mô tả hành vi của mạch số.
+Lời giải được trình bày trong Listing 5.11. Một đặc điểm thú vị của lời giải này là việc gom ba signal input lại, cho phép dùng case statement trong lời giải. Cách tiếp cận này đòi hỏi khai báo một intermediate signal được đặt tên thích hợp là “ABC”. Một lần nữa, đây có lẽ không phải phương pháp hiệu quả nhất để triển khai một hàm, nhưng nó làm nổi bật nhu cầu phải tháo vát và sáng tạo khi mô tả hành vi của mạch số.
 
 Listing 5.11: Lời giải của Ví dụ 12.
 
@@ -355,7 +355,7 @@ begin
 end my_soln_exam;
 ```
 
-Một cách tiếp cận tương tự khác cho Ví dụ 12 là dùng tính năng don’t care (được biểu diễn bằng ký hiệu ”-”) có sẵn trong VHDL. Điều này cho phép hiện thực hàm logic mà không phải xử lý lại các input. Như với mọi thứ, nếu bạn phải sửa đổi bài toán trước khi đi đến lời giải, bạn có một khả năng nhất định tạo ra một lỗi mà lẽ ra đã không xuất hiện nếu bạn chọn một cách tiếp cận khéo léo hơn. Một architecture khác cho lời giải của Ví dụ 12 được trình bày trong Listing 5.12. Một nhược điểm có thể có của việc dùng tính năng don’t care trong code VHDL là một số synthesizer và một số simulator không xử lý nó tốt lắm. Tôi sẽ tránh chúng bằng mọi giá và tìm một phương pháp rõ ràng hơn để mô hình hóa các mạch mà tôi đang làm việc.
+Một cách tiếp cận tương tự khác cho Ví dụ 12 là dùng tính năng don’t care (được biểu diễn bằng ký hiệu ”-”) có sẵn trong VHDL. Điều này cho phép triển khai hàm logic mà không phải xử lý lại các input. Như với mọi thứ, nếu bạn phải sửa đổi bài toán trước khi đi đến lời giải, bạn có một khả năng nhất định tạo ra một lỗi mà lẽ ra đã không xuất hiện nếu bạn chọn một cách tiếp cận khéo léo hơn. Một architecture khác cho lời giải của Ví dụ 12 được trình bày trong Listing 5.12. Một nhược điểm có thể có của việc dùng tính năng don’t care trong code VHDL là một số synthesizer và một số simulator không xử lý nó tốt lắm. Tôi sẽ tránh chúng bằng mọi giá và tìm một phương pháp rõ ràng hơn để mô hình hóa các mạch mà tôi đang làm việc.
 
 Listing 5.12: Lời giải khác cho Ví dụ 12.
 
@@ -377,11 +377,11 @@ end my_soln_exam2;
 
 Một trong những điểm chính cần được nhấn mạnh trong bất kỳ chương trình VHDL nào là khả năng đọc. Trong bài toán tiếp theo, chúng ta sẽ làm lại Ví dụ 11 bằng một case statement thay vì các if statement.
 
-> VÍ DỤ 13. Hãy viết code VHDL hiện thực MUX 8:1 dưới đây. Hãy dùng một case statement trong thiết kế của bạn. Trong sơ đồ black-box dưới đây, input CE là một chip enable. Khi CE = ’1’, output hoạt động như MUX của Ví dụ 10. Khi CE là ’0’, output của MUX là ’0’.
+> VÍ DỤ 13. Hãy viết code VHDL triển khai MUX 8:1 dưới đây. Hãy dùng một case statement trong thiết kế của bạn. Trong sơ đồ black-box dưới đây, input CE là một chip enable. Khi CE = ’1’, output hoạt động như MUX của Ví dụ 10. Khi CE là ’0’, output của MUX là ’0’.
 
 ![p0077_3](images/ch05_standard_models_in_vhdl_architectures/p0077_3.png)
 
-LỜI GIẢI. Lời giải này của Ví dụ 13 được trình bày trong Listing 5.13. Entity declaration được lặp lại dưới đây cho tiện. Lời giải này đặt case statement trong phần thân của một construct if. Nếu bạn chưa để ý, số lượng lời giải có thể có cho một bài toán cho trước tăng lên khi các mạch bạn hiện thực trở nên phức tạp hơn.
+LỜI GIẢI. Lời giải này của Ví dụ 13 được trình bày trong Listing 5.13. Entity declaration được lặp lại dưới đây cho tiện. Lời giải này đặt case statement trong phần thân của một construct if. Nếu bạn chưa để ý, số lượng lời giải có thể có cho một bài toán cho trước tăng lên khi các mạch bạn triển khai trở nên phức tạp hơn.
 
 Listing 5.13: Lời giải của Ví dụ 13.
 
@@ -424,11 +424,11 @@ Một điểm rất quan trọng trong lời giải của Ví dụ 13 là thực
 
 ## 5.5 Những lưu ý về sequential statement
 
-Khi bắt đầu làm việc với sequential statement, bạn có xu hướng bắt đầu có cảm giác rằng mình đang lập trình thuật toán bằng một ngôn ngữ higher-level. Lý do là sequential statement có hình thức và cảm giác giống với một số construct lập trình trong các ngôn ngữ higher-level. Mặt xấu của xu hướng này là khi nào và nếu cách tiếp cận viết code VHDL của bạn trở nên giống với cách viết của ngôn ngữ higher-level. Vì điều này rất thường xảy ra với những người đang học VHDL, cần nhắc lại một lần nữa rằng VHDL không phải là lập trình: VHDL là thiết kế phần cứng. Nói chung, bạn không hiện thực thuật toán trong VHDL, bạn đang mô tả phần cứng: đây là một mô hình hoàn toàn khác.
+Khi bắt đầu làm việc với sequential statement, bạn có xu hướng bắt đầu có cảm giác rằng mình đang lập trình thuật toán bằng một ngôn ngữ higher-level. Lý do là sequential statement có hình thức và cảm giác giống với một số construct lập trình trong các ngôn ngữ higher-level. Mặt xấu của xu hướng này là khi nào và nếu cách tiếp cận viết code VHDL của bạn trở nên giống với cách viết của ngôn ngữ higher-level. Vì điều này rất thường xảy ra với những người đang học VHDL, cần nhắc lại một lần nữa rằng VHDL không phải là lập trình: VHDL là thiết kế phần cứng. Nói chung, bạn không triển khai thuật toán trong VHDL, bạn đang mô tả phần cứng: đây là một mô hình hoàn toàn khác.
 
-Không hiếm khi thấy nhiều đoạn code VHDL không tốt lắm cố dùng một process statement duy nhất để hiện thực một mạch tương đối phức tạp. Dù code có vẻ như sẽ chạy được xét theo các statement được viết ra, đây là một ảo tưởng dựa trên việc đầu óc bạn đang diễn giải các statement theo kiểu một ngôn ngữ higher-level. Thực tế là VHDL phần nào bí ẩn ở chỗ bạn đang tin tưởng VHDL synthesizer sẽ biết một cách kỳ diệu bạn đang cố mô tả cái gì. Nếu bạn không hiểu những chi tiết ngóc ngách của VHDL ở mức thấp, mạch của bạn sẽ không synthesize đúng. Nhiều khả năng bạn hiểu các model behavioral VHDL đơn giản. Nhưng khi các model trở nên phức tạp, sự hiểu biết của bạn nhanh chóng mờ dần. Giải pháp cho vấn đề này thực sự đơn giản: hãy giữ các model VHDL của bạn đơn giản, đặc biệt là các process statement.
+Không hiếm khi thấy nhiều đoạn code VHDL không tốt lắm cố dùng một process statement duy nhất để triển khai một mạch tương đối phức tạp. Dù code có vẻ như sẽ chạy được xét theo các statement được viết ra, đây là một ảo tưởng dựa trên việc đầu óc bạn đang diễn giải các statement theo kiểu một ngôn ngữ higher-level. Thực tế là VHDL phần nào bí ẩn ở chỗ bạn đang tin tưởng VHDL synthesizer sẽ biết một cách kỳ diệu bạn đang cố mô tả cái gì. Nếu bạn không hiểu những chi tiết ngóc ngách của VHDL ở mức thấp, mạch của bạn sẽ không synthesize đúng. Nhiều khả năng bạn hiểu các model behavioral VHDL đơn giản. Nhưng khi các model trở nên phức tạp, sự hiểu biết của bạn nhanh chóng mờ dần. Giải pháp cho vấn đề này thực sự đơn giản: hãy giữ các model VHDL của bạn đơn giản, đặc biệt là các process statement.
 
-Trong VHDL, cách tiếp cận tốt nhất là giữ các process statement của bạn xoay quanh một chức năng duy nhất và có nhiều process statement giao tiếp với nhau. Cách tiếp cận sai là có một process statement lớn làm mọi thứ cho bạn. Điều kỳ diệu của VHDL là nếu bạn cung cấp code đơn giản cho synthesizer, nhiều khả năng nó sẽ cung cấp cho bạn một mạch chạy được với một bản hiện thực đơn giản và gọn gàng. Nếu bạn cung cấp cho synthesizer code VHDL phức tạp, mạch cuối cùng có thể chạy được và thậm chí có thể hiệu quả cả về tốc độ lẫn diện tích, nhưng có lẽ là không. Khác với các ngôn ngữ higher-level, nơi một lượng code nhỏ thường được chuyển trực tiếp thành code có hiệu quả tương đối cao, hiệu quả của code VHDL có được nhờ việc phân chia code VHDL gọn và đơn giản dựa trên các construct phần cứng bên dưới. Nói cách khác, các model VHDL đơn giản thì tốt hơn, nhưng sự đơn giản nói chung có được nhờ phân chia và mô tả model đúng cách. Vì vậy hãy cố cưỡng lại ham muốn gây ấn tượng với bạn bè bằng model VHDL ngắn nhất thế giới; những người bạn làm phần cứng của bạn sẽ hiểu rõ hơn.
+Trong VHDL, cách tiếp cận tốt nhất là giữ các process statement của bạn xoay quanh một chức năng duy nhất và có nhiều process statement giao tiếp với nhau. Cách tiếp cận sai là có một process statement lớn làm mọi thứ cho bạn. Điều kỳ diệu của VHDL là nếu bạn cung cấp code đơn giản cho synthesizer, nhiều khả năng nó sẽ cung cấp cho bạn một mạch chạy được với một bản triển khai đơn giản và gọn gàng. Nếu bạn cung cấp cho synthesizer code VHDL phức tạp, mạch cuối cùng có thể chạy được và thậm chí có thể hiệu quả cả về tốc độ lẫn diện tích, nhưng có lẽ là không. Khác với các ngôn ngữ higher-level, nơi một lượng code nhỏ thường được chuyển trực tiếp thành code có hiệu quả tương đối cao, hiệu quả của code VHDL có được nhờ việc phân chia code VHDL gọn và đơn giản dựa trên các construct phần cứng bên dưới. Nói cách khác, các model VHDL đơn giản thì tốt hơn, nhưng sự đơn giản nói chung có được nhờ phân chia và mô tả model đúng cách. Vì vậy hãy cố cưỡng lại ham muốn gây ấn tượng với bạn bè bằng model VHDL ngắn nhất thế giới; những người bạn làm phần cứng của bạn sẽ hiểu rõ hơn.
 
 ## 5.6 Tóm tắt
 
@@ -452,7 +452,7 @@ Giờ chúng ta hãy ôn lại một số khái niệm quan trọng đã đượ
 
 ## 5.7 Bài tập: Behavioral modeling
 
-1. Với các hàm sau, hãy viết các model behavioral VHDL hiện thực những hàm này bằng cả case statement và if statement (hai model riêng cho mỗi hàm).
+1. Với các hàm sau, hãy viết các model behavioral VHDL triển khai những hàm này bằng cả case statement và if statement (hai model riêng cho mỗi hàm).
 
 a) F(A, B) = $\overline{A}$B + A + A$\overline{B}$
 
@@ -464,7 +464,7 @@ d) F(A, B, C) = ∏(5,1, 4,3)
 
 e) F(A, B, C, D) = ∑(1,2)
 
-2. Với mạch dưới đây, hãy viết model behavioral VHDL hiện thực nó bằng cả case statement và if statement (hai model riêng).
+2. Với mạch dưới đây, hãy viết model behavioral VHDL triển khai nó bằng cả case statement và if statement (hai model riêng).
 
 ![p0081_4](images/ch05_standard_models_in_vhdl_architectures/p0081_4.png)
 

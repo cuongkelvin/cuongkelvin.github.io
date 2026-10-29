@@ -1542,7 +1542,7 @@ Thiết lập này trong file `conf/local.conf` cũng có thể được phân p
 
 Yocto Project build mọi thứ từ source. Khi bạn tạo một project mới, chỉ các file cấu hình được tạo. Sau đó quá trình build biên dịch mọi thứ từ đầu, kể cả toolchain cross-compilation và một số native tool quan trọng cho việc build.
 
-Quá trình này có thể mất nhiều thời gian, và Yocto Project hiện thực một cơ chế shared state cache được dùng cho incremental build, với mục đích chỉ build những thành phần thực sự cần thiết cho một thay đổi nhất định.
+Quá trình này có thể mất nhiều thời gian, và Yocto Project triển khai một cơ chế shared state cache được dùng cho incremental build, với mục đích chỉ build những thành phần thực sự cần thiết cho một thay đổi nhất định.
 
 Để việc này hoạt động, build system tính checksum của dữ liệu đầu vào cho một task. Nếu dữ liệu đầu vào thay đổi, task cần được build lại. Nói đơn giản, quá trình build sinh ra một run script cho mỗi task, có thể tính checksum và so sánh. Nó cũng theo dõi output của một task để có thể dùng lại.
 
@@ -1560,7 +1560,7 @@ Một cách làm tốt là giữ các bản backup của shared state cache sạ
 
 ### Còn nữa...
 
-Có thể chia sẻ shared state cache; tuy nhiên, cần làm điều đó một cách cẩn thận. Không phải mọi thay đổi đều được phần hiện thực shared state cache phát hiện, và khi điều đó xảy ra, một phần hoặc toàn bộ cache cần bị vô hiệu hóa. Việc này có thể gây vấn đề khi state cache đang được chia sẻ.
+Có thể chia sẻ shared state cache; tuy nhiên, cần làm điều đó một cách cẩn thận. Không phải mọi thay đổi đều được phần triển khai shared state cache phát hiện, và khi điều đó xảy ra, một phần hoặc toàn bộ cache cần bị vô hiệu hóa. Việc này có thể gây vấn đề khi state cache đang được chia sẻ.
 
 Khuyến nghị trong trường hợp này phụ thuộc vào use case. Các developer làm việc với metadata Yocto nên giữ shared state cache như mặc định, tách riêng cho từng project.
 
@@ -1698,7 +1698,7 @@ Chúng ta sẽ dùng `lighttpd` cho ví dụ này, vì nó nhẹ và dễ cấu 
 
 Công cụ createrepo sẽ tạo metadata XML-based từ các package RPM:
 
-> Bạn cũng có thể build và dùng tiện ích `createrepo-c` từ Yocto build system, một bản hiện thực bằng C của createrepo, như sau:
+> Bạn cũng có thể build và dùng tiện ích `createrepo-c` từ Yocto build system, một bản triển khai bằng C của createrepo, như sau:
 >
 > ```
 > $ bitbake createrepo-c-native -c addto_recipe_sysroot

@@ -133,7 +133,7 @@ Theo thời gian, các tác giả đã thực hiện một số phân tích trad
 
 Bạn có thể đã để ý rằng hầu như không bảng trade-off nào của chúng tôi<a id="idm45798374265752"></a> là *định lượng*—dựa trên con số—mà là *định tính*—đo lường chất lượng của một thứ gì đó thay vì số lượng, điều này là cần thiết vì hai architecture sẽ luôn khác nhau đủ nhiều để ngăn các so sánh định lượng thực sự. Tuy nhiên, dùng phân tích thống kê trên một tập dữ liệu lớn cho phép phân tích định tính hợp lý.
 
-Ví dụ, khi so sánh scalability của các pattern, chúng tôi đã xem xét nhiều *cách hiện thực* khác nhau của các tổ hợp giao tiếp, tính nhất quán và phối hợp, đánh giá scalability trong từng trường hợp, và cho phép chúng tôi xây dựng thang so sánh thể hiện trong [Bảng 15-2](#tbl-tradeoff-consolidated).
+Ví dụ, khi so sánh scalability của các pattern, chúng tôi đã xem xét nhiều *cách triển khai* khác nhau của các tổ hợp giao tiếp, tính nhất quán và phối hợp, đánh giá scalability trong từng trường hợp, và cho phép chúng tôi xây dựng thang so sánh thể hiện trong [Bảng 15-2](#tbl-tradeoff-consolidated).
 
 Tương tự, kiến trúc sư trong một tổ chức cụ thể có thể thực hiện cùng bài tập, xây dựng một ma trận chiều các mối quan tâm coupled, và xem xét các ví dụ tiêu biểu (hoặc trong tổ chức hiện có hoặc các spike cục bộ để kiểm chứng lý thuyết).
 
@@ -239,7 +239,7 @@ Kiến trúc sư thêm loại thanh toán *điểm thưởng* để xem nó có 
 
 Tuy nhiên, như trong nhiều trường hợp, các workflow phức tạp hơn làm nổi bật các phần khó của architecture, như thể hiện trong kịch bản thứ ba ở [Hình 15-8](#fig-build-your-own-biz-scenario-3).
 
-Trong kịch bản này, kiến trúc sư bắt đầu có được hiểu biết sâu sắc về các trade-offs thực sự liên quan đến quyết định này. Dùng các service riêng biệt đòi hỏi phối hợp cho workflow này, tốt nhất được xử lý bởi một orchestrator. Tuy nhiên, như chúng tôi đã thảo luận trong [Chương 11](ch11_managing_distributed_workflows.vi.md#ch11-managing-workflows), chuyển sang một orchestrator nhiều khả năng ảnh hưởng tiêu cực đến performance và khiến tính nhất quán dữ liệu trở thành thách thức lớn hơn. Kiến trúc sư có thể tránh orchestrator, nhưng logic workflow phải nằm ở đâu đó—hãy nhớ, semantic coupling chỉ có thể tăng lên thông qua hiện thực, không bao giờ giảm.
+Trong kịch bản này, kiến trúc sư bắt đầu có được hiểu biết sâu sắc về các trade-offs thực sự liên quan đến quyết định này. Dùng các service riêng biệt đòi hỏi phối hợp cho workflow này, tốt nhất được xử lý bởi một orchestrator. Tuy nhiên, như chúng tôi đã thảo luận trong [Chương 11](ch11_managing_distributed_workflows.vi.md#ch11-managing-workflows), chuyển sang một orchestrator nhiều khả năng ảnh hưởng tiêu cực đến performance và khiến tính nhất quán dữ liệu trở thành thách thức lớn hơn. Kiến trúc sư có thể tránh orchestrator, nhưng logic workflow phải nằm ở đâu đó—hãy nhớ, semantic coupling chỉ có thể tăng lên thông qua triển khai, không bao giờ giảm.
 
 <a id="fig-build-your-own-biz-scenario-3"></a>
 
@@ -267,7 +267,7 @@ Hãy xét vấn đề phổ biến mà kiến trúc sư có thể đối mặt t
 
 *Hình 15-9. Quyết định giữa các loại giao tiếp*
 
-Orchestrator của giải pháp đồng bộ thực hiện các lời gọi REST đồng bộ để giao tiếp với các bên cộng tác trong workflow, trong khi giải pháp bất đồng bộ dùng message queue để hiện thực giao tiếp bất đồng bộ.
+Orchestrator của giải pháp đồng bộ thực hiện các lời gọi REST đồng bộ để giao tiếp với các bên cộng tác trong workflow, trong khi giải pháp bất đồng bộ dùng message queue để triển khai giao tiếp bất đồng bộ.
 
 Sau khi xem xét các yếu tố chung chỉ về phía lựa chọn này hay lựa chọn kia, kiến trúc sư tiếp theo nghĩ về các kịch bản domain cụ thể mà các stakeholder phi kỹ thuật quan tâm. Để đạt mục tiêu đó, kiến trúc sư sẽ xây dựng một bảng trade-off giống [Bảng 15-3](#totbl-sync-async).
 
@@ -317,7 +317,7 @@ Trong ví dụ thể hiện ở [Hình 15-10](#fig-build-your-own-evangelize-set
 
 *Hình 15-11. Kịch bản 1: Thêm *bid history* vào topic hiện có*
 
-Dù giải pháp này hoạt động, nó có vấn đề. Thứ nhất, điều gì xảy ra nếu các team cần các contract khác nhau cho mỗi consumer? Xây dựng một contract lớn duy nhất bao gồm mọi thứ hiện thực anti-pattern [“Stamp Coupling for Workflow Management”](ch13_contracts.vi.md#sec-stamp-coupling); buộc mỗi team thống nhất trên một contract duy nhất tạo ra một điểm coupling ngẫu nhiên trong architecture—nếu một team thay đổi thông tin cần thiết của mình, mọi team đều phải phối hợp về thay đổi đó. Thứ hai, còn security dữ liệu thì sao? Dùng một topic publish-and-subscribe duy nhất, mỗi consumer có quyền truy cập mọi dữ liệu, điều có thể tạo ra cả vấn đề security lẫn vấn đề PII (Personally Identifiable Information — thông tin định danh cá nhân, được thảo luận trong [Chương 14](ch14_managing_analytical_data.vi.md#ch14-data-mesh)). Thứ ba, kiến trúc sư nên xem xét sự khác biệt về architecture characteristic vận hành giữa các consumer khác nhau. Ví dụ, nếu team vận hành muốn giám sát độ sâu queue và dùng auto-scaling cho *bid capture* và *bid tracking* nhưng không cho hai service còn lại, việc dùng một topic duy nhất ngăn cản năng lực đó—các consumer giờ bị coupled về mặt vận hành với nhau.
+Dù giải pháp này hoạt động, nó có vấn đề. Thứ nhất, điều gì xảy ra nếu các team cần các contract khác nhau cho mỗi consumer? Xây dựng một contract lớn duy nhất bao gồm mọi thứ triển khai anti-pattern [“Stamp Coupling for Workflow Management”](ch13_contracts.vi.md#sec-stamp-coupling); buộc mỗi team thống nhất trên một contract duy nhất tạo ra một điểm coupling ngẫu nhiên trong architecture—nếu một team thay đổi thông tin cần thiết của mình, mọi team đều phải phối hợp về thay đổi đó. Thứ hai, còn security dữ liệu thì sao? Dùng một topic publish-and-subscribe duy nhất, mỗi consumer có quyền truy cập mọi dữ liệu, điều có thể tạo ra cả vấn đề security lẫn vấn đề PII (Personally Identifiable Information — thông tin định danh cá nhân, được thảo luận trong [Chương 14](ch14_managing_analytical_data.vi.md#ch14-data-mesh)). Thứ ba, kiến trúc sư nên xem xét sự khác biệt về architecture characteristic vận hành giữa các consumer khác nhau. Ví dụ, nếu team vận hành muốn giám sát độ sâu queue và dùng auto-scaling cho *bid capture* và *bid tracking* nhưng không cho hai service còn lại, việc dùng một topic duy nhất ngăn cản năng lực đó—các consumer giờ bị coupled về mặt vận hành với nhau.
 
 Để giảm thiểu những nhược điểm này, kiến trúc sư nên mô hình hóa giải pháp thay thế để xem nó có giải quyết các vấn đề trên không (và không đưa vào những vấn đề nan giải mới). Phiên bản queue riêng lẻ xuất hiện trong [Hình 15-12](#fig-build-your-own-evangelize-add-queue).
 

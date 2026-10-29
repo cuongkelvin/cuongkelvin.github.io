@@ -20,7 +20,7 @@ Trong chương này, chúng tôi định nghĩa các logical component trong sof
 
 *Hình 8-1. Các phòng khác nhau đại diện cho các component của ngôi nhà*
 
-Tương tự, các chức năng chính mà một hệ thống thực hiện đại diện cho các component của hệ thống đó, như trong [Hình 8-2](#fig-components-system). Giống như các phòng của một ngôi nhà, mỗi component thực hiện một chức năng cụ thể, như quản lý tồn kho, giao đơn hàng, hoặc xử lý thanh toán. Cùng nhau, chúng tạo nên hệ thống. Mỗi component chứa source code hiện thực chức năng nghiệp vụ cụ thể đó.
+Tương tự, các chức năng chính mà một hệ thống thực hiện đại diện cho các component của hệ thống đó, như trong [Hình 8-2](#fig-components-system). Giống như các phòng của một ngôi nhà, mỗi component thực hiện một chức năng cụ thể, như quản lý tồn kho, giao đơn hàng, hoặc xử lý thanh toán. Cùng nhau, chúng tạo nên hệ thống. Mỗi component chứa source code triển khai chức năng nghiệp vụ cụ thể đó.
 
 <a id="fig-components-system"></a>
 
@@ -28,7 +28,7 @@ Tương tự, các chức năng chính mà một hệ thống thực hiện đ�
 
 *Hình 8-2. Các chức năng chính khác nhau đại diện cho các component của hệ thống*
 
-Các logical component trong software architecture thường được thể hiện thông qua một namespace hoặc một cấu trúc thư mục chứa source code hiện thực chức năng cụ thể đó. <a id="id993"></a>Thông thường, các *leaf node* (nút lá) của cấu trúc thư mục hoặc namespace chứa source code đại diện cho các logical component trong architecture, còn các thư mục hoặc nút namespace higher-level đại diện cho các domain và subdomain của hệ thống. Trong cấu trúc thư mục được minh họa ở [Hình 8-3](#fig-components-directory), đường dẫn thư mục *order_entry/ordering/payment* đại diện cho component `Payment Processing`, và đường dẫn *order_entry/processing/fulfillment* đại diện cho component `Order Fulfillment`. Source code bên dưới các thư mục hiện thực các logical component này.
+Các logical component trong software architecture thường được thể hiện thông qua một namespace hoặc một cấu trúc thư mục chứa source code triển khai chức năng cụ thể đó. <a id="id993"></a>Thông thường, các *leaf node* (nút lá) của cấu trúc thư mục hoặc namespace chứa source code đại diện cho các logical component trong architecture, còn các thư mục hoặc nút namespace higher-level đại diện cho các domain và subdomain của hệ thống. Trong cấu trúc thư mục được minh họa ở [Hình 8-3](#fig-components-directory), đường dẫn thư mục *order_entry/ordering/payment* đại diện cho component `Payment Processing`, và đường dẫn *order_entry/processing/fulfillment* đại diện cho component `Order Fulfillment`. Source code bên dưới các thư mục triển khai các logical component này.
 
 <a id="fig-components-directory"></a>
 
@@ -213,7 +213,7 @@ Việc xác định kích thước hộp có lẽ nên được xử lý bởi c
 
 > Xác định kích thước hộp (user story Người chuẩn bị đơn hàng) → `Order Fulfillment`
 
-Nhưng còn user story thứ ba thì sao? Component nào trong bốn component được liệt kê nên gửi email cho khách hàng khi đơn hàng đã được đặt, sẵn sàng để giao, và đã được giao đi? Câu trả lời có thể là các component `Order Placement`, `Order Fulfillment` và `Order Shipment`. Nhưng hãy nhớ rằng user story được hiện thực thông qua source code, vốn cần nằm trong một thư mục hoặc namespace cụ thể. Vì nhân bản code trên ba component không phải là ý hay, kiến trúc sư cần định nghĩa một component mới để xử lý user story này:
+Nhưng còn user story thứ ba thì sao? Component nào trong bốn component được liệt kê nên gửi email cho khách hàng khi đơn hàng đã được đặt, sẵn sàng để giao, và đã được giao đi? Câu trả lời có thể là các component `Order Placement`, `Order Fulfillment` và `Order Shipment`. Nhưng hãy nhớ rằng user story được triển khai thông qua source code, vốn cần nằm trong một thư mục hoặc namespace cụ thể. Vì nhân bản code trên ba component không phải là ý hay, kiến trúc sư cần định nghĩa một component mới để xử lý user story này:
 
 > Gửi email cho khách hàng (user story Khách hàng #2) → `Customer Notification` (mới)
 
@@ -444,4 +444,4 @@ Kiến trúc sư tạo một component mới cho `Auctioneer Capture`. Họ cũn
 
 Thiết kế trong [Hình 8-17](#ch-component-based-thinking-GGG-final-comps) khó có thể là thiết kế cuối cùng. Cần khám phá thêm nhiều yêu cầu: người dùng sẽ đăng ký tài khoản mới như thế nào, các chức năng thanh toán sẽ được quản trị ra sao, v.v. Tuy nhiên, thiết kế này cung cấp một điểm khởi đầu tốt để tiếp tục lặp.
 
-Đây là một tập component khả dĩ để giải quyết vấn đề GGG—nhưng nó không nhất thiết là tốt nhất hay duy nhất. Có rất ít hệ thống phần mềm chỉ có thể được hiện thực theo một cách duy nhất. Mỗi thiết kế có các tập trade-offs khác nhau. Là một kiến trúc sư, đừng ám ảnh về việc tìm ra “một thiết kế đúng duy nhất,” vì có nhiều thiết kế sẽ đáp ứng được. Hãy cố đánh giá trade-offs giữa các quyết định thiết kế khác nhau một cách khách quan nhất có thể, và chọn thiết kế có tập trade-offs “ít tệ nhất”<a id="id1044"></a><a id="id1045"></a>.<a id="id1046"></a>
+Đây là một tập component khả dĩ để giải quyết vấn đề GGG—nhưng nó không nhất thiết là tốt nhất hay duy nhất. Có rất ít hệ thống phần mềm chỉ có thể được triển khai theo một cách duy nhất. Mỗi thiết kế có các tập trade-offs khác nhau. Là một kiến trúc sư, đừng ám ảnh về việc tìm ra “một thiết kế đúng duy nhất,” vì có nhiều thiết kế sẽ đáp ứng được. Hãy cố đánh giá trade-offs giữa các quyết định thiết kế khác nhau một cách khách quan nhất có thể, và chọn thiết kế có tập trade-offs “ít tệ nhất”<a id="id1044"></a><a id="id1045"></a>.<a id="id1046"></a>

@@ -224,11 +224,11 @@ Kết quả của biểu thức này là một số nguyên dài tối đa 129 b
 
 > **LƯU Ý** Tôi đã mô tả Wegman–Carter như là dùng một PRF, nhưng AES không phải là một PRF, nó là một pseudorandom permutation (PRP). Tuy nhiên, điều đó không quan trọng, vì cấu trúc Wegman–Carter hoạt động tốt với cả PRP lẫn PRF. Đó là vì nếu bạn được cho một function là PRF hoặc PRP, rất khó xác định nó là PRF hay PRP chỉ bằng cách nhìn vào các giá trị đầu ra của function. Nói cách khác, phân biệt một PRP với một PRF là khó về mặt tính toán.
 
-Phân tích security của Poly1305-AES (xem “The Poly1305-AES Message-Authentication Code” tại https://cr.yp.to/mac/poly1305-20050329.pdf) cho thấy Poly1305-AES là 128-bit secure chừng nào AES là một block cipher an toàn—và mọi thứ được hiện thực đúng, như với bất kỳ cryptographic algorithm nào.
+Phân tích security của Poly1305-AES (xem “The Poly1305-AES Message-Authentication Code” tại https://cr.yp.to/mac/poly1305-20050329.pdf) cho thấy Poly1305-AES là 128-bit secure chừng nào AES là một block cipher an toàn—và mọi thứ được triển khai đúng, như với bất kỳ cryptographic algorithm nào.
 
 Bạn có thể kết hợp universal hash Poly1305 với các algorithm khác ngoài AES. Ví dụ, Poly1305 đã được dùng với stream cipher ChaCha (xem RFC 7539, “ChaCha20 and Poly1305 for IETF Protocols”). Chắc chắn Poly1305 sẽ tiếp tục được dùng ở bất cứ đâu cần một MAC nhanh.
 
-Dù Poly1305 nhanh và an toàn, nó có một số nhược điểm. Thứ nhất, việc tính giá trị đa thức của nó khó hiện thực một cách hiệu quả, đặc biệt là trong tay những người không quen với các khái niệm toán học liên quan. (Xem các ví dụ tại https://github.com/floodyberry/poly1305-donna.) Thứ hai, tự thân nó chỉ an toàn cho một message duy nhất trừ khi bạn dùng cấu trúc Wegman–Carter. Nhưng khi đó nó cần một nonce, và nếu nonce bị lặp lại, algorithm sẽ trở nên không an toàn. Cuối cùng, Poly1305 được tối ưu cho các message dài, nhưng nó là quá mức cần thiết nếu bạn chỉ xử lý các message nhỏ (chẳng hạn, ít hơn 128 byte). Trong những trường hợp như vậy, SipHash là một giải pháp tốt.
+Dù Poly1305 nhanh và an toàn, nó có một số nhược điểm. Thứ nhất, việc tính giá trị đa thức của nó khó triển khai một cách hiệu quả, đặc biệt là trong tay những người không quen với các khái niệm toán học liên quan. (Xem các ví dụ tại https://github.com/floodyberry/poly1305-donna.) Thứ hai, tự thân nó chỉ an toàn cho một message duy nhất trừ khi bạn dùng cấu trúc Wegman–Carter. Nhưng khi đó nó cần một nonce, và nếu nonce bị lặp lại, algorithm sẽ trở nên không an toàn. Cuối cùng, Poly1305 được tối ưu cho các message dài, nhưng nó là quá mức cần thiết nếu bạn chỉ xử lý các message nhỏ (chẳng hạn, ít hơn 128 byte). Trong những trường hợp như vậy, SipHash là một giải pháp tốt.
 
 ### SipHash
 
@@ -246,7 +246,7 @@ Function SipRound dùng một loạt phép XOR cùng với phép cộng và phé
 
 Ở đây, a += b là cách viết tắt của a = a + b, và b <<< = 13 là cách viết tắt của b = b <<< 13 (word 64-bit b được left-rotated 13 bit).
 
-Những phép toán đơn giản này trên các word 64-bit gần như là tất cả những gì bạn cần hiện thực để tính SipHash—dù bạn sẽ không phải tự hiện thực nó. Bạn có thể tìm thấy các implementation có sẵn trong phần lớn các ngôn ngữ, như C, Go, Java, JavaScript, Python và Rust.
+Những phép toán đơn giản này trên các word 64-bit gần như là tất cả những gì bạn cần triển khai để tính SipHash—dù bạn sẽ không phải tự triển khai nó. Bạn có thể tìm thấy các implementation có sẵn trong phần lớn các ngôn ngữ, như C, Go, Java, JavaScript, Python và Rust.
 
 > **LƯU Ý** Tôi viết SipHash-x-y để chỉ phiên bản SipHash, nghĩa là nó thực hiện x SipRound giữa mỗi lần đưa vào một message block rồi y round. Nhiều round hơn cần nhiều phép toán hơn, làm chậm hoạt động nhưng cũng tăng security. Phiên bản mặc định là SipHash-2-4 (gọi đơn giản là SipHash), và cho đến nay nó đã chống chịu được cryptanalysis. Lưu ý rằng tôi cũng đã định nghĩa SipHash128, một phiên bản SipHash tạo ra tag 128-bit.
 
@@ -314,7 +314,7 @@ Listing 7-2: Đo sự khác biệt thời gian khi thực thi compare_mac() từ
 
 Trên một MacBook Pro với chip ARM M1, một lần thực thi chương trình trong Listing 7-2 in ra thời gian thực thi lần lượt khoảng 67 và 26 mili giây. Khác biệt đó đủ đáng kể để nhận ra điều gì đang xảy ra bên trong algorithm. Bây giờ hãy chuyển điểm khác biệt sang các offset khác trong chuỗi, và bạn sẽ quan sát thấy thời gian thực thi khác nhau với các offset khác nhau. Nếu MAC1 là MAC tag đúng và MAC2 là tag kẻ tấn công thử, bạn có thể dễ dàng xác định vị trí của điểm khác biệt đầu tiên, tức là số byte đã đoán đúng.
 
-Nếu thời gian thực thi không phụ thuộc vào một timing bí mật, timing attack sẽ không có tác dụng, đó là lý do người hiện thực cố gắng viết các implementation constant-time—tức là code tốn đúng cùng một khoảng thời gian để hoàn tất với bất kỳ giá trị đầu vào bí mật nào. Ví dụ, function C trong Listing 7-3 so sánh hai buffer kích thước size bytes trong thời gian hằng: biến tạm result khác không khi và chỉ khi có một khác biệt ở đâu đó trong hai buffer.
+Nếu thời gian thực thi không phụ thuộc vào một timing bí mật, timing attack sẽ không có tác dụng, đó là lý do người triển khai cố gắng viết các implementation constant-time—tức là code tốn đúng cùng một khoảng thời gian để hoàn tất với bất kỳ giá trị đầu vào bí mật nào. Ví dụ, function C trong Listing 7-3 so sánh hai buffer kích thước size bytes trong thời gian hằng: biến tạm result khác không khi và chỉ khi có một khác biệt ở đâu đó trong hai buffer.
 
 ```
 int cmp_const(const void *a, const void *b, const size_t size)
@@ -336,7 +336,7 @@ Listing 7-3: So sánh constant-time hai buffer để xác minh MAC an toàn hơn
 
 ### Khi sponge bị rò rỉ (When Sponges Leak)
 
-Các algorithm Permutation-based như SHA-3 và SipHash đơn giản, dễ hiện thực và có các implementation nhỏ gọn, nhưng chúng mong manh trước các side-channel attack khôi phục được một ảnh chụp nhanh (snapshot) state của hệ thống. Ví dụ, nếu một process có thể đọc giá trị RAM và register bất kỳ lúc nào hoặc đọc một core dump của memory, kẻ tấn công có thể xác định internal state của SHA-3 ở MAC mode, hoặc internal state của SipHash, rồi tính ngược permutation để khôi phục secret state ban đầu. Khi đó, họ có thể làm giả tag cho bất kỳ message nào, phá security của MAC.
+Các algorithm Permutation-based như SHA-3 và SipHash đơn giản, dễ triển khai và có các implementation nhỏ gọn, nhưng chúng mong manh trước các side-channel attack khôi phục được một ảnh chụp nhanh (snapshot) state của hệ thống. Ví dụ, nếu một process có thể đọc giá trị RAM và register bất kỳ lúc nào hoặc đọc một core dump của memory, kẻ tấn công có thể xác định internal state của SHA-3 ở MAC mode, hoặc internal state của SipHash, rồi tính ngược permutation để khôi phục secret state ban đầu. Khi đó, họ có thể làm giả tag cho bất kỳ message nào, phá security của MAC.
 
 May thay, attack này sẽ không có tác dụng với các MAC compression function–based như HMAC-SHA-256 và keyed BLAKE2, vì kẻ tấn công cần một snapshot của memory vào đúng thời điểm key được dùng. Kết cục là nếu bạn ở trong một môi trường mà các phần memory của một process có thể bị rò rỉ, bạn có thể dùng một MAC dựa trên compression function biến đổi không khả nghịch thay vì dựa trên một permutation.
 

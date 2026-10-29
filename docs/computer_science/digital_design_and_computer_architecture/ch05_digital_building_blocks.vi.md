@@ -64,7 +64,7 @@ Hình 5.4 Carry propagate adder
 
 Hình 5.5 Adder ripple-carry 32-bit
 
-> Schematic thường biểu thị signal từ trái sang phải. Arithmetic circuit phá quy tắc vì carry chạy từ phải sang trái (từ cột trọng số thấp nhất đến cao nhất). Chúng ta giữ cột trọng số thấp nhất bên phải và cao nhất bên trái vì quen nhìn và cộng số như vậy.
+> Schematic thường thể hiện signal đi từ trái sang phải. Arithmetic circuit phá vỡ quy tắc này vì carry đi từ phải sang trái (từ cột có trọng số thấp nhất đến cột có trọng số cao nhất). Chúng ta giữ cột có trọng số thấp nhất ở bên phải và cột có trọng số cao nhất ở bên trái vì đó là cách chúng ta quen nhìn và cộng các số.
 
 ![img_p262](images/ch05/img_p262.png)
 
@@ -104,17 +104,15 @@ Hình 5.6 (a) Adder carry-lookahead 32-bit (CLA), (b) khối CLA 4-bit
 
 ![eq_p264](images/ch05/eq_p264.png) (5.6)
 
-trong đó t<sub>pg</sub> là độ trễ các column propagate và generate gate (một AND hoặc OR gate) tạo P<sub>i</sub>, G<sub>i</sub>; t<sub>pg\_block</sub> là độ trễ tìm block propagate và generate signal P<sub>i:j</sub>, G<sub>i:j</sub> cho khối k-bit; t<sub>AND\_OR</sub> là độ trễ từ C<sub>in</sub> đến C<sub>out</sub> qua AND/OR logic cuối của khối CLA k-bit. Với N \> 16, adder carry-lookahead thường nhanh hơn nhiều adder ripple-carry. Tuy nhiên, độ trễ vẫn tăng tuyến tính theo N.
+trong đó t<sub>pg</sub> là độ trễ các column propagate và generate gate (một AND hoặc OR gate) tạo P<sub>i</sub>, G<sub>i</sub>; t<sub>pg_block</sub> là độ trễ tìm block propagate và generate signal P<sub>i:j</sub>, G<sub>i:j</sub> cho khối k-bit; t<sub>AND_OR</sub> là độ trễ từ C<sub>in</sub> đến C<sub>out</sub> qua AND/OR logic cuối của khối CLA k-bit. Với N > 16, adder carry-lookahead thường nhanh hơn nhiều adder ripple-carry. Tuy nhiên, độ trễ vẫn tăng tuyến tính theo N.
 
-#### Ví dụ 5.1 ĐỘ TRỄ ADDER RIPPLE-CARRY VÀ CARRY-LOOKAHEAD
-
-ADDER
+#### Ví dụ 5.1 ĐỘ TRỄ ADDER RIPPLE-CARRY VÀ CARRY-LOOKAHEAD ADDER
 
 So sánh độ trễ adder ripple-carry 32-bit và adder carry-lookahead 32-bit có khối 4-bit. Giả sử độ trễ mỗi gate two-input là 100 ps và độ trễ full adder là 300 ps.
 
 Lời giải Theo Phương trình 5.1, propagation delay của adder ripple- carry 32-bit là 32 × 300 ps = 9.6 ns.
 
-CLA có t<sub>pg</sub> = 100 ps, t<sub>pg\_block</sub> = 6 × 100 ps = 600 ps và t<sub>AND\_OR</sub> = 2 × 100 ps = 200 ps. Theo Phương trình 5.6, propagation delay của adder carry-lookahead 32-bit có khối 4-bit vì vậy là 100 ps + 600 ps + (32/4 − 1) × 200 ps + (4 × 300 ps) = 3.3 ns, nhanh gần ba lần adder ripple-carry.
+CLA có t<sub>pg</sub> = 100 ps, t<sub>pg_block</sub> = 6 × 100 ps = 600 ps và t<sub>AND_OR</sub> = 2 × 100 ps = 200 ps. Theo Phương trình 5.6, propagation delay của adder carry-lookahead 32-bit có khối 4-bit vì vậy là 100 ps + 600 ps + (32/4 − 1) × 200 ps + (4 × 300 ps) = 3.3 ns, nhanh gần ba lần adder ripple-carry.
 
 Prefix Adder\*
 
@@ -152,15 +150,15 @@ Critical path của prefix adder N-bit gồm precomputation P<sub>i</sub>, G<sub
 
 > Chú ý độ trễ hộp cuối (sum) của prefix adder là một độ trễ XOR (không phải hai) vì phép tính A<sub>i</sub> ⊕ B<sub>i</sub> đã thực hiện trước đó do A<sub>i</sub>, B<sub>i</sub> đã sẵn có.
 
-t<sub>PA</sub> = t<sub>pg</sub> + log<sub>2</sub>N(t<sub>pg\_prefix</sub>) + t<sub>XOR</sub> (5.11)
+t<sub>PA</sub> = t<sub>pg</sub> + log<sub>2</sub>N(t<sub>pg_prefix</sub>) + t<sub>XOR</sub> (5.11)
 
-trong đó t<sub>pg\_prefix</sub> là độ trễ black prefix cell.
+trong đó t<sub>pg_prefix</sub> là độ trễ black prefix cell.
 
 #### Ví dụ 5.2 ĐỘ TRỄ PREFIX ADDER
 
 Tính độ trễ prefix adder 32-bit. Giả sử độ trễ mỗi gate two-input là 100 ps.
 
-Lời giải Propagation delay của mỗi black prefix cell t<sub>pg\_prefix</sub> là 200 ps (tức hai độ trễ gate). Do đó, dùng Phương trình 5.11, propagation delay prefix adder 32-bit là 100 ps + log<sub>2</sub>(32) × 200 ps + 100 ps = 1.2 ns, nhanh khoảng ba lần adder carry-lookahead và tám lần adder ripple-carry ở Ví dụ 5.1. Thực tế lợi ích không lớn đến vậy, nhưng prefix adder vẫn nhanh hơn đáng kể các phương án khác.
+Lời giải Propagation delay của mỗi black prefix cell t<sub>pg_prefix</sub> là 200 ps (tức hai độ trễ gate). Do đó, dùng Phương trình 5.11, propagation delay prefix adder 32-bit là 100 ps + log<sub>2</sub>(32) × 200 ps + 100 ps = 1.2 ns, nhanh khoảng ba lần adder carry-lookahead và tám lần adder ripple-carry ở Ví dụ 5.1. Thực tế lợi ích không lớn đến vậy, nhưng prefix adder vẫn nhanh hơn đáng kể các phương án khác.
 
 Kết hợp tất cả
 
@@ -170,7 +168,7 @@ Hardware description language cung cấp phép + để chỉ CPA. Công cụ syn
 
 ### 5.2.2 Phép trừ
 
-Nhớ từ Mục 1.4.6 rằng adder có thể cộng số dương và âm bằng biểu diễn số two’s complement. Phép trừ gần như dễ tương tự: đảo dấu số thứ hai rồi cộng. Đảo dấu số two’s complement bằng cách đảo bit và cộng 1.
+Hãy nhớ lại từ Mục 1.4.6 rằng adder có thể cộng cả số dương và số âm bằng cách sử dụng cách biểu diễn số two’s complement. Phép trừ cũng gần như đơn giản như vậy: đảo dấu số thứ hai rồi thực hiện phép cộng. Để đảo dấu một số two’s complement, ta đảo các bit rồi cộng thêm 1.
 
 ![fig5_09](images/ch05/fig5_09.png)
 
@@ -360,24 +358,24 @@ Bảng 5.2 So sánh signed và unsigned
 |---|---|---|
 | = | Z | Z |
 | ≠ | $\overline{Z}$ | $\overline{Z}$ |
-| \< | N⊕V | $\overline{C}$ |
+| < | N⊕V | $\overline{C}$ |
 | ≤ | Z + (N⊕V) | Z + $\overline{C}$ |
-| \> | $\overline{Z}$ • ($\overline{N{\oplus}V}$) | $\overline{Z}$ • C |
+| > | $\overline{Z}$ • ($\overline{N{\oplus}V}$) | $\overline{Z}$ • C |
 | ≥ | ($\overline{N{\oplus}V}$) | C |
 
 Flag ALU cũng có thể dùng để so sánh, như Bảng 5.2. Để so sánh input A và B, ALU tính A − B rồi xem flag. Nếu Z được assert, kết quả là 0 nên A = B. Nếu không, A không bằng B.
 
-So sánh độ lớn rắc rối hơn và phụ thuộc số signed hay unsigned. Ví dụ, để xác định A \< B, tính A − B và kiểm tra kết quả âm hay không. Nếu số unsigned, kết quả âm nếu không có carry out.[^1] Nếu số signed, không thể dựa vào carry vì số âm nhỏ biểu diễn giống số unsigned dương lớn. Thay vào đó, chỉ tính A − B và xem kết quả âm hay không qua flag N. Tuy nhiên, nếu overflow, flag N sai. Vì vậy A nhỏ hơn B nếu N ⊕ V (nói cách khác, kết quả âm và không overflow, hoặc kết quả dương nhưng đã overflow). Tóm lại, định nghĩa L (signal Less than) đúng nếu A \< B. Với số unsigned, L = $\overline{C}$. Với số signed, L = N ⊕ V. Các kiểm tra còn lại dễ hơn. Nhỏ hơn hoặc bằng (≤) là L OR Z vì L chỉ nhỏ hơn và Z chỉ bằng. Lớn hơn hoặc bằng (≥) là đối của nhỏ hơn: $\overline{L}$. Lớn hơn (\>) được biểu thị bằng lớn hơn hoặc bằng nhưng không bằng: $\overline{L}$ AND $\overline{Z}$.
+So sánh độ lớn rắc rối hơn và phụ thuộc số signed hay unsigned. Ví dụ, để xác định A < B, tính A − B và kiểm tra kết quả âm hay không. Nếu số unsigned, kết quả âm nếu không có carry out.[^1] Nếu số signed, không thể dựa vào carry vì số âm nhỏ biểu diễn giống số unsigned dương lớn. Thay vào đó, chỉ tính A − B và xem kết quả âm hay không qua flag N. Tuy nhiên, nếu overflow, flag N sai. Vì vậy A nhỏ hơn B nếu N ⊕ V (nói cách khác, kết quả âm và không overflow, hoặc kết quả dương nhưng đã overflow). Tóm lại, định nghĩa L (signal Less than) đúng nếu A < B. Với số unsigned, L = $\overline{C}$. Với số signed, L = N ⊕ V. Các kiểm tra còn lại dễ hơn. Nhỏ hơn hoặc bằng (≤) là L OR Z vì L chỉ nhỏ hơn và Z chỉ bằng. Lớn hơn hoặc bằng (≥) là đối của nhỏ hơn: $\overline{L}$. Lớn hơn (>) được biểu thị bằng lớn hơn hoặc bằng nhưng không bằng: $\overline{L}$ AND $\overline{Z}$.
 
 #### Ví dụ 5.3 SO SÁNH
 
-Xét số 4-bit A = 1111 và B = 0010. Xác định A \< B hay không, trước hết hiểu là số unsigned (15 và 2), rồi là số signed (−1 và 2).
+Xét số 4-bit A = 1111 và B = 0010. Xác định A < B hay không, trước hết hiểu là số unsigned (15 và 2), rồi là số signed (−1 và 2).
 
 Lời giải Tính A – B = A + $\overline{B}$ + 1 = 1111 + 1101 + 1 = 11101. Carry out C là 1, như màu xanh. Flag N là 1, như chữ nghiêng. Flag V là 0 vì kết quả cùng sign bit với A. Flag Z là 0 vì kết quả không phải 0000.
 
 Với so sánh unsigned, L = \~C = 0 vì 15 không nhỏ hơn 2. Với so sánh signed, L = N ⊕ V = 1 vì −1 nhỏ hơn 2.
 
-Một số ALU còn triển khai instruction gọi là set if less than (SLT). Khi A \< B, Result = 1. Nếu không, Result = 0. Điều này tiện cho máy tính không truy cập được flag ALU vì về cơ bản nó lưu thông tin flag trong kết quả. SLT thường coi input là signed. Biến thể khác SLTU coi input là unsigned. Có nhiều biến thể ALU cơ bản này hỗ trợ chức năng khác như NOT, XOR hoặc XNOR. HDL cho ALU N-bit, gồm phiên bản hỗ trợ SLT và output flag, được dành cho Bài tập 5.11 đến 5.14.
+Một số ALU còn triển khai instruction gọi là set if less than (SLT). Khi A < B, Result = 1. Nếu không, Result = 0. Điều này tiện cho máy tính không truy cập được flag ALU vì về cơ bản nó lưu thông tin flag trong kết quả. SLT thường coi input là signed. Biến thể khác SLTU coi input là unsigned. Có nhiều biến thể ALU cơ bản này hỗ trợ chức năng khác như NOT, XOR hoặc XNOR. HDL cho ALU N-bit, gồm phiên bản hỗ trợ SLT và output flag, được dành cho Bài tập 5.11 đến 5.14.
 
 #### Ví dụ 5.4 MỞ RỘNG ALU XỬ LÝ SLT
 
@@ -405,27 +403,21 @@ Shifter và rotator di chuyển bit và nhân hoặc chia cho lũy thừa 2. Nh�
 
 - Logical shifter—dịch số sang trái hoặc phải và điền 0 vào chỗ trống.
 
-Ví dụ: 11001 \>\> 2 = 00110; 11001 \<\< 2 = 00100
+Ví dụ: 11001 >> 2 = 00110; 11001 << 2 = 00100
 
 - Arithmetic shifter—giống logical shifter nhưng khi dịch phải, điền các bit trọng số cao nhất bằng bản sao bit trọng số cao nhất (msb) cũ. Hữu ích khi nhân chia số signed (xem Mục 5.2.6 và 5.2.7). Arithmetic shift left giống logical shift left.
 
-Ví dụ: 11001 \>\>\> 2 = 11110; 11001 \<\< 2 = 00100. Các toán
-
-tử \<\<, \>\> và \>\>\> thường lần lượt chỉ shift left, logical shift right
-
-và arithmetic shift right.
+Ví dụ: 11001 >>> 2 = 11110; 11001 << 2 = 00100. Các toán tử <<, >> và >>> thường lần lượt chỉ shift left, logical shift right và arithmetic shift right.
 
 - Rotator—xoay số theo vòng, sao cho chỗ trống được điền bằng các bit đã dịch ra ở đầu kia.
 
-Ví dụ: 11001 ROR 2 = 01110; 11001 ROL 2 = 00111. ROR = rotate
-
-right; ROL = rotate left.
+Ví dụ: 11001 ROR 2 = 01110; 11001 ROL 2 = 00111. ROR = rotate right; ROL = rotate left.
 
 Shifter N-bit có thể xây từ N multiplexer N:1. Input được dịch 0 đến N−1 bit tùy giá trị các select line log<sub>2</sub>N-bit. Hình 5.19 trình bày ký hiệu và hardware của shifter 4-bit. Tùy giá trị shift amount 2-bit shamt<sub>1:0</sub>, output Y nhận input A dịch 0 đến 3 bit. Với mọi shifter, khi shamt<sub>1:0</sub> = 00, Y = A. Bài tập 5.22 đề cập thiết kế rotator.
 
-Dịch trái là trường hợp đặc biệt của phép nhân. Dịch trái N bit nhân số với 2<sup>N</sup>. Ví dụ 000011<sub>2</sub> \<\< 4 = 110000<sub>2</sub> tương đương 3<sub>10</sub> × 2<sup>4</sup> = 48<sub>10</sub>.
+Dịch trái là trường hợp đặc biệt của phép nhân. Dịch trái N bit nhân số với 2<sup>N</sup>. Ví dụ 000011<sub>2</sub> << 4 = 110000<sub>2</sub> tương đương 3<sub>10</sub> × 2<sup>4</sup> = 48<sub>10</sub>.
 
-Arithmetic right shift là trường hợp đặc biệt của phép chia. Arithmetic right shift N bit chia số cho 2<sup>N</sup>. Ví dụ 11100<sub>2</sub> \>\>\> 2 = 11111<sub>2</sub> tương đương −4<sub>10</sub>/2<sup>2</sup> = −1<sub>10</sub>.
+Arithmetic right shift là trường hợp đặc biệt của phép chia. Arithmetic right shift N bit chia số cho 2<sup>N</sup>. Ví dụ 11100<sub>2</sub> >>> 2 = 11111<sub>2</sub> tương đương −4<sub>10</sub>/2<sup>2</sup> = −1<sub>10</sub>.
 
 ![fig5_19](images/ch05/fig5_19.png)
 
@@ -439,7 +431,7 @@ Hình 5.20 Phép nhân: (a) thập phân, (b) nhị phân
 
 Nhân số nhị phân unsigned tương tự nhân thập phân nhưng chỉ gồm 1 và 0. Hình 5.20 so sánh nhân thập phân và nhị phân. Cả hai trường hợp, partial product được tạo bằng nhân một chữ số của multiplier với toàn bộ multiplicand. Các partial product đã dịch được cộng để tạo kết quả.
 
-Nhìn chung, multiplier N × N nhân hai số N-bit và tạo kết quả 2N-bit. Partial product trong nhân nhị phân là multiplicand hoặc toàn 0. Nhân số nhị phân 1-bit tương đương phép AND nên dùng AND gate tạo partial product.
+Nhìn chung, một multiplier N × N nhân hai số N-bit và tạo ra kết quả 2N-bit. Các partial product trong phép nhân nhị phân hoặc là multiplicand, hoặc gồm toàn các bit 0. Phép nhân các số nhị phân 1-bit tương đương phép toán AND, vì vậy các AND gate được dùng để tạo ra partial product.
 
 Nhân signed và unsigned khác nhau. Ví dụ xét 0xFE × 0xFD. Nếu các số 8-bit hiểu là số nguyên signed, chúng biểu diễn −2 và −3 nên product 16-bit là 0x0006. Nếu hiểu là số nguyên unsigned, product 16-bit là 0xFB06. Chú ý cả hai trường hợp byte trọng số thấp nhất là 0x06.
 
@@ -455,7 +447,7 @@ Phép multiply accumulate nhân hai số rồi cộng kết quả vào số th�
 
 ### 5.2.7 Phép chia\*
 
-Chia nhị phân có thể thực hiện bằng thuật toán sau cho số unsigned N-bit trong khoảng \[0, 2<sup>N</sup> − 1\]:
+Chia nhị phân có thể thực hiện bằng thuật toán sau cho số unsigned N-bit trong khoảng [0, 2<sup>N</sup> − 1]:
 
 <pre>
 R′ = 0
@@ -467,7 +459,7 @@ for i = N−1 to 0
 R = R′
 </pre>
 
-Partial remainder R được khởi tạo 0 (R′ = 0), và bit trọng số cao nhất của dividend A trở thành bit trọng số thấp nhất của R (R = {R′ \<\< 1, Ai}). Divisor B được trừ khỏi partial remainder để xác định có trừ được không (D = R − B). Nếu hiệu D âm (tức sign bit D là 1), quotient bit Q<sub>i</sub> là 0 và hiệu bị bỏ. Ngược lại, Q<sub>i</sub> là 1 và partial remainder cập nhật bằng hiệu. Dù trường hợp nào, partial remainder sau đó được nhân đôi (left-shifted một cột), bit trọng số cao tiếp theo của A trở thành bit trọng số thấp nhất của R, và quá trình lặp lại. Kết quả thỏa
+Partial remainder R được khởi tạo 0 (R′ = 0), và bit trọng số cao nhất của dividend A trở thành bit trọng số thấp nhất của R (R = {R′ << 1, Ai}). Divisor B được trừ khỏi partial remainder để xác định có trừ được không (D = R − B). Nếu hiệu D âm (tức sign bit D là 1), quotient bit Q<sub>i</sub> là 0 và hiệu bị bỏ. Ngược lại, Q<sub>i</sub> là 1 và partial remainder cập nhật bằng hiệu. Dù trường hợp nào, partial remainder sau đó được nhân đôi (left-shifted một cột), bit trọng số cao tiếp theo của A trở thành bit trọng số thấp nhất của R, và quá trình lặp lại. Kết quả thỏa
 
 ![eq_p277](images/ch05/eq_p277.png)
 
@@ -477,7 +469,7 @@ Hình 5.22 trình bày schematic array divider 4-bit. Divider tính A/B, tạo q
 
 Hình 5.22 Array divider
 
-Độ trễ array divider N-bit tăng tỷ lệ N<sup>2</sup> vì carry phải lan qua mọi N stage trong hàng trước khi xác định dấu và multiplexer chọn R hoặc D. Điều này lặp cho mọi N hàng. Phép chia chậm và đắt trong hardware; vì vậy nên dùng ít nhất có thể.
+Độ trễ của một array divider N-bit tăng tỷ lệ thuận với N<sup>2</sup> vì carry phải lan truyền qua tất cả N stage trong một hàng trước khi xác định được dấu và multiplexer chọn R hoặc D. Quá trình này lặp lại cho tất cả N hàng. Phép chia là một phép toán chậm và tốn kém khi triển khai bằng hardware; vì vậy, nên sử dụng nó càng ít càng tốt.
 
 ### 5.2.8 Đọc thêm
 
@@ -501,7 +493,7 @@ Số fixed-point signed có thể dùng ký pháp two’s complement hoặc sign
 
 Hình 5.24 Biểu diễn Fixed-point của −2.375: (a) giá trị tuyệt đối, (b) sign và magnitude, (c) two’s complement
 
-Giống mọi biểu diễn số nhị phân, số fixed-point chỉ là tập bit. Không có cách biết binary point tồn tại ngoài thỏa thuận giữa những người diễn giải số.
+Giống như mọi cách biểu diễn số binary, các số fixed-point chỉ là một tập hợp bit. Không có cách nào biết được sự tồn tại của binary point ngoài thỏa thuận giữa những người diễn giải số đó.
 
 Nhìn chung, dùng Ua.b chỉ số fixed-point unsigned với a integer bit và b fraction bit. Qa.b chỉ số fixed point signed (two’s complement) với a integer bit (gồm sign bit) và b fractional bit.
 
@@ -509,7 +501,7 @@ Nhìn chung, dùng Ua.b chỉ số fixed-point unsigned với a integer bit và 
 
 Tính 0.75 + (−0.625) bằng số fixed-point Q4.4.
 
-Lời giải Trước hết chuyển 0.625, độ lớn số thứ hai, sang ký pháp nhị phân fixed-point. 0.625 ≥ 2<sup>−1</sup> nên cột 2<sup>−1</sup> có 1, còn 0.625 − 0.5 = 0.125. Vì 0.125 \< 2<sup>−2</sup>, cột 2<sup>−2</sup> có 0. Vì 0.125 ≥ 2<sup>−3</sup>, cột 2<sup>−3</sup> có 1, còn 0.125 − 0.125 = 0. Do đó cột 2<sup>−4</sup> phải có 0. Kết hợp lại, 0.625<sub>10</sub> = 0000.1010<sub>2</sub>.
+Lời giải Trước hết chuyển 0.625, độ lớn số thứ hai, sang ký pháp nhị phân fixed-point. 0.625 ≥ 2<sup>−1</sup> nên cột 2<sup>−1</sup> có 1, còn 0.625 − 0.5 = 0.125. Vì 0.125 < 2<sup>−2</sup>, cột 2<sup>−2</sup> có 0. Vì 0.125 ≥ 2<sup>−3</sup>, cột 2<sup>−3</sup> có 1, còn 0.125 − 0.125 = 0. Do đó cột 2<sup>−4</sup> phải có 0. Kết hợp lại, 0.625<sub>10</sub> = 0000.1010<sub>2</sub>.
 
 ![fig5_25](images/ch05/fig5_25.png)
 
@@ -551,7 +543,7 @@ Hình 5.29 floating-point 32-bit phiên bản 2
 >
 > Institute of Electrical and Electronics Engineers (IEEE) giải quyết bằng tạo IEEE 754 Floating-Point Standard năm 1985, định nghĩa số floating-point. Định dạng floating-point này hiện được dùng gần như phổ quát và được bàn trong mục này.
 
-Chúng ta sửa exponent field lần cuối. Exponent cần biểu diễn cả exponent dương và âm. Để làm vậy, floating- point dùng biased exponent, là exponent gốc cộng bias hằng số. floating-point 32-bit dùng bias 127. Ví dụ với exponent 7, biased exponent là 7 + 127 = 134 = 10000110<sub>2</sub>. Với exponent −4, biased exponent là −4 + 127 = 123 = 01111011<sub>2</sub>. Hình 5.30 trình bày 1.11001<sub>2</sub> × 2<sup>7</sup> trong ký pháp floating-point với implicit leading one và biased exponent 134 (7 + 127). Ký pháp tuân chuẩn floating-point IEEE 754.
+Chúng ta sửa exponent field lần cuối. Exponent cần biểu diễn cả exponent dương và âm. Để làm vậy, floating- point dùng biased exponent, là exponent gốc cộng bias hằng số. floating-point 32-bit dùng bias 127. Ví dụ với exponent 7, biased exponent là 7 + 127 = 134 = 10000110<sub>2</sub>. Với exponent −4, biased exponent là −4 + 127 = 123 = 01111011<sub>2</sub>. Hình 5.30 trình bày 1.11001<sub>2</sub> × 2<sup>7</sup> trong ký pháp floating-point với implicit leading one và biased exponent 134 (7 + 127). Ký pháp này tuân theo chuẩn floating-point IEEE 754.
 
 Trường hợp đặc biệt: 0, ±∞ và NaN
 
@@ -594,7 +586,7 @@ Nhớ số overflow khi độ lớn quá lớn để biểu diễn. Tương tự
 
 Phép cộng Floating-Point
 
-Cộng số floating-point không đơn giản như cộng số two’s complement. Các bước cộng số floating-point cùng dấu như sau:
+Phép cộng các số floating-point không đơn giản như phép cộng các số two’s complement. Các bước để cộng các số floating-point cùng dấu như sau:
 
 1\. Trích exponent bit và fraction bit.
 
@@ -816,7 +808,7 @@ Memory array được xây thành array bit cell, mỗi cell lưu 1 bit data. H�
 
 Tổ chức
 
-Hình 5.44 trình bày tổ chức nội bộ memory array 4 × 3. Dĩ nhiên memory thực lớn hơn nhiều, nhưng có thể suy hành vi array lớn từ array nhỏ. Trong ví dụ, array lưu data từ Hình 5.41(b).
+Hình 5.44 trình bày tổ chức bên trong của một memory array 4 × 3. Dĩ nhiên, các memory trong thực tế lớn hơn nhiều, nhưng có thể suy ra hoạt động của các array lớn hơn từ array nhỏ này. Trong ví dụ này, array lưu trữ data từ Hình 5.41(b).
 
 Khi đọc memory, assert wordline và hàng bit cell tương ứng drive bitline HIGH hoặc LOW. Khi ghi memory, trước hết drive bitline HIGH hoặc LOW rồi assert wordline, cho phép giá trị bitline lưu vào hàng bit cell đó. Ví dụ, để đọc Address 10, bitline để floating, decoder assert wordline<sub>2</sub>, data lưu trong hàng bit cell (100) đọc ra các Data bitline. Để ghi 001 vào Address 11, drive bitline giá trị 001, rồi assert wordline<sub>3</sub> và giá trị mới (001) lưu vào bit cell.
 
@@ -924,7 +916,7 @@ Hình 5.53 ROM bit cell Fuse-programmable
 
 Nội dung ROM bit cell Hình 5.50 được quy định khi chế tạo bằng có hoặc không có transistor trong mỗi bit cell. Programmable ROM (PROM, phát âm như từ chỉ dạ hội) đặt transistor trong mọi bit cell nhưng cung cấp cách nối hoặc ngắt transistor với ground.
 
-Hình 5.53 trình bày bit cell của ROM fuse-programmable. Người dùng lập trình ROM bằng áp điện áp cao để đốt chọn lọc fuse. Nếu còn fuse, transistor nối GND và cell giữ 0. Nếu fuse bị phá, transistor ngắt ground và cell giữ 1. Đây còn gọi ROM one-time programmable vì fuse không sửa được sau khi đốt.
+Hình 5.53 trình bày bit cell của một ROM fuse-programmable. Người dùng lập trình ROM bằng cách đặt điện áp cao để đốt đứt có chọn lọc các fuse. Nếu fuse còn nguyên, transistor được nối với GND và cell lưu giá trị 0. Nếu fuse bị phá hủy, transistor bị ngắt khỏi ground và cell lưu giá trị 1. Loại này còn được gọi là ROM one-time programmable, vì không thể sửa lại fuse sau khi nó đã bị đốt đứt.
 
 > ![note_p294](images/ch05/note_p294.png)
 >
@@ -1022,7 +1014,7 @@ end;
 
 Hình 5.55 ram sau synthesis
 
-#### Ví dụ HDL 5.7 ROM
+### Ví dụ HDL 5.7 ROM
 
 SystemVerilog
 
@@ -1062,7 +1054,7 @@ begin
 end;
 ```
 
-#### Ví dụ HDL 5.8 REGISTER FILE
+### Ví dụ HDL 5.8 REGISTER FILE
 
 SystemVerilog
 
@@ -1131,7 +1123,7 @@ begin
 
 PLA triển khai combinational logic two-level dạng sum-of-products (SOP). PLA xây từ AND array tiếp theo OR array, như Hình 5.56. Input (dạng true và complement) drive AND array tạo implicant. Các implicant sau đó được OR để tạo output. PLA M × N × P-bit có M input, N implicant và P output.
 
-Hình 5.57 trình bày dot notation cho PLA 3 × 3 × 2-bit thực hiện hàm X = $\overline{A}$$\overline{B}$C + AB$\overline{C}$ và Y = A$\overline{B}$. Mỗi hàng AND array tạo implicant. Dấu chấm trong mỗi hàng AND array chỉ literal nào tạo thành implicant. AND array Hình 5.57 tạo ba implicant: $\overline{A}$$\overline{B}$C, AB$\overline{C}$ và A$\overline{B}$. Dấu chấm trong OR array chỉ implicant nào thuộc output function.
+Hình 5.57 trình bày dot notation cho PLA 3 × 3 × 2-bit thực hiện hàm X = $\overline{A}\overline{B}$C + AB$\overline{C}$ và Y = A$\overline{B}$. Mỗi hàng AND array tạo implicant. Dấu chấm trong mỗi hàng AND array chỉ literal nào tạo thành implicant. AND array Hình 5.57 tạo ba implicant: $\overline{A}\overline{B}$C, AB$\overline{C}$ và A$\overline{B}$. Dấu chấm trong OR array chỉ implicant nào thuộc output function.
 
 ![fig5_56](images/ch05/fig5_56.png)
 
@@ -1177,9 +1169,7 @@ Hình 5.60 Cyclone IV Logic Element (LE)
 
 (Tái bản có phép từ Altera Cyclone™ IV Handbook © 2010
 
-Altera Corporation)
-
-output LE cho combinational function, hoặc qua flip-flop cho registered function. Input flip-flop đến từ output LUT của chính nó, input data 3 hoặc register output của LE trước. Hardware bổ sung hỗ trợ phép cộng bằng carry chain hardware, các multiplexer routing khác, cùng enable và reset flip-flop. Altera nhóm 16 LE thành logic array block (LAB), cung cấp kết nối cục bộ giữa LE trong LAB.
+Altera Corporation) output LE cho combinational function, hoặc qua flip-flop cho registered function. Input flip-flop đến từ output LUT của chính nó, input data 3 hoặc register output của LE trước. Hardware bổ sung hỗ trợ phép cộng bằng carry chain hardware, các multiplexer routing khác, cùng enable và reset flip-flop. Altera nhóm 16 LE thành logic array block (LAB), cung cấp kết nối cục bộ giữa LE trong LAB.
 
 Tóm lại, mỗi Cyclone IV LE thực hiện một combinational và/hoặc registered function, có thể có tối đa bốn biến. FPGA hãng khác tổ chức hơi khác nhưng cùng nguyên lý chung. Ví dụ FPGA 7-series của Xilinx dùng LUT 6-input thay LUT 4-input.
 
@@ -1187,7 +1177,7 @@ Người thiết kế cấu hình FPGA bằng trước hết tạo schematic ho�
 
 #### Ví dụ 5.8 CÁC HÀM XÂY BẰNG LE
 
-Giải thích cách cấu hình một hoặc nhiều Cyclone IV LE để thực hiện: (a) X = $\overline{A}$$\overline{B}$C + AB$\overline{C}$ và Y = A$\overline{B}$ (b) Y = JKLMPQR; (c) counter divide-by-3 với binary state encoding (xem Hình 3.29(a)). Có thể biểu diễn kết nối giữa LE nếu cần.
+Giải thích cách cấu hình một hoặc nhiều Cyclone IV LE để thực hiện: (a) X = $\overline{A}\overline{B}$C + AB$\overline{C}$ và Y = A$\overline{B}$ (b) Y = JKLMPQR; (c) counter divide-by-3 với binary state encoding (xem Hình 3.29(a)). Có thể biểu diễn kết nối giữa LE nếu cần.
 
 Lời giải (a) Cấu hình hai LE. Một LUT tính X, LUT kia tính Y như Hình 5.61. Với LE đầu, input data 1, data 2 và data 3 lần lượt là A, B, C (kết nối đặt bởi routing channel). data 4 là don’t care nhưng phải nối vào thứ gì đó nên nối 0. Với LE thứ hai, input data 1 và data 2 lần lượt là A, B; input LUT khác là don’t care và nối 0. Cấu hình multiplexer cuối để chọn combinational output từ LUT tạo X và Y. Nhìn chung, một LE có thể tính mọi hàm tối đa bốn biến input như vậy.
 
@@ -1255,7 +1245,7 @@ Do đó t<sub>pd</sub> = 5 ns − (0.199 ns + 0.076 ns), nên t<sub>pd</sub> ≤
 
 > Nhiều ROM và PLA dùng dynamic circuit thay circuit pseudo-nMOS. Dynamic gate chỉ bật transistor pMOS ON trong một phần thời gian, tiết kiệm công suất khi pMOS OFF và không cần kết quả. Ngoài điểm đó, memory array dynamic và pseudo-nMOS giống nhau về thiết kế và hành vi.
 
-Hình 5.64(a) trình bày dot notation cho ROM 4 × 3-bit thực hiện hàm: X = A ⊕ B,Y = $\overline{A}$ + B và Z = $\overline{A}$$\overline{B}$. Chúng giống hàm Hình 5.51 với address input đổi tên A, B và data output đổi tên X, Y, Z. Triển khai pseudo-nMOS ở Hình 5.64(b). Mỗi decoder output nối gate của transistor nMOS trong hàng của nó. Nhớ circuit pseudo-nMOS có transistor pMOS yếu kéo output HIGH chỉ khi không có đường đến GND qua mạng pull-down (nMOS).
+Hình 5.64(a) trình bày dot notation cho ROM 4 × 3-bit thực hiện hàm: X = A ⊕ B,Y = $\overline{A}$ + B và Z = $\overline{A}\overline{B}$. Chúng giống hàm Hình 5.51 với address input đổi tên A, B và data output đổi tên X, Y, Z. Triển khai pseudo-nMOS ở Hình 5.64(b). Mỗi decoder output nối gate của transistor nMOS trong hàng của nó. Nhớ circuit pseudo-nMOS có transistor pMOS yếu kéo output HIGH chỉ khi không có đường đến GND qua mạng pull-down (nMOS).
 
 Transistor Pull-down đặt tại mọi chỗ giao không có dấu chấm. Dấu chấm từ sơ đồ dot notation Hình 5.64(a) vẫn để trong Hình 5.64(b) để dễ so sánh. Transistor pull-up yếu kéo output HIGH cho mỗi wordline không có transistor pull-down. Ví dụ, khi AB = 11, wordline 11 HIGH, transistor trên X và Z bật, kéo các output đó LOW. Output Y không có transistor nối wordline 11 nên Y được pull-up yếu kéo HIGH.
 
@@ -1323,13 +1313,13 @@ Bài tập 5.8 Thiết kế comparator sau cho số unsigned 32-bit. Phác thả
 
 Bài tập 5.9 Xét signed comparator Hình 5.12.
 
-(a) Cho ví dụ hai số signed 4-bit A, B mà signed comparator 4-bit tính đúng A \< B.
+(a) Cho ví dụ hai số signed 4-bit A, B mà signed comparator 4-bit tính đúng A < B.
 
-(b) Cho ví dụ hai số signed 4-bit A, B mà signed comparator 4-bit tính sai A \< B.
+(b) Cho ví dụ hai số signed 4-bit A, B mà signed comparator 4-bit tính sai A < B.
 
 (c) Nhìn chung, khi nào signed comparator N-bit hoạt động sai?
 
-Bài tập 5.10 Sửa signed comparator N-bit Hình 5.12 để tính đúng A \< B cho mọi input signed N-bit A, B.
+Bài tập 5.10 Sửa signed comparator N-bit Hình 5.12 để tính đúng A < B cho mọi input signed N-bit A, B.
 
 Bài tập 5.11 Thiết kế ALU 32-bit Hình 5.15 bằng HDL yêu thích. Có thể làm module top-level dạng behavioral hoặc structural.
 
@@ -1347,13 +1337,13 @@ Bài tập 5.17 Làm lại Bài tập 5.15 cho ALU ở Bài tập 5.13.
 
 Bài tập 5.18 Làm lại Bài tập 5.15 cho ALU ở Bài tập 5.14.
 
-Bài tập 5.19 Xây unsigned comparison unit so sánh hai số unsigned A, B. Input unit là signal Flags (N, Z, C, V) từ ALU Hình 5.16 đang trừ A − B. Output unit là HS, LS, HI, LO, chỉ A cao hơn hoặc bằng (HS), thấp hơn hoặc bằng (LS), cao hơn (HI), thấp hơn (LO) B.
+Bài tập 5.19 Xây dựng một unsigned comparison unit so sánh hai số unsigned A và B. Input của unit là signal Flags (N, Z, C, V) từ ALU trong Hình 5.16, với ALU thực hiện phép trừ A − B. Các output của unit là HS, LS, HI và LO, lần lượt biểu thị A cao hơn hoặc bằng (HS), thấp hơn hoặc bằng (LS), cao hơn (HI) hoặc thấp hơn (LO) B.
 
 (a) Viết phương trình tối thiểu cho HS, LS, HI, LO theo N, Z, C, V.
 
 (b) Phác thảo circuit cho HS, LS, HI, LO.
 
-Bài tập 5.20 Xây signed comparison unit so sánh hai số signed A, B. Input unit là signal Flags (N, Z, C, V) từ ALU Hình 5.16 đang trừ A − B. Output unit là GE, LE, GT, LT, chỉ A lớn hơn hoặc bằng (GE), nhỏ hơn hoặc bằng (LE), lớn hơn (GT), nhỏ hơn (LT) B.
+Bài tập 5.20 Xây dựng một signed comparison unit so sánh hai số signed A và B. Input của unit là signal Flags (N, Z, C, V) từ ALU trong Hình 5.16, với ALU thực hiện phép trừ A − B. Các output của unit là GE, LE, GT và LT, lần lượt biểu thị A lớn hơn hoặc bằng (GE), nhỏ hơn hoặc bằng (LE), lớn hơn (GT) hoặc nhỏ hơn (LT) B.
 
 (a) Viết phương trình tối thiểu cho GE, LE, GT, LT theo N, Z, C, V.
 
@@ -1389,9 +1379,9 @@ Bài tập 5.27 Tìm critical path unsigned divider 4 × 4 Hình 5.22 theo độ
 
 Bài tập 5.28 Thiết kế multiplier xử lý số two’s complement.
 
-Bài tập 5.29 Sign extension unit mở rộng số two’s complement từ M lên N bit (N \> M) bằng sao chép bit trọng số cao nhất input vào các bit cao output (xem Mục 1.4.6). Nó nhận input A M-bit, tạo output Y N-bit. Phác thảo circuit sign extension unit có input 4-bit, output 8-bit. Viết HDL cho thiết kế.
+Bài tập 5.29 Sign extension unit mở rộng số two’s complement từ M lên N bit (N > M) bằng sao chép bit trọng số cao nhất input vào các bit cao output (xem Mục 1.4.6). Nó nhận input A M-bit, tạo output Y N-bit. Phác thảo circuit sign extension unit có input 4-bit, output 8-bit. Viết HDL cho thiết kế.
 
-Bài tập 5.30 Zero extension unit mở rộng số unsigned từ M lên N bit (N \> M) bằng điền zero vào bit cao output. Phác thảo circuit zero extension unit có input 4-bit, output 8-bit. Viết HDL cho thiết kế.
+Bài tập 5.30 Zero extension unit mở rộng số unsigned từ M lên N bit (N > M) bằng điền zero vào bit cao output. Phác thảo circuit zero extension unit có input 4-bit, output 8-bit. Viết HDL cho thiết kế.
 
 Bài tập 5.31 Tính 111001.000<sub>2</sub>/001100.000<sub>2</sub> trong nhị phân bằng thuật toán chia chuẩn ở tiểu học. Trình bày cách làm.
 
@@ -1475,37 +1465,35 @@ Bài tập 5.46 Xét các số decimal: 245 và 0.0625.
 
 (a) Viết hai số theo single-precision floating-point. Cho đáp án hexadecimal.
 
-(b) So sánh độ lớn hai số 32-bit ở phần (a). Tức diễn giải hai số 32-bit như two’s complement rồi so sánh. Integer comparison có cho kết quả đúng không?
+(b) Thực hiện phép so sánh độ lớn của hai số 32-bit trong phần (a). Nói cách khác, hãy diễn giải hai số 32-bit là các số two’s complement rồi so sánh chúng. Phép so sánh số nguyên có cho kết quả chính xác không?
 
 (c) Bạn quyết định tạo notation single-precision floating-point mới. Mọi thứ giống chuẩn IEEE 754 single-precision floating-point, nhưng biểu diễn exponent bằng two’s complement
 
-thay vì bias. Viết hai số theo chuẩn mới. Cho
-
-đáp án hexadecimal.
+thay vì bias. Viết hai số theo chuẩn mới. Cho đáp án hexadecimal.
 
 (d) Integer comparison có hoạt động với notation floating-point mới ở phần (c) không?
 
 (e) Vì sao thuận tiện khi integer comparison hoạt động với số floating-point?
 
-Bài tập 5.47 Thiết kế single-precision floating-point adder bằng HDL ưa thích. Trước khi viết code, phác schematic thiết kế. Simulation và test để chứng minh cho người hoài nghi rằng adder đúng. Có thể chỉ xét số dương và round toward zero (truncate). Cũng có thể bỏ special case Bảng 5.4.
+Bài tập 5.47 Thiết kế single-precision floating-point adder bằng HDL ưa thích. Trước khi viết code, phác thảo schematic thiết kế. Simulation và test để chứng minh cho người hoài nghi rằng adder đúng. Có thể chỉ xét số dương và round toward zero (truncate). Cũng có thể bỏ special case Bảng 5.4.
 
 Bài tập 5.48 Trong bài này, tìm hiểu thiết kế multiplier floating-point 32-bit. Nó nhận hai input floating-point 32-bit, tạo output floating-point 32-bit. Có thể chỉ xét số dương và round toward zero (truncate). Cũng có thể bỏ special case Bảng 5.4.
 
 (a) Viết các bước cần để nhân floating-point 32-bit.
 
-(b) Phác schematic multiplier floating-point 32-bit.
+(b) Phác thảo schematic multiplier floating-point 32-bit.
 
 (c) Thiết kế multiplier floating-point 32-bit bằng HDL. Simulation và test chứng minh cho người hoài nghi rằng nó đúng.
 
 Bài tập 5.49 Trong bài này, tìm hiểu thiết kế prefix adder 32-bit.
 
-(a) Phác schematic thiết kế.
+(a) Phác thảo schematic thiết kế.
 
 (b) Thiết kế prefix adder 32-bit bằng HDL. Simulation và test chứng minh hoạt động đúng.
 
 (c) Delay prefix adder 32-bit ở phần (a) là bao nhiêu? Giả định mỗi gate two-input có delay 100 ps.
 
-(d) Thiết kế bản pipelined của prefix adder 32-bit. Phác schematic. Adder pipelined chạy nhanh đến đâu? Có thể giả định sequencing overhead (t<sub>pcq</sub> + t<sub>setup</sub>) là 80 ps. Làm thiết kế nhanh nhất có thể.
+(d) Thiết kế bản pipelined của prefix adder 32-bit. Phác thảo schematic. Adder pipelined chạy nhanh đến đâu? Có thể giả định sequencing overhead (t<sub>pcq</sub> + t<sub>setup</sub>) là 80 ps. Làm thiết kế nhanh nhất có thể.
 
 (e) Thiết kế pipelined prefix adder 32-bit bằng HDL.
 
@@ -1515,35 +1503,33 @@ Bài tập 5.51 Xây synchronous Up/Down counter 32-bit. Input Reset và Up. Res
 
 Bài tập 5.52 Thiết kế counter 32-bit cộng 4 mỗi clock edge. Input reset và clock. Khi reset, output toàn 0.
 
-Bài tập 5.53 Sửa counter Bài tập 5.52 để mỗi clock edge tăng 4 hoặc load giá trị 32-bit D mới tùy control signal Load. Load = 1 thì load D; nếu không tăng 4.
+Bài tập 5.53 Sửa đổi counter trong Bài tập 5.52 sao cho tại mỗi clock edge, counter tăng thêm 4 hoặc load một giá trị 32-bit mới là D, tùy theo control signal Load. Khi Load = 1, counter load giá trị mới D. Nếu không, nó tăng thêm 4.
 
-Bài tập 5.54 Johnson counter N-bit gồm shift register N-bit có reset. Output shift register (S<sub>out</sub>) bị đảo rồi đưa về input (S<sub>in</sub>). Khi reset, mọi bit clear về 0.
+Bài tập 5.54 Một Johnson counter N-bit gồm một shift register N-bit có signal reset. Output của shift register (S<sub>out</sub>) được đảo rồi đưa ngược về input (S<sub>in</sub>). Khi counter được reset, tất cả các bit được xóa về 0.
 
 (a) Cho chuỗi output Q<sub>3:0</sub> của Johnson counter 4-bit bắt đầu ngay sau reset.
 
 (b) Sau bao nhiêu cycle thì Johnson counter N-bit lặp chuỗi? Giải thích.
 
-(c) Thiết kế decimal counter bằng Johnson counter 5-bit, mười AND gate và inverter. Counter có clock, reset, mười output one-hot Y<sub>9:0</sub>. Reset thì Y<sub>0</sub> assert. Mỗi cycle tiếp, output kế được assert. Sau mười cycle lặp lại. Phác schematic decimal counter.
+(c) Thiết kế decimal counter bằng Johnson counter 5-bit, mười AND gate và inverter. Counter có clock, reset, mười output one-hot Y<sub>9:0</sub>. Reset thì Y<sub>0</sub> assert. Mỗi cycle tiếp, output kế được assert. Sau mười cycle lặp lại. Phác thảo schematic decimal counter.
 
 (d) Johnson counter có thể có lợi thế gì so với counter thông thường?
 
-Bài tập 5.55 Viết HDL cho scannable flip-flop 4-bit như Hình 5.39. Simulation và test module để chứng minh đúng.
+Bài tập 5.55 Viết HDL cho một scannable flip-flop 4-bit giống như trong Hình 5.39. Mô phỏng và kiểm tra module HDL của bạn để chứng minh rằng nó hoạt động chính xác.
 
-Bài tập 5.56 Tiếng Anh có nhiều dư thừa, cho phép tái dựng thông tin truyền bị nhiễu. Binary data cũng có thể truyền dư thừa để sửa lỗi. Ví dụ encode 0 thành 00000, 1 thành 11111, gửi qua noisy channel có thể đảo tối đa hai bit. Receiver tái dựng data gốc vì 0 có ít nhất ba trong năm bit nhận là 0; tương tự 1 có ít nhất ba bit 1.
+Bài tập 5.56 Tiếng Anh có nhiều thông tin dư thừa, cho phép chúng ta khôi phục những thông tin truyền đi bị sai lệch. Binary data cũng có thể được truyền dưới dạng có dư thừa để cho phép sửa lỗi. Ví dụ, số 0 có thể được mã hóa thành 00000 và số 1 thành 11111. Sau đó, giá trị này có thể được gửi qua một kênh có nhiễu có khả năng đảo tối đa hai bit. Bên nhận có thể khôi phục data ban đầu vì số 0 sẽ có ít nhất ba trong năm bit nhận được là 0; tương tự, số 1 sẽ có ít nhất ba bit 1.
 
 (a) Đề xuất encoding gửi 00, 01, 10 hoặc 11 bằng năm bit thông tin để mọi lỗi làm hỏng một bit data đã encode
 
-đều sửa được. Gợi ý: encoding 00000 và 11111 lần lượt cho 00 và 11
-
-sẽ không hoạt động.
+đều sửa được. Gợi ý: encoding 00000 và 11111 lần lượt cho 00 và 11 sẽ không hoạt động.
 
 (b) Thiết kế circuit nhận data encode five-bit rồi decode về 00, 01, 10 hoặc 11 ngay cả khi một bit truyền bị đổi.
 
-(c) Giả sử muốn đổi encoding 5-bit khác. Triển khai thiết kế thế nào để dễ đổi encoding mà không cần hardware khác?
+(c) Giả sử bạn muốn chuyển sang một cách encoding 5-bit khác. Bạn có thể triển khai thiết kế như thế nào để dễ thay đổi encoding mà không cần sử dụng hardware khác?
 
 Bài tập 5.57 Flash EEPROM, gọi gọn Flash memory, là phát minh khá gần đây cách mạng hóa điện tử tiêu dùng. Nghiên cứu và giải thích hoạt động Flash. Dùng sơ đồ minh họa floating gate. Mô tả lập trình một bit memory. Trích nguồn đúng cách.
 
-Bài tập 5.58 Nhóm nghiên cứu sự sống ngoài Trái Đất vừa phát hiện sinh vật ngoài hành tinh dưới đáy Mono Lake. Họ cần circuit phân loại nguồn hành tinh tiềm năng theo đặc tính đo từ NASA probe: mức xanh lá, nâu, nhầy và xấu xí. Tham vấn kỹ xenobiologist cho kết luận:
+Bài tập 5.58 Nhóm dự án nghiên cứu sự sống ngoài Trái Đất vừa phát hiện người ngoài hành tinh sống dưới đáy Mono Lake. Họ cần xây dựng một circuit để phân loại người ngoài hành tinh theo hành tinh xuất xứ có khả năng nhất, dựa trên các đặc điểm đo được từ tàu thăm dò NASA: mức độ xanh lá, mức độ nâu, mức độ nhầy và mức độ xấu xí. Việc tham vấn kỹ các nhà sinh vật học ngoài hành tinh dẫn đến những kết luận sau:
 
 - Nếu sinh vật xanh lá và nhầy hoặc xấu xí, nâu và nhầy, nó có thể từ sao Hỏa.
 
@@ -1561,7 +1547,7 @@ Bài tập 5.58 Nhóm nghiên cứu sự sống ngoài Trái Đất vừa phát 
 
 Bài tập 5.59 Triển khai các function sau bằng một ROM 16 × 3. Dùng dot notation chỉ nội dung ROM.
 
-(a) X = AB + B$\overline{C}$D + $\overline{A}$$\overline{B}$
+(a) X = AB + B$\overline{C}$D + $\overline{A}\overline{B}$
 
 (b) Y = AB + BD
 
@@ -1583,7 +1569,7 @@ Bài tập 5.62 Xét circuit ROM Hình 5.67. Với mỗi row, có thể thay cir
 
 Hình 5.67 ROM circuit
 
-Bài tập 5.63 Cần bao nhiêu LE FPGA Cyclone IV để thực hiện từng function sau? Chỉ cách cấu hình một hoặc nhiều LE. Bạn nên làm được bằng quan sát, không cần logic synthesis.
+Bài tập 5.63 Cần bao nhiêu LE của FPGA Cyclone IV để thực hiện từng function dưới đây? Hãy trình bày cách cấu hình một hoặc nhiều LE để thực hiện function đó. Bạn nên có thể giải bài này bằng cách quan sát, mà không cần thực hiện logic synthesis.
 
 (a) combinational function Bài tập 2.13(c)
 
@@ -1628,7 +1614,7 @@ Bảng 5.7 Timing Cyclone IV
 
 Bài tập 5.66 Làm lại Bài tập 5.65 cho FSM Hình 3.31(b).
 
-Bài tập 5.67 Bạn muốn FPGA phân loại M\&M bằng color sensor và motor để đưa kẹo đỏ vào lọ này, kẹo xanh vào lọ khác. Thiết kế FSM dùng Cyclone IV FPGA. Datasheet cho timing Bảng 5.7. Muốn FSM chạy 100 MHz. Số LE tối đa trên critical path là bao nhiêu? Tốc độ nhanh nhất FSM chạy là bao nhiêu?
+Bài tập 5.67 Bạn muốn sử dụng một FPGA để triển khai máy phân loại M\&M với cảm biến màu và các motor để đưa kẹo đỏ vào một lọ và kẹo xanh vào lọ khác. Thiết kế sẽ được triển khai dưới dạng FSM bằng FPGA Cyclone IV. Theo datasheet, FPGA có các đặc tính timing trong Bảng 5.7. Bạn muốn FSM chạy ở 100 MHz. Số LE tối đa trên critical path là bao nhiêu? Tốc độ nhanh nhất mà FSM có thể chạy là bao nhiêu?
 
 ## Câu hỏi phỏng vấn
 
@@ -1638,6 +1624,6 @@ Câu hỏi 5.1 Kết quả lớn nhất khi nhân hai số unsigned N-bit là g�
 
 Câu hỏi 5.2 Binary coded decimal (BCD) dùng bốn bit encode mỗi decimal digit. Ví dụ 42<sub>10</sub> biểu diễn 01000010<sub>BCD</sub>. Giải thích bằng lời vì sao processor có thể dùng BCD.
 
-Câu hỏi 5.3 Thiết kế hardware cộng hai số BCD unsigned 8-bit (Câu hỏi 5.2). Phác schematic và viết module HDL BCD adder. Input A, B, C<sub>in</sub>; output S, C<sub>out</sub>. C<sub>in</sub>, C<sub>out</sub> là carry 1-bit; A, B, S là BCD 8-bit.
+Câu hỏi 5.3 Thiết kế hardware cộng hai số BCD unsigned 8-bit (Câu hỏi 5.2). Phác thảo schematic và viết module HDL BCD adder. Input A, B, C<sub>in</sub>; output S, C<sub>out</sub>. C<sub>in</sub>, C<sub>out</sub> là carry 1-bit; A, B, S là BCD 8-bit.
 
-[^1]: Có thể kiểm bằng thử vài số. Hoặc chú ý đổi dấu (lấy two’s complement) số N-bit để trừ cho −B = $\overline{B}$ + 1 = 2<sup>N</sup> – B. Nay A + (−B) = 2<sup>N</sup> + A – B. Nó có carry out (1 ở cột N) nếu A ≥ B, nên không carry out nếu A \< B.
+[^1]: Bạn có thể kiểm tra điều này bằng cách thử với một vài số. Một cách khác là lưu ý rằng việc đảo dấu (tức là lấy two’s complement) của các số N-bit để thực hiện phép trừ cho kết quả −B = $\overline{B}$ + 1 = 2<sup>N</sup> – B. Khi đó, A + (−B) = 2<sup>N</sup> + A – B. Phép cộng này sẽ có carry out (một bit 1 ở cột N) nếu A ≥ B; do đó, sẽ không có carry out nếu A < B.

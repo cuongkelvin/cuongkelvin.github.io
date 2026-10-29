@@ -2,7 +2,7 @@
 
 ## 14.1 Giới thiệu
 
-Trong bối cảnh digital design không ngừng phát triển, nhu cầu về các phương pháp phát triển hiệu quả, tin cậy và nhanh chóng trở nên quan trọng hơn bao giờ hết. Chương này đi sâu vào một trong những sự tích hợp mạnh mẽ nhất dành cho kỹ sư: sự kết hợp giữa Simulink HDL Coder và Xilinx Vivado. Các công cụ này đại diện cho sự hội tụ giữa high-level modeling và hardware synthesis, cho phép người thiết kế chuyển đổi liền mạch từ các biểu diễn hệ thống trừu tượng sang các hiện thực phần cứng thực tế. Simulink cung cấp một nền tảng động để mô phỏng các hệ thống phức tạp, cho phép kỹ sư trực quan hóa và tinh chỉnh thiết kế qua các block diagram trực quan. Trong khi đó, HDL Coder giúp người dùng tự động tạo code VHDL có thể synthesize trực tiếp từ các model Simulink, rút ngắn con đường tới triển khai trên FPGA và ASIC. Khi người thiết kế ngày càng chuyển sang các high-level abstraction, việc hiểu các sắc thái của quá trình tạo VHDL trở nên thiết yếu để tận dụng đầy đủ khả năng của các môi trường thiết kế hiện đại. Chương này sẽ hướng dẫn bạn qua các quá trình then chốt trong việc khai thác Simulink HDL Coder để tạo code VHDL phù hợp cho việc hiện thực trong Xilinx Vivado. Từ việc thiết lập model Simulink đến cấu hình các thiết lập HDL Coder và nắm bắt các chi tiết phức tạp của code được tạo ra, bạn sẽ có được những hiểu biết về các best practice giúp nâng cao hiệu quả và hiệu năng thiết kế. Đến cuối chương này, bạn sẽ không chỉ thấy được sự cộng hưởng giữa các công cụ mạnh mẽ này mà còn có được các kỹ năng thực hành nâng workflow digital design của bạn lên một tầm cao mới.
+Trong bối cảnh digital design không ngừng phát triển, nhu cầu về các phương pháp phát triển hiệu quả, tin cậy và nhanh chóng trở nên quan trọng hơn bao giờ hết. Chương này đi sâu vào một trong những sự tích hợp mạnh mẽ nhất dành cho kỹ sư: sự kết hợp giữa Simulink HDL Coder và Xilinx Vivado. Các công cụ này đại diện cho sự hội tụ giữa high-level modeling và hardware synthesis, cho phép người thiết kế chuyển đổi liền mạch từ các biểu diễn hệ thống trừu tượng sang các bản triển khai phần cứng thực tế. Simulink cung cấp một nền tảng động để mô phỏng các hệ thống phức tạp, cho phép kỹ sư trực quan hóa và tinh chỉnh thiết kế qua các block diagram trực quan. Trong khi đó, HDL Coder giúp người dùng tự động tạo code VHDL có thể synthesize trực tiếp từ các model Simulink, rút ngắn con đường tới triển khai trên FPGA và ASIC. Khi người thiết kế ngày càng chuyển sang các high-level abstraction, việc hiểu các sắc thái của quá trình tạo VHDL trở nên thiết yếu để tận dụng đầy đủ khả năng của các môi trường thiết kế hiện đại. Chương này sẽ hướng dẫn bạn qua các quá trình then chốt trong việc khai thác Simulink HDL Coder để tạo code VHDL phù hợp cho việc triển khai trong Xilinx Vivado. Từ việc thiết lập model Simulink đến cấu hình các thiết lập HDL Coder và nắm bắt các chi tiết phức tạp của code được tạo ra, bạn sẽ có được những hiểu biết về các best practice giúp nâng cao hiệu quả và hiệu năng thiết kế. Đến cuối chương này, bạn sẽ không chỉ thấy được sự cộng hưởng giữa các công cụ mạnh mẽ này mà còn có được các kỹ năng thực hành nâng workflow digital design của bạn lên một tầm cao mới.
 
 ## 14.2 Thiết kế mạch Half Adder
 
@@ -44,7 +44,7 @@ Cửa sổ thiết lập tham số của rounding function được minh họa t
 
 Ngoài ra, cửa sổ thiết lập tham số convert được thể hiện trong Hình 14.6.
 
-Sau đó, chúng ta lưu thiết kế Simulink trong một thư mục mong muốn (Half_Adder) và đặt tên là Half_Adder. slx. Gõ code sau trong MATLAB command window.
+Sau đó, chúng ta lưu thiết kế Simulink trong một thư mục mong muốn (Half_Adder) và đặt tên là Half_Adder.slx. Gõ code sau trong MATLAB command window.
 
 ![p0264_4](images/ch14_generating_vhdl_code_using_simulink_hdl_coder/p0264_4.png)
 
@@ -321,7 +321,7 @@ Sau khi mở môi trường Simulink, chúng ta dùng code sau để mở HDL Co
 >> hdllib
 ```
 
-Sau đó, dùng HDL Coder library browser, chúng ta tạo một model mới tên Basic_PWM_ Design, như được thể hiện trong Hình 14.36. Ngoài ra, model subsystem Basic_PWM_Design được mô tả trong Hình 14.37.
+Sau đó, dùng HDL Coder library browser, chúng ta tạo một model mới tên Basic_PWM_Design, như được thể hiện trong Hình 14.36. Ngoài ra, model subsystem Basic_PWM_Design được mô tả trong Hình 14.37.
 
 Các block parameter cho counter free-running 4-bit được minh họa trong Hình 14.38.
 
@@ -335,7 +335,7 @@ Bây giờ, chúng ta cũng có thể gõ code sau trong MATLAB command window.
 
 Chúng ta đặt fixed step size là 1s trong solver configuration parameters, như được mô tả trong Hình 14.41. Ngoài ra, chúng ta đặt các tham số tab HDL Code Generation, như được minh họa trong Hình 14.42.
 
-Bây giờ, nếu chạy simulation, các xung PWM được tạo ra ở output của subsystem Basic_ PWM_Design được thể hiện trong Hình 14.43.
+Bây giờ, nếu chạy simulation, các xung PWM được tạo ra ở output của subsystem Basic_PWM_Design được thể hiện trong Hình 14.43.
 
 ![p0277_37](images/ch14_generating_vhdl_code_using_simulink_hdl_coder/p0277_37.png)
 
@@ -357,7 +357,7 @@ Hình 14.39 Các block parameter cho tab main của constant.
 
 Hình 14.40 Các block parameter cho tab signal attributes của constant.
 
-Waveform output của counter free-running 4-bit và signal PWM bên trong model subsystem Basic_ PWM_Design được mô tả trong Hình 14.44.
+Waveform output của counter free-running 4-bit và signal PWM bên trong model subsystem Basic_PWM_Design được mô tả trong Hình 14.44.
 
 Trước khi kiểm tra và chạy các lệnh HDL coder, tốt hơn là xóa scope bên trong model subsystem Basic_PWM_Design. Bây giờ, chúng ta viết code sau trong MATLAB command window.
 

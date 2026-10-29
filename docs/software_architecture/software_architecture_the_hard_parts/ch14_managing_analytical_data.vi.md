@@ -6,7 +6,7 @@
 
 Logan và Dana (kiến trúc sư dữ liệu) đứng bên ngoài phòng họp lớn, trò chuyện sau cuộc họp báo cáo tiến độ hằng tuần.<a id="idm45798374963880"></a><a id="idm45798374962904"></a><a id="idm45798374961688"></a>
 
-“Chúng ta sẽ xử lý dữ liệu phân tích trong architecture mới này thế nào?” Dana hỏi. “Chúng ta đang chia database thành các phần nhỏ, nhưng chúng ta sẽ phải dán toàn bộ dữ liệu đó trở lại với nhau cho báo cáo và phân tích. Một trong những cải tiến chúng ta đang cố hiện thực là lập kế hoạch dự đoán tốt hơn, nghĩa là chúng ta đang dùng nhiều khoa học dữ liệu và thống kê hơn để đưa ra các quyết định chiến lược hơn. Giờ chúng ta có một team chuyên nghĩ về dữ liệu phân tích, và chúng ta cần một phần của hệ thống để đáp ứng nhu cầu này. Chúng ta sẽ có một data warehouse chứ?”
+“Chúng ta sẽ xử lý dữ liệu phân tích trong architecture mới này thế nào?” Dana hỏi. “Chúng ta đang chia database thành các phần nhỏ, nhưng chúng ta sẽ phải dán toàn bộ dữ liệu đó trở lại với nhau cho báo cáo và phân tích. Một trong những cải tiến chúng ta đang cố triển khai là lập kế hoạch dự đoán tốt hơn, nghĩa là chúng ta đang dùng nhiều khoa học dữ liệu và thống kê hơn để đưa ra các quyết định chiến lược hơn. Giờ chúng ta có một team chuyên nghĩ về dữ liệu phân tích, và chúng ta cần một phần của hệ thống để đáp ứng nhu cầu này. Chúng ta sẽ có một data warehouse chứ?”
 
 Logan nói, “Chúng tôi đã xem xét việc tạo một data warehouse, và dù nó giải quyết được vấn đề hợp nhất, nó lại có cả đống vấn đề đối với chúng ta.”
 
@@ -36,7 +36,7 @@ Vì dữ liệu vận hành nằm trong các database riêng lẻ, một phần 
 
 **Được biến đổi thành một schema duy nhất (Transformed to single schema)**
 
-Thường thì schema vận hành không khớp với schema cần cho báo cáo. Ví dụ, một hệ thống vận hành cần cấu trúc schema và hành vi quanh transaction, trong khi một hệ thống phân tích hiếm khi là dữ liệu OLTP (xem [Chương 1](ch01_what_happens_when_there_are_no_best_practices.vi.md#ch01-introduction)) mà thường xử lý lượng lớn dữ liệu, cho báo cáo, tổng hợp, v.v. <a id="idm45798374935704"></a><a id="idm45798374934968"></a>Do đó, hầu hết data warehouse dùng một *Star Schema* để hiện thực mô hình hóa theo chiều (dimensional modelling), biến đổi dữ liệu từ các hệ thống vận hành ở các định dạng khác nhau thành schema của warehouse. Để thúc đẩy tốc độ và sự đơn giản, người thiết kế warehouse phi chuẩn hóa dữ liệu để tạo điều kiện cho performance và các truy vấn đơn giản hơn.
+Thường thì schema vận hành không khớp với schema cần cho báo cáo. Ví dụ, một hệ thống vận hành cần cấu trúc schema và hành vi quanh transaction, trong khi một hệ thống phân tích hiếm khi là dữ liệu OLTP (xem [Chương 1](ch01_what_happens_when_there_are_no_best_practices.vi.md#ch01-introduction)) mà thường xử lý lượng lớn dữ liệu, cho báo cáo, tổng hợp, v.v. <a id="idm45798374935704"></a><a id="idm45798374934968"></a>Do đó, hầu hết data warehouse dùng một *Star Schema* để triển khai mô hình hóa theo chiều (dimensional modelling), biến đổi dữ liệu từ các hệ thống vận hành ở các định dạng khác nhau thành schema của warehouse. Để thúc đẩy tốc độ và sự đơn giản, người thiết kế warehouse phi chuẩn hóa dữ liệu để tạo điều kiện cho performance và các truy vấn đơn giản hơn.
 
 **Được nạp vào warehouse (Loaded into warehouse)**
 
@@ -157,7 +157,7 @@ Mối lo ngại về PII đã tăng lên <a id="idm45798374559576"></a><a id="id
 
 **Vẫn phân vùng theo kỹ thuật, không theo domain (Still technically, not domain, partitioned)**
 
-Xu hướng hiện tại trong software architecture chuyển trọng tâm từ việc phân vùng<a id="idm45798374556088"></a><a id="idm45798374555048"></a><a id="idm45798374553816"></a><a id="idm45798374552584"></a> một hệ thống dựa trên năng lực kỹ thuật sang dựa trên domain, trong khi cả Data Warehouse pattern lẫn Data Lake pattern đều tập trung vào phân vùng theo kỹ thuật. Nhìn chung, kiến trúc sư thiết kế mỗi giải pháp đó với các phân vùng nạp, biến đổi, tải và phục vụ riêng biệt, mỗi phân vùng tập trung vào một năng lực kỹ thuật. Các architecture pattern hiện đại ưu tiên phân vùng theo domain, đóng gói các chi tiết hiện thực kỹ thuật. <a id="idm45798374551048"></a>Ví dụ, microservices architecture cố gắng tách các service theo domain thay vì theo năng lực kỹ thuật, đóng gói kiến thức domain, kể cả dữ liệu, bên trong ranh giới service. Tuy nhiên, cả Data Warehouse pattern lẫn Data Lake pattern đều cố tách dữ liệu thành một thực thể riêng, làm mất hoặc che khuất các góc nhìn domain quan trọng (như dữ liệu PII) trong quá trình đó.
+Xu hướng hiện tại trong software architecture chuyển trọng tâm từ việc phân vùng<a id="idm45798374556088"></a><a id="idm45798374555048"></a><a id="idm45798374553816"></a><a id="idm45798374552584"></a> một hệ thống dựa trên năng lực kỹ thuật sang dựa trên domain, trong khi cả Data Warehouse pattern lẫn Data Lake pattern đều tập trung vào phân vùng theo kỹ thuật. Nhìn chung, kiến trúc sư thiết kế mỗi giải pháp đó với các phân vùng nạp, biến đổi, tải và phục vụ riêng biệt, mỗi phân vùng tập trung vào một năng lực kỹ thuật. Các architecture pattern hiện đại ưu tiên phân vùng theo domain, đóng gói các chi tiết triển khai kỹ thuật. <a id="idm45798374551048"></a>Ví dụ, microservices architecture cố gắng tách các service theo domain thay vì theo năng lực kỹ thuật, đóng gói kiến thức domain, kể cả dữ liệu, bên trong ranh giới service. Tuy nhiên, cả Data Warehouse pattern lẫn Data Lake pattern đều cố tách dữ liệu thành một thực thể riêng, làm mất hoặc che khuất các góc nhìn domain quan trọng (như dữ liệu PII) trong quá trình đó.
 
 Điểm cuối cùng là then chốt—ngày càng nhiều, kiến trúc sư thiết kế quanh phân vùng theo *domain* thay vì theo *kỹ thuật* trong architecture, và cả hai cách tiếp cận trước đó đều là ví dụ về việc tách dữ liệu khỏi bối cảnh của nó. Điều mà kiến trúc sư và nhà khoa học dữ liệu cần là một kỹ thuật giữ được loại phân vùng macro-level (mức vĩ mô) phù hợp, nhưng vẫn hỗ trợ sự tách biệt rõ ràng giữa dữ liệu phân tích và dữ liệu vận hành. [Bảng 14-2](#totbl-data-lake) liệt kê các trade-offs của Data Lake pattern.
 
@@ -255,7 +255,7 @@ Mỗi domain cũng đóng góp vào phân tích và business intelligence đều
 
 *Hình 14-2. Data product quantum đóng vai trò như một phần phụ trợ riêng biệt nhưng coupled cao của một service*
 
-Ở đây, DPQ biểu thị một component thuộc sở hữu của domain team chịu trách nhiệm hiện thực service. Nó chồng lấn thông tin được lưu trong database, và có thể có tương tác bất đồng bộ với một số hành vi domain. Data product quantum nhiều khả năng cũng có hành vi cũng như dữ liệu cho mục đích phân tích và business intelligence.
+Ở đây, DPQ biểu thị một component thuộc sở hữu của domain team chịu trách nhiệm triển khai service. Nó chồng lấn thông tin được lưu trong database, và có thể có tương tác bất đồng bộ với một số hành vi domain. Data product quantum nhiều khả năng cũng có hành vi cũng như dữ liệu cho mục đích phân tích và business intelligence.
 
 Mỗi data product quantum đóng vai trò cooperative quantum cho chính service đó:
 
@@ -269,9 +269,9 @@ Một phần nào đó của hệ thống sẽ đảm nhận trách nhiệm phâ
 
 ### Data mesh, coupling và architecture quantum (Data Mesh, Coupling, and Architecture Quantum)
 
-Vì báo cáo phân tích có lẽ là một tính năng bắt buộc của một giải pháp,<a id="idm45798374465192"></a><a id="idm45798374463928"></a> DPQ và cách hiện thực giao tiếp của nó thuộc về static coupling của một architecture quantum. Ví dụ, trong một microservices architecture, service plane phải khả dụng, giống như message broker phải khả dụng nếu thiết kế đòi hỏi messaging. Tuy nhiên, giống như Sidecar pattern trong service mesh, DPQ nên trực giao với các thay đổi hiện thực bên trong service, và duy trì một contract riêng với data plane.
+Vì báo cáo phân tích có lẽ là một tính năng bắt buộc của một giải pháp,<a id="idm45798374465192"></a><a id="idm45798374463928"></a> DPQ và cách triển khai giao tiếp của nó thuộc về static coupling của một architecture quantum. Ví dụ, trong một microservices architecture, service plane phải khả dụng, giống như message broker phải khả dụng nếu thiết kế đòi hỏi messaging. Tuy nhiên, giống như Sidecar pattern trong service mesh, DPQ nên trực giao với các thay đổi triển khai bên trong service, và duy trì một contract riêng với data plane.
 
-Từ góc độ dynamic quantum coupling, data sidecar nên<a id="idm45798374461720"></a><a id="idm45798374460728"></a> luôn hiện thực một trong các communication pattern có cả eventual consistency lẫn tính bất đồng bộ: hoặc [“Parallel Saga<sup>(aeo)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-parallel-saga) hoặc [“Anthology Saga<sup>(aec)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-anthology-saga). Nói cách khác, data sidecar không bao giờ nên bao gồm yêu cầu transaction để giữ dữ liệu vận hành và dữ liệu phân tích đồng bộ, điều sẽ phá hỏng mục đích của việc dùng DPQ để decoupling trực giao. Tương tự, giao tiếp tới data plane nhìn chung nên là bất đồng bộ, để có tác động tối thiểu đến các architecture characteristic vận hành của domain service.
+Từ góc độ dynamic quantum coupling, data sidecar nên<a id="idm45798374461720"></a><a id="idm45798374460728"></a> luôn triển khai một trong các communication pattern có cả eventual consistency lẫn tính bất đồng bộ: hoặc [“Parallel Saga<sup>(aeo)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-parallel-saga) hoặc [“Anthology Saga<sup>(aec)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-anthology-saga). Nói cách khác, data sidecar không bao giờ nên bao gồm yêu cầu transaction để giữ dữ liệu vận hành và dữ liệu phân tích đồng bộ, điều sẽ phá hỏng mục đích của việc dùng DPQ để decoupling trực giao. Tương tự, giao tiếp tới data plane nhìn chung nên là bất đồng bộ, để có tác động tối thiểu đến các architecture characteristic vận hành của domain service.
 
 <a id="idm45798374457224"></a>
 
@@ -308,9 +308,9 @@ Logan, Dana và Addison gặp nhau trong phòng họp lớn, nơi thường<a id
 
 “Tôi vừa trở về từ cuộc họp với các nhà khoa học dữ liệu của chúng ta, và họ đang cố tìm cách giải quyết một vấn đề long-term (dài hạn) cho chúng ta—chúng ta cần trở nên data-driven (dựa trên dữ liệu) trong việc lập kế hoạch cung ứng chuyên gia, cho nhu cầu bộ kỹ năng ở các vị trí địa lý khác nhau tại các thời điểm khác nhau. Năng lực đó sẽ giúp ích cho tuyển dụng, đào tạo và các chức năng supply-related (liên quan đến cung ứng) khác,” Logan nói.
 
-“Tôi chưa tham gia nhiều vào việc hiện thực data mesh—chúng ta đã tiến được bao xa rồi?” Addison hỏi.
+“Tôi chưa tham gia nhiều vào việc triển khai data mesh—chúng ta đã tiến được bao xa rồi?” Addison hỏi.
 
-“Mỗi service mới chúng ta hiện thực đều bao gồm một DPQ. Domain team chịu trách nhiệm chạy và duy trì cooperative quantum DPQ cho service của họ. Chúng ta chỉ mới bắt đầu. Chúng ta đang dần xây dựng các năng lực khi xác định được nhu cầu. Tôi có một bức hình về Ticket Management Domain trong [Hình 14-3](#fig-data-mesh-ss-ticket-dpq).”
+“Mỗi service mới chúng ta triển khai đều bao gồm một DPQ. Domain team chịu trách nhiệm chạy và duy trì cooperative quantum DPQ cho service của họ. Chúng ta chỉ mới bắt đầu. Chúng ta đang dần xây dựng các năng lực khi xác định được nhu cầu. Tôi có một bức hình về Ticket Management Domain trong [Hình 14-3](#fig-data-mesh-ss-ticket-dpq).”
 
 <a id="fig-data-mesh-ss-ticket-dpq"></a>
 
@@ -336,9 +336,9 @@ Logan đáp, “Cộng tác với các nhà khoa học dữ liệu, chúng tôi 
 
 ![](images/sahp_1404.png)
 
-*Hình 14-4. Hiện thực Experts Supply DPQ*
+*Hình 14-4. Triển khai Experts Supply DPQ*
 
-“OK, trông hoàn toàn hợp lý,” Dana nói. “Các service đã xong; chúng ta chỉ cần bảo đảm các endpoint cụ thể tồn tại trong mỗi DPQ nguồn, và hiện thực Experts Supply DPQ mới.”
+“OK, trông hoàn toàn hợp lý,” Dana nói. “Các service đã xong; chúng ta chỉ cần bảo đảm các endpoint cụ thể tồn tại trong mỗi DPQ nguồn, và triển khai Experts Supply DPQ mới.”
 
 “Đúng vậy,” Logan nói. “Tuy nhiên, có một điều chúng ta cần lo—phân tích xu hướng phụ thuộc vào dữ liệu đáng tin cậy. Điều gì xảy ra nếu một trong các hệ thống nguồn cung cấp dữ liệu trả về thông tin không đầy đủ trong một khoảng thời gian? Chẳng phải điều đó sẽ làm sai lệch phân tích xu hướng sao?”
 

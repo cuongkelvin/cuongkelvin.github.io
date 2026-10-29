@@ -644,7 +644,7 @@ If you wish, you may specify -n/--no-clean to skip running this command
  when resetting
 ```
 
-Lý do là subcommand cố thực thi một hành động dọn dẹp (tức là lệnh `bitbake -c clean hello2`), và `Makefile` của chúng ta không hiện thực target `clean` (tức là chúng ta không thể thực thi `make clean`). Trong tình huống này, chúng ta có hai giải pháp khả dĩ:
+Lý do là subcommand cố thực thi một hành động dọn dẹp (tức là lệnh `bitbake -c clean hello2`), và `Makefile` của chúng ta không triển khai target `clean` (tức là chúng ta không thể thực thi `make clean`). Trong tình huống này, chúng ta có hai giải pháp khả dĩ:
 
 1) Chúng ta có thể cung cấp target còn thiếu để dọn dẹp working directory.
 
@@ -1135,7 +1135,7 @@ Giờ cả hai recipe đều đã hoàn tất.
 
 Hình 9-1. Trang chủ của Log2cb
 
-Dự án này hiện thực một file circular buffer cơ bản để lưu các logging message, và nó được thiết kế riêng cho các hệ thống embedded nơi việc tiết kiệm (hoặc chắc chắn về một lượng cố định) dung lượng dùng cho logging là rất quan trọng. Dù cách dùng chính của nó là với daemon syslog-ng (xem `https://github.com/syslog-ng/syslog-ng`), nó export một số hàm cho các chương trình C muốn định nghĩa circular buffer của riêng mình. Các hàm này được lưu trong một thư viện với API well-defined.
+Dự án này triển khai một file circular buffer cơ bản để lưu các logging message, và nó được thiết kế riêng cho các hệ thống embedded nơi việc tiết kiệm (hoặc chắc chắn về một lượng cố định) dung lượng dùng cho logging là rất quan trọng. Dù cách dùng chính của nó là với daemon syslog-ng (xem `https://github.com/syslog-ng/syslog-ng`), nó export một số hàm cho các chương trình C muốn định nghĩa circular buffer của riêng mình. Các hàm này được lưu trong một thư viện với API well-defined.
 
 Trước khi bắt đầu viết một recipe phù hợp, tốt hơn là hiểu dự án này hoạt động thế nào, vì vậy trước tiên chúng ta nên tải code về host như được nêu ở trang chính tại menu `Code` (xem Hình 9-2).
 
@@ -2046,9 +2046,9 @@ Package `log2cb-tools` giờ phụ thuộc vào library package, như trước, 
 
 ![Figure 9-4](images/ch09/fig09-04.png)
 
-Hình 9-4. Trang chủ của dự án hiện thực giao thức MRP trong user space
+Hình 9-4. Trang chủ của dự án triển khai giao thức MRP trong user space
 
-Dự án này hiện thực một state machine của Media Redundancy Protocol (MRP) (xem `https://en.wikipedia.org/wiki/Media_Redundancy_Protocol` để biết thêm thông tin về giao thức) như được mô tả trong tiêu chuẩn quốc tế IEC 62439-2, trong đó toàn bộ code chỉ chạy trong user space. MRP cho phép các vòng Ethernet switch vượt qua bất kỳ sự cố đơn lẻ nào với thời gian khôi phục nhanh hơn nhiều, và đặc biệt là theo cách đáng tin cậy hơn, so với những gì đạt được bằng các giao thức phổ biến khác, như Spanning Tree Protocol (STP). Vì những lý do này, MRP phù hợp với phần lớn các ứng dụng Ethernet công nghiệp có yêu cầu real-time.
+Dự án này triển khai một state machine của Media Redundancy Protocol (MRP) (xem `https://en.wikipedia.org/wiki/Media_Redundancy_Protocol` để biết thêm thông tin về giao thức) như được mô tả trong tiêu chuẩn quốc tế IEC 62439-2, trong đó toàn bộ code chỉ chạy trong user space. MRP cho phép các vòng Ethernet switch vượt qua bất kỳ sự cố đơn lẻ nào với thời gian khôi phục nhanh hơn nhiều, và đặc biệt là theo cách đáng tin cậy hơn, so với những gì đạt được bằng các giao thức phổ biến khác, như Spanning Tree Protocol (STP). Vì những lý do này, MRP phù hợp với phần lớn các ứng dụng Ethernet công nghiệp có yêu cầu real-time.
 
 Ở bước đầu tiên, chúng ta có thể bắt đầu bằng cách thêm source vào workspace bằng lệnh `devtool add` như dưới đây:
 
@@ -2711,7 +2711,7 @@ Giờ mọi thứ đã sẵn sàng.
 
 Biết cách tạo recipe cho các ứng dụng user space là hữu ích, vì phần lớn ứng dụng được phát triển trong môi trường này. Tuy nhiên, trong thế giới embedded, chúng ta có thể phải phát triển ứng dụng kernel vì nhiều lý do: cần device driver mới để hỗ trợ hardware mới, giao thức mạng mới (trong kernel space), hỗ trợ filesystem mới, v.v.
 
-Tất nhiên, chúng ta có thể hiện thực mọi thứ này trực tiếp trong source kernel, nhưng một cách tốt hơn và sạch hơn để làm việc đó là dùng các kernel module out-of-tree. Giải pháp này cũng hữu ích khi mục tiêu chính của chúng ta là tạo code kernel tương thích với nhiều bản phát hành kernel, hoặc khi chúng ta không quan tâm đến việc đưa code của mình vào vanilla kernel (tức là repository Linux). Vì vậy chúng ta cần viết recipe cho các đối tượng này.
+Tất nhiên, chúng ta có thể triển khai mọi thứ này trực tiếp trong source kernel, nhưng một cách tốt hơn và sạch hơn để làm việc đó là dùng các kernel module out-of-tree. Giải pháp này cũng hữu ích khi mục tiêu chính của chúng ta là tạo code kernel tương thích với nhiều bản phát hành kernel, hoặc khi chúng ta không quan tâm đến việc đưa code của mình vào vanilla kernel (tức là repository Linux). Vì vậy chúng ta cần viết recipe cho các đối tượng này.
 
 Kernel module nằm ngoài phạm vi của sách; tuy nhiên, chúng ta nên nói vài lời về chúng là gì và trông như thế nào, để bạn đọc hiểu rõ chúng ta đang nói về điều gì.
 

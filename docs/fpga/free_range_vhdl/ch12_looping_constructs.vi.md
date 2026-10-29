@@ -29,6 +29,9 @@ Dạng cơ bản của vòng lặp for đã được trình bày trong Listing 1
 for cnt_val in 0 to 24 loop
    -- sequential_statements
 end loop;
+```
+
+```vhdl
 type my_range is range 0 to 24;
 --
 for cnt_val in my_range loop
@@ -62,7 +65,7 @@ Variable index dùng trong vòng lặp for có một số đặc điểm lạ đ
 
 • Phạm vi được chỉ định cho index (khi được chỉ định bên ngoài phần khai báo vòng lặp) có thể thuộc bất kỳ enumerated type nào.
 
-Và cuối cùng, như trong listing trước, vòng lặp for cũng có thể được hiện thực bằng tùy chọn downto. Tùy chọn này hợp lý hơn khi phạm vi được chỉ định trong phần khai báo vòng lặp for.
+Và cuối cùng, như trong listing trước, vòng lặp for cũng có thể được triển khai bằng tùy chọn downto. Tùy chọn này hợp lý hơn khi phạm vi được chỉ định trong phần khai báo vòng lặp for.
 
 ### 12.1.2 Vòng lặp while
 

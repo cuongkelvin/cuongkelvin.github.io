@@ -80,7 +80,7 @@ Các mục sau mô tả chi tiết các artifact chính này và cách chúng ho
 
 ### Processing Unit
 
-<a id="id1335"></a>Processing unit (minh họa trong [Hình 16-3](#fig-style-space-based-pu)) chứa logic ứng dụng (hoặc một phần của nó), thường bao gồm các component web-based cũng như logic nghiệp vụ backend. Nội dung của processing unit thay đổi tùy theo loại ứng dụng. Các ứng dụng web-based nhỏ hơn thường được deploy vào một processing unit duy nhất, trong khi các ứng dụng lớn hơn thường chia chức năng của mình thành nhiều processing unit, dựa trên các vùng chức năng của ứng dụng. Processing unit cũng có thể chứa các service nhỏ, single-purpose (khá giống microservices). Ngoài ra, processing unit cũng chứa một in-memory data grid và replication engine, thường được hiện thực thông qua các sản phẩm như [Hazelcast](https://hazelcast.com), [Apache Ignite](https://ignite.apache.org) và [Oracle Coherence](https://oreil.ly/XOUJL) (xem [“Data Grid”](#sec-data-grid)).
+<a id="id1335"></a>Processing unit (minh họa trong [Hình 16-3](#fig-style-space-based-pu)) chứa logic ứng dụng (hoặc một phần của nó), thường bao gồm các component web-based cũng như logic nghiệp vụ backend. Nội dung của processing unit thay đổi tùy theo loại ứng dụng. Các ứng dụng web-based nhỏ hơn thường được deploy vào một processing unit duy nhất, trong khi các ứng dụng lớn hơn thường chia chức năng của mình thành nhiều processing unit, dựa trên các vùng chức năng của ứng dụng. Processing unit cũng có thể chứa các service nhỏ, single-purpose (khá giống microservices). Ngoài ra, processing unit cũng chứa một in-memory data grid và replication engine, thường được triển khai thông qua các sản phẩm như [Hazelcast](https://hazelcast.com), [Apache Ignite](https://ignite.apache.org) và [Oracle Coherence](https://oreil.ly/XOUJL) (xem [“Data Grid”](#sec-data-grid)).
 
 <a id="fig-style-space-based-pu"></a>
 
@@ -94,7 +94,7 @@ Các mục sau mô tả chi tiết các artifact chính này và cách chúng ho
 
 <a id="id1336"></a>*Virtualized middleware*, như trong [Hình 16-4](#fig-style-space-based-messaging-grid), chứa nhiều artifact infrastructure-related và được dùng để quản lý và kiểm soát các processing unit. Ở mức tối thiểu, artifact middleware này chứa một *messaging grid* để quản lý các request đầu vào và user session state, một *data grid* để quản lý việc nhân bản và đồng bộ dữ liệu, và một *deployment manager* để khởi động và hủy các instance processing unit khi chúng cần và không cần. Tùy chọn, virtualized middleware cũng chứa một *processing grid* trong trường hợp hai hoặc nhiều processing unit cần được orchestrate cho một request nghiệp vụ duy nhất. Kiến trúc sư có thể thêm bất kỳ chức năng infrastructure-related nào khác vào virtualized middleware khi cần, như chức năng security, thu thập metric cho observability, v.v.
 
-Vì không có sản phẩm đơn lẻ nào có thể thực hiện tất cả các chức năng của virtualized middleware, nó thường được hiện thực thông qua các sản phẩm third-party như web server, công cụ caching, load balancer, service orchestrator, và deployment manager để quản lý việc giám sát, khởi động và hủy các processing unit. Mỗi artifact middleware này được mô tả chi tiết trong các mục sau.
+Vì không có sản phẩm đơn lẻ nào có thể thực hiện tất cả các chức năng của virtualized middleware, nó thường được triển khai thông qua các sản phẩm third-party như web server, công cụ caching, load balancer, service orchestrator, và deployment manager để quản lý việc giám sát, khởi động và hủy các processing unit. Mỗi artifact middleware này được mô tả chi tiết trong các mục sau.
 
 <a id="id346"></a>
 
@@ -102,7 +102,7 @@ Vì không có sản phẩm đơn lẻ nào có thể thực hiện tất cả c
 
 <a id="id1337"></a>*Messaging grid*, như trong [Hình 16-4](#fig-style-space-based-messaging-grid), là một phần của virtualized middleware và quản lý các request đầu vào và session state. Khi một request đi vào virtualized middleware, component messaging grid xác định những processing unit đang hoạt động nào sẵn sàng nhận nó, rồi chuyển tiếp request tới một trong các processing unit đó.
 
-Độ phức tạp của messaging grid có thể thay đổi, từ một thuật toán round-robin đơn giản đến một thuật toán next-available phức tạp hơn theo dõi processing unit nào sẵn sàng nhất. Component này thường được hiện thực bằng một web server điển hình có năng lực load-balancing (như HA Proxy hoặc Nginx).
+Độ phức tạp của messaging grid có thể thay đổi, từ một thuật toán round-robin đơn giản đến một thuật toán next-available phức tạp hơn theo dõi processing unit nào sẵn sàng nhất. Component này thường được triển khai bằng một web server điển hình có năng lực load-balancing (như HA Proxy hoặc Nginx).
 
 <a id="fig-style-space-based-messaging-grid"></a>
 
@@ -114,7 +114,7 @@ Vì không có sản phẩm đơn lẻ nào có thể thực hiện tất cả c
 
 ### Data Grid
 
-<a id="ix_ch16-style-space-based-asciidoc2"></a>*Data grid* là một component—có lẽ là component then chốt nhất—của virtualized middleware. Trong hầu hết các hiện thực hiện đại, data grid được hiện thực hoàn toàn bên trong các processing unit dưới dạng một cache được nhân bản in-memory (xem [“Replicated and distributed caching”](#sec-spa-caching)). Tuy nhiên, đối với các hiện thực replicated caching đòi hỏi một controller bên ngoài, hoặc dùng distributed cache, chức năng này nằm ở *cả* các processing unit lẫn các component data grid của virtualized middleware.
+<a id="ix_ch16-style-space-based-asciidoc2"></a>*Data grid* là một component—có lẽ là component then chốt nhất—của virtualized middleware. Trong hầu hết các bản triển khai hiện đại, data grid được triển khai hoàn toàn bên trong các processing unit dưới dạng một cache được nhân bản in-memory (xem [“Replicated and distributed caching”](#sec-spa-caching)). Tuy nhiên, đối với các bản triển khai replicated caching đòi hỏi một controller bên ngoài, hoặc dùng distributed cache, chức năng này nằm ở *cả* các processing unit lẫn các component data grid của virtualized middleware.
 
 Vì messaging grid có thể chuyển tiếp một request tới bất kỳ processing unit nào sẵn có, điều thiết yếu là in-memory data grid của mỗi processing unit phải chứa *chính xác cùng một dữ liệu*. Như minh họa bằng các đường chấm trong [Hình 16-5](#fig-style-space-based-data-grid), việc nhân bản dữ liệu thường được thực hiện bất đồng bộ giữa các processing unit, thường hoàn tất nhân bản dữ liệu trong chưa đến 100 ms.
 
@@ -274,7 +274,7 @@ Dù các front cache luôn được giữ đồng bộ với full backing cache,
 
 *Hình 16-9. Processing grid quản lý orchestration giữa các processing unit*
 
-Hầu hết các hiện thực space-based hiện đại (đặc biệt là những hiện thực có các service fine-grained) hiện thực chức năng processing-grid của chúng thông qua các *orchestration processing unit* fine-grained riêng biệt thay vì một orchestration engine coarse-grained duy nhất, với mỗi orchestration processing unit xử lý một workflow chính duy nhất. Lấy một ví dụ thương mại điện tử, giả sử khi một khách hàng đặt một đơn hàng, ba processing unit phải phối hợp: *Order Placement*, *Payment* và *Inventory Adjustment*. Kiến trúc sư có thể tạo một processing unit *Order Placement Orchestrator* để orchestrate ba processing unit này. Họ cũng có thể tạo các orchestration processing unit riêng cho các workflow chính khác, như xử lý trả hàng và bổ sung hàng tồn.
+Hầu hết các bản triển khai space-based hiện đại (đặc biệt là những bản triển khai có các service fine-grained) triển khai chức năng processing-grid của chúng thông qua các *orchestration processing unit* fine-grained riêng biệt thay vì một orchestration engine coarse-grained duy nhất, với mỗi orchestration processing unit xử lý một workflow chính duy nhất. Lấy một ví dụ thương mại điện tử, giả sử khi một khách hàng đặt một đơn hàng, ba processing unit phải phối hợp: *Order Placement*, *Payment* và *Inventory Adjustment*. Kiến trúc sư có thể tạo một processing unit *Order Placement Orchestrator* để orchestrate ba processing unit này. Họ cũng có thể tạo các orchestration processing unit riêng cho các workflow chính khác, như xử lý trả hàng và bổ sung hàng tồn.
 
 <a id="id349"></a>
 
@@ -288,7 +288,7 @@ Hầu hết các hiện thực space-based hiện đại (đặc biệt là nh�
 
 <a id="ix_ch16-style-space-based-asciidoc10"></a><a id="ix_ch16-style-space-based-asciidoc11"></a>Một *data pump* là một cách gửi dữ liệu tới một processor khác, processor này sau đó cập nhật một database. Space-based architecture cần data pump vì các processing unit không đọc từ và ghi vào database trực tiếp. Data pump trong space-based architecture luôn bất đồng bộ, mang lại eventual consistency giữa in-memory cache và database. Khi một instance processing-unit nhận một request và cập nhật cache của nó, processing unit đó trở thành chủ sở hữu của cập nhật, và do đó chịu trách nhiệm gửi nó qua data pump để database cuối cùng có thể được cập nhật.
 
-Data pump thường được hiện thực trong space-based architecture bằng messaging, như trong [Hình 16-10](#fig-style-space-based-data-pump).
+Data pump thường được triển khai trong space-based architecture bằng messaging, như trong [Hình 16-10](#fig-style-space-based-data-pump).
 
 <a id="fig-style-space-based-data-pump"></a>
 
@@ -306,7 +306,7 @@ Data pump thường có contract, bao gồm một hành động gắn với dữ
 
 ### Data Writers
 
-<a id="ix_ch16-style-space-based-asciidoc12"></a>Component `Data Writer` chấp nhận message từ một data pump và cập nhật database với thông tin trong payload của chúng (xem [Hình 16-10](#fig-style-space-based-data-pump)). Data writer có thể được hiện thực dưới dạng service, ứng dụng, hoặc data hub (như [Ab Initio](https://abinitio.com)). Granularity của chúng có thể thay đổi, dựa trên phạm vi của các data pump và processing unit.
+<a id="ix_ch16-style-space-based-asciidoc12"></a>Component `Data Writer` chấp nhận message từ một data pump và cập nhật database với thông tin trong payload của chúng (xem [Hình 16-10](#fig-style-space-based-data-pump)). Data writer có thể được triển khai dưới dạng service, ứng dụng, hoặc data hub (như [Ab Initio](https://abinitio.com)). Granularity của chúng có thể thay đổi, dựa trên phạm vi của các data pump và processing unit.
 
 Một *domain-based data writer* chứa logic database cần thiết để xử lý mọi cập nhật trong một domain cụ thể (như xử lý đơn hàng), bất kể số lượng data pump nó đang đọc. Hệ thống trong [Hình 16-11](#fig-style-space-based-dw-domain) có bốn processing unit khác nhau và bốn data pump khác nhau để đại diện cho các domain khách hàng (`Profile`, `WishList`, `Wallet` và `Preferences`)—nhưng chỉ có một data writer. Data writer khách hàng duy nhất đó lắng nghe cả bốn data pump và chứa logic database (như SQL) để cập nhật dữ liệu customer-related trong database.
 
@@ -330,7 +330,7 @@ Hoặc, mỗi loại processing unit có thể có component `Data Writer` chuy�
 
 <a id="ix_ch16-style-space-based-asciidoc13"></a>Trong khi data writer chịu trách nhiệm cập nhật database, *data reader* đọc dữ liệu từ database và gửi nó tới các processing unit thông qua một *reverse data pump* (data pump ngược) (mà chúng tôi sẽ thảo luận thêm ngay sau đây). Trong space-based architecture, data reader chỉ được gọi trong một trong ba tình huống: tất cả các instance processing unit của cùng cache có tên bị crash, tất cả các processing unit trong cùng cache có tên được deploy lại, hoặc cần truy xuất dữ liệu lưu trữ không có trong cache được nhân bản.
 
-Nếu tất cả các instance bị sập do một sự cố system-wide hoặc do deploy lại, dữ liệu phải được nạp vào cache từ database—điều mà chúng ta nhìn chung cố tránh trong space-based architecture. Khi các instance của một loại processing unit bắt đầu hoạt động trở lại, mỗi instance sẽ cố giành một lock trên cache. Instance đầu tiên giành được lock trở thành chủ sở hữu cache tạm thời; các instance khác chuyển sang trạng thái chờ cho đến khi lock được giải phóng. (Điều này có thể thay đổi tùy theo loại hiện thực cache, nhưng dù sao, có một chủ sở hữu chính của cache trong kịch bản này.) Để nạp cache, chủ sở hữu cache tạm thời gửi một message tới một queue, yêu cầu dữ liệu. Component `Data Reader` chấp nhận request đọc rồi thực hiện logic database-query cần thiết để truy xuất dữ liệu cần thiết. Nó gửi dữ liệu đó tới một queue khác gọi là reverse data pump, queue này gửi nó tới processing unit chủ sở hữu cache tạm thời. Khi đã nạp xong cache, chủ sở hữu tạm thời giải phóng lock. Tất cả các instance khác sau đó được đồng bộ, và việc xử lý có thể bắt đầu. Luồng xử lý này được minh họa trong [Hình 16-13](#fig-style-space-based-dr).
+Nếu tất cả các instance bị sập do một sự cố system-wide hoặc do deploy lại, dữ liệu phải được nạp vào cache từ database—điều mà chúng ta nhìn chung cố tránh trong space-based architecture. Khi các instance của một loại processing unit bắt đầu hoạt động trở lại, mỗi instance sẽ cố giành một lock trên cache. Instance đầu tiên giành được lock trở thành chủ sở hữu cache tạm thời; các instance khác chuyển sang trạng thái chờ cho đến khi lock được giải phóng. (Điều này có thể thay đổi tùy theo loại bản triển khai cache, nhưng dù sao, có một chủ sở hữu chính của cache trong kịch bản này.) Để nạp cache, chủ sở hữu cache tạm thời gửi một message tới một queue, yêu cầu dữ liệu. Component `Data Reader` chấp nhận request đọc rồi thực hiện logic database-query cần thiết để truy xuất dữ liệu cần thiết. Nó gửi dữ liệu đó tới một queue khác gọi là reverse data pump, queue này gửi nó tới processing unit chủ sở hữu cache tạm thời. Khi đã nạp xong cache, chủ sở hữu tạm thời giải phóng lock. Tất cả các instance khác sau đó được đồng bộ, và việc xử lý có thể bắt đầu. Luồng xử lý này được minh họa trong [Hình 16-13](#fig-style-space-based-dr).
 
 <a id="fig-style-space-based-dr"></a>
 
@@ -338,7 +338,7 @@ Nếu tất cả các instance bị sập do một sự cố system-wide hoặc 
 
 *Hình 16-13. Data reader gửi dữ liệu tới các processing unit*
 
-Giống như data writer, data reader có thể dựa trên domain hoặc dành riêng cho một loại processing unit cụ thể (cách sau phổ biến hơn). Cách hiện thực của nó cũng giống như data writer—service, ứng dụng, hoặc data hub.
+Giống như data writer, data reader có thể dựa trên domain hoặc dành riêng cho một loại processing unit cụ thể (cách sau phổ biến hơn). Cách triển khai của nó cũng giống như data writer—service, ứng dụng, hoặc data hub.
 
 <a id="id1348"></a>Data writer và data reader về cơ bản tạo thành một *data abstraction layer* (hoặc *data access layer*, trong một số trường hợp). Sự khác biệt giữa hai loại nằm ở lượng hiểu biết chi tiết mà các processing unit có về database schema (cấu trúc của các bảng). Với data access layer, các processing unit bị coupled với các cấu trúc dữ liệu nền trong database, và chỉ truy cập database một cách gián tiếp, thông qua data reader và writer. Ngược lại, với data abstraction layer, processing unit được decoupled khỏi các schema nền thông qua việc dùng các contract riêng.
 
@@ -493,7 +493,7 @@ Trong điều kiện bình thường, hầu hết các hệ thống không có t
 
 ## Quản trị (Governance)
 
-<a id="ix_ch16-style-space-based-asciidoc17"></a><a id="ix_ch16-style-space-based-asciidoc18"></a>Space-based architecture, với nhiều phần chuyển động, là một architectural style phức tạp để thiết kế và hiện thực. Governance đúng đắn là then chốt để bảo đảm thành công—đặc biệt là để kiểm soát mức tiêu thụ bộ nhớ, do các vấn đề của style này với việc sử dụng bộ nhớ nội bộ (như chúng tôi đã lưu ý trước đó, trong [“Common Risks”](#common-risks)).
+<a id="ix_ch16-style-space-based-asciidoc17"></a><a id="ix_ch16-style-space-based-asciidoc18"></a>Space-based architecture, với nhiều phần chuyển động, là một architectural style phức tạp để thiết kế và triển khai. Governance đúng đắn là then chốt để bảo đảm thành công—đặc biệt là để kiểm soát mức tiêu thụ bộ nhớ, do các vấn đề của style này với việc sử dụng bộ nhớ nội bộ (như chúng tôi đã lưu ý trước đó, trong [“Common Risks”](#common-risks)).
 
 Để giải quyết các vấn đề bộ nhớ này, chúng tôi khuyến nghị viết một fitness function governance liên tục, tự động để mỗi instance của một processing unit định kỳ làm cho mức sử dụng bộ nhớ hiện tại của nó quan sát được. Vì tất cả các instance của một processing unit có cùng cache được nhân bản, fitness function chỉ cần báo cáo tên của processing unit. Hãy dùng một fitness function riêng để ghi lại số lượng instance cho mỗi processing unit, cho phép bạn tính tổng mức tiêu thụ bộ nhớ cho mỗi processing unit. [Hình 16-15](#fig-spa-ff-memory) cho thấy một ví dụ về đầu ra của fitness function liên tục này.
 
@@ -529,7 +529,7 @@ Các fitness function governance khác cho space-based architecture có thể th
 
 **Stream-aligned team**
 
-Tùy thuộc vào kích thước của hệ thống, các stream-aligned team có thể thấy mình vật lộn để hiện thực các thay đổi domain-based do technical partitioning trong architectural style này. Ví dụ, một thay đổi stream-based có thể tác động đến một hoặc nhiều processing unit, data pump, data reader, data writer, cache contract, hoặc orchestrator, cũng như backing database. Đây có thể là nhiều thứ để một team stream-based duy nhất quản lý, đặc biệt nếu các artifact đó được các team khác dùng chung. Hệ thống càng lớn và phức tạp, các stream-aligned team càng kém hiệu quả với space-based architecture.
+Tùy thuộc vào kích thước của hệ thống, các stream-aligned team có thể thấy mình vật lộn để triển khai các thay đổi domain-based do technical partitioning trong architectural style này. Ví dụ, một thay đổi stream-based có thể tác động đến một hoặc nhiều processing unit, data pump, data reader, data writer, cache contract, hoặc orchestrator, cũng như backing database. Đây có thể là nhiều thứ để một team stream-based duy nhất quản lý, đặc biệt nếu các artifact đó được các team khác dùng chung. Hệ thống càng lớn và phức tạp, các stream-aligned team càng kém hiệu quả với space-based architecture.
 
 **Enabling team**
 
@@ -595,4 +595,4 @@ Space-based architecture là một architectural style phức tạp nhưng rất
 
 <a id="id1339"></a>
 
-<sup>[1](#id1339-marker)</sup> Có thể có ngoại lệ cho quy tắc này tùy theo cách hiện thực của sản phẩm caching được dùng. Một số sản phẩm caching đòi hỏi một controller bên ngoài để giám sát và kiểm soát việc nhân bản dữ liệu giữa các processing unit, nhưng hầu hết đang dần rời bỏ mô hình này.
+<sup>[1](#id1339-marker)</sup> Có thể có ngoại lệ cho quy tắc này tùy theo cách triển khai của sản phẩm caching được dùng. Một số sản phẩm caching đòi hỏi một controller bên ngoài để giám sát và kiểm soát việc nhân bản dữ liệu giữa các processing unit, nhưng hầu hết đang dần rời bỏ mô hình này.

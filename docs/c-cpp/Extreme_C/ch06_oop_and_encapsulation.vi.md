@@ -6,7 +6,7 @@ Có rất nhiều sách và bài viết tuyệt vời về chủ đề lập tr�
 
 Câu trả lời ngắn gọn cho câu hỏi trên là có, nhưng trước khi giải thích làm thế nào, chúng ta cần giải thích tại sao. Chúng ta cần chia nhỏ câu hỏi và xem OOP thực sự có nghĩa là gì. Tại sao có thể viết một chương trình object-oriented bằng một ngôn ngữ không hề tuyên bố hỗ trợ object-orientation? Điều này có vẻ như một nghịch lý, nhưng không phải vậy, và nỗ lực của chúng ta trong chương này là giải thích tại sao điều đó khả thi và nó nên được thực hiện như thế nào.
 
-Một câu hỏi khác có thể làm bạn bối rối là việc có những thảo luận như vậy và biết về OOP thì có ích gì khi bạn sẽ dùng C làm ngôn ngữ lập trình chính? Gần như mọi code base C trưởng thành hiện có như các kernel mã nguồn mở, hiện thực của các dịch vụ như HTTPD, Postfix, nfsd, ftpd, và nhiều library C khác như OpenSSL và OpenCV, đều được viết theo kiểu object-oriented. Điều này không có nghĩa là C là object-oriented; thay vào đó, cách tiếp cận mà những dự án này đã chọn để tổ chức cấu trúc bên trong của chúng đến từ một tư duy object-oriented.
+Một câu hỏi khác có thể làm bạn bối rối là việc có những thảo luận như vậy và biết về OOP thì có ích gì khi bạn sẽ dùng C làm ngôn ngữ lập trình chính? Gần như mọi code base C trưởng thành hiện có như các kernel mã nguồn mở, bản triển khai của các dịch vụ như HTTPD, Postfix, nfsd, ftpd, và nhiều library C khác như OpenSSL và OpenCV, đều được viết theo kiểu object-oriented. Điều này không có nghĩa là C là object-oriented; thay vào đó, cách tiếp cận mà những dự án này đã chọn để tổ chức cấu trúc bên trong của chúng đến từ một tư duy object-oriented.
 
 Tôi rất khuyến khích đọc chương này cùng với ba chương tiếp theo và tìm hiểu thêm về OOP vì, thứ nhất, nó sẽ cho phép bạn suy nghĩ và thiết kế giống như các kỹ sư đã thiết kế những library được đề cập ở trên, và thứ hai, nó sẽ rất có lợi khi đọc source của những library như vậy.
 
@@ -14,15 +14,15 @@ C không hỗ trợ các khái niệm object-oriented như class, inheritance v�
 
 C không thể và *không nên* hỗ trợ các tính năng object-oriented trong cú pháp của nó; không phải vì tuổi tác của nó, mà vì những lý do rất xác đáng mà chúng ta sẽ nói đến trong chương này. Nói đơn giản, bạn vẫn có thể viết một chương trình object-oriented bằng C, nhưng cần thêm một chút nỗ lực để vượt qua sự phức tạp.
 
-Có một vài cuốn sách và bài viết về OOP trong C, và chúng thường cố gắng tạo ra một *type system* để viết class, hiện thực inheritance, polymorphism, và nhiều thứ khác, bằng C. Những cuốn sách này xem việc bổ sung hỗ trợ OOP như một tập hàm, macro và một preprocessor, tất cả đều có thể được dùng cùng nhau để viết các chương trình object-oriented bằng C. Đây sẽ không phải là cách tiếp cận chúng ta chọn trong chương này. Chúng ta sẽ không tạo ra một C++ mới từ C; thay vào đó, chúng ta muốn suy xét xem C có tiềm năng được dùng cho OOP như thế nào.
+Có một vài cuốn sách và bài viết về OOP trong C, và chúng thường cố gắng tạo ra một *type system* để viết class, triển khai inheritance, polymorphism, và nhiều thứ khác, bằng C. Những cuốn sách này xem việc bổ sung hỗ trợ OOP như một tập hàm, macro và một preprocessor, tất cả đều có thể được dùng cùng nhau để viết các chương trình object-oriented bằng C. Đây sẽ không phải là cách tiếp cận chúng ta chọn trong chương này. Chúng ta sẽ không tạo ra một C++ mới từ C; thay vào đó, chúng ta muốn suy xét xem C có tiềm năng được dùng cho OOP như thế nào.
 
 Người ta thường nói rằng OOP là một paradigm lập trình khác bên cạnh các paradigm thủ tục (procedural) và hàm (functional). Nhưng OOP còn hơn thế. OOP giống một cách suy nghĩ về và phân tích một vấn đề hơn. Nó là một thái độ đối với vũ trụ và hệ thống phân cấp của các đối tượng trong đó. Nó là một phần của phương pháp cổ xưa, nội tại và được kế thừa của chúng ta để hiểu và phân tích các thực thể vật lý và trừu tượng xung quanh. Nó cơ bản đến mức gắn liền với sự hiểu biết của chúng ta về tự nhiên.
 
 Chúng ta luôn nghĩ về mọi vấn đề từ một góc nhìn object-oriented. OOP chỉ là việc áp dụng cùng góc nhìn mà con người luôn chấp nhận, nhưng lần này dùng một ngôn ngữ lập trình để giải quyết một vấn đề tính toán. Tất cả những điều này giải thích tại sao OOP là paradigm lập trình phổ biến nhất được dùng để viết phần mềm.
 
-Chương này, cùng với ba chương tiếp theo, sẽ cho thấy rằng mọi khái niệm trong OOP đều có thể được hiện thực trong C – dù việc đó có thể phức tạp. Chúng ta biết rằng chúng ta có thể có OOP với C vì một số người đã làm điều đó rồi, đặc biệt là khi họ tạo ra C++ trên nền C, và vì họ đã xây dựng nhiều chương trình phức tạp và thành công bằng C theo kiểu object-oriented.
+Chương này, cùng với ba chương tiếp theo, sẽ cho thấy rằng mọi khái niệm trong OOP đều có thể được triển khai trong C – dù việc đó có thể phức tạp. Chúng ta biết rằng chúng ta có thể có OOP với C vì một số người đã làm điều đó rồi, đặc biệt là khi họ tạo ra C++ trên nền C, và vì họ đã xây dựng nhiều chương trình phức tạp và thành công bằng C theo kiểu object-oriented.
 
-Những gì các chương này sẽ *không* gợi ý là một library hay tập macro nhất định mà bạn nên dùng để khai báo một class hay thiết lập một quan hệ inheritance hay làm việc với các khái niệm OOP khác. Ngoài ra, chúng ta sẽ không áp đặt bất kỳ phương pháp luận hay kỷ luật nào như các quy ước đặt tên cụ thể. Chúng ta sẽ đơn giản dùng C thuần để hiện thực các khái niệm OOP.
+Những gì các chương này sẽ *không* gợi ý là một library hay tập macro nhất định mà bạn nên dùng để khai báo một class hay thiết lập một quan hệ inheritance hay làm việc với các khái niệm OOP khác. Ngoài ra, chúng ta sẽ không áp đặt bất kỳ phương pháp luận hay kỷ luật nào như các quy ước đặt tên cụ thể. Chúng ta sẽ đơn giản dùng C thuần để triển khai các khái niệm OOP.
 
 Lý do tại sao chúng ta dành **trọn bốn chương** cho OOP với C là vì lý thuyết nặng nề đằng sau hướng đối tượng (object orientation) và nhiều ví dụ khác nhau cần được khám phá để minh họa tất cả. Phần lớn lý thuyết thiết yếu đằng sau OOP sẽ được giải thích trong chương này, trong khi các chủ đề thực tiễn hơn sẽ được xử lý trong các chương tiếp theo. Với tất cả những điều đã nói, chúng ta cần thảo luận lý thuyết vì các khái niệm OOP thường mới mẻ với hầu hết các lập trình viên C lành nghề, kể cả những người có nhiều năm kinh nghiệm.
 
@@ -690,17 +690,17 @@ Lưu ý rằng các behavior của hai object cùng kiểu, như `car1` và `car
 
 Trong *ví dụ 6.1*, chúng ta đã thấy rằng hàm `main` dễ dàng truy cập các attribute `speed` và `fuel` trong attribute structure `car_t`. Điều này có nghĩa là mọi attribute trong kiểu `car_t` đều là public. Có một attribute hay behavior public có thể là một điều tồi vì nó có thể có một số long-lasting và nguy hiểm.
 
-Hệ quả là, các chi tiết hiện thực có thể bị rò rỉ ra ngoài. Giả sử rằng bạn sẽ dùng một object xe hơi. Thông thường, điều quan trọng với bạn chỉ là nó có một behavior tăng tốc xe; và bạn không tò mò về việc nó được thực hiện như thế nào. Có thể có thậm chí nhiều attribute nội bộ hơn trong object góp phần vào quá trình tăng tốc, nhưng không có lý do hợp lệ nào để chúng phải hiển thị với logic sử dụng.
+Hệ quả là, các chi tiết triển khai có thể bị rò rỉ ra ngoài. Giả sử rằng bạn sẽ dùng một object xe hơi. Thông thường, điều quan trọng với bạn chỉ là nó có một behavior tăng tốc xe; và bạn không tò mò về việc nó được thực hiện như thế nào. Có thể có thậm chí nhiều attribute nội bộ hơn trong object góp phần vào quá trình tăng tốc, nhưng không có lý do hợp lệ nào để chúng phải hiển thị với logic sử dụng.
 
 Chẳng hạn, lượng dòng điện được cấp cho bộ khởi động động cơ có thể là một attribute, nhưng nó chỉ nên là private đối với chính object. Điều này cũng đúng với một số behavior nội bộ của object. Ví dụ, việc phun nhiên liệu vào buồng đốt là một behavior nội bộ không nên hiển thị và truy cập được với bạn, nếu không, bạn có thể can thiệp vào nó và làm gián đoạn quá trình bình thường của động cơ.
 
-Từ một góc nhìn khác, các chi tiết hiện thực (cách xe hoạt động) khác nhau giữa các nhà sản xuất xe hơi nhưng khả năng tăng tốc xe là một behavior được mọi nhà sản xuất xe hơi cung cấp. Chúng ta thường nói rằng khả năng tăng tốc xe là một phần của *public API* hay *public interface* của class `Car`.
+Từ một góc nhìn khác, các chi tiết triển khai (cách xe hoạt động) khác nhau giữa các nhà sản xuất xe hơi nhưng khả năng tăng tốc xe là một behavior được mọi nhà sản xuất xe hơi cung cấp. Chúng ta thường nói rằng khả năng tăng tốc xe là một phần của *public API* hay *public interface* của class `Car`.
 
 Nói chung, code dùng một object trở nên phụ thuộc vào các attribute và behavior public của object đó. Đây là một mối lo ngại nghiêm trọng. Để rò rỉ một attribute nội bộ bằng cách khai báo nó là public lúc đầu và sau đó làm nó private có thể thực chất làm hỏng việc build của code phụ thuộc. Có thể kỳ vọng rằng các phần khác của code đang dùng attribute đó như một thứ public sẽ không biên dịch được sau thay đổi.
 
 Điều này có nghĩa là bạn đã phá vỡ khả năng tương thích ngược (backward compatibility). Đó là lý do tại sao chúng ta chọn một cách tiếp cận thận trọng và làm cho từng attribute đều private theo mặc định cho đến khi chúng ta tìm thấy lý lẽ hợp lý để làm nó public.
 
-Nói đơn giản, việc phơi ra code private từ một class về thực chất có nghĩa là thay vì phụ thuộc vào một public interface nhẹ nhàng, chúng ta đã phụ thuộc vào một hiện thực nặng nề. Những hệ quả này nghiêm trọng và có tiềm năng gây ra rất nhiều việc làm lại trong một dự án. Vì vậy, điều quan trọng là giữ các attribute và behavior private nhất có thể.
+Nói đơn giản, việc phơi ra code private từ một class về thực chất có nghĩa là thay vì phụ thuộc vào một public interface nhẹ nhàng, chúng ta đã phụ thuộc vào một bản triển khai nặng nề. Những hệ quả này nghiêm trọng và có tiềm năng gây ra rất nhiều việc làm lại trong một dự án. Vì vậy, điều quan trọng là giữ các attribute và behavior private nhất có thể.
 
 Code box sau, trong *ví dụ 6.3*, sẽ minh họa cách chúng ta có thể có các attribute và behavior private trong C. Ví dụ là về một class `List` được dùng để lưu một số giá trị số nguyên:
 
@@ -798,7 +798,7 @@ void list_print(list_t* list) {
 
 *Code Box 6-14 [ExtremeC_examples_chapter6_3.c]: Định nghĩa của class List*
 
-Mọi định nghĩa <a id="_idIndexMarker537"></a>mà bạn thấy trong code box trên đều là private. Logic bên ngoài sẽ dùng một object `list_t` không biết gì về các hiện thực trên, và header file là mẩu code duy nhất <a id="_idIndexMarker538"></a>mà code bên ngoài sẽ phụ thuộc vào.
+Mọi định nghĩa <a id="_idIndexMarker537"></a>mà bạn thấy trong code box trên đều là private. Logic bên ngoài sẽ dùng một object `list_t` không biết gì về các bản triển khai trên, và header file là mẩu code duy nhất <a id="_idIndexMarker538"></a>mà code bên ngoài sẽ phụ thuộc vào.
 
 Lưu ý rằng file trên thậm chí không include header file! Chừng nào các định nghĩa và chữ ký hàm khớp với các khai báo trong header file, đó là tất cả những gì cần thiết. Tuy nhiên, nên làm như vậy vì nó bảo đảm tính tương thích giữa các khai báo và các định nghĩa tương ứng của chúng. Như bạn đã thấy trong *Chương 2*, *Biên dịch và Liên kết (Compilation and Linking)*, các source file được biên dịch riêng rẽ và cuối cùng được link lại với nhau.
 
@@ -849,7 +849,7 @@ int main(int argc, char** argv) {
 
 *Code Box 6-15 [ExtremeC_examples_chapter6_3_main.c]: Hàm main của ví dụ 6.3*
 
-Như bạn có thể thấy trong code box trên, chúng ta đã viết các hàm `main` và `reverse` chỉ dựa <a id="_idIndexMarker541"></a>trên những thứ được khai báo trong header file. Nói cách khác, những hàm này chỉ dùng public API (hay public interface) của class `List`; các khai báo của attribute structure `list_t` và các behavior function của nó. Ví dụ này là một minh họa hay về cách phá vỡ các phụ thuộc và che giấu chi tiết hiện thực khỏi các phần khác của code.
+Như bạn có thể thấy trong code box trên, chúng ta đã viết các hàm `main` và `reverse` chỉ dựa <a id="_idIndexMarker541"></a>trên những thứ được khai báo trong header file. Nói cách khác, những hàm này chỉ dùng public API (hay public interface) của class `List`; các khai báo của attribute structure `list_t` và các behavior function của nó. Ví dụ này là một minh họa hay về cách phá vỡ các phụ thuộc và che giấu chi tiết triển khai khỏi các phần khác của code.
 
 > **Lưu ý:**
 >
@@ -859,7 +859,7 @@ Có <a id="_idIndexMarker542"></a>một số điểm liên quan đến code trê
 
 Bạn không thể dùng `malloc` trực tiếp trong ví dụ trên. Đó là vì nếu bạn định dùng `malloc` bên trong hàm `main`, bạn phải truyền `sizeof(list_t)` làm số byte cần được cấp phát. Tuy nhiên, bạn không thể dùng `sizeof` cho một kiểu chưa hoàn chỉnh.
 
-Kiểu `list_t` được include từ header file là một *incomplete type* (kiểu chưa hoàn chỉnh) vì nó chỉ là một khai báo không cung cấp thông tin gì về các trường bên trong, và chúng ta không biết kích thước của nó khi biên dịch. Kích thước thực sẽ chỉ được xác định vào lúc link khi chúng ta biết các chi tiết hiện thực. Như một giải pháp, chúng ta phải định nghĩa hàm `list_malloc` và dùng `malloc` ở một nơi mà `sizeof(list_t)` được xác định.
+Kiểu `list_t` được include từ header file là một *incomplete type* (kiểu chưa hoàn chỉnh) vì nó chỉ là một khai báo không cung cấp thông tin gì về các trường bên trong, và chúng ta không biết kích thước của nó khi biên dịch. Kích thước thực sẽ chỉ được xác định vào lúc link khi chúng ta biết các chi tiết triển khai. Như một giải pháp, chúng ta phải định nghĩa hàm `list_malloc` và dùng `malloc` ở một nơi mà `sizeof(list_t)` được xác định.
 
 Để build *ví dụ 6.3*, trước tiên chúng ta cần biên dịch các source. Các lệnh sau tạo ra các object file cần thiết trước giai đoạn linking:
 
@@ -899,9 +899,9 @@ $
 
 *Shell Box 6-3: Link và chạy ví dụ 6.3*
 
-Điều gì xảy ra nếu bạn thay đổi hiện thực đằng sau class `List`?
+Điều gì xảy ra nếu bạn thay đổi bản triển khai đằng sau class `List`?
 
-Giả sử, thay vì dùng một mảng, bạn dùng một linked list. Có vẻ như chúng ta không cần tạo lại `main.o`, vì nó <a id="_idIndexMarker545"></a>độc lập một cách gọn gàng với các chi tiết hiện thực của list mà nó dùng. Vì vậy, chúng ta chỉ cần biên dịch và tạo một object file mới cho hiện thực mới; ví dụ, `private2.o`. Sau đó, chúng ta chỉ cần link lại các object file và có được executable mới:
+Giả sử, thay vì dùng một mảng, bạn dùng một linked list. Có vẻ như chúng ta không cần tạo lại `main.o`, vì nó <a id="_idIndexMarker545"></a>độc lập một cách gọn gàng với các chi tiết triển khai của list mà nó dùng. Vì vậy, chúng ta chỉ cần biên dịch và tạo một object file mới cho bản triển khai mới; ví dụ, `private2.o`. Sau đó, chúng ta chỉ cần link lại các object file và có được executable mới:
 
 ```
 $ gcc main.o private2.o -o ex6_3.out
@@ -911,11 +911,11 @@ $ ./ex6_3.out
 $
 ```
 
-*Shell Box 6-4: Link và chạy ví dụ 6.3 với một hiện thực khác của class List*
+*Shell Box 6-4: Link và chạy ví dụ 6.3 với một cách triển khai khác của class List*
 
-Như bạn thấy, từ góc nhìn của người dùng, không có gì thay đổi, nhưng hiện thực bên dưới <a id="_idIndexMarker546"></a>đã được thay thế. Đó là một thành tựu lớn và cách tiếp cận này đang được dùng rất nhiều trong các dự án C.
+Như bạn thấy, từ góc nhìn của người dùng, không có gì thay đổi, nhưng bản triển khai bên dưới <a id="_idIndexMarker546"></a>đã được thay thế. Đó là một thành tựu lớn và cách tiếp cận này đang được dùng rất nhiều trong các dự án C.
 
-Nếu chúng ta muốn không phải lặp lại giai đoạn linking trong trường hợp có một hiện thực list mới thì sao? Trong trường hợp đó, chúng ta có thể dùng một shared library (hay file `.so`) để chứa object file private. Sau đó, chúng ta có thể nạp nó một cách động vào lúc runtime, loại bỏ nhu cầu link lại executable. Chúng ta đã thảo luận về shared library trong *Chương 3*, *Object File*.
+Nếu chúng ta muốn không phải lặp lại giai đoạn linking trong trường hợp có một bản triển khai list mới thì sao? Trong trường hợp đó, chúng ta có thể dùng một shared library (hay file `.so`) để chứa object file private. Sau đó, chúng ta có thể nạp nó một cách động vào lúc runtime, loại bỏ nhu cầu link lại executable. Chúng ta đã thảo luận về shared library trong *Chương 3*, *Object File*.
 
 Ở đây, chúng ta kết thúc chương hiện tại và chúng ta sẽ tiếp tục thảo luận trong chương tiếp theo. Hai chương tiếp theo sẽ là về các mối quan hệ khả dĩ có thể tồn tại giữa hai class.
 
@@ -930,7 +930,7 @@ Trong chương này, các chủ đề sau đã được thảo luận:
 - Chúng ta cũng đã giới thiệu các attribute và behavior của một object đơn lẻ và cách chúng nên được trích xuất từ bản đồ tư duy hoặc từ các yêu cầu được đưa ra trong mô tả của một domain.
 - Chúng ta đã giải thích tại sao C không thể là một ngôn ngữ OOP và khám phá vai trò của nó trong việc dịch các chương trình OOP thành các instruction assembly low-level rốt cuộc sẽ được chạy trên một CPU.
 - Encapsulation, với tư cách là nguyên lý đầu tiên trong OOP, đã được thảo luận. Chúng ta dùng encapsulation để tạo các capsule (hay object) chứa một tập attribute (chỗ chứa cho giá trị) và một tập behavior (chỗ chứa cho logic).
-- Information-hiding cũng đã được thảo luận, bao gồm cách nó có thể dẫn đến các interface (hay API) có thể được dùng mà không phải trở nên phụ thuộc vào hiện thực bên dưới.
+- Information-hiding cũng đã được thảo luận, bao gồm cách nó có thể dẫn đến các interface (hay API) có thể được dùng mà không phải trở nên phụ thuộc vào bản triển khai bên dưới.
 - Trong khi thảo luận về information-hiding, chúng ta đã minh họa cách làm cho các attribute hay method trở thành private trong code C.
 
 Chương tiếp theo sẽ là phần mở đầu cho thảo luận về các mối quan hệ khả dĩ giữa các class. Chúng ta bắt đầu *Chương 7*, *Composition và Aggregation*, bằng việc nói về quan hệ composition và sau đó, chúng ta tiếp tục với inheritance và polymorphism trong *Chương 8*, *Inheritance và Polymorphism*.

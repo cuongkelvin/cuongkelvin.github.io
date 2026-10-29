@@ -101,9 +101,9 @@ void cstack_clear(cstack_t*, deleter_t);
 
 *Code Box 21-1 [cstack.h]: Public interface của library Stack*
 
-Như chúng tôi đã giải thích trong *Chương 6*, *OOP và Encapsulation*, các khai báo trên giới thiệu<a id="_idIndexMarker1568"></a> public interface của class Stack. Như bạn thấy, attribute structure đồng hành của class là `cstack_t`. Chúng tôi đã dùng `cstack_t` thay vì `stack_t` vì cái sau được dùng trong thư viện chuẩn C và tôi muốn tránh mọi sự mơ hồ trong code này. Với các khai báo trên, attribute structure được forward declare và không có trường nào bên trong. Thay vào đó, các chi tiết sẽ có trong source file thực hiện hiện thực thực sự. Class cũng có một constructor, một destructor, và một số behavior khác như push và pop. Như bạn có thể thấy, tất cả chúng đều nhận một pointer kiểu `cstack_t` làm argument đầu tiên chỉ ra đối tượng mà chúng nên tác động lên. Cách chúng ta viết class Stack được giải thích như một phần của *implicit encapsulation* trong *Chương 6*, *OOP và Encapsulation*.
+Như chúng tôi đã giải thích trong *Chương 6*, *OOP và Encapsulation*, các khai báo trên giới thiệu<a id="_idIndexMarker1568"></a> public interface của class Stack. Như bạn thấy, attribute structure đồng hành của class là `cstack_t`. Chúng tôi đã dùng `cstack_t` thay vì `stack_t` vì cái sau được dùng trong thư viện chuẩn C và tôi muốn tránh mọi sự mơ hồ trong code này. Với các khai báo trên, attribute structure được forward declare và không có trường nào bên trong. Thay vào đó, các chi tiết sẽ có trong source file thực hiện bản triển khai thực sự. Class cũng có một constructor, một destructor, và một số behavior khác như push và pop. Như bạn có thể thấy, tất cả chúng đều nhận một pointer kiểu `cstack_t` làm argument đầu tiên chỉ ra đối tượng mà chúng nên tác động lên. Cách chúng ta viết class Stack được giải thích như một phần của *implicit encapsulation* trong *Chương 6*, *OOP và Encapsulation*.
 
-*Code Box 21-2* chứa hiện thực của class stack. Nó cũng chứa định nghĩa thực sự cho attribute structure `cstack_t`:
+*Code Box 21-2* chứa bản triển khai của class stack. Nó cũng chứa định nghĩa thực sự cho attribute structure `cstack_t`:
 
 ```
 #include <stdlib.h>
@@ -658,14 +658,14 @@ class Stack<T> implements AutoCloseable {
 Các điểm sau có vẻ <a id="_idIndexMarker1593"></a>đáng chú ý về code trên:
 
 - Class `Stack<T>` là một generic class. Điều đó có nghĩa là các instance khác nhau của nó có thể thao tác trên các class khác nhau như `String`, `Integer`, `Point`, v.v., nhưng mỗi instance chỉ có thể thao tác trên kiểu được chỉ định khi tạo instance.
-- Khả năng lưu bất kỳ kiểu dữ liệu nào trong stack bên dưới đòi hỏi stack dùng một marshaller bên ngoài để thực hiện serialization và deserialization các đối tượng. Library stack C có thể lưu các mảng byte trong một cấu trúc dữ liệu stack và các ngôn ngữ higher-level muốn dùng các chức năng của nó nên có khả năng cung cấp mảng byte đó thông qua serialization các đối tượng input. Bạn sẽ thấy ngay sau đây hiện thực của interface `Marshaller` cho class `String`.
+- Khả năng lưu bất kỳ kiểu dữ liệu nào trong stack bên dưới đòi hỏi stack dùng một marshaller bên ngoài để thực hiện serialization và deserialization các đối tượng. Library stack C có thể lưu các mảng byte trong một cấu trúc dữ liệu stack và các ngôn ngữ higher-level muốn dùng các chức năng của nó nên có khả năng cung cấp mảng byte đó thông qua serialization các đối tượng input. Bạn sẽ thấy ngay sau đây bản triển khai của interface `Marshaller` cho class `String`.
 - Chúng ta inject instance `Marshaller` bằng constructor. Điều này có nghĩa là chúng ta nên có một instance marshaller đã được tạo tương thích với kiểu *generic* của class `T`.
-- Class `Stack<T>` hiện thực interface `AutoCloseable`. Điều này đơn giản có nghĩa là nó có một số tài nguyên native nên được giải phóng khi hủy. Lưu ý rằng stack thực sự được tạo trong native code chứ không phải trong code Java. Do đó, *garbage collector* của JVM không thể giải phóng stack khi nó không còn cần thiết. Các đối tượng `AutoCloseable` có thể được dùng như các tài nguyên có một scope cụ thể và khi chúng không còn cần thiết, method `close` của chúng được gọi tự động. Ngay sau đây, bạn sẽ thấy cách chúng ta dùng class trên trong một kịch bản test.
+- Class `Stack<T>` triển khai interface `AutoCloseable`. Điều này đơn giản có nghĩa là nó có một số tài nguyên native nên được giải phóng khi hủy. Lưu ý rằng stack thực sự được tạo trong native code chứ không phải trong code Java. Do đó, *garbage collector* của JVM không thể giải phóng stack khi nó không còn cần thiết. Các đối tượng `AutoCloseable` có thể được dùng như các tài nguyên có một scope cụ thể và khi chúng không còn cần thiết, method `close` của chúng được gọi tự động. Ngay sau đây, bạn sẽ thấy cách chúng ta dùng class trên trong một kịch bản test.
 - Như bạn thấy, chúng ta có method constructor và chúng ta đã khởi tạo stack bên dưới bằng các native method. Chúng ta giữ một handler tới stack dưới dạng một trường `long` trong class. Lưu ý rằng không giống trong C++, chúng ta không có destructor nào trong class. Do đó, có thể stack bên dưới không được giải phóng và rốt cuộc trở thành một memory leak. Đó là lý do tại sao chúng ta đã đánh dấu class là một `AutoCloseable`. Khi một đối tượng `AutoCloseable` không còn cần thiết, method `close` của nó được gọi và như bạn thấy trong code trên, chúng ta gọi hàm destructor từ library stack C để giải phóng các tài nguyên được stack C cấp phát.
 
 > Nói chung, bạn không thể<a id="_idIndexMarker1595"></a> tin tưởng cơ chế garbage collector sẽ gọi *finalizer method* trên các đối tượng Java và việc dùng các tài nguyên `AutoCloseable` là cách đúng để quản lý tài nguyên native.
 
-Sau đây là hiện thực của `StringMarshaller`. Hiện thực rất đơn giản nhờ sự hỗ trợ tuyệt vời của class `String` trong việc làm việc với mảng byte:
+Sau đây là bản triển khai của `StringMarshaller`. Bản triển khai rất đơn giản nhờ sự hỗ trợ tuyệt vời của class `String` trong việc làm việc với mảng byte:
 
 ```
 class StringMarshaller implements Marshaller<String> {
@@ -946,7 +946,7 @@ Các lệnh sau chạy kịch bản test được thể hiện trong *Code Box 2
 ```
 $ cd java
 $ LD_LIBRARY_PATH=$PWD/.. java -Djava.library.path=$PWD/native \
- -cp build/classes com.packt.extreme_c.ch21.ex1.Main
+  -cp build/classes com.packt.extreme_c.ch21.ex1.Main
 Size after pushes: 3
 !
 World

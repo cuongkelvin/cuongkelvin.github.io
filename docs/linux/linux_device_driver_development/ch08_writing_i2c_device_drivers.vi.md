@@ -177,7 +177,7 @@ Mỗi thành phần trong data structure này đều có ý nghĩa khá rõ. Hã
 
 - `buf`: Đây là read/write buffer, phải được cấp phát theo `length`.
 
-LƯU Ý Vì `i2c_msg.len` là `u16`, phải bảo đảm read/write buffer luôn nhỏ hơn 2<sup>16</sup> (64k).
+  LƯU Ý Vì `i2c_msg.len` là `u16`, phải bảo đảm read/write buffer luôn nhỏ hơn 2<sup>16</sup> (64k).
 
 Bây giờ đã bàn về những I2C data structure quan trọng nhất, hãy xem các API (phần lớn có I2C adapter tham gia bên trong) mà I2C core cung cấp để tận dụng tối đa device.
 
@@ -548,11 +548,7 @@ Chúng ta sẽ dùng khai báo device tree vì board file, dù được dùng tr
 
 - `reg`: Biểu diễn địa chỉ device trên bus.
 
-- `compatible`: Đây là string dùng để match device với driver. Nó phải khớp với entry trong driver.
-
-```
-of_match_table.
-```
+- `compatible`: Đây là string dùng để match device với driver. Nó phải khớp với entry trong driver. `of_match_table`.
 
 Sau đây là ví dụ khai báo hai I2C device trên cùng adapter:
 

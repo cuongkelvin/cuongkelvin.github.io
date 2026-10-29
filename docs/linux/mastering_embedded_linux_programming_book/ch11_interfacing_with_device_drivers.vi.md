@@ -50,7 +50,7 @@ Do đó, có một nguyên tắc là device driver nên đơn giản nhất có 
 
 Trong Linux, có ba loại device driver chính:
 
-- Character: Dành cho I/O không buffer với nhiều chức năng phong phú và một lớp mỏng giữa code ứng dụng và driver. Đây là lựa chọn đầu tiên khi hiện thực các device driver tùy chỉnh.
+- Character: Dành cho I/O không buffer với nhiều chức năng phong phú và một lớp mỏng giữa code ứng dụng và driver. Đây là lựa chọn đầu tiên khi triển khai các device driver tùy chỉnh.
 
 - Block: Loại này có một giao diện được may đo cho block I/O tới và từ các thiết bị lưu trữ dung lượng lớn. Có một lớp buffer dày được thiết kế để làm việc đọc và ghi đĩa nhanh nhất có thể, điều khiến nó không phù hợp cho bất kỳ việc gì khác.
 
@@ -306,7 +306,7 @@ Duyệt phân cấp này khá khó vì nó đòi hỏi một số hiểu biết 
 
 #### Driver – /sys/class
 
-Đây là một cái nhìn về các device driver được trình bày theo loại của chúng. Nói cách khác, đó là một góc nhìn phần mềm thay vì góc nhìn phần cứng. Mỗi thư mục con đại diện cho một lớp driver và được hiện thực bởi một thành phần của driver framework. Ví dụ, các thiết bị UART được quản lý bởi layer `tty`, vì vậy bạn sẽ tìm thấy chúng trong `/sys/class/tty`. Tương tự, bạn sẽ tìm thấy network device trong `/sys/class/net`, các thiết bị input như bàn phím, touchscreen và chuột trong `/sys/class/input`, v.v.
+Đây là một cái nhìn về các device driver được trình bày theo loại của chúng. Nói cách khác, đó là một góc nhìn phần mềm thay vì góc nhìn phần cứng. Mỗi thư mục con đại diện cho một lớp driver và được triển khai bởi một thành phần của driver framework. Ví dụ, các thiết bị UART được quản lý bởi layer `tty`, vì vậy bạn sẽ tìm thấy chúng trong `/sys/class/tty`. Tương tự, bạn sẽ tìm thấy network device trong `/sys/class/net`, các thiết bị input như bàn phím, touchscreen và chuột trong `/sys/class/input`, v.v.
 
 Có một symbolic link trong mỗi thư mục con cho mỗi instance của loại thiết bị đó, trỏ tới biểu diễn của nó trong `/sys/device`.
 
@@ -465,7 +465,7 @@ Ghi image hoàn chỉnh lên thẻ microSD bằng balenaEtcher, cắm thẻ micr
 
 General-Purpose Input/Output (GPIO) là dạng giao tiếp số đơn giản nhất vì nó cho bạn truy cập trực tiếp từng chân phần cứng riêng lẻ, mỗi chân có thể ở một trong hai trạng thái: cao hoặc thấp. Trong hầu hết các trường hợp, bạn có thể cấu hình chân GPIO là input hoặc output. Bạn thậm chí có thể dùng một nhóm chân GPIO để tạo các giao tiếp higher-level như I2C hoặc SPI bằng cách thao tác từng bit bằng phần mềm, một kỹ thuật gọi là bit banging. Hạn chế chính là tốc độ và độ chính xác của các vòng lặp phần mềm và số chu kỳ CPU bạn muốn dành cho chúng. Nhìn chung, khó đạt độ chính xác timer tốt hơn một mili giây trừ khi bạn cấu hình một kernel real-time, như chúng ta sẽ thấy trong Chương 21. Các trường hợp sử dụng GPIO phổ biến hơn là đọc nút nhấn và cảm biến số, và điều khiển LED, động cơ và relay.
 
-Hầu hết các SoC có rất nhiều bit GPIO được nhóm lại trong các thanh ghi GPIO, thường là 32 bit mỗi thanh ghi. Các bit GPIO On-chip được dẫn ra các chân GPIO trên vỏ chip qua một bộ ghép kênh được gọi là pin mux. Có thể có thêm các chân GPIO off-chip trong chip quản lý nguồn và trong các GPIO extender chuyên dụng nối qua bus I2C hoặc SPI. Tất cả sự đa dạng này được xử lý bởi một subsystem kernel được gọi là `gpiolib`, thực ra không phải là một thư viện, mà là hạ tầng mà các GPIO driver dùng để trình bày I/O một cách nhất quán. Có chi tiết về bản hiện thực của `gpiolib` trong source kernel dưới `Documentation/driver-api/gpio/`, và code của chính các driver nằm trong `drivers/gpio/`.
+Hầu hết các SoC có rất nhiều bit GPIO được nhóm lại trong các thanh ghi GPIO, thường là 32 bit mỗi thanh ghi. Các bit GPIO On-chip được dẫn ra các chân GPIO trên vỏ chip qua một bộ ghép kênh được gọi là pin mux. Có thể có thêm các chân GPIO off-chip trong chip quản lý nguồn và trong các GPIO extender chuyên dụng nối qua bus I2C hoặc SPI. Tất cả sự đa dạng này được xử lý bởi một subsystem kernel được gọi là `gpiolib`, thực ra không phải là một thư viện, mà là hạ tầng mà các GPIO driver dùng để trình bày I/O một cách nhất quán. Có chi tiết về bản triển khai của `gpiolib` trong source kernel dưới `Documentation/driver-api/gpio/`, và code của chính các driver nằm trong `drivers/gpio/`.
 
 Các ứng dụng có thể tương tác với `gpiolib` qua các file trong thư mục `/sys/class/gpio/`. Đây là những gì bạn sẽ thấy trên một board nhúng điển hình như BeaglePlay:
 
@@ -724,7 +724,7 @@ Chương trình này giống `i2cget`, chỉ khác là địa chỉ và các byt
 
 LƯU Ý QUAN TRỌNG
 
-Có thêm thông tin về bản hiện thực I2C của Linux trong `Documentation/i2c/dev-interface.rst`. Các host controller driver nằm trong `drivers/i2c/busses/`.
+Có thêm thông tin về bản triển khai I2C của Linux trong `Documentation/i2c/dev-interface.rst`. Các host controller driver nằm trong `drivers/i2c/busses/`.
 
 Một giao thức truyền thông phổ biến khác là SPI, dùng một bus 4-wire.
 
@@ -732,7 +732,7 @@ Một giao thức truyền thông phổ biến khác là SPI, dùng một bus 4-
 
 Bus SPI tương tự I2C nhưng nhanh hơn nhiều, tới hàng chục MHz. Giao diện dùng bốn dây với các đường gửi và nhận riêng biệt, cho phép nó hoạt động ở chế độ full duplex. Mỗi chip trên bus được chọn bằng một đường chip select riêng. Nó thường được dùng để nối với cảm biến touchscreen, display controller và các thiết bị flash NOR serial.
 
-Giống như I2C, nó là một giao thức master-slave, với hầu hết các SoC hiện thực một hoặc nhiều master host controller. Có một SPI device driver tổng quát mà bạn có thể bật qua cấu hình kernel `CONFIG_SPI_SPIDEV`. Driver này tạo một device node cho mỗi SPI controller, cho phép bạn truy cập các chip SPI từ user space. Các device node có tên `spidev<bus>.<chip select>`:
+Giống như I2C, nó là một giao thức master-slave, với hầu hết các SoC triển khai một hoặc nhiều master host controller. Có một SPI device driver tổng quát mà bạn có thể bật qua cấu hình kernel `CONFIG_SPI_SPIDEV`. Driver này tạo một device node cho mỗi SPI controller, cho phép bạn truy cập các chip SPI từ user space. Các device node có tên `spidev<bus>.<chip select>`:
 
 ```
 # ls -l /dev/spi*
@@ -878,13 +878,13 @@ MODULE_DESCRIPTION("A dummy driver");
 
 Thông tin này có thể được lấy từ kernel module đã compile bằng lệnh `modinfo`. Source code đầy đủ, cùng với một `Makefile` cho driver này, có thể được tìm thấy bên trong thư mục `MELD/Chapter11/meta-device-drivers/recipes-kernel/dummy-driver`.
 
-Khi module được nạp, hàm `dummy_init()` được gọi. Thời điểm nó trở thành một character device là khi nó gọi `register_chrdev`, truyền một con trỏ tới `struct` `file_operations` chứa các con trỏ tới bốn hàm mà driver hiện thực. Mặc dù `register_chrdev` cho kernel biết có một driver với major number là `42`, nó không nói gì về class của driver, vì vậy nó sẽ không tạo một mục trong `/sys/class/`.
+Khi module được nạp, hàm `dummy_init()` được gọi. Thời điểm nó trở thành một character device là khi nó gọi `register_chrdev`, truyền một con trỏ tới `struct` `file_operations` chứa các con trỏ tới bốn hàm mà driver triển khai. Mặc dù `register_chrdev` cho kernel biết có một driver với major number là `42`, nó không nói gì về class của driver, vì vậy nó sẽ không tạo một mục trong `/sys/class/`.
 
 Không có mục trong `/sys/class/`, device manager không thể tạo device node. Vì vậy, vài dòng code tiếp theo tạo một device class tên là `dummy` và bốn thiết bị thuộc class đó tên là `dummy0` đến `dummy3`. Kết quả là thư mục `/sys/class/dummy/` được tạo, chứa các thư mục con `dummy0` đến `dummy3` khi driver được khởi tạo. Mỗi thư mục con chứa một file `dev` chứa major number và minor number của thiết bị. Đây là tất cả những gì một device manager cần để tạo các device node `/dev/dummy0` đến `/dev/dummy3`.
 
 Hàm `dummy_exit()` phải giải phóng các tài nguyên mà `dummy_init()` đã chiếm bằng cách giải phóng device class và major number.
 
-Các thao tác file của driver này được hiện thực bởi `dummy_open()`, `dummy_read()`, `dummy_write()` và `dummy_release()`. Chúng được gọi khi một chương trình user space gọi `open(2)`, `read(2)`, `write(2)` và `close(2)` tương ứng. Chúng chỉ in một thông điệp kernel để bạn có thể thấy chúng đã được gọi. Bạn có thể minh họa điều này từ command line bằng lệnh `echo`:
+Các thao tác file của driver này được triển khai bởi `dummy_open()`, `dummy_read()`, `dummy_write()` và `dummy_release()`. Chúng được gọi khi một chương trình user space gọi `open(2)`, `read(2)`, `write(2)` và `close(2)` tương ứng. Chúng chỉ in một thông điệp kernel để bạn có thể thấy chúng đã được gọi. Bạn có thể minh họa điều này từ command line bằng lệnh `echo`:
 
 ```
 # echo hello > /dev/dummy0

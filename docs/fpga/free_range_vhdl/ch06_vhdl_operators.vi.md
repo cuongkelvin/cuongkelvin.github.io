@@ -43,14 +43,11 @@ Có sẵn trong ieee.numeric_std hoặc ieee.numeric_bit, có ba loại shift op
 
 | Operator |  | Tên | Ví dụ | Kết quả |
 |---|---|---|---|---|
-|  | sll | shift left logical | result <= ”10010101” sll 2 | ”01010100” |
-| logical |  |  |  |  |
+| logical | sll | shift left logical | result <= ”10010101” sll 2 | ”01010100” |
 |  | srl | shift right logical | result <= ”10010101” srl 3 | ”00010010” |
-|  | sla | shift left arithmetic | result <= ”10010101” sla 3 | ”10101111” |
-| arithmetic |  |  |  |  |
+| arithmetic | sla | shift left arithmetic | result <= ”10010101” sla 3 | ”10101111” |
 |  | sra | shift right arithmetic | result <= ”10010101” sra 2 | ”11100101” |
-|  | rol | rotate left | result <= ”10100011” rol 2 | ”10001110” |
-| rotate |  |  |  |  |
+| rotate | rol | rotate left | result <= ”10100011” rol 2 | ”10001110” |
 |  | ror | rotate right | result <= ”10100011” ror 2 | ”11101000” |
 
 Bảng 6.3: Các shift operator của VHDL kèm ví dụ.
@@ -87,19 +84,16 @@ Cả remainder operator rem và modulus operator mod đều được áp dụng 
 
 | Operator |  | Tên | Ghi chú |
 |---|---|---|---|
-|  | + | addition |  |
-| adding | - | subtraction |  |
+| adding | + | addition |  |
+|  | - | subtraction |  |
 |  | & | concatenation | chỉ có thể hoạt động trên những kiểu cụ thể |
-|  | + | identity | unary operator |
-| sign |  |  |  |
+| sign | + | identity | unary operator |
 |  | - | negation | unary operator |
-|  | * | multiplication |  |
+| multiplying | * | multiplication |  |
 |  | / | division | thường bị giới hạn ở các lũy thừa của hai |
-| multiplying |  |  |  |
 |  | mod | modulus | chỉ có thể hoạt động trên những kiểu cụ thể |
 |  | rem | remainder | chỉ có thể hoạt động trên những kiểu cụ thể |
-|  | ** | exponentiation | thường bị giới hạn ở các lũy thừa của hai |
-| miscellaneous |  |  |  |
+| miscellaneous | ** | exponentiation | thường bị giới hạn ở các lũy thừa của hai |
 |  | abs | absolute value |  |
 
 Bảng 6.4: Tất cả các operator VHDL khác chưa được liệt kê cho đến giờ.
@@ -118,7 +112,7 @@ Bảng 6.5: Định nghĩa của các operator rem và mod. (abs = giá trị tu
 
 ## 6.7 Ôn lại gần như mọi thứ cho đến giờ
 
-VHDL là một ngôn ngữ dùng để thiết kế, test và hiện thực mạch số. Các design unit cơ bản trong VHDL là entity và architecture, chúng tiêu biểu cho cách tiếp cận phân cấp tổng quát của VHDL. Entity biểu diễn sơ đồ black-box của mạch, hay interface của mạch với thế giới bên ngoài, còn architecture bao gồm mọi chi tiết khác về cách mạch hoạt động.
+VHDL là một ngôn ngữ dùng để thiết kế, test và triển khai mạch số. Các design unit cơ bản trong VHDL là entity và architecture, chúng tiêu biểu cho cách tiếp cận phân cấp tổng quát của VHDL. Entity biểu diễn sơ đồ black-box của mạch, hay interface của mạch với thế giới bên ngoài, còn architecture bao gồm mọi chi tiết khác về cách mạch hoạt động.
 
 Architecture VHDL được tạo thành từ các statement mô tả hành vi của mạch số. Vì đây là một ngôn ngữ mô tả phần cứng, các statement trong VHDL chủ yếu được xem là thực thi concurrent. Ý tưởng concurrency là một trong những chủ đề chính của VHDL, đúng như người ta có thể mong đợi, vì một mạch số có thể được mô hình hóa như một tập logic gate hoạt động concurrent.
 

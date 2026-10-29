@@ -6,7 +6,7 @@
 
 DOI: [10.1201/9781003598145-19](https://doi.org/10.1201/9781003598145-19)
 
-Chương này, cùng với [Chương 20](ch20_code_coverage_metrics.vi.md) và [21](ch21_static_analysis.vi.md), đề cập đến một vài kỹ thuật được các tiêu chuẩn quốc tế “khuyến nghị” hoặc “rất khuyến nghị” cho việc hiện thực phần mềm, chứ không phải cho thiết kế hay kiểm chứng.
+Chương này, cùng với [Chương 20](ch20_code_coverage_metrics.vi.md) và [21](ch21_static_analysis.vi.md), đề cập đến một vài kỹ thuật được các tiêu chuẩn quốc tế “khuyến nghị” hoặc “rất khuyến nghị” cho việc triển khai phần mềm, chứ không phải cho thiết kế hay kiểm chứng.
 
 ## 19.1 Lựa chọn ngôn ngữ lập trình
 
@@ -40,7 +40,7 @@ Một đặc tính tích cực lớn của một ngôn ngữ lập trình là m�
 
 Ngôn ngữ C có một đặc tả, nhưng ISO/IEC 9899 nói rõ rằng một một số câu lệnh có vẻ đúng cú pháp là undefined và:
 
-> *[nếu một] lần thực thi chứa một thao tác undefined, Tiêu chuẩn Quốc tế này không đặt ra yêu cầu nào đối với phần hiện thực thực thi chương trình đó với input đó (thậm chí cả đối với các thao tác đứng trước thao tác undefined đầu tiên).*
+> *[nếu một] lần thực thi chứa một thao tác undefined, Tiêu chuẩn Quốc tế này không đặt ra yêu cầu nào đối với phần triển khai thực thi chương trình đó với input đó (thậm chí cả đối với các thao tác đứng trước thao tác undefined đầu tiên).*
 
 Vì vậy, nếu một chương trình chứa bất kỳ thao tác undefined nào, compiler được phép sinh ra bất kỳ code nào cho chương trình đó! Các ví dụ về sự mơ hồ như vậy có trong <a id="b19fig19_1"></a>[Hình 19.1](#fig19_1).
 
@@ -68,7 +68,7 @@ Blog bảo mật của Google ngày 15 tháng Mười Một năm 2024 báo cáo 
 
 ### 19.3.3 Runtime contract
 
-Một số ngôn ngữ, ví dụ Eiffel, Ada 2012 và D, có hỗ trợ programming by contract (xem [Mục 2.2.4](ch02_terminology_of_safety.vi.md#sec2_2_4)) được tích hợp vào ngôn ngữ, và các ngôn ngữ cũ hơn, như ALGOL, hỗ trợ recovery block ([Mục 11.5](ch11_error_detection_and_handling.vi.md#sec11_5)). Cả hai kỹ thuật này đều có thể hữu ích để viết code an toàn. Mặc dù không khó để hiện thực programming by contract trong các ngôn ngữ khác (có các package cho C++, Java, Python và Ruby), sẽ thuận tiện hơn nếu có nó như một tính năng built-in của ngôn ngữ. Vào thời điểm viết sách, Felix Klock đã đề xuất đưa contract vào ngôn ngữ Rust, nhưng đề xuất này chưa được chấp nhận.
+Một số ngôn ngữ, ví dụ Eiffel, Ada 2012 và D, có hỗ trợ programming by contract (xem [Mục 2.2.4](ch02_terminology_of_safety.vi.md#sec2_2_4)) được tích hợp vào ngôn ngữ, và các ngôn ngữ cũ hơn, như ALGOL, hỗ trợ recovery block ([Mục 11.5](ch11_error_detection_and_handling.vi.md#sec11_5)). Cả hai kỹ thuật này đều có thể hữu ích để viết code an toàn. Mặc dù không khó để triển khai programming by contract trong các ngôn ngữ khác (có các package cho C++, Java, Python và Ruby), sẽ thuận tiện hơn nếu có nó như một tính năng built-in của ngôn ngữ. Vào thời điểm viết sách, Felix Klock đã đề xuất đưa contract vào ngôn ngữ Rust, nhưng đề xuất này chưa được chấp nhận.
 
 ### 19.3.4 Định thời có thể dự đoán được
 
@@ -233,7 +233,7 @@ Quentin Ochem của AdaCore đã công bố một so sánh hữu ích giữa Ada
 
 [https://blog.adacore.com/should-i-choose-ada-spark-or-rust-over-c-c](https://blog.adacore.com/should-i-choose-ada-spark-or-rust-over-c-c)
 
-Vào tháng Chín năm 2024, Sean Baxter và Christian Mazakas đã đề xuất một “Safe C++” cho study group 23 (Safety & Security) của ISO C++ Standization Committee. Đề xuất có thể được tìm thấy tại [https://safecpp.org/P3390R0.html](https://safecpp.org/P3390R0.html) và bao quát an toàn memory, định nghĩa ngôn ngữ đầy đủ, an toàn kiểu nghiêm ngặt và borrow checking của Rust. Để hiện thực nó, C++ Standard Library sẽ cần được thiết kế lại vì nhiều hàm của nó không an toàn.
+Vào tháng Chín năm 2024, Sean Baxter và Christian Mazakas đã đề xuất một “Safe C++” cho study group 23 (Safety & Security) của ISO C++ Standization Committee. Đề xuất có thể được tìm thấy tại [https://safecpp.org/P3390R0.html](https://safecpp.org/P3390R0.html) và bao quát an toàn memory, định nghĩa ngôn ngữ đầy đủ, an toàn kiểu nghiêm ngặt và borrow checking của Rust. Để triển khai nó, C++ Standard Library sẽ cần được thiết kế lại vì nhiều hàm của nó không an toàn.
 
 Erlang có nhiều tính năng hấp dẫn, nhưng việc dùng nó trong một ứng dụng safety-related bị hạn chế bởi nhu cầu chứng tỏ tính đúng đắn của máy ảo bên dưới.
 
@@ -275,7 +275,7 @@ Chương trình C trong <a id="b19fig19_3"></a>[Hình 19.3](#fig19_3) trả về
 
 khi chạy, kết quả này dễ hiểu hơn.
 
-Tài liệu tham khảo [<a id="b19refbib19_3"></a>[3](#refbib19_3)] của John L. Gustafson giải thích chi tiết hơn nhiều những thiếu sót của các cách biểu diễn IEEE 754 và đề xuất một cách tốt hơn để biểu diễn các giá trị phân số (Unum). Tuy nhiên, vào thời điểm viết sách, Unum chưa được hiện thực trong phần cứng số học.
+Tài liệu tham khảo [<a id="b19refbib19_3"></a>[3](#refbib19_3)] của John L. Gustafson giải thích chi tiết hơn nhiều những thiếu sót của các cách biểu diễn IEEE 754 và đề xuất một cách tốt hơn để biểu diễn các giá trị phân số (Unum). Tuy nhiên, vào thời điểm viết sách, Unum chưa được triển khai trong phần cứng số học.
 
 Trong một số ứng dụng, số học số nguyên, floating slash<a id="fn19_319b"></a>[<sup>3</sup>](#fn19_3) hoặc interval arithmetic sẽ là những cách tiếp cận tốt hơn so với dấu phẩy động.
 

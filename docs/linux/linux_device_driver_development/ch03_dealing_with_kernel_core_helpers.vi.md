@@ -63,11 +63,7 @@ Có thể dùng:
 static DEFINE_SPINLOCK(foo_lock);
 ```
 
-Sau đó truy cập spinlock bằng tên `foo_lock`, địa chỉ là
-
-```
-&foo_lock.
-```
+Sau đó truy cập spinlock bằng tên `foo_lock`, địa chỉ là `&foo_lock`.
 
 Tuy nhiên cấp phát động (runtime), tốt hơn nhúng spinlock trong structure lớn, cấp phát memory cho structure rồi gọi `spin_lock_init()` trên spinlock element, như snippet:
 
@@ -298,10 +294,9 @@ Thuật ngữ sleeping trong phần này chỉ cơ chế mà một task, thay m�
 
 Kernel scheduler quản lý list task cần chạy (state `TASK_RUNNING`), gọi runqueue. Sleeping task, interruptible hay không (state `TASK_INTERRUPTIBLE` hoặc `TASK_UNINTERRUPTIBLE`), có queue riêng, gọi wait queue.
 
-Wait queue là higher-level mechanism chủ yếu xử lý blocking input/output (I/O), chờ condition `true`, chờ event cụ thể, hay nhận biết data/resource availability. Để hiểu, xem structure sau trong
+Wait queue là higher-level mechanism chủ yếu xử lý blocking input/output (I/O), chờ condition `true`, chờ event cụ thể, hay nhận biết data/resource availability. Để hiểu, xem structure sau trong `include/linux/wait.h`:
 
 ```
-include/linux/wait.h:
 struct wait_queue_head {
     spinlock_t lock;
     struct list_head head;
@@ -674,9 +669,9 @@ Tick device có thể là global cho toàn hệ thống hoặc local, tức per-
 
 - Global tick device cung cấp periodic tick chủ yếu chạy `do_timer()` và `update_wall_time()`. Hàm đầu cập nhật global `jiffies`, system load average, hàm sau wall time (lưu `xtime`, ghi khoảng từ 1/1/1970 đến nay), chạy dynamic timer đã hết hạn (ví dụ local process timer). Timer core code có global variable `tick_do_timer_cpu` giữ CPU number có tick device làm global — thực thi `do_timer()`. Global variable khác `tick_next_period` theo dõi thời gian global tick device phát tiếp.
 
-LƯU Ý
+  LƯU Ý
 
-Nghĩa là biến `jiffies` luôn quản lý từ một core mỗi lần, nhưng function management affinity có thể nhảy core khi `tick_do_timer_cpu` đổi.
+  Nghĩa là biến `jiffies` luôn quản lý từ một core mỗi lần, nhưng function management affinity có thể nhảy core khi `tick_do_timer_cpu` đổi.
 
 Từ interrupt routine, driver clock event device phải gọi `evtdev->event_handler()`, default handler framework cài. Transparent với device driver, framework đặt handler theo hai kernel configuration option (`CONFIG_HIGH_RES_TIMERS`, `CONFIG_NO_HZ`), hardware timer resolution, tick device chạy dynamic hay one-shot mode.
 
@@ -822,11 +817,7 @@ struct timer_list {
 
 Data structure trên, `expires` là absolute value theo jiffies xác định lúc hết hạn tương lai. `entry` kernel dùng nội bộ theo dõi timer trong per-CPU global list timer. `flags` là bitmask OR biểu diễn timer flag, như cách quản lý/CPU callback schedule; `function` là callback chạy khi hết hạn.
 
-Định nghĩa timer động bằng `timer_setup()` hoặc tĩnh bằng
-
-```
-DEFINE_TIMER().
-```
+Định nghĩa timer động bằng `timer_setup()` hoặc tĩnh bằng `DEFINE_TIMER()`.
 
 LƯU Ý Trước Linux kernel 4.15 dùng `setup_timer()` làm dynamic variant.
 
@@ -858,11 +849,7 @@ my_timer.expires = jiffies + ((12 * HZ) / 10); /* 1.2s */
 add_timer(&my_timer);
 ```
 
-Giá trị mà `mod_timer()` return phụ thuộc trạng thái của timer trước khi gọi. Gọi `mod_timer()` trên inactive timer return `0` khi thành công, còn return `1` khi được gọi thành công trên pending timer hoặc timer có callback function đang được thực thi. Điều này nghĩa là hoàn toàn an toàn khi thực thi `mod_timer()` từ timer callback. Khi gọi trên active timer, nó tương đương với
-
-```
-del_timer(timer); timer->expires = expires; add_timer(timer);.
-```
+Giá trị mà `mod_timer()` return phụ thuộc trạng thái của timer trước khi gọi. Gọi `mod_timer()` trên inactive timer return `0` khi thành công, còn return `1` khi được gọi thành công trên pending timer hoặc timer có callback function đang được thực thi. Điều này nghĩa là hoàn toàn an toàn khi thực thi `mod_timer()` từ timer callback. Khi gọi trên active timer, nó tương đương với `del_timer(timer); timer->expires = expires; add_timer(timer);`.
 
 Khi xong, release/cancel timer qua một hàm:
 
@@ -1318,17 +1305,13 @@ Vài điều cần nhớ softirq:
 
 - Softirq chủ yếu schedule ở return path hardware interrupt handler. Nếu schedule ngoài interrupt context, chạy process context nếu vẫn pending khi local thread `ksoftirqd` nhận CPU. Có thể kích hoạt thực thi:
 
-- Local per-CPU timer interrupt (chỉ SMP system, bật `CONFIG_SMP`). Xem `timer_tick()`, `update_process_times()`, `run_local_timers()`.
+  - Local per-CPU timer interrupt (chỉ SMP system, bật `CONFIG_SMP`). Xem `timer_tick()`, `update_process_times()`, `run_local_timers()`.
 
-- Gọi hàm `local_bh_enable()` (chủ yếu network subsystem cho softirq nhận/truyền packet).
+  - Gọi hàm `local_bh_enable()` (chủ yếu network subsystem cho softirq nhận/truyền packet).
 
-- Exit path mọi I/O IRQ handler (xem `do_IRQ`, gọi `irq_exit()`, rồi gọi
+  - Exit path mọi I/O IRQ handler (xem `do_IRQ`, gọi `irq_exit()`, rồi gọi `invoke_softirq()`.
 
-```
-invoke_softirq().
-```
-
-- Khi local thread `ksoftirqd` nhận CPU (wake).
+  - Khi local thread `ksoftirqd` nhận CPU (wake).
 
 Kernel function thực sự chịu trách nhiệm duyệt pending bitmap của softirq và chạy chúng là `__do_softirq()`, được định nghĩa trong `kernel/softirq.c`. Function này luôn được gọi với interrupt bị disable trên local CPU. Nó thực hiện các công việc sau:
 
@@ -1496,9 +1479,9 @@ Thêm từ Linux kernel 2.6, deferring mechanism dùng nhiều và đơn giản 
 
 - Công việc cần defer, được gọi là work item, được biểu diễn trong kernel bằng các instance của `struct work_struct`, chỉ ra handler function cần chạy. Nếu cần một khoảng delay trước khi work chạy sau khi được submit vào workqueue, kernel cung cấp instance `struct delayed_work` thay thế. Work item là một structure đơn giản chỉ chứa pointer đến function cần được schedule để thực thi bất đồng bộ. Tóm lại, có thể liệt kê hai loại work item structure như sau:
 
-- Structure `work_struct`, schedule task chạy sớm nhất hệ thống cho phép
+  - Structure `work_struct`, schedule task chạy sớm nhất hệ thống cho phép
 
-- Structure `delayed_work`, schedule task sau ít nhất interval cho trước
+  - Structure `delayed_work`, schedule task sau ít nhất interval cho trước
 
 - Chính workqueue, instance `struct workqueue_struct`, structure đặt work. Là queue work item.
 
@@ -1586,11 +1569,7 @@ bool cancel_delayed_work(struct delayed_work *dwork)
 bool cancel_delayed_work_sync(struct delayed_work *dwork)
 ```
 
-`cancel_work_sync()` cancel work đồng bộ — cancel rồi chờ thực thi kết thúc. Kernel bảo đảm `work` không pending/chạy CPU nào khi trả, ngay migrate sang workqueue khác hay tự requeue. Trả `true` nếu `work` pending, `false` nếu không. `cancel_delayed_work()` cancel delayed entry asynchronous. Trả `true` (nonzero) nếu `dwork` pending và canceled, `false` nếu không pending, có lẽ đang chạy, vẫn có thể chạy sau `cancel_delayed_work()` trả. Muốn bảo đảm chạy xong dùng `flush_workqueue()` flush mọi item trong queue cho trước hoặc `cancel_delayed_work_sync()`, synchronous version của
-
-```
-cancel_delayed_work().
-```
+`cancel_work_sync()` cancel work đồng bộ — cancel rồi chờ thực thi kết thúc. Kernel bảo đảm `work` không pending/chạy CPU nào khi trả, ngay migrate sang workqueue khác hay tự requeue. Trả `true` nếu `work` pending, `false` nếu không. `cancel_delayed_work()` cancel delayed entry asynchronous. Trả `true` (nonzero) nếu `dwork` pending và canceled, `false` nếu không pending, có lẽ đang chạy, vẫn có thể chạy sau `cancel_delayed_work()` trả. Muốn bảo đảm chạy xong dùng `flush_workqueue()` flush mọi item trong queue cho trước hoặc `cancel_delayed_work_sync()`, synchronous version của `cancel_delayed_work()`.
 
 Xong workqueue, destroy bằng `destroy_workqueue()`:
 
@@ -1687,17 +1666,9 @@ LƯU Ý Memory reclaim là cơ chế Linux trên memory allocation path, chỉ c
 
 - `create_workqueue(name)` map thành `alloc_workqueue(name,WQ_MEM_RECLAIM, 1)`
 
-- `create_singlethread_workqueue(name)` map thành `alloc_ordered_workqueue(name,`
+- `create_singlethread_workqueue(name)` map thành `alloc_ordered_workqueue(name,` `WQ_MEM_RECLAIM)`
 
-```
-WQ_MEM_RECLAIM)
-```
-
-- `create_freezable_workqueue(name)` map thành `alloc_workqueue(name,WQ_FREEZABLE |`
-
-```
-WQ_UNBOUND|WQ_MEM_RECLAIM, 1)
-```
+- `create_freezable_workqueue(name)` map thành `alloc_workqueue(name,WQ_FREEZABLE |` `WQ_UNBOUND|WQ_MEM_RECLAIM, 1)`
 
 Tóm lại `alloc_ordered_workqueue()` thực tế thay `create_freezable_workqueue()` và `create_singlethread_workqueue()` (commit https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/commit/?id=81dcaf6516d8). Workqueue cấp phát bằng `alloc_ordered_workqueue()` unbound, `max_active` đặt `1`.
 
@@ -1785,9 +1756,9 @@ Chúng ta cũng phải xem xét return type `irqreturn_t` của interrupt handle
 
 - `IRQ_WAKE_THREAD`: Với thread IRQ handler, hard-IRQ handler phải return giá trị này để đánh thức handler thread. Trong trường hợp này, `IRQ_HANDLED` chỉ được return bởi threaded handler đó, vốn đã được đăng ký trước bằng `devm_request_threaded_irq()`. Chúng ta sẽ bàn về điều này ở phần sau của chương.
 
-LƯU Ý
+  LƯU Ý
 
-Bạn không bao giờ được re-enable IRQ từ bên trong IRQ handler vì điều này sẽ cho phép "interrupt reentrancy".
+  Bạn không bao giờ được re-enable IRQ từ bên trong IRQ handler vì điều này sẽ cho phép "interrupt reentrancy".
 
 `devm_request_irq()` là phiên bản managed của `request_irq()`, được định nghĩa như sau:
 
@@ -1813,15 +1784,17 @@ void free_irq(unsigned int irq, void *dev_id)
 
 - Interrupt handler không thể block; chúng không chạy trong process context. Vì thế, bạn không được thực hiện các thao tác sau từ bên trong interrupt handler:
 
-- Bạn không thể truyền data tới/từ user space vì việc này có thể block.
+  - Bạn không thể truyền data tới/từ user space vì việc này có thể block.
 
-- Bạn không thể sleep hoặc phụ thuộc vào code có thể dẫn tới sleep, chẳng hạn gọi `wait_event()`, cấp phát memory với bất kỳ flag nào ngoài `GFP_ATOMIC`, hoặc dùng mutex/semaphore. Threaded handler có thể xử lý việc này.
+  - Bạn không thể sleep hoặc phụ thuộc vào code có thể dẫn tới sleep, chẳng hạn gọi `wait_event()`, cấp phát memory với bất kỳ flag nào ngoài `GFP_ATOMIC`, hoặc dùng mutex/semaphore. Threaded handler có thể xử lý việc này.
 
-- Bạn không thể kích hoạt hoặc gọi `schedule()`.
+  - Bạn không thể kích hoạt hoặc gọi `schedule()`.
 
-LƯU Ý
+    LƯU Ý
 
-Nếu device phát IRQ trong lúc IRQ này bị disable (hoặc mask) ở cấp controller, nó hoàn toàn không được xử lý (bị mask trong flow handler), nhưng interrupt sẽ xảy ra tức thì nếu nó vẫn pending (ở cấp device) khi IRQ được enable (hoặc unmask). Khái niệm non-reentrancy của interrupt nghĩa là nếu interrupt đã ở trạng thái active, nó không thể vào lại trạng thái đó cho đến khi trạng thái active được clear.
+    Nếu device phát IRQ trong lúc IRQ này bị disable (hoặc mask) ở cấp controller, nó hoàn toàn không được xử lý (bị mask trong flow handler), nhưng interrupt sẽ xảy ra tức thì nếu nó vẫn pending (ở cấp device) khi IRQ được enable (hoặc unmask).
+
+    Khái niệm non-reentrancy của interrupt nghĩa là nếu interrupt đã ở trạng thái active, nó không thể vào lại trạng thái đó cho đến khi trạng thái active được clear.
 
 ### Tìm hiểu khái niệm top half và bottom half
 

@@ -46,7 +46,7 @@ Trước tiên, bạn phải xác định tất cả các trade-offs theo bối 
 
 **Code không đồng nhất (Heterogeneous code)**
 
-Nếu các giải pháp được viết trên nhiều nền tảng, thì service sẽ dễ làm việc hơn vì, bất kể technology stack, bên gọi truy cập service qua mạng, khiến nền tảng hiện thực không còn quan trọng. Với thư viện, team sẽ cần một phiên bản code cho mỗi technology stack và sẽ phải giữ các phiên bản đồng bộ, làm tăng đáng kể độ phức tạp tổng thể của dự án.
+Nếu các giải pháp được viết trên nhiều nền tảng, thì service sẽ dễ làm việc hơn vì, bất kể technology stack, bên gọi truy cập service qua mạng, khiến nền tảng triển khai không còn quan trọng. Với thư viện, team sẽ cần một phiên bản code cho mỗi technology stack và sẽ phải giữ các phiên bản đồng bộ, làm tăng đáng kể độ phức tạp tổng thể của dự án.
 
 **Code dễ biến động cao (High code volatility)**
 
@@ -94,9 +94,9 @@ Sự tích lũy các điểm cộng của thư viện dùng chung khiến nó ch
 
 ### Messaging đồng bộ so với bất đồng bộ (Synchronous Versus Asynchronous Messaging)
 
-<a id="ix_ch27-laws-revisited-asciidoc6"></a><a id="ix_ch27-laws-revisited-asciidoc7"></a>Hãy xét phân tích trade-off sau: team của bạn đang xây dựng một architecture phân tán để gửi thông tin giao dịch tới cả service `Notification` lẫn `Analytics`, và bạn đang cố quyết định dùng *queue* hay *topic* để hiện thực hành vi này.
+<a id="ix_ch27-laws-revisited-asciidoc6"></a><a id="ix_ch27-laws-revisited-asciidoc7"></a>Hãy xét phân tích trade-off sau: team của bạn đang xây dựng một architecture phân tán để gửi thông tin giao dịch tới cả service `Notification` lẫn `Analytics`, và bạn đang cố quyết định dùng *queue* hay *topic* để triển khai hành vi này.
 
-Lựa chọn thứ nhất là queue, hay một giao thức giao tiếp point-to-point. Như bạn đã học trong [Chương 2](ch02_architectural_thinking.vi.md#ch-architectural-thinking), bên publish biết ai đang nhận message. Để đến được nhiều consumer, bên publish cần gửi một message tới một queue cho mỗi consumer. Nếu service `Trading` muốn dùng queue để báo cho service `Analytics` và service `Reporting` về các giao dịch, cách hiện thực sẽ trông như trong [Hình 27-2](#fosa_2e_new_2702).
+Lựa chọn thứ nhất là queue, hay một giao thức giao tiếp point-to-point. Như bạn đã học trong [Chương 2](ch02_architectural_thinking.vi.md#ch-architectural-thinking), bên publish biết ai đang nhận message. Để đến được nhiều consumer, bên publish cần gửi một message tới một queue cho mỗi consumer. Nếu service `Trading` muốn dùng queue để báo cho service `Analytics` và service `Reporting` về các giao dịch, cách triển khai sẽ trông như trong [Hình 27-2](#fosa_2e_new_2702).
 
 <a id="fosa_2e_new_2702"></a>
 
@@ -112,7 +112,7 @@ Trong [Hình 27-2](#fosa_2e_new_2702), service `Trading` phát một message t�
 
 *Hình 27-3. Dùng topic để truyền thông tin giao dịch tới `Notification` và `Analytics`*
 
-Topology thay thế dùng một *topic* thay vào đó, thứ hiện thực việc phát quảng bá thay vì giao tiếp point-to-point. Trong [Hình 27-3](#fosa_2e_new_2703), service `Trading` đăng một message duy nhất lên một topic. Mỗi consumer subscribe topic, và tất cả đều nhận được thông báo khi một message xuất hiện. Trong trường hợp này, bên publish message không biết (hay quan tâm) consumer là ai—thực tế, team có thể thêm consumer mới bất cứ lúc nào mà không thay đổi các consumer khác hay producer.
+Topology thay thế dùng một *topic* thay vào đó, thứ triển khai việc phát quảng bá thay vì giao tiếp point-to-point. Trong [Hình 27-3](#fosa_2e_new_2703), service `Trading` đăng một message duy nhất lên một topic. Mỗi consumer subscribe topic, và tất cả đều nhận được thông báo khi một message xuất hiện. Trong trường hợp này, bên publish message không biết (hay quan tâm) consumer là ai—thực tế, team có thể thêm consumer mới bất cứ lúc nào mà không thay đổi các consumer khác hay producer.
 
 Cả hai lựa chọn đều khả thi, vậy bạn nên quyết định thế nào? Tất nhiên là bằng cách thực hiện phân tích trade-off.
 
@@ -164,13 +164,13 @@ Hãy xét tái sử dụng code. Chắc chắn đây là một thực hành hoà
 
 Hai yếu tố quyết định tái sử dụng code sẽ hiệu quả đến mức nào. Kiến trúc sư thường khám phá ra yếu tố thứ nhất nhưng bỏ sót yếu tố thứ hai. Yếu tố thứ nhất là *trừu tượng hóa*: nếu bạn có thể trừu tượng hóa đoạn code này và dùng nó từ nhiều điểm gọi, nó là một ứng viên tốt để tái sử dụng. Yếu tố thứ hai là *tính dễ biến động thấp*. Khi một team tái sử dụng một module code luôn thay đổi, điều này tạo ra sự xáo trộn trong toàn bộ hệ thống. Mỗi khi code dùng chung thay đổi, mọi bên gọi code đó phải phối hợp xoay quanh thay đổi đó. Ngay cả khi đó không phải là thay đổi phá vỡ tương thích, team vẫn phải kiểm chứng rằng thay đổi không làm hỏng gì. Khi các architecture tái sử dụng code không phù hợp, các team rốt cuộc phải đuổi theo những thay đổi phá vỡ tương thích khắp architecture. Đây là một trong những bài học then chốt mà giới kiến trúc sư đã học được từ architecture style orchestration-driven SOA (được đề cập trong [Chương 17](ch17_orchestration_driven_service_oriented_architecture.vi.md#ch-style-esb-soa)), một trong những triết lý nền tảng của nó là cố tái sử dụng càng nhiều code càng tốt. Từ góc nhìn thực tế, các team làm việc trong những architecture đó như đang bơi trong cát lún: mọi thay đổi đều có khả năng gây ra những tác dụng phụ không lường trước lan tỏa khắp hệ thống.
 
-Đó là trade-off ẩn giấu: tái sử dụng code hiệu quả đòi hỏi trừu tượng hóa tốt *và* tính dễ biến động thấp. Đó là lý do các mục tiêu tái sử dụng thành công nhất trong architecture là “hệ thống đường ống”: framework công nghệ, thư viện, nền tảng, v.v. Phần thay đổi nhanh nhất của hầu hết các ứng dụng là domain (động lực để viết phần mềm ngay từ đầu), nên các khái niệm domain là ứng viên tồi tệ cho tái sử dụng. (Lưu ý rằng điều này là nền tảng của nguyên lý bounded context trong DDD—không bounded context nào có thể tái sử dụng bất kỳ chi tiết hiện thực nào của một bounded context khác.)
+Đó là trade-off ẩn giấu: tái sử dụng code hiệu quả đòi hỏi trừu tượng hóa tốt *và* tính dễ biến động thấp. Đó là lý do các mục tiêu tái sử dụng thành công nhất trong architecture là “hệ thống đường ống”: framework công nghệ, thư viện, nền tảng, v.v. Phần thay đổi nhanh nhất của hầu hết các ứng dụng là domain (động lực để viết phần mềm ngay từ đầu), nên các khái niệm domain là ứng viên tồi tệ cho tái sử dụng. (Lưu ý rằng điều này là nền tảng của nguyên lý bounded context trong DDD—không bounded context nào có thể tái sử dụng bất kỳ chi tiết triển khai nào của một bounded context khác.)
 
 > **Vì sao chúng ta không thể có những thứ tốt đẹp—vì đánh đổi! (Why We Can’t Have Nice Things—Trade-Offs!)**
 >
 > Là những nhà tư vấn chuyên nghiệp, khách hàng của chúng tôi thường đưa ra những yêu cầu như sau: “Chúng tôi thích ý tưởng microservices và các architecture phân tán có mức decoupling cao vì chúng cho phép mức agility cao và deployment nhanh. Tuy nhiên, chúng tôi cũng muốn mức tái sử dụng cao trong toàn tổ chức để các team không phải liên tục viết lại code.”
 >
-> Chúng tôi phải là người mang tin xấu ở đây: bạn không thể có cả hai thứ này, vì cách một hệ thống hiện thực tái sử dụng là thông qua coupling. Không tổ chức nào có thể có cả decoupling *lẫn* mức tái sử dụng cao. Hai thứ này về cơ bản không tương thích. Đây là một ví dụ điển hình về việc các tổ chức có thể hiểu sai các trade-offs then chốt như thế nào.<a id="id1744"></a><a id="id1745"></a>
+> Chúng tôi phải là người mang tin xấu ở đây: bạn không thể có cả hai thứ này, vì cách một hệ thống triển khai tái sử dụng là thông qua coupling. Không tổ chức nào có thể có cả decoupling *lẫn* mức tái sử dụng cao. Hai thứ này về cơ bản không tương thích. Đây là một ví dụ điển hình về việc các tổ chức có thể hiểu sai các trade-offs then chốt như thế nào.<a id="id1744"></a><a id="id1745"></a>
 
 <a id="sec-3rd-corollary"></a>
 
@@ -242,6 +242,6 @@ Những người dùng kata của chúng tôi thường hỏi: có hướng dẫ
 
 > Không có câu trả lời đúng hay sai trong architecture—chỉ có *trade-offs*.
 
-Khi các tác giả bắt đầu dùng architecture kata trong các lớp đào tạo trực tiếp, ban đầu chúng tôi giữ lại các hình vẽ mà học viên tạo ra, với mục tiêu tạo ra một kho đáp án. Tuy nhiên, chúng tôi nhanh chóng bỏ cuộc, vì nhận ra rằng đây là những artifact chưa hoàn chỉnh. Các team đã ghi lại *cách* họ hiện thực giải pháp bằng hình vẽ topology. *Lý do tại sao* thú vị hơn nhiều—nhưng dù họ đã giải thích các trade-offs họ cân nhắc trong lớp, họ không có thời gian để tạo architecture decision record. Chỉ giữ lại *cách* nghĩa là chúng tôi chỉ có một nửa câu chuyện.
+Khi các tác giả bắt đầu dùng architecture kata trong các lớp đào tạo trực tiếp, ban đầu chúng tôi giữ lại các hình vẽ mà học viên tạo ra, với mục tiêu tạo ra một kho đáp án. Tuy nhiên, chúng tôi nhanh chóng bỏ cuộc, vì nhận ra rằng đây là những artifact chưa hoàn chỉnh. Các team đã ghi lại *cách* họ triển khai giải pháp bằng hình vẽ topology. *Lý do tại sao* thú vị hơn nhiều—nhưng dù họ đã giải thích các trade-offs họ cân nhắc trong lớp, họ không có thời gian để tạo architecture decision record. Chỉ giữ lại *cách* nghĩa là chúng tôi chỉ có một nửa câu chuyện.
 
 Vì vậy, lời khuyên chia tay của chúng tôi: luôn học hỏi, luôn thực hành, và *hãy bắt tay làm architecture*!

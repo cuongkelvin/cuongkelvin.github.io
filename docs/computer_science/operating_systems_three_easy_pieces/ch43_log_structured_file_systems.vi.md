@@ -70,7 +70,7 @@ Vì thế, tốc độ ghi hiệu dụng (R<sub>effective</sub>), đơn giản l
 
 ![eq43_3_6](images/ch43_log_structured_file_systems/eq43_3_6.png)
 
-Hãy xét ví dụ với disk có positioning time 10 millisecond và peak transfer rate 100 MB/s; giả sử ta muốn effective bandwidth bằng 90% mức đỉnh (F = 0.9). Trong trường hợp này, D = 0.9/0.1 × 100 M B/s × 0.01 giây = 9 M B. Hãy thử những giá trị khác nhau để xem cần giữ bao nhiêu trong buffer nhằm tiến gần peak bandwidth. Cần bao nhiêu để đạt 95% mức đỉnh? 99%?
+Hãy xét ví dụ với disk có positioning time 10 millisecond và peak transfer rate 100 MB/s; giả sử ta muốn effective bandwidth bằng 90% mức đỉnh (F = 0.9). Trong trường hợp này, D = 0.9/0.1 × 100 MB/s × 0.01 giây = 9 MB. Hãy thử những giá trị khác nhau để xem cần giữ bao nhiêu trong buffer nhằm tiến gần peak bandwidth. Cần bao nhiêu để đạt 95% mức đỉnh? 99%?
 
 ## 43.4 Vấn đề: Tìm inode
 

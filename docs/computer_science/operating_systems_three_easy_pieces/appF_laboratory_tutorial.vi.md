@@ -20,12 +20,14 @@ Phần tiếp theo chỉ định signature của main(): trả về integer (int
    may wrap over lines */
 // if you use gcc, two slashes will work too (and may be preferred)
 #include <stdio.h>
+
 /* main returns an integer */
 int main(int argc, char *argv[]) {
     /* printf is our output function;
        by default, writes to standard out */
     /* printf returns an integer, but we ignore that */
     printf("hello, world\n");
+
     /* return 0 to indicate all went well */
     return(0);
 }
@@ -131,10 +133,13 @@ Theo mặc định, nó tìm Makefile hoặc makefile và dùng làm input (có 
 ```
 hw: hw.o helper.o
     gcc -o hw hw.o helper.o -lm
+
 hw.o: hw.c
     gcc -O -Wall -c hw.c
+
 helper.o: helper.c
     gcc -O -Wall -c helper.c
+
 clean:
     rm -f hw.o helper.o hw
 ```
@@ -181,16 +186,21 @@ TARG = hw
 CC   = gcc
 OPTS = -Wall -O
 LIBS = -lm
+
 # this translates .c files in src list to .o’s
 OBJS = $(SRCS:.c=.o)
+
 # all is not really needed, but is used to generate the target
 all: $(TARG)
+
 # this generates the target executable
 $(TARG): $(OBJS)
     $(CC) -o $(TARG) $(OBJS) $(LIBS)
+
 # this is a generic rule for .o files
 %.o: %.c
     $(CC) $(OPTS) -c $< -o $@
+
 # and finally, a clean line
 clean:
     rm -f $(OBJS) $(TARG)
@@ -208,9 +218,11 @@ Xét code có bug sau, lưu trong buggy.c và compile thành executable buggy.
 
 ```
 #include <stdio.h>
+
 struct Data {
     int x;
 };
+
 int
 main(int argc, char *argv[])
 {
@@ -245,6 +257,7 @@ Copyright 2008 Free Software Foundation, Inc.
 ```
 (gdb) run
 Starting program: buggy
+
 Program received signal SIGSEGV, Segmentation fault.
 0x8048433 in main (argc=1, argv=0xbffff844) at buggy.cc:19
 19          printf("%d\n", p->x);
@@ -268,11 +281,13 @@ Cuối cùng, còn có thể đặt breakpoint trong chương trình để debug
 Breakpoint 1 at 0x8048426: file buggy.cc, line 17.
 (gdb) run
 Starting program: /homes/hacker/buggy
+
 Breakpoint 1, main (argc=1, argv=0xbffff844) at buggy.cc:17
 17          struct Data *p = NULL;
 (gdb) next
 19          printf("%d\n", p->x);
 (gdb)
+
 Program received signal SIGSEGV, Segmentation fault.
 0x8048433 in main (argc=1, argv=0xbffff844) at buggy.cc:19
 19          printf("%d\n", p->x);
@@ -295,6 +310,7 @@ SYNOPSIS
      #include <sys/types.h>
      #include <sys/stat.h>
      #include <fcntl.h>
+
      int open(const char *path, int oflag, /* mode_t mode */...);
 ```
 

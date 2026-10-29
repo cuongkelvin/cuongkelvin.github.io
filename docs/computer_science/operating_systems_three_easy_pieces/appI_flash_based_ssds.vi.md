@@ -42,9 +42,14 @@ Với tổ chức flash này, flash chip hỗ trợ ba operation low-level. Comm
 
 Một cách hình dung flash chip là mỗi page có state. Page bắt đầu INVALID. Erase block chứa page đặt state của nó (và mọi page trong block) thành ERASED, reset nội dung từng page và quan trọng là cho phép program. Program page đổi state thành VALID, nghĩa là nội dung đã được thiết lập và đọc được. Read không ảnh hưởng state (dù chỉ nên đọc page đã program). Khi page đã program, cách duy nhất đổi nội dung là erase toàn block chứa nó. Đây là ví dụ chuyển state sau các operation erase, program trong block 4-page:
 
-iiii Ban đầu: các page trong block invalid (i)
-
-Erase() → EEEE Đặt state của page trong block thành erased (E) Program(0) → VEEE Program page 0; state thành valid (V) Program(0) → error Không thể re-program page sau khi program Program(1) → VVEE Program page 1 Erase() → EEEE Nội dung bị erase; mọi page có thể program
+|  |  |  |  |
+|---|---|---|---|
+|  |  | iiii | Ban đầu: các page trong block invalid (i) |
+| Erase() | → | EEEE | Đặt state của page trong block thành erased (E) |
+| Program(0) | → | VEEE | Program page 0; state thành valid (V) |
+| Program(0) | → | error | Không thể re-program page sau khi program |
+| Program(1) | → | VVEE | Program page 1 |
+| Erase() | → | EEEE | Nội dung bị erase; mọi page có thể program |
 
 ### Ví dụ chi tiết
 
@@ -91,7 +96,9 @@ Một vấn đề reliability khác gọi là disturbance. Khi truy cập page c
 
 > MẸO: TẦM QUAN TRỌNG CỦA BACKWARDS COMPATIBILITY
 >
-> Backwards compatibility luôn là mối quan tâm trong layered system. Định nghĩa interface ổn định giữa hai hệ thống cho phép đổi mới mỗi phía mà vẫn tương tác được. Cách này thành công ở nhiều lĩnh vực: operating system có API tương đối ổn định cho ứng dụng, disk cung cấp cùng interface block-based cho file system, mỗi layer IP networking stack cung cấp interface cố định cho layer trên. Không ngạc nhiên sự cứng nhắc có nhược điểm vì interface thế hệ này có thể không phù hợp thế hệ sau. Đôi khi nên nghĩ lại thiết kế toàn hệ thống. Ví dụ xuất sắc là Sun ZFS file system [B07]; xét lại tương tác file system với RAID, người tạo ZFS hình dung rồi hiện thực một tổng thể tích hợp hiệu quả hơn.
+> Backwards compatibility luôn là mối quan tâm trong layered system. Định nghĩa interface ổn định giữa hai hệ thống cho phép đổi mới mỗi phía mà vẫn tương tác được. Cách này thành công ở nhiều lĩnh vực: operating system có API tương đối ổn định cho ứng dụng, disk cung cấp cùng interface block-based cho file system, mỗi layer IP networking stack cung cấp interface cố định cho layer trên.
+>
+> Không ngạc nhiên sự cứng nhắc có nhược điểm vì interface thế hệ này có thể không phù hợp thế hệ sau. Đôi khi nên nghĩ lại thiết kế toàn hệ thống. Ví dụ xuất sắc là Sun ZFS file system [B07]; xét lại tương tác file system với RAID, người tạo ZFS hình dung rồi hiện thực một tổng thể tích hợp hiệu quả hơn.
 
 ## I.5 Từ flash thô tới SSD Flash-Based
 
@@ -163,7 +170,9 @@ Cách log-based tự nó cải thiện performance (chỉ thỉnh thoảng cần
 
 > BÊN LỀ: LƯU BỀN VỮNG THÔNG TIN MAPPING FTL
 >
-> Có thể bạn hỏi: nếu mất điện thì sao? Mapping table in-memory biến mất? Rõ ràng không thể thực sự mất thông tin, nếu không thiết bị không hoạt động như persistent storage. SSD phải có cách phục hồi mapping. Đơn giản nhất là ghi một số thông tin mapping cùng mỗi page vào vùng out-of-band (OOB). Khi mất điện rồi khởi động lại, thiết bị phải quét OOB và tái dựng mapping table trong memory. Cách cơ bản có vấn đề: quét SSD lớn tìm mọi thông tin mapping cần thiết chậm. Để khắc phục, một số thiết bị higher-end dùng logging và checkpointing phức tạp hơn để tăng tốc recovery; ta sẽ học thêm logging khi bàn file system.
+> Có thể bạn hỏi: nếu mất điện thì sao? Mapping table in-memory biến mất? Rõ ràng không thể thực sự mất thông tin, nếu không thiết bị không hoạt động như persistent storage. SSD phải có cách phục hồi mapping.
+>
+> Đơn giản nhất là ghi một số thông tin mapping cùng mỗi page vào vùng out-of-band (OOB). Khi mất điện rồi khởi động lại, thiết bị phải quét OOB và tái dựng mapping table trong memory. Cách cơ bản có vấn đề: quét SSD lớn tìm mọi thông tin mapping cần thiết chậm. Để khắc phục, một số thiết bị higher-end dùng logging và checkpointing phức tạp hơn để tăng tốc recovery; ta sẽ học thêm logging khi bàn file system.
 
 Đáng tiếc cách log structuring cơ bản có down-sides. Đầu tiên, ghi đè logical block tạo garbage, tức phiên bản data cũ chiếm không gian quanh drive. Thiết bị phải định kỳ garbage collection (GC) để tìm block và giải phóng chỗ cho lần ghi sau; GC quá nhiều tăng write amplification và giảm performance. Thứ hai là chi phí cao của mapping table in-memory; thiết bị càng lớn, bảng càng cần nhiều memory. Ta xét lần lượt.
 

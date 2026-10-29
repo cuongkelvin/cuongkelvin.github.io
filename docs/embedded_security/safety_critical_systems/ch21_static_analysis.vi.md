@@ -38,7 +38,7 @@ Tài liệu tham khảo [<a id="b21refbib21_2"></a>[2](#refbib21_2)] của Benja
 
 ## 21.2 Phân tích code tĩnh và các tiêu chuẩn
 
-ISO 26262 rất khuyến nghị việc dùng phân tích tĩnh như một cơ chế để kiểm chứng rằng các coding standard định nghĩa một tập con của ngôn ngữ nguồn đã được tuân theo trong quá trình hiện thực (Table 7 của [phần 6](part6_implementation_verification.vi.md)) và như một phương pháp kiểm chứng việc tích hợp phần mềm (Table 10).
+ISO 26262 rất khuyến nghị việc dùng phân tích tĩnh như một cơ chế để kiểm chứng rằng các coding standard định nghĩa một tập con của ngôn ngữ nguồn đã được tuân theo trong quá trình triển khai (Table 7 của [phần 6](part6_implementation_verification.vi.md)) và như một phương pháp kiểm chứng việc tích hợp phần mềm (Table 10).
 
 IEC 61508 khuyến nghị phân tích tĩnh cho việc kiểm chứng phần mềm trong Table A.9 và B.8 của [phần 3](part3_design_patterns.vi.md) và đưa ra thông tin về kỹ thuật này trong đoạn B.6.3 của [phần 7](part7_appendices.vi.md), nơi nó mô tả khá cổ kính mục đích của kỹ thuật này là *“Để tránh các systematic fault có thể dẫn đến sự đổ vỡ trong hệ thống đang được kiểm thử, hoặc sớm hoặc sau nhiều năm hoạt động.”* Có thể lập luận rằng việc loại trừ cụ thể một hệ thống đã qua giai đoạn đầu, nhưng chưa ở ngoài thực địa nhiều năm, là điều đáng tiếc.
 

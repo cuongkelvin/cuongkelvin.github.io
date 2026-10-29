@@ -16,6 +16,8 @@ Thao tác cơ bản trong mô hình client-server là transaction (Hình 11.1). 
 
 3. Server gửi response tới client rồi chờ request tiếp theo. Ví dụ, Web server gửi file trở lại client.
 
+4. Client nhận response và xử lý nó. Ví dụ, sau khi Web browser nhận page từ server, nó hiển thị lên màn hình.
+
 ![p0955_1](images/ch11_network_programming/p0955_1.png)
 
 **Hình 11.1 Transaction client-server.**
@@ -23,8 +25,6 @@ Thao tác cơ bản trong mô hình client-server là transaction (Hình 11.1). 
 ### Thông tin thêm: Transaction Client-server và database transaction
 
 Transaction Client-server không phải database transaction và không có các thuộc tính như atomicity của database transaction. Trong ngữ cảnh này, transaction chỉ là dãy bước do client và server thực hiện.
-
-4. Client nhận response và xử lý nó. Ví dụ, sau khi Web browser nhận page từ server, nó hiển thị lên màn hình.
 
 Cần nhận ra rằng client và server là process, không phải máy tính, hay host như thường gọi trong ngữ cảnh này. Một host duy nhất có thể chạy nhiều client và server khác nhau concurrently, và client cùng server trong một transaction có thể nằm trên cùng host hoặc trên các host khác nhau. Mô hình client-server vẫn giống nhau, bất kể cách ánh xạ client và server tới host.
 
@@ -88,10 +88,6 @@ Hình 11.7 thể hiện ví dụ host và router dùng internet protocol truyề
 
 2. Protocol software trên host A tạo LAN1 frame bằng cách thêm internet header và LAN1 frame header vào dữ liệu. Internet header hướng tới internet host B. LAN1 frame header hướng tới router. Sau đó nó chuyển frame tới adapter. Chú ý payload LAN1 frame là internet packet, có payload là dữ liệu người dùng thực tế. Kiểu encapsulation này là một ý tưởng nền tảng của internetworking.
 
-![p0960_7](images/ch11_network_programming/p0960_7.png)
-
-**Hình 11.7 Cách dữ liệu đi từ host này tới host khác trên internet. PH: internet packet header; FH1: frame header cho LAN1; FH2: frame header cho LAN2.**
-
 3. LAN1 adapter sao chép frame ra mạng.
 
 4. Khi frame tới router, LAN1 adapter của router đọc từ dây rồi chuyển tới protocol software.
@@ -103,6 +99,10 @@ Hình 11.7 thể hiện ví dụ host và router dùng internet protocol truyề
 7. Khi frame tới host B, adapter đọc frame từ dây rồi chuyển tới protocol software.
 
 8. Cuối cùng, protocol software trên host B bỏ packet header và frame header. Protocol software cuối cùng sao chép dữ liệu thu được vào virtual address space của server khi server gọi system call đọc dữ liệu.
+
+![p0960_7](images/ch11_network_programming/p0960_7.png)
+
+**Hình 11.7 Cách dữ liệu đi từ host này tới host khác trên internet. PH: internet packet header; FH1: frame header cho LAN1; FH2: frame header cho LAN2.**
 
 Tất nhiên, ở đây chúng ta lướt qua nhiều vấn đề khó. Nếu các mạng có maximum frame size khác nhau thì sao? Router biết chuyển tiếp frame tới đâu bằng cách nào? Router được thông báo khi network topology thay đổi ra sao? Nếu packet mất thì sao? Tuy nhiên, ví dụ nắm bắt bản chất ý tưởng internet và encapsulation là chìa khóa.
 
@@ -122,13 +122,15 @@ Từ góc nhìn lập trình viên, có thể xem Internet là tập host toàn 
 
 - Tập host được ánh xạ tới tập IP address 32-bit.
 
-### Thông tin thêm: IPv4 và IPv6
-
-Internet protocol gốc với địa chỉ 32-bit được gọi là Internet Protocol Version 4 (IPv4). Năm 1996, Internet Engineering Task Force (IETF) đề xuất phiên bản IP mới gọi là Internet Protocol Version 6 (IPv6), dùng địa chỉ 128-bit và dự định kế nhiệm IPv4. Tuy nhiên, tính đến năm 2015, gần 20 năm sau, phần lớn lưu lượng Internet vẫn qua mạng IPv4. Ví dụ, chỉ 4 phần trăm người dùng truy cập dịch vụ Google bằng IPv6 [42]. Vì tỷ lệ áp dụng thấp, sách không thảo luận IPv6 chi tiết mà chỉ tập trung khái niệm IPv4. Khi nói Internet, chúng ta có ý nói Internet dựa trên IPv4. Dù vậy, kỹ thuật viết client và server học ở phần sau dựa trên interface hiện đại độc lập protocol cụ thể.
-
 - Tập IP address được ánh xạ tới tập định danh gọi là Internet domain name.
 
 - Process trên một Internet host có thể giao tiếp với process trên Internet host bất kỳ khác qua connection.
+
+### Thông tin thêm: IPv4 và IPv6
+
+Internet protocol gốc với địa chỉ 32-bit được gọi là Internet Protocol Version 4 (IPv4). Năm 1996, Internet Engineering Task Force (IETF) đề xuất phiên bản IP mới gọi là Internet Protocol Version 6 (IPv6), dùng địa chỉ 128-bit và dự định kế nhiệm IPv4. Tuy nhiên, tính đến năm 2015, gần 20 năm sau, phần lớn lưu lượng Internet vẫn qua mạng IPv4. Ví dụ, chỉ 4 phần trăm người dùng truy cập dịch vụ Google bằng IPv6 [42].
+
+Vì tỷ lệ áp dụng thấp, sách không thảo luận IPv6 chi tiết mà chỉ tập trung khái niệm IPv4. Khi nói Internet, chúng ta có ý nói Internet dựa trên IPv4. Dù vậy, kỹ thuật viết client và server học ở phần sau dựa trên interface hiện đại độc lập protocol cụ thể.
 
 Các mục tiếp theo thảo luận chi tiết hơn những ý tưởng Internet nền tảng này.
 
@@ -332,23 +334,25 @@ trong đó port 51213 là ephemeral port kernel gán. Socket address của Web s
 208.216.181.15:80
 ```
 
+trong đó port 80 là port well-known gắn với Web service. Với socket address client và server này, connection được nhận diện duy nhất bằng socket pair
+
+```
+(128.2.194.242:51213, 208.216.181.15:80)
+```
+
 #### Thông tin thêm: Nguồn gốc Internet
 
 Internet là một trong những ví dụ thành công nhất về hợp tác chính phủ, đại học và công nghiệp. Nhiều yếu tố đóng góp, nhưng chúng ta cho rằng hai yếu tố đặc biệt quan trọng: đầu tư 30-year liên tục của chính phủ Hoa Kỳ và cam kết của nhà nghiên cứu tâm huyết với điều Dave Clarke tại MIT gọi là “đồng thuận tương đối và code hoạt động được”.
 
 Hạt giống Internet được gieo năm 1957, khi đỉnh điểm Chiến tranh Lạnh, Liên Xô khiến thế giới kinh ngạc bằng Sputnik, vệ tinh nhân tạo đầu tiên của Trái Đất. Đáp lại, chính phủ Hoa Kỳ tạo Advanced Research Projects Agency (ARPA), có nhiệm vụ khôi phục vị trí dẫn đầu khoa học và công nghệ Mỹ. Năm 1967, Lawrence Roberts tại ARPA công bố kế hoạch mạng mới ARPANET. Node ARPANET đầu tiên hoạt động năm 1969. Đến 1971 có 13 node ARPANET và email trở thành ứng dụng mạng quan trọng đầu tiên.
 
-Năm 1972, Robert Kahn phác thảo nguyên lý internetworking tổng quát: tập mạng kết nối với nhau, giao tiếp giữa mạng được xử lý độc lập trên cơ sở “best-effort” bởi hộp đen gọi là “router”. Năm 1974, Kahn và Vinton Cerf công bố chi tiết TCP/IP đầu tiên; đến 1982 nó thành internetworking protocol chuẩn cho ARPANET. Ngày 1 tháng 1 năm 1983, mọi node ARPANET chuyển sang TCP/IP, đánh dấu global IP Internet ra đời. Năm 1985, Paul Mockapetris phát minh DNS và có hơn 1,000 Internet host. Năm sau, National Science Foundation (NSF) xây NSFNET backbone nối 13 địa điểm bằng đường điện thoại 56 Kb/s. Nó được nâng cấp lên liên kết T1 1.5 Mb/s năm 1988 và T3 45 Mb/s năm 1991. Đến 1988 có hơn 50,000 host. Năm 1989, ARPANET gốc chính thức ngừng hoạt động. Năm 1995, khi có gần 10,000,000 Internet host, NSF cho NSFNET ngừng hoạt động và thay bằng kiến trúc Internet hiện đại dựa trên commercial backbone tư nhân kết nối bằng public network access point.
+Năm 1972, Robert Kahn phác thảo nguyên lý internetworking tổng quát: tập mạng kết nối với nhau, giao tiếp giữa mạng được xử lý độc lập trên cơ sở “best-effort” bởi hộp đen gọi là “router”. Năm 1974, Kahn và Vinton Cerf công bố chi tiết TCP/IP đầu tiên; đến 1982 nó thành internetworking protocol chuẩn cho ARPANET. Ngày 1 tháng 1 năm 1983, mọi node ARPANET chuyển sang TCP/IP, đánh dấu global IP Internet ra đời.
+
+Năm 1985, Paul Mockapetris phát minh DNS và có hơn 1,000 Internet host. Năm sau, National Science Foundation (NSF) xây NSFNET backbone nối 13 địa điểm bằng đường điện thoại 56 Kb/s. Nó được nâng cấp lên liên kết T1 1.5 Mb/s năm 1988 và T3 45 Mb/s năm 1991. Đến 1988 có hơn 50,000 host. Năm 1989, ARPANET gốc chính thức ngừng hoạt động. Năm 1995, khi có gần 10,000,000 Internet host, NSF cho NSFNET ngừng hoạt động và thay bằng kiến trúc Internet hiện đại dựa trên commercial backbone tư nhân kết nối bằng public network access point.
 
 ![p0968_10](images/ch11_network_programming/p0968_10.png)
 
 **Hình 11.11 Cấu trúc Internet connection.**
-
-trong đó port 80 là port well-known gắn với Web service. Với socket address client và server này, connection được nhận diện duy nhất bằng socket pair
-
-```
-(128.2.194.242:51213, 208.216.181.15:80)
-```
 
 #### Thông tin thêm: Nguồn gốc sockets interface
 
@@ -547,6 +551,18 @@ Sau khi client gọi getaddrinfo, nó duyệt list, thử lần lượt socket a
 
 - Theo mặc định, getaddrinfo có thể trả socket address IPv4 và IPv6. Đặt ai_family thành AF_INET giới hạn list ở IPv4. Đặt AF_INET6 giới hạn list ở IPv6.
 
+- Theo mặc định, với mỗi địa chỉ duy nhất gắn với host, getaddrinfo có thể trả tối đa ba addrinfo structure có field ai_socktype khác nhau: một cho connection, một cho datagram (không đề cập), một cho raw socket (không đề cập). Đặt ai_socktype thành SOCK_STREAM giới hạn tối đa một addrinfo structure cho mỗi địa chỉ duy nhất, có socket address dùng làm endpoint connection. Đây là hành vi mong muốn cho mọi chương trình ví dụ.
+
+- Field ai_flags là bit mask sửa thêm hành vi mặc định. Bạn tạo nó bằng OR tổ hợp các giá trị. Một số giá trị hữu ích:
+
+  - AI_ADDRCONFIG. Flag được khuyên dùng nếu dùng connection [34]. Nó yêu cầu getaddrinfo chỉ trả IPv4 nếu local host được cấu hình IPv4. Tương tự với IPv6.
+
+  - AI_CANONNAME. Theo mặc định ai_canonname là NULL. Nếu đặt flag, getaddrinfo trỏ ai_canonname trong addrinfo structure đầu list tới tên canonical (chính thức) của host (xem Hình 11.15).
+
+  - AI_NUMERICSERV. Theo mặc định service có thể là service name hoặc port number. Flag buộc service là port number.
+
+  - AI_PASSIVE. Theo mặc định getaddrinfo trả socket address client dùng làm active socket trong connect. Flag yêu cầu trả socket address server dùng làm listening socket. Khi đó host cần NULL. Address field trong socket address structure thu được là wildcard address, báo kernel server nhận request tới bất kỳ IP address nào của host này. Đây là hành vi mong muốn cho mọi server ví dụ.
+
 ```
                                                                code/netp/netpfragments.c
 struct addrinfo {
@@ -563,10 +579,6 @@ struct addrinfo {
 ```
 
 **Hình 11.16 Cấu trúc addrinfo dùng bởi getaddrinfo .**
-
-- Theo mặc định, với mỗi địa chỉ duy nhất gắn với host, getaddrinfo có thể trả tối đa ba addrinfo structure có field ai_socktype khác nhau: một cho connection, một cho datagram (không đề cập), một cho raw socket (không đề cập). Đặt ai_socktype thành SOCK_STREAM giới hạn tối đa một addrinfo structure cho mỗi địa chỉ duy nhất, có socket address dùng làm endpoint connection. Đây là hành vi mong muốn cho mọi chương trình ví dụ.
-
-- Field ai_flags là bit mask sửa thêm hành vi mặc định. Bạn tạo nó bằng OR tổ hợp các giá trị. Một số giá trị hữu ích: AI_ADDRCONFIG. Flag được khuyên dùng nếu dùng connection [34]. Nó yêu cầu getaddrinfo chỉ trả IPv4 nếu local host được cấu hình IPv4. Tương tự với IPv6. AI_CANONNAME. Theo mặc định ai_canonname là NULL. Nếu đặt flag, getaddrinfo trỏ ai_canonname trong addrinfo structure đầu list tới tên canonical (chính thức) của host (xem Hình 11.15). AI_NUMERICSERV. Theo mặc định service có thể là service name hoặc port number. Flag buộc service là port number. AI_PASSIVE. Theo mặc định getaddrinfo trả socket address client dùng làm active socket trong connect. Flag yêu cầu trả socket address server dùng làm listening socket. Khi đó host cần NULL. Address field trong socket address structure thu được là wildcard address, báo kernel server nhận request tới bất kỳ IP address nào của host này. Đây là hành vi mong muốn cho mọi server ví dụ.
 
 Khi getaddrinfo tạo một addrinfo structure trong output list, nó điền mọi field ngoại trừ ai_flags. Field ai_addr trỏ tới một socket address structure, field ai_addrlen cho biết kích thước của structure này, còn field ai_next trỏ tới addrinfo structure tiếp theo trong list. Các field còn lại mô tả những thuộc tính khác nhau của socket address.
 
@@ -792,9 +804,8 @@ Hình 11.21 thể hiện routine main của echo server. Sau khi mở listening 
 
 **Hình 11.19 open_listenfd : Helper function mở và trả listening descriptor. Nó reentrant và protocol-independent.**
 
-code/netp/echoclient.c
-
 ```
+                                                         code/netp/echoclient.c
  1   #include "csapp.h"
  2
  3   int main(int argc, char **argv)
@@ -832,9 +843,8 @@ Chú ý echo server đơn giản chỉ xử lý một client mỗi lần. Server
 
 Cuối cùng, Hình 11.22 thể hiện code echo, lặp đọc và ghi dòng văn bản đến khi rio_readlineb gặp EOF tại dòng 10.
 
-code/netp/echoserveri.c
-
 ```
+                                                                           code/netp/echoserveri.c
  1   #include "csapp.h"
  2
  3   void echo(int connfd);
@@ -1226,9 +1236,8 @@ Tiny chỉ hỗ trợ GET. Nếu client yêu cầu method khác (như POST), g�
 
 **Hình 11.29 Tiny Web server.**
 
-code/netp/tiny/tiny.c
-
 ```
+                                                                             code/netp/tiny/tiny.c
  1   void doit(int fd)
  2   {
  3       int is_static;
@@ -1468,11 +1477,11 @@ Sau khi gửi phần response đầu tiên, fork child process mới (dòng 11).
 
 **Hình 11.35 Tiny serve_dynamic phục vụ dynamic content cho client.**
 
+Tiếp theo, child redirect standard output của mình tới connected file descriptor (dòng 14), rồi load và chạy CGI program (dòng 15). Vì CGI program chạy trong context của child, nó có quyền truy cập cùng các file đang mở và environment variable đã tồn tại trước lời gọi execve. Do đó, mọi thứ CGI program ghi ra standard output đều đi trực tiếp tới client process, không cần parent process can thiệp. Trong khi đó, parent block trong lời gọi wait, chờ reap child khi nó kết thúc (dòng 17).
+
 #### Thông tin thêm: Xử lý connection đóng sớm
 
 Mặc dù chức năng cơ bản Web server khá đơn giản, chúng ta không muốn tạo ấn tượng sai rằng viết server thực tế là dễ. Xây Web server robust chạy lâu không crash là nhiệm vụ khó, cần hiểu Linux systems programming sâu hơn những gì đã học. Ví dụ, nếu server ghi vào connection client đã đóng (chẳng hạn vì nhấn “Stop” trên browser), lần write đầu trả bình thường nhưng lần thứ hai gây gửi SIGPIPE có hành vi mặc định là kết thúc process. Nếu catch hoặc bỏ qua SIGPIPE, write thứ hai trả −1 với errno bằng EPIPE. Hàm strerr và perror báo EPIPE là “Broken pipe”, thông điệp trái trực giác gây bối rối nhiều thế hệ sinh viên. Do đó server robust phải catch SIGPIPE và kiểm tra lời gọi write có lỗi EPIPE không.
-
-Tiếp theo, child redirect standard output của mình tới connected file descriptor (dòng 14), rồi load và chạy CGI program (dòng 15). Vì CGI program chạy trong context của child, nó có quyền truy cập cùng các file đang mở và environment variable đã tồn tại trước lời gọi execve. Do đó, mọi thứ CGI program ghi ra standard output đều đi trực tiếp tới client process, không cần parent process can thiệp. Trong khi đó, parent block trong lời gọi wait, chờ reap child khi nó kết thúc (dòng 17).
 
 ## 11.7 Tổng kết
 
@@ -1536,9 +1545,6 @@ Lời giải Bài toán 11.1 (trang 963)
 | 64.12.149.13 | 0x400C950D |
 | 107.212.96.29 | 0x6BD4601D |
 | [0.0].[0.128] | 0x00000080 |
-
-| Địa chỉ Dotted-decimal | Địa chỉ hex |
-|---|---|
 | [255.255].[255.0] | 0xFFFFFF00 |
 | [10.1].[1.64] | 0x0A010140 |
 
@@ -1589,12 +1595,12 @@ Lời giải Bài toán 11.3 (trang 963)
 13       rc = inet_pton(AF_INET, argv[1], &inaddr);
 14       if (rc == 0)
 15           app_error("inet_pton error: invalid network byte order");
-            16       else if (rc < 0)
-            17           unix_error("inet_pton error");
-            18
-            19       printf("0x%x\n", ntohs(inaddr.s_addr));
-            20       exit(0);
-            21   }
+16       else if (rc < 0)
+17           unix_error("inet_pton error");
+18
+19       printf("0x%x\n", ntohs(inaddr.s_addr));
+20       exit(0);
+21   }
                                                              code/netp/global-dd2hex.c
 ```
 

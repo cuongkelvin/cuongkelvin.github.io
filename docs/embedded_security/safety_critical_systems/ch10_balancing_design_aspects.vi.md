@@ -116,9 +116,9 @@ Tăng reliability của một hệ thống thường có nghĩa là tăng chi ph
 
 Time replication (lặp lại cùng một phép tính trên cùng phần cứng, có thể dùng recovery block hoặc coded processor) đặc biệt làm giảm hiệu năng hệ thống, nhưng các kỹ thuật khác để tăng xác suất nhận được phản hồi đúng từ hệ thống, như tắt caching trên bộ xử lý, cũng ảnh hưởng trực tiếp đến hiệu năng.
 
-## 10.5 Cân bằng trong hiện thực
+## 10.5 Cân bằng trong triển khai
 
-Còn một sự cân bằng nữa mà người làm architecture hoặc nhà thiết kế cần xem xét. Khi các lập trình viên hiện thực hệ thống, họ sẽ cần hướng dẫn về cách lập trình. Họ nên lập trình để đạt hiệu năng cao (code nhanh, tightly-knit), để dễ kiểm thử, để dễ bảo trì, để các công cụ phân tích tĩnh hoạt động hiệu quả, để phát hiện lỗi runtime hiệu quả, hay để code dễ đọc?
+Còn một sự cân bằng nữa mà người làm architecture hoặc nhà thiết kế cần xem xét. Khi các lập trình viên triển khai hệ thống, họ sẽ cần hướng dẫn về cách lập trình. Họ nên lập trình để đạt hiệu năng cao (code nhanh, tightly-knit), để dễ kiểm thử, để dễ bảo trì, để các công cụ phân tích tĩnh hoạt động hiệu quả, để phát hiện lỗi runtime hiệu quả, hay để code dễ đọc?
 
 Những đòi hỏi này đi ngược chiều nhau. Code High-performance có khả năng kém dễ đọc hơn, kém dễ bảo trì hơn, ít có khả năng phát hiện lỗi runtime hơn và kém phù hợp với phân tích tĩnh chuyên sâu hơn so với code được viết riêng với những đặc tính đó trong đầu. Việc theo đuổi hiệu năng cao đặc biệt có thể làm giảm khả năng phát hiện lỗi runtime vì nó sẽ loại trừ việc dữ liệu được nhân bản, được lưu ở các dạng khác nhau, hoặc được bảo vệ bằng một check-sum. Việc kiểm tra những thứ này lúc runtime sẽ làm giảm hiệu năng của hệ thống.
 
@@ -126,11 +126,11 @@ Các lập trình viên cần biết các ưu tiên cho mỗi module họ tạo 
 
 Một khi các ưu tiên này đã được thiết lập cho mỗi module, các đặc tính thu được có thể được đưa vào failure model của hệ thống.
 
-Trong thực tế, việc khiến các lập trình viên chú ý đến các ưu tiên đã được phân bổ có thể khó khăn — một số lập trình viên muốn làm anh hùng và khăng khăng viết code để đạt hiệu năng cao, bất kể thứ tự ưu tiên của các đặc tính khác. Một vấn đề khác phát sinh khi phát hiện ra rằng sự cân bằng phải thay đổi, thường là trong quá trình kiểm thử tích hợp. Ví dụ, kiểm thử tích hợp có thể phát hiện rằng một module mà lúc thiết kế không được cho là cần hiệu năng cao, lại cần hiệu năng đó. Điều này có thể đòi hỏi làm lại, không chỉ phần thiết kế, mà còn cả phần hiện thực.
+Trong thực tế, việc khiến các lập trình viên chú ý đến các ưu tiên đã được phân bổ có thể khó khăn — một số lập trình viên muốn làm anh hùng và khăng khăng viết code để đạt hiệu năng cao, bất kể thứ tự ưu tiên của các đặc tính khác. Một vấn đề khác phát sinh khi phát hiện ra rằng sự cân bằng phải thay đổi, thường là trong quá trình kiểm thử tích hợp. Ví dụ, kiểm thử tích hợp có thể phát hiện rằng một module mà lúc thiết kế không được cho là cần hiệu năng cao, lại cần hiệu năng đó. Điều này có thể đòi hỏi làm lại, không chỉ phần thiết kế, mà còn cả phần triển khai.
 
 ## 10.6 Tóm tắt
 
-Việc thiết kế và hiện thực bất kỳ hệ thống nào, nhưng đặc biệt là một hệ thống nhúng được thiết kế cho một ứng dụng safety-critical, đều phải chịu những sự cân bằng và đánh đổi. Một danh sách dài các yếu tố phải được cân bằng, bao gồm an toàn, hiệu năng, bảo mật, khả năng sử dụng, availability và reliability. Việc phân tích những yếu tố này nên được thực hiện một cách tường minh và mọi quyết định được đưa ra nên được ghi lại. Điều này cho phép những quyết định đó được xem xét lại dựa trên kinh nghiệm.
+Việc thiết kế và triển khai bất kỳ hệ thống nào, nhưng đặc biệt là một hệ thống nhúng được thiết kế cho một ứng dụng safety-critical, đều phải chịu những sự cân bằng và đánh đổi. Một danh sách dài các yếu tố phải được cân bằng, bao gồm an toàn, hiệu năng, bảo mật, khả năng sử dụng, availability và reliability. Việc phân tích những yếu tố này nên được thực hiện một cách tường minh và mọi quyết định được đưa ra nên được ghi lại. Điều này cho phép những quyết định đó được xem xét lại dựa trên kinh nghiệm.
 
 ## Tài liệu tham khảo
 

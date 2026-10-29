@@ -34,13 +34,7 @@ Hình 3.1 Cặp inverter Cross-coupled
 
 Xét hai trường hợp Q là 0 hoặc Q là 1. Xét hệ quả từng trường hợp, chúng ta có:
 
-- Trường hợp I: Q = 0 Như Hình 3.2(a), I2 nhận input FALSE, Q, nên tạo
-
-output TRUE trên $\overline{Q}$. I1 nhận input TRUE, $\overline{Q}$, nên tạo
-
-output FALSE trên Q. Điều này nhất quán với giả định ban đầu
-
-rằng Q = 0, nên trường hợp này được gọi là ổn định.
+- Trường hợp I: Q = 0 Như Hình 3.2(a), I2 nhận input FALSE, Q, nên tạo output TRUE trên $\overline{Q}$. I1 nhận input TRUE, $\overline{Q}$, nên tạo output FALSE trên Q. Điều này nhất quán với giả định ban đầu rằng Q = 0, nên trường hợp này được gọi là ổn định.
 
 - Trường hợp II: Q = 1 Như Hình 3.2(b), I2 nhận input TRUE và tạo output FALSE trên $\overline{Q}$. I1 nhận input FALSE và tạo output TRUE trên Q. Trường hợp này cũng ổn định.
 
@@ -72,31 +66,17 @@ Cách tốt để hiểu circuit chưa quen là tìm truth table, nên chúng ta
 
 - Trường hợp III: R = 1, S = 1 N1 và N2 đều thấy ít nhất một input TRUE (R hoặc S), nên mỗi gate tạo output FALSE. Do đó, cả Q và $\overline{Q}$ đều FALSE.
 
-- Trường hợp IV: R = 0, S = 0 N1 nhận input 0 và $\overline{Q}$. Vì chưa biết $\overline{Q}$ nên chưa xác định được output. N2 nhận input 0 và Q. Vì chưa biết Q nên chưa xác định được output. Giờ chúng ta
+- Trường hợp IV: R = 0, S = 0 N1 nhận input 0 và $\overline{Q}$. Vì chưa biết $\overline{Q}$ nên chưa xác định được output. N2 nhận input 0 và Q. Vì chưa biết Q nên chưa xác định được output. Giờ chúng ta bị mắc kẹt. Điều này gợi nhớ đến các inverter cross-coupled. Nhưng chúng ta biết Q phải là 0 hoặc 1, nên có thể giải quyết bằng cách kiểm tra điều gì xảy ra trong từng trường hợp con.
 
 ![fig3_04](images/ch03/fig3_04.png)
 
 Hình 3.4 Các state bistable của SR latch
 
-bị mắc kẹt. Điều này gợi nhớ đến các inverter cross-coupled. Nhưng chúng ta
-
-biết Q phải là 0 hoặc 1, nên có thể giải quyết bằng cách
-
-kiểm tra điều gì xảy ra trong từng trường hợp con.
-
 - Trường hợp IVa: Q = 0 Vì S và Q đều FALSE, N2 tạo output TRUE trên $\overline{Q}$, như Hình 3.4(a). Giờ N1 nhận một input TRUE, $\overline{Q}$, nên output Q của nó là FALSE, đúng như giả định.
 
 - Trường hợp IVb: Q = 1 Vì Q là TRUE, N2 tạo output FALSE trên $\overline{Q}$, như Hình 3.4(b). Giờ N1 nhận hai input FALSE, R và $\overline{Q}$, nên output Q của nó là TRUE, đúng như giả định.
 
-Kết hợp tất cả, giả sử Q có một giá trị trước đó đã biết,
-
-gọi là Q<sub>prev</sub>, trước khi vào Trường hợp IV. Q<sub>prev</sub>
-
-là 0 hoặc 1 và biểu diễn state của hệ thống. Khi R và S
-
-là 0, Q sẽ nhớ giá trị cũ Q<sub>prev</sub> này, và $\overline{Q}$ sẽ là
-
-complement của nó, $\overline{Q}$<sub>prev</sub> . Circuit này có memory.
+Kết hợp tất cả, giả sử Q có một giá trị trước đó đã biết, gọi là Q<sub>prev</sub>, trước khi vào Trường hợp IV. Q<sub>prev</sub> là 0 hoặc 1 và biểu diễn state của hệ thống. Khi R và S là 0, Q sẽ nhớ giá trị cũ Q<sub>prev</sub> này, và $\overline{Q}$ sẽ là complement của nó, $\overline{Q}$<sub>prev</sub> . Circuit này có memory.
 
 Truth table trong Hình 3.5 tổng kết bốn trường hợp. Input S và R viết tắt cho Set và Reset. Set bit nghĩa là đặt nó TRUE. Reset bit nghĩa là đặt nó FALSE. Các output Q và $\overline{Q}$ thông thường là complement của nhau. Khi R được assert, Q được reset về 0 và $\overline{Q}$ làm ngược lại. Khi S được assert, Q được set lên 1 và $\overline{Q}$ làm ngược lại. Khi không input nào được assert, Q nhớ giá trị cũ Q<sub>prev</sub>. Assert đồng thời S và R không có nhiều ý nghĩa vì yêu cầu latch vừa set vừa reset cùng lúc, điều không thể xảy ra. Circuit tội nghiệp bối rối phản hồi bằng cách đặt cả hai output về 0.
 
@@ -550,7 +530,7 @@ Alyssa P. Hacker sở hữu ốc sên robot thú cưng có bộ não FSM. Ốc b
 
 Lời giải Moore machine cần ba state, như Hình 3.30(a). Hãy tự thuyết phục rằng state transition diagram đúng. Cụ thể, vì sao có cung từ S2 về S1 khi input là 0?
 
-Trong khi đó, Mealy machine chỉ cần hai state, như Hình 3.30(b). Mỗi cung có nhãn A/Y. A là giá trị input gây transition đó, Y là output tương ứng.
+Trong khi đó, Mealy machine chỉ cần hai state, như minh họa trong Hình 3.30(b). Mỗi cung được gắn nhãn A/Y. A là giá trị input gây ra transition đó, còn Y là output tương ứng.
 
 Bảng 3.11 và 3.12 lần lượt trình bày state transition table và output table của Moore machine. Moore machine cần ít nhất hai bit state. Xét dùng binary state encoding: S0 = 00, S1 = 01 và S2 = 10. Bảng 3.13 và 3.14 lần lượt viết lại state transition table và output table với encoding này.
 
@@ -678,9 +658,7 @@ Suy ra state transition diagram từ schematic gần như theo quy trình ngư�
 
 - Vẽ state transition diagram.
 
-- Mô tả bằng lời FSM làm gì. Ở bước cuối, cẩn thận mô tả súc tích mục đích tổng thể
-
-và chức năng FSM—đừng chỉ nhắc lại từng transition trong state transition diagram.
+- Mô tả bằng lời FSM làm gì. Ở bước cuối, cẩn thận mô tả súc tích mục đích tổng thể và chức năng FSM—đừng chỉ nhắc lại từng transition trong state transition diagram.
 
 #### Ví dụ 3.9 SUY RA FSM TỪ CIRCUIT CỦA NÓ
 
@@ -814,11 +792,11 @@ Chúng ta sẽ liên tục dùng FSM để thiết kế digital system phức t�
 
 Nhớ flip-flop sao chép input D đến output Q trên rising edge clock. Quá trình gọi là sampling D tại clock edge. Nếu D ổn định ở 0 hoặc 1 khi clock tăng, hành vi này được định nghĩa rõ. Nhưng điều gì xảy ra nếu D thay đổi cùng lúc clock tăng?
 
-Vấn đề tương tự máy ảnh khi chụp hình. Hãy tưởng tượng chụp con ếch nhảy từ lá súng xuống hồ. Chụp trước cú nhảy, bạn thấy ếch trên lá. Chụp sau cú nhảy, bạn thấy gợn sóng trên nước. Nhưng chụp đúng lúc ếch nhảy, bạn có thể thấy ảnh nhòe kéo dài từ lá súng xuống nước. Máy ảnh được đặc trưng bởi aperture time, trong đó vật phải đứng yên để chụp ảnh sắc nét. Tương tự, sequential element có aperture time quanh clock edge, trong đó input phải ổn định để flip-flop tạo output well-defined.
+Vấn đề này tương tự điều mà máy ảnh gặp phải khi chụp hình. Hãy tưởng tượng bạn chụp một con ếch đang nhảy từ lá súng xuống hồ. Nếu chụp trước cú nhảy, bạn sẽ thấy con ếch trên lá súng. Nếu chụp sau cú nhảy, bạn sẽ thấy những gợn sóng trên mặt nước. Nhưng nếu chụp đúng lúc con ếch nhảy, bạn có thể thấy hình ảnh nhòe của con ếch kéo dài từ lá súng xuống nước. Máy ảnh được đặc trưng bởi aperture time, là khoảng thời gian mà vật thể phải đứng yên để thu được hình ảnh sắc nét. Tương tự, sequential element có một aperture time quanh clock edge, trong đó input phải ổn định để flip-flop tạo ra output được xác định rõ ràng (well-defined).
 
 ![img_p162](images/ch03/img_p162.png)
 
-Aperture của sequential element được định nghĩa bởi setup time và hold time, lần lượt trước và sau clock edge. Giống static discipline giới hạn dùng logic level ngoài forbidden zone, dynamic discipline giới hạn dùng signal thay đổi ngoài aperture time. Tận dụng dynamic discipline, có thể nghĩ thời gian theo đơn vị rời rạc gọi là clock cycle, giống nghĩ signal level là các giá trị rời rạc 1 và 0. Signal có thể glitch và dao động mạnh trong khoảng thời gian có giới hạn. Theo dynamic discipline, chúng ta chỉ quan tâm giá trị cuối ở cuối clock cycle, sau khi signal ổn định. Vì vậy, có thể viết đơn giản A\[n\], giá trị signal A cuối clock cycle thứ n, với n là số nguyên, thay vì A(t), giá trị A tại thời điểm t bất kỳ, với t là số thực bất kỳ.
+Aperture của sequential element được định nghĩa bởi setup time và hold time, lần lượt trước và sau clock edge. Giống static discipline giới hạn dùng logic level ngoài forbidden zone, dynamic discipline giới hạn dùng signal thay đổi ngoài aperture time. Tận dụng dynamic discipline, có thể nghĩ thời gian theo đơn vị rời rạc gọi là clock cycle, giống nghĩ signal level là các giá trị rời rạc 1 và 0. Signal có thể glitch và dao động mạnh trong khoảng thời gian có giới hạn. Theo dynamic discipline, chúng ta chỉ quan tâm giá trị cuối ở cuối clock cycle, sau khi signal ổn định. Vì vậy, có thể viết đơn giản A[n], giá trị signal A cuối clock cycle thứ n, với n là số nguyên, thay vì A(t), giá trị A tại thời điểm t bất kỳ, với t là số thực bất kỳ.
 
 Clock period phải đủ dài để mọi signal ổn định. Điều này đặt giới hạn tốc độ hệ thống. Trong hệ thống thực, clock không đến mọi flip-flops chính xác cùng lúc. Sai lệch thời gian này gọi là clock skew, làm tăng thêm clock period cần thiết.
 
@@ -898,7 +876,7 @@ Tuy nhiên, hold time constraint cực kỳ quan trọng. Nếu vi phạm, giả
 
 Kết hợp tất cả
 
-Sequential circuit có setup time constraint và hold time constraint quy định độ trễ tối đa và tối thiểu của combinational logic giữa flip-flops. Flip-flops hiện đại thường được thiết kế để độ trễ tối thiểu qua combinational logic có thể bằng 0—tức flip-flops có thể đặt back-to-back. Max delay constraint giới hạn số gate liên tiếp trên critical path của circuit high-speed vì clock frequency cao nghĩa là clock period ngắn.
+Sequential circuit có setup time constraint và hold time constraint quy định độ trễ tối đa và tối thiểu của combinational logic giữa flip-flops. Các flip-flops hiện đại thường được thiết kế để độ trễ tối thiểu qua combinational logic có thể bằng 0—tức flip-flops có thể đặt back-to-back. Max delay constraint giới hạn số gate liên tiếp trên critical path của circuit high-speed vì clock frequency cao nghĩa là clock period ngắn.
 
 #### Ví dụ 3.10 PHÂN TÍCH TIMING
 
@@ -928,7 +906,7 @@ Alyssa P. Hacker đề xuất sửa circuit của Ben bằng thêm buffer để 
 
 Lời giải Hình 3.45 trình bày waveform minh họa khi nào signal có thể thay đổi. Critical path từ A đến Y không bị ảnh hưởng vì không qua buffer nào. Do đó clock frequency tối đa vẫn 4 GHz. Tuy nhiên, short path bị chậm thêm bởi contamination delay buffer. Giờ X′ không đổi cho đến t<sub>ccq</sub> + 2t<sub>cd</sub> = 30 + 2 × 25 = 80 ps. Đây là sau khi hold time 60 ps đã qua, nên circuit hiện hoạt động đúng.
 
-Ví dụ này có hold time dài bất thường để minh họa vấn đề hold time. Phần lớn flip-flops được thiết kế t<sub>hold</sub> \< t<sub>ccq</sub> để tránh vấn đề đó. Tuy nhiên, một số microprocessor high-performance, gồm Pentium 4, dùng element gọi là pulsed latch thay flip-flop. Pulsed latch hoạt động như flip-flop nhưng có độ trễ clock-to-Q ngắn và hold time dài. Nhìn chung, thêm buffer thường, nhưng không phải luôn, giải quyết hold time mà không làm chậm critical path.
+Ví dụ này có hold time dài bất thường để minh họa vấn đề hold time. Phần lớn flip-flops được thiết kế t<sub>hold</sub> < t<sub>ccq</sub> để tránh vấn đề đó. Tuy nhiên, một số microprocessor high-performance, gồm Pentium 4, dùng element gọi là pulsed latch thay flip-flop. Pulsed latch hoạt động như flip-flop nhưng có độ trễ clock-to-Q ngắn và hold time dài. Nhìn chung, thêm buffer thường, nhưng không phải luôn, giải quyết hold time mà không làm chậm critical path.
 
 ![fig3_44](images/ch03/fig3_44.png)
 
@@ -970,7 +948,7 @@ t<sub>ccq</sub> + t<sub>cd</sub> ≥ t<sub>hold</sub> + t<sub>skew</sub> (3.21)
 
 t<sub>cd</sub> ≥ t<sub>hold</sub> + t<sub>skew</sub> − t<sub>ccq</sub> (3.22)
 
-Tóm lại, clock skew thực chất làm tăng cả setup time lẫn hold time. Nó cộng vào sequencing overhead, giảm thời gian dành cho công việc hữu ích trong combinational logic. Nó cũng tăng độ trễ tối thiểu cần có qua combinational logic. Ngay cả khi t<sub>hold</sub> = 0, cặp flip-flops back-to-back vẫn vi phạm Phương trình 3.22 nếu t<sub>skew</sub> \> t<sub>ccq</sub>. Để tránh lỗi hold time nghiêm trọng, người thiết kế không được cho phép clock skew quá lớn. Đôi khi flip-flops cố ý được thiết kế đặc biệt chậm (tức t<sub>ccq</sub> lớn) để tránh vấn đề hold time ngay cả khi clock skew đáng kể.
+Tóm lại, clock skew thực chất làm tăng cả setup time lẫn hold time. Nó cộng vào sequencing overhead, giảm thời gian dành cho công việc hữu ích trong combinational logic. Nó cũng tăng độ trễ tối thiểu cần có qua combinational logic. Ngay cả khi t<sub>hold</sub> = 0, cặp flip-flops back-to-back vẫn vi phạm Phương trình 3.22 nếu t<sub>skew</sub> > t<sub>ccq</sub>. Để tránh lỗi hold time nghiêm trọng, người thiết kế không được cho phép clock skew quá lớn. Đôi khi flip-flops cố ý được thiết kế đặc biệt chậm (tức t<sub>ccq</sub> lớn) để tránh vấn đề hold time ngay cả khi clock skew đáng kể.
 
 ![fig3_49](images/ch03/fig3_49.png)
 
@@ -1044,11 +1022,11 @@ Hình 3.53 trình bày cách đơn giản xây dựng synchronizer từ hai flip
 
 Hình 3.53 Synchronizer đơn giản
 
-Nói synchronizer lỗi nếu Q, output synchronizer, trở thành metastable. Điều này có thể xảy ra nếu D2 chưa phân giải về mức hợp lệ khi phải setup tại F2—tức t<sub>res</sub> \> T<sub>c</sub> − t<sub>setup</sub>. Theo Phương trình 3.24, xác suất lỗi cho một lần input thay đổi tại thời điểm ngẫu nhiên là
+Nói synchronizer lỗi nếu Q, output synchronizer, trở thành metastable. Điều này có thể xảy ra nếu D2 chưa phân giải về mức hợp lệ khi phải setup tại F2—tức t<sub>res</sub> > T<sub>c</sub> − t<sub>setup</sub>. Theo Phương trình 3.24, xác suất lỗi cho một lần input thay đổi tại thời điểm ngẫu nhiên là
 
 ![eq_p174](images/ch03/eq_p174.png) (3.25)
 
-Xác suất lỗi P(failure) là xác suất output Q metastable khi D đổi một lần. Nếu D đổi một lần mỗi giây, xác suất lỗi mỗi giây chính là P(failure). Tuy nhiên, nếu D đổi N lần mỗi giây, xác suất lỗi mỗi giây lớn gấp N lần:
+Xác suất lỗi P(failure) là xác suất output Q ở trạng thái metastable khi D thay đổi một lần. Nếu D thay đổi một lần mỗi giây, xác suất lỗi mỗi giây chính là P(failure). Tuy nhiên, nếu D thay đổi N lần mỗi giây, xác suất lỗi mỗi giây sẽ lớn gấp N lần:
 
 ![eq_p174_2](images/ch03/eq_p174_2.png) (3.26)
 
@@ -1074,7 +1052,7 @@ Có thể suy ra Phương trình 3.24 bằng kiến thức cơ bản về lý th
 
 Output flip-flop sẽ metastable sau thời gian t nếu flip-flop sample input đang đổi (gây điều kiện metastable) và output không phân giải về mức hợp lệ trong thời gian đó sau clock edge. Dùng ký hiệu, có thể biểu diễn là
 
-P(t<sub>res</sub> \> t) = P(samples changing input) × P(unresolved) (3.29)
+P(t<sub>res</sub> > t) = P(samples changing input) × P(unresolved) (3.29)
 
 Xét riêng từng hạng xác suất. Asynchronous input signal chuyển giữa 0 và 1 trong thời gian t<sub>switch</sub>, như Hình 3.54. Xác suất input đổi trong aperture quanh clock edge là
 
@@ -1092,7 +1070,7 @@ Hình 3.55 Mô hình circuit của bistable device
 
 Bistable device dùng bộ lưu trữ có positive feedback. Hình 3.55(a) trình bày feedback này triển khai bằng cặp inverter; hành vi circuit đại diện cho phần lớn bistable element. Cặp inverter hoạt động như buffer. Mô hình buffer có DC transfer characteristic đối xứng như Hình 3.55(b), với độ dốc G. Buffer chỉ cung cấp lượng output current hữu hạn; có thể mô hình hóa bằng output resistance R. Mọi circuit thực cũng có capacitance C cần nạp. Nạp capacitor qua resistor gây RC delay, ngăn buffer chuyển tức thời. Vì vậy mô hình circuit đầy đủ như Hình 3.55(c), trong đó v<sub>out</sub>(t) là điện áp quan tâm truyền tải state bistable device.
 
-Metastable point của circuit là v<sub>out</sub>(t) = v<sub>in</sub>(t) = V<sub>DD</sub>/2; nếu circuit bắt đầu chính xác ở điểm đó, nó giữ ở đó vô hạn khi không có nhiễu. Vì điện áp là biến liên tục, khả năng circuit bắt đầu đúng metastable point cực kỳ nhỏ. Tuy nhiên, circuit có thể bắt đầu tại thời điểm 0 gần metastability, v<sub>out</sub>(0) = V<sub>DD</sub>/2 + ΔV với offset ΔV nhỏ. Khi đó, positive feedback cuối cùng drive v<sub>out</sub>(t) đến V<sub>DD</sub> nếu ΔV \> 0 và đến 0 nếu ΔV \< 0. Thời gian cần đạt V<sub>DD</sub> hoặc 0 là resolution time của bistable device.
+Metastable point của circuit là v<sub>out</sub>(t) = v<sub>in</sub>(t) = V<sub>DD</sub>/2; nếu circuit bắt đầu chính xác ở điểm đó, nó giữ ở đó vô hạn khi không có nhiễu. Vì điện áp là biến liên tục, khả năng circuit bắt đầu đúng metastable point cực kỳ nhỏ. Tuy nhiên, circuit có thể bắt đầu tại thời điểm 0 gần metastability, v<sub>out</sub>(0) = V<sub>DD</sub>/2 + ΔV với offset ΔV nhỏ. Khi đó, positive feedback cuối cùng drive v<sub>out</sub>(t) đến V<sub>DD</sub> nếu ΔV > 0 và đến 0 nếu ΔV < 0. Thời gian cần đạt V<sub>DD</sub> hoặc 0 là resolution time của bistable device.
 
 DC transfer characteristic phi tuyến nhưng gần metastable point, vùng chúng ta quan tâm, nó trông tuyến tính. Cụ thể, nếu v<sub>in</sub>(t) = V<sub>DD</sub>/2 + ΔV/G, thì v<sub>out</sub>(t) = V<sub>DD</sub>/2 + ΔV với ΔV nhỏ. Dòng qua resistor là i(t) = (v<sub>out</sub>(t) − v<sub>in</sub>(t))/R. Capacitor nạp với tốc độ dv<sub>in</sub>(t)/dt = i(t)/C. Kết hợp các điều này, tìm được phương trình chi phối output voltage.
 
@@ -1144,7 +1122,7 @@ Lời giải Trong ví dụ này, khay bánh là token. Latency là 1/3 giờ m�
 
 Như có thể hình dung, throughput có thể cải thiện bằng xử lý nhiều token cùng lúc. Đây gọi là parallelism, có hai dạng: spatial và temporal. Với spatial parallelism, cung cấp nhiều bản hardware để nhiều task được thực hiện đồng thời. Với temporal parallelism, task chia thành stage như dây chuyền lắp ráp. Nhiều task có thể trải trên các stage. Dù mỗi task phải qua mọi stage, tại một thời điểm mỗi stage chứa task khác nhau, nên nhiều task chồng lấp. Temporal parallelism thường gọi là pipelining. Spatial parallelism đôi khi gọi ngắn là parallelism, nhưng chúng ta tránh quy ước này vì nhập nhằng.
 
-#### Ví dụ 3.16 PARALLELISM TRONG LÀM BÁNH QUY
+### Ví dụ 3.16 PARALLELISM TRONG LÀM BÁNH QUY
 
 Ben Bitdiddle có hàng trăm bạn đến tiệc và cần nướng bánh nhanh hơn. Cậu cân nhắc dùng spatial và/hoặc temporal parallelism.
 
@@ -1391,7 +1369,7 @@ Bài tập 3.38 Bạn đi trong hành lang và gặp bạn cùng nhóm thực h�
 
 (b) Bạn không chỉ buồn ngủ mà còn đói cồn cào. Thực ra bạn sẽ chết đói nếu không đi đến căn tin trong 3 phút. Xác suất bạn cùng nhóm phải kéo bạn đến nhà xác là bao nhiêu?
 
-Bài tập 3.39 Bạn xây synchronizer bằng flip-flops có T<sub>0</sub> = 20 ps và τ = 30 ps. Sếp bảo cần tăng MTBF 10 lần. Bạn cần tăng clock period thêm bao nhiêu?
+Bài tập 3.39 Bạn đã xây dựng một synchronizer bằng các flip-flops có T<sub>0</sub> = 20 ps và τ = 30 ps. Cấp trên yêu cầu bạn tăng MTBF lên 10 lần. Bạn cần tăng clock period thêm bao nhiêu?
 
 Bài tập 3.40 Ben Bitdiddle phát minh synchronizer mới cải tiến ở Hình 3.76 mà cậu khẳng định loại metastability trong một cycle. Cậu giải thích circuit trong hộp M là “metastability detector” analog, tạo output HIGH nếu input voltage trong forbidden zone giữa V<sub>IL</sub> và V<sub>IH</sub>. Detector kiểm tra flip-flop đầu có tạo output metastable trên D2 không. Nếu có, nó reset bất đồng bộ flip-flop để tạo 0 hợp lệ tại D2. flip-flop thứ hai sau đó sample D2, luôn tạo logic level hợp lệ trên Q. Alyssa P. Hacker nói với Ben circuit nhất định có bug, vì loại metastability bất khả thi như xây máy chuyển động vĩnh cửu. Ai đúng? Giải thích, chỉ lỗi Ben hoặc vì sao Alyssa sai.
 

@@ -2,12 +2,12 @@
 
 # Chương 09: Abstraction và OOP trong C++ (Abstraction and OOP in C++)
 
-Đây là chương cuối cùng về OOP trong C. Trong chương này, chúng ta sẽ trình bày các chủ đề còn lại và giới thiệu với bạn một paradigm lập trình mới. Ngoài ra, chúng ta khám phá C++ và xem cách nó hiện thực các khái niệm object-oriented ở phía sau hậu trường.
+Đây là chương cuối cùng về OOP trong C. Trong chương này, chúng ta sẽ trình bày các chủ đề còn lại và giới thiệu với bạn một paradigm lập trình mới. Ngoài ra, chúng ta khám phá C++ và xem cách nó triển khai các khái niệm object-oriented ở phía sau hậu trường.
 
 Trong chương này, chúng ta sẽ trình bày các chủ đề sau:
 
 - Trước hết, chúng ta thảo luận về *Abstraction*. Điều này tiếp nối thảo luận của chúng ta về inheritance và polymorphism và sẽ là chủ đề cuối cùng chúng ta trình bày trong phần OOP trong C. Chúng tôi cho thấy abstraction giúp chúng ta như thế nào trong việc thiết kế các object model có khả năng mở rộng tối đa và sự phụ thuộc tối thiểu giữa các thành phần khác nhau của nó.
-- Chúng ta nói về cách các khái niệm object-oriented đã được hiện thực trong một compiler C++ nổi tiếng, trong trường hợp này là `g++`. Trong đó, chúng ta thấy các cách tiếp cận mà chúng ta đã thảo luận cho đến giờ phù hợp chặt chẽ như thế nào với các cách tiếp cận mà `g++` đã chọn để cung cấp cùng các khái niệm.
+- Chúng ta nói về cách các khái niệm object-oriented đã được triển khai trong một compiler C++ nổi tiếng, trong trường hợp này là `g++`. Trong đó, chúng ta thấy các cách tiếp cận mà chúng ta đã thảo luận cho đến giờ phù hợp chặt chẽ như thế nào với các cách tiếp cận mà `g++` đã chọn để cung cấp cùng các khái niệm.
 
 Hãy bắt đầu chương bằng việc nói về abstraction.
 
@@ -43,21 +43,21 @@ Chúng ta có thể tiếp tục trừu tượng hóa mọi thứ trong một ob
 
 Một hướng dẫn chung về lượng abstraction mà chúng ta cần có thể được tìm thấy trong *abstraction principle* (nguyên lý trừu tượng hóa). Tôi lấy trích dẫn sau từ trang Wikipedia của nó [page, https://en.wikipedia.org/wiki/Abstraction_principle_(computer_program](https://en.wikipedia.org/wiki/Abstraction_principle_(computer_programming))ming). Nó đơn giản <a id="_idIndexMarker617"></a>phát biểu:
 
-*Mỗi phần chức năng quan trọng trong một chương trình nên được hiện thực ở đúng một chỗ trong source code. Khi các hàm tương tự được thực hiện bởi các đoạn code riêng biệt, nhìn chung sẽ có lợi nếu kết hợp chúng thành một bằng cách trừu tượng hóa các phần khác nhau.*
+*Mỗi phần chức năng quan trọng trong một chương trình nên được triển khai ở đúng một chỗ trong source code. Khi các hàm tương tự được thực hiện bởi các đoạn code riêng biệt, nhìn chung sẽ có lợi nếu kết hợp chúng thành một bằng cách trừu tượng hóa các phần khác nhau.*
 
 Dù thoạt nhìn bạn có thể không thấy dấu hiệu nào của hướng đối tượng hay inheritance trong phát biểu này, bằng cách suy nghĩ thêm về nó, bạn sẽ nhận thấy rằng những gì chúng ta đã làm với inheritance đều dựa trên nguyên lý này. Do đó, như một quy tắc chung, bất cứ khi nào bạn không kỳ vọng có các biến thể trong một logic cụ thể, không cần đưa abstraction vào ở điểm đó.
 
 Trong một ngôn ngữ<a id="_idIndexMarker618"></a> lập trình, inheritance và polymorphism là hai khả năng cần thiết để tạo ra abstraction. Một abstract class như *Eatable* là một supertype trong quan hệ với các concrete class của nó, như *Apple*, và điều này đạt được nhờ inheritance.
 
-Polymorphism cũng đóng một vai trò quan trọng. Có những behavior trong một abstract type *không thể* có hiện thực mặc định ở mức trừu tượng đó. Ví dụ, *vị* (taste) như một attribute được hiện thực bằng một behavior function như `eatable_get_taste` trong class *Eatable* không thể có một giá trị chính xác khi chúng ta đang nói về một object *Eatable*. Nói cách khác, chúng ta không thể tạo một object trực tiếp từ class *Eatable* nếu chúng ta không biết cách định nghĩa behavior function `eatable_get_taste`.
+Polymorphism cũng đóng một vai trò quan trọng. Có những behavior trong một abstract type *không thể* có triển khai mặc định ở mức trừu tượng đó. Ví dụ, *vị* (taste) như một attribute được triển khai bằng một behavior function như `eatable_get_taste` trong class *Eatable* không thể có một giá trị chính xác khi chúng ta đang nói về một object *Eatable*. Nói cách khác, chúng ta không thể tạo một object trực tiếp từ class *Eatable* nếu chúng ta không biết cách định nghĩa behavior function `eatable_get_taste`.
 
 Hàm trên chỉ có thể được định nghĩa khi class con đủ cụ thể. Ví dụ, chúng ta biết rằng các object *Apple* nên trả về *ngọt* (sweet) cho vị của chúng (ở đây chúng ta đã giả định rằng mọi quả táo đều ngọt). Đây là chỗ polymorphism giúp ích. Nó cho phép một class con override các behavior của cha và trả về vị phù hợp, chẳng hạn.
 
 Nếu bạn còn nhớ từ chương trước, các behavior function có thể bị override bởi các class con được <a id="_idIndexMarker619"></a>gọi là *virtual function*. Lưu ý rằng có thể một virtual function hoàn toàn không có định nghĩa nào. Dĩ nhiên, điều này làm cho class sở hữu trở thành trừu tượng.
 
-Bằng cách thêm ngày càng nhiều abstraction, ở một mức nhất định, chúng ta đi đến các class không có attribute nào và chỉ chứa các virtual function không có định nghĩa mặc định. Những class này được gọi là *interface*. Nói <a id="_idIndexMarker620"></a>cách khác, chúng phơi ra các chức năng nhưng hoàn toàn không cung cấp hiện thực nào, và chúng thường được dùng để tạo ra các phụ thuộc giữa các thành phần khác nhau trong một dự án phần mềm. Ví dụ, trong các ví dụ trên, các class *Eater* và *Eatable* là interface. Lưu ý rằng, giống như abstract class, bạn không được tạo một object từ một interface. Code sau cho thấy tại sao điều này không thể được thực hiện trong code C.
+Bằng cách thêm ngày càng nhiều abstraction, ở một mức nhất định, chúng ta đi đến các class không có attribute nào và chỉ chứa các virtual function không có định nghĩa mặc định. Những class này được gọi là *interface*. Nói <a id="_idIndexMarker620"></a>cách khác, chúng phơi ra các chức năng nhưng hoàn toàn không cung cấp bản triển khai nào, và chúng thường được dùng để tạo ra các phụ thuộc giữa các thành phần khác nhau trong một dự án phần mềm. Ví dụ, trong các ví dụ trên, các class *Eater* và *Eatable* là interface. Lưu ý rằng, giống như abstract class, bạn không được tạo một object từ một interface. Code sau cho thấy tại sao điều này không thể được thực hiện trong code C.
 
-Code box sau là code tương đương được viết cho interface *Eatable* trên bằng C, dùng các kỹ thuật mà chúng ta đã giới thiệu trong chương trước để hiện thực inheritance và polymorphism:
+Code box sau là code tương đương được viết cho interface *Eatable* trên bằng C, dùng các kỹ thuật mà chúng ta đã giới thiệu trong chương trước để triển khai inheritance và polymorphism:
 
 ```
 typedef enum {SWEET, SOUR} taste_t;
@@ -93,7 +93,7 @@ free(eatable);
 
 *Code Box 9-2: Segmentation fault khi tạo một object từ interface Eatable và gọi một pure virtual function từ nó*
 
-Để ngăn bản thân<a id="_idIndexMarker622"></a> tạo một object từ một abstract type, chúng ta có thể bỏ *allocator function* khỏi public interface của class. Nếu bạn còn nhớ các cách tiếp cận mà chúng ta đã chọn trong chương trước để hiện thực inheritance trong C, bằng việc bỏ allocator function, chỉ các class con mới có thể tạo object từ attribute structure của cha.
+Để ngăn bản thân<a id="_idIndexMarker622"></a> tạo một object từ một abstract type, chúng ta có thể bỏ *allocator function* khỏi public interface của class. Nếu bạn còn nhớ các cách tiếp cận mà chúng ta đã chọn trong chương trước để triển khai inheritance trong C, bằng việc bỏ allocator function, chỉ các class con mới có thể tạo object từ attribute structure của cha.
 
 Khi đó code bên ngoài không còn có thể làm điều đó. Chẳng hạn, trong ví dụ trên, chúng ta không muốn bất kỳ code bên ngoài nào có thể tạo bất kỳ object nào từ structure `eatable_t`. Để làm điều đó, chúng ta cần có attribute structure được forward declare và làm nó thành một incomplete type. Sau đó, chúng ta cần bỏ memory allocator public `eatable_new` khỏi class.
 
@@ -107,7 +107,7 @@ Trong phần sau, chúng ta sẽ so sánh các tính năng object-oriented tươ
 
 Trong phần này, chúng ta<a id="_idIndexMarker623"></a> sẽ so sánh những gì chúng ta đã làm trong C và các cơ chế bên dưới <a id="_idIndexMarker624"></a>được dùng trong một compiler C++ nổi tiếng, trong trường hợp này là `g++`, để hỗ trợ encapsulation, inheritance, polymorphism và abstraction.
 
-Chúng tôi muốn cho thấy rằng có một sự phù hợp chặt chẽ giữa các phương pháp mà các khái niệm object-oriented được hiện thực trong C và C++. Lưu ý rằng, từ giờ trở đi, bất cứ khi nào chúng tôi đề cập đến C++, chúng tôi thực ra đang đề cập đến hiện thực của `g++` như một trong các compiler C++, chứ không phải chuẩn C++. Dĩ nhiên, các hiện thực bên dưới có thể khác nhau với các compiler khác nhau, nhưng chúng tôi không kỳ vọng thấy nhiều khác biệt. Chúng tôi cũng sẽ dùng `g++` trong một thiết lập Linux 64-bit.
+Chúng tôi muốn cho thấy rằng có một sự phù hợp chặt chẽ giữa các phương pháp mà các khái niệm object-oriented được triển khai trong C và C++. Lưu ý rằng, từ giờ trở đi, bất cứ khi nào chúng tôi đề cập đến C++, chúng tôi thực ra đang đề cập đến bản triển khai của `g++` như một trong các compiler C++, chứ không phải chuẩn C++. Dĩ nhiên, các bản triển khai bên dưới có thể khác nhau với các compiler khác nhau, nhưng chúng tôi không kỳ vọng thấy nhiều khác biệt. Chúng tôi cũng sẽ dùng `g++` trong một thiết lập Linux 64-bit.
 
 Chúng ta sẽ dùng các kỹ thuật đã thảo luận trước đây để viết một code object-oriented bằng C, và sau đó chúng ta viết cùng chương trình bằng C++, trước khi đi đến kết luận cuối cùng.
 
@@ -238,7 +238,7 @@ $
 
 Thật khó tin, chúng giống hệt nhau! Tôi không chắc code C++ biến thành code assembly trên như thế nào, nhưng tôi chắc chắn rằng code assembly được sinh ra cho hàm C trên gần như, với độ chính xác cao, tương đương với code assembly được sinh ra cho hàm C++.
 
-Từ đây chúng ta có thể kết luận rằng compiler C++ đã dùng một cách tiếp cận tương tự cách chúng ta đã dùng trong C, được giới thiệu là *implicit encapsulation* trong *Chương 6*, *OOP và Encapsulation*, để hiện thực encapsulation. Giống như những gì chúng ta đã làm với implicit <a id="_idIndexMarker635"></a>encapsulation, bạn có thể thấy trong *Code Box 9-3* rằng một pointer tới attribute structure được truyền cho hàm `rect_area` làm argument đầu tiên.
+Từ đây chúng ta có thể kết luận rằng compiler C++ đã dùng một cách tiếp cận tương tự cách chúng ta đã dùng trong C, được giới thiệu là *implicit encapsulation* trong *Chương 6*, *OOP và Encapsulation*, để triển khai encapsulation. Giống như những gì chúng ta đã làm với implicit <a id="_idIndexMarker635"></a>encapsulation, bạn có thể thấy trong *Code Box 9-3* rằng một pointer tới attribute structure được truyền cho hàm `rect_area` làm argument đầu tiên.
 
 Trong các instruction assembly được in đậm ở cả hai shell box, các biến `width` và `length` đang được đọc bằng cách cộng vào memory address được truyền làm argument đầu tiên. Argument pointer đầu tiên có thể được tìm thấy trong register `%rdi` theo *System V ABI*. Vì vậy, chúng ta có thể suy ra rằng C++ đã thay đổi hàm `Area` để nhận một argument pointer làm argument đầu tiên, trỏ tới chính object đó.
 
@@ -250,7 +250,7 @@ Lời cuối về encapsulation, chúng ta đã thấy C và C++ liên quan ch�
 
 Việc điều tra inheritance<a id="_idIndexMarker636"></a> dễ hơn encapsulation. Trong C++, <a id="_idIndexMarker637"></a>pointer từ một class con có thể được gán cho pointer từ class cha. Ngoài ra, class con nên có quyền truy cập định nghĩa private của class cha.
 
-Cả hai behavior này ngụ ý rằng C++ đang dùng cách tiếp cận thứ nhất của chúng ta để hiện thực inheritance, đã được thảo luận trong chương trước, *Chương 8, Inheritance và Polymorphism*, cùng với cách tiếp cận thứ hai. Hãy tham khảo lại chương trước nếu bạn cần nhắc lại hai cách tiếp cận.
+Cả hai behavior này ngụ ý rằng C++ đang dùng cách tiếp cận thứ nhất của chúng ta để triển khai inheritance, đã được thảo luận trong chương trước, *Chương 8, Inheritance và Polymorphism*, cùng với cách tiếp cận thứ hai. Hãy tham khảo lại chương trước nếu bạn cần nhắc lại hai cách tiếp cận.
 
 Tuy nhiên, inheritance trong C++ có vẻ phức tạp hơn vì C++ hỗ trợ multiple inheritance mà chúng ta không thể hỗ trợ trong cách tiếp cận thứ nhất. Trong phần này, chúng ta sẽ kiểm tra memory layout của hai object được tạo instance từ hai class tương tự trong C và C++, như được minh họa trong *ví dụ 9.2*.
 
@@ -349,7 +349,7 @@ $
 
 Như bạn có thể thấy trong hai shell box trên, memory layout và các giá trị được lưu trong các attribute là giống nhau. Bạn không nên bị rối bởi việc có behavior function và attribute cùng nhau trong một class trong C++; chúng sẽ được xử lý riêng rẽ khỏi class. Trong C++, các attribute, bất kể bạn đặt chúng ở đâu trong một class, luôn được gom lại trong cùng một khối memory đối với một object cụ thể, và các hàm sẽ luôn độc lập với các attribute, giống như chúng ta đã thấy khi xem xét *implicit encapsulation* trong *Chương 6*, *OOP và Encapsulation*.
 
-Ví dụ trước minh họa *single inheritance*. Vậy, còn *multiple inheritance* thì sao? Trong<a id="_idIndexMarker644"></a> chương trước, chúng ta đã giải thích tại sao cách tiếp cận thứ nhất của chúng ta để hiện thực inheritance trong C không thể hỗ trợ multiple inheritance. Chúng tôi một lần nữa minh họa lý do trong code box sau:
+Ví dụ trước minh họa *single inheritance*. Vậy, còn *multiple inheritance* thì sao? Trong<a id="_idIndexMarker644"></a> chương trước, chúng ta đã giải thích tại sao cách tiếp cận thứ nhất của chúng ta để triển khai inheritance trong C không thể hỗ trợ multiple inheritance. Chúng tôi một lần nữa minh họa lý do trong code box sau:
 
 ```
 typedef struct { ... } a_t;
@@ -365,7 +365,7 @@ b_t* b_ptr = (b_ptr*)&c_obj;
 c_t* c_ptr = &c_obj;
 ```
 
-*Code Box 9-7: Minh họa tại sao multiple inheritance không thể hoạt động với cách tiếp cận thứ nhất mà chúng ta đã đề xuất để hiện thực inheritance trong C*
+*Code Box 9-7: Minh họa tại sao multiple inheritance không thể hoạt động với cách tiếp cận thứ nhất mà chúng ta đã đề xuất để triển khai inheritance trong C*
 
 Trong code<a id="_idIndexMarker645"></a> box trên, class `c_t` muốn kế thừa cả hai class `a_t` và `b_t`. Sau khi khai báo các class, chúng ta tạo object `c_obj`. Trong các dòng tiếp theo của code trên, chúng ta tạo các pointer khác nhau.
 
@@ -468,7 +468,7 @@ $4 = (D *) 0x7fffffffe25a
 
 Shell box trên cho thấy address bắt đầu của object d, được hiển thị là `$4`, giống với address đang được ap trỏ tới, được hiển thị là `$1`. Vì vậy, điều này cho thấy rõ rằng C++ đặt một object thuộc kiểu *A* làm trường đầu tiên trong attribute structure tương ứng của class *D*. Dựa trên các address trong các pointer và kết quả chúng ta nhận được từ lệnh `x`, một object thuộc kiểu *B* và sau đó một object thuộc kiểu *C*, được đặt vào cùng memory layout thuộc về object `d`.
 
-Ngoài ra, các address trên cho thấy rằng phép cast trong C++ không phải là một thao tác thụ động, và nó có thể thực hiện một số phép tính số học pointer trên address được chuyển trong khi chuyển đổi kiểu. Ví dụ, trong *Code Box 9-9*, khi gán pointer `bp` trong hàm `main`, năm byte hay `sizeof(A)`, được cộng vào address của `d`. Điều này được thực hiện để vượt qua vấn đề chúng ta gặp phải khi hiện thực multiple inheritance trong C. Giờ, những pointer này có thể dễ dàng được dùng trong mọi behavior function mà bạn không cần tự làm phép tính số học. Một lưu ý quan trọng, phép cast trong C và phép cast trong C++ là khác nhau, và bạn có thể thấy behavior khác nếu bạn giả định rằng phép cast trong C++ cũng thụ động như phép cast trong C.
+Ngoài ra, các address trên cho thấy rằng phép cast trong C++ không phải là một thao tác thụ động, và nó có thể thực hiện một số phép tính số học pointer trên address được chuyển trong khi chuyển đổi kiểu. Ví dụ, trong *Code Box 9-9*, khi gán pointer `bp` trong hàm `main`, năm byte hay `sizeof(A)`, được cộng vào address của `d`. Điều này được thực hiện để vượt qua vấn đề chúng ta gặp phải khi triển khai multiple inheritance trong C. Giờ, những pointer này có thể dễ dàng được dùng trong mọi behavior function mà bạn không cần tự làm phép tính số học. Một lưu ý quan trọng, phép cast trong C và phép cast trong C++ là khác nhau, và bạn có thể thấy behavior khác nếu bạn giả định rằng phép cast trong C++ cũng thụ động như phép cast trong C.
 
 Giờ là lúc xem xét những điểm tương đồng giữa C và C++ trong trường hợp polymorphism.
 
@@ -476,7 +476,7 @@ Giờ là lúc xem xét những điểm tương đồng giữa C và C++ trong t
 
 ### Polymorphism
 
-So sánh các <a id="_idIndexMarker652"></a>kỹ thuật bên dưới để có<a id="_idIndexMarker653"></a> polymorphism trong C và C++ không phải là một việc dễ dàng. Trong chương trước, chúng ta đã nghĩ ra một phương pháp đơn giản để có một behavior function polymorphic trong C, nhưng C++ dùng một cơ chế tinh vi hơn nhiều để mang lại polymorphism, dù ý tưởng cơ bản bên dưới vẫn như nhau. Nếu chúng ta muốn tổng quát hóa cách tiếp cận của mình để hiện thực polymorphism trong C, chúng ta có thể làm như pseudo-code có thể thấy trong code box sau:
+So sánh các <a id="_idIndexMarker652"></a>kỹ thuật bên dưới để có<a id="_idIndexMarker653"></a> polymorphism trong C và C++ không phải là một việc dễ dàng. Trong chương trước, chúng ta đã nghĩ ra một phương pháp đơn giản để có một behavior function polymorphic trong C, nhưng C++ dùng một cơ chế tinh vi hơn nhiều để mang lại polymorphism, dù ý tưởng cơ bản bên dưới vẫn như nhau. Nếu chúng ta muốn tổng quát hóa cách tiếp cận của mình để triển khai polymorphism trong C, chúng ta có thể làm như pseudo-code có thể thấy trong code box sau:
 
 ```
 // Typedefing function pointer types
@@ -548,7 +548,7 @@ Các hàm Non-virtual không phải là polymorphic, và bạn không bao giờ 
 ```
 Include everything related to parent class ...
 typedef struct {
- parent_t parent;
+  parent_t parent;
   // Child attributes
   ...
 } child_t;
@@ -559,8 +559,8 @@ void child_ctor(child_t* child) {
   // Initialize child attributes
   ...
   // Update pointers to functions
- child->parent.func_4 = __child_func_4;
- child->parent.func_7 = __child_func_7;
+  child->parent.func_4 = __child_func_4;
+  child->parent.func_7 = __child_func_7;
 }
 // Child's behavior functions
 ...
@@ -587,7 +587,7 @@ enum class Taste { Sweet, Sour };
 // This is an interface
 class Eatable {
 public:
- virtual Taste GetTaste() = 0;
+  virtual Taste GetTaste() = 0;
 };
 ```
 
@@ -612,7 +612,7 @@ public:
 };
 ```
 
-*Code Box 9-13: Hai class con hiện thực interface Eatable*
+*Code Box 9-13: Hai class con triển khai interface Eatable*
 
 Các pure virtual function rất giống các virtual function. Address tới các định nghĩa <a id="_idIndexMarker666"></a>thực sự được giữ trong virtual table theo cùng cách như các virtual function, nhưng với một khác biệt. Giá trị ban đầu cho các pointer của pure virtual function là null, không giống các pointer của virtual function thông thường, vốn cần trỏ tới một định nghĩa mặc định trong khi quá trình tạo dựng đang diễn ra.
 

@@ -395,21 +395,11 @@ Trong device tree, mỗi device được biểu diễn bằng node và được 
 
 - Với mỗi driver trong danh sách, core thực hiện như sau:
 
-1\. Gọi bus match function, với parameter là driver tìm được và device structure đã xây dựng trước đó; tức
+  1\. Gọi bus match function, với parameter là driver tìm được và device structure đã xây dựng trước đó; tức là, `bus_found->match(cur_drv, cur_dev);`.
 
-là, `bus_found->match(cur_drv, cur_dev);`.
+  2\. Nếu bus driver này hỗ trợ DT matching mechanism, bus match function sẽ gọi `of_driver_match_device()`, với cùng các parameter đã đề cập trước đó; tức là, `of_driver_match_device(ur_drv, cur_dev)`.
 
-2\. Nếu bus driver này hỗ trợ DT matching mechanism, bus match function sẽ gọi
-
-`of_driver_match_device()`, với cùng các parameter đã đề cập trước đó; tức là,
-
-```
-of_driver_match_device(ur_drv, cur_dev).
-```
-
-3\. `of_driver_match_device` sẽ duyệt bảng `of_match_table` (là array các phần tử struct
-
-`of_device_id`) gắn với driver hiện tại. Với mỗi `of_device_id` trong array, kernel so sánh compatible property của cả phần tử `of_device_id` hiện tại và `built_pdev->dev.of_node`. Nếu giống nhau (tức có match), probe function của driver hiện tại được chạy.
+  3\. `of_driver_match_device` sẽ duyệt bảng `of_match_table` (là array các phần tử struct `of_device_id`) gắn với driver hiện tại. Với mỗi `of_device_id` trong array, kernel so sánh compatible property của cả phần tử `of_device_id` hiện tại và `built_pdev->dev.of_node`. Nếu giống nhau (tức có match), probe function của driver hiện tại được chạy.
 
 - Nếu không tìm thấy driver hỗ trợ device này, device vẫn được đăng ký với bus. Sau đó, probing mechanism được hoãn tới về sau để mỗi khi driver mới được đăng ký với bus này, core duyệt danh sách device do bus duy trì; mọi device chưa có driver gắn với chúng sẽ được probe lại. Với mỗi device, compatible property của `of_node` tương ứng được so sánh với compatible property của từng `of_device_id` trong array `of_match_table` gắn với driver vừa đăng ký.
 

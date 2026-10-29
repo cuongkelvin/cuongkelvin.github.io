@@ -4,7 +4,7 @@ Chương trước đã giới thiệu ý tưởng về các design unit cơ bả
 
 Trước khi đi vào chi tiết của việc đặc tả architecture, chúng ta phải lùi lại một chút và nhớ lại điều chúng ta đang cố làm với VHDL là gì. Vì lý do này hay lý do khác, chúng ta đang mô tả một mạch số. Nhận ra điều này là rất quan trọng. Những người lập trình VHDL trẻ có nền tảng lập trình máy tính có xu hướng xem VHDL chỉ là thêm một ngôn ngữ lập trình nữa mà họ muốn hoặc phải học. Dù nhiều sinh viên đại học đã dùng cách tiếp cận này để qua được các môn số cơ bản, đây không phải là một ý hay.
 
-Khi được nhìn nhận đúng, VHDL thể hiện một cách tiếp cận lập trình hoàn toàn khác, trong khi vẫn có nhiều điểm tương đồng với các ngôn ngữ lập trình khác. Điểm tương đồng chính là cả hai đều dùng một ngôn ngữ có cú pháp và rule-based để mô tả một thứ trừu tượng. Nhưng điểm khác biệt là chúng mô tả hai thứ khác nhau. Phần lớn các ngôn ngữ lập trình được dùng để hiện thực các chức năng theo cách tuần tự, mỗi lần một instruction. Tuy nhiên VHDL mô tả phần cứng, và vì vậy các instruction được thực thi theo cách concurrent[^1], nghĩa là mọi instruction được thực thi cùng một lúc. Nhận ra thực tế này sẽ giúp bạn thực sự hiểu mô hình lập trình và ngôn ngữ VHDL.
+Khi được nhìn nhận đúng, VHDL thể hiện một cách tiếp cận lập trình hoàn toàn khác, trong khi vẫn có nhiều điểm tương đồng với các ngôn ngữ lập trình khác. Điểm tương đồng chính là cả hai đều dùng một ngôn ngữ có cú pháp và rule-based để mô tả một thứ trừu tượng. Nhưng điểm khác biệt là chúng mô tả hai thứ khác nhau. Phần lớn các ngôn ngữ lập trình được dùng để triển khai các chức năng theo cách tuần tự, mỗi lần một instruction. Tuy nhiên VHDL mô tả phần cứng, và vì vậy các instruction được thực thi theo cách concurrent[^1], nghĩa là mọi instruction được thực thi cùng một lúc. Nhận ra thực tế này sẽ giúp bạn thực sự hiểu mô hình lập trình và ngôn ngữ VHDL.
 
 ## 4.1 Concurrent statement
 
@@ -22,7 +22,7 @@ Vì phần lớn chúng ta là con người, chúng ta chỉ có khả năng đ�
 
 Mô hình lập trình VHDL được xây dựng xung quanh khái niệm diễn đạt tính song song và tính concurrent bằng các mô tả mạch dạng văn bản. Cốt lõi của lập trình VHDL là concurrent statement. Đây là những statement trông rất giống các statement trong các ngôn ngữ thuật toán nhưng khác biệt đáng kể, vì các statement VHDL, theo định nghĩa, diễn đạt tính concurrent của việc thực thi.
 
-Listing 4.1 cho thấy code hiện thực mạch trong Hình 4.1. Code này có bốn concurrent signal assignment statement. Như đã thấy trước đây, construct “<=” là signal assignment operator. Đúng là chúng ta không thể viết bốn statement này cùng một lúc, nhưng chúng ta có thể diễn giải các statement này như những hành động xảy ra concurrent. Hãy luôn nhớ rằng khái niệm concurrency là một khái niệm then chốt trong VHDL. Nếu bạn cảm thấy lối tư duy thuật toán đang len lỏi vào tâm trí mình, hãy cố thoát ra khỏi nó thật nhanh. Concurrent signal assignment được thảo luận chi tiết hơn trong mục tiếp theo.
+Listing 4.1 cho thấy code triển khai mạch trong Hình 4.1. Code này có bốn concurrent signal assignment statement. Như đã thấy trước đây, construct “<=” là signal assignment operator. Đúng là chúng ta không thể viết bốn statement này cùng một lúc, nhưng chúng ta có thể diễn giải các statement này như những hành động xảy ra concurrent. Hãy luôn nhớ rằng khái niệm concurrency là một khái niệm then chốt trong VHDL. Nếu bạn cảm thấy lối tư duy thuật toán đang len lỏi vào tâm trí mình, hãy cố thoát ra khỏi nó thật nhanh. Concurrent signal assignment được thảo luận chi tiết hơn trong mục tiếp theo.
 
 Listing 4.1: Code VHDL cho mạch trong Hình 4.1.
 
@@ -85,7 +85,7 @@ Với những hiểu biết mới này về VHDL, bạn sẽ có thể hiểu co
 
 Có bốn loại concurrent statement được xem xét trong chương này. Chúng ta đã bàn sơ qua về concurrent signal assignment statement, mà chúng ta sẽ sớm xem xét kỹ hơn và đặt vào ngữ cảnh của một mạch thực tế. Ba loại concurrent statement khác mà chúng ta quan tâm ngay lúc này là process statement, conditional signal assignment và selected signal assignment.
 
-Về bản chất, bốn loại statement này là những công cụ bạn sẽ dùng để hiện thực mạch số trong VHDL. Bạn sẽ sớm khám phá ra tính linh hoạt của những statement này. Đáng tiếc là tính linh hoạt này thực tế làm learning curve dốc lên kha khá. Như bạn biết từ kinh nghiệm với các ngôn ngữ lập trình khác, luôn có nhiều cách để làm cùng một việc. Nói cách khác, nhiều đoạn code trông có vẻ khác nhau thực ra có thể cho ra cùng một kết quả. Điều tương tự cũng đúng với code VHDL: nhiều đoạn code VHDL khác nhau đáng kể thực ra có thể tạo ra phần cứng giống hệt nhau. Hãy nhớ điều này khi bạn xem bất kỳ ví dụ nào trong tutorial này. Bất kỳ code VHDL nào dùng để giải một bài toán thì nhiều khả năng cũng chỉ là một trong nhiều lời giải có thể có cho bài toán đó. Một số model VHDL trong tutorial này được trình bày để cho thấy một việc có thể làm theo một cách nhất định, nhưng điều đó không nhất thiết có nghĩa là việc đó chỉ có thể làm theo cách đó.
+Về bản chất, bốn loại statement này là những công cụ bạn sẽ dùng để triển khai mạch số trong VHDL. Bạn sẽ sớm khám phá ra tính linh hoạt của những statement này. Đáng tiếc là tính linh hoạt này thực tế làm learning curve dốc lên kha khá. Như bạn biết từ kinh nghiệm với các ngôn ngữ lập trình khác, luôn có nhiều cách để làm cùng một việc. Nói cách khác, nhiều đoạn code trông có vẻ khác nhau thực ra có thể cho ra cùng một kết quả. Điều tương tự cũng đúng với code VHDL: nhiều đoạn code VHDL khác nhau đáng kể thực ra có thể tạo ra phần cứng giống hệt nhau. Hãy nhớ điều này khi bạn xem bất kỳ ví dụ nào trong tutorial này. Bất kỳ code VHDL nào dùng để giải một bài toán thì nhiều khả năng cũng chỉ là một trong nhiều lời giải có thể có cho bài toán đó. Một số model VHDL trong tutorial này được trình bày để cho thấy một việc có thể làm theo một cách nhất định, nhưng điều đó không nhất thiết có nghĩa là việc đó chỉ có thể làm theo cách đó.
 
 ## 4.3 Concurrent signal assignment statement
 
@@ -97,7 +97,7 @@ Listing 4.5: Cú pháp của concurrent signal assignment statement.
 <target> <= <expression>;
 ```
 
-> VÍ DỤ 1. Hãy viết code VHDL hiện thực một NAND gate three-input. Ba signal input có tên A, B và C, và tên signal output là F.
+> VÍ DỤ 1. Hãy viết code VHDL triển khai một NAND gate three-input. Ba signal input có tên A, B và C, và tên signal output là F.
 
 LỜI GIẢI. Luôn vẽ sơ đồ của mạch bạn đang thiết kế là một thói quen tốt. Hơn nữa, dù chúng ta có thể vẽ một sơ đồ dùng ký hiệu quen thuộc của NAND gate, chúng ta sẽ chọn giữ sơ đồ ở dạng tổng quát và dùng cách tiếp cận black-box. Hãy nhớ, black box là một trợ giúp tốt khi đến lúc viết entity declaration. Lời giải của Ví dụ 1 có trong Listing 4.6.
 
@@ -131,7 +131,7 @@ Ví dụ này chứa một vài ý tưởng mới đáng được làm rõ thêm
 
 Ví dụ 1 minh họa cách dùng concurrent signal assignment (CSA) statement trong một chương trình VHDL chạy được (xem dòng 12 của Listing 4.6). Nhưng vì chỉ có một CSA statement, khái niệm concurrency chưa lộ rõ ngay. Ý tưởng đằng sau bất kỳ concurrent statement nào trong VHDL là output thay đổi bất cứ lúc nào một trong các signal input thay đổi. Nói cách khác, output F được re-evaluated bất cứ lúc nào một signal trong expression input thay đổi. Đây là một khái niệm then chốt để thực sự hiểu VHDL, nên bạn có thể muốn đọc câu đó thêm vài lần. Ý tưởng về concurrency được minh họa rõ hơn trong Ví dụ 2.
 
-> VÍ DỤ 2. Hãy viết code VHDL hiện thực hàm được biểu diễn bởi phương trình logic sau: F3 = $\overline{L}$ · $\overline{M}$ · N + L · M
+> VÍ DỤ 2. Hãy viết code VHDL triển khai hàm được biểu diễn bởi phương trình logic sau: F3 = $\overline{L}$ · $\overline{M}$ · N + L · M
 
 LỜI GIẢI. Sơ đồ black box và code VHDL đi kèm được trình bày trong Listing 4.7.
 
@@ -155,9 +155,9 @@ end f3_2;
 
 ![p0048_3](images/ch04_vhdl_programming_paradigm/p0048_3.png)
 
-Ví dụ này cho thấy một bản hiện thực one-line của phương trình logic đã cho.
+Ví dụ này cho thấy một bản triển khai one-line của phương trình logic đã cho.
 
-Một lời giải khác cho Ví dụ 2 được cung cấp trong Listing 4.8. Ví dụ này thể hiện một khái niệm quan trọng trong VHDL. Lời giải trong Listing 4.8 dùng một số statement đặc biệt để hiện thực mạch. Các statement đặc biệt này được dùng để cung cấp thứ thường được gọi là kết quả trung gian. Cách tiếp cận này tương đương với việc khai báo thêm biến trong một ngôn ngữ lập trình thuật toán để dùng lưu kết quả trung gian. Nhu cầu về kết quả trung gian đi kèm với việc khai báo thêm các giá trị signal, thường được gọi là intermediate signal. Lưu ý trong Listing 4.8 rằng việc khai báo intermediate signal giống với các khai báo port trong entity declaration, chỉ khác là thiếu phần chỉ định mode (in, out hoặc inout).
+Một lời giải khác cho Ví dụ 2 được cung cấp trong Listing 4.8. Ví dụ này thể hiện một khái niệm quan trọng trong VHDL. Lời giải trong Listing 4.8 dùng một số statement đặc biệt để triển khai mạch. Các statement đặc biệt này được dùng để cung cấp thứ thường được gọi là kết quả trung gian. Cách tiếp cận này tương đương với việc khai báo thêm biến trong một ngôn ngữ lập trình thuật toán để dùng lưu kết quả trung gian. Nhu cầu về kết quả trung gian đi kèm với việc khai báo thêm các giá trị signal, thường được gọi là intermediate signal. Lưu ý trong Listing 4.8 rằng việc khai báo intermediate signal giống với các khai báo port trong entity declaration, chỉ khác là thiếu phần chỉ định mode (in, out hoặc inout).
 
 Intermediate signal phải được khai báo bên trong phần thân của architecture vì chúng không có liên kết nào với thế giới bên ngoài và vì thế không xuất hiện trong entity declaration. Lưu ý rằng intermediate signal được khai báo trong phần thân architecture nhưng xuất hiện trước statement begin.
 
@@ -186,7 +186,7 @@ Dù các architecture f3_2 và f3_1 của Listing 4.7 và Listing 4.8 trông kh�
 
 Dù cách dùng intermediate signal không bắt buộc cho ví dụ này, việc dùng chúng nêu ra một số điểm hay. Thứ nhất, dùng intermediate signal là chuẩn mực trong phần lớn các model VHDL. Việc dùng intermediate signal là tùy chọn trong Listing 4.8 vì ví dụ chỉ mô hình hóa một mạch tương đối đơn giản. Khi mạch trở nên phức tạp hơn, có nhiều trường hợp phải dùng intermediate signal. Thứ hai, intermediate signal là một dạng công cụ mà bạn sẽ thường cần dùng trong các model VHDL của mình. Ý ở đây là bạn đang cố mô tả một mạch số bằng một ngôn ngữ mô tả dạng văn bản: bạn sẽ thường cần dùng intermediate signal để đạt được mục tiêu mô hình hóa mạch. Dùng intermediate signal cho phép bạn mô hình hóa mạch số dễ dàng hơn nhưng không làm phần cứng được tạo ra phức tạp hơn. Khi dùng VHDL, người ta có xu hướng nghĩ rằng vì có nhiều chữ hơn trên trang, mạch bạn đang mô tả và/hoặc phần cứng tạo ra sẽ lớn hơn hoặc phức tạp hơn. Điều này hoàn toàn không đúng. Chủ đề chính của VHDL là bạn nên dùng các công cụ VHDL có trong tay để mô hình hóa mạch theo cách đơn giản nhất có thể. Mạch đơn giản có xác suất được hiểu và được synthesize cao hơn. Nhưng quan trọng nhất là một model VHDL đơn giản không liên quan đến độ dài của code VHDL thực tế.
 
-Trong Ví dụ 2, việc chuyển hàm logic thành các CSA tương đối đơn giản. Việc hiện thực các hàm này thành code VHDL dễ đến mức gần như tầm thường. Nhưng xét cho cùng, hàm trong Ví dụ 2 cũng không quá phức tạp. Khi các hàm trở nên phức tạp hơn (nhiều input và output hơn), cách tiếp cận nhập phương trình sẽ trở nên nhàm chán. May mắn là có một vài loại concurrent construct khác có thể giúp việc hiện thực dễ dàng hơn.
+Trong Ví dụ 2, việc chuyển hàm logic thành các CSA tương đối đơn giản. Việc triển khai các hàm này thành code VHDL dễ đến mức gần như tầm thường. Nhưng xét cho cùng, hàm trong Ví dụ 2 cũng không quá phức tạp. Khi các hàm trở nên phức tạp hơn (nhiều input và output hơn), cách tiếp cận nhập phương trình sẽ trở nên nhàm chán. May mắn là có một vài loại concurrent construct khác có thể giúp việc triển khai dễ dàng hơn.
 
 ## 4.4 Conditional signal assignment when
 
@@ -204,7 +204,7 @@ Listing 4.9: Cú pháp của conditional signal assignment statement.
 
 Conditional signal assignment statement có lẽ dễ hiểu nhất trong ngữ cảnh của một mạch. Với ví dụ đầu tiên, chúng ta hãy đơn giản làm lại Ví dụ 2 bằng conditional signal assignment thay vì concurrent signal assignment.
 
-> VÍ DỤ 3. Hãy viết code VHDL hiện thực hàm được biểu diễn trong Ví dụ 2. Chỉ dùng conditional signal assignment statement trong code VHDL của bạn.
+> VÍ DỤ 3. Hãy viết code VHDL triển khai hàm được biểu diễn trong Ví dụ 2. Chỉ dùng conditional signal assignment statement trong code VHDL của bạn.
 
 LỜI GIẢI. Entity declaration không thay đổi so với Ví dụ 2, nên lời giải chỉ cần một mô tả architecture mới. Xét lại cùng phương trình logic của Ví dụ 2, F3 = $\overline{L}$·$\overline{M}$ ·N + L ·M, lời giải của Ví dụ 3 được trình bày trong Listing 4.10.
 
@@ -229,9 +229,9 @@ Có một vài điểm thú vị cần lưu ý về lời giải này.
 
 • Lời giải dùng relational operator. Thực tế có sáu relational operator khác nhau trong VHDL. Hai trong số các relational operator phổ biến hơn là “=” và “/=”, lần lượt là operator “bằng” và operator “không bằng”. Operator được thảo luận kỹ hơn trong các mục sau.
 
-Có những cách dùng thông minh hơn cho conditional signal assignment statement. Một trong những cách dùng kinh điển là hiện thực một multiplexer (MUX). Ví dụ tiếp theo là một bản hiện thực MUX điển hình bằng conditional signal assignment.
+Có những cách dùng thông minh hơn cho conditional signal assignment statement. Một trong những cách dùng kinh điển là triển khai một multiplexer (MUX). Ví dụ tiếp theo là một bản triển khai MUX điển hình bằng conditional signal assignment.
 
-> VÍ DỤ 4. Hãy viết code VHDL hiện thực một MUX 4:1 dùng một conditional signal assignment statement duy nhất. Các input của MUX là các data input D3, D2, D1, D0 và một control bus two-input SEL. Output duy nhất là MX_OUT.
+> VÍ DỤ 4. Hãy viết code VHDL triển khai một MUX 4:1 dùng một conditional signal assignment statement duy nhất. Các input của MUX là các data input D3, D2, D1, D0 và một control bus two-input SEL. Output duy nhất là MX_OUT.
 
 LỜI GIẢI. Với ví dụ này, chúng ta cần bắt đầu từ đầu. Điều này tất nhiên gồm cả sơ đồ black-box nay đã nổi tiếng và entity statement đi kèm. Phần VHDL của lời giải được trình bày trong Listing 4.11.
 
@@ -314,7 +314,7 @@ with <choose_expression> select
               <expression> when <choices>;
 ```
 
-> VÍ DỤ 5. Hãy viết code VHDL hiện thực hàm được biểu diễn bởi phương trình logic sau: F3 = $\overline{L}$·$\overline{M}$ ·N + L·M. Chỉ dùng selected signal assignment statement trong code VHDL của bạn.
+> VÍ DỤ 5. Hãy viết code VHDL triển khai hàm được biểu diễn bởi phương trình logic sau: F3 = $\overline{L}$·$\overline{M}$ ·N + L·M. Chỉ dùng selected signal assignment statement trong code VHDL của bạn.
 
 LỜI GIẢI. Đây lại là thêm một phiên bản nữa của ví dụ my_ckt_f3 lần đầu xuất hiện trong Ví dụ 2. Lời giải được trình bày trong Listing 4.14.
 
@@ -357,7 +357,7 @@ end mux4t1_2;
 
 Một điều cần để ý về lời giải trong Listing 4.14 là việc dùng mệnh đề when others làm mục cuối cùng trong selected signal assignment statement. Trên thực tế, mệnh đề ở giữa ’0’ when ’0’ có thể bị bỏ khỏi lời giải mà không làm thay đổi ý nghĩa của statement. Nói chung, đưa mọi trường hợp dự kiến vào selected signal assignment statement rồi theo sau là mệnh đề when others được xem là một thói quen lập trình VHDL tốt.
 
-> VÍ DỤ 6. Hãy viết code VHDL hiện thực một MUX 4:1 dùng một selected signal assignment statement duy nhất. Các input của MUX là các data input D3, D2, D1, D0 và một control bus two-input SEL. Output duy nhất là MX_OUT.
+> VÍ DỤ 6. Hãy viết code VHDL triển khai một MUX 4:1 dùng một selected signal assignment statement duy nhất. Các input của MUX là các data input D3, D2, D1, D0 và một control bus two-input SEL. Output duy nhất là MX_OUT.
 
 LỜI GIẢI. Đây là sự lặp lại của Ví dụ 4, chỉ khác là dùng selected signal assignment operator thay cho conditional signal assignment operator. Lời giải của Ví dụ 6 được trình bày trong Listing 4.15. Sơ đồ black-box cho ví dụ này giống như trước và không được lặp lại ở đây.
 
@@ -369,7 +369,7 @@ Một lần nữa, có một vài điều đáng chú ý trong lời giải củ
 
 • Mạch dùng trong ví dụ này là một MUX 4:1. Trong trường hợp này, mỗi điều kiện của chooser_expression đều được tính đến trong phần thân của selected signal assignment statement. Tuy nhiên, đây không phải là yêu cầu bắt buộc. Yêu cầu duy nhất ở đây là dòng chứa các keyword when others phải xuất hiện ở dòng cuối cùng của statement.
 
-> VÍ DỤ 7. Hãy viết code VHDL hiện thực mạch sau. Mạch có một input bundle gồm bốn signal và một output bundle gồm ba signal. Input bundle, D_IN, biểu diễn một số nhị phân 4-bit. Output bundle, SZ_OUT, được dùng để chỉ độ lớn của số input nhị phân 4-bit. Quan hệ giữa input và output được trình bày trong bảng dưới đây. Hãy dùng một selected signal assignment statement trong lời giải.
+> VÍ DỤ 7. Hãy viết code VHDL triển khai mạch sau. Mạch có một input bundle gồm bốn signal và một output bundle gồm ba signal. Input bundle, D_IN, biểu diễn một số nhị phân 4-bit. Output bundle, SZ_OUT, được dùng để chỉ độ lớn của số input nhị phân 4-bit. Quan hệ giữa input và output được trình bày trong bảng dưới đây. Hãy dùng một selected signal assignment statement trong lời giải.
 
 | khoảng của D_IN | SZ_OUT |
 |---|---|
@@ -413,9 +413,9 @@ Một lần nữa, selected signal assignment statement là một dạng concurr
 
 Nhận xét cuối cùng về selected signal assignment giống với nhận xét cuối cùng về conditional signal assignment. Bạn nên nhận ra dạng tổng quát của selected signal assignment statement là giống với các statement switch trong các ngôn ngữ lập trình thuật toán như C và Java. Một lần nữa, quan hệ này sẽ được xem xét sâu hơn nhiều khi chúng ta sẵn sàng nói về sequential statement.
 
-> VÍ DỤ 8. Hãy viết code VHDL hiện thực hàm được biểu diễn bởi phương trình logic sau: F3 = $\overline{L}$ · $\overline{M}$ · N + L · M.
+> VÍ DỤ 8. Hãy viết code VHDL triển khai hàm được biểu diễn bởi phương trình logic sau: F3 = $\overline{L}$ · $\overline{M}$ · N + L · M.
 
-LỜI GIẢI. Đây là cùng bài toán đã xem xét trước đây. Vấn đề với các lời giải trước cho ví dụ này là chúng đòi hỏi người dùng phải bằng cách nào đó rút gọn hàm trước khi hiện thực nó. Trong thời đại thiết kế mạch số hiện nay, bạn ghi điểm nhiều nhất khi để VHDL synthesizer làm việc đó cho bạn. Hy vọng lời giải cho ví dụ này sẽ giải thoát bạn khỏi việc phải dùng lại Karnaugh map, hay lạy trời đừng, đại số boolean, để rút gọn một hàm. Biểu thức tương đương cho F3(L, M, N) = $\overline{L}$ · $\overline{M}$ · N + L · M và Karnaugh map của nó được trình bày dưới đây. Lời giải của Ví dụ 8 được trình bày trong Listing 4.17.
+LỜI GIẢI. Đây là cùng bài toán đã xem xét trước đây. Vấn đề với các lời giải trước cho ví dụ này là chúng đòi hỏi người dùng phải bằng cách nào đó rút gọn hàm trước khi triển khai nó. Trong thời đại thiết kế mạch số hiện nay, bạn ghi điểm nhiều nhất khi để VHDL synthesizer làm việc đó cho bạn. Hy vọng lời giải cho ví dụ này sẽ giải thoát bạn khỏi việc phải dùng lại Karnaugh map, hay lạy trời đừng, đại số boolean, để rút gọn một hàm. Biểu thức tương đương cho F3(L, M, N) = $\overline{L}$ · $\overline{M}$ · N + L · M và Karnaugh map của nó được trình bày dưới đây. Lời giải của Ví dụ 8 được trình bày trong Listing 4.17.
 
 Listing 4.17: Lời giải của Ví dụ 8.
 
@@ -451,7 +451,7 @@ end f3_8;
 | 1 | 1 | 0 | 1 |
 | 1 | 1 | 1 | 1 |
 
-F3(L, M, N) = ∑(1, 6,7)
+F3(L, M, N) = ∑(1,6,7)
 
 ## 4.6 Process statement
 
@@ -477,7 +477,7 @@ Vì vậy, bây giờ chưa phải lúc học về process statement. Chúng ta 
 
 ## 4.8 Bài tập
 
-1. Với các mô tả hàm sau, hãy viết các model VHDL hiện thực những hàm này bằng concurrent signal assignment.
+1. Với các mô tả hàm sau, hãy viết các model VHDL triển khai những hàm này bằng concurrent signal assignment.
 
 a) F(A, B) = $\overline{A}$B + A + A$\overline{B}$
 
@@ -491,7 +491,7 @@ e) F(A, B, C) = ∏(5,1,4,3)
 
 f) F(A, B, C, D) = ∑(1,2)
 
-2. Với các mô tả hàm sau, hãy viết các model VHDL hiện thực những hàm này bằng cả conditional signal assignment và selected signal assignment.
+2. Với các mô tả hàm sau, hãy viết các model VHDL triển khai những hàm này bằng cả conditional signal assignment và selected signal assignment.
 
 a) F(A, B, C, D) = $\overline{A}$C$\overline{D}$ + $\overline{B}$C + BC$\overline{D}$
 

@@ -58,27 +58,21 @@ Header chính cần include để xử lý DMA mapping như sau:
 
 Tuy nhiên, tùy mapping có thể dùng API khác nhau. Trước khi đi sâu API, cần hiểu các operation diễn ra trong DMA mapping:
 
-1\. Giả sử device hỗ trợ DMA, nếu driver thiết lập buffer bằng `kmalloc()`, nó nhận virtual address (hãy gọi là
+1\. Giả sử device hỗ trợ DMA, nếu driver thiết lập buffer bằng `kmalloc()`, nó nhận virtual address (hãy gọi là X), hiện chưa trỏ tới đâu.
 
-X), hiện chưa trỏ tới đâu.
-
-2\. Virtual memory system (với sự hỗ trợ của MMU, Memory Management Unit) map X tới physical address (hãy gọi
-
-là Y) trong RAM hệ thống, giả sử vẫn còn free memory.
+2\. Virtual memory system (với sự hỗ trợ của MMU, Memory Management Unit) map X tới physical address (hãy gọi là Y) trong RAM hệ thống, giả sử vẫn còn free memory.
 
 Vì DMA không đi qua CPU virtual memory system, tại đây driver có thể dùng virtual address X để truy cập buffer nhưng bản thân device thì không.
 
-3\. Trong một số hệ thống đơn giản (không có I/O MMU), device có thể DMA trực tiếp tới physical address Y. Nhưng trong nhiều hệ thống khác,
-
-device nhìn main memory qua I/O MMU; vì vậy có I/O MMU hardware chuyển DMA address thành physical address, ví dụ chuyển Z thành Y.
+3\. Trong một số hệ thống đơn giản (không có I/O MMU), device có thể DMA trực tiếp tới physical address Y. Nhưng trong nhiều hệ thống khác, device nhìn main memory qua I/O MMU; vì vậy có I/O MMU hardware chuyển DMA address thành physical address, ví dụ chuyển Z thành Y.
 
 4\. Đây là nơi DMA API tham gia:
 
-- Driver có thể truyền virtual address X cho function như `dma_map_single()` (sẽ xem sau trong chương, phần Single-buffer mapping), thiết lập I/O MMU mapping thích hợp và return DMA address Z.
+  - Driver có thể truyền virtual address X cho function như `dma_map_single()` (sẽ xem sau trong chương, phần Single-buffer mapping), thiết lập I/O MMU mapping thích hợp và return DMA address Z.
 
-- Sau đó driver yêu cầu device thực hiện DMA vào Z.
+  - Sau đó driver yêu cầu device thực hiện DMA vào Z.
 
-- Cuối cùng I/O MMU map nó tới buffer tại địa chỉ Y trong RAM hệ thống.
+  - Cuối cùng I/O MMU map nó tới buffer tại địa chỉ Y trong RAM hệ thống.
 
 Bây giờ đã giới thiệu khái niệm memory mapping cho DMA, có thể bắt đầu tạo mapping, trước hết với loại dễ nhất — coherent DMA mapping.
 
@@ -344,11 +338,15 @@ Hình 11.2 – DMA engine framework
 
 Cách dùng slave DMA đơn giản, gồm các bước sau:
 
-1\. Thông báo kernel về DMA addressing capability của device. 2. Yêu cầu DMA channel. 3. Nếu thành công, cấu hình DMA channel này. 4. Chuẩn bị hoặc cấu hình DMA transfer. Tại bước này, transfer descriptor biểu diễn transfer được return.
+1\. Thông báo kernel về DMA addressing capability của device.
 
-5\. Submit DMA transfer bằng descriptor. Transfer sau đó được thêm vào pending queue của controller tương ứng với
+2\. Yêu cầu DMA channel.
 
-channel đã chỉ định. Bước này return cookie đặc biệt có thể dùng để kiểm tra tiến độ hoạt động DMA.
+3\. Nếu thành công, cấu hình DMA channel này.
+
+4\. Chuẩn bị hoặc cấu hình DMA transfer. Tại bước này, transfer descriptor biểu diễn transfer được return.
+
+5\. Submit DMA transfer bằng descriptor. Transfer sau đó được thêm vào pending queue của controller tương ứng với channel đã chỉ định. Bước này return cookie đặc biệt có thể dùng để kiểm tra tiến độ hoạt động DMA.
 
 6\. Bắt đầu DMA transfer trên channel đã chỉ định để nếu channel idle, transfer đầu tiên trong queue được bắt đầu.
 
@@ -486,11 +484,7 @@ sdma->dma_device.directions = SDMA_DMA_DIRECTIONS;
 
 - `device_free_chan_resources`: Callback cho phép giải phóng resource của DMA channel.
 
-Trong khi phần trên là generic callback, phần sau là controller callback phụ thuộc khả năng controller và phải được cung cấp nếu capability bit mask tương ứng được đặt trong
-
-```
-cap_mask.
-```
+Trong khi phần trên là generic callback, phần sau là controller callback phụ thuộc khả năng controller và phải được cung cấp nếu capability bit mask tương ứng được đặt trong `cap_mask`.
 
 - `device_prep_dma_memcpy` chuẩn bị memcpy operation. Nếu `DMA_MEMCPY` được đặt trong `cap_mask`, phải đặt thành phần này. Với mỗi flag được đặt, phải cung cấp callback tương ứng, nếu không đăng ký controller thất bại. Điều này đúng cho mọi callback `device_prep_*`.
 
@@ -1342,11 +1336,7 @@ Trong phần tiếp theo, chúng ta học cách chỉ định và lấy DMA chan
 
 ## Tìm hiểu DMA và DT binding
 
-DT binding cho DMA channel phụ thuộc DMA controller node, vốn SoC-dependent, và một số parameter (như DMA cell) có thể khác giữa các SoC. Ví dụ này chỉ tập trung i.MX SDMA controller, có trong kernel source tại
-
-```
-Documentation/devicetree/bindings/dma/fsl-imx-sdma.txt.
-```
+DT binding cho DMA channel phụ thuộc DMA controller node, vốn SoC-dependent, và một số parameter (như DMA cell) có thể khác giữa các SoC. Ví dụ này chỉ tập trung i.MX SDMA controller, có trong kernel source tại `Documentation/devicetree/bindings/dma/fsl-imx-sdma.txt`.
 
 ## Consumer binding
 

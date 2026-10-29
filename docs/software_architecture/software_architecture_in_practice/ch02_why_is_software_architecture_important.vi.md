@@ -15,7 +15,7 @@ Chương này tập trung vào lý do vì sao architecture quan trọng từ gó
 3. Việc phân tích một architecture cho phép dự đoán sớm các chất lượng của một hệ thống.
 4. Một architecture được tài liệu hóa giúp tăng cường giao tiếp giữa các stakeholder.
 5. Architecture là vật mang những quyết định thiết kế sớm nhất, và do đó most-fundamental, hardest-to-change.
-6. Một architecture định nghĩa một tập các ràng buộc đối với việc hiện thực về sau.
+6. Một architecture định nghĩa một tập các ràng buộc đối với việc triển khai về sau.
 7. Architecture quyết định cấu trúc của một tổ chức, hoặc ngược lại.
 8. Một architecture có thể cung cấp cơ sở cho phát triển tăng dần (incremental development).
 9. Một architecture là artifact then chốt cho phép kiến trúc sư và quản lý dự án suy luận về chi phí và tiến độ.
@@ -42,7 +42,7 @@ Mối quan hệ này quan trọng đến mức chúng tôi đã dành toàn bộ
 - Nếu các dự án của bạn cần khả năng bàn giao các tập con tăng dần của hệ thống, thì bạn phải quản lý việc sử dụng lẫn nhau giữa các component.
 - Nếu bạn muốn các element từ hệ thống của mình có thể tái sử dụng trong các hệ thống khác, thì bạn cần hạn chế coupling giữa các element sao cho khi bạn tách một element ra, nó không mang theo quá nhiều ràng buộc với môi trường hiện tại đến mức không còn hữu ích.
 
-Các chiến lược cho những quality attribute này và các quality attribute khác mang tính architecture ở mức cao nhất. Nhưng chỉ riêng một architecture không thể bảo đảm chức năng hay chất lượng mà hệ thống đòi hỏi. Các quyết định thiết kế hoặc hiện thực kém ở khâu sau luôn có thể phá hỏng một thiết kế architecture đầy đủ. Như chúng tôi hay nói (*phần lớn* là đùa): Những gì architecture ban cho, implementation có thể lấy đi. Các quyết định ở mọi giai đoạn của vòng đời—từ thiết kế architecture đến viết code, hiện thực và kiểm thử—đều ảnh hưởng đến chất lượng hệ thống. Do đó, chất lượng không hoàn toàn là một hàm của thiết kế architecture. Nhưng đó là nơi nó bắt đầu.
+Các chiến lược cho những quality attribute này và các quality attribute khác mang tính architecture ở mức cao nhất. Nhưng chỉ riêng một architecture không thể bảo đảm chức năng hay chất lượng mà hệ thống đòi hỏi. Các quyết định thiết kế hoặc triển khai kém ở khâu sau luôn có thể phá hỏng một thiết kế architecture đầy đủ. Như chúng tôi hay nói (*phần lớn* là đùa): Những gì architecture ban cho, implementation có thể lấy đi. Các quyết định ở mọi giai đoạn của vòng đời—từ thiết kế architecture đến viết code, triển khai và kiểm thử—đều ảnh hưởng đến chất lượng hệ thống. Do đó, chất lượng không hoàn toàn là một hàm của thiết kế architecture. Nhưng đó là nơi nó bắt đầu.
 
 <a id="sec2_2"></a>
 
@@ -80,12 +80,12 @@ Ngay cả khi bạn không thực hiện việc mô hình hóa phân tích đị
 
 ## 2.4 Giao tiếp giữa các stakeholder (Communication among Stakeholders)
 
-Một điểm được nêu trong [Chương 1](ch01_what_is_software_architecture.vi.md#ch01) là một architecture là một sự trừu tượng hóa, và điều đó hữu ích vì nó biểu diễn một model đơn giản hóa của toàn bộ hệ thống mà (không giống như vô số chi tiết của toàn bộ hệ thống) bạn có thể giữ trong đầu. Những người khác trong team của bạn cũng vậy. Architecture biểu diễn một sự trừu tượng hóa chung của một hệ thống mà hầu hết, nếu không phải tất cả, các stakeholder của hệ thống có thể dùng làm cơ sở để tạo ra sự hiểu biết lẫn nhau, đàm phán, đạt được đồng thuận và giao tiếp với nhau. Architecture—hoặc ít nhất là các phần của nó—đủ trừu tượng để hầu hết những người không chuyên về kỹ thuật có thể hiểu nó ở mức họ cần, đặc biệt là khi có sự hướng dẫn từ kiến trúc sư, nhưng sự trừu tượng hóa đó vẫn có thể được tinh chỉnh thành các đặc tả kỹ thuật đủ phong phú để dẫn dắt việc hiện thực, tích hợp, kiểm thử và deployment.
+Một điểm được nêu trong [Chương 1](ch01_what_is_software_architecture.vi.md#ch01) là một architecture là một sự trừu tượng hóa, và điều đó hữu ích vì nó biểu diễn một model đơn giản hóa của toàn bộ hệ thống mà (không giống như vô số chi tiết của toàn bộ hệ thống) bạn có thể giữ trong đầu. Những người khác trong team của bạn cũng vậy. Architecture biểu diễn một sự trừu tượng hóa chung của một hệ thống mà hầu hết, nếu không phải tất cả, các stakeholder của hệ thống có thể dùng làm cơ sở để tạo ra sự hiểu biết lẫn nhau, đàm phán, đạt được đồng thuận và giao tiếp với nhau. Architecture—hoặc ít nhất là các phần của nó—đủ trừu tượng để hầu hết những người không chuyên về kỹ thuật có thể hiểu nó ở mức họ cần, đặc biệt là khi có sự hướng dẫn từ kiến trúc sư, nhưng sự trừu tượng hóa đó vẫn có thể được tinh chỉnh thành các đặc tả kỹ thuật đủ phong phú để dẫn dắt việc triển khai, tích hợp, kiểm thử và deployment.
 
 Mỗi stakeholder của một hệ thống phần mềm—khách hàng, người dùng, quản lý dự án, người viết code, tester, v.v.—quan tâm đến những đặc điểm khác nhau của hệ thống chịu ảnh hưởng bởi architecture của nó. Ví dụ:
 
 - người dùng quan tâm đến việc hệ thống nhanh, đáng tin cậy và sẵn sàng khi cần;
-- khách hàng (người trả tiền cho hệ thống) quan tâm đến việc architecture có thể được hiện thực đúng tiến độ và trong ngân sách;
+- khách hàng (người trả tiền cho hệ thống) quan tâm đến việc architecture có thể được triển khai đúng tiến độ và trong ngân sách;
 - người quản lý lo lắng rằng (ngoài các mối quan tâm về chi phí và tiến độ) architecture sẽ cho phép các team làm việc phần lớn độc lập, tương tác theo những cách có kỷ luật và được kiểm soát; và
 - kiến trúc sư lo lắng về các chiến lược để đạt được tất cả những mục tiêu đó.
 
@@ -148,11 +148,11 @@ Hãy tưởng tượng cơn ác mộng khi phải thay đổi bất kỳ quyết
 
 <a id="sec2_6"></a>
 
-## 2.6 Các ràng buộc đối với việc hiện thực (Constraints on Implementation)
+## 2.6 Các ràng buộc đối với việc triển khai (Constraints on Implementation)
 
-Nếu bạn muốn implementation của mình tuân theo một architecture, thì nó phải tuân theo các quyết định thiết kế mà architecture quy định. Nó phải có tập các element mà architecture quy định; các element này phải tương tác với nhau theo cách mà architecture quy định; và mỗi element phải hoàn thành trách nhiệm của mình đối với các element khác như architecture quy định. Mỗi quy định này là một ràng buộc đối với người hiện thực.
+Nếu bạn muốn implementation của mình tuân theo một architecture, thì nó phải tuân theo các quyết định thiết kế mà architecture quy định. Nó phải có tập các element mà architecture quy định; các element này phải tương tác với nhau theo cách mà architecture quy định; và mỗi element phải hoàn thành trách nhiệm của mình đối với các element khác như architecture quy định. Mỗi quy định này là một ràng buộc đối với người triển khai.
 
-Những người xây dựng element phải thông thạo các đặc tả của element riêng của họ nhưng họ có thể không biết đến các tradeoff của architecture—architecture (hoặc kiến trúc sư) đơn giản là ràng buộc họ theo cách đáp ứng được các tradeoff đó. Một ví dụ kinh điển là khi một kiến trúc sư phân bổ ngân sách performance cho các phần mềm tham gia vào một chức năng lớn hơn nào đó. Nếu mỗi đơn vị phần mềm nằm trong ngân sách của nó, toàn bộ transaction sẽ đáp ứng yêu cầu performance của nó. Những người hiện thực từng phần cấu thành có thể không biết ngân sách tổng thể, mà chỉ biết ngân sách của riêng họ.
+Những người xây dựng element phải thông thạo các đặc tả của element riêng của họ nhưng họ có thể không biết đến các tradeoff của architecture—architecture (hoặc kiến trúc sư) đơn giản là ràng buộc họ theo cách đáp ứng được các tradeoff đó. Một ví dụ kinh điển là khi một kiến trúc sư phân bổ ngân sách performance cho các phần mềm tham gia vào một chức năng lớn hơn nào đó. Nếu mỗi đơn vị phần mềm nằm trong ngân sách của nó, toàn bộ transaction sẽ đáp ứng yêu cầu performance của nó. Những người triển khai từng phần cấu thành có thể không biết ngân sách tổng thể, mà chỉ biết ngân sách của riêng họ.
 
 Ngược lại, các kiến trúc sư không cần là chuyên gia về mọi khía cạnh của thiết kế algorithm hay những điểm phức tạp của ngôn ngữ lập trình—dù chắc chắn họ nên biết đủ để không thiết kế ra một thứ khó xây dựng. Tuy nhiên, kiến trúc sư là những người chịu trách nhiệm thiết lập, phân tích và thực thi các quyết định và tradeoff của architecture.
 
@@ -258,7 +258,7 @@ Software architecture quan trọng vì nhiều lý do kỹ thuật và phi kỹ 
 3. Việc phân tích một architecture cho phép dự đoán sớm các chất lượng của một hệ thống.
 4. Một architecture được tài liệu hóa giúp tăng cường giao tiếp giữa các stakeholder.
 5. Architecture là vật mang những quyết định thiết kế sớm nhất. và do đó most-fundamental, hardest-to-change.
-6. Một architecture định nghĩa một tập các ràng buộc đối với việc hiện thực về sau.
+6. Một architecture định nghĩa một tập các ràng buộc đối với việc triển khai về sau.
 7. Architecture quyết định cấu trúc của một tổ chức, hoặc ngược lại.
 8. Một architecture có thể cung cấp cơ sở cho phát triển tăng dần.
 9. Một architecture là artifact then chốt cho phép kiến trúc sư và quản lý dự án suy luận về chi phí và tiến độ.

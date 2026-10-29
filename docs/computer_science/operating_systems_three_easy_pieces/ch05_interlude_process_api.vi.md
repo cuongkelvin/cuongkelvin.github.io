@@ -232,7 +232,11 @@ Cuối cùng, dù ta mới phác thảo process API ở mức khái quát, vẫn
 
 > THÔNG TIN THÊM: RTFM — HÃY ĐỌC MAN PAGE
 >
-> Nhiều lần trong sách, khi đề cập một system call hoặc library call cụ thể, ta sẽ khuyên bạn đọc manual page, gọi ngắn gọn là man page. Man page là hình thức tài liệu ban đầu trên hệ thống UNIX; hãy nhớ rằng chúng được tạo ra trước khi có thứ gọi là web. Dành thời gian đọc man page là một bước quan trọng trong quá trình trưởng thành của lập trình viên hệ thống; những trang đó ẩn chứa rất nhiều thông tin nhỏ hữu ích. Một số trang đặc biệt đáng đọc là man page của shell bạn đang dùng (ví dụ tcsh hoặc bash), và chắc chắn là của mọi system call mà chương trình gọi (để biết các return value và error condition có thể có). Cuối cùng, đọc man page còn giúp bạn tránh chút ngượng ngùng. Khi bạn hỏi đồng nghiệp về một chi tiết phức tạp của fork(), họ có thể chỉ đáp: “RTFM.” Đây là cách đồng nghiệp nhẹ nhàng thúc giục bạn Read The Man pages. Chữ F trong RTFM chỉ thêm chút sắc thái cho cụm từ...
+> Nhiều lần trong sách, khi đề cập một system call hoặc library call cụ thể, ta sẽ khuyên bạn đọc manual page, gọi ngắn gọn là man page. Man page là hình thức tài liệu ban đầu trên hệ thống UNIX; hãy nhớ rằng chúng được tạo ra trước khi có thứ gọi là web.
+>
+> Dành thời gian đọc man page là một bước quan trọng trong quá trình trưởng thành của lập trình viên hệ thống; những trang đó ẩn chứa rất nhiều thông tin nhỏ hữu ích. Một số trang đặc biệt đáng đọc là man page của shell bạn đang dùng (ví dụ tcsh hoặc bash), và chắc chắn là của mọi system call mà chương trình gọi (để biết các return value và error condition có thể có).
+>
+> Cuối cùng, đọc man page còn giúp bạn tránh chút ngượng ngùng. Khi bạn hỏi đồng nghiệp về một chi tiết phức tạp của fork(), họ có thể chỉ đáp: “RTFM.” Đây là cách đồng nghiệp nhẹ nhàng thúc giục bạn Read The Man pages. Chữ F trong RTFM chỉ thêm chút sắc thái cho cụm từ...
 
 ## 5.5 Các phần khác của API
 

@@ -169,14 +169,14 @@ Trong pattern này, có bốn vai trò:
 
 - Một service (mà bạn muốn cung cấp rộng rãi)
 - Một client của service
-- Một interface (được client dùng, được service hiện thực)
+- Một interface (được client dùng, được service triển khai)
 - Một injector (tạo một instance của service và inject nó vào client)
 
-Khi một interface tạo service và inject nó vào client, client được viết mà không cần biết về implementation cụ thể. Nói cách khác, mọi chi tiết hiện thực đều được inject, thường là tại runtime.
+Khi một interface tạo service và inject nó vào client, client được viết mà không cần biết về implementation cụ thể. Nói cách khác, mọi chi tiết triển khai đều được inject, thường là tại runtime.
 
 **Lợi ích:**
 
-- Có thể inject các instance test (thay vì các instance production), và các instance test này có thể quản lý và giám sát trạng thái của service. Do đó, client có thể được viết mà không cần biết nó sẽ được kiểm thử như thế nào. Thực tế, đây là cách nhiều testing framework hiện đại được hiện thực.
+- Có thể inject các instance test (thay vì các instance production), và các instance test này có thể quản lý và giám sát trạng thái của service. Do đó, client có thể được viết mà không cần biết nó sẽ được kiểm thử như thế nào. Thực tế, đây là cách nhiều testing framework hiện đại được triển khai.
 
 **Các tradeoff:**
 
@@ -198,7 +198,7 @@ Trong pattern strategy, hành vi của một class có thể được thay đổ
 
 ### Pattern intercepting filter (Intercepting Filter Pattern)
 
-Pattern intercepting filter được dùng để inject tiền xử lý và hậu xử lý (pre- and post-processing) vào một request hoặc một response giữa một client và một service. Có thể định nghĩa và áp dụng bất kỳ số lượng filter nào, theo thứ tự tùy ý, cho request trước khi chuyển request tới service cuối cùng. Ví dụ, các service logging và authentication là những filter thường hữu ích khi được hiện thực một lần và áp dụng ở mọi nơi. Các testing filter có thể được chèn vào theo cách này, mà không làm xáo trộn bất kỳ xử lý nào khác trong hệ thống.
+Pattern intercepting filter được dùng để inject tiền xử lý và hậu xử lý (pre- and post-processing) vào một request hoặc một response giữa một client và một service. Có thể định nghĩa và áp dụng bất kỳ số lượng filter nào, theo thứ tự tùy ý, cho request trước khi chuyển request tới service cuối cùng. Ví dụ, các service logging và authentication là những filter thường hữu ích khi được triển khai một lần và áp dụng ở mọi nơi. Các testing filter có thể được chèn vào theo cách này, mà không làm xáo trộn bất kỳ xử lý nào khác trong hệ thống.
 
 **Lợi ích:**
 

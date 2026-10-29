@@ -592,7 +592,7 @@ Như tên gọi của nó ngụ ý, nó là một *stack* (ngăn xếp). Nếu b
 
 > **Lưu ý**:
 >
-> Stack, ở dạng <a id="_idIndexMarker355"></a>trừu tượng của nó, là một cấu trúc dữ liệu **First In, Last Out** (**FILO**) hay **Last In, First Out** (**LIFO**) <a id="_idIndexMarker356"></a>. Bất kể chi tiết hiện thực, mỗi mục được lưu (push) lên đỉnh stack, và nó sẽ bị các mục tiếp theo chôn vùi. Một mục không thể được pop ra mà không lấy đi các mục phía trên trước.
+> Stack, ở dạng <a id="_idIndexMarker355"></a>trừu tượng của nó, là một cấu trúc dữ liệu **First In, Last Out** (**FILO**) hay **Last In, First Out** (**LIFO**) <a id="_idIndexMarker356"></a>. Bất kể chi tiết triển khai, mỗi mục được lưu (push) lên đỉnh stack, và nó sẽ bị các mục tiếp theo chôn vùi. Một mục không thể được pop ra mà không lấy đi các mục phía trên trước.
 
 Biến không phải là thực thể duy nhất được lưu trong segment Stack. Bất cứ khi nào bạn thực hiện một lời gọi hàm, một mục mới gọi là *stack frame* được đặt lên đỉnh segment Stack. Nếu không, bạn <a id="_idIndexMarker357"></a>không thể quay lại hàm gọi hay trả kết quả về cho nơi gọi.
 

@@ -6,9 +6,9 @@
 
 <a id="id1490"></a>Điều quan trọng là phân biệt giữa architecture pattern và “best practice” (được thảo luận sâu hơn trong [Chương 21](ch21_architectural_decisions.vi.md#ch-architectural-decisions)). Gọi một thứ là “best practice” hàm ý rằng kiến trúc sư có nghĩa vụ rõ ràng, bất cứ khi nào một tình huống cụ thể phát sinh, phải dùng thực hành đó. Gọi nó là một thực hành *tốt hơn* ít nhất sẽ cho phép tranh luận, nhưng không—chúng ta gọi nó là thực hành *tốt nhất*, cho phép kiến trúc sư tắt não và luôn theo cùng một giải pháp.
 
-<a id="id1491"></a>Cũng quan trọng là phân biệt giữa pattern và *giải pháp* (solution). Nhiều công cụ, framework, thư viện và các artifact software-development khác đóng gói một hoặc nhiều pattern—tùy thuộc vào cách chúng được hiện thực, với các mức độ trung thành và đan xen khác nhau với các pattern khác. Hãy tập trung xác định pattern phù hợp nhất trước, rồi chọn hiện thực phù hợp nhất cho nó.
+<a id="id1491"></a>Cũng quan trọng là phân biệt giữa pattern và *giải pháp* (solution). Nhiều công cụ, framework, thư viện và các artifact software-development khác đóng gói một hoặc nhiều pattern—tùy thuộc vào cách chúng được triển khai, với các mức độ trung thành và đan xen khác nhau với các pattern khác. Hãy tập trung xác định pattern phù hợp nhất trước, rồi chọn triển khai phù hợp nhất cho nó.
 
-Chúng tôi đưa ra một ít pattern tiêu biểu trong chương này để đối chiếu và cung cấp bối cảnh cho các style chúng tôi đã giới thiệu trong Phần II của cuốn sách này. Ví dụ đầu tiên của chúng tôi, một pattern tái sử dụng kiến trúc, làm rõ sự khác biệt giữa pattern và hiện thực.
+Chúng tôi đưa ra một ít pattern tiêu biểu trong chương này để đối chiếu và cung cấp bối cảnh cho các style chúng tôi đã giới thiệu trong Phần II của cuốn sách này. Ví dụ đầu tiên của chúng tôi, một pattern tái sử dụng kiến trúc, làm rõ sự khác biệt giữa pattern và bản triển khai.
 
 <a id="id360"></a>
 
@@ -22,11 +22,11 @@ Chúng tôi đưa ra một ít pattern tiêu biểu trong chương này để đ
 
 <a id="ix_ch20-architectural-patterns-asciidoc2"></a><a id="ix_ch20-architectural-patterns-asciidoc3"></a><a id="ix_ch20-architectural-patterns-asciidoc4"></a><a id="ix_ch20-architectural-patterns-asciidoc5"></a>Một trong các mục tiêu thiết kế của microservices architecture là mức decoupling cao, thường thể hiện qua lời khuyên: “nhân bản tốt hơn coupling.”
 
-Giả sử hai service cần truyền qua lại thông tin về hồ sơ khách hàng, nhưng bounded context domain-driven của architecture khăng khăng rằng các chi tiết hiện thực phải giữ riêng tư với mỗi service. Một giải pháp phổ biến là cho mỗi service biểu diễn nội bộ riêng của các thực thể như `Profile`, rồi truyền thông tin đó theo những cách loosely coupled, như các cặp name-value trong JSON. Điều này cho phép mỗi service thay đổi biểu diễn nội bộ của mình—kể cả technology stack—tùy ý, mà không làm hỏng việc tích hợp. Developer nhìn chung không thích nhân bản code, điều có thể gây ra vấn đề về đồng bộ, trôi dạt ngữ nghĩa, v.v., nhưng có những thứ còn tệ hơn nhân bản…và trong microservices, điều đó bao gồm coupling.
+Giả sử hai service cần truyền qua lại thông tin về hồ sơ khách hàng, nhưng bounded context domain-driven của architecture khăng khăng rằng các chi tiết triển khai phải giữ riêng tư với mỗi service. Một giải pháp phổ biến là cho mỗi service biểu diễn nội bộ riêng của các thực thể như `Profile`, rồi truyền thông tin đó theo những cách loosely coupled, như các cặp name-value trong JSON. Điều này cho phép mỗi service thay đổi biểu diễn nội bộ của mình—kể cả technology stack—tùy ý, mà không làm hỏng việc tích hợp. Developer nhìn chung không thích nhân bản code, điều có thể gây ra vấn đề về đồng bộ, trôi dạt ngữ nghĩa, v.v., nhưng có những thứ còn tệ hơn nhân bản…và trong microservices, điều đó bao gồm coupling.
 
-Các kiến trúc sư thiết kế microservices nhìn chung chấp nhận thực tế rằng đôi khi họ phải nhân bản hiện thực để giữ decoupling. Nhưng còn những năng lực *có lợi* từ coupling cao thì sao? Mỗi service nên có một số năng lực vận hành chung nhất định, như giám sát, logging, xác thực và ủy quyền, và circuit breaker. Tuy nhiên, để mỗi team tự quản lý các phụ thuộc này thường dẫn đến hỗn loạn.
+Các kiến trúc sư thiết kế microservices nhìn chung chấp nhận thực tế rằng đôi khi họ phải nhân bản phần triển khai để giữ decoupling. Nhưng còn những năng lực *có lợi* từ coupling cao thì sao? Mỗi service nên có một số năng lực vận hành chung nhất định, như giám sát, logging, xác thực và ủy quyền, và circuit breaker. Tuy nhiên, để mỗi team tự quản lý các phụ thuộc này thường dẫn đến hỗn loạn.
 
-Ví dụ, hãy xét một công ty đang cố chọn một giải pháp giám sát chuẩn cho tất cả các service để dễ vận hành chúng hơn. Kiến trúc sư quyết định để mỗi team chịu trách nhiệm hiện thực việc giám sát cho service của mình: team service `Payment`, team service `Inventory`, v.v. Nhưng làm sao team vận hành có thể chắc chắn rằng mỗi team thực sự đã làm điều này? Ngoài ra, còn các vấn đề như nâng cấp thống nhất thì sao? Nếu công cụ giám sát đã chuẩn hóa cần được nâng cấp trên toàn tổ chức, các team nên phối hợp việc đó như thế nào?
+Ví dụ, hãy xét một công ty đang cố chọn một giải pháp giám sát chuẩn cho tất cả các service để dễ vận hành chúng hơn. Kiến trúc sư quyết định để mỗi team chịu trách nhiệm triển khai việc giám sát cho service của mình: team service `Payment`, team service `Inventory`, v.v. Nhưng làm sao team vận hành có thể chắc chắn rằng mỗi team thực sự đã làm điều này? Ngoài ra, còn các vấn đề như nâng cấp thống nhất thì sao? Nếu công cụ giám sát đã chuẩn hóa cần được nâng cấp trên toàn tổ chức, các team nên phối hợp việc đó như thế nào?
 
 #### Hexagonal architecture (kiến trúc lục giác)
 
@@ -40,9 +40,9 @@ Ví dụ, hãy xét một công ty đang cố chọn một giải pháp giám s�
 
 Những độc giả sharp-eyed (tinh mắt) có thể nhận thấy chỉ bốn trong sáu cạnh của hình lục giác được dùng. Người tạo ra pattern này, Alistair Cockburn, ban đầu vẽ nó thành hình lục giác và gọi nó là pattern Hexagonal architecture. Ông gần như lập tức hối hận, vì tên Ports and Adapters mang tính mô tả hơn, nhưng đã quá muộn. Quá nhiều kiến trúc sư thấy “Hexagonal” nghe ngầu, nên cái tên đã bám rễ.
 
-Nhầm lẫn pattern với hiện thực là một mối nguy phổ biến, và đây là một ví dụ tốt. Hexagonal architecture có một khiếm khuyết tiềm ẩn nghiêm trọng khi được dùng để mô tả microservices, nhưng chỉ đối với những người hiểu ý định ban đầu của pattern. Hexagonal architecture ra đời trước microservices hiện đại, nhưng có nhiều điểm tương đồng giữa chúng. Cũng có một khác biệt đáng kể: tính trung thành dữ liệu (data fidelity). Hexagonal architecture coi database chỉ là một adapter khác có thể cắm vào. Nó không bao gồm data schema như logic nghiệp vụ, vì nhận thức sai lầm (vốn phổ biến vào thời điểm tên pattern Hexagonal được đặt ra) rằng database là một bộ máy hoàn toàn tách biệt. Eric Evans đã có cái nhìn sâu sắc để sửa sai lầm này trong cuốn sách *Domain-Driven Design* của ông bằng cách nhận ra rằng, bất kể chúng nằm ở đâu, database schema phải thay đổi để phản ánh logic nghiệp vụ của hệ thống.
+Nhầm lẫn pattern với bản triển khai là một mối nguy phổ biến, và đây là một ví dụ tốt. Hexagonal architecture có một khiếm khuyết tiềm ẩn nghiêm trọng khi được dùng để mô tả microservices, nhưng chỉ đối với những người hiểu ý định ban đầu của pattern. Hexagonal architecture ra đời trước microservices hiện đại, nhưng có nhiều điểm tương đồng giữa chúng. Cũng có một khác biệt đáng kể: tính trung thành dữ liệu (data fidelity). Hexagonal architecture coi database chỉ là một adapter khác có thể cắm vào. Nó không bao gồm data schema như logic nghiệp vụ, vì nhận thức sai lầm (vốn phổ biến vào thời điểm tên pattern Hexagonal được đặt ra) rằng database là một bộ máy hoàn toàn tách biệt. Eric Evans đã có cái nhìn sâu sắc để sửa sai lầm này trong cuốn sách *Domain-Driven Design* của ông bằng cách nhận ra rằng, bất kể chúng nằm ở đâu, database schema phải thay đổi để phản ánh logic nghiệp vụ của hệ thống.
 
-Điều này khiến pattern Hexagonal trở thành một nguồn gây nhầm lẫn thường trực giữa các kiến trúc sư. Bất cứ khi nào ai đó dùng nó, họ đang mô tả sự tách biệt giữa các mối quan tâm vận hành và domain, hay họ đang đề cập đến pattern theo nghĩa đen, thứ sẽ cô lập dữ liệu và do đó vi phạm một nguyên lý thiết kế cốt lõi của microservices? Dùng tên pattern như cách viết tắt cho “tách biệt các mối quan tâm domain và vận hành” là ổn, miễn là nó không gây hiểu lầm trong bối cảnh. Tuy nhiên, kiến trúc sư ngày nay không cần đến hiện thực này. Giờ đây chúng ta có một cơ chế phù hợp hơn để hiện thực pattern Hexagonal: pattern *Service Mesh*.<a id="id1492"></a><a id="id1493"></a>
+Điều này khiến pattern Hexagonal trở thành một nguồn gây nhầm lẫn thường trực giữa các kiến trúc sư. Bất cứ khi nào ai đó dùng nó, họ đang mô tả sự tách biệt giữa các mối quan tâm vận hành và domain, hay họ đang đề cập đến pattern theo nghĩa đen, thứ sẽ cô lập dữ liệu và do đó vi phạm một nguyên lý thiết kế cốt lõi của microservices? Dùng tên pattern như cách viết tắt cho “tách biệt các mối quan tâm domain và vận hành” là ổn, miễn là nó không gây hiểu lầm trong bối cảnh. Tuy nhiên, kiến trúc sư ngày nay không cần đến bản triển khai này. Giờ đây chúng ta có một cơ chế phù hợp hơn để triển khai pattern Hexagonal: pattern *Service Mesh*.<a id="id1492"></a><a id="id1493"></a>
 
 #### Service Mesh
 
@@ -64,17 +64,17 @@ Dù pattern Sidecar mang lại một sự trừu tượng hay, nó có trade-off
 
 | Ưu điểm | Nhược điểm |
 |---|---|
-| Mang lại một cách nhất quán để tạo coupling được cô lập | Phải hiện thực một sidecar cho mỗi nền tảng |
+| Mang lại một cách nhất quán để tạo coupling được cô lập | Phải triển khai một sidecar cho mỗi nền tảng |
 | Cho phép phối hợp hạ tầng nhất quán | Component sidecar có thể phát triển lớn/phức tạp |
-| Quyền sở hữu theo từng team, tập trung, hoặc kết hợp | “Trôi dạt” hiện thực giữa các team độc lập |
+| Quyền sở hữu theo từng team, tập trung, hoặc kết hợp | “Trôi dạt” triển khai giữa các team độc lập |
 
-Cả pattern Hexagonal lẫn pattern Service Mesh đều minh họa các cách hiện thực pattern tái sử dụng để tách domain khỏi các mối quan tâm vận hành. Hiện thực Hexagonal là general purpose, trong khi Service Mesh rất phù hợp với microservices và các architecture phân tán khác. Chìa khóa đối với kiến trúc sư là xác định pattern trước—sự tách biệt—rồi quyết định cách tốt nhất để hiện thực nó trong<a id="id1497"></a><a id="id1498"></a> architecture của mình<a id="id1499"></a><a id="id1500"></a><a id="id1501"></a><a id="id1502"></a>.<a id="id1503"></a>
+Cả pattern Hexagonal lẫn pattern Service Mesh đều minh họa các cách triển khai pattern tái sử dụng để tách domain khỏi các mối quan tâm vận hành. Bản triển khai Hexagonal là general purpose, trong khi Service Mesh rất phù hợp với microservices và các architecture phân tán khác. Chìa khóa đối với kiến trúc sư là xác định pattern trước—sự tách biệt—rồi quyết định cách tốt nhất để triển khai nó trong<a id="id1497"></a><a id="id1498"></a> architecture của mình<a id="id1499"></a><a id="id1500"></a><a id="id1501"></a><a id="id1502"></a>.<a id="id1503"></a>
 
 <a id="id361"></a>
 
 ## Giao tiếp (Communication)
 
-<a id="ix_ch20-architectural-patterns-asciidoc10"></a>Nhiều architecture pattern, bao gồm các communication pattern, đến từ event-driven architecture và áp dụng cho bất kỳ architecture phân tán nào giao tiếp qua message và/hoặc sự kiện, như được thảo luận trong các Chương [15](ch15_event_driven_architecture_style.vi.md#ch-style-eda) và [18](ch18_microservices_architecture.vi.md#ch-style-microservices). Thực tế, bạn đã thấy các ví dụ về giao tiếp trong mỗi chương đó—chỉ là chúng tôi chưa xác định chúng là các pattern cụ thể vì kiến trúc sư thường hiện thực pattern mà không nhận ra. Suy cho cùng, pattern là các giải pháp cho những vấn đề phổ biến.
+<a id="ix_ch20-architectural-patterns-asciidoc10"></a>Nhiều architecture pattern, bao gồm các communication pattern, đến từ event-driven architecture và áp dụng cho bất kỳ architecture phân tán nào giao tiếp qua message và/hoặc sự kiện, như được thảo luận trong các Chương [15](ch15_event_driven_architecture_style.vi.md#ch-style-eda) và [18](ch18_microservices_architecture.vi.md#ch-style-microservices). Thực tế, bạn đã thấy các ví dụ về giao tiếp trong mỗi chương đó—chỉ là chúng tôi chưa xác định chúng là các pattern cụ thể vì kiến trúc sư thường triển khai pattern mà không nhận ra. Suy cho cùng, pattern là các giải pháp cho những vấn đề phổ biến.
 
 <a id="sec-pattern-orch-chor"></a>
 
@@ -90,7 +90,7 @@ Cả pattern Hexagonal lẫn pattern Service Mesh đều minh họa các cách h
 
 Trong mỗi workflow đẳng cấu trong [Hình 20-2](#fosa_2e_new_2006), bốn domain service (Service A đến D) cần cộng tác để tạo thành một workflow. Trong trường hợp orchestration, còn có một service riêng đóng vai trò bộ điều phối cho workflow: *orchestrator*.
 
-Dù chúng tôi đã mô tả giao tiếp này là cả *orchestration* lẫn *mediation*, pattern vẫn như nhau. Kiến trúc sư có lợi khi có thể nhận ra các pattern ẩn nấp bên trong các hiện thực vì trade-offs của chúng trở nên rõ ràng hơn.
+Dù chúng tôi đã mô tả giao tiếp này là cả *orchestration* lẫn *mediation*, pattern vẫn như nhau. Kiến trúc sư có lợi khi có thể nhận ra các pattern ẩn nấp bên trong các bản triển khai vì trade-offs của chúng trở nên rõ ràng hơn.
 
 Lưu ý rằng khi chúng tôi mô tả trade-offs cho mediation và orchestration, chúng tôi đã chạm đến nhiều vấn đề giống nhau. Chúng tôi sẽ tóm tắt các ưu điểm ở đây:
 
@@ -198,15 +198,15 @@ Kiến trúc sư quan tâm đến coupling: giữa các component, các phần t
 
 ### Pattern broker theo domain (Broker-Domain Pattern)
 
-<a id="ix_ch20-architectural-patterns-asciidoc15"></a>Trong mục này, chúng ta sẽ xem xét cùng workflow order-placement, lần này được hiện thực bằng một event-driven architecture, như minh họa trong [Hình 20-4](#fosa_2e_new_2016).
+<a id="ix_ch20-architectural-patterns-asciidoc15"></a>Trong mục này, chúng ta sẽ xem xét cùng workflow order-placement, lần này được triển khai bằng một event-driven architecture, như minh họa trong [Hình 20-4](#fosa_2e_new_2016).
 
 <a id="fosa_2e_new_2016"></a>
 
 ![](images/fsa2_2004.png)
 
-*Hình 20-4. Một workflow đặt đơn hàng được hiện thực bằng EDA*
+*Hình 20-4. Một workflow đặt đơn hàng được triển khai bằng EDA*
 
-Như bạn đã thấy, EDA dùng sự kiện để giao tiếp giữa các service, nên các event handler cần subscribe tới các service phù hợp để xây dựng workflow. Event handler được hiện thực bởi các *broker*, vốn là một phần của hạ tầng của architecture. Trong EDA, topic hoặc queue thường thuộc sở hữu của bên gửi: ví dụ, `Payment` cần biết địa chỉ của một topic để subscribe vào nó.
+Như bạn đã thấy, EDA dùng sự kiện để giao tiếp giữa các service, nên các event handler cần subscribe tới các service phù hợp để xây dựng workflow. Event handler được triển khai bởi các *broker*, vốn là một phần của hạ tầng của architecture. Trong EDA, topic hoặc queue thường thuộc sở hữu của bên gửi: ví dụ, `Payment` cần biết địa chỉ của một topic để subscribe vào nó.
 
 Trong [Hình 20-5](#fosa_2e_new_2017), `OrderPlacement` “sở hữu” broker mà các processor khác sẽ subscribe; nói cách khác, hạ tầng cần thiết để hỗ trợ service này bao gồm broker. Nếu một hệ thống chỉ dùng một broker cho mọi giao tiếp, tất cả các service của nó đều phụ thuộc vào một phần duy nhất của hạ tầng.
 

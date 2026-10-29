@@ -82,7 +82,7 @@ Trong ví dụ này, plug-in Eclipse cung cấp<a id="idm45798387611848"></a><a 
 
 Robert Martin, một nhân vật well-known (nổi tiếng) trong giới software architecture<a id="idm45798387597112"></a><a id="idm45798387595752"></a><a id="idm45798387595080"></a>, đã tạo ra một số metric dẫn xuất cho một cuốn sách về C++ vào cuối thập niên 1990s, áp dụng được cho bất kỳ ngôn ngữ object-oriented (hướng đối tượng) nào. Các metric này—abstractness và instability—đo sự cân bằng của các đặc điểm nội bộ của một codebase.
 
-*Abstractness* (độ trừu tượng) là tỉ lệ giữa các artifact trừu tượng (abstract class, interface, v.v.) và các artifact cụ thể (class hiện thực). Nó biểu thị một thước đo giữa *trừu tượng* và *hiện thực*. Các phần tử trừu tượng là những đặc điểm của một codebase cho phép developer hiểu chức năng tổng thể tốt hơn. Ví dụ, một codebase gồm một method `main()` duy nhất và 10,000 dòng code sẽ có điểm gần bằng không trên metric này và khá khó hiểu.
+*Abstractness* (độ trừu tượng) là tỉ lệ giữa các artifact trừu tượng (abstract class, interface, v.v.) và các artifact cụ thể (class triển khai). Nó biểu thị một thước đo giữa *trừu tượng* và *triển khai*. Các phần tử trừu tượng là những đặc điểm của một codebase cho phép developer hiểu chức năng tổng thể tốt hơn. Ví dụ, một codebase gồm một method `main()` duy nhất và 10,000 dòng code sẽ có điểm gần bằng không trên metric này và khá khó hiểu.
 
 Công thức cho abstractness xuất hiện trong [Phương trình 4-1](#eq_abstractness).
 
@@ -132,7 +132,7 @@ Metric distance-from-the-main-sequence hình dung một quan hệ lý tưởng g
 
 *Hình 4-3. Khoảng cách chuẩn hóa tới main sequence của một component cụ thể*
 
-Developer vẽ đồ thị component ứng viên, rồi đo khoảng cách tới đường lý tưởng hóa. Càng gần đường, component càng cân bằng tốt. <a id="idm45798387521736"></a><a id="idm45798387521016"></a>Các component rơi quá xa vào góc upper-right (trên bên phải) đi vào vùng mà kiến trúc sư gọi là *zone of uselessness* (vùng vô dụng): code quá trừu tượng trở nên khó dùng. Ngược lại, code rơi vào góc lower-left (dưới bên trái) đi vào *zone of pain* (vùng đau đớn): code có quá nhiều hiện thực và không đủ trừu tượng trở nên dễ vỡ và khó bảo trì, như minh họa trong [Hình 4-4](#ch-measuring-zones).
+Developer vẽ đồ thị component ứng viên, rồi đo khoảng cách tới đường lý tưởng hóa. Càng gần đường, component càng cân bằng tốt. <a id="idm45798387521736"></a><a id="idm45798387521016"></a>Các component rơi quá xa vào góc upper-right (trên bên phải) đi vào vùng mà kiến trúc sư gọi là *zone of uselessness* (vùng vô dụng): code quá trừu tượng trở nên khó dùng. Ngược lại, code rơi vào góc lower-left (dưới bên trái) đi vào *zone of pain* (vùng đau đớn): code có quá nhiều bản triển khai và không đủ trừu tượng trở nên dễ vỡ và khó bảo trì, như minh họa trong [Hình 4-4](#ch-measuring-zones).
 
 Trên nhiều nền tảng có công cụ cung cấp các thước đo này, hỗ trợ kiến trúc sư khi phân tích codebase vì lý do chưa quen thuộc, chuyển đổi, hoặc đánh giá technical debt.
 
@@ -152,7 +152,7 @@ Theo lưu đồ trong [Hình 4-1](#fig-architectural-decomposition-flowchart), m
 
 ## Phân rã dựa trên component (Component-Based Decomposition)
 
-Theo kinh nghiệm của chúng tôi, phần lớn khó khăn và độ phức tạp liên quan<a id="ch04-cbd2"></a><a id="ch04-cbd"></a> đến việc chuyển các ứng dụng monolith sang architecture phân tán cao như microservices đến từ các component kiến trúc được định nghĩa kém. <a id="idm45798387504712"></a><a id="idm45798387503752"></a>Ở đây chúng tôi định nghĩa một *component* là một khối xây dựng của ứng dụng có vai trò và trách nhiệm well-defined (được định nghĩa rõ) trong hệ thống và một tập thao tác well-defined. Component trong hầu hết các ứng dụng được thể hiện thông qua namespace hoặc cấu trúc thư mục và được hiện thực thông qua các file component (hay file source). Ví dụ, trong [Hình 4-5](#fig-decomposition-patterns-namespace), cấu trúc thư mục *penultimate/ss/ticket/assign* sẽ biểu thị một component tên Ticket Assign với namespace `penultimate.ss.ticket.assign`.
+Theo kinh nghiệm của chúng tôi, phần lớn khó khăn và độ phức tạp liên quan<a id="ch04-cbd2"></a><a id="ch04-cbd"></a> đến việc chuyển các ứng dụng monolith sang architecture phân tán cao như microservices đến từ các component kiến trúc được định nghĩa kém. <a id="idm45798387504712"></a><a id="idm45798387503752"></a>Ở đây chúng tôi định nghĩa một *component* là một khối xây dựng của ứng dụng có vai trò và trách nhiệm well-defined (được định nghĩa rõ) trong hệ thống và một tập thao tác well-defined. Component trong hầu hết các ứng dụng được thể hiện thông qua namespace hoặc cấu trúc thư mục và được triển khai thông qua các file component (hay file source). Ví dụ, trong [Hình 4-5](#fig-decomposition-patterns-namespace), cấu trúc thư mục *penultimate/ss/ticket/assign* sẽ biểu thị một component tên Ticket Assign với namespace `penultimate.ss.ticket.assign`.
 
 <a id="fig-decomposition-patterns-namespace"></a>
 

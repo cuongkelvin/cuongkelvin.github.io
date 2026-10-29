@@ -208,7 +208,7 @@ Kết quả trên console
 5.500000 inches = 13.970000 cm
 ```
 
-Các header file Programmer-created cũng có thể được include nhưng phải dùng dấu ngoặc kép (`" "`) bao quanh tên file thay vì dấu ngoặc (\< \>). Chẳng hạn, một header file user-created tên `myfunctions.h` được include bằng dòng sau.
+Các header file Programmer-created cũng có thể được include nhưng phải dùng dấu ngoặc kép (`" "`) bao quanh tên file thay vì dấu ngoặc (< >). Chẳng hạn, một header file user-created tên `myfunctions.h` được include bằng dòng sau.
 
 ```
 #include "myfunctions.h"
@@ -423,7 +423,7 @@ Phép gán đơn giản sử dụng toán tử `=`. Code C cũng cho phép phép
     else         y = b;
 ```
 
-#### Ví dụ code C eC.7 VÍ DỤ VỀ TOÁN TỬ
+### Ví dụ code C eC.7 VÍ DỤ VỀ TOÁN TỬ
 
 | Biểu thức | Kết quả | Ghi chú |
 |---|---|---|
@@ -473,7 +473,7 @@ int sum3(int a, int b, int c) {
 
 Một hàm phải được khai báo trong code trước khi được gọi. Có thể làm điều này bằng cách đặt hàm được gọi ở phía trước trong file. Vì vậy, `main` thường được đặt ở cuối file C, sau tất cả hàm mà nó gọi. Hoặc có thể đặt function prototype trong chương trình trước khi định nghĩa hàm. Function prototype là dòng đầu tiên của hàm; nó khai báo kiểu trả về, tên hàm và các input của hàm. Chẳng hạn, prototype cho các hàm trong Ví dụ code C eC.8 và eC.9 là:
 
-#### Ví dụ code C eC.9 HÀM `printPrompt` KHÔNG CÓ INPUT HAY OUTPUT
+### Ví dụ code C eC.9 HÀM `printPrompt` KHÔNG CÓ INPUT HAY OUTPUT
 
 ```
 // Print a prompt to the console
@@ -493,7 +493,7 @@ Ví dụ code C eC.10 cho thấy cách sử dụng function prototype. Dù bản
 
 > Giống tên biến, tên hàm phân biệt chữ hoa chữ thường, không được là từ dành riêng của C, không được chứa ký tự đặc biệt (trừ dấu gạch dưới `_`), và không được bắt đầu bằng chữ số. Tên hàm thường chứa một động từ để chỉ điều chúng làm.
 >
-> Hãy nhất quán trong cách viết hoa tên hàm và biến để không phải liên tục tra lại cách viết hoa đúng. Hai phong cách phổ biến là camelCase, trong đó chữ cái đầu mỗi từ sau từ đầu được viết hoa như bướu lạc đà (ví dụ printPrompt), hoặc dùng dấu gạch dưới giữa các từ (ví dụ print\_prompt). Chúng tôi quan sát một cách không khoa học rằng vươn tay tới phím gạch dưới làm nặng thêm hội chứng ống cổ tay (ngón út của tôi nhói lên chỉ khi nghĩ đến dấu gạch dưới!) và vì vậy thích camelCase hơn. Nhưng điều quan trọng nhất là giữ phong cách nhất quán trong tổ chức của bạn.
+> Hãy nhất quán trong cách viết hoa tên hàm và biến để không phải liên tục tra lại cách viết hoa đúng. Hai phong cách phổ biến là camelCase, trong đó chữ cái đầu mỗi từ sau từ đầu được viết hoa như bướu lạc đà (ví dụ printPrompt), hoặc dùng dấu gạch dưới giữa các từ (ví dụ print_prompt). Chúng tôi quan sát một cách không khoa học rằng vươn tay tới phím gạch dưới làm nặng thêm hội chứng ống cổ tay (ngón út của tôi nhói lên chỉ khi nghĩ đến dấu gạch dưới!) và vì vậy thích camelCase hơn. Nhưng điều quan trọng nhất là giữ phong cách nhất quán trong tổ chức của bạn.
 
 Hàm `main` luôn được khai báo trả về một `int`; giá trị trả về này cho hệ điều hành biết lý do chương trình kết thúc. Số không biểu thị hoàn tất bình thường, còn giá trị khác không báo hiệu trạng thái lỗi. Nếu `main` đi đến cuối mà không gặp câu lệnh return, nó tự động trả về 0. Đa số hệ điều hành không tự động thông báo cho người dùng giá trị mà chương trình trả về.
 
@@ -1158,7 +1158,7 @@ Linked list là cấu trúc dữ liệu phổ biến để lưu số lượng ph
 
 Ví dụ code C eC.39 mô tả linked list lưu tài khoản người dùng máy tính để đáp ứng số người dùng thay đổi. Mỗi người có tên người dùng, mật khẩu, số nhận dạng người dùng duy nhất (UID) và trường cho biết họ có quyền quản trị hay không. Mỗi phần tử list thuộc kiểu `userL`, chứa toàn bộ thông tin người dùng này cùng liên kết đến phần tử tiếp theo. Pointer đến head của list được lưu trong biến toàn cục tên `users`, ban đầu được đặt là NULL để cho biết chưa có người dùng.
 
-Chương trình định nghĩa các hàm chèn, xóa, tìm người dùng và đếm số người dùng. Hàm `insertUser` cấp phát chỗ cho phần tử list mới và thêm vào head. Hàm `deleteUser` duyệt list đến khi tìm được UID chỉ định rồi xóa phần tử đó, điều chỉnh liên kết từ phần tử trước để bỏ qua phần tử bị xóa và giải phóng bộ nhớ nó chiếm. Hàm `findUser` duyệt list đến khi tìm được UID chỉ định và trả về pointer đến phần tử đó, hoặc NULL nếu không tìm thấy UID. Hàm `numUsers` đếm số phần tử trong list.
+Chương trình định nghĩa các hàm để chèn, xóa, tìm một người dùng và đếm số lượng người dùng. Hàm `insertUser` cấp phát vùng nhớ cho một phần tử list mới và thêm nó vào đầu list. Hàm `deleteUser` duyệt list cho đến khi tìm được UID chỉ định, rồi xóa phần tử đó, điều chỉnh liên kết từ phần tử trước để bỏ qua phần tử đã xóa và giải phóng vùng nhớ mà phần tử đã xóa chiếm dụng. Hàm `findUser` duyệt list cho đến khi tìm được UID chỉ định và trả về pointer đến phần tử đó, hoặc NULL nếu không tìm thấy UID. Hàm `numUsers` đếm số phần tử trong list.
 
 ## TÓM TẮT
 
@@ -1244,7 +1244,7 @@ Lập trình viên thường dùng nhiều hàm chuẩn khác nhau, như in và 
 
 ### C.9.1 stdio
 
-Thư viện input/output chuẩn `stdio.h` chứa lệnh in ra console, đọc input bàn phím, đọc và ghi file. Để dùng các hàm này, phải include thư viện ở đầu file C:
+Thư viện input/output chuẩn `stdio.h` chứa các lệnh để in ra console, đọc input từ bàn phím và đọc, ghi file. Để sử dụng các hàm này, phải include thư viện ở đầu file C:
 
 Bảng eC.5 Các thư viện C thường dùng
 
@@ -1608,7 +1608,7 @@ argv[2] = 25
 argv[3] = lastarg!
 ```
 
-#### Lỗi code C eC.1 THIẾU `&` TRONG `scanf`
+### Lỗi code C eC.1 THIẾU `&` TRONG `scanf`
 
 Code có lỗi
 
@@ -1678,7 +1678,7 @@ scanf("%d", &a);
 >
 > chạy như dự định.
 
-#### Lỗi code C eC.2 DÙNG `=` THAY VÌ `= =` ĐỂ SO SÁNH
+### Lỗi code C eC.2 DÙNG `=` THAY VÌ `= =` ĐỂ SO SÁNH
 
 Code có lỗi
 
@@ -1694,7 +1694,7 @@ if (x = = 1)
   printf("Found!\n");
 ```
 
-#### Lỗi code C eC.3 ĐÁNH CHỈ SỐ VƯỢT PHẦN TỬ CUỐI ARRAY
+### Lỗi code C eC.3 ĐÁNH CHỈ SỐ VƯỢT PHẦN TỬ CUỐI ARRAY
 
 Code có lỗi
 
@@ -1710,7 +1710,7 @@ int array[10];
 array[9] = 42;
 ```
 
-#### Lỗi code C eC.4 DÙNG `=` TRONG CÂU LỆNH `#define`
+### Lỗi code C eC.4 DÙNG `=` TRONG CÂU LỆNH `#define`
 
 Code có lỗi
 
@@ -1725,7 +1725,7 @@ Code đã sửa
 #define NUM 4
 ```
 
-#### Lỗi code C eC.5 DÙNG BIẾN CHƯA KHỞI TẠO
+### Lỗi code C eC.5 DÙNG BIẾN CHƯA KHỞI TẠO
 
 Code có lỗi
 
@@ -1743,7 +1743,7 @@ if (i = = 10)
   ...
 ```
 
-#### Lỗi code C eC.6 KHÔNG ĐƯA VÀO ĐƯỜNG DẪN HEADER FILE USER-CREATED
+### Lỗi code C eC.6 KHÔNG ĐƯA VÀO ĐƯỜNG DẪN HEADER FILE USER-CREATED
 
 Code có lỗi
 
@@ -1757,7 +1757,7 @@ Code đã sửa
 #include "othercode\myfile.h"
 ```
 
-#### Lỗi code C eC.7 DÙNG TOÁN TỬ LOGIC (`!, ||, &&`) THAY VÌ BITWISE (`~, |, &`)
+### Lỗi code C eC.7 DÙNG TOÁN TỬ LOGIC (`!, ||, &&`) THAY VÌ BITWISE (`~, |, &`)
 
 Code có lỗi
 
@@ -1775,7 +1775,7 @@ char y = 5|2; // bitwise OR:    y = 0b00000111
 char z = 5 & 2; // logical AND:  z = 0b00000000
 ```
 
-#### Lỗi code C eC.8 QUÊN `break` TRONG CÂU LỆNH `switch/case`
+### Lỗi code C eC.8 QUÊN `break` TRONG CÂU LỆNH `switch/case`
 
 Code có lỗi
 
@@ -1807,7 +1807,7 @@ switch (x) {
 // direction = 2
 ```
 
-#### Lỗi code C eC.9 THIẾU DẤU NGOẶC NHỌN `{}`
+### Lỗi code C eC.9 THIẾU DẤU NGOẶC NHỌN `{}`
 
 Code có lỗi
 
@@ -1826,7 +1826,7 @@ if (ptr == NULL) {
 }
 ```
 
-#### Lỗi code C eC.10 DÙNG HÀM TRƯỚC KHI KHAI BÁO
+### Lỗi code C eC.10 DÙNG HÀM TRƯỚC KHI KHAI BÁO
 
 Code có lỗi
 
@@ -1850,7 +1850,7 @@ int main(void) {
 }
 ```
 
-#### Lỗi code C eC.11 KHAI BÁO BIẾN CỤC BỘ VÀ TOÀN CỤC CÙNG TÊN
+### Lỗi code C eC.11 KHAI BÁO BIẾN CỤC BỘ VÀ TOÀN CỤC CÙNG TÊN
 
 Code có lỗi
 
@@ -1872,7 +1872,7 @@ int test(void) {
 }
 ```
 
-#### Lỗi code C eC.12 CỐ KHỞI TẠO ARRAY BẰNG `{}` SAU KHI KHAI BÁO
+### Lỗi code C eC.12 CỐ KHỞI TẠO ARRAY BẰNG `{}` SAU KHI KHAI BÁO
 
 Code có lỗi
 
@@ -1887,7 +1887,7 @@ Code đã sửa
 int scores[3] = {93, 81, 97};
 ```
 
-#### Lỗi code C eC.13 GÁN ARRAY NÀY CHO ARRAY KHÁC BẰNG `=`
+### Lỗi code C eC.13 GÁN ARRAY NÀY CHO ARRAY KHÁC BẰNG `=`
 
 Code có lỗi
 
@@ -1906,7 +1906,7 @@ for (i = 0; i < 3; i++)
   scores2[i] = scores[i];
 ```
 
-#### Lỗi code C eC.14 QUÊN SEMI-COLON SAU VÒNG LẶP `do/while`
+### Lỗi code C eC.14 QUÊN SEMI-COLON SAU VÒNG LẶP `do/while`
 
 Code có lỗi
 
@@ -1926,7 +1926,7 @@ do {
 } while (num < 100);
 ```
 
-#### Lỗi code C eC.15 DÙNG DẤU PHẨY THAY VÌ CHẤM PHẨY TRONG VÒNG LẶP `for`
+### Lỗi code C eC.15 DÙNG DẤU PHẨY THAY VÌ CHẤM PHẨY TRONG VÒNG LẶP `for`
 
 Code có lỗi
 
@@ -1942,7 +1942,7 @@ for (i = 0; i < 200; i++)
   ...
 ```
 
-#### Lỗi code C eC.16 CHIA SỐ NGUYÊN THAY VÌ CHIA FLOATING-POINT
+### Lỗi code C eC.16 CHIA SỐ NGUYÊN THAY VÌ CHIA FLOATING-POINT
 
 Code có lỗi
 
@@ -1961,7 +1961,7 @@ Code đã sửa
 float x = 9.0 / 4; // x = 2.25
 ```
 
-#### Lỗi code C eC.17 GHI VÀO POINTER CHƯA KHỞI TẠO
+### Lỗi code C eC.17 GHI VÀO POINTER CHƯA KHỞI TẠO
 
 Code có lỗi
 
@@ -1976,7 +1976,7 @@ int x, *y = &x;
 *y = 77;
 ```
 
-#### Lỗi code C eC.18 KỲ VỌNG LỚN (HOẶC KHÔNG CÓ KỲ VỌNG)
+### Lỗi code C eC.18 KỲ VỌNG LỚN (HOẶC KHÔNG CÓ KỲ VỌNG)
 
 Một lỗi thường gặp ở người mới là viết toàn bộ chương trình (thường ít tính module) rồi kỳ vọng nó hoạt động hoàn hảo ngay lần đầu. Với chương trình không tầm thường, viết code có tính module và kiểm tra từng hàm trong quá trình phát triển là thiết yếu. Việc debug trở nên khó hơn theo cấp số nhân và ngày càng time-consuming khi độ phức tạp tăng.
 

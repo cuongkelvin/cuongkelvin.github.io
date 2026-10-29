@@ -56,11 +56,11 @@ struct input_dev {
 
 - `evbit` là bitmap event type mà device hỗ trợ. Sau đây là một số event:
 
-- `EV_KEY` cho device hỗ trợ gửi key event (ví dụ keyboard, button, v.v.)
+  - `EV_KEY` cho device hỗ trợ gửi key event (ví dụ keyboard, button, v.v.)
 
-- `EV_REL` cho device hỗ trợ gửi relative position (ví dụ mouse, digitizer, v.v.)
+  - `EV_REL` cho device hỗ trợ gửi relative position (ví dụ mouse, digitizer, v.v.)
 
-- `EV_ABS` cho device hỗ trợ gửi absolute position (ví dụ joystick). Danh sách event nằm trong kernel source tại file `include/linux/input-event-codes.h`. Có thể dùng macro `set_bit()` đặt bit thích hợp tùy khả năng input device. Dĩ nhiên, device có thể hỗ trợ nhiều event type. Ví dụ mouse driver đặt cả `EV_KEY` và `EV_REL` như sau:
+  - `EV_ABS` cho device hỗ trợ gửi absolute position (ví dụ joystick). Danh sách event nằm trong kernel source tại file `include/linux/input-event-codes.h`. Có thể dùng macro `set_bit()` đặt bit thích hợp tùy khả năng input device. Dĩ nhiên, device có thể hỗ trợ nhiều event type. Ví dụ mouse driver đặt cả `EV_KEY` và `EV_REL` như sau:
 
 ```
     set_bit(EV_KEY, my_input_dev->evbit);
@@ -204,11 +204,7 @@ Hãy xem thành phần structure:
 
 - `close` là method tùy chọn được gọi khi device không còn được poll. Dùng đưa device vào low power mode.
 
-- `poll` là method bắt buộc được gọi mỗi khi cần poll device. Được gọi ở frequency của
-
-```
-poll_inteval.
-```
+- `poll` là method bắt buộc được gọi mỗi khi cần poll device. Được gọi ở frequency của `poll_inteval`.
 
 - `poll_interval` là frequency gọi method `poll()`. Mặc định 500 millisecond trừ khi ghi đè lúc đăng ký device.
 
@@ -340,11 +336,7 @@ Danh sách report function sẵn có nằm trong kernel source file `include/lin
 
 - `dev` là input device chịu trách nhiệm event.
 
-- `code` biểu diễn event code; ví dụ `REL_X` hoặc `KEY_BACKSPACE`. Danh sách đầy đủ có trong
-
-```
-include/linux/input-event-codes.h.
-```
+- `code` biểu diễn event code; ví dụ `REL_X` hoặc `KEY_BACKSPACE`. Danh sách đầy đủ có trong `include/linux/input-event-codes.h`.
 
 - `value` là giá trị event mang. Với event type `EV_REL`, mang relative change. Với event type `EV_ABS` (joystick, v.v.), chứa absolute value mới. Với event type `EV_KEY`, nên đặt `0` cho key release, `1` cho keypress và `2` cho auto-repeat.
 
@@ -479,11 +471,7 @@ Hãy xem ý nghĩa từng thành phần trong structure:
 
 - `type` là event type; ví dụ `EV_KEY` cho keypress hoặc release, `EV_REL` cho relative movement hoặc `EV_ABS` cho absolute movement. Thêm type được định nghĩa trong `include/linux/input-event-codes.h`.
 
-- `code` là event code; ví dụ `REL_X` hoặc `KEY_BACKSPACE`. Một lần nữa, danh sách đầy đủ có trong
-
-```
-include/linux/input-event-codes.h.
-```
+- `code` là event code; ví dụ `REL_X` hoặc `KEY_BACKSPACE`. Một lần nữa, danh sách đầy đủ có trong `include/linux/input-event-codes.h`.
 
 - `value` là giá trị event mang. Với event type `EV_REL`, mang relative change. Với event type `EV_ABS` (joystick, v.v.), chứa absolute value mới. Với event type `EV_KEY`, đặt `0` cho key release, `1` cho keypress và `2` cho auto-repeat.
 

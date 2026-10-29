@@ -1,6 +1,6 @@
 # 8 Thiết kế finite state machine bằng VHDL
 
-Finite state machine (FSM) là những trừu tượng toán học được dùng để giải một phạm vi rất rộng các bài toán, trong đó có electronic design automation, thiết kế communication protocol, parsing và các ứng dụng kỹ thuật khác. Ở giai đoạn này trong sự nghiệp digital design của bạn, có lẽ bạn đã thiết kế vài state machine trên giấy. Giờ bạn đã đến lúc có thể hiện thực và test chúng bằng phần cứng thực tế. Bước đầu tiên trong quá trình này là học cách mô hình hóa FSM bằng VHDL.
+Finite state machine (FSM) là những trừu tượng toán học được dùng để giải một phạm vi rất rộng các bài toán, trong đó có electronic design automation, thiết kế communication protocol, parsing và các ứng dụng kỹ thuật khác. Ở giai đoạn này trong sự nghiệp digital design của bạn, có lẽ bạn đã thiết kế vài state machine trên giấy. Giờ bạn đã đến lúc có thể triển khai và test chúng bằng phần cứng thực tế. Bước đầu tiên trong quá trình này là học cách mô hình hóa FSM bằng VHDL.
 
 Như bạn sẽ thấy trong mục tiếp theo, các thiết kế FSM đơn giản chỉ tiến thêm một bước so với thiết kế mạch tuần tự đã mô tả ở mục trước. Các kỹ thuật bạn học trong mục này sẽ cho phép bạn thiết kế nhanh và dễ dàng những FSM tương đối phức tạp, có thể hữu ích theo nhiều cách.
 
@@ -12,13 +12,13 @@ Hình 8.1: Sơ đồ khối của một FSM Moore-type.
 
 ![p0102_2](images/ch08_finite_state_machine_design_using_vhdl/p0102_2.png)
 
-Hình 8.2: Model cho các bản hiện thực FSM bằng VHDL.
+Hình 8.2: Model cho các bản triển khai FSM bằng VHDL.
 
-Model FSM trong Hình 8.1 là model phổ biến nhất để mô tả một FSM Moore-type. Điều này có lẽ là vì sinh viên thường được yêu cầu tạo ra logic tổ hợp cần để hiện thực Next State Decoder và Output Decoder; tuy nhiên ở đây chúng ta muốn nghĩ về FSM trong ngữ cảnh VHDL. Sức mạnh thực sự của VHDL bắt đầu lộ ra khi làm việc với FSM. Như bạn sẽ thấy, tính linh hoạt của behavioral modeling VHDL loại bỏ nhu cầu về những bản thiết kế lớn trên giấy với vô số K-maps và vô số phần tử logic tổ hợp.
+Model FSM trong Hình 8.1 là model phổ biến nhất để mô tả một FSM Moore-type. Điều này có lẽ là vì sinh viên thường được yêu cầu tạo ra logic tổ hợp cần để triển khai Next State Decoder và Output Decoder; tuy nhiên ở đây chúng ta muốn nghĩ về FSM trong ngữ cảnh VHDL. Sức mạnh thực sự của VHDL bắt đầu lộ ra khi làm việc với FSM. Như bạn sẽ thấy, tính linh hoạt của behavioral modeling VHDL loại bỏ nhu cầu về những bản thiết kế lớn trên giấy với vô số K-maps và vô số phần tử logic tổ hợp.
 
-Có nhiều cách tiếp cận khác nhau được dùng để mô hình hóa FSM trong VHDL. Các cách tiếp cận khác nhau này là kết quả của tính linh hoạt chung của VHDL với tư cách một ngôn ngữ. Những gì chúng ta sẽ mô tả trong mục này có lẽ là cách tiếp cận rõ ràng nhất để hiện thực FSM. Sơ đồ khối của cách tiếp cận chúng ta sẽ dùng trong việc hiện thực FSM được trình bày trong Hình 8.2.
+Có nhiều cách tiếp cận khác nhau được dùng để mô hình hóa FSM trong VHDL. Các cách tiếp cận khác nhau này là kết quả của tính linh hoạt chung của VHDL với tư cách một ngôn ngữ. Những gì chúng ta sẽ mô tả trong mục này có lẽ là cách tiếp cận rõ ràng nhất để triển khai FSM. Sơ đồ khối của cách tiếp cận chúng ta sẽ dùng trong việc triển khai FSM được trình bày trong Hình 8.2.
 
-Dù trông không rõ ràng hơn là bao, bạn sẽ sớm thấy model FSM trong Hình 8.2 là một phương pháp đơn giản để hiện thực FSM. Cách tiếp cận chúng ta sẽ dùng chia FSM thành hai process VHDL. Một process, gọi là Synchronous Process, xử lý mọi vấn đề liên quan đến clocking và các điều khiển khác gắn với phần tử lưu trữ. Process kia, Combinatorial Process, xử lý mọi vấn đề gắn với Next State Decoder và Output Decoder của Hình 8.1. Lưu ý rằng cả hai khối trong Hình 8.1 đều chỉ được tạo thành hoàn toàn từ logic tổ hợp.
+Dù trông không rõ ràng hơn là bao, bạn sẽ sớm thấy model FSM trong Hình 8.2 là một phương pháp đơn giản để triển khai FSM. Cách tiếp cận chúng ta sẽ dùng chia FSM thành hai process VHDL. Một process, gọi là Synchronous Process, xử lý mọi vấn đề liên quan đến clocking và các điều khiển khác gắn với phần tử lưu trữ. Process kia, Combinatorial Process, xử lý mọi vấn đề gắn với Next State Decoder và Output Decoder của Hình 8.1. Lưu ý rằng cả hai khối trong Hình 8.1 đều chỉ được tạo thành hoàn toàn từ logic tổ hợp.
 
 Một số thuật ngữ mới được dùng để mô tả các signal trong Hình 8.2, như được nêu và mô tả dưới đây:
 
@@ -28,15 +28,15 @@ Một số thuật ngữ mới được dùng để mô tả các signal trong H
 
 • Các signal Present State được khối Combinatorial Process dùng cho cả việc giải mã trạng thái tiếp theo lẫn giải mã output. Sơ đồ trong Hình 8.2 cũng cho thấy các variable Present State cũng có thể được cung cấp làm output của FSM nhưng chúng không bắt buộc.
 
-Một nhận xét cuối cùng trước khi bắt đầu. Có nhiều phương pháp khác nhau có thể được dùng để mô tả FSM bằng VHDL. Khi bạn đã hiểu phương pháp trình bày ở đây, việc học bất kỳ kiểu hiện thực FSM nào khác tương đối nhẹ nhàng. Thông tin thêm về các coding style FSM khác có thể tìm thấy trong nhiều tài liệu VHDL khác nhau hoặc trên web.
+Một nhận xét cuối cùng trước khi bắt đầu. Có nhiều phương pháp khác nhau có thể được dùng để mô tả FSM bằng VHDL. Khi bạn đã hiểu phương pháp trình bày ở đây, việc học bất kỳ kiểu triển khai FSM nào khác tương đối nhẹ nhàng. Thông tin thêm về các coding style FSM khác có thể tìm thấy trong nhiều tài liệu VHDL khác nhau hoặc trên web.
 
 ## 8.1 Biểu diễn behavioral của FSM bằng VHDL
 
-> VÍ DỤ 18. Hãy viết code VHDL hiện thực FSM ở bên phải.
+> VÍ DỤ 18. Hãy viết code VHDL triển khai FSM ở bên phải.
 
 ![p0104_3](images/ch08_finite_state_machine_design_using_vhdl/p0104_3.png)
 
-LỜI GIẢI. Bài toán này thể hiện một bản hiện thực FSM cơ bản. Việc trình bày sơ đồ black-box rất bổ ích, vì nó giúp viết mô tả entity. Bắt đầu các bài toán FSM bằng việc vẽ một sơ đồ black box là một cách tiếp cận lành mạnh, đặc biệt khi làm việc với FSM. Với các bài toán FSM, nhiều khi việc phân biệt input với output của FSM trở nên khó khăn. Vẽ một sơ đồ giúp giảm bớt vấn đề này. Sơ đồ black box và code cho lời giải của Ví dụ 18 được trình bày trong Listing 8.1.
+LỜI GIẢI. Bài toán này thể hiện một bản triển khai FSM cơ bản. Việc trình bày sơ đồ black-box rất bổ ích, vì nó giúp viết mô tả entity. Bắt đầu các bài toán FSM bằng việc vẽ một sơ đồ black box là một cách tiếp cận lành mạnh, đặc biệt khi làm việc với FSM. Với các bài toán FSM, nhiều khi việc phân biệt input với output của FSM trở nên khó khăn. Vẽ một sơ đồ giúp giảm bớt vấn đề này. Sơ đồ black box và code cho lời giải của Ví dụ 18 được trình bày trong Listing 8.1.
 
 ![p0104_4](images/ch08_finite_state_machine_design_using_vhdl/p0104_4.png)
 
@@ -169,9 +169,7 @@ Lưu ý rằng code VHDL trong Listing 8.2 chỉ khác code trong Listing 8.1 �
 
 Cuối cùng, có ba concurrent statement trong code VHDL ở Listing 8.2: hai process statement và một selective signal assignment statement.
 
-> VÍ DỤ 19. Hãy viết code VHDL hiện thực FSM ở bên phải. Coi các state variable là output của
->
-> FSM.
+> VÍ DỤ 19. Hãy viết code VHDL triển khai FSM ở bên phải. Coi các state variable là output của FSM.
 
 ![p0109_6](images/ch08_finite_state_machine_design_using_vhdl/p0109_6.png)
 
@@ -244,11 +242,11 @@ Như thường lệ, có một vài điều thú vị cần chỉ ra về lời 
 
 • Khi giả lập các output state variable (nhớ rằng các state variable thực sự được biểu diễn bằng enumeration type), cần hai signal vì sơ đồ trạng thái có nhiều hơn hai trạng thái (và ít hơn năm trạng thái). Lời giải chọn biểu diễn các output này thành một bundle, việc này có tác dụng làm thay đổi đôi chút hình thức của selected signal assignment statement xuất hiện ở cuối mô tả architecture.
 
-> VÍ DỤ 20. Hãy viết code VHDL hiện thực FSM ở bên phải. Coi các state variable được liệt kê là output.
+> VÍ DỤ 20. Hãy viết code VHDL triển khai FSM ở bên phải. Coi các state variable được liệt kê là output.
 
 ![p0111_8](images/ch08_finite_state_machine_design_using_vhdl/p0111_8.png)
 
-LỜI GIẢI. Sơ đồ trạng thái cho thấy bản hiện thực của nó sẽ có bốn trạng thái, một input bên ngoài và hai output bên ngoài. Đây là một FSM hybrid ở chỗ if có chứa cả một output Mealy và một output Moore-type, nhưng trong trường hợp này FSM sẽ được xem là một FSM Mealy-type. Sơ đồ black-box và code VHDL của lời giải được trình bày trong Listing 8.4.
+LỜI GIẢI. Sơ đồ trạng thái cho thấy bản triển khai của nó sẽ có bốn trạng thái, một input bên ngoài và hai output bên ngoài. Đây là một FSM hybrid ở chỗ if có chứa cả một output Mealy và một output Moore-type, nhưng trong trường hợp này FSM sẽ được xem là một FSM Mealy-type. Sơ đồ black-box và code VHDL của lời giải được trình bày trong Listing 8.4.
 
 ![p0112_9](images/ch08_finite_state_machine_design_using_vhdl/p0112_9.png)
 
@@ -315,33 +313,33 @@ begin
 end fsm4;
 ```
 
-Nếu đến giờ bạn vẫn chưa nhận ra, việc hiện thực FSM bằng behavioral model VHDL đơn giản một cách đáng kể. Thực tế, tôi hiếm khi viết code một FSM từ đầu; tôi thường chọn lấy một FSM nào đó tôi đã viết trước đây và bắt đầu từ đó. Hãy nhớ rằng kỹ thuật thực sự hiếm khi dựa trên một cuốn sách công thức nấu ăn. Với các bài toán FSM, phần kỹ thuật nằm ở việc test và tạo ra sơ đồ trạng thái. Đừng quá thoải mái với behavioral modeling của FSM; niềm vui thực sự là tạo ra một FSM giải được một bài toán cho trước.
+Nếu đến giờ bạn vẫn chưa nhận ra, việc triển khai FSM bằng behavioral model VHDL đơn giản một cách đáng kể. Thực tế, tôi hiếm khi viết code một FSM từ đầu; tôi thường chọn lấy một FSM nào đó tôi đã viết trước đây và bắt đầu từ đó. Hãy nhớ rằng kỹ thuật thực sự hiếm khi dựa trên một cuốn sách công thức nấu ăn. Với các bài toán FSM, phần kỹ thuật nằm ở việc test và tạo ra sơ đồ trạng thái. Đừng quá thoải mái với behavioral modeling của FSM; niềm vui thực sự là tạo ra một FSM giải được một bài toán cho trước.
 
 ## 8.2 One-Hot encoding cho FSM
 
-Nói thật lòng, có nhiều phương pháp khác nhau có thể dùng để mã hóa state variable[^1]. Nếu dạng chính xác của cách biểu diễn được dùng là quan trọng với bạn, bạn sẽ cần thực hiện các bước cần thiết để điều khiển cách synthesizer biểu diễn các state variable. Có hai cách tiếp cận để điều khiển cách biểu diễn state variable. Cách tiếp cận thứ nhất là để công cụ synthesis lo các chi tiết. Vì mọi FSM chúng ta thấy cho đến giờ đều dùng enumeration type để biểu diễn state variable, synthesizer có thể chọn biểu diễn chúng thực tế bằng một encoding scheme do nó tự chọn. Thực tế là các công cụ nói chung có một tùy chọn để chọn encoding scheme mong muốn. Nhược điểm của cách tiếp cận này là bạn bị mất đi trải nghiệm học tập gắn với việc hiện thực code VHDL tạo ra tường minh encoding scheme mong muốn của bạn. Xét cho cùng, bạn có thể có một encoding scheme đặc biệt nào đó cần dùng nhưng không được các công cụ phát triển hỗ trợ. Cách tiếp cận thứ hai để mã hóa state variable là chỉ định chúng trực tiếp trong VHDL. Cách tiếp cận chỉ định state variable trong code VHDL được trình bày trong mục này.
+Nói thật lòng, có nhiều phương pháp khác nhau có thể dùng để mã hóa state variable[^1]. Nếu dạng chính xác của cách biểu diễn được dùng là quan trọng với bạn, bạn sẽ cần thực hiện các bước cần thiết để điều khiển cách synthesizer biểu diễn các state variable. Có hai cách tiếp cận để điều khiển cách biểu diễn state variable. Cách tiếp cận thứ nhất là để công cụ synthesis lo các chi tiết. Vì mọi FSM chúng ta thấy cho đến giờ đều dùng enumeration type để biểu diễn state variable, synthesizer có thể chọn biểu diễn chúng thực tế bằng một encoding scheme do nó tự chọn. Thực tế là các công cụ nói chung có một tùy chọn để chọn encoding scheme mong muốn. Nhược điểm của cách tiếp cận này là bạn bị mất đi trải nghiệm học tập gắn với việc triển khai code VHDL tạo ra tường minh encoding scheme mong muốn của bạn. Xét cho cùng, bạn có thể có một encoding scheme đặc biệt nào đó cần dùng nhưng không được các công cụ phát triển hỗ trợ. Cách tiếp cận thứ hai để mã hóa state variable là chỉ định chúng trực tiếp trong VHDL. Cách tiếp cận chỉ định state variable trong code VHDL được trình bày trong mục này.
 
-One-hot encoding dùng một bit trong state register cho mỗi trạng thái của FSM. Với một FSM one-hot encoding có 16 trạng thái, cần 16 flip flop. Tuy nhiên chỉ cần bốn flip flop nếu cùng FSM đó được hiện thực bằng binary encoding. One-hot encoding đơn giản hóa logic và các kết nối giữa toàn bộ logic. Dù trông khá lãng phí xét về lượng logic sử dụng, one-hot encoding thường cho ra các FSM nhỏ hơn và nhanh hơn.
+One-hot encoding dùng một bit trong state register cho mỗi trạng thái của FSM. Với một FSM one-hot encoding có 16 trạng thái, cần 16 flip flop. Tuy nhiên chỉ cần bốn flip flop nếu cùng FSM đó được triển khai bằng binary encoding. One-hot encoding đơn giản hóa logic và các kết nối giữa toàn bộ logic. Dù trông khá lãng phí xét về lượng logic sử dụng, one-hot encoding thường cho ra các FSM nhỏ hơn và nhanh hơn.
 
 Cách tiếp cận dùng trong các ví dụ FSM trước là giả vờ như chúng ta đang dùng full encoding cho các state variable của FSM. Cách tiếp cận full encoding tối thiểu hóa số lượng phần tử lưu trữ (flip-flops) dùng để lưu các state variable. Phương trình dạng đóng mô tả số lượng flip-flops cần cho một FSM cho trước như một hàm của số trạng thái được trình bày trong phương trình 8.1. Các ký hiệu bracket-like dùng trong phương trình 8.1 biểu thị một ceiling function[^2]. Bản chất nhị phân được thể hiện qua phương trình này rõ ràng đến mức encoding này thường được gọi là binary encoding.
 
 #(flip_flops) = ⌈log<sub>2</sub>(#states)⌉ (8.1)
 
-Với các FSM one-hot encoded, tại mỗi thời điểm chỉ có một flip-flop được assert. Điều này đòi hỏi mỗi trạng thái riêng biệt được biểu diễn bằng một flip-flop. Vì vậy, trong one-hot encoding, số lượng flip-flops cần để hiện thực một FSM bằng số trạng thái trong FSM. Dạng đóng của quan hệ này được trình bày trong phương trình 8.2.
+Với các FSM one-hot encoded, tại mỗi thời điểm chỉ có một flip-flop được assert. Điều này đòi hỏi mỗi trạng thái riêng biệt được biểu diễn bằng một flip-flop. Vì vậy, trong one-hot encoding, số lượng flip-flops cần để triển khai một FSM bằng số trạng thái trong FSM. Dạng đóng của quan hệ này được trình bày trong phương trình 8.2.
 
 #(flip_flops) = #(states) (8.2)
 
-Câu hỏi tự nhiên nảy sinh là làm sao có thể dùng VHDL để hiện thực các FSM one-hot encoded. Nếu bạn muốn kiểm soát hoàn toàn quá trình, bạn sẽ cần giành quyền kiểm soát từ synthesizer. Và vì chúng ta quan tâm đến việc học VHDL, chúng ta cần xem xét quá trình mã hóa tường minh các FSM one-hot.
+Câu hỏi tự nhiên nảy sinh là làm sao có thể dùng VHDL để triển khai các FSM one-hot encoded. Nếu bạn muốn kiểm soát hoàn toàn quá trình, bạn sẽ cần giành quyền kiểm soát từ synthesizer. Và vì chúng ta quan tâm đến việc học VHDL, chúng ta cần xem xét quá trình mã hóa tường minh các FSM one-hot.
 
-Cách tiếp cận theo module mà chúng ta dùng để hiện thực FSM giúp đẩy nhanh quá trình chuyển đổi từ việc dùng enumeration type sang việc thực sự chỉ định cách các state variable được biểu diễn. Các thay đổi so với cách tiếp cận trước của chúng ta chỉ giới hạn ở cách các output được gán cho state variable và cách các state variable bị buộc phải được biểu diễn bằng những bit pattern nhất định. Vì vậy, các sửa đổi so với cách tiếp cận fully encoded chỉ giới hạn ở entity declaration (bạn sẽ cần nhiều variable hơn để biểu diễn các trạng thái), phần khai báo state variable (bạn sẽ cần khai báo tường minh các bit pattern gắn với mỗi trạng thái) và việc gán state variable cho các output (trong trường hợp này, chúng ta thực sự không giả lập như đã làm trong các ví dụ khác).
+Cách tiếp cận theo module mà chúng ta dùng để triển khai FSM giúp đẩy nhanh quá trình chuyển đổi từ việc dùng enumeration type sang việc thực sự chỉ định cách các state variable được biểu diễn. Các thay đổi so với cách tiếp cận trước của chúng ta chỉ giới hạn ở cách các output được gán cho state variable và cách các state variable bị buộc phải được biểu diễn bằng những bit pattern nhất định. Vì vậy, các sửa đổi so với cách tiếp cận fully encoded chỉ giới hạn ở entity declaration (bạn sẽ cần nhiều variable hơn để biểu diễn các trạng thái), phần khai báo state variable (bạn sẽ cần khai báo tường minh các bit pattern gắn với mỗi trạng thái) và việc gán state variable cho các output (trong trường hợp này, chúng ta thực sự không giả lập như đã làm trong các ví dụ khác).
 
-> VÍ DỤ 21. Hãy viết code VHDL hiện thực FSM ở bên phải. Coi các state variable được liệt kê là output. Hãy dùng one-hot encoding cho các state variable. Bài toán này là Ví dụ 20 làm lại từ đầu nhưng dùng one-hot encoding thực sự cho các state variable.
+> VÍ DỤ 21. Hãy viết code VHDL triển khai FSM ở bên phải. Coi các state variable được liệt kê là output. Hãy dùng one-hot encoding cho các state variable. Bài toán này là Ví dụ 20 làm lại từ đầu nhưng dùng one-hot encoding thực sự cho các state variable.
 
 ![p0115_10](images/ch08_finite_state_machine_design_using_vhdl/p0115_10.png)
 
-LỜI GIẢI. Sơ đồ trạng thái cho thấy bốn trạng thái, một input bên ngoài X, hai output bên ngoài Z1 và Z2, trong đó output Z2 là một Mealy output. Đây là một Mealy machine cho thấy nên dùng one-hot encoding để mã hóa các state variable. Chúng ta sẽ tiếp cận việc hiện thực FSM này từng phần một.
+LỜI GIẢI. Sơ đồ trạng thái cho thấy bốn trạng thái, một input bên ngoài X, hai output bên ngoài Z1 và Z2, trong đó output Z2 là một Mealy output. Đây là một Mealy machine cho thấy nên dùng one-hot encoding để mã hóa các state variable. Chúng ta sẽ tiếp cận việc triển khai FSM này từng phần một.
 
-Listing 8.5 cho thấy các sửa đổi cần thiết trong entity declaration để chuyển full encoding dùng trong Ví dụ 20 sang một pseudo one-hot encoding. Listing 8.6 cho thấy các sửa đổi cần thiết đối với assignment output state variable để chuyển từ enumeration type sang một dạng assigned type đặc biệt. Việc buộc các state variable được mã hóa thực sự bằng one-hot encoding đòi hỏi hai dòng code bổ sung này, như được trình bày trong Listing 8.6. Về bản chất, hai dòng code này buộc VHDL synthesizer biểu diễn mỗi trạng thái của FSM bằng phần tử lưu trữ riêng của nó. Nói cách khác, mỗi trạng thái được biểu diễn bằng modifier ”string” như được liệt kê. Điều này buộc bản hiện thực FSM phải nhớ bốn bit mỗi trạng thái, về bản chất đòi hỏi bốn flip-flops. Lưu ý trong Listing 8.7 rằng trường hợp mặc định được gán một trạng thái one-hot hợp lệ thay vì trạng thái toàn số không như thường lệ. Bạn rất nên cân nhắc so sánh ba hình này. Lời giải hoàn chỉnh được trình bày trong Listing 8.8
+Listing 8.5 cho thấy các sửa đổi cần thiết trong entity declaration để chuyển full encoding dùng trong Ví dụ 20 sang một pseudo one-hot encoding. Listing 8.6 cho thấy các sửa đổi cần thiết đối với assignment output state variable để chuyển từ enumeration type sang một dạng assigned type đặc biệt. Việc buộc các state variable được mã hóa thực sự bằng one-hot encoding đòi hỏi hai dòng code bổ sung này, như được trình bày trong Listing 8.6. Về bản chất, hai dòng code này buộc VHDL synthesizer biểu diễn mỗi trạng thái của FSM bằng phần tử lưu trữ riêng của nó. Nói cách khác, mỗi trạng thái được biểu diễn bằng modifier ”string” như được liệt kê. Điều này buộc bản triển khai FSM phải nhớ bốn bit mỗi trạng thái, về bản chất đòi hỏi bốn flip-flops. Lưu ý trong Listing 8.7 rằng trường hợp mặc định được gán một trạng thái one-hot hợp lệ thay vì trạng thái toàn số không như thường lệ. Bạn rất nên cân nhắc so sánh ba hình này. Lời giải hoàn chỉnh được trình bày trong Listing 8.8
 
 Listing 8.5: Các sửa đổi để chuyển Ví dụ 20 sang one-hot encoding.
 
@@ -466,7 +464,7 @@ end fsm4_oh;
 
 ## 8.3 Những điểm quan trọng
 
-• Mô hình hóa FSM từ một sơ đồ trạng thái là một quá trình đơn giản khi dùng behavioral modeling VHDL. Quá trình này đơn giản đến mức thường được xem là kiểu rập khuôn (cookie cutter). Phần kỹ thuật thực sự trong việc hiện thực FSM nằm ở việc tạo ra sơ đồ trạng thái giải được bài toán đang xét.
+• Mô hình hóa FSM từ một sơ đồ trạng thái là một quá trình đơn giản khi dùng behavioral modeling VHDL. Quá trình này đơn giản đến mức thường được xem là kiểu rập khuôn (cookie cutter). Phần kỹ thuật thực sự trong việc triển khai FSM nằm ở việc tạo ra sơ đồ trạng thái giải được bài toán đang xét.
 
 • Do tính linh hoạt chung của VHDL, có nhiều cách tiếp cận có thể được dùng để mô hình hóa FSM bằng VHDL. Cách tiếp cận dùng ở đây chỉ trình bày chi tiết một trong các kiểu đó, nhưng nói chung được xem là đơn giản nhất trong tất cả các kiểu.
 
@@ -474,7 +472,7 @@ end fsm4_oh;
 
 ## 8.4 Bài tập: Behavioral modeling của FSM
 
-BÀI TẬP 1. Hãy vẽ sơ đồ trạng thái gắn với code VHDL sau. Hãy nhớ cung cấp chú giải và ghi nhãn đầy đủ mọi thứ. BÀI TẬP 2. Hãy viết một
+BÀI TẬP 1. Hãy vẽ sơ đồ trạng thái gắn với code VHDL sau. Hãy nhớ cung cấp chú giải và ghi nhãn đầy đủ mọi thứ.
 
 ```vhdl
 -- library declaration
@@ -528,9 +526,9 @@ end fsm;
 
 ![p0120_12](images/ch08_finite_state_machine_design_using_vhdl/p0120_12.png)
 
-model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái như ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
+BÀI TẬP 2. Hãy viết một model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái như ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
 
-BÀI TẬP 3. Hãy vẽ sơ đồ trạng thái gắn với code VHDL sau. Hãy nhớ cung cấp chú giải và nhớ ghi nhãn mọi thứ. BÀI TẬP 4.
+BÀI TẬP 3. Hãy vẽ sơ đồ trạng thái gắn với code VHDL sau. Hãy nhớ cung cấp chú giải và nhớ ghi nhãn mọi thứ.
 
 ```vhdl
 -- library declaration
@@ -594,9 +592,9 @@ end my_fsmx;
 
 ![p0122_14](images/ch08_finite_state_machine_design_using_vhdl/p0122_14.png)
 
-Hãy viết code model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái ở bên phải.
+BÀI TẬP 4. Hãy viết code model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái ở bên phải.
 
-BÀI TẬP 5. Hãy vẽ sơ đồ trạng thái gắn với code VHDL sau. Coi các output Y là đại diện cho các state variable. Hãy nhớ cung cấp chú giải. Hãy chỉ ra các trạng thái bằng cả state variable lẫn dạng tương đương symbolic của chúng. BÀI TẬP 6. Hãy viết
+BÀI TẬP 5. Hãy vẽ sơ đồ trạng thái gắn với code VHDL sau. Coi các output Y là đại diện cho các state variable. Hãy nhớ cung cấp chú giải. Hãy chỉ ra các trạng thái bằng cả state variable lẫn dạng tương đương symbolic của chúng.
 
 ```vhdl
 -- library declaration
@@ -657,9 +655,9 @@ end my_fsm;
 
 ![p0124_15](images/ch08_finite_state_machine_design_using_vhdl/p0124_15.png)
 
-code model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái ở bên phải. Tất cả các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
+BÀI TẬP 6. Hãy viết code model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái ở bên phải. Tất cả các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
 
-BÀI TẬP 7. Hãy vẽ sơ đồ trạng thái tương ứng với model VHDL sau và cho biết FSM là một Mealy machine hay một Moore machine. Hãy nhớ ghi nhãn mọi thứ. BÀI TẬP 8. Hãy viết
+BÀI TẬP 7. Hãy vẽ sơ đồ trạng thái tương ứng với model VHDL sau và cho biết FSM là một Mealy machine hay một Moore machine. Hãy nhớ ghi nhãn mọi thứ.
 
 ```vhdl
 -- library declaration
@@ -733,33 +731,31 @@ end my_fsm;
 
 ![p0126_17](images/ch08_finite_state_machine_design_using_vhdl/p0126_17.png)
 
-code model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM. BÀI TẬP 9. Hãy viết
+BÀI TẬP 8. Hãy viết code model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
 
 ![p0127_18](images/ch08_finite_state_machine_design_using_vhdl/p0127_18.png)
 
-code model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
-
-BÀI TẬP 10. Hãy viết
+BÀI TẬP 9. Hãy viết code model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
 
 ![p0127_19](images/ch08_finite_state_machine_design_using_vhdl/p0127_19.png)
 
-code model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM. BÀI TẬP 11. Hãy viết
+BÀI TẬP 10. Hãy viết code model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
 
 ![p0128_20](images/ch08_finite_state_machine_design_using_vhdl/p0128_20.png)
 
-code model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
+BÀI TẬP 11. Hãy viết code model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
 
-BÀI TẬP 12. Hãy viết code model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM. BÀI TẬP 13.
+BÀI TẬP 12. Hãy viết code model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
 
 ![p0128_21](images/ch08_finite_state_machine_design_using_vhdl/p0128_21.png)
 
 ![p0128_22](images/ch08_finite_state_machine_design_using_vhdl/p0128_22.png)
 
-Hãy viết code model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM. BÀI TẬP 14.
+BÀI TẬP 13. Hãy viết code model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
 
 ![p0129_23](images/ch08_finite_state_machine_design_using_vhdl/p0129_23.png)
 
-Hãy viết code model behavioral VHDL có thể được dùng để hiện thực sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
+BÀI TẬP 14. Hãy viết code model behavioral VHDL có thể được dùng để triển khai sơ đồ trạng thái ở bên phải. Các state variable nên được mã hóa như được liệt kê và cũng được cung cấp làm output của FSM.
 
 ---
 

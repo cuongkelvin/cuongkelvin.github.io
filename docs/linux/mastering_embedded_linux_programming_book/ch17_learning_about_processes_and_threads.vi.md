@@ -30,7 +30,7 @@ Code dùng trong chương này có trong thư mục `Chapter17` trong GitHub rep
 
 ## Process hay thread?
 
-Nhiều nhà phát triển nhúng quen với real-time operating system (RTOS) cho rằng Unix process model cồng kềnh. Mặt khác, họ thấy sự tương đồng giữa một task RTOS và một Linux thread, và họ có xu hướng chuyển một thiết kế có sẵn bằng cách ánh xạ one-to-one các task RTOS sang thread. Tôi đã nhiều lần thấy các thiết kế trong đó toàn bộ ứng dụng được hiện thực bằng một process chứa 40 thread trở lên. Tôi muốn dành chút thời gian xem xét đây có phải là ý tưởng hay hay không. Hãy bắt đầu với một số định nghĩa.
+Nhiều nhà phát triển nhúng quen với real-time operating system (RTOS) cho rằng Unix process model cồng kềnh. Mặt khác, họ thấy sự tương đồng giữa một task RTOS và một Linux thread, và họ có xu hướng chuyển một thiết kế có sẵn bằng cách ánh xạ one-to-one các task RTOS sang thread. Tôi đã nhiều lần thấy các thiết kế trong đó toàn bộ ứng dụng được triển khai bằng một process chứa 40 thread trở lên. Tôi muốn dành chút thời gian xem xét đây có phải là ý tưởng hay hay không. Hãy bắt đầu với một số định nghĩa.
 
 Một process là một không gian địa chỉ bộ nhớ và một luồng thực thi, như được thể hiện trong sơ đồ sau. Không gian địa chỉ là riêng của process, vì vậy các thread chạy trong các process khác không thể truy cập nó. Sự tách biệt bộ nhớ này được tạo bởi subsystem quản lý bộ nhớ trong kernel, vốn giữ một ánh xạ trang bộ nhớ cho mỗi process và lập trình lại memory management unit ở mỗi lần context switch. Tôi sẽ mô tả chi tiết cách điều này hoạt động trong Chương 18. Một phần của không gian địa chỉ được ánh xạ tới một file chứa code và dữ liệu tĩnh mà chương trình đang chạy, như được thể hiện ở đây:
 
@@ -54,7 +54,7 @@ Vậy, dựa trên những chi tiết ngắn gọn này, bạn có thể hình d
 
 Bạn có thể ánh xạ task sang process và có 40 chương trình riêng lẻ giao tiếp qua IPC, ví dụ, với các thông điệp được gửi qua socket. Bạn sẽ giảm đáng kể các vấn đề hỏng bộ nhớ vì main thread chạy trong mỗi process được bảo vệ khỏi các process khác, và bạn sẽ giảm rò rỉ tài nguyên vì mỗi process được dọn dẹp sau khi nó thoát. Tuy nhiên, giao diện thông điệp giữa các process khá phức tạp và, khi có sự hợp tác chặt chẽ giữa một nhóm process, số lượng thông điệp có thể lớn và trở thành một yếu tố hạn chế đối với hiệu năng của hệ thống. Hơn nữa, bất kỳ process nào trong số 40 process đó có thể kết thúc, có lẽ vì một bug khiến nó crash, để lại 39 process còn lại tiếp tục chạy. Mỗi process sẽ phải xử lý thực tế là các process lân cận không còn chạy nữa và phục hồi một cách êm ái.
 
-Ở thái cực kia, bạn có thể ánh xạ task sang thread và hiện thực hệ thống như một process duy nhất chứa 40 thread. Việc hợp tác trở nên dễ dàng hơn nhiều vì chúng dùng chung không gian địa chỉ và file descriptor. Overhead của việc gửi thông điệp được giảm hoặc loại bỏ, và context switch giữa các thread nhanh hơn giữa các process. Nhược điểm là bạn đã tạo ra khả năng một task làm hỏng heap hoặc stack của task khác. Nếu bất kỳ thread nào gặp một bug nghiêm trọng, toàn bộ process sẽ kết thúc, kéo theo tất cả các thread. Cuối cùng, debug một process multithreaded phức tạp có thể là một cơn ác mộng.
+Ở thái cực kia, bạn có thể ánh xạ task sang thread và triển khai hệ thống như một process duy nhất chứa 40 thread. Việc hợp tác trở nên dễ dàng hơn nhiều vì chúng dùng chung không gian địa chỉ và file descriptor. Overhead của việc gửi thông điệp được giảm hoặc loại bỏ, và context switch giữa các thread nhanh hơn giữa các process. Nhược điểm là bạn đã tạo ra khả năng một task làm hỏng heap hoặc stack của task khác. Nếu bất kỳ thread nào gặp một bug nghiêm trọng, toàn bộ process sẽ kết thúc, kéo theo tất cả các thread. Cuối cùng, debug một process multithreaded phức tạp có thể là một cơn ác mộng.
 
 Kết luận bạn nên rút ra là không thiết kế nào lý tưởng và có một cách tốt hơn để làm. Nhưng trước khi đến điểm đó, tôi sẽ đi sâu hơn một chút vào các API và hành vi của process và thread.
 
@@ -197,7 +197,7 @@ Bạn có thể kết thúc chương trình bằng cách gõ Ctrl + C.
 
 Có vẻ kỳ lạ khi có một hàm nhân bản một process có sẵn và một hàm khác loại bỏ tài nguyên của nó và nạp một chương trình khác vào bộ nhớ, đặc biệt vì thường thì một `fork` được theo sau gần như ngay lập tức bởi một trong các hàm `exec`. Hầu hết các hệ điều hành kết hợp hai hành động thành một lời gọi duy nhất.
 
-Tuy nhiên, cách này có những ưu điểm rõ rệt. Ví dụ, nó giúp rất dễ hiện thực redirection và pipe trong shell. Hãy tưởng tượng bạn muốn lấy danh sách thư mục. Đây là chuỗi sự kiện:
+Tuy nhiên, cách này có những ưu điểm rõ rệt. Ví dụ, nó giúp rất dễ triển khai redirection và pipe trong shell. Hãy tưởng tượng bạn muốn lấy danh sách thư mục. Đây là chuỗi sự kiện:
 
 1\. Bạn gõ `ls` tại dấu nhắc shell.
 
@@ -292,7 +292,7 @@ Unix socket không có cơ chế để biểu thị mức ưu tiên của một 
 
 #### FIFO và named pipe
 
-FIFO và named pipe chỉ là các thuật ngữ khác nhau cho cùng một thứ. Chúng là phần mở rộng của anonymous pipe được dùng để giao tiếp giữa process parent và child khi hiện thực pipe trong shell.
+FIFO và named pipe chỉ là các thuật ngữ khác nhau cho cùng một thứ. Chúng là phần mở rộng của anonymous pipe được dùng để giao tiếp giữa process parent và child khi triển khai pipe trong shell.
 
 Một FIFO là một loại file đặc biệt, được tạo bởi lệnh `mkfifo(1)`. Giống như Unix socket, quyền truy cập file xác định ai có thể đọc và ghi. Chúng là một chiều, nghĩa là có một reader và thường là một writer, dù có thể có vài writer. Dữ liệu là một byte stream thuần túy nhưng bảo đảm tính nguyên tử của các thông điệp nhỏ hơn buffer gắn với pipe. Nói cách khác, các lần ghi nhỏ hơn kích thước này sẽ không bị tách thành nhiều lần ghi nhỏ hơn, vì vậy bạn sẽ đọc được toàn bộ thông điệp một lượt miễn là kích thước buffer ở phía bạn đủ lớn. Kích thước mặc định của buffer FIFO là 64 KB trên các kernel hiện đại và có thể được tăng bằng `fcntl(2)` với `F_SETPIPE_SZ`, lên tới giá trị trong `/proc/sys/fs/pipe-max-size`, thường là 1 MB. Không có khái niệm mức ưu tiên.
 
@@ -306,7 +306,7 @@ Tham khảo man page `mq_overview(7)` của Linux để biết thêm chi tiết.
 
 ### Tóm tắt về IPC message-based
 
-Unix socket được dùng thường xuyên nhất vì chúng cung cấp mọi thứ cần thiết, có lẽ ngoại trừ mức ưu tiên thông điệp. Chúng được hiện thực trên hầu hết các hệ điều hành, vì vậy chúng mang lại tính khả chuyển tối đa.
+Unix socket được dùng thường xuyên nhất vì chúng cung cấp mọi thứ cần thiết, có lẽ ngoại trừ mức ưu tiên thông điệp. Chúng được triển khai trên hầu hết các hệ điều hành, vì vậy chúng mang lại tính khả chuyển tối đa.
 
 FIFO ít được dùng hơn, chủ yếu vì chúng thiếu một thứ tương đương với datagram. Mặt khác, API rất đơn giản, vì nó cung cấp các lời gọi file thông thường `open(2)`, `close(2)`, `read(2)` và `write(2)`.
 
@@ -421,7 +421,7 @@ Hello from process 279
 
 Nó không tạo segment shared memory vì segment đã tồn tại, và nó hiển thị thông điệp mà segment đã chứa, đó là PID của chương trình kia. Nhấn Enter khiến nó ghi PID của chính nó, mà chương trình thứ nhất sẽ có thể thấy. Bằng cách này, hai chương trình có thể giao tiếp với nhau.
 
-Các hàm POSIX IPC là một phần của POSIX real-time extensions, vì vậy bạn cần link chúng với `librt`. Kỳ lạ là các semaphore POSIX được hiện thực trong thư viện POSIX threads, vì vậy bạn cũng cần link với thư viện `pthreads`. Do đó, các đối số compile như sau khi bạn nhắm tới các SoC Arm 64-bit:
+Các hàm POSIX IPC là một phần của POSIX real-time extensions, vì vậy bạn cần link chúng với `librt`. Kỳ lạ là các semaphore POSIX được triển khai trong thư viện POSIX threads, vì vậy bạn cũng cần link với thư viện `pthreads`. Do đó, các đối số compile như sau khi bạn nhắm tới các SoC Arm 64-bit:
 
 ```
 $ aarch64-buildroot-linux-gnu-gcc shared-mem-demo.c -lrt -pthread -o
@@ -432,7 +432,7 @@ shared-mem-demo
 
 ## Thread
 
-Giao diện lập trình cho thread là POSIX threads API, được định nghĩa lần đầu trong chuẩn IEEE POSIX 1003.1c (1995) và thường được biết đến với tên pthreads. Nó được hiện thực như một phần bổ sung của thư viện C `libpthread.so.0`. Đã có hai bản hiện thực `pthreads` trong khoảng 20 năm qua: LinuxThreads và Native POSIX Thread Library (NPTL). Bản sau tuân thủ đặc tả tốt hơn nhiều, đặc biệt về việc xử lý signal và process ID. NPTL giờ đang chiếm ưu thế. Nếu bạn tình cờ gặp bất kỳ thư viện chuẩn C nào vẫn dùng `LinuxThreads`, tôi khuyên không nên dùng nó.
+Giao diện lập trình cho thread là POSIX threads API, được định nghĩa lần đầu trong chuẩn IEEE POSIX 1003.1c (1995) và thường được biết đến với tên pthreads. Nó được triển khai như một phần bổ sung của thư viện C `libpthread.so.0`. Đã có hai bản triển khai `pthreads` trong khoảng 20 năm qua: LinuxThreads và Native POSIX Thread Library (NPTL). Bản sau tuân thủ đặc tả tốt hơn nhiều, đặc biệt về việc xử lý signal và process ID. NPTL giờ đang chiếm ưu thế. Nếu bạn tình cờ gặp bất kỳ thư viện chuẩn C nào vẫn dùng `LinuxThreads`, tôi khuyên không nên dùng nó.
 
 ### Tạo một thread mới
 
@@ -800,7 +800,7 @@ Scheduler chạy khi bất kỳ điều nào sau đây xảy ra:
 
 Tôi đã nhóm các scheduling policy thành hai loại: time-shared và real-time. Time-shared policy dựa trên nguyên tắc công bằng. Chúng được thiết kế để bảo đảm mỗi thread nhận được một lượng thời gian bộ xử lý công bằng và không thread nào có thể chiếm dụng hệ thống. Nếu một thread chạy quá lâu, nó bị đưa xuống cuối hàng đợi để các thread khác có lượt. Đồng thời, một fairness policy cần điều chỉnh theo các thread đang làm nhiều việc và cấp cho chúng tài nguyên để hoàn thành công việc. Time-shared scheduling tốt nhờ cách nó tự động điều chỉnh theo nhiều loại workload khác nhau.
 
-Mặt khác, nếu bạn có một chương trình real-time, sự công bằng không hữu ích. Trong trường hợp này, bạn muốn một policy tất định, sẽ cho bạn ít nhất các bảo đảm tối thiểu rằng các thread real-time sẽ được lập lịch đúng lúc để chúng không lỡ deadline. Điều này có nghĩa là một thread real-time phải preempt các thread time-shared. Các thread real-time cũng có một mức ưu tiên tĩnh mà scheduler có thể dùng để chọn giữa chúng khi có nhiều thread cần chạy cùng lúc. Real-time scheduler của Linux hiện thực một thuật toán khá chuẩn, chạy thread real-time highest-priority. Hầu hết các RTOS scheduler cũng được viết theo cách này.
+Mặt khác, nếu bạn có một chương trình real-time, sự công bằng không hữu ích. Trong trường hợp này, bạn muốn một policy tất định, sẽ cho bạn ít nhất các bảo đảm tối thiểu rằng các thread real-time sẽ được lập lịch đúng lúc để chúng không lỡ deadline. Điều này có nghĩa là một thread real-time phải preempt các thread time-shared. Các thread real-time cũng có một mức ưu tiên tĩnh mà scheduler có thể dùng để chọn giữa chúng khi có nhiều thread cần chạy cùng lúc. Real-time scheduler của Linux triển khai một thuật toán khá chuẩn, chạy thread real-time highest-priority. Hầu hết các RTOS scheduler cũng được viết theo cách này.
 
 Cả hai loại thread có thể cùng tồn tại. Những thread đòi hỏi lập lịch tất định được lập lịch trước, và mọi thời gian còn lại được chia giữa các thread time-shared.
 

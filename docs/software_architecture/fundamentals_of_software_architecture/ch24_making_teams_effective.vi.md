@@ -2,7 +2,7 @@
 
 # Chương 24. Làm cho team hiệu quả (Making Teams Effective)
 
-<a id="ix_ch24-making-teams-effective-asciidoc0"></a>Ngoài việc tạo ra các architecture kỹ thuật và đưa ra các architecture decision, kiến trúc sư phần mềm còn chịu trách nhiệm dẫn dắt development team và hướng dẫn team qua việc hiện thực architecture. Những kiến trúc sư làm tốt việc này tạo ra các development team hiệu quả, làm việc chặt chẽ cùng nhau để giải quyết vấn đề và tạo ra những giải pháp thành công. Dù điều này nghe có vẻ hiển nhiên, chúng tôi đã thấy quá nhiều kiến trúc sư phớt lờ development team của mình và tạo ra architecture một mình, trong một môi trường biệt lập. Khi architecture này được giao cho development team, các developer thường vật lộn để hiện thực nó cho đúng.
+<a id="ix_ch24-making-teams-effective-asciidoc0"></a>Ngoài việc tạo ra các architecture kỹ thuật và đưa ra các architecture decision, kiến trúc sư phần mềm còn chịu trách nhiệm dẫn dắt development team và hướng dẫn team qua việc triển khai architecture. Những kiến trúc sư làm tốt việc này tạo ra các development team hiệu quả, làm việc chặt chẽ cùng nhau để giải quyết vấn đề và tạo ra những giải pháp thành công. Dù điều này nghe có vẻ hiển nhiên, chúng tôi đã thấy quá nhiều kiến trúc sư phớt lờ development team của mình và tạo ra architecture một mình, trong một môi trường biệt lập. Khi architecture này được giao cho development team, các developer thường vật lộn để triển khai nó cho đúng.
 
 Làm cho các team năng suất là một trong những cách mà các kiến trúc sư phần mềm thành công tạo nên sự khác biệt. Trong chương này, chúng tôi giới thiệu một số kỹ thuật cơ bản để cải thiện hiệu quả của các development team.
 
@@ -36,17 +36,17 @@ Trong phần còn lại của chương này và trong [Chương 25](ch25_negotia
 
 ## Ràng buộc và ranh giới (Constraints and Boundaries)
 
-<a id="ix_ch24-making-teams-effective-asciidoc3"></a>Theo kinh nghiệm của chúng tôi, một kiến trúc sư phần mềm có thể ảnh hưởng đáng kể đến sự thành công hay thất bại của một development team. Các team cảm thấy bị gạt ra ngoài hoặc xa cách với kiến trúc sư của mình thường thiếu hiểu biết về các ràng buộc khác nhau của hệ thống; không có mức hướng dẫn phù hợp, họ vật lộn để hiện thực architecture cho đúng.
+<a id="ix_ch24-making-teams-effective-asciidoc3"></a>Theo kinh nghiệm của chúng tôi, một kiến trúc sư phần mềm có thể ảnh hưởng đáng kể đến sự thành công hay thất bại của một development team. Các team cảm thấy bị gạt ra ngoài hoặc xa cách với kiến trúc sư của mình thường thiếu hiểu biết về các ràng buộc khác nhau của hệ thống; không có mức hướng dẫn phù hợp, họ vật lộn để triển khai architecture cho đúng.
 
-Một trong những vai trò của kiến trúc sư phần mềm là tạo ra và truyền đạt các ràng buộc mà developer phải hiện thực architecture bên trong đó. Hãy nghĩ về những ràng buộc này như tạo thành một “căn phòng” trong đó development team làm việc để hiện thực architecture. Như [Hình 24-3](#fig-making-teams-effective-boundaries) minh họa, có các ranh giới quá chặt hoặc quá lỏng trực tiếp cản trở khả năng hiện thực thành công architecture của các team.
+Một trong những vai trò của kiến trúc sư phần mềm là tạo ra và truyền đạt các ràng buộc mà developer phải triển khai architecture bên trong đó. Hãy nghĩ về những ràng buộc này như tạo thành một “căn phòng” trong đó development team làm việc để triển khai architecture. Như [Hình 24-3](#fig-making-teams-effective-boundaries) minh họa, có các ranh giới quá chặt hoặc quá lỏng trực tiếp cản trở khả năng triển khai thành công architecture của các team.
 
 <a id="fig-making-teams-effective-boundaries"></a>
 
 ![](images/fsa2_2403.png)
 
-*Hình 24-3. Các ranh giới mà kiến trúc sư phần mềm tạo ra ảnh hưởng đến khả năng hiện thực architecture của team*
+*Hình 24-3. Các ranh giới mà kiến trúc sư phần mềm tạo ra ảnh hưởng đến khả năng triển khai architecture của team*
 
-Quá nhiều ràng buộc khiến căn phòng quá nhỏ đối với development team, ngăn họ tiếp cận nhiều công cụ, thư viện và thực hành mà họ cần để hiện thực hệ thống. Điều này gây ra sự bực bội, và thường dẫn đến việc developer rời dự án để tìm đến những môi trường vui vẻ và lành mạnh hơn.
+Quá nhiều ràng buộc khiến căn phòng quá nhỏ đối với development team, ngăn họ tiếp cận nhiều công cụ, thư viện và thực hành mà họ cần để triển khai hệ thống. Điều này gây ra sự bực bội, và thường dẫn đến việc developer rời dự án để tìm đến những môi trường vui vẻ và lành mạnh hơn.
 
 Điều ngược lại cũng có thể xảy ra. Các ràng buộc quá lỏng (hoặc không có ràng buộc nào) khiến căn phòng quá lớn. Trong trường hợp này có quá nhiều lựa chọn, buộc development team về cơ bản phải đảm nhận vai trò của kiến trúc sư để đưa ra mọi quyết định kiến trúc quan trọng. Thiếu sự hướng dẫn đúng mức, các developer thấy mình thực hiện quá nhiều proof of concept, vật lộn với các quyết định thiết kế, và trở nên kém năng suất, bối rối và bực bội.
 
@@ -64,11 +64,11 @@ Các kiến trúc sư phần mềm hiệu quả cố gắng cung cấp đúng m�
 
 <a id="id1608"></a><a id="id1609"></a>Kiến trúc sư control-freak cố kiểm soát mọi chi tiết của quy trình phát triển phần mềm. Mọi quyết định họ đưa ra thường quá fine-grained và quá low-level, dẫn đến ranh giới chặt và quá nhiều ràng buộc đối với development team.
 
-Ví dụ, một control-freak architect có thể cấm development team tải về các thư viện open source hoặc third-party hữu ích hoặc thậm chí cần thiết, hoặc đặt ra những hạn chế chặt chẽ về quy ước đặt tên, thiết kế class, độ dài method, v.v. Họ có thể đi xa đến mức viết pseudocode để các development team hiện thực, về cơ bản là tước đi nghệ thuật lập trình khỏi tay developer. Developer thấy điều này bực bội và thường mất sự tôn trọng đối với kiến trúc sư.
+Ví dụ, một control-freak architect có thể cấm development team tải về các thư viện open source hoặc third-party hữu ích hoặc thậm chí cần thiết, hoặc đặt ra những hạn chế chặt chẽ về quy ước đặt tên, thiết kế class, độ dài method, v.v. Họ có thể đi xa đến mức viết pseudocode để các development team triển khai, về cơ bản là tước đi nghệ thuật lập trình khỏi tay developer. Developer thấy điều này bực bội và thường mất sự tôn trọng đối với kiến trúc sư.
 
-Đáng tiếc là rất dễ trở thành một control-freak architect, đặc biệt khi bạn đang chuyển sang architecture từ vai trò developer phần mềm. Vai trò của kiến trúc sư là tạo ra các khối xây dựng của ứng dụng (các logical component) và xác định cách tất cả chúng tương tác. Vai trò tương ứng của developer là xác định cách tốt nhất để hiện thực các logical component đó, dùng sơ đồ class và design pattern. Các kiến trúc sư mới, vốn quen tự tạo sơ đồ class và chọn design pattern khi còn là developer, thường thấy cám dỗ này khó cưỡng lại.
+Đáng tiếc là rất dễ trở thành một control-freak architect, đặc biệt khi bạn đang chuyển sang architecture từ vai trò developer phần mềm. Vai trò của kiến trúc sư là tạo ra các khối xây dựng của ứng dụng (các logical component) và xác định cách tất cả chúng tương tác. Vai trò tương ứng của developer là xác định cách tốt nhất để triển khai các logical component đó, dùng sơ đồ class và design pattern. Các kiến trúc sư mới, vốn quen tự tạo sơ đồ class và chọn design pattern khi còn là developer, thường thấy cám dỗ này khó cưỡng lại.
 
-Ví dụ, giả sử một kiến trúc sư tạo một logical component quản lý dữ liệu tham chiếu trong hệ thống: những thứ như dữ liệu cặp name-value tĩnh được dùng trên website, mã sản phẩm và mã kho. Vai trò của kiến trúc sư là xác định logical component (trong trường hợp này là một `Reference Manager`), xác định tập thao tác cốt lõi của nó (ví dụ, `GetData`, `SetData`, `ReloadCache` và `NotifyOnUpdate`), và xác định những component nào khác cần tương tác với `ReferenceManager`. Một control-freak architect có thể nghĩ rằng cách tốt nhất để hiện thực component này là thông qua pattern parallel loader, tận dụng một cache nội bộ với một cấu trúc dữ liệu cụ thể. Đây có thể là một thiết kế hiệu quả, nhưng nó không phải thiết kế duy nhất, và quan trọng hơn, không phải việc của kiến trúc sư là nghĩ ra thiết kế nội bộ cho `Reference Manager`—đó là việc của developer.
+Ví dụ, giả sử một kiến trúc sư tạo một logical component quản lý dữ liệu tham chiếu trong hệ thống: những thứ như dữ liệu cặp name-value tĩnh được dùng trên website, mã sản phẩm và mã kho. Vai trò của kiến trúc sư là xác định logical component (trong trường hợp này là một `Reference Manager`), xác định tập thao tác cốt lõi của nó (ví dụ, `GetData`, `SetData`, `ReloadCache` và `NotifyOnUpdate`), và xác định những component nào khác cần tương tác với `ReferenceManager`. Một control-freak architect có thể nghĩ rằng cách tốt nhất để triển khai component này là thông qua pattern parallel loader, tận dụng một cache nội bộ với một cấu trúc dữ liệu cụ thể. Đây có thể là một thiết kế hiệu quả, nhưng nó không phải thiết kế duy nhất, và quan trọng hơn, không phải việc của kiến trúc sư là nghĩ ra thiết kế nội bộ cho `Reference Manager`—đó là việc của developer.
 
 Như chúng tôi sẽ nói trong chương này, đôi khi kiến trúc sư cần đóng vai control freak, tùy thuộc vào độ phức tạp của dự án và trình độ kỹ năng của team. Tuy nhiên, hầu hết thời gian, một control-freak architect gây xáo trộn cho development team, không cung cấp đúng mức hướng dẫn, cản đường, và nhìn chung kém hiệu quả với vai trò lãnh đạo.
 
@@ -76,7 +76,7 @@ Như chúng tôi sẽ nói trong chương này, đôi khi kiến trúc sư cần
 
 ### Kiến trúc sư ngồi ghế bành (The Armchair Architect)
 
-<a id="ix_ch24-making-teams-effective-asciidoc6"></a><a id="ix_ch24-making-teams-effective-asciidoc7"></a>Armchair architect là một kiến trúc sư đã không viết code trong một thời gian rất dài (nếu từng viết) và không tính đến các chi tiết hiện thực khi tạo architecture. Họ thường tách rời khỏi development team và hiếm khi có mặt, đơn giản là chuyển sang dự án tiếp theo sau khi hoàn thành các sơ đồ architecture ban đầu.
+<a id="ix_ch24-making-teams-effective-asciidoc6"></a><a id="ix_ch24-making-teams-effective-asciidoc7"></a>Armchair architect là một kiến trúc sư đã không viết code trong một thời gian rất dài (nếu từng viết) và không tính đến các chi tiết triển khai khi tạo architecture. Họ thường tách rời khỏi development team và hiếm khi có mặt, đơn giản là chuyển sang dự án tiếp theo sau khi hoàn thành các sơ đồ architecture ban đầu.
 
 Một số armchair architect đơn giản là quá sức với họ: họ không biết công nghệ hoặc business domain đủ rõ để lãnh đạo hay hướng dẫn. Hãy nghĩ xem: developer làm gì? Tất nhiên là họ viết source code. Viết source code thực sự khó giả vờ; hoặc bạn viết được source code hoặc bạn không viết được. Kiến trúc sư làm gì? Không ai biết! Vẽ thật nhiều đường và hộp? Làm kiến trúc sư thì quá dễ giả vờ.
 
@@ -84,11 +84,11 @@ Ví dụ, giả sử một armchair architect thiết kế một hệ thống st
 
 Armchair architect tạo ra ranh giới lỏng quanh development team của họ, nên các team đó rốt cuộc phải làm công việc mà kiến trúc sư lẽ ra phải làm. Velocity và năng suất của họ vì vậy bị ảnh hưởng, và mọi người đều bối rối về việc hệ thống nên hoạt động thế nào.
 
-Trở thành một armchair architect cũng dễ như trở thành một control freak. Khi một kiến trúc sư thấy rằng họ không có thời gian cho các development team đang hiện thực architecture (hoặc đơn giản là chọn không dành thời gian với họ), đó là dấu hiệu cho thấy họ có thể đang rơi vào tính cách armchair-architect. Các development team cần sự hỗ trợ và hướng dẫn của kiến trúc sư, và họ cần kiến trúc sư luôn sẵn sàng trả lời câu hỏi. Các dấu hiệu khác của một armchair architect là:
+Trở thành một armchair architect cũng dễ như trở thành một control freak. Khi một kiến trúc sư thấy rằng họ không có thời gian cho các development team đang triển khai architecture (hoặc đơn giản là chọn không dành thời gian với họ), đó là dấu hiệu cho thấy họ có thể đang rơi vào tính cách armchair-architect. Các development team cần sự hỗ trợ và hướng dẫn của kiến trúc sư, và họ cần kiến trúc sư luôn sẵn sàng trả lời câu hỏi. Các dấu hiệu khác của một armchair architect là:
 
 - Không hiểu đầy đủ business domain, vấn đề kinh doanh, hoặc công nghệ đang được dùng
 - Không đủ kinh nghiệm hands-on phát triển phần mềm
-- Không xem xét các hệ quả gắn với một cách hiện thực nhất định của giải pháp kiến trúc (như độ phức tạp, bảo trì và testing)
+- Không xem xét các hệ quả gắn với một cách triển khai nhất định của giải pháp kiến trúc (như độ phức tạp, bảo trì và testing)
 
 Rất ít kiến trúc sư *có ý định* trở thành armchair architect; nó cứ “xảy ra” khi họ bị dàn trải quá mỏng giữa các dự án hoặc team và mất liên hệ với công nghệ hoặc business domain. Để tránh điều này, chúng tôi khuyến nghị tham gia sâu hơn vào các công nghệ của dự án và xây dựng hiểu biết vững chắc hơn về vấn đề kinh doanh và domain.<a id="id1610"></a><a id="id1611"></a>
 
@@ -230,7 +230,7 @@ Trong các cuộc họp, một kiến trúc sư phần mềm hiệu quả quan s
 
 *Hình 24-8. Sự khuếch tán trách nhiệm*
 
-Một kiến trúc sư hiệu quả không chỉ hướng dẫn development team qua việc hiện thực architecture, mà còn bảo đảm các thành viên khỏe mạnh, vui vẻ, và cùng làm việc để đạt được mục tiêu chung. Tìm kiếm ba dấu hiệu cảnh báo này và giúp sửa các vấn đề mà chúng chỉ ra là một cách tốt để bảo đảm một development team hiệu quả.<a id="id1623"></a>
+Một kiến trúc sư hiệu quả không chỉ hướng dẫn development team qua việc triển khai architecture, mà còn bảo đảm các thành viên khỏe mạnh, vui vẻ, và cùng làm việc để đạt được mục tiêu chung. Tìm kiếm ba dấu hiệu cảnh báo này và giúp sửa các vấn đề mà chúng chỉ ra là một cách tốt để bảo đảm một development team hiệu quả.<a id="id1623"></a>
 
 <a id="id241"></a>
 
@@ -330,7 +330,7 @@ Bất cứ khi nào một build hoặc deployment thất bại, kiến trúc sư
 
 ## Cung cấp hướng dẫn (Providing Guidance)
 
-<a id="ix_ch24-making-teams-effective-asciidoc17"></a><a id="ix_ch24-making-teams-effective-asciidoc18"></a>Một cách khác để kiến trúc sư phần mềm làm cho team hiệu quả là dùng các nguyên lý thiết kế để cung cấp hướng dẫn. Điều này cũng giúp hình thành “căn phòng” ràng buộc mà developer làm việc trong đó để hiện thực architecture. Truyền đạt các nguyên lý thiết kế là một trong những chìa khóa để tạo ra một team thành công.
+<a id="ix_ch24-making-teams-effective-asciidoc17"></a><a id="ix_ch24-making-teams-effective-asciidoc18"></a>Một cách khác để kiến trúc sư phần mềm làm cho team hiệu quả là dùng các nguyên lý thiết kế để cung cấp hướng dẫn. Điều này cũng giúp hình thành “căn phòng” ràng buộc mà developer làm việc trong đó để triển khai architecture. Truyền đạt các nguyên lý thiết kế là một trong những chìa khóa để tạo ra một team thành công.
 
 <a id="id1639"></a>Để minh họa điểm này, hãy tưởng tượng bạn đang hướng dẫn một development team dùng cái thường được gọi là *layered stack*—tập hợp các thư viện third-party tạo nên ứng dụng. Các development team thường có rất nhiều câu hỏi về layered stack, bao gồm thư viện nào được, thư viện nào không, và liệu hoặc khi nào họ có thể tự đưa ra quyết định về thư viện.
 
@@ -379,4 +379,4 @@ Tiếp theo, kiến trúc sư tạo ra “căn phòng” xung quanh nguyên lý 
 
 Làm cho các development team hiệu quả là công việc khó khăn. Nó đòi hỏi nhiều kinh nghiệm và thực hành, cũng như kỹ năng con người vững vàng (mà chúng tôi sẽ thảo luận trong các chương tiếp theo). Dù vậy, các kỹ thuật đơn giản trong chương này về elastic leadership, tận dụng checklist, và cung cấp hướng dẫn bằng cách truyền đạt các nguyên lý thiết kế thực sự hiệu quả. Chúng tôi đã thấy chúng hữu ích thế nào trong việc làm cho các development team làm việc thông minh hơn.
 
-Một số người đặt câu hỏi về vai trò của kiến trúc sư trong những hoạt động như vậy, khăng khăng rằng công việc này nên được giao cho development manager hoặc project manager. Chúng tôi hoàn toàn không đồng ý. Kiến trúc sư phần mềm hướng dẫn team về các vấn đề kỹ thuật và dẫn dắt họ qua việc hiện thực architecture. Xây dựng một mối quan hệ cộng tác chặt chẽ với development team cho phép kiến trúc sư quan sát động lực của team và hỗ trợ những thay đổi để làm cho team năng suất hơn.<a id="id1643"></a>
+Một số người đặt câu hỏi về vai trò của kiến trúc sư trong những hoạt động như vậy, khăng khăng rằng công việc này nên được giao cho development manager hoặc project manager. Chúng tôi hoàn toàn không đồng ý. Kiến trúc sư phần mềm hướng dẫn team về các vấn đề kỹ thuật và dẫn dắt họ qua việc triển khai architecture. Xây dựng một mối quan hệ cộng tác chặt chẽ với development team cho phép kiến trúc sư quan sát động lực của team và hỗ trợ những thay đổi để làm cho team năng suất hơn.<a id="id1643"></a>

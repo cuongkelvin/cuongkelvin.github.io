@@ -146,7 +146,7 @@ Hai công ty tưởng tượng của chúng ta (xem [Chương 4](ch04_representa
 
 ### 22.2.1 Các tiêu chuẩn
 
-Một mô hình của hệ thống, có thể ở dạng một discrete event simulation ([Mục 17.2](ch17_semi_formal_verification.vi.md#sec17_2)) hoặc một formal model ([Mục 18.6](ch18_formal_verification.vi.md#sec18_6)) có thể là một nguồn test case tuyệt vời. Kỹ thuật thực hiện so sánh back-to-back giữa mô hình và phần hiện thực được khuyến nghị trong Table 7 và 10 của ISO 26262-6 và trong Table B.2 của IEC 61508-3, nơi nó được gọi là *“Test case execution from model-based test case generation.”*
+Một mô hình của hệ thống, có thể ở dạng một discrete event simulation ([Mục 17.2](ch17_semi_formal_verification.vi.md#sec17_2)) hoặc một formal model ([Mục 18.6](ch18_formal_verification.vi.md#sec18_6)) có thể là một nguồn test case tuyệt vời. Kỹ thuật thực hiện so sánh back-to-back giữa mô hình và phần triển khai được khuyến nghị trong Table 7 và 10 của ISO 26262-6 và trong Table B.2 của IEC 61508-3, nơi nó được gọi là *“Test case execution from model-based test case generation.”*
 
 Table A.1 của IEC TS 61508-3-2 xem xét việc sinh test case từ các định nghĩa formal của các yêu cầu an toàn, architecture/thiết kế và Executable Source-Code Level (ESCL). Đặc tả đó cũng nói rằng *“Kiểm thử không phải là một phương pháp có thể cung cấp bảo đảm tại một điểm assurance — theo một câu trích well-known từ năm 1969, nó có thể ‘chứng tỏ sự hiện diện của bug, nhưng không chứng tỏ được sự vắng mặt của chúng.’ ”*
 
@@ -154,7 +154,7 @@ ISO 29119 cũng thảo luận, với sự tán thành, việc sinh test case mod
 
 ### 22.2.2 Ví dụ Back-to-Back
 
-Làm ví dụ, hãy xét công ty tưởng tượng BCI (xem [Chương 4](ch04_representative_companies.vi.md)), công ty đang dự định chứng nhận hệ điều hành của mình. Một thuật toán hệ điều hành bề ngoài đơn giản, nhưng có rất nhiều chỗ tinh tế, là thuật toán được dùng để tránh priority inversion. Thuật toán này có thể làm ví dụ về cách một mô hình có thể được dùng để rút ra test case cho một phần hiện thực thực tế.
+Làm ví dụ, hãy xét công ty tưởng tượng BCI (xem [Chương 4](ch04_representative_companies.vi.md)), công ty đang dự định chứng nhận hệ điều hành của mình. Một thuật toán hệ điều hành bề ngoài đơn giản, nhưng có rất nhiều chỗ tinh tế, là thuật toán được dùng để tránh priority inversion. Thuật toán này có thể làm ví dụ về cách một mô hình có thể được dùng để rút ra test case cho một phần triển khai thực tế.
 
 Vấn đề priority inversion liên quan đến việc nhiều thread có mức ưu tiên khác nhau cần truy cập cùng một tài nguyên, chẳng hạn một mutex. Giả sử có ba thread: *T*<sub>1</sub>, *T*<sub>2</sub> và *T*<sub>3</sub> với mức ưu tiên lần lượt là 10, 20 và 30 (con số càng cao, mức ưu tiên càng lớn). Chuỗi hành động sau trên một bộ xử lý single-core dẫn đến tình huống *T*<sub>3</sub> sẵn sàng chạy, nhưng bị chặn vô thời hạn bởi *T*<sub>2</sub> có mức ưu tiên thấp hơn:
 
@@ -169,7 +169,7 @@ Một cơ chế để tránh priority inversion được gọi là priority inhe
 
 Protocol priority inheritance có vẻ đơn giản, nhưng như nhiều nhà thiết kế đã phát hiện, nó có nhiều chỗ tinh tế, đặc biệt khi mức ưu tiên được hạ xuống sau khi giải phóng mutex và khi một task giữ nhiều mutex.
 
-<a id="b22fig22_2"></a>[Hình 22.2](#fig22_2) minh họa một cách dùng discrete event simulation (xem [Mục 17.2](ch17_semi_formal_verification.vi.md#sec17_2)) để kiểm tra thuật toán được đề xuất, và cũng để tạo ra test case để kiểm tra phần hiện thực, một kỹ thuật tôi đã dùng thành công nhiều lần:
+<a id="b22fig22_2"></a>[Hình 22.2](#fig22_2) minh họa một cách dùng discrete event simulation (xem [Mục 17.2](ch17_semi_formal_verification.vi.md#sec17_2)) để kiểm tra thuật toán được đề xuất, và cũng để tạo ra test case để kiểm tra phần triển khai, một kỹ thuật tôi đã dùng thành công nhiều lần:
 
 <a id="fn22_2"></a>
 
@@ -183,9 +183,9 @@ Protocol priority inheritance có vẻ đơn giản, nhưng như nhiều nhà th
 
 3. *Sinh test case (chương trình) từ mỗi lớp tương đương.* Trong trường hợp thuật toán priority inheritance, nếu trace mô phỏng nói rằng thread 6 cố chiếm mutex 4 tại thời điểm $T = 15 \; 342$ rồi thôi chờ tại thời điểm $T = 15 \; 368$, thì hành vi tương đương có thể được đưa vào chương trình được sinh ra — nó cố chiếm mutex tại thời điểm $T = 15 \; 342$ với timeout $15 \; 368 - 15 \; 342 = 26$ đơn vị thời gian. Có thể cần thay đổi đơn vị thời gian theo một hệ số, chẳng hạn từ micro giây trong mô phỏng sang mili giây trong test case.
 
-4. *Biên dịch và thực thi các chương trình test được sinh ra.* Đây là các test case. Chúng đã được tạo ra từ một mô hình được tin là biểu diễn một thuật toán đúng, và chúng sẽ bao phủ thỏa đáng phần hiện thực của thuật toán.
+4. *Biên dịch và thực thi các chương trình test được sinh ra.* Đây là các test case. Chúng đã được tạo ra từ một mô hình được tin là biểu diễn một thuật toán đúng, và chúng sẽ bao phủ thỏa đáng phần triển khai của thuật toán.
 
-5. *Xem xét kết quả test.* Nếu chúng không như mong đợi, thì hoặc test case sai — trong trường hợp đó mô hình sai và phải được cập nhật và vòng lặp được lặp lại — hoặc phần hiện thực sai — trong trường hợp đó mô hình đã làm đúng nhiệm vụ của nó bằng cách tìm ra một bug trong code được hiện thực.
+5. *Xem xét kết quả test.* Nếu chúng không như mong đợi, thì hoặc test case sai — trong trường hợp đó mô hình sai và phải được cập nhật và vòng lặp được lặp lại — hoặc phần triển khai sai — trong trường hợp đó mô hình đã làm đúng nhiệm vụ của nó bằng cách tìm ra một bug trong code được triển khai.
 
 <a id="fig22_2"></a>
 
@@ -399,7 +399,7 @@ Trong trường hợp này, subsystem ghi log sẽ được nhận diện là m�
 
 Khi đó câu hỏi đặt ra là nhóm kiểm chứng nên kiểm tra gì một khi thiết bị đang trải qua integration testing hoặc system testing. Nếu áp dụng kiểm thử requirements-based, thì câu trả lời rõ ràng — mỗi yêu cầu an toàn được kiểm chứng, bằng kiểm tra hoặc bằng kiểm thử. Trong trường hợp ví dụ ghi log, nhóm kiểm chứng kiểm tra rằng hệ thống ghi log cung cấp một giao diện bất đồng bộ, có lẽ bằng cách kiểm tra thiết kế hoặc code.
 
-<a id="p304"></a>Tuy nhiên, sẽ hữu ích hơn nhiều nếu nhóm kiểm chứng nhìn xa hơn về phía sau trong chuỗi ở [Hình 22.3](#fig22_3) và xem yêu cầu an toàn đó đang giảm thiểu rủi ro nào. Trong trường hợp này, nó được đưa vào để ngăn safety function bị khóa bởi một subsystem ghi log bị tắc nghẽn. Khi đó có thể rút ra các test để thiết lập điều kiện đó và kiểm tra điều gì xảy ra. Điều này không chỉ xác nhận rằng hệ thống vẫn an toàn, mà còn ngầm kiểm tra rằng các mitigation là thỏa đáng và đã được hiện thực đúng.
+<a id="p304"></a>Tuy nhiên, sẽ hữu ích hơn nhiều nếu nhóm kiểm chứng nhìn xa hơn về phía sau trong chuỗi ở [Hình 22.3](#fig22_3) và xem yêu cầu an toàn đó đang giảm thiểu rủi ro nào. Trong trường hợp này, nó được đưa vào để ngăn safety function bị khóa bởi một subsystem ghi log bị tắc nghẽn. Khi đó có thể rút ra các test để thiết lập điều kiện đó và kiểm tra điều gì xảy ra. Điều này không chỉ xác nhận rằng hệ thống vẫn an toàn, mà còn ngầm kiểm tra rằng các mitigation là thỏa đáng và đã được triển khai đúng.
 
 ### 22.6.2 Chúng ta có biết tất cả các yêu cầu không?
 

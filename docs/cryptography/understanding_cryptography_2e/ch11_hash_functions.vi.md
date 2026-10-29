@@ -264,13 +264,13 @@ Một cách khác để có message digest lớn hơn là dùng các cấu trúc
 
 Hình 11.8 Hirose construction cho một hash function có độ rộng gấp đôi độ rộng block
 
-Có nhiều cipher khác thỏa điều kiện này ngoài AES, ví dụ, các block cipher Blowfish, Mars, RC6 và Serpent. Nếu cần một hash function cho các ứng dụng resource-constrained, lightweight block cipher PRESENT (xem Mục 3.7) cho phép một hiện thực hardware rất gọn. Với kích thước key 128 bit và kích thước block 64 bit, cấu trúc tính ra một output hash 128-bit. Nhớ rằng kích thước message digest này chống được preimage và second preimage attack, nhưng chỉ cung cấp bảo mật không đáng kể trước birthday attack.
+Có nhiều cipher khác thỏa điều kiện này ngoài AES, ví dụ, các block cipher Blowfish, Mars, RC6 và Serpent. Nếu cần một hash function cho các ứng dụng resource-constrained, lightweight block cipher PRESENT (xem Mục 3.7) cho phép một bản triển khai hardware rất gọn. Với kích thước key 128 bit và kích thước block 64 bit, cấu trúc tính ra một output hash 128-bit. Nhớ rằng kích thước message digest này chống được preimage và second preimage attack, nhưng chỉ cung cấp bảo mật không đáng kể trước birthday attack.
 
 ### 11.3.2 Các Hash Function chuyên dụng SHA-1, SHA-2 và SHA-3
 
 Một số lượng lớn hash function đã được đề xuất trong ba thập kỷ qua. Trong thực tế, các thuật toán phổ biến nhất cho tới nay là SHA-1, SHA-2 và SHA-3. Trong khi SHA-1 và SHA-2 cũng như MD5 và RIPEMD thuộc về cái được gọi là họ MD4, SHA-3 có thiết kế bên trong hoàn toàn khác. Trong mục này, chúng tôi giới thiệu các thuật toán hash này. Sau đó, chúng tôi sẽ thảo luận chi tiết SHA-2 và SHA-3.
 
-Hash function MD4 được tạo bởi Ronald Rivest (một cái tên chúng ta đã gặp trước đó trong sách; Rivest là chữ “R” trong RSA). Ý tưởng đằng sau MD4 mang tính đổi mới vì nó được thiết kế đặc biệt để cho phép hiện thực hiệu quả bằng software. Nó dùng các biến 32-bit và hầu hết các phép toán là các hàm Boolean theo bit như AND, OR, XOR logic và phủ định. Mọi hash function tiếp theo trong họ MD4 đều dựa trên cùng các nguyên lý software-friendly. Một phiên bản tăng cường của MD4, tên là MD5, được Rivest đề xuất năm 1991. Cả hai hash function tính một output 128-bit, tức là chúng có collision resistance khoảng 2<sup>64</sup>. MD5 được dùng rộng rãi, ví dụ, trong các protocol bảo mật internet, để tính checksum của file hoặc tạo hash mật khẩu.
+Hash function MD4 được tạo bởi Ronald Rivest (một cái tên chúng ta đã gặp trước đó trong sách; Rivest là chữ “R” trong RSA). Ý tưởng đằng sau MD4 mang tính đổi mới vì nó được thiết kế đặc biệt để cho phép triển khai hiệu quả bằng software. Nó dùng các biến 32-bit và hầu hết các phép toán là các hàm Boolean theo bit như AND, OR, XOR logic và phủ định. Mọi hash function tiếp theo trong họ MD4 đều dựa trên cùng các nguyên lý software-friendly. Một phiên bản tăng cường của MD4, tên là MD5, được Rivest đề xuất năm 1991. Cả hai hash function tính một output 128-bit, tức là chúng có collision resistance khoảng 2<sup>64</sup>. MD5 được dùng rộng rãi, ví dụ, trong các protocol bảo mật internet, để tính checksum của file hoặc tạo hash mật khẩu.
 
 Tuy nhiên, đã có những dấu hiệu sớm về các điểm yếu tiềm ẩn. Do đó, NIST, U.S. National Institute of Standards and Technology, đã công bố một tiêu chuẩn message digest mới, được đặt tên là Secure Hash Algorithm (SHA), năm 1993. Đây là thành viên đầu tiên của họ SHA và chính thức được gọi là SHA, dù ngày nay nó thường được gọi là SHA-0. Nó dựa trên MD5. Năm 1995, SHA-0 được sửa đổi để tạo SHA-1. Khác biệt giữa các thuật toán SHA-0 và SHA-1 nằm ở một schedule cải tiến của compression function. Cả hai thuật toán có độ dài output 160 bit. Năm 1996, một collision attack của Hans Dobbertin nhắm vào hash function MD5 đã khiến ngày càng nhiều chuyên gia khuyến nghị SHA-1 thay thế cho MD5 được dùng rộng rãi.
 
@@ -422,11 +422,11 @@ Sau khi mọi n block của thông điệp x = x<sub>1</sub>,x<sub>2</sub>,...,x
 
 SHA-256(x) = H<sub>n</sub><sup>(0)</sup>||H<sub>n</sub><sup>(1)</sup>||H<sub>n</sub><sup>(2)</sup>||H<sub>n</sub><sup>(3)</sup>||H<sub>n</sub><sup>(4)</sup>||H<sub>n</sub><sup>(5)</sup>||H<sub>n</sub><sup>(6)</sup>||H<sub>n</sub><sup>(7)</sup>
 
-### 11.4.3 Hiện thực bằng Software và Hardware
+### 11.4.3 Triển khai bằng Software và Hardware
 
-SHA-2 được thiết kế đặc biệt phù hợp cho các hiện thực software. Mỗi vòng chỉ cần các phép toán Boolean theo bit và phép cộng với các thanh ghi 32-bit, vốn rất nhanh trong software. Dù các phép toán hiệu quả này dẫn tới thực thi nhanh một vòng đơn lẻ, SHA-2 có số vòng tương đối lớn. Tuy nhiên, các hiện thực được tối ưu trên các kiến trúc CPU 64-bit hiện đại có thể đạt throughput khoảng 10 Gbit/s. Chúng tôi lưu ý rằng các lệnh SHA-2 đặc biệt có sẵn trên nhiều loại vi xử lý hiện đại, giúp tăng tốc hash function. Chẳng hạn, Intel SHA extensions có sẵn trên một số vi xử lý x86 của Intel và AMD.
+SHA-2 được thiết kế đặc biệt phù hợp cho các bản triển khai software. Mỗi vòng chỉ cần các phép toán Boolean theo bit và phép cộng với các thanh ghi 32-bit, vốn rất nhanh trong software. Dù các phép toán hiệu quả này dẫn tới thực thi nhanh một vòng đơn lẻ, SHA-2 có số vòng tương đối lớn. Tuy nhiên, các bản triển khai được tối ưu trên các kiến trúc CPU 64-bit hiện đại có thể đạt throughput khoảng 10 Gbit/s. Chúng tôi lưu ý rằng các lệnh SHA-2 đặc biệt có sẵn trên nhiều loại vi xử lý hiện đại, giúp tăng tốc hash function. Chẳng hạn, Intel SHA extensions có sẵn trên một số vi xử lý x86 của Intel và AMD.
 
-Về hardware, các hiện thực SHA-2 trên FPGA có thể đạt throughput vài Gbit/s, tức là chúng ở cùng khoảng tốc độ với các hiện thực software. Lý do cho hiệu năng hardware vừa phải bao gồm các phép toán cơ bản bên trong compression function khó song song hóa. Chúng tôi lưu ý rằng SHA-3, được thảo luận ở mục sau, có cấu trúc hardware-friendly hơn, dẫn tới throughput cao hơn đáng kể trong các hiện thực hardware.
+Về hardware, các bản triển khai SHA-2 trên FPGA có thể đạt throughput vài Gbit/s, tức là chúng ở cùng khoảng tốc độ với các bản triển khai software. Lý do cho hiệu năng hardware vừa phải bao gồm các phép toán cơ bản bên trong compression function khó song song hóa. Chúng tôi lưu ý rằng SHA-3, được thảo luận ở mục sau, có cấu trúc hardware-friendly hơn, dẫn tới throughput cao hơn đáng kể trong các bản triển khai hardware.
 
 ## 11.5 Secure Hash Algorithm SHA-3
 
@@ -562,7 +562,7 @@ Hình 11.16 Cấu trúc bên trong của hàm Keccak-f
 
 Hình 11.17 cho thấy bước θ ở mức bit. Nói đại khái, mỗi bit trong state được thay bằng tổng XOR của 10 bit “trong vùng lân cận của nó” và chính bit gốc. Nói chính xác: Người ta cộng vào bit đang được xử lý năm bit tạo thành cột bên trái cộng với cột ở bên phải và lệch một vị trí về “phía trước”. Lưu ý rằng mọi vị trí theo hướng x và y được tính modulo 5, và modulo w theo hướng z.
 
-Để hiện thực software hiệu quả, bước θ có thể được mô tả như thao tác trên các lane w bit thay vì trên từng bit. Để làm điều này, chúng ta xem lại Hình 11.15, nơi chúng ta thấy state gồm 25 lane được sắp xếp thành một mảng 5 × 5. Nếu ký hiệu mảng state là A(x,y) với x,y = 0,1,...,4, bước θ có thể được hiện thực qua phép toán sau:
+Để triển khai software hiệu quả, bước θ có thể được mô tả như thao tác trên các lane w bit thay vì trên từng bit. Để làm điều này, chúng ta xem lại Hình 11.15, nơi chúng ta thấy state gồm 25 lane được sắp xếp thành một mảng 5 × 5. Nếu ký hiệu mảng state là A(x,y) với x,y = 0,1,...,4, bước θ có thể được triển khai qua phép toán sau:
 
 C[x] = A[x,0] ⊕ A[x,1] ⊕ A[x,2] ⊕ A[x,3] ⊕ A[x,4], x = 0,1,2,3,4
 
@@ -691,13 +691,13 @@ Bây giờ chúng tôi sẽ mô tả ngắn gọn ba hàm được chuẩn hóa 
 
 ■ ParallelHash cho phép hash hiệu quả các chuỗi input rất dài bằng cách hỗ trợ tính song song có trong các máy tính hiện đại. Như với KMAC và TupleHash, nó cũng hỗ trợ hai mức bảo mật 128 và 256 bit. ParallelHash hoạt động theo hai giai đoạn. Thứ nhất, input được chia thành các block độ dài B. Mỗi block này được hash riêng lẻ bằng cSHAKE, cho phép các hash riêng lẻ này được tính song song, chẳng hạn trên một CPU multi-core. Ở giai đoạn thứ hai, các output hash được tính từ giai đoạn thứ nhất được kết hợp bằng cách đưa chúng vào cSHAKE lần nữa và tạo một giá trị hash cuối cùng.
 
-### 11.5.5 Hiện thực bằng Software và Hardware
+### 11.5.5 Triển khai bằng Software và Hardware
 
-Khi tính SHA-3 và SHAKE, phần lớn thời gian được dành cho Keccak-f. Do đó, Keccak-f xác định các đặc tính hiện thực của hash function. Dưới đây chúng tôi sẽ thảo luận các hiện thực software và hardware.
+Khi tính SHA-3 và SHAKE, phần lớn thời gian được dành cho Keccak-f. Do đó, Keccak-f xác định các đặc tính triển khai của hash function. Dưới đây chúng tôi sẽ thảo luận các bản triển khai software và hardware.
 
-Keccak-f, và do đó cả SHA-3 và SHAKE, hóa ra rất phù hợp cho các hiện thực hardware. Điều này trái ngược với SHA-1 và SHA-2, vốn thiên về software. Một kiến trúc hardware song song high-speed của SHA-3 có thể dễ dàng đạt throughput 30 Gbit/s trở lên với diện tích khoảng 100,000 gate equivalence. Ở đầu kia của phổ hiệu năng, một engine hardware nối tiếp rất nhỏ với ít hơn 10,000 gate equivalence vẫn có thể đạt throughput vài 10 Mbit/s. Chúng tôi lưu ý rằng SHA-3 cũng dẫn tới các hiện thực hardware tiết kiệm năng lượng hơn so với các hiện thực SHA-1 và SHA-2, điều đặc biệt được quan tâm cho các ứng dụng như tiền mã hóa hay các scheme proof-of-work khác, xem Mục 11.6.
+Keccak-f, và do đó cả SHA-3 và SHAKE, hóa ra rất phù hợp cho các bản triển khai hardware. Điều này trái ngược với SHA-1 và SHA-2, vốn thiên về software. Một kiến trúc hardware song song high-speed của SHA-3 có thể dễ dàng đạt throughput 30 Gbit/s trở lên với diện tích khoảng 100,000 gate equivalence. Ở đầu kia của phổ hiệu năng, một engine hardware nối tiếp rất nhỏ với ít hơn 10,000 gate equivalence vẫn có thể đạt throughput vài 10 Mbit/s. Chúng tôi lưu ý rằng SHA-3 cũng dẫn tới các bản triển khai hardware tiết kiệm năng lượng hơn so với các bản triển khai SHA-1 và SHA-2, điều đặc biệt được quan tâm cho các ứng dụng như tiền mã hóa hay các scheme proof-of-work khác, xem Mục 11.6.
 
-Dù thân thiện với hardware, SHA-3 cũng khá phù hợp cho hiện thực software. Keccak-f có state 1600 bit, được lưu trong 25 word mỗi word 64 bit, xem Hình 11.15. Phần lớn CPU hiện đại, tức là Intel và AMD cho laptop và server cũng như ARM trong smartphone, dùng kiến trúc 64-bit. Điều này cho phép biểu diễn hiệu quả một lane 64-bit trong một thanh ghi duy nhất. Hơn nữa, nhiều phép toán nguyên tử được dùng trong năm bước của hàm vòng Keccak-f (xem Hình 11.16) như các phép toán Boolean theo bit và phép xoay được hỗ trợ trực tiếp bởi các lệnh CPU low-level, dẫn tới các hiện thực nhanh. Một hiện thực SHA-3 được tối ưu cao với output 512-bit trên các CPU Intel core hiện đại có thể được thực thi với tốc độ khoảng 15 chu kỳ/byte, tương ứng, ví dụ, với throughput khoảng 200 MByte/s (hay khoảng 1.6 Gbit/s) nếu giả sử vi xử lý chạy clock ở 3 GHz.
+Dù thân thiện với hardware, SHA-3 cũng khá phù hợp cho triển khai software. Keccak-f có state 1600 bit, được lưu trong 25 word mỗi word 64 bit, xem Hình 11.15. Phần lớn CPU hiện đại, tức là Intel và AMD cho laptop và server cũng như ARM trong smartphone, dùng kiến trúc 64-bit. Điều này cho phép biểu diễn hiệu quả một lane 64-bit trong một thanh ghi duy nhất. Hơn nữa, nhiều phép toán nguyên tử được dùng trong năm bước của hàm vòng Keccak-f (xem Hình 11.16) như các phép toán Boolean theo bit và phép xoay được hỗ trợ trực tiếp bởi các lệnh CPU low-level, dẫn tới các bản triển khai nhanh. Một bản triển khai SHA-3 được tối ưu cao với output 512-bit trên các CPU Intel core hiện đại có thể được thực thi với tốc độ khoảng 15 chu kỳ/byte, tương ứng, ví dụ, với throughput khoảng 200 MByte/s (hay khoảng 1.6 Gbit/s) nếu giả sử vi xử lý chạy clock ở 3 GHz.
 
 ## 11.6 Thảo luận và đọc thêm (Discussion and Further Reading)
 
@@ -727,9 +727,9 @@ SHA-3 và Keccak Như một phần của cuộc thi SHA-3, đã có những nỗ
 
 Về Keccak, tài liệu tham khảo chính thức mô tả thuật toán là tài liệu [133]. Bốn người thiết kế thuật toán duy trì một website với nhiều thông tin hữu ích về hash function [130], bao gồm code software và hardware (HDL) và một mô tả mã giả của Keccak. Sponge construction, hay sponge function, là một cách tiếp cận tương đối mới để xây dựng hash function. Nó được những người thiết kế Keccak đề xuất tại một workshop ECRYPT năm 2007. Một giới thiệu tổng quát và thêm thông tin về sponge construction có thể được tìm thấy trực tuyến [132].
 
-Hiện thực Keccak Có rất nhiều mẹo hiện thực low-level để speed-up Keccak trên các CPU 32 và 64-bit hiện đại. Một tổng quan về hiện thực software open-source có thể được tìm thấy trên trang [136] và các con số hiệu năng trên [134].
+Bản triển khai Keccak Có rất nhiều mẹo triển khai low-level để speed-up Keccak trên các CPU 32 và 64-bit hiện đại. Một tổng quan về triển khai software open-source có thể được tìm thấy trên trang [136] và các con số hiệu năng trên [134].
 
-Dù SHA-3 có hiệu năng tốt trong software, các hiện thực SHA-2 được tối ưu cao chạy nhanh hơn khoảng ba tới bốn lần trên các CPU hiện đại. Tình hình khác trong hardware. Keccak hiệu quả hơn đáng kể so với SHA-2 và các thuật toán chung kết khác của cuộc thi SHA-3. Trong một so sánh có tính tới tỉ lệ throughput-to-area, Keccak efficien *(ghi chú: sách in efficien; đúng là efficient)* hơn khoảng năm lần. Hai tài liệu tham khảo được khuyến nghị cung cấp các con số tuyệt đối và cũng thảo luận khó khăn của việc đưa ra so sánh hardware đáng tin cậy là [225] và [255]. Code VHDL cho một hiện thực hardware của Keccak được cung cấp trong [135]. Xem thêm Mục 11.5.5 về hiện thực Keccak.
+Dù SHA-3 có hiệu năng tốt trong software, các bản triển khai SHA-2 được tối ưu cao chạy nhanh hơn khoảng ba tới bốn lần trên các CPU hiện đại. Tình hình khác trong hardware. Keccak hiệu quả hơn đáng kể so với SHA-2 và các thuật toán chung kết khác của cuộc thi SHA-3. Trong một so sánh có tính tới tỉ lệ throughput-to-area, Keccak efficien *(ghi chú: sách in efficien; đúng là efficient)* hơn khoảng năm lần. Hai tài liệu tham khảo được khuyến nghị cung cấp các con số tuyệt đối và cũng thảo luận khó khăn của việc đưa ra so sánh hardware đáng tin cậy là [225] và [255]. Code VHDL cho một bản triển khai hardware của Keccak được cung cấp trong [135]. Xem thêm Mục 11.5.5 về triển khai Keccak.
 
 ## 11.7 Bài học rút ra (Lessons Learned)
 
@@ -831,7 +831,7 @@ h(PW<sub>i</sub>) = y<sub>i</sub>
 
 trong đó các mật khẩu (hay passphrase) có độ dài tùy ý. Trong hệ thống máy tính, chỉ các giá trị y<sub>i</sub> thực sự được dùng để định danh người dùng và cấp quyền truy cập cho họ.
 
-Đáng tiếc, file mật khẩu chứa mọi giá trị hash rơi vào tay bạn và bạn được biết đến rộng rãi là một hacker rất nguy hiểm. Bản thân điều này không nên gây vấn đề nghiêm trọng vì lẽ ra không thể khôi phục mật khẩu từ hash do tính one-wayness của hash function. Tuy nhiên, bạn đã phát hiện một lỗi hiện thực nhỏ nhưng hệ trọng trong software: Hằng số c trong scheme hash được gán giá trị c = 0. Giả sử bạn cũng biết các giá trị khởi tạo (H<sub>0,L</sub> và H<sub>0,R</sub>).
+Đáng tiếc, file mật khẩu chứa mọi giá trị hash rơi vào tay bạn và bạn được biết đến rộng rãi là một hacker rất nguy hiểm. Bản thân điều này không nên gây vấn đề nghiêm trọng vì lẽ ra không thể khôi phục mật khẩu từ hash do tính one-wayness của hash function. Tuy nhiên, bạn đã phát hiện một lỗi triển khai nhỏ nhưng hệ trọng trong software: Hằng số c trong scheme hash được gán giá trị c = 0. Giả sử bạn cũng biết các giá trị khởi tạo (H<sub>0,L</sub> và H<sub>0,R</sub>).
 
 1. Kích thước của mỗi mục y<sub>i</sub> là bao nhiêu?
 

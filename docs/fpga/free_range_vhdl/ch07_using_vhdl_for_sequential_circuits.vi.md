@@ -6,9 +6,9 @@ Một vài cách tiếp cận thiết kế flip-flops trình bày trong mục ti
 
 ## 7.1 Các phần tử lưu trữ đơn giản dùng VHDL
 
-Cách tiếp cận chung để học cách hiện thực các phần tử lưu trữ trong digital design là nghiên cứu các tính chất của một cell cross-coupled cơ bản. Cell cross coupled tạo thành thứ được gọi là latch. Khái niệm về một signal clock được thêm vào thiết bị để tăng khả năng điều khiển nó. Cuối cùng, một dạng mạch làm hẹp xung nào đó được thêm vào signal clock để có được flip-flop. Thực chất, flip-flop không gì khác hơn là một thiết bị bit-storage edge-sensitive.
+Cách tiếp cận chung để học cách triển khai các phần tử lưu trữ trong digital design là nghiên cứu các tính chất của một cell cross-coupled cơ bản. Cell cross coupled tạo thành thứ được gọi là latch. Khái niệm về một signal clock được thêm vào thiết bị để tăng khả năng điều khiển nó. Cuối cùng, một dạng mạch làm hẹp xung nào đó được thêm vào signal clock để có được flip-flop. Thực chất, flip-flop không gì khác hơn là một thiết bị bit-storage edge-sensitive.
 
-Việc nghiên cứu một bản hiện thực VHDL của các phần tử lưu trữ bắt đầu với D flip-flop edge-triggered. Các ví dụ VHDL được trình bày là D flip-flop edge-triggered cơ bản với nhiều chức năng bổ sung khác nhau.
+Việc nghiên cứu một bản triển khai VHDL của các phần tử lưu trữ bắt đầu với D flip-flop edge-triggered. Các ví dụ VHDL được trình bày là D flip-flop edge-triggered cơ bản với nhiều chức năng bổ sung khác nhau.
 
 > VÍ DỤ 14. Hãy viết code VHDL mô tả D flip-flop ở bên phải. Hãy dùng một model behavioral trong mô tả của bạn.
 
@@ -16,13 +16,13 @@ Việc nghiên cứu một bản hiện thực VHDL của các phần tử lưu 
 
 LỜI GIẢI. Lời giải của Ví dụ 14 được trình bày trong Listing 7.1. Dưới đây là một vài điều thú vị cần lưu ý về lời giải.
 
-• Phần thân architecture đã cho mô tả phiên bản my_d ff của entity d_ff.
+• Phần thân architecture đã cho mô tả phiên bản my_d_ff của entity d_ff.
 
 • Vì ví dụ này yêu cầu dùng một model behavioral, phần thân architecture chủ yếu chứa một process statement. Các statement bên trong process được thực thi tuần tự. Process được thực thi mỗi khi phát hiện có thay đổi ở bất kỳ signal nào trong sensitivity list của process. Trong trường hợp này, các statement bên trong process được thực thi mỗi khi có thay đổi mức logic của signal CLK.
 
 • Construct rising_edge() được dùng trong if statement để chỉ ra rằng các thay đổi ở output của mạch chỉ xảy ra ở cạnh lên của input CLK. Construct rising_edge() thực ra là một ví dụ về một function VHDL đã được định nghĩa trong một trong các library được đưa vào. Cách code VHDL được viết làm cho toàn bộ mạch là đồng bộ; thực tế, các thay đổi ở output của mạch được đồng bộ với cạnh lên của signal clock. Trong trường hợp này, hành động là việc chuyển mức logic ở input D sang output Q.
 
-• Chức năng của rising_edge(CLK) có thể đạt được bằng attribute “event” khá phổ biến của VHDL qua construct: CLK’event and CLK=’1’. Hãy nhớ điều này.
+• Chức năng của rising_edge(CLK) có thể đạt được bằng attribute “event” khá phổ biến của VHDL qua construct:<br>CLK’event and CLK=’1’.<br>Hãy nhớ điều này.
 
 • Process có label dff. Điều này không bắt buộc trong ngôn ngữ VHDL, nhưng việc thêm process label thúc đẩy tính self-describing của code và làm tăng khả năng đọc và khả năng hiểu của nó.
 
@@ -147,9 +147,9 @@ Các lời giải của Ví dụ 15 và Ví dụ 16 lần lượt thể hiện n
 
 LỜI GIẢI. Lời giải của Ví dụ 17 được trình bày trong Listing 7.4. Ví dụ này có một số kỹ thuật rất quan trọng đi kèm, rất đáng được nêu dưới đây.
 
-• Một phẩm chất riêng của D flip-flop được thể hiện trong bản hiện thực T flip-flop này. Output của một D flip-flop chỉ phụ thuộc vào input D và không phải là hàm của output hiện tại của flip-flop. Output của một T flip-flop phụ thuộc vào cả input T và output hiện tại của flip-flop. Điều này làm model T flip-flop phức tạp thêm một mức nhất định so với D flip-flop, như được thể hiện trong Listing 7.4. Model T flip-flop trong Listing 7.4 dùng một signal tạm để dùng trạng thái hiện tại của flip-flop làm input. Nói cách khác, vì Q xuất hiện như một port của entity, nó phải được gán một mode specifier, và trong trường hợp này nó đã được gán mode specifier “out”. Vì vậy, các signal được khai báo là output không thể xuất hiện ở right-hand side của signal assignment operator. Cách tiếp cận chuẩn để vượt qua giới hạn có vẻ như vậy trong VHDL là dùng intermediate signal, loại signal này, khác với các port signal, không có mode specification và vì thế có thể được dùng như input hoặc output (có thể xuất hiện ở cả hai phía của signal assignment operator) trong phần thân của architecture. Cách tiếp cận là thao tác với intermediate signal trong phần thân architecture nhưng cũng dùng một concurrent signal assignment statement để gán intermediate signal cho output thích hợp. Lưu ý rằng trong statement then chốt của lời giải trình bày ở 7.4, intermediate signal xuất hiện ở cả hai phía của signal assignment operator. Đây là một cách tiếp cận được dùng rộng rãi trong VHDL: hãy dành thời gian để hiểu và thấm nó. Và cuối cùng về điểm này, có những mode specification khác cho phép bạn một cách tiếp cận khác để vượt qua vấn đề này (cụ thể là dùng mode specification “buffer”), nhưng bạn không bao giờ nên dùng chúng trong VHDL. Cách tiếp cận được trình bày ở đây được xem là một cách dùng VHDL tốt.
+• Một phẩm chất riêng của D flip-flop được thể hiện trong bản triển khai T flip-flop này. Output của một D flip-flop chỉ phụ thuộc vào input D và không phải là hàm của output hiện tại của flip-flop. Output của một T flip-flop phụ thuộc vào cả input T và output hiện tại của flip-flop. Điều này làm model T flip-flop phức tạp thêm một mức nhất định so với D flip-flop, như được thể hiện trong Listing 7.4. Model T flip-flop trong Listing 7.4 dùng một signal tạm để dùng trạng thái hiện tại của flip-flop làm input. Nói cách khác, vì Q xuất hiện như một port của entity, nó phải được gán một mode specifier, và trong trường hợp này nó đã được gán mode specifier “out”. Vì vậy, các signal được khai báo là output không thể xuất hiện ở right-hand side của signal assignment operator. Cách tiếp cận chuẩn để vượt qua giới hạn có vẻ như vậy trong VHDL là dùng intermediate signal, loại signal này, khác với các port signal, không có mode specification và vì thế có thể được dùng như input hoặc output (có thể xuất hiện ở cả hai phía của signal assignment operator) trong phần thân của architecture. Cách tiếp cận là thao tác với intermediate signal trong phần thân architecture nhưng cũng dùng một concurrent signal assignment statement để gán intermediate signal cho output thích hợp. Lưu ý rằng trong statement then chốt của lời giải trình bày ở 7.4, intermediate signal xuất hiện ở cả hai phía của signal assignment operator. Đây là một cách tiếp cận được dùng rộng rãi trong VHDL: hãy dành thời gian để hiểu và thấm nó. Và cuối cùng về điểm này, có những mode specification khác cho phép bạn một cách tiếp cận khác để vượt qua vấn đề này (cụ thể là dùng mode specification “buffer”), nhưng bạn không bao giờ nên dùng chúng trong VHDL. Cách tiếp cận được trình bày ở đây được xem là một cách dùng VHDL tốt.
 
-• Code này dùng phương trình đặc trưng của T flip-flop trong bản hiện thực của nó. Về mặt kỹ thuật, chúng ta đã dùng một phương trình đặc trưng khi hiện thực D flip-flop, nhưng vì phương trình đặc trưng của D flip-flop tương đối tầm thường, có thể bạn đã không để ý đến nó.
+• Code này dùng phương trình đặc trưng của T flip-flop trong bản triển khai của nó. Về mặt kỹ thuật, chúng ta đã dùng một phương trình đặc trưng khi triển khai D flip-flop, nhưng vì phương trình đặc trưng của D flip-flop tương đối tầm thường, có thể bạn đã không để ý đến nó.
 
 • Dùng T flip-flops có những lợi thế nhất định trong một số điều kiện, nhưng D flip-flops nói chung là phần tử lưu trữ được ưu tiên chọn khi dùng VHDL. Nếu bạn không có lý do cụ thể để dùng một loại flip-flop nào đó khác D flip-flop, có lẽ bạn không nên làm vậy.
 
@@ -188,7 +188,7 @@ end my_t_ff_s;
 
 Một phần lớn của digital design liên quan đến mạch tuần tự. Nói chung, phần lớn việc thiết kế mạch tuần tự là đồng bộ các sự kiện với một cạnh clock. Nói cách khác, các thay đổi output chỉ xảy ra ở một cạnh clock. Phần giới thiệu về các phần tử nhớ trong VHDL trình bày ở mục này có thể khiến người đọc nghĩ rằng bộ nhớ trong VHDL chỉ gắn với behavioral modeling, nhưng không phải vậy. Cùng khái niệm tạo ra bộ nhớ cũng đúng với data-flow modeling: không chỉ định tường minh một output cho mọi điều kiện input có thể có sẽ tạo ra một latch (một phần tử lưu trữ). Và nhân tiện nói về điểm này, kiểm tra việc tạo ra phần tử nhớ ngoài ý muốn là một trong những nhiệm vụ của người thiết kế số. Như bạn có thể hình dung, các phần tử nhớ thêm vào một mức độ phức tạp không cần thiết cho mạch được synthesize.
 
-Một cách tiếp cận phổ biến để học cú pháp và cơ chế của các ngôn ngữ máy tính mới là hiện thực cùng một tác vụ theo càng nhiều cách khác nhau càng tốt. Cách tiếp cận này tận dụng tính linh hoạt của ngôn ngữ và có thể cho là một cách tiếp cận hợp lệ để học một ngôn ngữ mới. Điều này cũng đúng với VHDL. Nhưng, có lẽ trong VHDL còn hơn các ngôn ngữ khác, có những cách làm cụ thể và những việc này luôn nên được làm theo những cách cụ thể đó. Dù có thể tạo ra flip-flops bằng model data-flow, phần lớn những người am hiểu khi xem code VHDL của bạn sẽ thoạt đầu không rõ chính xác bạn đang làm gì. Xét về việc tạo ra các phần tử nhớ đồng bộ, các phương pháp được trình bày trong mục này đơn giản là phương pháp tối ưu nên chọn. Đây là một lĩnh vực không nên tỏ ra khéo léo.
+Một cách tiếp cận phổ biến để học cú pháp và cơ chế của các ngôn ngữ máy tính mới là triển khai cùng một tác vụ theo càng nhiều cách khác nhau càng tốt. Cách tiếp cận này tận dụng tính linh hoạt của ngôn ngữ và có thể cho là một cách tiếp cận hợp lệ để học một ngôn ngữ mới. Điều này cũng đúng với VHDL. Nhưng, có lẽ trong VHDL còn hơn các ngôn ngữ khác, có những cách làm cụ thể và những việc này luôn nên được làm theo những cách cụ thể đó. Dù có thể tạo ra flip-flops bằng model data-flow, phần lớn những người am hiểu khi xem code VHDL của bạn sẽ thoạt đầu không rõ chính xác bạn đang làm gì. Xét về việc tạo ra các phần tử nhớ đồng bộ, các phương pháp được trình bày trong mục này đơn giản là phương pháp tối ưu nên chọn. Đây là một lĩnh vực không nên tỏ ra khéo léo.
 
 ## 7.3 Những điểm quan trọng
 
@@ -218,9 +218,11 @@ BÀI TẬP 3. Hãy viết một model behavioral VHDL của D flip-flop ở bên
 
 ![p0098_8](images/ch07_using_vhdl_for_sequential_circuits/p0098_8.png)
 
-BÀI TẬP 4. Hãy viết một model behavioral VHDL của D flip-flop ở bên phải. Các input S và R là preset và clear bất đồng bộ active low. Nếu cả hai input S và R được assert đồng thời, output của flip-flop sẽ toggle. BÀI TẬP 5. Hãy viết một model behavioral VHDL của T flip-flop ở bên phải. Các input S và R là preset và clear bất đồng bộ active low. Giả sử cả hai input S và R sẽ không bao giờ được assert đồng thời. Hãy hiện thực flip-flop này trước bằng một mô tả dạng phương trình cho các output, rồi bằng một mô tả behavioral cho các output.
+BÀI TẬP 4. Hãy viết một model behavioral VHDL của D flip-flop ở bên phải. Các input S và R là preset và clear bất đồng bộ active low. Nếu cả hai input S và R được assert đồng thời, output của flip-flop sẽ toggle.
 
 ![p0099_9](images/ch07_using_vhdl_for_sequential_circuits/p0099_9.png)
+
+BÀI TẬP 5. Hãy viết một model behavioral VHDL của T flip-flop ở bên phải. Các input S và R là preset và clear bất đồng bộ active low. Giả sử cả hai input S và R sẽ không bao giờ được assert đồng thời. Hãy triển khai flip-flop này trước bằng một mô tả dạng phương trình cho các output, rồi bằng một mô tả behavioral cho các output.
 
 ![p0099_10](images/ch07_using_vhdl_for_sequential_circuits/p0099_10.png)
 

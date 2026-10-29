@@ -152,11 +152,17 @@ Lỗi phổ biến khác là memory leak, xảy ra khi quên free. Với ứng d
 
 Đôi khi program free cùng một vùng memory hơn một lần, gọi là double free. Kết quả của việc này là undefined. Như bạn có thể hình dung, library memory-allocation có thể bị rối và làm đủ chuyện kỳ lạ; crash là kết quả thường gặp.
 
-Gọi free() không đúng cách. Vấn đề cuối ta bàn là gọi free() sai. Rốt cuộc, free() chỉ mong bạn truyền vào một trong những pointer đã nhận từ malloc() trước đó. Khi truyền giá trị khác, những chuyện xấu có thể (và thực sự) xảy ra. Vì vậy, invalid free nguy hiểm và dĩ nhiên cũng cần tránh.
+### Gọi free() không đúng cách
+
+Vấn đề cuối ta bàn là gọi free() sai. Rốt cuộc, free() chỉ mong bạn truyền vào một trong những pointer đã nhận từ malloc() trước đó. Khi truyền giá trị khác, những chuyện xấu có thể (và thực sự) xảy ra. Vì vậy, invalid free nguy hiểm và dĩ nhiên cũng cần tránh.
 
 > THÔNG TIN THÊM: VÌ SAO KHÔNG LEAK MEMORY KHI PROCESS THOÁT
 >
-> Khi viết chương trình short-lived, có thể cấp phát bằng malloc(). Chương trình chạy và sắp xong: có cần gọi free() nhiều lần ngay trước khi thoát? Dù không gọi có vẻ sai, thực sự không memory nào bị “mất”. Lý do đơn giản: hệ thống có hai mức quản lý memory. Đầu tiên là OS, cấp memory khi process chạy và thu lại khi thoát (hoặc chết theo cách khác). Thứ hai là bên trong mỗi process, ví dụ heap khi gọi malloc() và free(). Dù không gọi free() (nên leak trong heap), operating system thu toàn memory process (gồm page code, stack và heap liên quan ở đây) khi chương trình chạy xong. Bất kể trạng thái heap trong address space, OS thu mọi page khi process chết, bảo đảm không memory nào mất dù không free. Vì vậy, chương trình short-lived leak thường không gây vấn đề vận hành (dù bị xem là thói quen kém). Khi viết server long-running (như web server hoặc database management system không bao giờ thoát), memory leak lớn hơn nhiều, cuối cùng crash khi ứng dụng hết memory. Và tất nhiên leak còn nghiêm trọng hơn trong một chương trình đặc biệt: chính operating system. Lại cho thấy người viết kernel code có công việc khó nhất...
+> Khi viết chương trình short-lived, có thể cấp phát bằng malloc(). Chương trình chạy và sắp xong: có cần gọi free() nhiều lần ngay trước khi thoát? Dù không gọi có vẻ sai, thực sự không memory nào bị “mất”. Lý do đơn giản: hệ thống có hai mức quản lý memory.
+>
+> Đầu tiên là OS, cấp memory khi process chạy và thu lại khi thoát (hoặc chết theo cách khác). Thứ hai là bên trong mỗi process, ví dụ heap khi gọi malloc() và free(). Dù không gọi free() (nên leak trong heap), operating system thu toàn memory process (gồm page code, stack và heap liên quan ở đây) khi chương trình chạy xong. Bất kể trạng thái heap trong address space, OS thu mọi page khi process chết, bảo đảm không memory nào mất dù không free.
+>
+> Vì vậy, chương trình short-lived leak thường không gây vấn đề vận hành (dù bị xem là thói quen kém). Khi viết server long-running (như web server hoặc database management system không bao giờ thoát), memory leak lớn hơn nhiều, cuối cùng crash khi ứng dụng hết memory. Và tất nhiên leak còn nghiêm trọng hơn trong một chương trình đặc biệt: chính operating system. Lại cho thấy người viết kernel code có công việc khó nhất...
 
 ### Tóm tắt
 

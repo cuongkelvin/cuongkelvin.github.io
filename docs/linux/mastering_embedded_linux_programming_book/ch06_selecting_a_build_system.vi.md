@@ -717,7 +717,7 @@ Cấu trúc recipe và các dữ liệu cấu hình khác theo cách này giúp 
 
 Thêm một layer đơn giản như copy thư mục meta vào một vị trí phù hợp và thêm nó vào `bblayers.conf`. Hãy bảo đảm bạn đọc file `REAMDE` đi kèm mỗi layer để xem nó phụ thuộc vào những layer khác nào và tương thích với những phiên bản Yocto nào.
 
-Để minh họa cách layer hoạt động, hãy tạo một layer cho board Nova mà chúng ta có thể dùng cho phần còn lại của chương khi thêm tính năng. Bạn có thể xem bản hiện thực đầy đủ của layer dưới `MELD/Chapter06/meta-nova` trong kho code.
+Để minh họa cách layer hoạt động, hãy tạo một layer cho board Nova mà chúng ta có thể dùng cho phần còn lại của chương khi thêm tính năng. Bạn có thể xem bản triển khai đầy đủ của layer dưới `MELD/Chapter06/meta-nova` trong kho code.
 
 Mỗi meta layer phải có ít nhất một file cấu hình tên là `conf/layer.conf` và cũng nên có một file `README` và một license.
 

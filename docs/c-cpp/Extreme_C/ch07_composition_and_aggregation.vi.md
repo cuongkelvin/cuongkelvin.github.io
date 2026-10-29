@@ -93,7 +93,7 @@ Một số phần của object được chứa có thể vẫn truy cập đư�
 
 Ví dụ sau, *ví dụ 7.1*, minh họa quan hệ composition giữa một object xe hơi và một object động cơ.
 
-Nó gồm năm file: hai header file, khai báo public interface của các class `Car` và `Engine`; hai source file, chứa hiện thực của các class `Car` và `Engine`; và cuối cùng, một source file, chứa hàm `main` và <a id="_idIndexMarker558"></a>thực thi một kịch bản đơn giản dùng một chiếc xe và object động cơ của nó.
+Nó gồm năm file: hai header file, khai báo public interface của các class `Car` và `Engine`; hai source file, chứa bản triển khai của các class `Car` và `Engine`; và cuối cùng, một source file, chứa hàm `main` và <a id="_idIndexMarker558"></a>thực thi một kịch bản đơn giản dùng một chiếc xe và object động cơ của nó.
 
 Lưu ý rằng, trong một số domain, chúng ta có thể có các object động cơ bên ngoài các object xe hơi; ví dụ, trong phần mềm CAD kỹ thuật cơ khí. Vì vậy, loại quan hệ giữa các object khác nhau được xác định bởi domain của vấn đề. Vì mục đích của ví dụ, hãy tưởng tượng một domain trong đó các object động cơ không thể tồn tại bên ngoài các object xe hơi.
 
@@ -141,7 +141,7 @@ double engine_get_temperature(struct engine_t*);
 
 *Code Box 7-4 [ExtremeC_examples_chapter7_1_engine.h]: Public interface của class Engine*
 
-Các code box sau chứa các hiện thực được thực hiện cho các class `Car` và `Engine`. Chúng ta bắt đầu với class `Car`:
+Các code box sau chứa các bản triển khai được thực hiện cho các class `Car` và `Engine`. Chúng ta bắt đầu với class `Car`:
 
 ```
 #include <stdlib.h>
@@ -183,17 +183,17 @@ Code box trên cho thấy <a id="_idIndexMarker560"></a>cách chiếc xe đã ch
 
 Dù kiểu `struct engine_t*` vẫn chưa hoàn chỉnh bên trong source file này, nó có thể trỏ tới một object từ một kiểu `engine_t` hoàn chỉnh vào lúc runtime. Attribute này sẽ trỏ tới một object sẽ được tạo dựng trong constructor của class `Car`, và nó sẽ được giải phóng bên trong destructor. Ở cả hai chỗ, object xe hơi đều tồn tại, và điều này có nghĩa là vòng đời của động cơ nằm trong vòng đời của xe.
 
-Pointer `engine` là private, và không có pointer nào bị rò rỉ ra từ hiện thực. Đó là một lưu ý quan trọng. Khi bạn đang hiện thực một quan hệ composition, không pointer nào được để rò rỉ ra ngoài, nếu không nó khiến code bên ngoài có thể thay đổi state của object được chứa. Giống như encapsulation, không pointer nào được để rò rỉ ra ngoài khi nó cho phép truy cập trực tiếp vào các phần private của một object. Các phần private nên luôn được truy cập một cách gián tiếp qua các behavior function.
+Pointer `engine` là private, và không có pointer nào bị rò rỉ ra từ bản triển khai. Đó là một lưu ý quan trọng. Khi bạn đang triển khai một quan hệ composition, không pointer nào được để rò rỉ ra ngoài, nếu không nó khiến code bên ngoài có thể thay đổi state của object được chứa. Giống như encapsulation, không pointer nào được để rò rỉ ra ngoài khi nó cho phép truy cập trực tiếp vào các phần private của một object. Các phần private nên luôn được truy cập một cách gián tiếp qua các behavior function.
 
-Hàm `car_get_engine_temperature` trong code box cho phép truy cập attribute `temperature` của động cơ. Tuy nhiên, có một lưu ý quan trọng về hàm này. Nó dùng public interface của động cơ. Nếu bạn để ý, bạn sẽ thấy rằng *hiện thực private của xe* đang sử dụng *public interface của động cơ*.
+Hàm `car_get_engine_temperature` trong code box cho phép truy cập attribute `temperature` của động cơ. Tuy nhiên, có một lưu ý quan trọng về hàm này. Nó dùng public interface của động cơ. Nếu bạn để ý, bạn sẽ thấy rằng *bản triển khai private của xe* đang sử dụng *public interface của động cơ*.
 
-Điều này có nghĩa là bản thân chiếc xe không biết gì về các chi tiết hiện thực của động cơ. Đây là cách nó nên như vậy.
+Điều này có nghĩa là bản thân chiếc xe không biết gì về các chi tiết triển khai của động cơ. Đây là cách nó nên như vậy.
 
-*Hai object không cùng kiểu, trong hầu hết các trường hợp, không được biết về chi tiết hiện thực của nhau*. Đây là những gì information hiding quy định. Hãy nhớ rằng các behavior của xe được coi là bên ngoài đối với động cơ.
+*Hai object không cùng kiểu, trong hầu hết các trường hợp, không được biết về chi tiết triển khai của nhau*. Đây là những gì information hiding quy định. Hãy nhớ rằng các behavior của xe được coi là bên ngoài đối với động cơ.
 
-Bằng cách này, chúng ta có thể thay hiện thực của động cơ bằng một hiện thực khác, và nó vẫn sẽ hoạt động, chừng nào hiện thực mới cung cấp định nghĩa cho cùng các hàm public được khai báo trong header file của động cơ.
+Bằng cách này, chúng ta có thể thay bản triển khai của động cơ bằng một cách triển khai khác, và nó vẫn sẽ hoạt động, chừng nào bản triển khai mới cung cấp định nghĩa cho cùng các hàm public được khai báo trong header file của động cơ.
 
-Giờ, hãy xem hiện thực của class `Engine`:
+Giờ, hãy xem bản triển khai của class `Engine`:
 
 ```
 #include <stdlib.h>
@@ -240,7 +240,7 @@ double engine_get_temperature(engine_t* engine) {
 
 *Code Box 7-6 [ExtremeC_examples_chapter7_1_engine.c]: Định nghĩa của class Engine*
 
-Code trên chỉ dùng cách tiếp cận implicit<a id="_idIndexMarker562"></a> encapsulation cho hiện thực private của nó, và nó rất giống các ví dụ trước. Nhưng có một điều cần lưu ý về điều này. Như bạn thấy, object `engine` không biết rằng một object bên ngoài sẽ chứa nó trong một quan hệ composition. Điều này giống như thế giới thực. Khi một công ty đang chế tạo động cơ, không rõ động cơ nào sẽ đi vào chiếc xe nào. Dĩ nhiên, chúng ta có thể đã giữ một pointer tới object `car` chứa, nhưng trong ví dụ này, chúng ta không cần.
+Code trên chỉ dùng cách tiếp cận implicit<a id="_idIndexMarker562"></a> encapsulation cho bản triển khai private của nó, và nó rất giống các ví dụ trước. Nhưng có một điều cần lưu ý về điều này. Như bạn thấy, object `engine` không biết rằng một object bên ngoài sẽ chứa nó trong một quan hệ composition. Điều này giống như thế giới thực. Khi một công ty đang chế tạo động cơ, không rõ động cơ nào sẽ đi vào chiếc xe nào. Dĩ nhiên, chúng ta có thể đã giữ một pointer tới object `car` chứa, nhưng trong ví dụ này, chúng ta không cần.
 
 Code box sau minh họa kịch bản trong đó chúng ta tạo một object `car` và gọi một số public API của nó để trích xuất thông tin về động cơ của xe:
 
@@ -271,7 +271,7 @@ int main(int argc, char** argv) {
 
 *Code Box 7-7 [ExtremeC_examples_chapter7_1_main.c]: Hàm main của ví dụ 7.1*
 
-Để build<a id="_idIndexMarker563"></a> ví dụ trên, trước tiên chúng ta cần biên dịch ba source file trước đó. Sau đó, chúng ta cần link chúng lại với nhau để tạo ra executable object file cuối cùng. Lưu ý rằng main source file (source file chứa hàm `main`) chỉ phụ thuộc vào public interface của xe. Vì vậy, khi link, nó chỉ cần hiện thực private của object `car`. Tuy nhiên, hiện thực private của object `car` dựa vào public interface của interface động cơ; do đó, khi link, chúng ta cần cung cấp hiện thực private của object `engine`. Vì vậy, chúng ta cần link cả ba object file để có executable cuối cùng.
+Để build<a id="_idIndexMarker563"></a> ví dụ trên, trước tiên chúng ta cần biên dịch ba source file trước đó. Sau đó, chúng ta cần link chúng lại với nhau để tạo ra executable object file cuối cùng. Lưu ý rằng main source file (source file chứa hàm `main`) chỉ phụ thuộc vào public interface của xe. Vì vậy, khi link, nó chỉ cần triển khai private của object `car`. Tuy nhiên, bản triển khai private của object `car` dựa vào public interface của interface động cơ; do đó, khi link, chúng ta cần cung cấp bản triển khai private của object `engine`. Vì vậy, chúng ta cần link cả ba object file để có executable cuối cùng.
 
 Các lệnh sau cho thấy cách build ví dụ và chạy executable cuối cùng:
 
@@ -355,7 +355,7 @@ Code box trên định nghĩa public interface của mọi object người chơi
 
 Một lần nữa, chúng ta phải khai báo trước các structure `gun_t` và `player_t`. Chúng ta cần có kiểu `gun_t` được khai báo vì một số behavior function của class `Player` có argument thuộc kiểu này.
 
-Hiện thực của class `Player` như sau:
+Bản triển khai của class `Player` như sau:
 
 ```
 #include <stdlib.h>
@@ -418,11 +418,11 @@ Nếu aggregation pointer có thể được để null trong constructor, thì 
 
 Trong hàm `player_pickup_gun`, quan hệ aggregation bắt đầu, và nó kết thúc trong hàm `player_drop_gun` khi người chơi bỏ súng xuống.
 
-Lưu ý rằng chúng ta cần đặt pointer `gun` về null sau khi bỏ quan hệ aggregation. Không giống trong composition, object chứa không phải là *owner* của object được chứa. Vì vậy, nó không có quyền kiểm soát vòng đời của object đó. Do đó, chúng ta không nên giải phóng object súng ở bất kỳ chỗ nào bên trong code hiện thực của người chơi.
+Lưu ý rằng chúng ta cần đặt pointer `gun` về null sau khi bỏ quan hệ aggregation. Không giống trong composition, object chứa không phải là *owner* của object được chứa. Vì vậy, nó không có quyền kiểm soát vòng đời của object đó. Do đó, chúng ta không nên giải phóng object súng ở bất kỳ chỗ nào bên trong code triển khai của người chơi.
 
 Trong các quan hệ optional aggregation, chúng ta có thể chưa đặt object được chứa vào một thời điểm nào đó trong chương trình. Do đó, chúng ta nên cẩn thận khi dùng aggregation pointer vì mọi truy cập tới một pointer chưa được đặt, hay một pointer là `null`, đều có thể dẫn đến segmentation fault. Về cơ bản đó là lý do tại sao trong hàm `player_shoot`, chúng ta kiểm tra pointer `gun` có hợp lệ không. Nếu aggregation pointer là null, điều đó có nghĩa là code dùng object người chơi đang dùng sai nó. Nếu trường hợp đó xảy ra, chúng ta hủy bỏ việc thực thi bằng cách trả về 1 làm *exit* code của process.
 
-Code sau là hiện thực của class `Gun`:
+Code sau là bản triển khai của class `Gun`:
 
 ```
 #include <stdlib.h>

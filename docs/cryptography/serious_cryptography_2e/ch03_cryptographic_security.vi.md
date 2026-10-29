@@ -118,7 +118,7 @@ Nhưng chẳng lẽ parallelism và việc có nhiều mục tiêu không thể 
 
 Một điều khác cần xem xét khi đánh giá security level là sự phát triển của công nghệ. Định luật Moore (Moore’s law) cho rằng hiệu năng tính toán tăng gấp đôi khoảng mỗi hai năm. Chúng ta có thể xem điều này như việc mất 1 bit security mỗi hai năm: nếu hôm nay một ngân sách $1,000 cho phép bạn phá, chẳng hạn, một key 40-bit trong một giờ, thì định luật Moore nói rằng hai năm sau, bạn có thể phá một key 41-bit trong một giờ với cùng ngân sách $1,000 (tôi đang đơn giản hóa). Từ đó, chúng ta có thể ngoại suy để nói rằng, theo định luật Moore, chúng ta sẽ có ít hơn 40 bit security sau 80 năm so với ngày nay. Nói cách khác, sau 80 năm, việc thực hiện 2<sup>128</sup> phép toán có thể tốn ngang việc thực hiện 2<sup>88</sup> phép toán ngày nay. Tính cả parallelism và nhiều mục tiêu, chúng ta còn lại 2<sup>48</sup> nano giây tính toán, hay khoảng ba ngày. Nhưng phép ngoại suy này rất thiếu chính xác vì định luật Moore sẽ không và không thể mở rộng đến mức đó. Dù vậy, bạn hiểu ý rồi đấy: những gì trông có vẻ bất khả thi hôm nay có thể trở thành hiện thực trong một thế kỷ.
 
-Sẽ có những lúc một security level thấp hơn 128 bit là hợp lý, chẳng hạn khi bạn cần security trong một khoảng thời gian ngắn và khi chi phí hiện thực một security level cao hơn sẽ ảnh hưởng tiêu cực đến chi phí hoặc khả năng sử dụng của hệ thống. Một ví dụ là các hệ thống truyền hình trả tiền (pay-TV), trong đó encryption key dài 48 hoặc 64 bit. Điều này nghe có vẻ thấp một cách lố bịch nhưng lại đủ, vì key được làm mới cứ mỗi 5 hoặc 10 giây.
+Sẽ có những lúc một security level thấp hơn 128 bit là hợp lý, chẳng hạn khi bạn cần security trong một khoảng thời gian ngắn và khi chi phí triển khai một security level cao hơn sẽ ảnh hưởng tiêu cực đến chi phí hoặc khả năng sử dụng của hệ thống. Một ví dụ là các hệ thống truyền hình trả tiền (pay-TV), trong đó encryption key dài 48 hoặc 64 bit. Điều này nghe có vẻ thấp một cách lố bịch nhưng lại đủ, vì key được làm mới cứ mỗi 5 hoặc 10 giây.
 
 Dù vậy, để bảo đảm long-term security, bạn nên chọn security 256-bit hoặc thấp hơn một chút. Ngay cả trong kịch bản worst-case—sự tồn tại của quantum computer (xem Chương 14)—chúng ta cũng khó có thể phá một scheme 256-bit secure trong tương lai gần. Security trên 256 bit thực tế là không cần thiết, ngoại trừ như một công cụ marketing.
 
@@ -168,7 +168,7 @@ Thêm nữa, chứng minh không phải lúc nào cũng đúng, và có thể ph
 
 Một điểm quan trọng khác cần xem xét là các bài toán toán học khó đôi khi hóa ra dễ giải hơn dự kiến. Ví dụ, một số tham số yếu nhất định khiến việc phá RSA cryptosystem trở nên dễ dàng. Hoặc bài toán toán học có thể khó trong một số trường hợp nhất định nhưng không khó trung bình, như thường xảy ra khi bài toán tham chiếu còn mới và chưa được hiểu rõ. Đó là điều đã xảy ra khi knapsack encryption scheme năm 1978 của Merkle và Hellman sau đó bị phá bằng các kỹ thuật lattice reduction.
 
-Cuối cùng, dù chứng minh security của một algorithm có thể ổn, implementation của algorithm vẫn có thể yếu. Ví dụ, kẻ tấn công có thể khai thác thông tin side-channel như mức tiêu thụ điện hoặc thời gian thực thi để biết về các thao tác bên trong của một algorithm nhằm phá nó, do đó bỏ qua được chứng minh. Hoặc người hiện thực có thể dùng sai crypto scheme: nếu algorithm quá phức tạp với quá nhiều nút điều chỉnh cần cấu hình, khả năng người dùng hoặc developer cấu hình sai sẽ cao hơn, điều có thể khiến algorithm hoàn toàn không an toàn.
+Cuối cùng, dù chứng minh security của một algorithm có thể ổn, implementation của algorithm vẫn có thể yếu. Ví dụ, kẻ tấn công có thể khai thác thông tin side-channel như mức tiêu thụ điện hoặc thời gian thực thi để biết về các thao tác bên trong của một algorithm nhằm phá nó, do đó bỏ qua được chứng minh. Hoặc người triển khai có thể dùng sai crypto scheme: nếu algorithm quá phức tạp với quá nhiều nút điều chỉnh cần cấu hình, khả năng người dùng hoặc developer cấu hình sai sẽ cao hơn, điều có thể khiến algorithm hoàn toàn không an toàn.
 
 ### Heuristic Security
 
@@ -213,7 +213,7 @@ Khác với symmetric key, asymmetric key thường dài hơn security level mà
 
 Để tạo một asymmetric key, bạn gửi các bit pseudorandom làm seed cho một algorithm key-generation. Algorithm này nhận đầu vào là một giá trị seed dài ít nhất bằng security level dự kiến và từ đó xây dựng một private key cùng public key tương ứng, bảo đảm rằng cả hai đều thỏa mãn các tiêu chí cần thiết. Ví dụ, một algorithm key-generation ngây thơ cho RSA sẽ tạo ra một số, n = pq, bằng cách dùng một algorithm để tạo hai số nguyên tố ngẫu nhiên có độ dài xấp xỉ nhau. Algorithm đó sẽ chọn các số ngẫu nhiên cho đến khi gặp một số là số nguyên tố, vì vậy bạn cũng sẽ cần một algorithm để kiểm tra một số có phải là số nguyên tố hay không.
 
-Để khỏi phải tự hiện thực algorithm key-generation, bạn có thể dùng OpenSSL để tạo một RSA private key 4,096-bit, như sau:
+Để khỏi phải tự triển khai algorithm key-generation, bạn có thể dùng OpenSSL để tạo một RSA private key 4,096-bit, như sau:
 
 ```
 $ openssl genrsa 4096
@@ -276,7 +276,7 @@ Cryptographic security có thể sai theo nhiều cách. Rủi ro lớn nhất l
 
 ### Security proof sai (Incorrect Security Proof)
 
-Ngay cả các chứng minh security của những nhà nghiên cứu nổi tiếng cũng có thể sai. Một trong những ví dụ nổi bật nhất về một chứng minh sai lầm nghiêm trọng là chứng minh cho Optimal Asymmetric Encryption Padding (OAEP), một phương pháp mã hóa an toàn dùng RSA và đã được hiện thực trong nhiều ứng dụng. Một chứng minh sai về security của OAEP trước các kẻ tấn công chosen-ciphertext đã được chấp nhận là hợp lệ trong bảy năm, cho đến khi một nhà nghiên cứu tìm ra lỗi vào năm 2001. Không chỉ chứng minh sai, mà kết quả cũng sai. Một chứng minh mới sau đó cho thấy OAEP chỉ gần như an toàn trước các kẻ tấn công chosen-ciphertext. Giờ đây chúng ta phải tin vào chứng minh mới và hy vọng rằng nó không có lỗi. (Để biết thêm chi tiết, xem bài báo năm 2001 “OAEP Reconsidered” của Victor Shoup.)
+Ngay cả các chứng minh security của những nhà nghiên cứu nổi tiếng cũng có thể sai. Một trong những ví dụ nổi bật nhất về một chứng minh sai lầm nghiêm trọng là chứng minh cho Optimal Asymmetric Encryption Padding (OAEP), một phương pháp mã hóa an toàn dùng RSA và đã được triển khai trong nhiều ứng dụng. Một chứng minh sai về security của OAEP trước các kẻ tấn công chosen-ciphertext đã được chấp nhận là hợp lệ trong bảy năm, cho đến khi một nhà nghiên cứu tìm ra lỗi vào năm 2001. Không chỉ chứng minh sai, mà kết quả cũng sai. Một chứng minh mới sau đó cho thấy OAEP chỉ gần như an toàn trước các kẻ tấn công chosen-ciphertext. Giờ đây chúng ta phải tin vào chứng minh mới và hy vọng rằng nó không có lỗi. (Để biết thêm chi tiết, xem bài báo năm 2001 “OAEP Reconsidered” của Victor Shoup.)
 
 ### Key ngắn để hỗ trợ hệ thống cũ (Short Keys for Legacy Support)
 

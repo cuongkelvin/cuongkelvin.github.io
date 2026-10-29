@@ -1,6 +1,8 @@
 # 9 Virtual Memory
 
-Các process trong hệ thống dùng chung CPU và main memory với những process khác. Tuy nhiên, dùng chung main memory đặt ra một số thách thức đặc biệt. Khi nhu cầu CPU tăng, các process chậm lại tương đối đều đặn. Nhưng nếu quá nhiều process cần quá nhiều bộ nhớ, một số process đơn giản không thể chạy. Khi chương trình hết không gian, nó cũng hết đường xoay xở. Bộ nhớ còn dễ bị hỏng. Nếu một process vô tình ghi vào bộ nhớ process khác đang sử dụng, process đó có thể thất bại theo cách khó hiểu, hoàn toàn không liên quan đến logic chương trình.
+Các process trong hệ thống dùng chung CPU và main memory với những process khác.
+
+Tuy nhiên, dùng chung main memory đặt ra một số thách thức đặc biệt. Khi nhu cầu CPU tăng, các process chậm lại tương đối đều đặn. Nhưng nếu quá nhiều process cần quá nhiều bộ nhớ, một số process đơn giản không thể chạy. Khi chương trình hết không gian, nó cũng hết đường xoay xở. Bộ nhớ còn dễ bị hỏng. Nếu một process vô tình ghi vào bộ nhớ process khác đang sử dụng, process đó có thể thất bại theo cách khó hiểu, hoàn toàn không liên quan đến logic chương trình.
 
 Để quản lý bộ nhớ hiệu quả hơn và ít lỗi hơn, hệ thống hiện đại cung cấp abstraction của main memory gọi là virtual memory (VM). Virtual memory là sự phối hợp tinh tế giữa hardware exception, hardware address translation, main memory, file trên đĩa và phần mềm kernel, cung cấp cho mỗi process một address space lớn, đồng nhất và riêng tư. Chỉ với một cơ chế rõ ràng, virtual memory cung cấp ba khả năng quan trọng: (1) Sử dụng main memory hiệu quả bằng cách xem nó là cache cho address space lưu trên đĩa, chỉ giữ các vùng đang hoạt động trong main memory và truyền dữ liệu qua lại giữa đĩa và bộ nhớ khi cần. (2) Đơn giản hóa memory management bằng cách cung cấp address space đồng nhất cho mỗi process. (3) Bảo vệ address space của mỗi process khỏi bị process khác làm hỏng.
 
@@ -174,9 +176,13 @@ Sự kết hợp demand paging và virtual address space riêng ảnh hưởng s
 
 - Đơn giản hóa linking. Address space riêng cho phép mỗi process dùng cùng định dạng cơ bản cho memory image, bất kể code và dữ liệu thực sự nằm ở đâu trong physical memory. Ví dụ, như đã thấy trong Hình 8.13, mọi process trên một hệ thống Linux cụ thể có định dạng bộ nhớ tương tự. Với address space 64-bit, code segment luôn bắt đầu tại virtual address 0x400000. Data segment theo sau code segment sau một khoảng trống alignment thích hợp. Stack chiếm phần cao nhất của user process address space và tăng trưởng xuống dưới. Sự đồng nhất này đơn giản hóa đáng kể thiết kế và triển khai linker, cho phép tạo executable được link hoàn chỉnh độc lập với vị trí cuối cùng của code và dữ liệu trong physical memory.
 
-- Đơn giản hóa loading. Virtual memory còn giúp dễ load executable object file và shared object file vào bộ nhớ. Để load section .text và .data của object file vào process mới tạo, Linux loader cấp phát virtual page cho code segment và data segment, đánh dấu chúng invalid (tức không được cache) và trỏ page table entry tới vị trí thích hợp trong object file. Điểm thú vị là loader không bao giờ thực sự sao chép dữ liệu từ đĩa vào bộ nhớ. Dữ liệu được paged in tự động theo yêu cầu bởi hệ thống virtual memory khi mỗi page được tham chiếu lần đầu, hoặc bởi CPU khi fetch instruction, hoặc bởi instruction đang thực thi khi tham chiếu vị trí bộ nhớ. Khái niệm ánh xạ một tập virtual page liên tiếp tới vị trí bất kỳ trong file bất kỳ gọi là memory mapping. Linux cung cấp system call mmap cho phép chương trình ứng dụng tự thực hiện memory mapping. Chúng ta sẽ mô tả memory mapping application-level chi tiết hơn trong Mục 9.8.
+- Đơn giản hóa loading. Virtual memory còn giúp dễ load executable object file và shared object file vào bộ nhớ. Để load section .text và .data của object file vào process mới tạo, Linux loader cấp phát virtual page cho code segment và data segment, đánh dấu chúng invalid (tức không được cache) và trỏ page table entry tới vị trí thích hợp trong object file. Điểm thú vị là loader không bao giờ thực sự sao chép dữ liệu từ đĩa vào bộ nhớ. Dữ liệu được paged in tự động theo yêu cầu bởi hệ thống virtual memory khi mỗi page được tham chiếu lần đầu, hoặc bởi CPU khi fetch instruction, hoặc bởi instruction đang thực thi khi tham chiếu vị trí bộ nhớ.
 
-- Đơn giản hóa chia sẻ. Address space riêng cung cấp cho operating system cơ chế nhất quán để quản lý chia sẻ giữa user process và chính operating system. Nhìn chung, mỗi process có các vùng code, dữ liệu, heap và stack riêng không dùng chung với process khác. Khi đó, operating system tạo page table ánh xạ các virtual page tương ứng tới physical page rời nhau. Tuy nhiên, trong một số trường hợp, process cần chia sẻ code và dữ liệu. Ví dụ, mọi process phải gọi cùng code kernel của operating system, và mọi chương trình C gọi routine trong thư viện C chuẩn như printf. Thay vì đưa bản sao riêng của kernel và thư viện C chuẩn vào mỗi process, operating system có thể sắp xếp để nhiều process dùng chung một bản sao code bằng cách ánh xạ virtual page thích hợp trong các process khác nhau tới cùng physical page, như Hình 9.9.
+  Khái niệm ánh xạ một tập virtual page liên tiếp tới vị trí bất kỳ trong file bất kỳ gọi là memory mapping. Linux cung cấp system call mmap cho phép chương trình ứng dụng tự thực hiện memory mapping. Chúng ta sẽ mô tả memory mapping application-level chi tiết hơn trong Mục 9.8.
+
+- Đơn giản hóa chia sẻ. Address space riêng cung cấp cho operating system cơ chế nhất quán để quản lý chia sẻ giữa user process và chính operating system. Nhìn chung, mỗi process có các vùng code, dữ liệu, heap và stack riêng không dùng chung với process khác. Khi đó, operating system tạo page table ánh xạ các virtual page tương ứng tới physical page rời nhau.
+
+  Tuy nhiên, trong một số trường hợp, process cần chia sẻ code và dữ liệu. Ví dụ, mọi process phải gọi cùng code kernel của operating system, và mọi chương trình C gọi routine trong thư viện C chuẩn như printf. Thay vì đưa bản sao riêng của kernel và thư viện C chuẩn vào mỗi process, operating system có thể sắp xếp để nhiều process dùng chung một bản sao code bằng cách ánh xạ virtual page thích hợp trong các process khác nhau tới cùng physical page, như Hình 9.9.
 
 - Đơn giản hóa memory allocation. Virtual memory cung cấp cơ chế đơn giản để cấp phát thêm bộ nhớ cho user process. Khi chương trình chạy trong user process yêu cầu thêm không gian heap (ví dụ, do gọi malloc), operating system cấp phát số lượng thích hợp, chẳng hạn k, virtual memory page liên tiếp và ánh xạ chúng tới k physical page bất kỳ nằm ở bất kỳ đâu trong physical memory. Do cách page table hoạt động, operating system không cần tìm k physical memory page liên tiếp. Các page có thể phân tán ngẫu nhiên trong physical memory.
 
@@ -254,11 +260,11 @@ Bước 5. Fault handler xác định victim page trong physical memory, và n�
 
 Bước 6. Fault handler page in page mới và cập nhật PTE trong bộ nhớ.
 
+Bước 7. Fault handler trở về process ban đầu, khiến faulting instruction được khởi động lại. CPU gửi lại virtual address gây lỗi tới MMU. Vì virtual page hiện được cache trong physical memory, có hit; sau khi MMU thực hiện các bước trong Hình 9.13(a), main memory trả word được yêu cầu về processor.
+
 ![p0853_12](images/ch09_virtual_memory/p0853_12.png)
 
 **Hình 9.13 Góc nhìn hoạt động của page hit và page fault. VA: virtual address. PTEA: page table entry address. PTE: page table entry. PA: physical address.**
-
-Bước 7. Fault handler trở về process ban đầu, khiến faulting instruction được khởi động lại. CPU gửi lại virtual address gây lỗi tới MMU. Vì virtual page hiện được cache trong physical memory, có hit; sau khi MMU thực hiện các bước trong Hình 9.13(a), main memory trả word được yêu cầu về processor.
 
 ### Bài tập thực hành 9.3 (lời giải trang 917)
 
@@ -446,17 +452,13 @@ Hình 9.22 tóm tắt toàn bộ quá trình address translation Core i7, từ l
 |---|---|
 | P | Child page table có trong physical memory (1) hay không (0). |
 | R/W | Quyền truy cập Read-only hoặc read-write cho mọi page có thể tới được. |
-
-U/S Quyền truy cập user mode hoặc supervisor (kernel) mode cho mọi page có thể tới được.
-
+| U/S | Quyền truy cập user mode hoặc supervisor (kernel) mode cho mọi page có thể tới được. |
 | WT | Cache policy Write-through hoặc write-back cho child page table. |
-|---|---|
 | CD | Tắt hoặc bật caching cho child page table. |
 | A | Reference bit (MMU đặt khi đọc và ghi, phần mềm xóa). |
 | PS | Page size là 4 KB hoặc 4 MB (chỉ định nghĩa cho PTE level 1). |
 | Base addr | 40 bit quan trọng nhất của physical base address của child page table. |
-
-XD Tắt hoặc bật instruction fetch từ mọi page có thể tới được từ PTE này.
+| XD | Tắt hoặc bật instruction fetch từ mọi page có thể tới được từ PTE này. |
 
 **Hình 9.23 Định dạng page table entry level 1, level 2 và level 3. Mỗi entry tham chiếu child page table 4 KB.**
 
@@ -466,7 +468,7 @@ Hình 9.24 thể hiện định dạng entry trong page table level 4. Khi P = 1
 
 PTE có ba permission bit kiểm soát truy cập page. Bit R/W xác định nội dung page là đọc/ghi hay read-only. Bit U/S xác định page có thể được truy cập trong user mode hay không, bảo vệ code và dữ liệu trong kernel của operating system khỏi user program. Bit XD (execute disable), được giới thiệu trong hệ thống 64-bit, có thể dùng để tắt instruction fetch từ từng memory page. Đây là tính năng mới quan trọng cho phép kernel giảm nguy cơ buffer overflow attack bằng cách giới hạn thực thi trong code segment read-only.
 
-Khi MMU chuyển đổi mỗi virtual address, nó còn cập nhật hai bit khác mà page fault handler của kernel có thể dùng. MMU đặt bit A, gọi là reference bit, mỗi khi page được truy cập. Kernel có thể dùng reference bit để triển khai page replacement algorithm. MMU đặt bit D, hay dirty bit, mỗi khi page được ghi. Page đã bị sửa đôi khi gọi là dirty page. Dirty bit cho kernel biết có phải U/S Quyền truy cập user mode hoặc supervisor mode (kernel mode) cho child page. ghi victim page trở lại trước khi sao chép replacement page vào hay không. Kernel có thể gọi instruction kernel-mode đặc biệt để xóa reference bit hoặc dirty bit.
+Khi MMU chuyển đổi mỗi virtual address, nó còn cập nhật hai bit khác mà page fault handler của kernel có thể dùng. MMU đặt bit A, gọi là reference bit, mỗi khi page được truy cập. Kernel có thể dùng reference bit để triển khai page replacement algorithm. MMU đặt bit D, hay dirty bit, mỗi khi page được ghi. Page đã bị sửa đôi khi gọi là dirty page. Dirty bit cho kernel biết có phải ghi victim page trở lại trước khi sao chép replacement page vào hay không. Kernel có thể gọi instruction kernel-mode đặc biệt để xóa reference bit hoặc dirty bit.
 
 ![p0865_27](images/ch09_virtual_memory/p0865_27.png)
 
@@ -474,9 +476,8 @@ Khi MMU chuyển đổi mỗi virtual address, nó còn cập nhật hai bit kh�
 |---|---|
 | P | Child page có trong physical memory (1) hay không (0). |
 | R/W | Quyền truy cập Read-only hoặc đọc/ghi cho child page. |
-
+| U/S | Quyền truy cập user mode hoặc supervisor mode (kernel mode) cho child page. |
 | WT | Cache policy Write-through hoặc write-back cho child page. |
-|---|---|
 | CD | Tắt hoặc bật cache. |
 | A | Reference bit (MMU đặt khi đọc và ghi, phần mềm xóa). |
 | D | Dirty bit (MMU đặt khi ghi, phần mềm xóa). |
@@ -542,7 +543,9 @@ vm_next. Trỏ tới area struct tiếp theo trong danh sách.
 
 Giả sử MMU kích hoạt page fault khi thử chuyển một virtual address A. Exception chuyển quyền điều khiển tới page fault handler của kernel, rồi thực hiện các bước sau:
 
-1. Virtual address A có hợp lệ không? Nói cách khác, A có nằm trong area do một area struct định nghĩa không? Để trả lời, fault handler tìm trong danh sách area struct, so sánh A với vm_start và vm_end của mỗi area struct. Nếu instruction không hợp lệ, fault handler kích hoạt segmentation fault để kết thúc process. Tình huống này được gắn nhãn “1” trong Hình 9.28. Vì process có thể tạo số lượng tùy ý virtual memory area mới (bằng hàm mmap được mô tả ở mục tiếp theo), tìm tuần tự trong danh sách area struct có thể rất tốn kém. Vì vậy, trong thực tế Linux đặt thêm một cây lên danh sách bằng một số field không được thể hiện và thực hiện tìm kiếm trên cây này.
+1. Virtual address A có hợp lệ không? Nói cách khác, A có nằm trong area do một area struct định nghĩa không? Để trả lời, fault handler tìm trong danh sách area struct, so sánh A với vm_start và vm_end của mỗi area struct. Nếu instruction không hợp lệ, fault handler kích hoạt segmentation fault để kết thúc process. Tình huống này được gắn nhãn “1” trong Hình 9.28.
+
+   Vì process có thể tạo số lượng tùy ý virtual memory area mới (bằng hàm mmap được mô tả ở mục tiếp theo), tìm tuần tự trong danh sách area struct có thể rất tốn kém. Vì vậy, trong thực tế Linux đặt thêm một cây lên danh sách bằng một số field không được thể hiện và thực hiện tìm kiếm trên cây này.
 
 2. Truy cập bộ nhớ được thử có hợp lệ không? Nói cách khác, process có quyền đọc, ghi hoặc thực thi page trong area này không? Ví dụ, page fault có phải do store instruction thử ghi vào page read-only trong code segment? Page fault có phải do process chạy trong user mode thử đọc word từ kernel virtual memory? Nếu truy cập không hợp lệ, fault handler kích hoạt protection exception để kết thúc process. Tình huống này được gắn nhãn “2” trong Hình 9.28.
 
@@ -685,11 +688,11 @@ Allocator có hai kiểu cơ bản. Cả hai yêu cầu ứng dụng cấp phát
 
 - Explicit allocator yêu cầu ứng dụng giải phóng tường minh mọi block đã cấp phát. Ví dụ, thư viện C chuẩn cung cấp explicit allocator gọi là gói malloc. Chương trình C cấp phát block bằng hàm malloc và giải phóng block bằng hàm free. Các lời gọi new và delete trong C++ tương đương.
 
+- Ngược lại, implicit allocator yêu cầu allocator phát hiện khi block đã cấp phát không còn được chương trình sử dụng rồi giải phóng. Implicit allocator còn gọi là garbage collector, và quá trình tự động giải phóng block đã cấp phát không còn dùng gọi là garbage collection. Ví dụ, ngôn ngữ higher-level như Lisp, ML và Java dựa vào garbage collection để giải phóng block đã cấp phát.
+
 ![p0877_36](images/ch09_virtual_memory/p0877_36.png)
 
 **Hình 9.33 Heap.**
-
-- Ngược lại, implicit allocator yêu cầu allocator phát hiện khi block đã cấp phát không còn được chương trình sử dụng rồi giải phóng. Implicit allocator còn gọi là garbage collector, và quá trình tự động giải phóng block đã cấp phát không còn dùng gọi là garbage collection. Ví dụ, ngôn ngữ higher-level như Lisp, ML và Java dựa vào garbage collection để giải phóng block đã cấp phát.
 
 Phần còn lại của mục này thảo luận thiết kế và triển khai explicit allocator. Chúng ta sẽ thảo luận implicit allocator trong Mục 9.10. Để cụ thể, phần thảo luận tập trung vào allocator quản lý heap memory. Tuy nhiên, cần biết memory allocation là ý tưởng tổng quát xuất hiện trong nhiều bối cảnh. Ví dụ, ứng dụng thao tác graph chuyên sâu thường dùng standard allocator để lấy block virtual memory lớn rồi dùng allocator application-specific quản lý bộ nhớ trong block khi các node graph được tạo và hủy.
 
@@ -963,19 +966,27 @@ Xét mọi trường hợp có thể khi allocator giải phóng current block:
 
 3. Previous block free và next block allocated.
 
-4. Previous block và next block đều free. Hình 9.40 thể hiện cách coalesce trong bốn trường hợp. Trường hợp 1, cả hai block liền kề allocated nên không thể coalesce. Chỉ đổi trạng thái current block từ allocated sang free. Trường hợp 2, current block hợp nhất với next block. Header current block và footer next block được cập nhật bằng tổng kích thước current và next block. Trường hợp 3, previous block hợp nhất với current block. Header previous block và footer current block được cập nhật bằng tổng kích thước hai block. Trường hợp 4, cả ba block hợp nhất thành một free block, với header previous block và footer next block được cập nhật bằng tổng kích thước ba block. Trong mọi trường hợp, coalescing diễn ra trong thời gian không đổi. Ý tưởng boundary tag đơn giản và tinh tế, khái quát cho nhiều loại allocator và cách tổ chức free list. Tuy nhiên, có nhược điểm tiềm tàng. Yêu cầu mỗi block có cả header và footer có thể tạo memory overhead đáng kể nếu ứng dụng thao tác nhiều block nhỏ. Ví dụ, nếu ứng dụng graph tạo và hủy node động bằng các lời gọi malloc và free lặp lại, mỗi node chỉ cần vài word, header và footer sẽ tiêu thụ nửa block allocated. May thay, có tối ưu boundary tag thông minh loại bỏ nhu cầu footer trong block allocated. Nhớ rằng khi coalesce current block với previous và next block trong bộ nhớ, size field trong footer previous block chỉ cần nếu previous block free. Nếu lưu allocated/free bit của previous block trong một bit low-order dư của current block, block allocated không cần footer và có thể dùng không gian đó cho payload. Tuy nhiên, chú ý free block vẫn cần footer.
+4. Previous block và next block đều free.
+
+Hình 9.40 thể hiện cách coalesce trong bốn trường hợp.
+
+Trường hợp 1, cả hai block liền kề allocated nên không thể coalesce. Chỉ đổi trạng thái current block từ allocated sang free. Trường hợp 2, current block hợp nhất với next block. Header current block và footer next block được cập nhật bằng tổng kích thước current và next block. Trường hợp 3, previous block hợp nhất với current block. Header previous block và footer current block được cập nhật bằng tổng kích thước hai block. Trường hợp 4, cả ba block hợp nhất thành một free block, với header previous block và footer next block được cập nhật bằng tổng kích thước ba block. Trong mọi trường hợp, coalescing diễn ra trong thời gian không đổi.
+
+Ý tưởng boundary tag đơn giản và tinh tế, khái quát cho nhiều loại allocator và cách tổ chức free list. Tuy nhiên, có nhược điểm tiềm tàng. Yêu cầu mỗi block có cả header và footer có thể tạo memory overhead đáng kể nếu ứng dụng thao tác nhiều block nhỏ. Ví dụ, nếu ứng dụng graph tạo và hủy node động bằng các lời gọi malloc và free lặp lại, mỗi node chỉ cần vài word, header và footer sẽ tiêu thụ nửa block allocated.
+
+May thay, có tối ưu boundary tag thông minh loại bỏ nhu cầu footer trong block allocated. Nhớ rằng khi coalesce current block với previous và next block trong bộ nhớ, size field trong footer previous block chỉ cần nếu previous block free. Nếu lưu allocated/free bit của previous block trong một bit low-order dư của current block, block allocated không cần footer và có thể dùng không gian đó cho payload. Tuy nhiên, chú ý free block vẫn cần footer.
 
 ![p0889_43](images/ch09_virtual_memory/p0889_43.png)
 
 **Hình 9.39 Định dạng heap block dùng boundary tag.**
 
-#### Bài tập thực hành 9.7 (lời giải trang 919)
-
-Xác định minimum block size cho mỗi tổ hợp yêu cầu alignment và định dạng block sau. Giả định: Implicit free list, không cho phép payload zero-size, header và footer được lưu trong word 4-byte.
-
 ![p0890_44](images/ch09_virtual_memory/p0890_44.png)
 
 **Hình 9.40 Coalescing bằng boundary tag. Trường hợp 1: prev và next allocated. Trường hợp 2: prev allocated, next free. Trường hợp 3: prev free, next allocated. Trường hợp 4: next và prev free.**
+
+#### Bài tập thực hành 9.7 (lời giải trang 919)
+
+Xác định minimum block size cho mỗi tổ hợp yêu cầu alignment và định dạng block sau. Giả định: Implicit free list, không cho phép payload zero-size, header và footer được lưu trong word 4-byte.
 
 | Alignment | Block allocated | Free block | Minimum block size (byte) |
 |---|---|---|---|
@@ -1065,6 +1076,9 @@ Có thể kết hợp macro theo nhiều cách để thao tác free list. Ví d�
 
 ```
 size_t size = GET_SIZE(HDRP(NEXT_BLKP(bp)));
+```
+
+```
                                                                       code/vm/malloc/mm.c
  1   /* Basic constants and macros */
  2   #define WSIZE       4       /* Word and header/footer size (bytes) */
@@ -1508,9 +1522,7 @@ Như đã thấy trong Mục 3.10.3, chương trình có bug buffer overflow n�
 7   }
 ```
 
-### 9.11.4 Giả định pointer và object mà nó trỏ tới
-
-có cùng kích thước
+### 9.11.4 Giả định pointer và object mà nó trỏ tới có cùng kích thước
 
 Lỗi phổ biến là giả định pointer tới object có cùng kích thước object mà nó trỏ tới:
 

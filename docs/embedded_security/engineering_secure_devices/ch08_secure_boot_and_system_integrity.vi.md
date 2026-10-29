@@ -4,7 +4,7 @@
 
 Trong quá trình boot của embedded system, việc khởi tạo phần cứng cơ bản cũng như việc khởi động một OS diễn ra. Nhiều bước trong số này liên quan đến firmware được lưu trong flash memory vì điều đó cho kỹ sư thiết bị khả năng cập nhật. Tuy nhiên, khả năng thay thế này đi kèm một cái giá: kẻ tấn công có thể can thiệp vào dữ liệu đó vì lợi ích riêng của họ.
 
-Trong chương này, tôi sẽ giải thích sự phức tạp của các quá trình boot và nhiều khái niệm bảo vệ khác nhau. Sau khi giới thiệu khái niệm secure boot chain cổ điển, tôi sẽ thảo luận các cân nhắc thực tế như tác động của quá trình secure boot lên các quy trình phát triển và sản xuất. Như thường lệ, lý thuyết và thực tế không phải là một, nên tôi sẽ đưa vào một case study về việc hiện thực secure boot trên nền tảng STM32MP157F.
+Trong chương này, tôi sẽ giải thích sự phức tạp của các quá trình boot và nhiều khái niệm bảo vệ khác nhau. Sau khi giới thiệu khái niệm secure boot chain cổ điển, tôi sẽ thảo luận các cân nhắc thực tế như tác động của quá trình secure boot lên các quy trình phát triển và sản xuất. Như thường lệ, lý thuyết và thực tế không phải là một, nên tôi sẽ đưa vào một case study về việc triển khai secure boot trên nền tảng STM32MP157F.
 
 Dựa trên tính toàn vẹn của quá trình boot, bạn có thể thắc mắc liệu tính toàn vẹn của thiết bị có thể được mở rộng hơn nữa không, nên chương này cũng mô tả cách đạt được bảo vệ integrity cho filesystem và hơn thế nữa. Cuối cùng, tôi sẽ xem xét một giải pháp integrity firmware low-cost cho các hệ thống microcontroller-based không dựa vào flash memory bên ngoài và một quá trình boot phức tạp.
 
@@ -36,7 +36,7 @@ Có một thuộc tính cơ bản cần nhấn mạnh ở điểm này: các gia
 
 ## Các khái niệm bảo vệ boot
 
-Từ góc nhìn của khách hàng hay người dùng thiết bị, integrity thường là một protection goal mong muốn đối với firmware và phần mềm của thiết bị. Một kịch bản rủi ro liên quan là tội phạm mạng cố duy trì phần mềm độc hại trong firmware để tồn tại qua lần khởi động lại hệ thống—ví dụ, để có quyền truy cập backdoor long-lasting. Ngoài ra, việc thao túng các tham số cấu hình low-level và thiết lập OS sẽ không khả thi với các routine xác minh chạy lúc boot. Ngay cả các cuộc tấn công sửa đổi phần mềm của thiết bị trong quá trình giao hàng, như được báo cáo là do các cơ quan tình báo thực hiện, sẽ khiến sản phẩm không hoạt động được nếu có hiện thực bảo vệ integrity vững chắc.
+Từ góc nhìn của khách hàng hay người dùng thiết bị, integrity thường là một protection goal mong muốn đối với firmware và phần mềm của thiết bị. Một kịch bản rủi ro liên quan là tội phạm mạng cố duy trì phần mềm độc hại trong firmware để tồn tại qua lần khởi động lại hệ thống—ví dụ, để có quyền truy cập backdoor long-lasting. Ngoài ra, việc thao túng các tham số cấu hình low-level và thiết lập OS sẽ không khả thi với các routine xác minh chạy lúc boot. Ngay cả các cuộc tấn công sửa đổi phần mềm của thiết bị trong quá trình giao hàng, như được báo cáo là do các cơ quan tình báo thực hiện, sẽ khiến sản phẩm không hoạt động được nếu có triển khai bảo vệ integrity vững chắc.
 
 Các tác giả của IEC 62443 (Part 4-2) dường như cũng nghĩ đến những kịch bản này. Yêu cầu embedded device requirement (EDR) 3.14 cho security level (SL) 1 trở lên nhắm tới integrity của quá trình boot. Nó yêu cầu một thiết bị phải có khả năng thực hiện xác minh integrity đối với firmware, phần mềm và dữ liệu cấu hình được dùng trong các quá trình boot và runtime của thiết bị trước khi chúng được thực thi. Bắt đầu từ SL 2, tiêu chuẩn thậm chí đòi hỏi authenticity của mọi phần có thể thay thế của quá trình boot.
 
@@ -60,7 +60,7 @@ Các nhà sản xuất thiết bị thường đồng ý về tầm quan trọng
 
 > <a id="page_145"></a>**CẢNH BÁO**
 >
-> *Hãy cẩn thận bất cứ khi nào gặp các thuật ngữ tiếp thị về bảo vệ quá trình boot. Chúng có thể gây hiểu lầm và đôi khi chỉ hiện thực một phần những gì bạn kỳ vọng!*
+> *Hãy cẩn thận bất cứ khi nào gặp các thuật ngữ tiếp thị về bảo vệ quá trình boot. Chúng có thể gây hiểu lầm và đôi khi chỉ triển khai một phần những gì bạn kỳ vọng!*
 
 <a id="ch00lev1_65"></a>
 
@@ -94,9 +94,9 @@ Các vi mạch hỗ trợ secure boot thường cung cấp OTP memory để đ�
 
 <a id="ch00lev1_66"></a>
 
-## Các cân nhắc khi hiện thực secure boot
+## Các cân nhắc khi triển khai secure boot
 
-Đáng tiếc là việc hiện thực secure boot không giống như kích hoạt một tùy chọn duy nhất trong một menu cấu hình, có lẽ đó là lý do tại sao secure boot trên embedded system vẫn chưa phổ biến trên thị trường. Tuy nhiên, các chi tiết sau không nhằm làm developer sợ hãi, mà là để làm một danh sách nhiệm vụ cần ghi nhớ nếu bạn quyết định đảm nhận secure boot.
+Đáng tiếc là việc triển khai secure boot không giống như kích hoạt một tùy chọn duy nhất trong một menu cấu hình, có lẽ đó là lý do tại sao secure boot trên embedded system vẫn chưa phổ biến trên thị trường. Tuy nhiên, các chi tiết sau không nhằm làm developer sợ hãi, mà là để làm một danh sách nhiệm vụ cần ghi nhớ nếu bạn quyết định đảm nhận secure boot.
 
 <a id="ch00lev2_84"></a>
 
@@ -106,7 +106,7 @@ Trước tiên, điều quan trọng là hiểu rằng một secure boot chain n
 
 Hãy bảo đảm biến secure boot thành một yêu cầu trong các cuộc thảo luận về architecture thiết bị. Nếu vi mạch trung tâm không hỗ trợ nó, bạn buộc phải hoãn tính năng secure boot sang thế hệ thiết bị tiếp theo.
 
-Ngoài ra, nếu các thành phần phần mềm không hỗ trợ xác minh chữ ký, như có thể là trường hợp với một số bootloader, và bạn không thể tự tích hợp chức năng này, bạn sẽ cần bắt đầu quá trình có thể tẻ nhạt là tìm kiếm và hiện thực các thay thế phù hợp.
+Ngoài ra, nếu các thành phần phần mềm không hỗ trợ xác minh chữ ký, như có thể là trường hợp với một số bootloader, và bạn không thể tự tích hợp chức năng này, bạn sẽ cần bắt đầu quá trình có thể tẻ nhạt là tìm kiếm và triển khai các thay thế phù hợp.
 
 Ở đầu cuối của quá trình boot, việc xác minh operating system kernel như bước cuối cùng có thể là đủ. Tuy nhiên, ví dụ trên Linux, bạn cũng có thể muốn xác minh integrity và authenticity của các kernel module, hay thậm chí mở rộng quá trình xác minh sang filesystem và ứng dụng như được thảo luận trong “Integrity Protection Beyond the Boot Process” ở [trang 154](#ch00lev1_69).
 
@@ -120,7 +120,7 @@ Về phía phát triển, quá trình tạo chữ ký (ví dụ, trong một CI 
 
 > **CẢNH BÁO**
 >
-> *Quá trình image-signing là then chốt cho việc hiện thực secure boot. Tuy nhiên, nó liên quan đến các private key có nhu cầu bảo vệ confidentiality mạnh. Nếu chúng bị xâm phạm, authenticity và integrity của phần mềm thiết bị không còn có thể được bảo đảm.*
+> *Quá trình image-signing là then chốt cho việc triển khai secure boot. Tuy nhiên, nó liên quan đến các private key có nhu cầu bảo vệ confidentiality mạnh. Nếu chúng bị xâm phạm, authenticity và integrity của phần mềm thiết bị không còn có thể được bảo đảm.*
 
 Một trở ngại phổ biến cần vượt qua trong quá trình phát triển các thiết bị được bảo vệ bởi secure boot là việc xử lý các image và thiết bị thử nghiệm. Có nhiều cách tiếp cận khác nhau, tất cả đều hợp lệ trong các tình huống cụ thể của chúng. Một mặt, bạn có thể muốn thực hiện kiểm thử sớm mà không có bất kỳ hạn chế secure boot nào trên các thiết bị hoàn toàn mở. Tuy nhiên, bạn sẽ không thể phát hiện các vấn đề liên quan đến secure boot. Mặt khác, bạn có thể muốn dùng một hay nhiều test signing key trên các thiết bị thử nghiệm để xác thực các image chỉ dành cho kiểm thử. Tuy nhiên, điều này có rủi ro vô tình khóa các thiết bị thử nghiệm với cấu hình hay key sai, điều có thể biến chúng thành những viên gạch điện tử.
 
@@ -130,13 +130,13 @@ Một trở ngại phổ biến cần vượt qua trong quá trình phát triể
 
 ### *Sản xuất và vòng đời*
 
-Một lĩnh vực khác liên quan đến các hiện thực secure boot là việc sản xuất thiết bị. Vì dữ liệu cấu hình và key phải được đốt vào OTP memory, quy trình sản xuất phải được điều chỉnh để bật secure boot. Kiểm thử secure boot in-production cũng có thể là một sự mở rộng hợp lý. Hãy tưởng tượng nếu mọi bước trước đó đã được thực hiện với sự cẩn thận và công sức lớn, nhưng rồi các thiết bị rời khỏi khâu sản xuất với một quá trình secure boot được kích hoạt sai, có thể dễ dàng bị vượt qua ngoài hiện trường. Trong trường hợp tốt nhất, đó sẽ là một thảm họa về động lực đối với mọi kỹ sư bảo mật, có lẽ còn tệ hơn.
+Một lĩnh vực khác liên quan đến các bản triển khai secure boot là việc sản xuất thiết bị. Vì dữ liệu cấu hình và key phải được đốt vào OTP memory, quy trình sản xuất phải được điều chỉnh để bật secure boot. Kiểm thử secure boot in-production cũng có thể là một sự mở rộng hợp lý. Hãy tưởng tượng nếu mọi bước trước đó đã được thực hiện với sự cẩn thận và công sức lớn, nhưng rồi các thiết bị rời khỏi khâu sản xuất với một quá trình secure boot được kích hoạt sai, có thể dễ dàng bị vượt qua ngoài hiện trường. Trong trường hợp tốt nhất, đó sẽ là một thảm họa về động lực đối với mọi kỹ sư bảo mật, có lẽ còn tệ hơn.
 
-Như thể nhiệm vụ này chưa đủ phức tạp, các hiện thực secure boot còn là mục tiêu hấp dẫn đối với kẻ tấn công và các nhà nghiên cứu. Do đó, các signing key có thể bị xâm phạm trong hạ tầng phát triển của bạn, hay các lỗ hổng trong phần cứng hay firmware ảnh hưởng đến bảo mật quá trình boot có thể bị các bên bên ngoài tìm ra. Cả hai trường hợp đều dẫn đến sự cần thiết phải thay các phần của firmware bằng các phiên bản đã cập nhật, có thể bao gồm một public verification key mới được tạo. Một chức năng cập nhật an toàn, như được mô tả trong [Chương 9](ch09_secure_firmware_update.vi.md#ch09), cũng như một quy trình key- and firmware-management vững chắc, là thiết yếu để xử lý những hoàn cảnh này một cách chuyên nghiệp.
+Như thể nhiệm vụ này chưa đủ phức tạp, các bản triển khai secure boot còn là mục tiêu hấp dẫn đối với kẻ tấn công và các nhà nghiên cứu. Do đó, các signing key có thể bị xâm phạm trong hạ tầng phát triển của bạn, hay các lỗ hổng trong phần cứng hay firmware ảnh hưởng đến bảo mật quá trình boot có thể bị các bên bên ngoài tìm ra. Cả hai trường hợp đều dẫn đến sự cần thiết phải thay các phần của firmware bằng các phiên bản đã cập nhật, có thể bao gồm một public verification key mới được tạo. Một chức năng cập nhật an toàn, như được mô tả trong [Chương 9](ch09_secure_firmware_update.vi.md#ch09), cũng như một quy trình key- and firmware-management vững chắc, là thiết yếu để xử lý những hoàn cảnh này một cách chuyên nghiệp.
 
 > **LƯU Ý**
 >
-> *Việc hiện thực secure boot đòi hỏi developer, quản trị viên môi trường IT và kỹ sư sản xuất làm việc cùng nhau. Hãy bảo đảm rằng bảo mật thiết bị được coi là mục tiêu chung đối với mọi người tham gia.*
+> *Việc triển khai secure boot đòi hỏi developer, quản trị viên môi trường IT và kỹ sư sản xuất làm việc cùng nhau. Hãy bảo đảm rằng bảo mật thiết bị được coi là mục tiêu chung đối với mọi người tham gia.*
 
 <a id="ch00lev1_67"></a>
 
@@ -150,17 +150,17 @@ Tiếp theo cuộc xung đột này, FSF đã phát triển GPLv3, một license
 
 > Corresponding Source được chuyển giao theo phần này phải đi kèm với Installation Information. [. . .] Installation Information [. . .] có nghĩa là mọi phương pháp, [. . .] authorization key, [. . .] cần thiết để cài đặt và thực thi các phiên bản đã sửa đổi.
 
-<a id="page_149"></a>Trong khi Linux kernel và bootloader embedded system phổ biến U-Boot được cung cấp theo GPLv2, các phần mềm khác như GNU Grand Unified Bootloader (GRUB) chịu sự điều chỉnh của GPLv3 và có thể dẫn đến xung đột pháp lý khi được hiện thực trong một kịch bản secure boot.
+<a id="page_149"></a>Trong khi Linux kernel và bootloader embedded system phổ biến U-Boot được cung cấp theo GPLv2, các phần mềm khác như GNU Grand Unified Bootloader (GRUB) chịu sự điều chỉnh của GPLv3 và có thể dẫn đến xung đột pháp lý khi được triển khai trong một kịch bản secure boot.
 
 Làm rõ các mục tiêu đối lập giữa license phần mềm open source và bảo vệ secure boot cho trường hợp riêng của bạn là tuyệt đối cần thiết trước khi đưa ra thị trường, để tránh cho bạn khá nhiều rắc rối.
 
-Điều này có vẻ không đáng để suy nghĩ, nhưng trong một số trường hợp, developer tìm kiếm một giải pháp thỏa mãn cả hai yêu cầu: bảo vệ boot-process và khả năng cài đặt phần mềm đã sửa đổi. Một cách để đạt được sự thỏa hiệp như vậy là hiện thực một tính năng mở khóa (unlock) trong quá trình boot. Tính năng này cho phép vô hiệu hóa việc xác minh secure boot để cho phép thực thi phần mềm (boot) tùy chỉnh, nhưng đồng thời, thiết bị phải bảo đảm rằng mọi dữ liệu nhạy cảm, như key giải mã, authenticator và kiến thức độc quyền, đều bị xóa khỏi memory. Cách tiếp cận này đã được nhiều nhà cung cấp điện thoại di động Android sử dụng.
+Điều này có vẻ không đáng để suy nghĩ, nhưng trong một số trường hợp, developer tìm kiếm một giải pháp thỏa mãn cả hai yêu cầu: bảo vệ boot-process và khả năng cài đặt phần mềm đã sửa đổi. Một cách để đạt được sự thỏa hiệp như vậy là triển khai một tính năng mở khóa (unlock) trong quá trình boot. Tính năng này cho phép vô hiệu hóa việc xác minh secure boot để cho phép thực thi phần mềm (boot) tùy chỉnh, nhưng đồng thời, thiết bị phải bảo đảm rằng mọi dữ liệu nhạy cảm, như key giải mã, authenticator và kiến thức độc quyền, đều bị xóa khỏi memory. Cách tiếp cận này đã được nhiều nhà cung cấp điện thoại di động Android sử dụng.
 
 <a id="ch00lev1_68"></a>
 
 ## Case Study: Quá trình secure boot trên một thiết bị STM32MP157F
 
-Trong phần này, tôi xem xét các biện pháp bảo vệ boot-process cụ thể của thiết bị STM32MP157F và các gói phần mềm tương ứng của nó. Tuy nhiên, hãy nhớ rằng đây là một tổng quan rộng chứ không phải hướng dẫn step-by-step. Một hiện thực secure boot toàn diện đòi hỏi công sức đáng kể và rất nhiều fine-tuning.
+Trong phần này, tôi xem xét các biện pháp bảo vệ boot-process cụ thể của thiết bị STM32MP157F và các gói phần mềm tương ứng của nó. Tuy nhiên, hãy nhớ rằng đây là một tổng quan rộng chứ không phải hướng dẫn step-by-step. Một bản triển khai secure boot toàn diện đòi hỏi công sức đáng kể và rất nhiều fine-tuning.
 
 <a id="ch00lev2_87"></a>
 
@@ -208,7 +208,7 @@ Lúc boot, code ROM xác minh integrity và authenticity của image FSBL đư�
 
 Đối với FSBL, các thiết bị STM32MP157F dựa vào BL2 TF-A của ARM, vốn cũng cung cấp hỗ trợ secure boot. Tuy nhiên, nó bị vô hiệu hóa theo mặc định và phải được kích hoạt bằng cách đặt build flag `TRUSTED_BOARD_BOOT=1`. Sau đó, digital signature của các binary được BL2 nạp được xác minh về integrity và authenticity dựa trên asymmetric cryptography.
 
-BL2 TF-A đòi hỏi một firmware image package (FIP) có thể được tạo bằng ứng dụng `fiptool`. Nó chứa mọi binary cần được nạp và thực thi cùng dữ liệu cryptography cần thiết để xác minh các binary này. Các binary bao gồm, ví dụ, một SSBL và một hiện thực TEE như OP-TEE chạy trong ARM TrustZone. Theo phân loại của TF-A, TEE được ký hiệu là BL32, và SSBL được biết đến là BL33.
+BL2 TF-A đòi hỏi một firmware image package (FIP) có thể được tạo bằng ứng dụng `fiptool`. Nó chứa mọi binary cần được nạp và thực thi cùng dữ liệu cryptography cần thiết để xác minh các binary này. Các binary bao gồm, ví dụ, một SSBL và một bản triển khai TEE như OP-TEE chạy trong ARM TrustZone. Theo phân loại của TF-A, TEE được ký hiệu là BL32, và SSBL được biết đến là BL33.
 
 <a id="page_152"></a>Một lần nữa, bước đầu tiên là tạo các cặp key (trong trường hợp này là certificate X.509) có thể được dùng để ký và xác minh các phần firmware. Cho nhiệm vụ này, ST cung cấp công cụ `cert_create`.
 
@@ -222,7 +222,7 @@ Thứ tự nạp và thực thi binary như sau. Trước tiên, BL2 nạp BL32 
 
 ### *Tính năng secure boot của U-Boot*
 
-Sau code ROM và BL2 TF-A, hiện thực thứ ba tham gia vào secure boot của thiết bị là thủ tục image-authentication của U-Boot. Năm 2013, nền móng cho hỗ trợ secure boot của U-Boot đã được đặt bằng việc đưa vào xác minh chữ ký RSA-based cho các image Flattened Image Tree (FIT).
+Sau code ROM và BL2 TF-A, bản triển khai thứ ba tham gia vào secure boot của thiết bị là thủ tục image-authentication của U-Boot. Năm 2013, nền móng cho hỗ trợ secure boot của U-Boot đã được đặt bằng việc đưa vào xác minh chữ ký RSA-based cho các image Flattened Image Tree (FIT).
 
 Để kích hoạt những tính năng này, cũng phải bật nhiều tùy chọn cấu hình—ví dụ, chức năng crypto RSA (`CONFIG_RSA`), hỗ trợ FIT (`CONFIG_FIT`) và xử lý chữ ký trong image FIT (`CONFIG_FIT_SIGNATURE`).
 
@@ -352,7 +352,7 @@ Hơn nữa, bảo vệ integrity cũng có thể đạt được ở mức block
 
 #### Filesystem read-only
 
-Nếu bạn lo ngại về việc sửa đổi filesystem lúc runtime, có một giải pháp còn đơn giản hơn. Các filesystem read-only như CramFS và SquashFS không hiện thực quyền ghi cho file, nghĩa là đơn giản không có cách nào thay đổi dữ liệu đĩa lúc runtime, ngay cả khi hệ thống bị xâm phạm. Một ưu điểm phi bảo mật khác là việc lưu trữ nén của những filesystem này, làm giảm <a id="page_156"></a>nhu cầu memory nonvolatile. Tuy nhiên, kẻ tấn công có quyền truy cập offline vào phương tiện lưu trữ khối lượng lớn có thể thay filesystem tùy ý.
+Nếu bạn lo ngại về việc sửa đổi filesystem lúc runtime, có một giải pháp còn đơn giản hơn. Các filesystem read-only như CramFS và SquashFS không triển khai quyền ghi cho file, nghĩa là đơn giản không có cách nào thay đổi dữ liệu đĩa lúc runtime, ngay cả khi hệ thống bị xâm phạm. Một ưu điểm phi bảo mật khác là việc lưu trữ nén của những filesystem này, làm giảm <a id="page_156"></a>nhu cầu memory nonvolatile. Tuy nhiên, kẻ tấn công có quyền truy cập offline vào phương tiện lưu trữ khối lượng lớn có thể thay filesystem tùy ý.
 
 #### Bảo vệ integrity toàn diện
 
@@ -368,16 +368,16 @@ Từ góc nhìn kỹ thuật, `dm-verity` dùng một hash tree trong đó mỗi
 
 Quá trình boot của những nền tảng này thường đơn giản hơn nhiều vì chúng dùng một RTOS hay thậm chí chỉ chạy phần mềm bare-metal. Hơn nữa, phần mềm và dữ liệu của chúng nhỏ hơn đáng kể và thường nằm ít nhất một phần trong flash memory *nội bộ*. Nhưng vẫn vậy, các mục tiêu integrity và authenticity có thể quan trọng để bảo vệ thiết bị khỏi các sửa đổi độc hại.
 
-Một tính năng đơn giản nhưng mạnh mẽ trong ngữ cảnh này là kích hoạt write protection cho flash memory nội bộ. Firmware được ghi vào thiết bị và memory được “khóa” sau đó. Ngoài ra, các debugging interface như Joint Test Action Group (JTAG) nên bị vô hiệu hóa. Theo nguyên tắc defense in depth, hợp lý khi hiện thực các hàm xác minh bên trong firmware như vậy để kiểm tra xem các lock-bits và các biện pháp anti-debugging khác có được đặt đúng không. Khi đó, ngay cả khi các cơ chế write-protection bị vượt qua—ví dụ, bằng tấn công vật lý—đối thủ vẫn phải đầu tư một lượng reverse engineering đáng kể để phá vỡ hoàn toàn việc bảo vệ integrity firmware.
+Một tính năng đơn giản nhưng mạnh mẽ trong ngữ cảnh này là kích hoạt write protection cho flash memory nội bộ. Firmware được ghi vào thiết bị và memory được “khóa” sau đó. Ngoài ra, các debugging interface như Joint Test Action Group (JTAG) nên bị vô hiệu hóa. Theo nguyên tắc defense in depth, hợp lý khi triển khai các hàm xác minh bên trong firmware như vậy để kiểm tra xem các lock-bits và các biện pháp anti-debugging khác có được đặt đúng không. Khi đó, ngay cả khi các cơ chế write-protection bị vượt qua—ví dụ, bằng tấn công vật lý—đối thủ vẫn phải đầu tư một lượng reverse engineering đáng kể để phá vỡ hoàn toàn việc bảo vệ integrity firmware.
 
-Dĩ nhiên, phần mềm nội bộ integrity-protected này có thể hiện thực việc xác minh chữ ký cryptography và trở thành điểm khởi đầu của một chuỗi xác minh chuyển các protection goal nội bộ sang dữ liệu được lưu trong memory bên ngoài.
+Dĩ nhiên, phần mềm nội bộ integrity-protected này có thể triển khai việc xác minh chữ ký cryptography và trở thành điểm khởi đầu của một chuỗi xác minh chuyển các protection goal nội bộ sang dữ liệu được lưu trong memory bên ngoài.
 
 <a id="ch00lev1_71"></a>
 
 ## Tóm tắt
 
-Phần cứng processor và các nhà sản xuất của nó đóng vai trò quan trọng trong việc hiện thực các quá trình secure boot cho embedded system. Các architecture độc quyền, độ phức tạp multicore không đồng nhất và một mớ thuật ngữ tiếp thị góp phần tạo nên rào cản cao mà kiến trúc sư thiết bị và developer phải vượt qua khi hướng tới một quá trình boot được bảo vệ.
+Phần cứng processor và các nhà sản xuất của nó đóng vai trò quan trọng trong việc triển khai các quá trình secure boot cho embedded system. Các architecture độc quyền, độ phức tạp multicore không đồng nhất và một mớ thuật ngữ tiếp thị góp phần tạo nên rào cản cao mà kiến trúc sư thiết bị và developer phải vượt qua khi hướng tới một quá trình boot được bảo vệ.
 
 Nguyên tắc cơ bản rất đơn giản: một thành phần phần cứng bất biến xác minh integrity và authenticity của thành phần phần mềm đầu tiên được nạp. Nếu thành công, việc thực thi được chuyển giao cho phần mềm đó, phần mềm này lại có thể xác minh phần mềm tiếp theo, và cứ thế. Tuy nhiên, trên thực tế, như case study của chương này cho thấy, mỗi giai đoạn của quá trình boot đều khác nhau và đòi hỏi kiến thức product-specific và thường cả các công cụ vendor-specific. Ngoài ra, một loạt cryptographic key phải được quản lý, và các quy trình sản xuất thiết bị thậm chí phải được chuẩn bị cho việc hỗ trợ secure boot. Lợi ích đầy hứa hẹn của biện pháp bảo vệ này đối với bảo mật thiết bị tổng thể đòi hỏi cái giá của nó.
 
-Một hiện thực secure boot bền vững là nền tảng vững chắc cho các biện pháp bảo mật tiếp theo như kernel-module verification, bảo vệ integrity filesystem và nhiều biện pháp runtime integrity. Nó thậm chí có tác động tích cực lên việc bảo vệ trước reverse-engineering và các cách tiếp cận lưu trữ dữ liệu an toàn được mô tả trong [Chương 5](ch05_confidential_data_storage_and_secure_memory.vi.md#ch05), vì nó ngăn kẻ tấn công thực thi code tùy chỉnh trên sản phẩm của bạn và qua đó khám phá phần bên trong của nó.
+Một bản triển khai secure boot bền vững là nền tảng vững chắc cho các biện pháp bảo mật tiếp theo như kernel-module verification, bảo vệ integrity filesystem và nhiều biện pháp runtime integrity. Nó thậm chí có tác động tích cực lên việc bảo vệ trước reverse-engineering và các cách tiếp cận lưu trữ dữ liệu an toàn được mô tả trong [Chương 5](ch05_confidential_data_storage_and_secure_memory.vi.md#ch05), vì nó ngăn kẻ tấn công thực thi code tùy chỉnh trên sản phẩm của bạn và qua đó khám phá phần bên trong của nó.

@@ -216,7 +216,7 @@
 
 ## [Chương 20](ch20_architectural_patterns.vi.md#ch-architectural-patterns): Các architectural pattern (Architectural Patterns)
 
-1. Nêu hai pattern hiện thực mối quan tâm kiến trúc về tách biệt các mối quan tâm vận hành và domain.
+1. Nêu hai pattern triển khai mối quan tâm kiến trúc về tách biệt các mối quan tâm vận hành và domain.
 2. Một workflow được orchestrate có component nào mà các workflow choreographed không có?
 3. Một số ưu điểm của việc dùng một broker duy nhất trong event-driven architecture là gì? Một số nhược điểm là gì?
 4. CQRS tách hai thao tác dữ liệu nào?
@@ -279,7 +279,7 @@
 
 ## [Chương 26](ch26_architectural_intersections.vi.md#ch-architecture-intersections): Các giao điểm của architecture (Architectural Intersections)
 
-1. Bạn có thể dùng những kỹ thuật nào để bảo đảm sự gắn kết cấu trúc với architecture trong quá trình hiện thực?
+1. Bạn có thể dùng những kỹ thuật nào để bảo đảm sự gắn kết cấu trúc với architecture trong quá trình triển khai?
 2. Giải thích vì sao gắn kết architecture và hạ tầng lại quan trọng đến vậy, và đưa ra một ví dụ về sự gắn kết này.
 3. Đưa ra một ví dụ về trường hợp team topology có thể không gắn kết với architecture.
 4. Vì sao một kiến trúc sư phụ trách một hệ thống cụ thể nên quan tâm đến giao điểm giữa architecture và tích hợp hệ thống? Đưa ra một ví dụ về trường hợp architecture có thể mất gắn kết với tích hợp hệ thống.

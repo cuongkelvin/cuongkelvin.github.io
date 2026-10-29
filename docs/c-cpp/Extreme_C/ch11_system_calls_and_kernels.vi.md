@@ -32,11 +32,11 @@ Có một quy tắc về sự phân tách này, đó là không có gì trong ha
 
 Như đã nói, bạn có thể nghĩ rằng điều này có vẻ hơi mâu thuẫn với bất cứ điều gì bạn biết và đã trải nghiệm về các hệ điều hành Unix-like, như Linux. Nếu bạn không thấy vấn đề, hãy để tôi giải thích cho bạn. Nó có vẻ là một mâu thuẫn vì, chẳng hạn, khi một chương trình <a id="_idIndexMarker775"></a>đọc một số byte từ một network socket, không phải chương trình thực sự đọc những byte đó từ network adapter. Chính kernel đọc các byte và sao chép chúng vào user space, và sau đó chương trình có thể lấy chúng và dùng chúng.
 
-Chúng ta có thể làm rõ điều này bằng cách đi qua mọi bước được thực hiện từ user space đến kernel space và ngược lại trong một ví dụ. Khi bạn muốn đọc một file từ một ổ cứng, bạn viết một chương trình ở vòng user application. Chương trình của bạn dùng một hàm I/O của libc gọi là `fread` (hay một hàm tương tự khác) và rốt cuộc sẽ chạy như một process trong user space. Khi chương trình thực hiện một lời gọi tới hàm `fread`, hiện thực đằng sau libc được kích hoạt.
+Chúng ta có thể làm rõ điều này bằng cách đi qua mọi bước được thực hiện từ user space đến kernel space và ngược lại trong một ví dụ. Khi bạn muốn đọc một file từ một ổ cứng, bạn viết một chương trình ở vòng user application. Chương trình của bạn dùng một hàm I/O của libc gọi là `fread` (hay một hàm tương tự khác) và rốt cuộc sẽ chạy như một process trong user space. Khi chương trình thực hiện một lời gọi tới hàm `fread`, bản triển khai đằng sau libc được kích hoạt.
 
-Cho đến giờ, mọi thứ vẫn ở trong user process. Sau đó, hiện thực `fread` rốt cuộc gọi một system call, trong khi `fread` nhận một *file descriptor* đã được mở làm argument thứ nhất, address của một buffer được cấp phát trong memory của process, vốn nằm trong user space, làm argument thứ hai, và độ dài của buffer làm argument thứ ba.
+Cho đến giờ, mọi thứ vẫn ở trong user process. Sau đó, bản triển khai `fread` rốt cuộc gọi một system call, trong khi `fread` nhận một *file descriptor* đã được mở làm argument thứ nhất, address của một buffer được cấp phát trong memory của process, vốn nằm trong user space, làm argument thứ hai, và độ dài của buffer làm argument thứ ba.
 
-Khi system call được kích hoạt bởi hiện thực libc, kernel nắm quyền điều khiển việc thực thi thay mặt cho user process. Nó nhận các argument từ user space và giữ chúng trong kernel space. Sau đó, chính kernel đọc từ file bằng cách truy cập đơn vị filesystem bên trong kernel (như có thể thấy trong *Hình 10-5* ở chương trước).
+Khi system call được kích hoạt bởi bản triển khai libc, kernel nắm quyền điều khiển việc thực thi thay mặt cho user process. Nó nhận các argument từ user space và giữ chúng trong kernel space. Sau đó, chính kernel đọc từ file bằng cách truy cập đơn vị filesystem bên trong kernel (như có thể thấy trong *Hình 10-5* ở chương trước).
 
 Khi thao tác `read` hoàn tất trong vòng kernel, dữ liệu đã đọc sẽ được sao chép vào buffer trong user space, như được chỉ định bởi argument thứ hai khi gọi hàm `fread`, và system call rời đi và trả quyền điều khiển việc thực thi cho user process. Trong khi đó, user process thường chờ trong lúc system call bận với thao tác. Trong trường hợp này, system call là blocking.
 
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 
 *Code Box 11-1 [ExtremeC_examples_chapter11_1.c]: Một ví dụ Hello World khác gọi trực tiếp system call write*
 
-Ở câu lệnh đầu tiên trong code box trên, chúng ta phải định nghĩa `_GNU_SOURCE` để chỉ ra rằng chúng ta <a id="_idIndexMarker779"></a>sẽ dùng các phần của **GNU C Library** (**glibc**) không <a id="_idIndexMarker780"></a>thuộc chuẩn POSIX hay SUS. Điều này phá vỡ tính portability của chương trình, và vì vậy, bạn <a id="_idIndexMarker781"></a>có thể không biên dịch được code của mình trên một máy Unix khác. Trong câu lệnh `include` thứ hai, chúng ta include một trong các header file glibc-specific không tồn tại trong các hệ thống POSIX khác dùng các hiện thực khác glibc làm xương sống libc chính.
+Ở câu lệnh đầu tiên trong code box trên, chúng ta phải định nghĩa `_GNU_SOURCE` để chỉ ra rằng chúng ta <a id="_idIndexMarker779"></a>sẽ dùng các phần của **GNU C Library** (**glibc**) không <a id="_idIndexMarker780"></a>thuộc chuẩn POSIX hay SUS. Điều này phá vỡ tính portability của chương trình, và vì vậy, bạn <a id="_idIndexMarker781"></a>có thể không biên dịch được code của mình trên một máy Unix khác. Trong câu lệnh `include` thứ hai, chúng ta include một trong các header file glibc-specific không tồn tại trong các hệ thống POSIX khác dùng các cách triển khai khác glibc làm xương sống libc chính.
 
 Trong hàm `main`, chúng ta thực hiện một system call bằng cách gọi hàm `syscall`. Trước hết, chúng ta phải chỉ định system call bằng cách truyền một số. Đây là một số nguyên tham chiếu tới một system call cụ thể. Mọi system call đều có *system call number* (số hiệu system call) cụ thể độc nhất của riêng nó trong Linux.
 
@@ -129,13 +129,13 @@ Như bạn có thể thấy ở phần in đậm trong *Shell Box 11-2*, system 
 
 > **Lưu ý**:
 >
-> Một user application không bao giờ nên cố dùng system call trực tiếp. Thường có những bước cần được thực hiện trước và sau khi gọi system call. Các hiện thực libc thực hiện những bước này. Khi bạn không định dùng libc, bạn phải tự thực hiện những bước này, và bạn phải biết rằng những bước này khác nhau từ hệ thống Unix này sang hệ thống khác.
+> Một user application không bao giờ nên cố dùng system call trực tiếp. Thường có những bước cần được thực hiện trước và sau khi gọi system call. Các bản triển khai libc thực hiện những bước này. Khi bạn không định dùng libc, bạn phải tự thực hiện những bước này, và bạn phải biết rằng những bước này khác nhau từ hệ thống Unix này sang hệ thống khác.
 
 <a id="_idParaDest-157"></a>
 
 ### Bên trong hàm syscall
 
-Tuy nhiên, điều gì xảy ra bên trong hàm `syscall`? Lưu ý rằng thảo luận hiện tại chỉ áp dụng cho glibc và <a id="_idIndexMarker786"></a>không áp dụng cho các hiện thực libc còn lại. Trước tiên, chúng ta cần tìm `syscall` trong glibc. Đây là link tới định nghĩa `syscall`[ definition: https://github.com/lattera/glibc/blob/master/sysdeps/unix/sysv/linux/x86](https://github.com/lattera/glibc/blob/master/sysdeps/unix/sysv/linux/x86_64/syscall.S)_64/syscall.S.
+Tuy nhiên, điều gì xảy ra bên trong hàm `syscall`? Lưu ý rằng thảo luận hiện tại chỉ áp dụng cho glibc và <a id="_idIndexMarker786"></a>không áp dụng cho các bản triển khai libc còn lại. Trước tiên, chúng ta cần tìm `syscall` trong glibc. Đây là link tới định nghĩa `syscall`[ definition: https://github.com/lattera/glibc/blob/master/sysdeps/unix/sysv/linux/x86](https://github.com/lattera/glibc/blob/master/sysdeps/unix/sysv/linux/x86_64/syscall.S)_64/syscall.S.
 
 Nếu bạn mở link trên trong một trình duyệt, bạn sẽ thấy rằng hàm này được viết bằng assembly language.
 

@@ -10,7 +10,7 @@ DOI: [10.1201/9781003598145-18](https://doi.org/10.1201/9781003598145-18)
 >
 > John Rushby trong tài liệu tham khảo [<a id="b18refbib18_1"></a>[1](#refbib18_1)] (1993)
 
-[Chương 17](ch17_semi_formal_verification.vi.md) đã trình bày một số kỹ thuật semi-formal có thể được dùng để trả lời câu hỏi: *“Một hệ thống được hiện thực theo thiết kế này có đáp ứng được những gì được yêu cầu ở nó không?”* Chương này đề cập đến cùng câu hỏi đó, nhưng dùng formal method.
+[Chương 17](ch17_semi_formal_verification.vi.md) đã trình bày một số kỹ thuật semi-formal có thể được dùng để trả lời câu hỏi: *“Một hệ thống được triển khai theo thiết kế này có đáp ứng được những gì được yêu cầu ở nó không?”* Chương này đề cập đến cùng câu hỏi đó, nhưng dùng formal method.
 
 Ý định của việc kiểm chứng thiết kế hình thức là tạo ra một định nghĩa đầy đủ về mặt toán học của thiết kế rồi chứng minh rằng thiết kế là đúng theo các invariant được chọn, vốn phải luôn đúng bất kể chuỗi sự kiện mà hệ thống phải chịu.
 
@@ -22,7 +22,7 @@ Thực ra, formal method có thể phục vụ nhiều mục đích hơn là ch�
 
 <a id="p221"></a>Một khi thiết kế của một hệ thống, một thành phần hay một thuật toán được biểu diễn một cách formal, chúng ta có thể suy luận về nó. Liệu thuật toán có luôn hoàn tất trong một khoảng thời gian hữu hạn bất kể tổ hợp và định thời của các sự kiện xảy ra? Liệu việc nhận thông điệp A có *luôn luôn* dẫn đến việc gửi thông điệp B? Có *bất kỳ* tổ hợp tình huống nào mà thông điệp B được gửi mà không có thông điệp A được nhận trước đó không? Các tiến trình có thể deadlock không? Nếu tiến trình A cố gửi thông điệp X vô hạn lần, thì nó có thành công vô hạn lần không?
 
-Việc biểu diễn thiết kế một cách formal mang lại nhiều hơn là kiểm chứng: với thiết kế formal, có thể sinh ra phần mềm một cách tự động. Về nguyên tắc, khi đó không cần kiểm thử phần hiện thực; nếu code đã được tạo ra bởi một thuật toán đáng tin cậy từ một thiết kế đã được chứng minh là đúng, thì tại sao lại cần kiểm thử? Trong thực tế, kiểm thử vẫn sẽ cần thiết, nhưng IEC 61508-3 lưu ý rằng, khi formal method được sử dụng, nỗ lực kiểm thử tích hợp có thể được giảm bớt. Hãy nhớ lời cảnh báo năm 1977 của Donald Knuth: *“Hãy coi chừng bug trong đoạn code trên; tôi chỉ mới chứng minh nó đúng, chưa chạy thử nó.”*
+Việc biểu diễn thiết kế một cách formal mang lại nhiều hơn là kiểm chứng: với thiết kế formal, có thể sinh ra phần mềm một cách tự động. Về nguyên tắc, khi đó không cần kiểm thử phần triển khai; nếu code đã được tạo ra bởi một thuật toán đáng tin cậy từ một thiết kế đã được chứng minh là đúng, thì tại sao lại cần kiểm thử? Trong thực tế, kiểm thử vẫn sẽ cần thiết, nhưng IEC 61508-3 lưu ý rằng, khi formal method được sử dụng, nỗ lực kiểm thử tích hợp có thể được giảm bớt. Hãy nhớ lời cảnh báo năm 1977 của Donald Knuth: *“Hãy coi chừng bug trong đoạn code trên; tôi chỉ mới chứng minh nó đúng, chưa chạy thử nó.”*
 
 ## 18.2 Lịch sử của formal method
 
@@ -50,7 +50,7 @@ IEC 61508-3 lưu ý rằng, khi formal method được sử dụng, phạm vi c�
 
 IEC 61508-7 mô tả formal method và chỉ định mục đích của việc dùng chúng:
 
-> *Formal method chuyển các nguyên tắc suy luận toán học vào việc đặc tả và hiện thực các hệ thống kỹ thuật [qua đó tăng] tính đầy đủ, tính nhất quán hoặc tính đúng đắn của một đặc tả hoặc phần hiện thực.*
+> *Formal method chuyển các nguyên tắc suy luận toán học vào việc đặc tả và triển khai các hệ thống kỹ thuật [qua đó tăng] tính đầy đủ, tính nhất quán hoặc tính đúng đắn của một đặc tả hoặc phần triển khai.*
 
 Nó còn nói thêm rằng, *“[Formal method] có thể trở nên không thể tránh khỏi khi độ phức tạp tăng lên và cần một mức độ tin cậy cao (SIL trên 2),”* nhưng tiếp tục liệt kê một số nhược điểm khả dĩ của formal method:<a id="fn18_118b"></a>[<sup>1</sup>](#fn18_1)
 
@@ -70,9 +70,9 @@ Nó còn nói thêm rằng, *“[Formal method] có thể trở nên không th�
 
   Ngôn ngữ real-time Maude được thiết kế riêng để bắc cầu qua khoảng cách giữa tính hình thức và khả năng biểu đạt.
 
-- *IEC 61508: “Khó khăn của các kỹ sư hiện thực trong việc hiểu mô hình.”*
+- *IEC 61508: “Khó khăn của các kỹ sư triển khai trong việc hiểu mô hình.”*
 
-  Đây có thể là một vấn đề. Như Guy Broadfoot, Akramul Azim và tôi đã chỉ ra trong tài liệu tham khảo [<a id="b18refbib18_4"></a>[4](#refbib18_4)], đây không chỉ là vấn đề của các kỹ sư hiện thực. Theo kinh nghiệm của chúng tôi, ít assessor nào, khi đối mặt với hàng trang định lý và chứng minh được cho là biện minh cho tính đúng đắn của một thiết kế, có thể tiếp thu chúng và đánh giá mức độ liên quan của chúng.
+  Đây có thể là một vấn đề. Như Guy Broadfoot, Akramul Azim và tôi đã chỉ ra trong tài liệu tham khảo [<a id="b18refbib18_4"></a>[4](#refbib18_4)], đây không chỉ là vấn đề của các kỹ sư triển khai. Theo kinh nghiệm của chúng tôi, ít assessor nào, khi đối mặt với hàng trang định lý và chứng minh được cho là biện minh cho tính đúng đắn của một thiết kế, có thể tiếp thu chúng và đánh giá mức độ liên quan của chúng.
 
 - *IEC 61508: “Nỗ lực cao để phát triển, phân tích và bảo trì mô hình trong suốt vòng đời của hệ thống.”*
 
@@ -88,7 +88,7 @@ Nó còn nói thêm rằng, *“[Formal method] có thể trở nên không th�
 
   Đúng là rất khó tìm được nhân sự có khả năng phát triển formal model. Như câu trích ở đầu chương này nói, cần nhiều đào tạo hơn, nhưng, như được thể hiện trong các ví dụ bên dưới, mức chuyên môn toán học cần thiết không cao.
 
-  Tôi cảm thấy câu hỏi cốt lõi là, ai nên tạo ra các mô hình? Các nhóm phát triển theo truyền thống gồm những người về bản chất là lập trình viên — họ có thể đang làm nhà thiết kế, người hiện thực hoặc tester, nhưng thực chất họ là <a id="p224"></a>lập trình viên. Có lẽ tốt hơn là không dùng lập trình viên để tạo ra mô hình vì, mặc dù hai kỹ năng có liên quan, chúng thực ra khác biệt. Việc tạo một formal model bằng ngôn ngữ PROMELA của Spin như được mô tả bên dưới rất gần với việc viết một chương trình C. Điều này có thể gây nhầm lẫn vì, bất chấp sự tương đồng về cú pháp, một chương trình PROMELA *không phải* là một chương trình máy tính, nó là một định nghĩa của một thiết kế.
+  Tôi cảm thấy câu hỏi cốt lõi là, ai nên tạo ra các mô hình? Các nhóm phát triển theo truyền thống gồm những người về bản chất là lập trình viên — họ có thể đang làm nhà thiết kế, người triển khai hoặc tester, nhưng thực chất họ là <a id="p224"></a>lập trình viên. Có lẽ tốt hơn là không dùng lập trình viên để tạo ra mô hình vì, mặc dù hai kỹ năng có liên quan, chúng thực ra khác biệt. Việc tạo một formal model bằng ngôn ngữ PROMELA của Spin như được mô tả bên dưới rất gần với việc viết một chương trình C. Điều này có thể gây nhầm lẫn vì, bất chấp sự tương đồng về cú pháp, một chương trình PROMELA *không phải* là một chương trình máy tính, nó là một định nghĩa của một thiết kế.
 
 - *IEC 61508: “Việc mô hình hóa chức năng mục tiêu của hệ thống thường có thể làm giảm sự chú trọng vào khả năng chịu lỗi của hệ thống.”*
 
@@ -158,7 +158,7 @@ Ký hiệu toán học và một chút tư duy toán học là có liên quan, n
 
 *Huyền thoại: Formal method làm tăng chi phí phát triển.*
 
-Huyền thoại này đặc biệt nguy hại. Thực ra, việc dùng chúng đẩy chi phí lên sớm hơn trong dự án, tăng chi phí cho công việc architecture và thiết kế và giảm chi phí hiện thực và kiểm thử. Tuy nhiên, các nhà quản lý thường đánh giá tiến độ của một dự án bằng tiến độ của việc hiện thực (viết code), và điều này làm nảy sinh huyền thoại này.
+Huyền thoại này đặc biệt nguy hại. Thực ra, việc dùng chúng đẩy chi phí lên sớm hơn trong dự án, tăng chi phí cho công việc architecture và thiết kế và giảm chi phí triển khai và kiểm thử. Tuy nhiên, các nhà quản lý thường đánh giá tiến độ của một dự án bằng tiến độ của việc triển khai (viết code), và điều này làm nảy sinh huyền thoại này.
 
 *Huyền thoại: Formal method không được người dùng chấp nhận.*
 
@@ -309,7 +309,7 @@ Cũng có những khác biệt về cú pháp giữa PROMELA và C. Ví dụ, d�
 
 Để minh họa việc dùng Spin trong một ứng dụng đơn giản đến mức không cần LTL, tôi sẽ lấy một thuật toán mutual exclusion được công bố năm 1966. Vì thuật toán có chứa một lỗi, tôi sẽ không đưa ra tham chiếu đến bài báo, nhưng tôi xin nói thêm rằng tạp chí công bố nó đã, và vẫn, rất có uy tín.
 
-Mục đích của một thuật toán mutual exclusion là cung cấp cho một thread quyền truy cập một tài nguyên cụ thể, các thread khác bị loại trừ cho đến khi thread sở hữu giải phóng nó. Thuật toán thực chất cố gắng hiện thực một mutex. Trong trường hợp thuật toán đã công bố, có hai thread tranh giành tài nguyên: Thread 0 và Thread 1. Ba biến cho phép hai thread tránh xung đột về tài nguyên:
+Mục đích của một thuật toán mutual exclusion là cung cấp cho một thread quyền truy cập một tài nguyên cụ thể, các thread khác bị loại trừ cho đến khi thread sở hữu giải phóng nó. Thuật toán thực chất cố gắng triển khai một mutex. Trong trường hợp thuật toán đã công bố, có hai thread tranh giành tài nguyên: Thread 0 và Thread 1. Ba biến cho phép hai thread tránh xung đột về tài nguyên:
 
 1. `flag[0],` được khởi tạo là 0
 2. `flag[1],` được khởi tạo là 0
@@ -577,7 +577,7 @@ Như có thể thấy từ năm xuất bản của các bài báo trong danh m�
 
 Các thuật toán được cải tiến và bộ xử lý nhanh hơn đang làm giảm các hạn chế kỹ thuật và các công cụ như Rodin đang làm cho formal method trở nên dễ tiếp cận đối với lập trình viên ngồi trước bàn phím. Tuy nhiên, điều này đặt ra câu hỏi mà tôi đã đề cập trước đó — ai nên tạo ra và kiểm chứng các mô hình của thiết kế?
 
-Ở nhiều tổ chức, để tránh sự lệch pha giữa thiết kế và hiện thực, công việc thiết kế được thực hiện bởi chính những lập trình viên sẽ phải hiện thực nó. Các kỹ năng và công cụ cần cho thiết kế và cho lập trình là khác nhau, và ít kỹ sư thành thạo cả hai. Điều này có nghĩa là việc đưa các phương pháp này vào quy trình của một công ty buộc phải có một thay đổi cơ bản trong cấu trúc của công ty: ít lập trình viên hơn và nhiều nhà thiết kế hơn. Và công việc lập trình sẽ trở nên đòi hỏi ít kỹ năng hơn phần nào.
+Ở nhiều tổ chức, để tránh sự lệch pha giữa thiết kế và triển khai, công việc thiết kế được thực hiện bởi chính những lập trình viên sẽ phải triển khai nó. Các kỹ năng và công cụ cần cho thiết kế và cho lập trình là khác nhau, và ít kỹ sư thành thạo cả hai. Điều này có nghĩa là việc đưa các phương pháp này vào quy trình của một công ty buộc phải có một thay đổi cơ bản trong cấu trúc của công ty: ít lập trình viên hơn và nhiều nhà thiết kế hơn. Và công việc lập trình sẽ trở nên đòi hỏi ít kỹ năng hơn phần nào.
 
 ## Tài liệu tham khảo
 

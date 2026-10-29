@@ -74,7 +74,7 @@ Các kết nối mới từ thiết bị của bạn tới các vị trí và đ
 
 Trái với các hệ thống IT cổ điển, một embedded system thường có nhiều interface low-level như bus I<sup>2</sup>C, kết nối serial hay các chân general-purpose input/output (GPIO). Giao tiếp của chúng thường mang dữ liệu cảm biến hay điều khiển, điều một lần nữa có thể là nguồn để phát hiện hành vi bất ngờ như việc buộc actuator vào một chế độ hoạt động nguy hiểm.
 
-Ghi log trạng thái và dữ liệu giao tiếp của những interface này có thể không phải là tính năng tiêu chuẩn, nhưng tùy thuộc vào mức độ trọng yếu của chúng, việc hiện thực nó có thể đáng cân nhắc.
+Ghi log trạng thái và dữ liệu giao tiếp của những interface này có thể không phải là tính năng tiêu chuẩn, nhưng tùy thuộc vào mức độ trọng yếu của chúng, việc triển khai nó có thể đáng cân nhắc.
 
 <a id="ch00lev2_152"></a>
 
@@ -128,7 +128,7 @@ Những biện pháp giám sát nào hợp lý cho sản phẩm của bạn nên
 
 ## <a id="page_228"></a>Thiết kế một lược đồ giám sát
 
-Mặc dù giám sát hệ thống không phải là điều mới với các hệ thống IT, việc hiện thực nó một cách hiệu quả luôn là một thách thức—đặc biệt khi nói đến việc ghi log các sự kiện và quy trình trên embedded system. Tùy thuộc vào khả năng của một sản phẩm cụ thể và các yêu cầu sử dụng nó, phải tìm ra một trade-off giữa xử lý on-device và xử lý server-based.
+Mặc dù giám sát hệ thống không phải là điều mới với các hệ thống IT, việc triển khai nó một cách hiệu quả luôn là một thách thức—đặc biệt khi nói đến việc ghi log các sự kiện và quy trình trên embedded system. Tùy thuộc vào khả năng của một sản phẩm cụ thể và các yêu cầu sử dụng nó, phải tìm ra một trade-off giữa xử lý on-device và xử lý server-based.
 
 [Hình 12-1](#ch12fig01) cho thấy một architecture data-flow chung của dữ liệu log, bắt đầu với việc thu thập, lưu trữ cục bộ và có thể phân tích on-device. Trong khi các thiết bị bị hạn chế sẽ giữ phần này khá gọn nhẹ, các thiết bị mạnh hơn có thể tổng hợp nhiều dữ liệu hơn và thực hiện phân tích on-device để tối đa hóa các hiểu biết tiềm năng.
 
@@ -172,7 +172,7 @@ Việc bảo vệ system-integrity như được mô tả trong [Chương 8](ch0
 
 Như đã đề cập trong phần trước, dữ liệu log có thể không chỉ hữu ích cho việc debug thiết bị mà còn cho kẻ tấn công trong giai đoạn do thám của họ. Do đó, bạn chắc chắn có thể coi các logfile là asset cần được bảo vệ confidentiality.
 
-Các biện pháp như filesystem được mã hóa, như được giải thích trong [Chương 5](ch05_confidential_data_storage_and_secure_memory.vi.md#ch05), có thể là một giải pháp. Một lựa chọn khác là hiện thực một lược đồ mã hóa lai dùng public key của một log server trung tâm để mã hóa một symmetric key cục bộ ngẫu nhiên, key này đến lượt nó được dùng để mã hóa dữ liệu log được tạo cục bộ. Trong trường hợp đó, chỉ server từ xa sở hữu private key tương ứng mới có thể giải mã và phân tích thông tin log.
+Các biện pháp như filesystem được mã hóa, như được giải thích trong [Chương 5](ch05_confidential_data_storage_and_secure_memory.vi.md#ch05), có thể là một giải pháp. Một lựa chọn khác là triển khai một lược đồ mã hóa lai dùng public key của một log server trung tâm để mã hóa một symmetric key cục bộ ngẫu nhiên, key này đến lượt nó được dùng để mã hóa dữ liệu log được tạo cục bộ. Trong trường hợp đó, chỉ server từ xa sở hữu private key tương ứng mới có thể giải mã và phân tích thông tin log.
 
 <a id="ch00lev2_156"></a>
 
@@ -192,7 +192,7 @@ Hơn nữa, các ứng dụng ghi log của bạn có thể gặp phải các bu
 
 Trong nhiều use case, việc có một vị trí lưu trữ tập trung cho dữ liệu giám sát cũng như việc phân tích và tương quan thông tin từ toàn bộ quần thể thiết bị có giá trị lớn. Trong số các ưu điểm khác, cách tiếp cận này cho phép bạn phản ứng với các sự kiện security-related ngoài hiện trường trong một khung thời gian ngắn. Nếu một kẻ tấn công đang nghịch các file cấu hình hay file hệ thống trọng yếu, bạn có thể muốn biết điều đó càng sớm càng tốt. Cách tiếp cận này cũng cho phép bạn đưa một lịch sử dài dữ liệu log thiết bị vào các phân tích hiện tại, và một khi dữ liệu đã được truyền, việc thao túng hay hủy thông tin log on-device sẽ trở nên hiển nhiên.
 
-Tuy nhiên, việc hiện thực hàng thứ hai của architecture ghi log được thể hiện trong [Hình 12-1](#ch12fig01) chẳng hề đơn giản. Một thách thức trong các kịch bản (I)IoT có thể <a id="page_231"></a>là khả năng mở rộng của hệ thống giám sát trung tâm và việc có sẵn năng lực phân tích tương ứng. Dĩ nhiên, điều này phụ thuộc vào quy mô quần thể thiết bị của bạn. Trong khi vài nghìn sản phẩm có thể quản lý được, khả năng mở rộng trở thành trọng tâm khi giám sát số lượng thiết bị six-digit hay thậm chí hơn. Điều này không chỉ đòi hỏi dung lượng lưu trữ trung tâm khổng lồ mà còn cả con người và thuật toán sàng lọc toàn bộ dữ liệu để xác định hành vi thiết bị bất ngờ, các hoạt động độc hại mới nổi hay các indicator of compromise (IoC).
+Tuy nhiên, việc triển khai hàng thứ hai của architecture ghi log được thể hiện trong [Hình 12-1](#ch12fig01) chẳng hề đơn giản. Một thách thức trong các kịch bản (I)IoT có thể <a id="page_231"></a>là khả năng mở rộng của hệ thống giám sát trung tâm và việc có sẵn năng lực phân tích tương ứng. Dĩ nhiên, điều này phụ thuộc vào quy mô quần thể thiết bị của bạn. Trong khi vài nghìn sản phẩm có thể quản lý được, khả năng mở rộng trở thành trọng tâm khi giám sát số lượng thiết bị six-digit hay thậm chí hơn. Điều này không chỉ đòi hỏi dung lượng lưu trữ trung tâm khổng lồ mà còn cả con người và thuật toán sàng lọc toàn bộ dữ liệu để xác định hành vi thiết bị bất ngờ, các hoạt động độc hại mới nổi hay các indicator of compromise (IoC).
 
 Các hệ thống được dùng cho mục đích này thường được biết đến là *security information and event management (SIEM)* vì chúng thu thập dữ liệu sự kiện liên quan đến giám sát bảo mật và cung cấp phương tiện để tìm cây kim trong đống rơm như thành ngữ vẫn nói. Ví dụ về các nền tảng phân tích như vậy, open source hay thương mại, bao gồm Elastic Stack, Graylog và Splunk, chỉ để kể tên một vài. Mặc dù big data analytics và trí tuệ nhân tạo có thể hỗ trợ mạnh cho nhiệm vụ này, trong nhiều trường hợp, sự phán đoán và có thể cả điều tra thủ công của một chuyên gia con người là cần thiết.
 
@@ -338,7 +338,7 @@ Mặc dù `auditd` cung cấp các dịch vụ mạnh để giám sát hành vi 
 
 #### <a id="page_235"></a>Ghi log sự kiện ứng dụng bằng syslog
 
-Trong firmware STM32MP157F của tôi, BusyBox hiện thực một phiên bản tối giản của `syslogd` mà một số ứng dụng dùng để lưu thông tin log trong file */var/log/messages*. Một ví dụ về ứng dụng như vậy là SSH daemon gọn nhẹ `dropbear`.
+Trong firmware STM32MP157F của tôi, BusyBox triển khai một phiên bản tối giản của `syslogd` mà một số ứng dụng dùng để lưu thông tin log trong file */var/log/messages*. Một ví dụ về ứng dụng như vậy là SSH daemon gọn nhẹ `dropbear`.
 
 [Listing 12-5](#ch12list05) cho thấy các thông điệp log tương ứng sau nhiều lần thử đăng nhập SSH.
 
@@ -404,14 +404,14 @@ Thông tin này không chỉ cung cấp lịch sử các trang web được web 
 
 Mọi công cụ đã đề cập trước đó đều hoạt động cục bộ trên thiết bị, điều có thể đủ cho mục đích forensic device-specific bất cứ khi nào bạn có quyền truy cập vật lý hay từ xa vào nó. Tuy nhiên, như đã gợi ý trước đó trong chương này, việc thu thập dữ liệu log tập trung có thể có lợi theo nhiều cách. Mặc dù việc thiết lập một hạ tầng giám sát tập trung vượt ra ngoài trọng tâm device-centered của cuốn sách này, tôi muốn chỉ ra rằng mọi dữ liệu được các công cụ này thu thập đều có thể được truyền tới các vị trí từ xa.
 
-Ví dụ, daemon `journald` có thể được mở rộng bằng một service gọi là `systemd-journal-remote` để ghi log dữ liệu tới một server từ xa. Công cụ `audisp` và plug-in `audisp-remote` của nó có thể cho phép tổng hợp log tập trung cho dữ liệu được Linux audit framework và `auditd` thu thập. Ngoài ra, các công cụ cụ thể như `auditbeat` có thể được dùng để gửi dữ liệu audit tới một Elastic Stack, chẳng hạn. Hơn nữa, `rsyslog` và `syslog-ng` là các hiện thực `syslog` hiện đại cho phép ghi log tới các vị trí từ xa. Cuối cùng, một số công cụ này thậm chí có thể tương tác với nhau, nghĩa là `journald`, ví dụ, có thể được cấu hình để chuyển tiếp dữ liệu log tới một daemon `syslog`, daemon này đến lượt nó có thể lo việc truyền từ xa.
+Ví dụ, daemon `journald` có thể được mở rộng bằng một service gọi là `systemd-journal-remote` để ghi log dữ liệu tới một server từ xa. Công cụ `audisp` và plug-in `audisp-remote` của nó có thể cho phép tổng hợp log tập trung cho dữ liệu được Linux audit framework và `auditd` thu thập. Ngoài ra, các công cụ cụ thể như `auditbeat` có thể được dùng để gửi dữ liệu audit tới một Elastic Stack, chẳng hạn. Hơn nữa, `rsyslog` và `syslog-ng` là các bản triển khai `syslog` hiện đại cho phép ghi log tới các vị trí từ xa. Cuối cùng, một số công cụ này thậm chí có thể tương tác với nhau, nghĩa là `journald`, ví dụ, có thể được cấu hình để chuyển tiếp dữ liệu log tới một daemon `syslog`, daemon này đến lượt nó có thể lo việc truyền từ xa.
 
 <a id="ch00lev1_100"></a>
 
 ## <a id="page_237"></a>Tóm tắt
 
-Yêu cầu một thiết bị tổng hợp và truyền dữ liệu hệ thống và thông tin sự kiện tới một server trung tâm thì đơn giản. Tuy nhiên, khi bạn bắt đầu hiện thực những biện pháp như vậy, bạn sẽ gặp nhiều trở ngại cần vượt qua, từ các vấn đề pháp lý đến các ràng buộc thiết bị đến nguồn nhân lực cần thiết để vận hành liên tục các dịch vụ security-monitoring.
+Yêu cầu một thiết bị tổng hợp và truyền dữ liệu hệ thống và thông tin sự kiện tới một server trung tâm thì đơn giản. Tuy nhiên, khi bạn bắt đầu triển khai những biện pháp như vậy, bạn sẽ gặp nhiều trở ngại cần vượt qua, từ các vấn đề pháp lý đến các ràng buộc thiết bị đến nguồn nhân lực cần thiết để vận hành liên tục các dịch vụ security-monitoring.
 
 Trong chương này, tôi đã thảo luận các thông tin điển hình có thể hữu ích cho việc giám sát bảo mật embedded system, từ các phiên người dùng và tương tác của họ đến metadata lưu lượng mạng đến các lần crash hệ thống và thông báo lỗi. Rõ ràng, bạn càng muốn giám sát nhiều, bạn càng cần nhiều tài nguyên on-device và server. Một cách tiếp cận risk-based là hoàn toàn hợp lý để tìm ra sự thỏa hiệp giữa sự minh bạch thiết bị đầy đủ và mức sử dụng tài nguyên tối thiểu cho sản phẩm cụ thể của bạn.
 
-Giám sát hệ thống là một lớp thiết yếu trong chiến lược defense-in-depth của bạn vì ngay cả khi mọi biện pháp bảo vệ bạn hiện thực đều thất bại, giám sát có thể cho phép bạn phát hiện các cuộc tấn công và bất thường đang diễn ra. Giám sát có thể tạo ra sự khác biệt giữa việc thoát nạn với một vết bầm nhẹ và việc hủy hoại danh tiếng của sản phẩm và công ty bạn.
+Giám sát hệ thống là một lớp thiết yếu trong chiến lược defense-in-depth của bạn vì ngay cả khi mọi biện pháp bảo vệ bạn triển khai đều thất bại, giám sát có thể cho phép bạn phát hiện các cuộc tấn công và bất thường đang diễn ra. Giám sát có thể tạo ra sự khác biệt giữa việc thoát nạn với một vết bầm nhẹ và việc hủy hoại danh tiếng của sản phẩm và công ty bạn.

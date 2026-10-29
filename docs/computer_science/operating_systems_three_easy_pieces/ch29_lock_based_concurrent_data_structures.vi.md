@@ -399,7 +399,9 @@ Hình 29.11: Scaling Hash Table
 
 > MẸO: TRÁNH PREMATURE OPTIMIZATION (ĐỊNH LUẬT KNUTH)
 >
-> Khi xây concurrent data structure, bắt đầu cách cơ bản nhất: thêm một lock lớn để đồng bộ truy cập. Nhờ vậy dễ xây lock đúng; nếu sau đó thấy vấn đề hiệu năng, tinh chỉnh, chỉ tăng tốc khi cần. Như Knuth nổi tiếng nói, “Tối ưu quá sớm là gốc rễ mọi điều xấu.” Nhiều operating system dùng một lock khi mới chuyển sang multiprocessor, gồm Sun OS và Linux. Ở Linux lock thậm chí có tên big kernel lock (BKL). Nhiều năm, cách đơn giản này tốt, nhưng khi hệ thống multi-CPU phổ biến, chỉ cho một thread hoạt động trong kernel mỗi lúc trở thành bottleneck hiệu năng. Vì vậy đã đến lúc tối ưu bằng cải thiện concurrency. Linux chọn cách thẳng thắn: thay một lock bằng nhiều lock. Sun quyết định căn bản hơn: xây operating system mới hoàn toàn Solaris, tích hợp concurrency từ nền tảng ngay ngày đầu. Đọc sách Linux và Solaris kernel để biết thêm về các hệ thống hấp dẫn [BC05, MM00].
+> Khi xây concurrent data structure, bắt đầu cách cơ bản nhất: thêm một lock lớn để đồng bộ truy cập. Nhờ vậy dễ xây lock đúng; nếu sau đó thấy vấn đề hiệu năng, tinh chỉnh, chỉ tăng tốc khi cần. Như Knuth nổi tiếng nói, “Tối ưu quá sớm là gốc rễ mọi điều xấu.”
+>
+> Nhiều operating system dùng một lock khi mới chuyển sang multiprocessor, gồm Sun OS và Linux. Ở Linux lock thậm chí có tên big kernel lock (BKL). Nhiều năm, cách đơn giản này tốt, nhưng khi hệ thống multi-CPU phổ biến, chỉ cho một thread hoạt động trong kernel mỗi lúc trở thành bottleneck hiệu năng. Vì vậy đã đến lúc tối ưu bằng cải thiện concurrency. Linux chọn cách thẳng thắn: thay một lock bằng nhiều lock. Sun quyết định căn bản hơn: xây operating system mới hoàn toàn Solaris, tích hợp concurrency từ nền tảng ngay ngày đầu. Đọc sách Linux và Solaris kernel để biết thêm về các hệ thống hấp dẫn [BC05, MM00].
 
 ## 29.5 Tổng kết
 

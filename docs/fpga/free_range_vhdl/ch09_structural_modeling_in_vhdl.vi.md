@@ -4,7 +4,7 @@ Như đã nhắc ở trên, nói chung có ba cách tiếp cận để viết co
 
 Cho đến lúc này, cuốn sách chỉ mới làm việc với các model data-flow và behavioral. Mục này trình bày phần giới thiệu về structural modeling.
 
-Khi các thiết kế số trở nên phức tạp hơn, càng ít khả năng một thiết kế bất kỳ có thể được hiện thực chỉ bằng một trong ba loại model VHDL. Chúng ta đã thấy đặc điểm này khi làm việc với FSM, nơi chúng ta trộn process statement (behavioral modeling) với selective signal assignment statement (data-flow modeling). Kết quả là một model VHDL hybrid. Xét về bản chất, structural modeling cũng là một model VHDL hybrid. Phần lớn các thiết kế phức tạp có thể được xem là model structural, tức là nếu chúng được hiện thực bằng các quy trình viết code đúng đắn.
+Khi các thiết kế số trở nên phức tạp hơn, càng ít khả năng một thiết kế bất kỳ có thể được triển khai chỉ bằng một trong ba loại model VHDL. Chúng ta đã thấy đặc điểm này khi làm việc với FSM, nơi chúng ta trộn process statement (behavioral modeling) với selective signal assignment statement (data-flow modeling). Kết quả là một model VHDL hybrid. Xét về bản chất, structural modeling cũng là một model VHDL hybrid. Phần lớn các thiết kế phức tạp có thể được xem là model structural, tức là nếu chúng được triển khai bằng các quy trình viết code đúng đắn.
 
 Việc thiết kế các mạch số phức tạp bằng VHDL nên giống sát với cấu trúc của các chương trình máy tính phức tạp. Nhiều kỹ thuật và thói quen dùng để xây dựng các chương trình máy tính lớn và có cấu trúc tốt viết bằng ngôn ngữ higher-level cũng nên được áp dụng khi dùng VHDL. Cấu trúc chung mà chúng ta đang nói đến là cách tiếp cận viết code theo module vô cùng phổ biến. Thuật ngữ structural modeling là thuật ngữ mà VHDL dùng cho modular design. Cách tiếp cận modular design của VHDL hỗ trợ trực tiếp hierarchical design, thứ về bản chất được dùng khi cố gắng hiểu các thiết kế số phức tạp.
 
@@ -26,7 +26,7 @@ Giờ chúng ta hãy dùng các nguyên tắc này trong một ví dụ thực t
 
 ![p0133_1](images/ch09_structural_modeling_in_vhdl/p0133_1.png)
 
-LỜI GIẢI. Comparator là một trong những mạch tổ hợp kinh điển mà mọi kỹ sư digital design phải tự suy ra vào một lúc nào đó trong sự nghiệp. Lời giải trình bày ở đây hiện thực phiên bản discrete gate của mạch, được trình bày trong Hình 9.1. Một lần nữa, lời giải trình bày ở đây chủ yếu là một ví dụ về model structural VHDL và không phải phương pháp hiệu quả nhất để biểu diễn một comparator bằng VHDL.
+LỜI GIẢI. Comparator là một trong những mạch tổ hợp kinh điển mà mọi kỹ sư digital design phải tự suy ra vào một lúc nào đó trong sự nghiệp. Lời giải trình bày ở đây triển khai phiên bản discrete gate của mạch, được trình bày trong Hình 9.1. Một lần nữa, lời giải trình bày ở đây chủ yếu là một ví dụ về model structural VHDL và không phải phương pháp hiệu quả nhất để biểu diễn một comparator bằng VHDL.
 
 | Ngôn ngữ lập trình C | VHDL |
 |---|---|
@@ -39,13 +39,13 @@ Bảng 9.1: Những điểm tương đồng giữa module trong C và VHDL.
 
 Cách tiếp cận của lời giải này là mô hình hóa mỗi discrete gate thành một khối riêng. Trong trường hợp này, chúng thực ra chỉ là các gate đơn giản, nhưng các yêu cầu về interface của cách tiếp cận structural VHDL là như nhau bất kể các phần tử mạch là gate đơn giản hay subsystem số phức tạp.
 
-Mạch trong Hình 9.1 chứa một số thông tin bổ sung liên quan đến bản hiện thực structural VHDL của nó. Thứ nhất, đường nét đứt biểu diễn ranh giới của entity VHDL top-level; vì vậy các signal cắt qua ranh giới này phải xuất hiện trong entity declaration của bản hiện thực này. Thứ hai, mỗi signal bên trong đều được đặt một tên. Trong trường hợp này, signal bên trong được định nghĩa là các signal không cắt qua ranh giới entity nét đứt. Đây là một yêu cầu đối với các bản hiện thực structural VHDL, vì những signal này phải được gán cho các sub-modules khác nhau ở bên trong thiết kế (ở đâu đó trong architecture).
+Mạch trong Hình 9.1 chứa một số thông tin bổ sung liên quan đến bản triển khai structural VHDL của nó. Thứ nhất, đường nét đứt biểu diễn ranh giới của entity VHDL top-level; vì vậy các signal cắt qua ranh giới này phải xuất hiện trong entity declaration của bản triển khai này. Thứ hai, mỗi signal bên trong đều được đặt một tên. Trong trường hợp này, signal bên trong được định nghĩa là các signal không cắt qua ranh giới entity nét đứt. Đây là một yêu cầu đối với các bản triển khai structural VHDL, vì những signal này phải được gán cho các sub-modules khác nhau ở bên trong thiết kế (ở đâu đó trong architecture).
 
 ![p0134_2](images/ch09_structural_modeling_in_vhdl/p0134_2.png)
 
-Hình 9.1: Bản hiện thực discrete gate của một comparator 3-bit.
+Hình 9.1: Bản triển khai discrete gate của một comparator 3-bit.
 
-Phần đầu tiên của lời giải là cung cấp các bản hiện thực entity và architecture cho từng gate riêng lẻ trong Hình 9.1. Chúng ta cần cung cấp ít nhất một định nghĩa cho một XNOR gate và một AND gate 3-input. Chúng ta chỉ cần cung cấp một định nghĩa XNOR gate, dù thực tế có ba XNOR gate trong sơ đồ. Cách tiếp cận VHDL theo module cho phép chúng ta dùng lại các định nghĩa mạch và chúng ta tận dụng đặc điểm này. Các định nghĩa này được trình bày trong Listing 9.1.
+Phần đầu tiên của lời giải là cung cấp các bản triển khai entity và architecture cho từng gate riêng lẻ trong Hình 9.1. Chúng ta cần cung cấp ít nhất một định nghĩa cho một XNOR gate và một AND gate 3-input. Chúng ta chỉ cần cung cấp một định nghĩa XNOR gate, dù thực tế có ba XNOR gate trong sơ đồ. Cách tiếp cận VHDL theo module cho phép chúng ta dùng lại các định nghĩa mạch và chúng ta tận dụng đặc điểm này. Các định nghĩa này được trình bày trong Listing 9.1.
 
 Listing 9.1: Các định nghĩa entity và architecture cho các discrete gate.
 
@@ -76,9 +76,19 @@ begin
 end ckt1;
 ```
 
-Các bản hiện thực trong Listing 9.1 không có chi tiết VHDL nào mới. Thông tin mới nằm ở cách các phần tử mạch liệt kê trong Hình 9.1 được dùng làm component trong một mạch lớn hơn. Các quy trình hiện thực một thiết kế structural VHDL có thể được tóm tắt trong các bước sau. Các bước này giả định rằng entity declaration của các module bên trong đã có sẵn. Bước 1. Tạo entity declaration top-level. Bước 2. Khai báo các design unit lower-level dùng trong thiết kế. Bước 3. Khai báo các signal bên trong cần thiết dùng để nối các design unit. Bước 4. Instantiate các design unit.
+Các bản triển khai trong Listing 9.1 không có chi tiết VHDL nào mới. Thông tin mới nằm ở cách các phần tử mạch liệt kê trong Hình 9.1 được dùng làm component trong một mạch lớn hơn. Các quy trình triển khai một thiết kế structural VHDL có thể được tóm tắt trong các bước sau. Các bước này giả định rằng entity declaration của các module bên trong đã có sẵn.
 
-Vì vậy, đây là cách bạn tiến hành: Bước Một: Bước đầu tiên trong một bản hiện thực structural giống hệt cách tiếp cận chuẩn mà chúng ta đã dùng để hiện thực các mạch VHDL khác: entity. Entity declaration được suy ra trực tiếp từ hộp nét đứt trong Hình 9.1 và được trình bày trong Listing 9.2. Nói cách khác, các signal cắt các đường nét đứt là những signal mà thế giới bên ngoài biết đến và phải được đưa vào entity declaration. Bước Hai: Bước tiếp theo là khai báo các design unit được dùng trong mạch. Trong biệt ngữ VHDL, declaration là việc làm cho một design unit cụ thể dùng được trong một thiết kế cụ thể. Lưu ý rằng việc khai báo một design unit, theo định nghĩa, biến mạch của bạn thành một thiết kế phân cấp. Việc khai báo một design unit làm cho unit đó có thể được đặt vào hệ phân cấp thiết kế. Design unit về bản chất là các module nằm ở các mức thấp hơn của thiết kế. Với thiết kế của chúng ta, chúng ta cần khai báo hai design unit riêng biệt: XNOR gate và một AND gate 3-input.
+Bước 1. Tạo entity declaration top-level.
+
+Bước 2. Khai báo các design unit lower-level dùng trong thiết kế.
+
+Bước 3. Khai báo các signal bên trong cần thiết dùng để nối các design unit.
+
+Bước 4. Instantiate các design unit.
+
+Vì vậy, đây là cách bạn tiến hành:
+
+Bước Một: Bước đầu tiên trong một bản triển khai structural giống hệt cách tiếp cận chuẩn mà chúng ta đã dùng để triển khai các mạch VHDL khác: entity. Entity declaration được suy ra trực tiếp từ hộp nét đứt trong Hình 9.1 và được trình bày trong Listing 9.2. Nói cách khác, các signal cắt các đường nét đứt là những signal mà thế giới bên ngoài biết đến và phải được đưa vào entity declaration.
 
 Listing 9.2: Entity declaration cho comparator 3-bit.
 
@@ -93,7 +103,9 @@ entity my_compare is
 end my_compare;
 ```
 
-Có hai yếu tố liên quan đến việc khai báo một design unit: 1) làm thế nào và, 2) đặt nó ở đâu. Một component declaration có thể được xem là một biến thể của entity declaration tương ứng. Khác biệt là từ entity được thay bằng từ component và từ component cũng phải được theo sau bởi từ end component để kết thúc phần khai báo. Cách tốt nhất để làm việc này là copy, paste và sửa entity declaration gốc. Component declaration thu được được đặt trong phần khai báo architecture, sau dòng architecture và trước dòng begin. Hai component declaration và các entity declaration tương ứng của chúng được trình bày trong listing tiếp theo. Listing 9.3 cho thấy các component declaration như chúng xuất hiện trong code VHDL chạy được. Bước Ba: Bước tiếp theo là khai báo các signal bên trong mà thiết kế của bạn dùng. Các signal bên trong cần cho thiết kế này là các signal không bị đường nét đứt trong Hình 9.1 cắt qua. Ba signal này giống với các biến cục bộ dùng trong các ngôn ngữ lập trình higher-level ở chỗ chúng phải được khai báo trước khi có thể được dùng trong thiết kế. Những signal này thực chất cung cấp một interface giữa các design unit khác nhau được instantiate trong thiết kế cuối cùng. Với thiết kế này, cần ba signal và chúng được dùng làm output của các XNOR gate và làm input của AND gate. Các khai báo signal bên trong như vậy xuất hiện cùng với các component declaration trong phần khai báo architecture, sau dòng architecture và trước dòng begin. Lưu ý rằng việc khai báo intermediate signal giống với việc khai báo signal chứa trong phần thân entity. Khác biệt duy nhất là khai báo intermediate signal không chứa mode specifier. Chúng ta đã từng làm việc với intermediate signal trong các mục khác của cuốn sách này. Các khai báo signal được đưa vào như một phần của lời giải cuối cùng trong Listing 9.3. Bước Bốn: Bước cuối cùng là tạo các instance của các module cần thiết và map các instance của các component khác nhau trong phần thân architecture. Về mặt kỹ thuật, như chữ instantiation ngụ ý, sự xuất hiện của các instance của design unit là phần chính của quá trình instantiation. Trong một số tài liệu, quá trình instantiation gồm cả thứ mà chúng ta gọi là component declaration, nhưng chúng ta đã chọn không làm vậy ở đây. Cách tiếp cận được trình bày ở đây là để declaration chỉ các component declaration trước dòng begin, còn instantiation chỉ việc tạo các instance riêng lẻ sau dòng begin. Vì vậy, quá trình mapping được bao gồm trong định nghĩa component instantiation của chúng ta.
+Bước Hai: Bước tiếp theo là khai báo các design unit được dùng trong mạch. Trong biệt ngữ VHDL, declaration là việc làm cho một design unit cụ thể dùng được trong một thiết kế cụ thể. Lưu ý rằng việc khai báo một design unit, theo định nghĩa, biến mạch của bạn thành một thiết kế phân cấp. Việc khai báo một design unit làm cho unit đó có thể được đặt vào hệ phân cấp thiết kế. Design unit về bản chất là các module nằm ở các mức thấp hơn của thiết kế. Với thiết kế của chúng ta, chúng ta cần khai báo hai design unit riêng biệt: XNOR gate và một AND gate 3-input.
+
+Có hai yếu tố liên quan đến việc khai báo một design unit: 1) làm thế nào và, 2) đặt nó ở đâu. Một component declaration có thể được xem là một biến thể của entity declaration tương ứng. Khác biệt là từ entity được thay bằng từ component và từ component cũng phải được theo sau bởi từ end component để kết thúc phần khai báo. Cách tốt nhất để làm việc này là copy, paste và sửa entity declaration gốc. Component declaration thu được được đặt trong phần khai báo architecture, sau dòng architecture và trước dòng begin. Hai component declaration và các entity declaration tương ứng của chúng được trình bày trong listing tiếp theo. Listing 9.3 cho thấy các component declaration như chúng xuất hiện trong code VHDL chạy được.
 
 ```vhdl
 entity big_xnor is
@@ -122,6 +134,10 @@ component big_and3
               F : out std_logic);
 end component;
 ```
+
+Bước Ba: Bước tiếp theo là khai báo các signal bên trong mà thiết kế của bạn dùng. Các signal bên trong cần cho thiết kế này là các signal không bị đường nét đứt trong Hình 9.1 cắt qua. Ba signal này giống với các biến cục bộ dùng trong các ngôn ngữ lập trình higher-level ở chỗ chúng phải được khai báo trước khi có thể được dùng trong thiết kế. Những signal này thực chất cung cấp một interface giữa các design unit khác nhau được instantiate trong thiết kế cuối cùng. Với thiết kế này, cần ba signal và chúng được dùng làm output của các XNOR gate và làm input của AND gate. Các khai báo signal bên trong như vậy xuất hiện cùng với các component declaration trong phần khai báo architecture, sau dòng architecture và trước dòng begin. Lưu ý rằng việc khai báo intermediate signal giống với việc khai báo signal chứa trong phần thân entity. Khác biệt duy nhất là khai báo intermediate signal không chứa mode specifier. Chúng ta đã từng làm việc với intermediate signal trong các mục khác của cuốn sách này. Các khai báo signal được đưa vào như một phần của lời giải cuối cùng trong Listing 9.3.
+
+Bước Bốn: Bước cuối cùng là tạo các instance của các module cần thiết và map các instance của các component khác nhau trong phần thân architecture. Về mặt kỹ thuật, như chữ instantiation ngụ ý, sự xuất hiện của các instance của design unit là phần chính của quá trình instantiation. Trong một số tài liệu, quá trình instantiation gồm cả thứ mà chúng ta gọi là component declaration, nhưng chúng ta đã chọn không làm vậy ở đây. Cách tiếp cận được trình bày ở đây là để declaration chỉ các component declaration trước dòng begin, còn instantiation chỉ việc tạo các instance riêng lẻ sau dòng begin. Vì vậy, quá trình mapping được bao gồm trong định nghĩa component instantiation của chúng ta.
 
 Quá trình mapping cung cấp các yêu cầu interface cho từng component trong thiết kế. Bước mapping này gắn các kết nối bên ngoài của từng component với các signal ở mức tiếp theo phía trên trong hệ phân cấp thiết kế. Mỗi signal gắn với từng component được map tới một signal bên trong hoặc bên ngoài trong thiết kế higher-level. Mỗi mapping riêng lẻ gồm một tên duy nhất cho instance cụ thể đó cũng như tên của entity gốc. Thông tin mapping thực tế theo sau các keyword port map của VHDL. Tất cả thông tin này xuất hiện trong lời giải cuối cùng trình bày ở Listing 9.3.
 
@@ -181,7 +197,7 @@ end ckt1;
 
 Cách tiếp cận thay thế cho mapping là dùng implied mapping. Trong cách tiếp cận này, các kết nối giữa các signal bên ngoài của design unit được gắn với các signal trong design unit theo thứ tự xuất hiện của chúng trong mapping statement. Điều này khác với direct mapping vì thay vào đó chỉ các signal của thiết kế higher-level xuất hiện trong mapping statement. Quan hệ giữa các signal trong design unit và thiết kế higher-level được ngụ ý qua thứ tự của signal như chúng xuất hiện trong component declaration hoặc entity declaration. Cách tiếp cận này dùng ít chỗ hơn trong source code nhưng đòi hỏi các signal phải được đặt đúng thứ tự. Một architecture thay thế nhưng tương đương cho ví dụ trước dùng implied mapping được trình bày trong Listing 9.4.
 
-Để simulate và synthesize thành công thiết kế trong Listing 9.3, code của Listing 9.1 cũng cần được đưa vào project VHDL của bạn. Thói quen bình thường là giữ hai listing trong hai file riêng biệt. Điều tương tự cũng đúng với bản hiện thực của Listing 9.4.
+Để simulate và synthesize thành công thiết kế trong Listing 9.3, code của Listing 9.1 cũng cần được đưa vào project VHDL của bạn. Thói quen bình thường là giữ hai listing trong hai file riêng biệt. Điều tương tự cũng đúng với bản triển khai của Listing 9.4.
 
 Listing 9.4: Architecture thay thế cho Ví dụ 22 dùng implied mapping.
 
@@ -229,9 +245,9 @@ x5: some_component port map (CLK => CLK,
 
 Như chúng ta đã thấy ở mục trước, việc dùng keyword component cho phép chúng ta khai báo một module VHDL để instantiate sau này.
 
-Thường người ta muốn viết code mang tính generic. Ví dụ một routine thực hiện một tác vụ nhất định trên một mảng input có kích thước generic. Giả sử chúng ta muốn hiện thực một đoạn code của một parity check routine trả về ’1’ khi mảng input N-size là một số chẵn và ’0’ khi mảng input N-size là một số lẻ. Listing 9.6 cho thấy một bản hiện thực như vậy.
+Thường người ta muốn viết code mang tính generic. Ví dụ một routine thực hiện một tác vụ nhất định trên một mảng input có kích thước generic. Giả sử chúng ta muốn triển khai một đoạn code của một parity check routine trả về ’1’ khi mảng input N-size là một số chẵn và ’0’ khi mảng input N-size là một số lẻ. Listing 9.6 cho thấy một bản triển khai như vậy.
 
-Listing 9.6: Bản hiện thực parity check với kích thước mảng input generic.
+Listing 9.6: Bản triển khai parity check với kích thước mảng input generic.
 
 ```vhdl
  1   -- library declarations
@@ -311,7 +327,7 @@ Mọi khối số có trong library package này đều được mô tả trong 
 
 ## 9.4 Bài tập: Structural modeling
 
-BÀI TẬP 1. Hãy vẽ một sơ đồ khối của mạch được biểu diễn bởi code VHDL liệt kê dưới đây. Hãy nhớ ghi nhãn đầy đủ cho sơ đồ cuối cùng. BÀI TẬP 2. Hãy vẽ một sơ đồ khối của mạch được biểu diễn bởi code VHDL liệt kê dưới đây. Hãy nhớ ghi nhãn đầy đủ cho sơ đồ cuối cùng. BÀI TẬP 3. Hãy viết các model structural VHDL cho các mạch liệt kê dưới đây.
+BÀI TẬP 1. Hãy vẽ một sơ đồ khối của mạch được biểu diễn bởi code VHDL liệt kê dưới đây. Hãy nhớ ghi nhãn đầy đủ cho sơ đồ cuối cùng.
 
 ```vhdl
 -- library declaration
@@ -347,6 +363,8 @@ begin
 end arch;
 ```
 
+BÀI TẬP 2. Hãy vẽ một sơ đồ khối của mạch được biểu diễn bởi code VHDL liệt kê dưới đây. Hãy nhớ ghi nhãn đầy đủ cho sơ đồ cuối cùng.
+
 ```vhdl
 -- library declaration
 library IEEE;
@@ -379,6 +397,8 @@ begin
 
 end my_ckt;
 ```
+
+BÀI TẬP 3. Hãy viết các model structural VHDL cho các mạch liệt kê dưới đây.
 
 ![p0144_3](images/ch09_structural_modeling_in_vhdl/p0144_3.png)
 

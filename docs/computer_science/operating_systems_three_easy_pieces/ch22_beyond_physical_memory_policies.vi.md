@@ -14,13 +14,15 @@ Trước khi đi sâu policy, ta mô tả kỹ hơn vấn đề cần giải quy
 
 Biết số cache hit và miss cho phép ta tính average memory access time (AMAT) của program (một metric mà computer architect tính cho hardware cache [HP06]). Cụ thể, với các giá trị này, ta tính AMAT của program như sau:
 
-AM AT = (P<sub>H it</sub> · TM) + (P<sub>M iss</sub> · TD) (22.1) trong đó TM là chi phí memory access, TD là chi phí disk access, P<sub>H it</sub> là xác suất tìm data item trong cache (hit), P<sub>M iss</sub> là xác suất không tìm thấy data trong cache (miss). P<sub>H it</sub> và P<sub>M iss</sub> đều từ 0.0 đến 1.0, và P<sub>M iss</sub> + P<sub>H it</sub> = 1.0.
+AMAT = (P<sub>Hit</sub> · T<sub>M</sub>) + (P<sub>Miss</sub> · T<sub>D</sub>) (22.1)
+
+trong đó T<sub>M</sub> là chi phí memory access, T<sub>D</sub> là chi phí disk access, P<sub>Hit</sub> là xác suất tìm data item trong cache (hit), P<sub>Miss</sub> là xác suất không tìm thấy data trong cache (miss). P<sub>Hit</sub> và P<sub>Miss</sub> đều từ 0.0 đến 1.0, và P<sub>Miss</sub> + P<sub>Hit</sub> = 1.0.
 
 Ví dụ, tưởng tượng máy có address space (nhỏ) 4KB, page 256-byte. Virtual address có VPN 4-bit (các bit most-significant) và offset 8-bit (các bit least-significant). Process có thể truy cập tổng 2<sup>4</sup> tức 16 virtual page. Ví dụ process tạo memory reference (virtual address): 0x000, 0x100, 0x200, 0x300, 0x400, 0x500, 0x600, 0x700, 0x800, 0x900. Chúng tham chiếu byte đầu mỗi page trong mười page đầu address space (page number là chữ số hex đầu mỗi virtual address).
 
-Giả sử thêm mọi page trừ virtual page 3 đã trong memory. Chuỗi memory reference có hành vi: hit, hit, hit, miss, hit, hit, hit, hit, hit, hit. Hit rate (phần trăm reference tìm trong memory) là 90% (P<sub>H it</sub> = 0.9), vì 9 trong 10 reference trong memory. Miss rate rõ ràng 10% (P<sub>M iss</sub> = 0.1).
+Giả sử thêm mọi page trừ virtual page 3 đã trong memory. Chuỗi memory reference có hành vi: hit, hit, hit, miss, hit, hit, hit, hit, hit, hit. Hit rate (phần trăm reference tìm trong memory) là 90% (P<sub>Hit</sub> = 0.9), vì 9 trong 10 reference trong memory. Miss rate rõ ràng 10% (P<sub>Miss</sub> = 0.1).
 
-Để tính AMAT, chỉ cần biết chi phí memory access và disk access. Giả sử memory access (TM) khoảng 100 nanosecond, disk access (TD) khoảng 10 millisecond, AMAT là 0.9 · 100ns + 0.1 · 10ms, tức 90ns + 1ms, hay 1.00009 ms, khoảng 1 millisecond. Nếu hit rate là 99.9%, kết quả rất khác: AMAT 10.1 microsecond, nhanh hơn khoảng 100 lần. Khi hit rate gần 100%, AMAT gần 100 nanosecond.
+Để tính AMAT, chỉ cần biết chi phí memory access và disk access. Giả sử memory access (T<sub>M</sub>) khoảng 100 nanosecond, disk access (T<sub>D</sub>) khoảng 10 millisecond, AMAT là 0.9 · 100ns + 0.1 · 10ms, tức 90ns + 1ms, hay 1.00009 ms, khoảng 1 millisecond. Nếu hit rate là 99.9%, kết quả rất khác: AMAT 10.1 microsecond, nhanh hơn khoảng 100 lần. Khi hit rate gần 100%, AMAT gần 100 nanosecond.
 
 Đáng tiếc như ví dụ, chi phí disk access cao đến mức ngay miss rate nhỏ cũng nhanh chóng chi phối AMAT tổng của program. Rõ ràng cần tránh miss tối đa hoặc chạy chậm ở tốc độ disk. Một cách là phát triển policy thông minh cẩn thận, như sắp làm.
 
@@ -59,7 +61,7 @@ Hình 22.1: Trace Optimal Policy
 >
 > Trong computer architecture, đôi khi hữu ích phân loại miss thành ba nhóm: compulsory, capacity và conflict miss, đôi khi gọi Three C’s [H87]. Compulsory miss (hay cold-start miss [EF78]) xảy ra vì cache ban đầu rỗng và đây là reference đầu tới item; ngược lại capacity miss xảy ra vì cache hết chỗ, phải evict item để đưa item mới vào. Loại thứ ba (conflict miss) phát sinh trong hardware do giới hạn vị trí item được đặt trong hardware cache, vì thứ gọi là set-associativity; không xuất hiện trong OS page cache vì cache ấy luôn fully-associative, tức không hạn chế page được đặt đâu trong memory. Xem H&P để biết thêm [HP06].
 
-Cũng tính được cache hit rate: với 6 hit và 5 miss, hit rate là (H its)/(H its+M isses), tức 6/(6+5) hay 54.5%. Cũng có thể tính hit rate bỏ compulsory miss (bỏ miss đầu tới page), cho hit rate 85.7%.
+Cũng tính được cache hit rate: với 6 hit và 5 miss, hit rate là (Hits)/(Hits+Misses), tức 6/(6+5) hay 54.5%. Cũng có thể tính hit rate bỏ compulsory miss (bỏ miss đầu tới page), cho hit rate 85.7%.
 
 Đáng tiếc, như thấy khi phát triển scheduling policy, nhìn chung không biết tương lai; không thể xây optimal policy cho operating system general-purpose[^1]. Vì vậy, khi phát triển policy thực có thể triển khai, tập trung cách khác quyết định evict page nào. Optimal chỉ làm mốc so sánh để biết gần “hoàn hảo” bao nhiêu.
 
@@ -90,7 +92,11 @@ So với optimal, FIFO kém rõ: hit rate 36.4% (hoặc 57.1% bỏ compulsory mi
 
 > BỔ SUNG: NGHỊCH LÝ BELADY
 >
-> Belady (tác giả optimal policy) và cộng sự tìm thấy chuỗi reference thú vị có hành vi hơi bất ngờ [BNS69]. Chuỗi memory-reference: 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5. Replacement policy họ nghiên cứu là FIFO. Phần thú vị: cache hit rate đổi thế nào khi cache size từ 3 lên 4 page. Thường bạn mong hit rate tăng (tốt hơn) khi cache lớn. Nhưng ở đây, với FIFO, lại tệ hơn! Tự tính hit và miss xem. Hành vi lạ thường gọi Belady’s Anomaly (khiến co-authors phiền lòng). Policy khác như LRU không gặp vấn đề. Bạn đoán vì sao? Hóa ra LRU có stack property [M+70]. Với thuật toán có tính chất này, cache kích thước N + 1 tự nhiên chứa nội dung cache kích thước N. Vì vậy tăng cache size, hit rate giữ nguyên hoặc tăng. FIFO và Random (cùng vài policy khác) rõ ràng không tuân stack property, nên dễ có hành vi bất thường.
+> Belady (tác giả optimal policy) và cộng sự tìm thấy chuỗi reference thú vị có hành vi hơi bất ngờ [BNS69]. Chuỗi memory-reference: 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5. Replacement policy họ nghiên cứu là FIFO. Phần thú vị: cache hit rate đổi thế nào khi cache size từ 3 lên 4 page.
+>
+> Thường bạn mong hit rate tăng (tốt hơn) khi cache lớn. Nhưng ở đây, với FIFO, lại tệ hơn! Tự tính hit và miss xem. Hành vi lạ thường gọi Belady’s Anomaly (khiến co-authors phiền lòng).
+>
+> Policy khác như LRU không gặp vấn đề. Bạn đoán vì sao? Hóa ra LRU có stack property [M+70]. Với thuật toán có tính chất này, cache kích thước N + 1 tự nhiên chứa nội dung cache kích thước N. Vì vậy tăng cache size, hit rate giữ nguyên hoặc tăng. FIFO và Random (cùng vài policy khác) rõ ràng không tuân stack property, nên dễ có hành vi bất thường.
 
 |  |  |  | Kết quả |
 |---|---|---|---|
@@ -152,7 +158,9 @@ Vì vậy họ thuật toán historically-based đơn giản ra đời. Policy L
 
 > BỔ SUNG: CÁC LOẠI LOCALITY
 >
-> Program thường có hai loại locality. Đầu là spatial locality: nếu page P được truy cập, các page quanh nó (P − 1 hay P + 1) cũng có thể được truy cập. Hai là temporal locality: page vừa truy cập gần đây có thể được truy cập lại trong tương lai gần. Giả định có locality này đóng vai trò lớn trong caching hierarchy hardware, dùng nhiều tầng caching instruction, data và address-translation giúp program nhanh khi có locality. Dĩ nhiên principle of locality không phải luật hard-and-fast mọi program phải theo. Thực tế, một số program truy cập memory (hoặc disk) khá ngẫu nhiên, ít hoặc không có locality trong access stream. Vì vậy dù locality đáng nhớ khi thiết kế cache bất kỳ (hardware hoặc software), nó không bảo đảm thành công. Đúng hơn là heuristic thường hữu ích khi thiết kế hệ thống máy tính.
+> Program thường có hai loại locality. Đầu là spatial locality: nếu page P được truy cập, các page quanh nó (P − 1 hay P + 1) cũng có thể được truy cập. Hai là temporal locality: page vừa truy cập gần đây có thể được truy cập lại trong tương lai gần. Giả định có locality này đóng vai trò lớn trong caching hierarchy hardware, dùng nhiều tầng caching instruction, data và address-translation giúp program nhanh khi có locality.
+>
+> Dĩ nhiên principle of locality không phải luật hard-and-fast mọi program phải theo. Thực tế, một số program truy cập memory (hoặc disk) khá ngẫu nhiên, ít hoặc không có locality trong access stream. Vì vậy dù locality đáng nhớ khi thiết kế cache bất kỳ (hardware hoặc software), nó không bảo đảm thành công. Đúng hơn là heuristic thường hữu ích khi thiết kế hệ thống máy tính.
 
 Cũng lưu ý có thuật toán ngược: Most- Frequently-Used (MFU) và Most-Recently-Used (MRU). Phần lớn trường hợp (không phải tất cả!), chúng hoạt động không tốt vì bỏ qua locality phần lớn program có thay vì tận dụng.
 

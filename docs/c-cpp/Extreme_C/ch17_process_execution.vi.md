@@ -38,7 +38,7 @@ Một ví dụ hữu hình là việc dùng Cygwin hay MinGW để làm cho Micr
 
 > **Lưu ý**:
 >
-> Bạn có thể tìm thấy chi tiết hiện thực của hàm `fork` trong Cygwin ở đây: https://github.com/openunix/cygwin/blob/master/winsup/cygwin/fork.cc. Lưu ý rằng nó<a id="_idIndexMarker1162"></a> không gọi system call `fork` vốn thường tồn tại trong các kernel Unix-like; thay vào đó, nó include các header từ Win32 API và gọi các hàm vốn là những hàm well-known liên quan đến tạo process và quản lý process.
+> Bạn có thể tìm thấy chi tiết triển khai của hàm `fork` trong Cygwin ở đây: https://github.com/openunix/cygwin/blob/master/winsup/cygwin/fork.cc. Lưu ý rằng nó<a id="_idIndexMarker1162"></a> không gọi system call `fork` vốn thường tồn tại trong các kernel Unix-like; thay vào đó, nó include các header từ Win32 API và gọi các hàm vốn là những hàm well-known liên quan đến tạo process và quản lý process.
 
 Theo chuẩn POSIX, thư viện chuẩn C không phải là thứ duy nhất được phơi ra từ vòng shell trên một hệ thống Unix-like. Khi dùng một Terminal, có các chương trình tiện ích shell được viết sẵn được dùng để cung cấp một cách dùng phức tạp của standard C API. Về việc tạo process, bất cứ khi nào người dùng nhập một lệnh trong Terminal, một process mới được tạo ra.
 
@@ -305,7 +305,7 @@ Lưu ý rằng đối với các script file, executable binary của chương t
 - Nó khởi tạo các register sống còn cần thiết cho việc thực thi.
 - Nó thực thi instruction đầu tiên của entry point của chương trình.
 
-Trong trường hợp script file, đường dẫn tới script file được sao chép làm argument command-line của interpreter process. Các bước chung trên được hầu hết các kernel thực hiện, nhưng chi tiết hiện thực có thể khác nhau rất nhiều từ kernel này sang kernel khác.
+Trong trường hợp script file, đường dẫn tới script file được sao chép làm argument command-line của interpreter process. Các bước chung trên được hầu hết các kernel thực hiện, nhưng chi tiết triển khai có thể khác nhau rất nhiều từ kernel này sang kernel khác.
 
 Để biết thêm thông tin về một hệ điều hành cụ thể, bạn cần đọc tài liệu của nó hay đơn giản là tìm kiếm nó trên Google. Các bài viết sau từ LWN là một khởi đầu tuyệt vời cho những ai tìm kiếm thêm chi tiết về <a id="_idIndexMarker1182"></a>pro[cess execution in Linux: https:/](https://lwn.net/Articles/631631/)/lwn.[net/Articles/631631/ and https:/](https://lwn.net/Articles/630727/)/lwn.net/Articles/630727/ (việc thực thi process trong Linux).
 
@@ -711,7 +711,7 @@ Chúng ta dùng file descriptor để tham chiếu tới các file thực sự t
 >
 > Chúng ta thường ánh xạ file descriptor. Tuy nhiên, có một số trường hợp ngoại lệ, nơi *socket descriptor* có thể được ánh xạ. Socket<a id="_idIndexMarker1220"></a> descriptor tương tự file descriptor nhưng được dùng cho network socket hay Unix socket. Link này cung cấp <a id="_idIndexMarker1221"></a>một trường hợp sử dụng thú vị cho việc ánh xạ kernel buffer đằng sau một TCP socket, được gọi là một *zero-copy receive mechanism*: https://lwn.net/Articles/752188/.
 
-Lưu ý rằng đúng là API được dùng để làm việc với filesystem rất giống API chúng ta đã dùng cho shared memory, nhưng điều đó không có nghĩa là hiện thực của chúng cũng tương tự. Thực tế, một đối tượng file trong một filesystem được hỗ trợ bởi một ổ cứng về cơ bản khác với một đối tượng shared memory. Hãy thảo luận ngắn gọn một số khác biệt:
+Lưu ý rằng đúng là API được dùng để làm việc với filesystem rất giống API chúng ta đã dùng cho shared memory, nhưng điều đó không có nghĩa là bản triển khai của chúng cũng tương tự. Thực tế, một đối tượng file trong một filesystem được hỗ trợ bởi một ổ cứng về cơ bản khác với một đối tượng shared memory. Hãy thảo luận ngắn gọn một số khác biệt:
 
 - Một đối tượng shared memory <a id="_idIndexMarker1223"></a>về cơ bản nằm trong không gian memory của kernel process trong khi một file trong một filesystem nằm trên một đĩa. Nhiều nhất, một file như vậy có một số buffer được cấp phát cho các thao tác đọc và ghi.
 - Các state được ghi vào shared memory bị xóa sạch khi khởi động lại hệ thống, nhưng các state được ghi vào một file dùng chung, nếu nó được hỗ trợ bởi một ổ cứng hay nơi lưu trữ vĩnh viễn, có thể được giữ lại sau khi khởi động lại.
@@ -784,7 +784,7 @@ Có những cân nhắc sau về concurrency và synchronization nên được c
 
 Nếu số lượng yêu cầu tăng đáng kể, số lượng thread giới hạn bên trong thread pool nên được tăng lên để đáp ứng nhu cầu. Điều này theo đúng nghĩa đen có nghĩa là nâng cấp phần cứng và tài nguyên trên máy mà process chính đang chạy. Điều này được gọi là *scaling up* hay *vertical scaling*. Nó có nghĩa là bạn nâng cấp phần cứng bạn có trên<a id="_idIndexMarker1230"></a> một máy duy nhất để<a id="_idIndexMarker1231"></a> có thể đáp ứng nhiều yêu cầu hơn. Ngoài thời gian ngừng hoạt động khả dĩ mà các client gặp phải trong khi nâng cấp lên phần cứng mới (dù có thể ngăn được), việc nâng cấp tốn kém, và bạn phải thực hiện một lần scale up khác khi số lượng yêu cầu lại tăng.
 
-Nếu việc xử lý các yêu cầu rốt cuộc dẫn đến việc thao tác một shared state hay một kho dữ liệu, các kỹ thuật synchronization có thể được hiện thực dễ dàng, nhờ biết thực tế rằng các thread có quyền truy cập vào cùng không gian memory. Dĩ nhiên, điều này là cần thiết dù chúng có một cấu trúc dữ liệu dùng chung cần được duy trì hay chúng có quyền truy cập vào một kho dữ liệu từ xa không có tính giao dịch (transactional).
+Nếu việc xử lý các yêu cầu rốt cuộc dẫn đến việc thao tác một shared state hay một kho dữ liệu, các kỹ thuật synchronization có thể được triển khai dễ dàng, nhờ biết thực tế rằng các thread có quyền truy cập vào cùng không gian memory. Dĩ nhiên, điều này là cần thiết dù chúng có một cấu trúc dữ liệu dùng chung cần được duy trì hay chúng có quyền truy cập vào một kho dữ liệu từ xa không có tính giao dịch (transactional).
 
 Mọi thread đều đang chạy trên cùng một máy, và do đó chúng có thể dùng mọi kỹ thuật được dùng để chia sẻ một state mà chúng tôi đã giải thích cho đến giờ, được dùng bởi cả thread lẫn process. Đây là<a id="_idIndexMarker1232"></a> một tính năng tuyệt vời và giảm bớt rất nhiều khó khăn<a id="_idIndexMarker1233"></a> khi nói đến thread synchronization.
 

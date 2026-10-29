@@ -32,9 +32,9 @@ Nhờ bản chất có hai trạng thái ổn định, một SRAM memory cell s�
 
 ![p0618_1](images/ch06_the_memory_hierarchy/p0618_1.png)
 
-**Hình 6.1 Con lắc ngược. Tương tự một SRAM cell, con lắc chỉ có hai cấu hình, hay trạng thái, ổn định.**
-
 ![p0618_2](images/ch06_the_memory_hierarchy/p0618_2.png)
+
+**Hình 6.1 Con lắc ngược. Tương tự một SRAM cell, con lắc chỉ có hai cấu hình, hay trạng thái, ổn định.**
 
 |  | Transistor | Tương đối |  |  | Tương đối |  |
 |---|---|---|---|---|---|---|
@@ -86,13 +86,13 @@ Hình 6.5 thể hiện ý tưởng cơ bản của memory module. Module ví d�
 
 Có thể kết hợp main memory bằng cách kết nối nhiều memory module với memory controller. Trong trường hợp này, khi controller nhận địa chỉ A, nó chọn module k chứa A, chuyển A sang dạng (i, j ), rồi gửi (i, j ) tới module k.
 
-#### Bài tập thực hành 6.1 (lời giải trang 696)
-
-Trong phần sau, gọi r là số hàng của mảng DRAM, c là số cột, b<sub>r</sub> là số bit cần để định địa chỉ các hàng và b<sub>c</sub> là số bit cần để định địa chỉ các cột. Với mỗi DRAM dưới đây, hãy xác định các kích thước mảng power-of-2 sao cho max(b<sub>r</sub>, b<sub>c</sub>), tức số bit tối đa cần để định địa chỉ hàng hoặc cột của mảng, là nhỏ nhất.
-
 ![p0622_5](images/ch06_the_memory_hierarchy/p0622_5.png)
 
 **Hình 6.5 Đọc nội dung của một memory module.**
+
+#### Bài tập thực hành 6.1 (lời giải trang 696)
+
+Trong phần sau, gọi r là số hàng của mảng DRAM, c là số cột, b<sub>r</sub> là số bit cần để định địa chỉ các hàng và b<sub>c</sub> là số bit cần để định địa chỉ các cột. Với mỗi DRAM dưới đây, hãy xác định các kích thước mảng power-of-2 sao cho max(b<sub>r</sub>, b<sub>c</sub>), tức số bit tối đa cần để định địa chỉ hàng hoặc cột của mảng, là nhỏ nhất.
 
 | Cách tổ chức | r | c | b<sub>r</sub> | b<sub>c</sub> | max(b<sub>r</sub>, b<sub>c</sub>) |
 |---|---|---|---|---|---|
@@ -156,15 +156,15 @@ movq A,%rax
 
 trong đó nội dung địa chỉ A được load vào register %rax. Mạch trên chip CPU được gọi là bus interface khởi tạo một read transaction trên bus. Read transaction gồm ba bước. Đầu tiên, CPU đặt địa chỉ A lên system bus. I/O bridge chuyển tiếp tín hiệu sang memory bus (Hình 6.7(a)). Tiếp theo, main memory phát hiện tín hiệu địa chỉ trên memory bus, đọc địa chỉ từ memory bus, lấy dữ liệu từ DRAM rồi ghi dữ liệu lên memory bus. I/O bridge chuyển tín hiệu memory bus thành tín hiệu system bus rồi chuyển tiếp lên system bus (Hình 6.7(b)). Cuối cùng, CPU phát hiện dữ liệu trên system bus, đọc dữ liệu từ bus rồi sao chép dữ liệu vào register %rax (Hình 6.7(c)).
 
+![p0626_7](images/ch06_the_memory_hierarchy/p0626_7.png)
+
+**Hình 6.7 Memory read transaction cho một thao tác load: movq A,%rax .**
+
 Ngược lại, khi CPU thực hiện một thao tác store như
 
 ```
 movq %rax,A
 ```
-
-![p0626_7](images/ch06_the_memory_hierarchy/p0626_7.png)
-
-**Hình 6.7 Memory read transaction cho một thao tác load: movq A,%rax .**
 
 trong đó nội dung register %rax được ghi tới địa chỉ A, CPU khởi tạo một write transaction. Một lần nữa, có ba bước cơ bản. Đầu tiên, CPU đặt địa chỉ lên system bus. Bộ nhớ đọc địa chỉ từ memory bus và chờ dữ liệu tới (Hình 6.8(a)). Tiếp theo, CPU sao chép dữ liệu trong %rax lên system bus (Hình 6.8(b)). Cuối cùng, main memory đọc dữ liệu từ memory bus và lưu các bit vào DRAM (Hình 6.8(c)).
 
@@ -302,10 +302,6 @@ Khi operating system muốn thực hiện một thao tác I/O, chẳng hạn đ�
 
 Giả sử một file 1 MB gồm các logical block 512-byte được lưu trên một ổ đĩa có các đặc tính sau:
 
-#### Thông tin thêm: Dung lượng đĩa sau khi định dạng
-
-Trước khi có thể dùng đĩa để lưu dữ liệu, disk controller phải định dạng đĩa. Quá trình này bao gồm điền thông tin nhận diện sector vào các khoảng trống giữa sector, xác định mọi cylinder có khuyết tật bề mặt và loại chúng khỏi sử dụng, đồng thời dành riêng một tập hợp cylinder trong mỗi zone làm dự phòng, có thể đưa vào sử dụng nếu một hoặc nhiều cylinder trong zone hỏng trong suốt vòng đời đĩa. Dung lượng sau khi định dạng do nhà sản xuất đĩa công bố nhỏ hơn dung lượng tối đa do có các cylinder dự phòng này.
-
 | Tham số | Giá trị |
 |---|---|
 | Tốc độ quay | 13,000 RPM |
@@ -320,6 +316,10 @@ A. Trường hợp tốt nhất: Ước lượng thời gian tối ưu (tính b�
 
 B. Trường hợp ngẫu nhiên: Ước lượng thời gian (tính bằng ms) cần để đọc file nếu các block được ánh xạ ngẫu nhiên tới sector đĩa.
 
+#### Thông tin thêm: Dung lượng đĩa sau khi định dạng
+
+Trước khi có thể dùng đĩa để lưu dữ liệu, disk controller phải định dạng đĩa. Quá trình này bao gồm điền thông tin nhận diện sector vào các khoảng trống giữa sector, xác định mọi cylinder có khuyết tật bề mặt và loại chúng khỏi sử dụng, đồng thời dành riêng một tập hợp cylinder trong mỗi zone làm dự phòng, có thể đưa vào sử dụng nếu một hoặc nhiều cylinder trong zone hỏng trong suốt vòng đời đĩa. Dung lượng sau khi định dạng do nhà sản xuất đĩa công bố nhỏ hơn dung lượng tối đa do có các cylinder dự phòng này.
+
 ### Kết nối thiết bị I/O
 
 Các thiết bị input/output (I/O) như card đồ họa, màn hình, chuột, bàn phím và đĩa được kết nối với CPU và main memory bằng I/O bus. Khác với system bus và memory bus vốn là CPU-specific, I/O bus được thiết kế để độc lập với CPU bên dưới. Hình 6.11 thể hiện một cấu trúc I/O bus tiêu biểu kết nối CPU, main memory và thiết bị I/O.
@@ -328,13 +328,13 @@ Mặc dù I/O bus chậm hơn system bus và memory bus, nó có thể hỗ tr�
 
 - Universal Serial Bus (USB) controller là đường dẫn cho các thiết bị gắn với USB bus, một chuẩn cực kỳ phổ biến để kết nối nhiều loại thiết bị I/O ngoại vi, gồm bàn phím, chuột, modem, máy ảnh số, bộ điều khiển trò chơi, máy in, ổ đĩa ngoài và solid state disk. USB 3.0 bus có bandwidth tối đa 625 MB/s. USB 3.1 bus có bandwidth tối đa 1,250 MB/s.
 
-![p0634_11](images/ch06_the_memory_hierarchy/p0634_11.png)
-
-**Hình 6.11 Cấu trúc bus ví dụ kết nối CPU, main memory và thiết bị I/O.**
-
 - Card đồ họa (hay adapter) chứa logic phần cứng và phần mềm chịu trách nhiệm vẽ các pixel lên màn hình hiển thị thay cho CPU.
 
 - Host bus adapter kết nối một hoặc nhiều đĩa với I/O bus bằng một giao thức truyền thông được xác định bởi host bus interface cụ thể. Hai interface phổ biến nhất như vậy cho đĩa là SCSI (phát âm “scuzzy”) và SATA (phát âm “sat-uh”). Đĩa SCSI thường nhanh hơn và đắt hơn ổ SATA. Một SCSI host bus adapter (thường gọi là SCSI controller) có thể hỗ trợ nhiều ổ đĩa, còn SATA adapter chỉ hỗ trợ một ổ.
+
+![p0634_11](images/ch06_the_memory_hierarchy/p0634_11.png)
+
+**Hình 6.11 Cấu trúc bus ví dụ kết nối CPU, main memory và thiết bị I/O.**
 
 Có thể gắn thêm các thiết bị như network adapter vào I/O bus bằng cách cắm adapter vào những khe mở rộng còn trống trên motherboard, cung cấp kết nối điện trực tiếp tới bus.
 
@@ -451,9 +451,17 @@ Hiệu năng DRAM và đĩa đang tụt lại so với hiệu năng CPU. Như tr
 | Số core | 1 | 1 | 1 | 1 | 1 | 2 | 4 | 4 | 4 |
 | Thời gian chu kỳ hiệu dụng (ns) | 166 | 50 | 6 | 1.6 | 0.30 | 0.25 | 0.10 | 0.08 | 2,075 |
 
-(d) Xu hướng CPU Sự phân nhánh của đường cong hiệu năng CPU vào khoảng năm 2003 phản ánh sự xuất hiện của processor multi-core (xem phần thông tin thêm ở trang 641). Sau sự phân nhánh này, thời gian chu kỳ của từng core thực ra tăng nhẹ rồi mới bắt đầu giảm trở lại, dù với tốc độ chậm hơn trước. Chú ý rằng mặc dù hiệu năng SRAM tụt lại, về cơ bản nó vẫn theo kịp. Tuy nhiên, khoảng cách giữa hiệu năng DRAM và đĩa với hiệu năng CPU thực sự đang rộng ra. Cho đến khi processor multi-core xuất hiện vào khoảng năm 2003, khoảng cách hiệu năng này phụ thuộc vào latency, khi thời gian truy cập DRAM và đĩa giảm chậm hơn thời gian chu kỳ của một processor riêng lẻ. Tuy nhiên, với sự xuất hiện của nhiều core, khoảng cách hiệu năng ngày càng phụ thuộc vào throughput, khi nhiều processor core gửi yêu cầu song song tới DRAM và đĩa. Những xu hướng khác nhau được thể hiện rất rõ trong Hình 6.16, vẽ thời gian truy cập và thời gian chu kỳ từ Hình 6.15 trên thang semi-log. Như sẽ thấy trong Mục 6.4, máy tính hiện đại sử dụng rộng rãi cache SRAM-based để cố gắng thu hẹp khoảng cách processor–bộ nhớ. Cách tiếp cận này hiệu quả nhờ một thuộc tính cơ bản của chương trình ứng dụng được gọi là locality, mà chúng ta sẽ thảo luận tiếp theo.
+(d) Xu hướng CPU
 
 **Hình 6.15 Xu hướng công nghệ lưu trữ và xử lý. Core i7 vào khoảng năm 2010 sử dụng processor core Nehalem. Core i7 vào khoảng năm 2015 sử dụng core Haswell.**
+
+Sự phân nhánh của đường cong hiệu năng CPU vào khoảng năm 2003 phản ánh sự xuất hiện của processor multi-core (xem phần thông tin thêm ở trang 641). Sau sự phân nhánh này, thời gian chu kỳ của từng core thực ra tăng nhẹ rồi mới bắt đầu giảm trở lại, dù với tốc độ chậm hơn trước.
+
+Chú ý rằng mặc dù hiệu năng SRAM tụt lại, về cơ bản nó vẫn theo kịp. Tuy nhiên, khoảng cách giữa hiệu năng DRAM và đĩa với hiệu năng CPU thực sự đang rộng ra. Cho đến khi processor multi-core xuất hiện vào khoảng năm 2003, khoảng cách hiệu năng này phụ thuộc vào latency, khi thời gian truy cập DRAM và đĩa giảm chậm hơn thời gian chu kỳ của một processor riêng lẻ. Tuy nhiên, với sự xuất hiện của nhiều core, khoảng cách hiệu năng ngày càng phụ thuộc vào throughput, khi nhiều processor core gửi yêu cầu song song tới DRAM và đĩa.
+
+Những xu hướng khác nhau được thể hiện rất rõ trong Hình 6.16, vẽ thời gian truy cập và thời gian chu kỳ từ Hình 6.15 trên thang semi-log.
+
+Như sẽ thấy trong Mục 6.4, máy tính hiện đại sử dụng rộng rãi cache SRAM-based để cố gắng thu hẹp khoảng cách processor–bộ nhớ. Cách tiếp cận này hiệu quả nhờ một thuộc tính cơ bản của chương trình ứng dụng được gọi là locality, mà chúng ta sẽ thảo luận tiếp theo.
 
 ![p0641_14](images/ch06_the_memory_hierarchy/p0641_14.png)
 
@@ -976,9 +984,9 @@ Bạn có thể thắc mắc vì sao cache dùng bit giữa cho set index thay v
 
 ![p0660_22](images/ch06_the_memory_hierarchy/p0660_22.png)
 
-**Hình 6.31 Vì sao cache đánh index bằng bit giữa.**
-
 ![p0660_23](images/ch06_the_memory_hierarchy/p0660_23.png)
+
+**Hình 6.31 Vì sao cache đánh index bằng bit giữa.**
 
 Điểm chính là mặc dù chương trình có spatial locality tốt và cache đủ chỗ chứa block cho cả x[i] và y[i], mỗi tham chiếu đều conflict miss vì block ánh xạ cùng set. Thrashing như vậy thường làm chậm hệ số 2 hoặc 3. Cũng lưu ý dù ví dụ cực đơn giản, vấn đề có thật với cache direct-mapped lớn và thực tế hơn.
 
@@ -1200,6 +1208,8 @@ Hit rate. Tỷ lệ những tham chiếu bộ nhớ tạo hit. Chỉ số này �
 
 Hit time. Thời gian đưa word trong cache đến CPU, gồm chọn set, xác định line và chọn word. Hit time của L1 cache khoảng vài clock cycle.
 
+Miss penalty. Mọi thời gian bổ sung cần thiết do một lần miss. Penalty cho L1 miss được L2 phục vụ vào khoảng 10 cycle; được L3 phục vụ là 50 cycle; và được main memory phục vụ là 200 cycle.
+
 ![p0669_34](images/ch06_the_memory_hierarchy/p0669_34.png)
 
 **Hình 6.38 Cache hierarchy Intel Core i7.**
@@ -1212,8 +1222,6 @@ Hit time. Thời gian đưa word trong cache đến CPU, gồm chọn set, xác 
 | L3 unified cache | 40–75 | 8 MB | 16 | 64 B | 8,192 |
 
 **Hình 6.39 Đặc tính cache hierarchy Intel Core i7.**
-
-Miss penalty. Mọi thời gian bổ sung cần thiết do một lần miss. Penalty cho L1 miss được L2 phục vụ vào khoảng 10 cycle; được L3 phục vụ là 50 cycle; và được main memory phục vụ là 200 cycle.
 
 Tối ưu những trade-offs giữa chi phí và hiệu năng của cache memory là công việc tinh tế, đòi hỏi mô phỏng sâu rộng trên benchmark code thực tế, nên vượt ngoài phạm vi ở đây. Tuy vậy, có thể xác định vài trade-offs định tính.
 
@@ -1332,7 +1340,7 @@ Trong trường hợp này, chúng ta quét array theo từng cột thay vì t�
 
 Miss rate cao hơn có thể tác động đáng kể đến thời gian chạy. Ví dụ, trên máy desktop của chúng ta, sumarrayrows chạy nhanh hơn sumarraycols 25 lần khi kích thước array lớn. Tóm lại, lập trình viên nên chú ý đến locality trong chương trình và cố gắng viết chương trình tận dụng đặc điểm này.
 
-#### Bài tập thực hành 6.17 (lời giải trang 701)
+### Bài tập thực hành 6.17 (lời giải trang 701)
 
 Chuyển vị hàng và cột ma trận là bài toán quan trọng trong xử lý tín hiệu và ứng dụng tính toán khoa học. Nó cũng thú vị từ góc nhìn locality vì mẫu tham chiếu vừa row-wise vừa column-wise. Ví dụ, xét routine chuyển vị sau:
 
@@ -1373,7 +1381,7 @@ A. Với mỗi row và col, chỉ ra truy cập src[row][col] và dst[row][col] 
 
 B. Lặp lại bài toán với cache có 32 byte dữ liệu.
 
-#### Bài tập thực hành 6.18 (lời giải trang 702)
+### Bài tập thực hành 6.18 (lời giải trang 702)
 
 Cốt lõi của trò chơi ăn khách gần đây SimAquarium là một vòng lặp gọn tính vị trí trung bình của 512 tảo. Bạn đang đánh giá hiệu năng cache trên máy có data cache direct-mapped 2,048-byte với block 32-byte (B = 32). Bạn được cung cấp các định nghĩa sau:
 
@@ -1420,7 +1428,7 @@ B. Tổng số lần đọc miss trong cache là bao nhiêu?
 
 C. Miss rate là bao nhiêu?
 
-#### Bài tập thực hành 6.19 (lời giải trang 702)
+### Bài tập thực hành 6.19 (lời giải trang 702)
 
 Với các giả định của Bài tập thực hành 6.18, xác định hiệu năng cache của code sau:
 
@@ -1441,7 +1449,7 @@ C. Hit rate là bao nhiêu?
 
 D. Miss hit sẽ là bao nhiêu nếu cache lớn gấp đôi?
 
-#### Bài tập thực hành 6.20 (lời giải trang 702)
+### Bài tập thực hành 6.20 (lời giải trang 702)
 
 Với các giả định của Bài tập thực hành 6.18, xác định hiệu năng cache của code sau:
 
@@ -1478,9 +1486,8 @@ Các argument size và stride của function run cho phép điều khiển mức
 
 Mỗi máy tính có một memory mountain riêng, đặc trưng cho khả năng của hệ thống bộ nhớ. Ví dụ, Hình 6.41 thể hiện memory mountain của một hệ thống Intel Core i7 Haswell. Trong ví dụ này, size thay đổi từ 16 KB đến 128 MB, còn stride thay đổi từ 1 đến 12 phần tử, trong đó mỗi phần tử là một long int 8-byte.
 
-code/mem/mountain/mountain.c
-
 ```
+                                                                   code/mem/mountain/mountain.c
  1   long data[MAXELEMS];      /* The global array we’ll be traversing */
  2
  3   /* test - Iterate over first "elems" elements of array "data" with
@@ -1665,11 +1672,11 @@ Có một số điểm thú vị cần lưu ý trong đồ thị:
 
 - Trong trường hợp này, miss rate dự đoán hiệu năng tốt hơn tổng số truy cập bộ nhớ. Ví dụ routine lớp BC, với 0.5 miss mỗi lần lặp, hoạt động tốt hơn nhiều AB với 1.25 miss, dù BC thực hiện nhiều tham chiếu hơn trong vòng lặp trong (hai load và một store) so với AB (hai load).
 
+- Với các giá trị n lớn, hiệu năng của cặp phiên bản nhanh nhất (kij và ikj ) không thay đổi. Mặc dù array lớn hơn nhiều so với bất kỳ cache memory SRAM nào, phần cứng prefetching đủ thông minh để nhận ra mẫu truy cập stride-1 và đủ nhanh để theo kịp các truy cập bộ nhớ trong vòng lặp trong gọn. Đây là thành tựu đáng kinh ngạc của các kỹ sư Intel đã thiết kế hệ thống bộ nhớ này, tạo thêm động lực để lập trình viên phát triển các chương trình có spatial locality tốt.
+
 #### Ghi chú Web MEM:BLOCKING Sử dụng blocking để tăng temporal locality
 
 Có một kỹ thuật thú vị gọi là blocking, có thể cải thiện temporal locality của các vòng lặp trong. Ý tưởng tổng quát là tổ chức các cấu trúc dữ liệu trong chương trình thành những khối lớn gọi là block. (Trong bối cảnh này, “block” chỉ một khối dữ liệu application-level, không phải cache block.) Chương trình được tổ chức sao cho nó nạp một khối vào cache L1, thực hiện mọi thao tác đọc và ghi cần thiết trên khối đó, rồi loại bỏ khối, nạp khối tiếp theo, và cứ tiếp tục như vậy. Khác với các phép biến đổi vòng lặp đơn giản để cải thiện spatial locality, blocking khiến code khó đọc và khó hiểu hơn. Vì lý do này, nó phù hợp nhất với optimizing compiler hoặc các routine thư viện được thực thi thường xuyên. Blocking không cải thiện hiệu năng nhân ma trận trên Core i7 vì hệ thống có phần cứng prefetching tinh vi. Tuy vậy, kỹ thuật này vẫn đáng nghiên cứu và tìm hiểu, vì đây là khái niệm tổng quát có thể mang lại mức tăng hiệu năng lớn trên những hệ thống không prefetch.
-
-- Với các giá trị n lớn, hiệu năng của cặp phiên bản nhanh nhất (kij và ikj ) không thay đổi. Mặc dù array lớn hơn nhiều so với bất kỳ cache memory SRAM nào, phần cứng prefetching đủ thông minh để nhận ra mẫu truy cập stride-1 và đủ nhanh để theo kịp các truy cập bộ nhớ trong vòng lặp trong gọn. Đây là thành tựu đáng kinh ngạc của các kỹ sư Intel đã thiết kế hệ thống bộ nhớ này, tạo thêm động lực để lập trình viên phát triển các chương trình có spatial locality tốt.
 
 ### 6.6.3 Tận dụng locality trong chương trình
 
@@ -1882,18 +1889,18 @@ B. Tham chiếu bộ nhớ:
 6.34 ◆◆ Xét thủ tục chuyển vị ma trận sau:
 
 ```
-1   typedef int array[4][4];
-2
-3   void transpose2(array dst, array src)
-4   {
-5       int i, j;
-6
-            7       for (i = 0; i < 4; i++) {
-            8           for (j = 0; j < 4; j++) {
-            9               dst[j][i] = src[i][j];
-           10           }
-           11       }
-           12   }
+ 1   typedef int array[4][4];
+ 2
+ 3   void transpose2(array dst, array src)
+ 4   {
+ 5       int i, j;
+ 6
+ 7       for (i = 0; i < 4; i++) {
+ 8           for (j = 0; j < 4; j++) {
+ 9               dst[j][i] = src[i][j];
+10           }
+11       }
+12   }
 ```
 
 Giả sử code này chạy trên máy có các tính chất sau:
@@ -2169,10 +2176,10 @@ Bao nhiêu phần trăm phép ghi trong code sau sẽ hit trong cache?
 2   {
 3       int i, j;
 4
-            5       for (i = 0; i < dim; i++)
-            6           for (j = 0; j < dim; j++)
-            7               dst[j*dim + i] = src[i*dim + j];
-            8   }
+5       for (i = 0; i < dim; i++)
+6           for (j = 0; j < dim; j++)
+7               dst[j*dim + i] = src[i*dim + j];
+8   }
 ```
 
 trong đó các đối số của thủ tục là pointer tới ma trận đích (dst) và nguồn (src), cũng như kích thước ma trận N (dim). Nhiệm vụ của bạn là nghĩ ra một thủ tục chuyển vị chạy nhanh nhất có thể.

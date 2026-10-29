@@ -8,6 +8,7 @@ Một cách xuất hiện là monitor. Được Per Brinch Hansen mô tả đầ
 monitor class account {
 private:
     int balance = 0;
+
 public:
     void deposit(int amount) {
         balance = balance + amount;
@@ -33,6 +34,7 @@ class account {
 private:
     int balance = 0;
     pthread_mutex_t monitor;
+
 public:
     void deposit(int amount) {
         pthread_mutex_lock(&monitor);
@@ -67,6 +69,7 @@ monitor class BoundedBuffer {
     int fullEntries = 0;
     cond_t empty;
     cond_t full;
+
   public:
     void produce(int element) {
         if (fullEntries == MAX)    // line P0
@@ -76,6 +79,7 @@ monitor class BoundedBuffer {
         fullEntries++;             // line P4
         signal(&full);             // line P5
     }
+
     int consume() {
         if (fullEntries == 0)      // line C0
             wait(&full);           // line C1
@@ -153,6 +157,7 @@ public:
       fullEntries++;             // line P4
       signal(&full);             // line P5
   }
+
   int consume() {
       while (fullEntries == 0)   // line C0 (CHANGED IF->WHILE)
           wait(&full);           // line C1
@@ -215,6 +220,7 @@ Hình dung hai thread gọi allocate. Thread đầu gọi allocate(20), thread t
 monitor class allocator {
     int available; // how much memory is available?
     cond_t c;
+
     void *allocate(int size) {
         while (size > available)
             wait(&c);
@@ -222,6 +228,7 @@ monitor class allocator {
         // and then do whatever the allocator should do
         // and return a chunk of memory
     }
+
     void free(void *pointer, int size) {
         // free up some memory
         available += size;
@@ -287,6 +294,7 @@ class BoundedBuffer {
     pthread_mutex_t monitor; // monitor lock
     pthread_cond_t empty;
     pthread_cond_t full;
+
   public:
     BoundedBuffer() {
         use = fill = fullEntries = 0;
@@ -301,6 +309,7 @@ class BoundedBuffer {
         pthread_cond_signal(&full);
         pthread_mutex_unlock(&monitor);
     }
+
     int consume() {
         pthread_mutex_lock(&monitor);
         while (fullEntries == 0)

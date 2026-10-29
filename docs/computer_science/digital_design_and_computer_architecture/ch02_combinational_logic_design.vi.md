@@ -99,7 +99,7 @@ Phương trình Boolean làm việc với các biến có giá trị TRUE hoặc
 
 Complement của biến A là giá trị đảo $\overline{A}$ của nó. Biến hoặc complement của biến được gọi là literal. Ví dụ, A, $\overline{A}$, B và $\overline{B}$ đều là literal. Chúng ta gọi A là true form của biến và $\overline{A}$ là complementary form; “true form” không có nghĩa A là TRUE, mà chỉ có nghĩa phía trên A không có gạch ngang.
 
-Phép AND của một hoặc nhiều literal được gọi là product hoặc implicant. $\overline{A}$B, A$\overline{B}$$\overline{C}$ và B đều là implicant của một hàm ba biến. Minterm là product có tất cả input của hàm. A$\overline{B}$$\overline{C}$ là minterm của hàm ba biến A, B và C, nhưng $\overline{A}$B thì không vì không có C. Tương tự, phép OR của một hoặc nhiều literal được gọi là sum. Maxterm là sum có tất cả input của hàm. A + $\overline{B}$ + C là maxterm của hàm ba biến A, B và C.
+Phép AND của một hoặc nhiều literal được gọi là product hoặc implicant. $\overline{A}$B, A$\overline{B}\overline{C}$ và B đều là implicant của một hàm ba biến. Minterm là product có tất cả input của hàm. A$\overline{B}\overline{C}$ là minterm của hàm ba biến A, B và C, nhưng $\overline{A}$B thì không vì không có C. Tương tự, phép OR của một hoặc nhiều literal được gọi là sum. Maxterm là sum có tất cả input của hàm. A + $\overline{B}$ + C là maxterm của hàm ba biến A, B và C.
 
 Thứ tự phép toán rất quan trọng khi diễn giải phương trình Boolean. Y = A + BC có nghĩa là Y = (A OR B) AND C hay Y = A OR (B AND C)? Trong phương trình Boolean, NOT có độ ưu tiên cao nhất, tiếp theo là AND rồi OR. Giống như phương trình thông thường, product được thực hiện trước sum. Vì vậy, phương trình được đọc là Y = A OR (B AND C). Phương trình 2.1 đưa ra một ví dụ khác về thứ tự phép toán.
 
@@ -111,7 +111,7 @@ $\overline{A}$B + BC$\overline{D}$ = (($\overline{A}$)B) + (BC($\overline{D}$)) 
 
 Hình 2.8 Truth table và minterm
 
-Truth table có N input chứa 2<sup>N</sup> hàng, mỗi hàng cho một giá trị input có thể có. Mỗi hàng của truth table tương ứng với một minterm mang giá trị TRUE ở hàng đó. Hình 2.8 trình bày truth table có hai input A và B. Mỗi hàng hiển thị minterm tương ứng. Ví dụ, minterm của hàng đầu tiên là $\overline{A}$$\overline{B}$ vì $\overline{A}$$\overline{B}$ là TRUE khi A = 0, B = 0. Các minterm được đánh số từ 0; hàng trên cùng tương ứng minterm 0, m<sub>0</sub>, hàng tiếp theo tương ứng minterm 1, m<sub>1</sub>, v.v.
+Truth table có N input chứa 2<sup>N</sup> hàng, mỗi hàng cho một giá trị input có thể có. Mỗi hàng của truth table tương ứng với một minterm mang giá trị TRUE ở hàng đó. Hình 2.8 trình bày truth table có hai input A và B. Mỗi hàng hiển thị minterm tương ứng. Ví dụ, minterm của hàng đầu tiên là $\overline{A}\overline{B}$ vì $\overline{A}\overline{B}$ là TRUE khi A = 0, B = 0. Các minterm được đánh số từ 0; hàng trên cùng tương ứng minterm 0, m<sub>0</sub>, hàng tiếp theo tương ứng minterm 1, m<sub>1</sub>, v.v.
 
 Chúng ta có thể viết phương trình Boolean cho một truth table bất kỳ bằng cách cộng tất cả minterm có output Y là TRUE. Ví dụ, trong Hình 2.8, chỉ có một hàng (hay minterm) mà output Y là TRUE, được khoanh màu xanh. Do đó, Y = $\overline{A}$B. Hình 2.9 trình bày truth table có nhiều hơn một hàng mà output là TRUE. Lấy sum của từng minterm được khoanh cho kết quả Y = $\overline{A}$B + AB.
 
@@ -139,7 +139,7 @@ Ben Bitdiddle đang đi dã ngoại. Cậu sẽ không thích chuyến đi nếu
 
 Lời giải Trước tiên, định nghĩa input và output. Các input là A và R, cho biết có kiến và có mưa hay không. A là TRUE khi có kiến và FALSE khi không có kiến. Tương tự, R là TRUE khi trời mưa và FALSE khi mặt trời mỉm cười với Ben. Output là E, niềm vui của Ben trong chuyến dã ngoại. E là TRUE nếu Ben thích chuyến đi và FALSE nếu cậu khổ sở. Hình 2.10 trình bày truth table cho trải nghiệm dã ngoại của Ben.
 
-Dùng dạng sum-of-products, chúng ta viết phương trình là: E = $\overline{A}$$\overline{R}$ hoặc E = Σ(0). Chúng ta có thể xây dựng phương trình bằng hai inverter và một AND gate two-input, như trong Hình 2.11(a). Bạn có thể nhận ra truth table này là hàm NOR ở Mục 1.5.5: E = A NOR R = $\overline{A+ R}$. Hình 2.11(b) trình bày cách triển khai NOR. Ở Mục 2.3, chúng ta chứng minh hai phương trình $\overline{A}$$\overline{R}$ và $\overline{A+ R}$ tương đương.
+Dùng dạng sum-of-products, chúng ta viết phương trình là: E = $\overline{A}\overline{R}$ hoặc E = Σ(0). Chúng ta có thể xây dựng phương trình bằng hai inverter và một AND gate two-input, như trong Hình 2.11(a). Bạn có thể nhận ra truth table này là hàm NOR ở Mục 1.5.5: E = A NOR R = $\overline{A+ R}$. Hình 2.11(b) trình bày cách triển khai NOR. Ở Mục 2.3, chúng ta chứng minh hai phương trình $\overline{A}\overline{R}$ và $\overline{A+ R}$ tương đương.
 
 Dạng sum-of-products cung cấp phương trình Boolean cho mọi truth table với số lượng biến bất kỳ. Hình 2.12 trình bày một truth table three-input ngẫu nhiên. Dạng sum-of-products của logic function là
 
@@ -147,7 +147,7 @@ Dạng sum-of-products cung cấp phương trình Boolean cho mọi truth table 
 
 Hình 2.10 Truth table của Ben
 
-Y = $\overline{A}$$\overline{B}$$\overline{C}$ + A$\overline{B}$$\overline{C}$ + A$\overline{B}$C
+Y = $\overline{A}\overline{B}\overline{C}$ + A$\overline{B}\overline{C}$ + A$\overline{B}$C
 
 hoặc (2.3)
 
@@ -177,7 +177,7 @@ Lời giải Truth table có hai hàng mà output là FALSE. Do đó, có thể 
 
 Hình 2.13 Truth table có nhiều maxterm FALSE
 
-Tương tự, phương trình Boolean cho chuyến dã ngoại của Ben trong Hình 2.10 có thể viết dưới dạng product-of-sums bằng cách khoanh ba hàng có giá trị 0 để thu được E = (A + $\overline{R}$)($\overline{A}$ + R)($\overline{A}$ + $\overline{R}$) hoặc E = Π(1,2,3). Dạng này kém đẹp hơn phương trình sum-of-products E = $\overline{A}$$\overline{R}$, nhưng hai phương trình tương đương về logic.
+Tương tự, phương trình Boolean cho chuyến dã ngoại của Ben trong Hình 2.10 có thể viết dưới dạng product-of-sums bằng cách khoanh ba hàng có giá trị 0 để thu được E = (A + $\overline{R}$)($\overline{A}$ + R)($\overline{A}$ + $\overline{R}$) hoặc E = Π(1,2,3). Dạng này kém đẹp hơn phương trình sum-of-products E = $\overline{A}\overline{R}$, nhưng hai phương trình tương đương về logic.
 
 Sum-of-products cho phương trình ngắn hơn khi output chỉ là TRUE ở một vài hàng của truth table; product-of-sums đơn giản hơn khi output chỉ là FALSE ở một vài hàng của truth table.
 
@@ -287,7 +287,7 @@ Vòng tròn đảo được gọi là bubble. Một cách trực quan, bạn có
 
 Hình 2.19 Các gate tương đương De Morgan
 
-> Chú ý rằng $\overline{AB}$ không bằng $\overline{A}$$\overline{B}$.
+> Chú ý rằng $\overline{AB}$ không bằng $\overline{A}\overline{B}$.
 
 - Đẩy bubble ngược lại (từ output) hoặc về phía trước (từ input) làm đổi phần thân gate từ AND sang OR hoặc ngược lại.
 
@@ -307,7 +307,7 @@ Hình 2.20 Truth table biểu diễn Y và $\overline{Y}$
 
 Lời giải Hình 2.21 trình bày các minterm (được khoanh) có trong $\overline{Y}$. Canonical form sum-of-products của $\overline{Y}$ là
 
-$\overline{Y}$ = $\overline{A}$$\overline{B}$ + $\overline{A}$B (2.4)
+$\overline{Y}$ = $\overline{A}\overline{B}$ + $\overline{A}$B (2.4)
 
 Lấy complement hai vế và áp dụng định lý De Morgan hai lần, chúng ta được
 
@@ -321,9 +321,7 @@ $\overline{\overline{Y}}$ = Y = $\overline{\overline{A}\overline{B} + \overline{
 
 Độc giả tò mò có thể tự hỏi làm sao chứng minh một định lý là đúng. Trong đại số Boolean, chứng minh định lý với số lượng biến hữu hạn rất dễ: chỉ cần cho thấy định lý đúng với mọi giá trị có thể có của các biến. Phương pháp này gọi là perfect induction và có thể thực hiện bằng truth table.
 
-#### Ví dụ 2.5 CHỨNG MINH ĐỊNH LÝ CONSENSUS BẰNG
-
-PERFECT INDUCTION
+#### Ví dụ 2.5 CHỨNG MINH ĐỊNH LÝ CONSENSUS BẰNG PERFECT INDUCTION
 
 Chứng minh định lý consensus T11 trong Bảng 2.3.
 
@@ -345,32 +343,32 @@ Một implicant được gọi là prime implicant nếu không thể kết hợ
 
 #### Ví dụ 2.6 TỐI GIẢN PHƯƠNG TRÌNH
 
-Tối giản Phương trình 2.3: $\overline{A}$$\overline{B}$$\overline{C}$ + A$\overline{B}$$\overline{C}$ + A$\overline{B}$C.
+Tối giản Phương trình 2.3: $\overline{A}\overline{B}\overline{C}$ + A$\overline{B}\overline{C}$ + A$\overline{B}$C.
 
 Lời giải Chúng ta bắt đầu từ phương trình ban đầu và áp dụng từng bước các định lý Boolean, như Bảng 2.4.
 
-Đến đây chúng ta đã đơn giản hóa hoàn toàn phương trình chưa? Hãy xem kỹ hơn. Trong phương trình ban đầu, các minterm $\overline{A}$$\overline{B}$$\overline{C}$ và A$\overline{B}$$\overline{C}$ chỉ khác ở biến A. Vì thế chúng ta kết hợp chúng thành $\overline{B}$$\overline{C}$. Tuy nhiên, nhìn lại phương trình ban đầu, hai minterm cuối A$\overline{B}$$\overline{C}$ và A$\overline{B}$C cũng chỉ khác một literal (C và $\overline{C}$). Do đó, bằng cùng phương pháp, có thể kết hợp hai minterm này thành minterm A$\overline{B}$. Chúng ta nói các implicant $\overline{B}$$\overline{C}$ và A$\overline{B}$ dùng chung minterm A$\overline{B}$$\overline{C}$.
+Đến đây chúng ta đã đơn giản hóa hoàn toàn phương trình chưa? Hãy xem kỹ hơn. Trong phương trình ban đầu, các minterm $\overline{A}\overline{B}\overline{C}$ và A$\overline{B}\overline{C}$ chỉ khác ở biến A. Vì thế chúng ta kết hợp chúng thành $\overline{B}\overline{C}$. Tuy nhiên, nhìn lại phương trình ban đầu, hai minterm cuối A$\overline{B}\overline{C}$ và A$\overline{B}$C cũng chỉ khác một literal (C và $\overline{C}$). Do đó, bằng cùng phương pháp, có thể kết hợp hai minterm này thành minterm A$\overline{B}$. Chúng ta nói các implicant $\overline{B}\overline{C}$ và A$\overline{B}$ dùng chung minterm A$\overline{B}\overline{C}$.
 
-Vậy chúng ta chỉ được đơn giản hóa một cặp minterm, hay có thể đơn giản hóa cả hai? Dùng định lý idempotency, có thể nhân bản các hạng bao nhiêu lần tùy ý: B = B + B + B + B … . Áp dụng nguyên tắc này, chúng ta đơn giản hóa hoàn toàn phương trình về hai prime implicant, B$\overline{C}$ + A$\overline{B}$ *(ghi chú: sách in thiếu gạch trên ở B đầu; đúng là $\overline{B}$$\overline{C}$ + A$\overline{B}$, như Bảng 2.5)*, như Bảng 2.5.
+Vậy chúng ta chỉ được đơn giản hóa một cặp minterm, hay có thể đơn giản hóa cả hai? Dùng định lý idempotency, có thể nhân bản các hạng bao nhiêu lần tùy ý: B = B + B + B + B … . Áp dụng nguyên tắc này, chúng ta đơn giản hóa hoàn toàn phương trình về hai prime implicant, B$\overline{C}$ + A$\overline{B}$ *(ghi chú: sách in thiếu gạch trên ở B đầu; đúng là $\overline{B}\overline{C}$ + A$\overline{B}$, như Bảng 2.5)*, như Bảng 2.5.
 
 Bảng 2.4 Tối giản phương trình
 
 | Bước | Phương trình | Cơ sở |
 |---|---|---|
-|  | $\overline{A}$$\overline{B}$$\overline{C}$ + A$\overline{B}$$\overline{C}$ + A$\overline{B}$C |  |
-| 1 | $\overline{B}$$\overline{C}$($\overline{A}$ + A) + A$\overline{B}$C | T8: Distributivity |
-| 2 | $\overline{B}$$\overline{C}$(1) + A$\overline{B}$C | T5: Complements |
-| 3 | $\overline{B}$$\overline{C}$ + A$\overline{B}$C | T1: Identity |
+|  | $\overline{A}\overline{B}\overline{C}$ + A$\overline{B}\overline{C}$ + A$\overline{B}$C |  |
+| 1 | $\overline{B}\overline{C}$($\overline{A}$ + A) + A$\overline{B}$C | T8: Distributivity |
+| 2 | $\overline{B}\overline{C}$(1) + A$\overline{B}$C | T5: Complements |
+| 3 | $\overline{B}\overline{C}$ + A$\overline{B}$C | T1: Identity |
 
 Bảng 2.5 Cách tối giản phương trình cải tiến
 
 | Bước | Phương trình | Cơ sở |
 |---|---|---|
-|  | $\overline{A}$$\overline{B}$$\overline{C}$ + A$\overline{B}$$\overline{C}$ + A$\overline{B}$C |  |
-| 1 | $\overline{A}$$\overline{B}$$\overline{C}$ + A$\overline{B}$$\overline{C}$ + A$\overline{B}$$\overline{C}$ + A$\overline{B}$C | T3: Idempotency |
-| 2 | $\overline{B}$$\overline{C}$($\overline{A}$ + A) + A$\overline{B}$($\overline{C}$ + C) | T8: Distributivity |
-| 3 | $\overline{B}$$\overline{C}$(1) + A$\overline{B}$(1) | T5: Complements |
-| 4 | $\overline{B}$$\overline{C}$ + A$\overline{B}$ | T1: Identity |
+|  | $\overline{A}\overline{B}\overline{C}$ + A$\overline{B}\overline{C}$ + A$\overline{B}$C |  |
+| 1 | $\overline{A}\overline{B}\overline{C}$ + A$\overline{B}\overline{C}$ + A$\overline{B}\overline{C}$ + A$\overline{B}$C | T3: Idempotency |
+| 2 | $\overline{B}\overline{C}$($\overline{A}$ + A) + A$\overline{B}$($\overline{C}$ + C) | T8: Distributivity |
+| 3 | $\overline{B}\overline{C}$(1) + A$\overline{B}$(1) | T5: Complements |
+| 4 | $\overline{B}\overline{C}$ + A$\overline{B}$ | T1: Identity |
 
 Dù hơi trái trực giác, khai triển implicant (ví dụ, biến AB thành ABC + AB$\overline{C}$) đôi khi hữu ích khi tối giản phương trình. Bằng cách này, bạn có thể lặp lại một minterm đã khai triển để kết hợp (dùng chung) với minterm khác.
 
@@ -384,11 +382,11 @@ Tại sao phải đơn giản hóa phương trình Boolean nếu nó vẫn tươ
 
 Schematic là sơ đồ digital circuit biểu diễn các element và dây nối giữa chúng. Ví dụ, schematic trong Hình 2.23 trình bày một cách triển khai hardware có thể có cho logic function yêu thích của chúng ta, Phương trình 2.3:
 
-Y = $\overline{A}$$\overline{B}$$\overline{C}$ + A$\overline{B}$$\overline{C}$ + A$\overline{B}$C (2.3)
+Y = $\overline{A}\overline{B}\overline{C}$ + A$\overline{B}\overline{C}$ + A$\overline{B}$C (2.3)
 
 ![fig2_23](images/ch02/fig2_23.png)
 
-Hình 2.23 Schematic của Y = $\overline{A}$$\overline{B}$$\overline{C}$ + A$\overline{B}$$\overline{C}$ + A$\overline{B}$C
+Hình 2.23 Schematic của Y = $\overline{A}\overline{B}\overline{C}$ + A$\overline{B}\overline{C}$ + A$\overline{B}$C
 
 ![fig2_24](images/ch02/fig2_24.png)
 
@@ -416,11 +414,11 @@ Mọi phương trình Boolean dạng sum-of-products đều có thể vẽ thàn
 
 ![fig2_25](images/ch02/fig2_25.png)
 
-Hình 2.25 Schematic của Y = $\overline{B}$$\overline{C}$ + A$\overline{B}$
+Hình 2.25 Schematic của Y = $\overline{B}\overline{C}$ + A$\overline{B}$
 
 Hình 2.25 trình bày cách triển khai phương trình đã đơn giản hóa bằng đại số Boolean trong Ví dụ 2.6. Chú ý circuit đã đơn giản hóa có ít hardware hơn đáng kể so với Hình 2.23. Nó cũng có thể nhanh hơn vì dùng các gate có ít input hơn.
 
-Có thể giảm số gate hơn nữa (dù chỉ một inverter) bằng cách tận dụng inverting gate. Quan sát thấy $\overline{B}$$\overline{C}$ là AND với các input đảo. Hình 2.26 trình bày schematic dùng tối ưu hóa này để loại inverter trên C. Nhớ rằng theo định lý De Morgan, AND với input đảo tương đương NOR gate. Tùy công nghệ triển khai, dùng ít gate nhất hoặc ưu tiên một số loại gate có thể rẻ hơn. Ví dụ, trong triển khai CMOS, NAND và NOR được ưu tiên hơn AND và OR.
+Chúng ta có thể giảm số lượng gate hơn nữa (dù chỉ bớt được một inverter) bằng cách tận dụng các inverting gate. Quan sát thấy $\overline{B}\overline{C}$ là một phép AND với các input bị đảo. Hình 2.26 minh họa schematic sử dụng cách tối ưu hóa này để loại bỏ inverter trên C. Hãy nhớ rằng theo định lý De Morgan, AND với các input bị đảo tương đương với một gate NOR. Tùy theo công nghệ triển khai, việc sử dụng số gate ít nhất hoặc ưu tiên một số loại gate nhất định có thể ít tốn kém hơn. Ví dụ, NAND và NOR được ưu tiên hơn AND và OR trong các cách triển khai CMOS.
 
 ![fig2_26](images/ch02/fig2_26.png)
 
@@ -432,7 +430,7 @@ Nhiều circuit có nhiều output, mỗi output tính một hàm Boolean riêng
 
 Trưởng khoa, trưởng bộ môn, trợ giảng và người phụ trách sinh hoạt ký túc xá đều thỉnh thoảng dùng hội trường. Đáng tiếc, đôi khi lịch của họ trùng nhau, dẫn đến thảm họa như lần cuộc gặp gây quỹ của trưởng khoa với những ủy viên quản trị khó tính diễn ra cùng lúc với tiệc BTB[^1] của ký túc xá. Alyssa P. Hacker được mời thiết kế hệ thống đặt phòng.
 
-Hệ thống có bốn input, A<sub>3</sub>, …, A<sub>0</sub>, và bốn output, Y<sub>3</sub>, …, Y<sub>0</sub>. Các signal này cũng có thể viết A<sub>3:0</sub> và Y<sub>3:0</sub>. Mỗi người assert input của mình khi yêu cầu hội trường cho ngày hôm sau. Hệ thống assert nhiều nhất một output, cấp hội trường cho người có độ ưu tiên cao nhất. Trưởng khoa, người trả tiền cho hệ thống, đòi độ ưu tiên cao nhất (3). Trưởng bộ môn, trợ giảng và người phụ trách sinh hoạt ký túc xá có độ ưu tiên giảm dần.
+Hệ thống có bốn input, A<sub>3</sub>, …, A<sub>0</sub>, và bốn output, Y<sub>3</sub>, …, Y<sub>0</sub>. Các signal này cũng có thể viết A<sub>3:0</sub> và Y<sub>3:0</sub>. Mỗi người assert input của mình khi yêu cầu hội trường cho ngày hôm sau. Hệ thống assert nhiều nhất một output, cấp hội trường cho người có độ ưu tiên cao nhất. Trưởng khoa, người trả tiền cho hệ thống, đòi hỏi độ ưu tiên cao nhất (3). Trưởng bộ môn, trợ giảng và người phụ trách sinh hoạt ký túc xá có độ ưu tiên giảm dần.
 
 Viết truth table và phương trình Boolean cho hệ thống. Phác thảo circuit thực hiện hàm này.
 
@@ -466,7 +464,7 @@ Một số logic function cần lượng hardware khổng lồ khi xây dựng b
 
 Nhớ rằng XOR N-input tạo output TRUE khi số input TRUE là số lẻ. Hình 2.30 trình bày truth table của XOR three-input, với những hàng tạo output TRUE được khoanh lại. Từ truth table, chúng ta đọc được phương trình Boolean dạng sum-of-products trong Phương trình 2.6. Đáng tiếc, không có cách rút gọn phương trình này thành ít implicant hơn.
 
-Y = $\overline{A}$$\overline{B}$C + $\overline{A}$B$\overline{C}$ + A$\overline{B}$$\overline{C}$ + ABC (2.6)
+Y = $\overline{A}\overline{B}$C + $\overline{A}$B$\overline{C}$ + A$\overline{B}\overline{C}$ + ABC (2.6)
 
 Mặt khác, A ⊕ B ⊕ C = (A ⊕ B) ⊕ C (hãy tự chứng minh bằng perfect induction nếu còn nghi ngờ). Vì vậy, XOR three-input có thể xây dựng bằng cách mắc nối tiếp các XOR two-input, như Hình 2.31.
 
@@ -496,7 +494,7 @@ Bạn có thể nhớ từ Mục 1.7.6 rằng circuit CMOS ưu tiên NAND và NO
 
 - Đi ngược lại, vẽ mỗi gate dưới dạng sao cho bubble triệt tiêu. Nếu gate hiện tại có input bubble, vẽ gate trước đó với output bubble. Nếu gate hiện tại không có input bubble, vẽ gate trước đó không có output bubble.
 
-Hình 2.34 trình bày cách vẽ lại Hình 2.33 theo hướng dẫn bubble pushing. Bắt đầu tại output Y, NAND gate có bubble trên output cần loại bỏ. Đẩy output bubble ngược lại để tạo OR với input đảo, như Hình 2.34(a). Đi sang trái, gate ngoài cùng bên phải có input bubble triệt tiêu với output bubble của NAND gate ở giữa, nên không cần thay đổi, như Hình 2.34(b). Gate giữa không có input bubble, vì vậy biến đổi gate ngoài cùng bên trái để không có output bubble, như Hình 2.34(c). Bây giờ, mọi bubble trong circuit đều triệt tiêu trừ các bubble ở input, nên có thể đọc hàm bằng quan sát theo AND và OR của input true hoặc complement: Y = $\overline{A}$$\overline{B}$C + $\overline{D}$.
+Hình 2.34 trình bày cách vẽ lại Hình 2.33 theo hướng dẫn bubble pushing. Bắt đầu tại output Y, NAND gate có bubble trên output cần loại bỏ. Đẩy output bubble ngược lại để tạo OR với input đảo, như Hình 2.34(a). Đi sang trái, gate ngoài cùng bên phải có input bubble triệt tiêu với output bubble của NAND gate ở giữa, nên không cần thay đổi, như Hình 2.34(b). Gate giữa không có input bubble, vì vậy biến đổi gate ngoài cùng bên trái để không có output bubble, như Hình 2.34(c). Bây giờ, mọi bubble trong circuit đều triệt tiêu trừ các bubble ở input, nên có thể đọc hàm bằng quan sát theo AND và OR của input true hoặc complement: Y = $\overline{A}\overline{B}$C + $\overline{D}$.
 
 ![fig2_33](images/ch02/fig2_33.png)
 
@@ -635,13 +633,13 @@ Nhớ rằng tối giản logic bao gồm kết hợp các hạng. Hai hạng ch
 
 Hình 2.43 trình bày truth table và K-map cho hàm three-input. Hàng trên cùng của K-map cho bốn giá trị có thể có của các input A và B. Cột trái cho hai giá trị có thể có của input C. Mỗi ô trong K-map tương ứng một hàng truth table và chứa giá trị output Y của hàng đó. Ví dụ, ô trên cùng bên trái tương ứng hàng đầu của truth table và cho biết giá trị output Y = 1 khi ABC = 000. Giống mỗi hàng truth table, mỗi ô K-map biểu diễn một minterm. Để giải thích, Hình 2.43(c) trình bày minterm tương ứng từng ô K-map.
 
-Mỗi ô, hay minterm, khác một ô kề ở sự thay đổi của đúng một biến. Điều này có nghĩa các ô kề có chung tất cả literal trừ một literal, xuất hiện dạng true trong ô này và dạng complement trong ô kia. Ví dụ, các ô biểu diễn minterm $\overline{A}$$\overline{B}$$\overline{C}$ và $\overline{A}$$\overline{B}$C nằm kề nhau và chỉ khác ở biến C. Bạn có thể đã nhận thấy các tổ hợp A và B trên hàng đầu có thứ tự lạ: 00, 01, 11, 10. Thứ tự này gọi là Gray code. Nó khác thứ tự nhị phân thông thường (00, 01, 10, 11) ở chỗ các mục kề nhau chỉ khác một biến. Ví dụ, 01:11 chỉ đổi A từ 0 thành 1, trong khi 01:10 đổi A từ 0 thành 1 và B từ 1 thành 0. Vì vậy, viết các tổ hợp theo thứ tự nhị phân sẽ không cho tính chất mong muốn là các ô kề chỉ khác một biến.
+Mỗi ô, hay minterm, khác một ô kề ở sự thay đổi của đúng một biến. Điều này có nghĩa các ô kề có chung tất cả literal trừ một literal, xuất hiện dạng true trong ô này và dạng complement trong ô kia. Ví dụ, các ô biểu diễn minterm $\overline{A}\overline{B}\overline{C}$ và $\overline{A}\overline{B}$C nằm kề nhau và chỉ khác ở biến C. Bạn có thể đã nhận thấy các tổ hợp A và B trên hàng đầu có thứ tự lạ: 00, 01, 11, 10. Thứ tự này gọi là Gray code. Nó khác thứ tự nhị phân thông thường (00, 01, 10, 11) ở chỗ các mục kề nhau chỉ khác một biến. Ví dụ, 01:11 chỉ đổi A từ 0 thành 1, trong khi 01:10 đổi A từ 0 thành 1 và B từ 1 thành 0. Vì vậy, viết các tổ hợp theo thứ tự nhị phân sẽ không cho tính chất mong muốn là các ô kề chỉ khác một biến.
 
-K-map còn “quấn vòng”. Các ô ngoài cùng bên phải thực chất kề các ô ngoài cùng bên trái vì chúng chỉ khác một biến A. Nói cách khác, có thể cuộn bản đồ thành hình trụ, rồi nối hai đầu hình trụ thành torus (tức hình bánh vòng), mà vẫn bảo đảm các ô kề chỉ khác một biến.
+K-map còn có tính chất “quấn vòng”. Các ô ngoài cùng bên phải thực chất kề với các ô ngoài cùng bên trái vì chúng chỉ khác nhau ở một biến A. Nói cách khác, bạn có thể cuộn bản đồ thành một hình trụ, rồi nối hai đầu hình trụ để tạo thành torus (tức hình bánh vòng), mà vẫn bảo đảm các ô kề nhau chỉ khác nhau ở một biến.
 
 ### 2.7.1 Tư duy khoanh vòng
 
-Trong K-map ở Hình 2.43, chỉ hai minterm xuất hiện trong phương trình, $\overline{A}$$\overline{B}$$\overline{C}$ và $\overline{A}$$\overline{B}$C, như các giá trị 1 ở cột trái thể hiện. Đọc minterm từ K-map hoàn toàn tương đương với đọc phương trình dạng sum-of-products trực tiếp từ truth table. Như trước, có thể dùng đại số Boolean để tối giản phương trình dạng sum-of-products.
+Trong K-map ở Hình 2.43, chỉ hai minterm xuất hiện trong phương trình, $\overline{A}\overline{B}\overline{C}$ và $\overline{A}\overline{B}$C, như các giá trị 1 ở cột trái thể hiện. Đọc minterm từ K-map hoàn toàn tương đương với đọc phương trình dạng sum-of-products trực tiếp từ truth table. Như trước, có thể dùng đại số Boolean để tối giản phương trình dạng sum-of-products.
 
 ![fig2_43](images/ch02/fig2_43.png)
 
@@ -651,9 +649,9 @@ Hình 2.43 Hàm Three-input: (a) truth table, (b) K-map, (c) K-map có hiển th
 
 Hình 2.44 Tối giản bằng K-map
 
-Y = $\overline{A}$$\overline{B}$$\overline{C}$ + $\overline{A}$$\overline{B}$C = $\overline{A}$$\overline{B}$($\overline{C}$ + C) = $\overline{A}$$\overline{B}$ (2.7)
+Y = $\overline{A}\overline{B}\overline{C}$ + $\overline{A}\overline{B}$C = $\overline{A}\overline{B}$($\overline{C}$ + C) = $\overline{A}\overline{B}$ (2.7)
 
-K-maps giúp thực hiện đơn giản hóa này bằng đồ họa, qua việc khoanh các giá trị 1 trong những ô kề nhau, như Hình 2.44. Với mỗi vòng khoanh, viết implicant tương ứng. Nhớ từ Mục 2.2 rằng implicant là product của một hoặc nhiều literal. Những biến có cả dạng true lẫn complement trong vòng khoanh được loại khỏi implicant. Trong trường hợp này, biến C có cả dạng true (1) và dạng complement (0) trong vòng khoanh, nên không đưa nó vào implicant. Nói cách khác, Y là TRUE khi A = B = 0, không phụ thuộc C. Vì vậy, implicant là $\overline{A}$$\overline{B}$. K-map cho cùng kết quả đã tìm bằng đại số Boolean.
+K-maps giúp thực hiện đơn giản hóa này bằng đồ họa, qua việc khoanh các giá trị 1 trong những ô kề nhau, như Hình 2.44. Với mỗi vòng khoanh, viết implicant tương ứng. Nhớ từ Mục 2.2 rằng implicant là product của một hoặc nhiều literal. Những biến có cả dạng true lẫn complement trong vòng khoanh được loại khỏi implicant. Trong trường hợp này, biến C có cả dạng true (1) và dạng complement (0) trong vòng khoanh, nên không đưa nó vào implicant. Nói cách khác, Y là TRUE khi A = B = 0, không phụ thuộc C. Vì vậy, implicant là $\overline{A}\overline{B}$. K-map cho cùng kết quả đã tìm bằng đại số Boolean.
 
 ### 2.7.2 Tối giản logic bằng K-Maps
 
@@ -661,7 +659,7 @@ K-maps cung cấp cách trực quan dễ dàng để tối giản logic. Chỉ c
 
 Chính xác hơn, nhớ rằng phương trình Boolean được tối giản khi viết thành sum của số prime implicant ít nhất. Mỗi vòng khoanh trên K-map biểu diễn một implicant. Các vòng lớn nhất có thể là prime implicant.
 
-Ví dụ, trong K-map của Hình 2.44, $\overline{A}$$\overline{B}$$\overline{C}$ và $\overline{A}$$\overline{B}$C là implicant nhưng không phải prime implicant. Chỉ $\overline{A}$$\overline{B}$ là prime implicant trong K-map đó. Quy tắc tìm phương trình tối giản từ K-map như sau:
+Ví dụ, trong K-map của Hình 2.44, $\overline{A}\overline{B}\overline{C}$ và $\overline{A}\overline{B}$C là implicant nhưng không phải prime implicant. Chỉ $\overline{A}\overline{B}$ là prime implicant trong K-map đó. Quy tắc tìm phương trình tối giản từ K-map như sau:
 
 - Dùng ít vòng khoanh nhất cần thiết để phủ tất cả giá trị 1.
 
@@ -675,9 +673,7 @@ Ví dụ, trong K-map của Hình 2.44, $\overline{A}$$\overline{B}$$\overline{C
 
 - Một giá trị 1 trong K-map có thể được khoanh nhiều lần nếu nhờ vậy dùng ít vòng hơn.
 
-#### Ví dụ 2.9 TỐI GIẢN HÀM THREE-VARIABLE
-
-BẰNG K-MAP
+#### Ví dụ 2.9 TỐI GIẢN HÀM THREE-VARIABLE BẰNG K-MAP
 
 Giả sử có hàm Y = F(A, B, C) với K-map trong Hình 2.45. Tối giản phương trình bằng K-map.
 
@@ -833,7 +829,7 @@ Khéo léo một chút, có thể giảm một nửa kích thước multiplexer,
 
 #### Ví dụ 2.12 LOGIC BẰNG MULTIPLEXER
 
-Alyssa P. Hacker cần triển khai hàm Y = A$\overline{B}$ + $\overline{B}$$\overline{C}$ + $\overline{A}$BC để hoàn thành đồ án tốt nghiệp, nhưng khi tìm bộ dụng cụ thực hành, linh kiện duy nhất còn lại là multiplexer 8:1. Cô triển khai hàm thế nào?
+Alyssa P. Hacker cần triển khai hàm Y = A$\overline{B}$ + $\overline{B}\overline{C}$ + $\overline{A}$BC để hoàn thành đồ án tốt nghiệp, nhưng khi tìm bộ dụng cụ thực hành, linh kiện duy nhất còn lại là multiplexer 8:1. Cô triển khai hàm thế nào?
 
 Lời giải Hình 2.61 trình bày cách triển khai của Alyssa bằng một multiplexer 8:1 duy nhất. Multiplexer đóng vai trò lookup table, mỗi hàng truth table tương ứng một input multiplexer.
 
@@ -879,7 +875,7 @@ Hình 2.65 Logic function dùng decoder
 
 Logic bằng decoder
 
-Decoder có thể kết hợp với OR gate để xây dựng logic function. Hình 2.65 trình bày hàm XNOR two-input bằng decoder 2:4 và một OR gate duy nhất. Vì mỗi output decoder biểu diễn một minterm, hàm được xây dựng bằng OR mọi minterm trong hàm. Trong Hình 2.65, Y = $\overline{A}$$\overline{B}$ + AB = $\overline{A {\oplus} B}$.
+Decoder có thể kết hợp với OR gate để xây dựng logic function. Hình 2.65 trình bày hàm XNOR two-input bằng decoder 2:4 và một OR gate duy nhất. Vì mỗi output decoder biểu diễn một minterm, hàm được xây dựng bằng OR mọi minterm trong hàm. Trong Hình 2.65, Y = $\overline{A}\overline{B}$ + AB = $\overline{A {\oplus} B}$.
 
 Khi dùng decoder để xây dựng logic, dễ nhất là biểu diễn hàm bằng truth table hoặc canonical form sum-of-products. Hàm N-input có M giá trị 1 trong truth table có thể được xây dựng bằng decoder N:2<sup>N</sup> và OR gate M-input nối đến tất cả minterm chứa 1 trong truth table. Khái niệm này sẽ được áp dụng để xây dựng memory read-only (ROM) ở Mục 5.5.6.
 
@@ -955,15 +951,13 @@ Hình 2.71 Critical path của Ben
 
 Hình 2.72 Đường ngắn nhất của Ben
 
-#### Ví dụ 2.16 TIMING CỦA MULTIPLEXER: CONTROL-CRITICAL
-
-SO VỚI DATA-CRITICAL
+#### Ví dụ 2.16 TIMING CỦA MULTIPLEXER: CONTROL-CRITICAL SO VỚI DATA-CRITICAL
 
 So sánh timing worst-case của ba thiết kế multiplexer four-input trong Hình 2.58 trang 83. Bảng 2.7 liệt kê propagation delay của các thành phần. Critical path của từng thiết kế là gì? Từ phân tích timing, vì sao bạn có thể chọn thiết kế này thay thiết kế kia?
 
-Lời giải Một critical path của mỗi trong ba phương án thiết kế được tô xanh ở Hình 2.73 và 2.74. t<sub>pd\_sy</sub> biểu thị propagation delay từ input S đến output Y; t<sub>pd\_dy</sub> biểu thị propagation delay từ input D đến output Y; t<sub>pd</sub> của circuit là độ trễ lớn hơn trong hai giá trị: max(t<sub>pd\_sy</sub>, t<sub>pd\_dy</sub>).
+Lời giải Một critical path của mỗi trong ba phương án thiết kế được tô xanh ở Hình 2.73 và 2.74. t<sub>pd_sy</sub> biểu thị propagation delay từ input S đến output Y; t<sub>pd_dy</sub> biểu thị propagation delay từ input D đến output Y; t<sub>pd</sub> của circuit là độ trễ lớn hơn trong hai giá trị: max(t<sub>pd_sy</sub>, t<sub>pd_dy</sub>).
 
-Với cả cách triển khai logic two-level và tristate trong Hình 2.73, critical path đi từ một control signal S đến output Y: t<sub>pd</sub> = t<sub>pd\_sy</sub>. Các circuit này là control critical vì critical path đi từ control signal đến output. Bất kỳ độ trễ bổ sung nào trong control signal đều cộng trực tiếp vào độ trễ worst-case. Độ trễ từ D đến Y trong Hình 2.73(b) chỉ 50 ps, so với độ trễ từ S đến Y là 125 ps. Hình 2.74 trình bày cách triển khai phân cấp multiplexer 4:1 bằng hai tầng multiplexer 2:1. Critical path đi từ bất kỳ input D nào đến output. Circuit này là data critical vì critical path đi từ data input đến output: t<sub>pd</sub> = t<sub>pd\_dy</sub>.
+Với cả cách triển khai logic two-level và tristate trong Hình 2.73, critical path đi từ một control signal S đến output Y: t<sub>pd</sub> = t<sub>pd_sy</sub>. Các circuit này là control critical vì critical path đi từ control signal đến output. Bất kỳ độ trễ bổ sung nào trong control signal đều cộng trực tiếp vào độ trễ worst-case. Độ trễ từ D đến Y trong Hình 2.73(b) chỉ 50 ps, so với độ trễ từ S đến Y là 125 ps. Hình 2.74 trình bày cách triển khai phân cấp multiplexer 4:1 bằng hai tầng multiplexer 2:1. Critical path đi từ bất kỳ input D nào đến output. Circuit này là data critical vì critical path đi từ data input đến output: t<sub>pd</sub> = t<sub>pd_dy</sub>.
 
 Nếu data input đến sớm hơn control input nhiều, chúng ta ưu tiên thiết kế có độ trễ control-to-output ngắn nhất (thiết kế phân cấp ở Hình 2.74). Tương tự, nếu control input đến sớm hơn data input nhiều, chúng ta ưu tiên thiết kế có độ trễ data-to-output ngắn nhất (thiết kế tristate ở Hình 2.73(b)).
 
@@ -1082,11 +1076,11 @@ Bài tập 2.12 Làm lại Bài tập 2.8, chỉ dùng NOT gate cùng NAND và N
 
 Bài tập 2.13 Đơn giản hóa các phương trình Boolean sau bằng định lý Boolean. Kiểm tra tính đúng đắn bằng truth table hoặc K-map.
 
-(a) Y = AC + $\overline{A}$$\overline{B}$C
+(a) Y = AC + $\overline{A}\overline{B}$C
 
-(b) Y = $\overline{A}$$\overline{B}$ + $\overline{A}$B$\overline{C}$ + (A + $\overline{C}$)
+(b) Y = $\overline{A}\overline{B}$ + $\overline{A}$B$\overline{C}$ + (A + $\overline{C}$)
 
-(c) Y = $\overline{A}$$\overline{B}$$\overline{C}$$\overline{D}$ + A$\overline{B}$$\overline{C}$ + A$\overline{B}$C$\overline{D}$ + ABD + $\overline{A}$$\overline{B}$C$\overline{D}$ + B$\overline{C}$D + $\overline{A}$
+(c) Y = $\overline{A}\overline{B}\overline{C}\overline{D}$ + A$\overline{B}\overline{C}$ + A$\overline{B}$C$\overline{D}$ + ABD + $\overline{A}\overline{B}$C$\overline{D}$ + B$\overline{C}$D + $\overline{A}$
 
 Bài tập 2.14 Đơn giản hóa các phương trình Boolean sau bằng định lý Boolean. Kiểm tra tính đúng đắn bằng truth table hoặc K-map.
 
@@ -1102,13 +1096,13 @@ Bài tập 2.16 Phác thảo combinational circuit đơn giản hợp lý triể
 
 Bài tập 2.17 Đơn giản hóa từng phương trình Boolean sau. Phác thảo combinational circuit đơn giản hợp lý triển khai phương trình đã đơn giản hóa.
 
-(a) Y = BC + $\overline{A}$$\overline{B}$$\overline{C}$ + B$\overline{C}$
+(a) Y = BC + $\overline{A}\overline{B}\overline{C}$ + B$\overline{C}$
 
 (b) Y = $\overline{A + \overline{A}B + \overline{A}\overline{B}}$ + A + $\overline{B}$
 
-(c) Y = ABC + ABD + ABE + ACD + ACE + ($\overline{A + D + E}$) + $\overline{B}$$\overline{C}$D
+(c) Y = ABC + ABD + ABE + ACD + ACE + ($\overline{A + D + E}$) + $\overline{B}\overline{C}$D
 
-\+ $\overline{B}$$\overline{C}$E + $\overline{B}$$\overline{D}$$\overline{E}$ + $\overline{C}$$\overline{D}$$\overline{E}$
+\+ $\overline{B}\overline{C}$E + $\overline{B}\overline{D}\overline{E}$ + $\overline{C}\overline{D}\overline{E}$
 
 Bài tập 2.18 Đơn giản hóa từng phương trình Boolean sau. Phác thảo combinational circuit đơn giản hợp lý triển khai phương trình đã đơn giản hóa.
 
@@ -1267,7 +1261,7 @@ Các bài tập sau trình bày những câu hỏi từng được hỏi trong p
 
 Câu hỏi 2.1 Phác thảo schematic cho hàm XOR two-input, chỉ dùng NAND gate. Bạn có thể dùng ít nhất bao nhiêu gate?
 
-Câu hỏi 2.2 Thiết kế circuit cho biết một tháng nhất định có 31 ngày hay không. Tháng được chỉ định bằng input 4-bit A<sub>3:0</sub>. Ví dụ, input 0001 là tháng Một, input 1100 là tháng Mười Hai. Output Y của circuit chỉ phải HIGH khi tháng được input chỉ định có 31 ngày. Viết phương trình đơn giản hóa và vẽ sơ đồ circuit dùng ít gate nhất. (Gợi ý: Nhớ tận dụng don’t care.)
+Câu hỏi 2.2 Thiết kế một circuit cho biết một tháng nhất định có 31 ngày hay không. Tháng được chỉ định bằng input 4-bit A<sub>3:0</sub>. Ví dụ, nếu các input là 0001 thì đó là tháng Một, còn nếu các input là 1100 thì đó là tháng Mười Hai. Output Y của circuit chỉ được HIGH khi tháng do các input chỉ định có 31 ngày. Viết phương trình đã đơn giản hóa và vẽ sơ đồ circuit sử dụng số lượng gate ít nhất. (Gợi ý: Hãy nhớ tận dụng don’t care.)
 
 Câu hỏi 2.3 Tristate buffer là gì? Nó được dùng như thế nào và vì sao?
 

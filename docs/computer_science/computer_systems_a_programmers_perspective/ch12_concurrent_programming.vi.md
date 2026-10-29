@@ -54,11 +54,11 @@ Hình 12.5 thể hiện code concurrent echo server dựa trên process. Hàm ec
 
 - Thứ hai, parent và child phải đóng bản sao connfd tương ứng (lần lượt dòng 33 và 30). Như đã nói, điều này đặc biệt quan trọng với parent để tránh memory leak.
 
+- Cuối cùng, vì reference count trong file table entry của socket, connection tới client chỉ kết thúc sau khi cả bản sao connfd của parent và child đều đóng.
+
 ![p1012_4](images/ch12_concurrent_programming/p1012_4.png)
 
 **Hình 12.4 Bước 4: Server fork child khác phục vụ client mới.**
-
-- Cuối cùng, vì reference count trong file table entry của socket, connection tới client chỉ kết thúc sau khi cả bản sao connfd của parent và child đều đóng.
 
 ### 12.1.2 Ưu và nhược điểm của process
 
@@ -159,17 +159,20 @@ Mỗi bit b<sub>k</sub> tương ứng descriptor k. Descriptor k thuộc descrip
 
 Trong phạm vi này, select nhận hai đầu vào: descriptor set (fdset) gọi là read set, và lực lượng (n) của read set (thực ra là maximum cardinality của descriptor set bất kỳ). select block đến khi ít nhất một descriptor trong read set sẵn sàng đọc. Descriptor k sẵn sàng đọc khi và chỉ khi yêu cầu đọc 1 byte từ nó không block. Như side effect, select sửa fd_set mà fdset trỏ tới để biểu thị tập con của read set gọi là ready set, gồm descriptor sẵn sàng đọc. Giá trị trả về là số phần tử ready set. Chú ý do side effect, phải cập nhật read set mỗi lần gọi select.
 
-Cách tốt nhất hiểu select là nghiên cứu ví dụ cụ thể. Hình 12.6 thể hiện cách dùng select triển khai iterative echo server còn nhận lệnh người dùng từ standard input. Bắt đầu dùng open_listenfd từ Hình 11.19 mở listening descriptor (dòng 16), rồi dùng FD_ZERO tạo read set rỗng (dòng 18): Tiếp theo, dòng 19 và 20 định nghĩa read set gồm descriptor 0 (standard input) và descriptor 3 (listening descriptor):
+Cách tốt nhất hiểu select là nghiên cứu ví dụ cụ thể. Hình 12.6 thể hiện cách dùng select triển khai iterative echo server còn nhận lệnh người dùng từ standard input. Bắt đầu dùng open_listenfd từ Hình 11.19 mở listening descriptor (dòng 16), rồi dùng FD_ZERO tạo read set rỗng (dòng 18):
 
 ![p1015_5](images/ch12_concurrent_programming/p1015_5.png)
+
+Tiếp theo, dòng 19 và 20 định nghĩa read set gồm descriptor 0 (standard input) và descriptor 3 (listening descriptor):
 
 ![p1015_6](images/ch12_concurrent_programming/p1015_6.png)
 
 Lúc này bắt đầu vòng lặp server điển hình. Nhưng thay vì chờ connection request bằng accept, gọi select để block đến khi listening descriptor hoặc standard input sẵn sàng đọc (dòng 24). Ví dụ, đây là giá trị ready_set select trả nếu người dùng nhấn enter, khiến standard input descriptor sẵn sàng đọc:
 
-code/conc/select.c
+![p1017_7](images/ch12_concurrent_programming/p1017_7.png)
 
 ```
+                                                             code/conc/select.c
  1   #include "csapp.h"
  2   void echo(int connfd);
  3   void command(void);
@@ -216,8 +219,6 @@ code/conc/select.c
 
 **Hình 12.6 Iterative echo server dùng I/O multiplexing. Server dùng select chờ connection request trên listening descriptor và lệnh trên standard input.**
 
-![p1017_7](images/ch12_concurrent_programming/p1017_7.png)
-
 Khi select trả về, dùng FD_ISSET xác định descriptor nào sẵn sàng đọc. Nếu standard input sẵn sàng (dòng 25), gọi command để đọc, phân tích và phản hồi lệnh trước khi trở về main. Nếu listening descriptor sẵn sàng (dòng 27), gọi accept lấy connected descriptor rồi gọi echo từ Hình 11.22, echo từng dòng client cho đến khi client đóng đầu connection của nó.
 
 Mặc dù là ví dụ tốt về select, chương trình vẫn chưa hoàn hảo. Vấn đề là sau khi nối client, nó tiếp tục echo dòng đầu vào cho đến khi client đóng đầu connection. Vì vậy, nếu gõ lệnh vào standard input, bạn không nhận phản hồi đến khi server phục vụ xong client. Cách tốt hơn là multiplex ở granularity nhỏ hơn, echo tối đa một dòng văn bản mỗi lần qua vòng lặp server.
@@ -246,9 +247,8 @@ Hàm add_client (Hình 12.10) thêm client mới vào pool active client. Sau kh
 
 Hàm check_clients trong Hình 12.11 echo dòng văn bản từ mỗi ready connected descriptor. Nếu đọc thành công, echo lại client (dòng 15–18). Chú ý dòng 15 duy trì tổng tích lũy byte nhận từ mọi client. Nếu phát hiện EOF vì client đóng đầu connection, đóng đầu connection của mình (dòng 23) và loại descriptor khỏi pool (dòng 24–25).
 
-code/conc/echoservers.c
-
 ```
+                                                                          code/conc/echoservers.c
  1   #include "csapp.h"
  2
  3   typedef struct { /* Represents a pool of connected descriptors */
@@ -563,6 +563,26 @@ Variable once_control là global hoặc static variable luôn được khởi t�
 Hình 12.14 thể hiện code concurrent echo server dựa trên thread. Cấu trúc tổng thể tương tự thiết kế process-based. Main thread liên tục chờ connection request rồi tạo peer xử lý. Mặc dù code có vẻ đơn giản, có hai vấn đề tổng quát khá tinh tế cần xem kỹ. Vấn đề đầu là truyền connected descriptor cho peer khi gọi pthread_create thế nào. Cách hiển nhiên là truyền pointer tới descriptor như sau:
 
 ```
+connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
+Pthread_create(&tid, NULL, thread, &connfd);
+```
+
+Sau đó để peer dereference pointer và gán cho local variable như sau:
+
+```
+void *thread(void *vargp) {
+    int connfd = *((int *)vargp);
+    .
+    .
+    .
+}
+```
+
+Tuy nhiên, cách này sai vì tạo race giữa câu lệnh gán trong peer và accept trong main. Nếu gán xong trước accept tiếp theo, local connfd trong peer nhận đúng descriptor. Nhưng nếu gán xong sau accept, local connfd nhận descriptor number của connection tiếp theo. Kết quả không mong muốn là hai thread cùng input và output trên một descriptor. Để tránh race có thể nghiêm trọng này, phải gán mỗi connected descriptor do accept trả vào memory block allocated động riêng như dòng 21–22. Chúng ta quay lại race trong Mục 12.7.4.
+
+Vấn đề khác là tránh memory leak trong thread routine. Vì không reap thread tường minh, phải detach mỗi thread để tài nguyên được thu hồi khi kết thúc (dòng 31). Hơn nữa, phải cẩn thận free memory block do main cấp phát (dòng 32).
+
+```
                                                                           code/conc/echoservert.c
  1   #include "csapp.h"
  2
@@ -605,26 +625,6 @@ Hình 12.14 thể hiện code concurrent echo server dựa trên thread. Cấu t
 
 **Hình 12.14 Concurrent echo server dựa trên thread.**
 
-```
-connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
-Pthread_create(&tid, NULL, thread, &connfd);
-```
-
-Sau đó để peer dereference pointer và gán cho local variable như sau:
-
-```
-void *thread(void *vargp) {
-    int connfd = *((int *)vargp);
-    .
-    .
-    .
-}
-```
-
-Tuy nhiên, cách này sai vì tạo race giữa câu lệnh gán trong peer và accept trong main. Nếu gán xong trước accept tiếp theo, local connfd trong peer nhận đúng descriptor. Nhưng nếu gán xong sau accept, local connfd nhận descriptor number của connection tiếp theo. Kết quả không mong muốn là hai thread cùng input và output trên một descriptor. Để tránh race có thể nghiêm trọng này, phải gán mỗi connected descriptor do accept trả vào memory block allocated động riêng như dòng 21–22. Chúng ta quay lại race trong Mục 12.7.4.
-
-Vấn đề khác là tránh memory leak trong thread routine. Vì không reap thread tường minh, phải detach mỗi thread để tài nguyên được thu hồi khi kết thúc (dòng 31). Hơn nữa, phải cẩn thận free memory block do main cấp phát (dòng 32).
-
 #### Bài tập thực hành 12.5 (lời giải trang 1072)
 
 Trong server process-based Hình 12.5, chúng ta thấy không memory leak và code vẫn đúng dù xóa dòng 33. Trong server threads-based Hình 12.14, có nguy cơ memory leak nếu xóa dòng 31 hoặc 32 không? Tại sao?
@@ -635,9 +635,8 @@ Từ góc nhìn lập trình viên, điểm hấp dẫn của thread là dễ đ
 
 Cần trả lời các câu hỏi cơ bản để hiểu variable C có shared không: (1) Memory model bên dưới của thread là gì? (2) Với mô hình này, instance variable được ánh xạ vào bộ nhớ thế nào? (3) Cuối cùng, bao nhiêu thread tham chiếu từng instance? Variable shared khi và chỉ khi nhiều thread tham chiếu một instance nào đó.
 
-code/conc/sharing.c
-
 ```
+                                                           code/conc/sharing.c
  1   #include "csapp.h"
  2   #define N 2
  3   void *thread(void *vargp);
@@ -717,9 +716,8 @@ Shared variable thuận tiện nhưng tạo khả năng lỗi đồng bộ khó 
 
 Vì mỗi thread tăng counter niters lần, kỳ vọng giá trị cuối là 2 × niters. Điều này có vẻ đơn giản, dễ hiểu. Tuy nhiên, khi chạy badcnt.c trên Linux, không chỉ kết quả sai mà mỗi lần còn khác nhau!
 
-code/conc/badcnt.c
-
 ```
+                                                            code/conc/badcnt.c
  1   /* WARNING: This code is buggy! */
  2   #include "csapp.h"
  3
@@ -991,30 +989,18 @@ Tương tác Producer-consumer thường xảy ra trong hệ thống thực. Ví
 Trong mục này, chúng ta phát triển gói đơn giản Sbuf để xây chương trình producer-consumer. Mục tiếp theo dùng nó xây concurrent server thú vị dựa trên prethreading. Sbuf thao tác bounded buffer type sbuf_t (Hình 12.24). Item được lưu trong integer array allocated động (buf) n item. Index front và rear theo dõi item đầu, cuối trong array. Ba semaphore đồng bộ truy cập buffer. Semaphore mutex bảo đảm truy cập loại trừ lẫn nhau. Semaphore slots và items là counting semaphore lần lượt đếm slot trống và item sẵn có.
 
 ```
-1   typedef struct {
-2       int *buf;
-3       int n;
-4       int front;
-5       int rear;
-6       sem_t mutex;
-7       sem_t slots;
-8       sem_t items;
-9   } sbuf_t;
+                                                        code/conc/sbuf.h
+ 1   typedef struct {
+ 2       int *buf;          /* Buffer array */
+ 3       int n;             /* Maximum number of slots */
+ 4       int front;         /* buf[(front+1)%n] is first item */
+ 5       int rear;          /* buf[rear%n] is last item */
+ 6       sem_t mutex;       /* Protects accesses to buf */
+ 7       sem_t slots;       /* Counts available slots */
+ 8       sem_t items;       /* Counts available items */
+ 9   } sbuf_t;
+                                                        code/conc/sbuf.h
 ```
-
-code/conc/sbuf.h
-
-```
-/* Buffer array */
-/* Maximum number of slots */
-/* buf[(front+1)%n] is first item */
-/* buf[rear%n] is last item */
-/* Protects accesses to buf */
-/* Counts available slots */
-/* Counts available items */
-```
-
-code/conc/sbuf.h
 
 **Hình 12.24 sbuf_t : Bounded buffer dùng bởi Sbuf.**
 
@@ -1151,9 +1137,8 @@ Hình 12.28 thể hiện dùng Sbuf triển khai prethreaded concurrent echo ser
 
 Hàm echo_cnt trong Hình 12.29 là phiên bản echo Hình 11.22 ghi tổng tích lũy byte nhận từ mọi client vào global variable byte_cnt. Code thú vị vì thể hiện kỹ thuật chung khởi tạo gói được gọi từ thread routine. Ở đây cần khởi tạo byte_cnt và semaphore mutex. Một cách, dùng trong Sbuf và Rio, yêu cầu main gọi tường minh initialization function. Cách khác ở đây dùng pthread_once (dòng 19) gọi initialization function lần đầu một thread gọi echo_cnt. Ưu điểm là gói dễ dùng hơn. Nhược điểm là mỗi echo_cnt gọi pthread_once, phần lớn thời gian không làm gì hữu ích.
 
-code/conc/echoservert-pre.c
-
 ```
+                                                        code/conc/echoservert-pre.c
  1   #include "csapp.h"
  2   #include "sbuf.h"
  3   #define NTHREADS  4
@@ -1197,9 +1182,8 @@ code/conc/echoservert-pre.c
 41           Close(connfd);
 42       }
 43   }
+                                                        code/conc/echoservert-pre.c
 ```
-
-code/conc/echoservert-pre.c
 
 **Hình 12.28 Prethreaded concurrent echo server. Server dùng mô hình producer-consumer với một producer và nhiều consumer.**
 
@@ -1681,23 +1665,23 @@ Semaphore tạo ra nguy cơ xảy ra một loại lỗi run-time khó chịu, g�
 
 - Lập trình viên đã sắp xếp sai thứ tự các thao tác P và V, khiến các forbidden region của hai semaphore chồng lấn nhau. Nếu một execution trajectory đi đến deadlock state d, không thể tiến triển thêm vì các forbidden region chồng lấn chặn mọi hướng tiến triển hợp lệ. Nói cách khác, chương trình bị deadlock vì mỗi thread đang chờ thread kia thực hiện một thao tác V sẽ không bao giờ xảy ra.
 
-![p1065_22](images/ch12_concurrent_programming/p1065_22.png)
-
-**Hình 12.44 Progress graph của một chương trình có thể deadlock.**
-
 - Các forbidden region chồng lấn tạo ra một tập hợp trạng thái gọi là deadlock region. Nếu một trajectory chạm đến trạng thái trong deadlock region, deadlock là không thể tránh khỏi. Trajectory có thể đi vào deadlock region nhưng không bao giờ thoát ra được.
 
 - Deadlock là một vấn đề đặc biệt khó vì không phải lúc nào cũng dự đoán được. Một số execution trajectory may mắn sẽ đi vòng tránh deadlock region, trong khi những trajectory khác bị mắc kẹt trong đó. Hình 12.44 cho thấy ví dụ của mỗi trường hợp. Hệ quả đối với lập trình viên thật đáng ngại. Bạn có thể chạy cùng một chương trình hàng nghìn lần không gặp vấn đề, nhưng lần tiếp theo nó lại deadlock. Hoặc chương trình chạy tốt trên máy này nhưng deadlock trên máy khác. Tệ nhất là lỗi thường không thể tái hiện vì các lần thực thi khác nhau có trajectory khác nhau.
 
+![p1065_22](images/ch12_concurrent_programming/p1065_22.png)
+
+**Hình 12.44 Progress graph của một chương trình có thể deadlock.**
+
 Chương trình deadlock vì nhiều nguyên nhân và nhìn chung việc ngăn chặn là một bài toán khó. Tuy nhiên, khi dùng binary semaphore cho mutual exclusion như trong Hình 12.44, bạn có thể áp dụng quy tắc đơn giản và hiệu quả sau để ngăn deadlock:
-
-![p1066_23](images/ch12_concurrent_programming/p1066_23.png)
-
-**Hình 12.45 Progress graph của một chương trình deadlock-free.**
 
 Quy tắc thứ tự mutex lock: Với một thứ tự toàn phần của tất cả mutex, chương trình sẽ deadlock-free nếu mỗi thread acquire các mutex theo thứ tự đó và release theo thứ tự ngược lại.
 
 Ví dụ, ta có thể sửa deadlock trong Hình 12.44 bằng cách lock s trước rồi đến t trong mỗi thread. Hình 12.45 cho thấy progress graph thu được.
+
+![p1066_23](images/ch12_concurrent_programming/p1066_23.png)
+
+**Hình 12.45 Progress graph của một chương trình deadlock-free.**
 
 #### Bài tập thực hành 12.15 (lời giải trang 1075)
 
@@ -1745,9 +1729,8 @@ A. Chương trình trong Hình 12.46 có một bug. Thread lẽ ra phải sleep 
 
 B. Bạn có thể sửa bug này bằng cách thay hàm exit ở dòng 10 bằng một trong hai lời gọi hàm Pthreads khác nhau. Đó là những hàm nào?
 
-code/conc/hellobug.c
-
 ```
+                                                          code/conc/hellobug.c
  1   /* WARNING: This code is buggy! */
  2   #include "csapp.h"
  3   void *thread(void *vargp);
@@ -1816,7 +1799,7 @@ Tuy nhiên, nếu thử phương pháp này trong concurrent server dựa trên 
 
 12.28 ◆ Trong Hình 12.45, việc hoán đổi thứ tự hai thao tác V có ảnh hưởng đến việc chương trình deadlock hay không không? Giải thích câu trả lời bằng cách vẽ progress graph cho bốn trường hợp có thể xảy ra:
 
-|  | Trường hợp 1 |  | Trường hợp 2 | Trường hợp 3 |  | Trường hợp 4 |  |
+| Trường hợp 1 |  | Trường hợp 2 |  | Trường hợp 3 |  | Trường hợp 4 |  |
 |---|---|---|---|---|---|---|---|
 | Thread 1 | Thread 2 | Thread 1 | Thread 2 | Thread 1 | Thread 2 | Thread 1 | Thread 2 |
 | P(s) | P(s) | P(s) | P(s) | P(s) | P(s) | P(s) | P(s) |
@@ -1930,7 +1913,17 @@ A. Đây là bảng:
 | myid.p0 | không | có | không |
 | myid.p1 | không | không | có |
 
-Ghi chú: ptr Một global variable được main thread ghi và peer thread đọc. cnt Một static variable chỉ có một instance trong memory, được hai peer thread đọc và ghi. i.m Một local automatic variable lưu trên stack của main thread. Mặc dù giá trị của nó được truyền cho peer thread, peer thread không bao giờ tham chiếu nó trên stack, do đó nó không được dùng chung. msgs.m Một local automatic variable lưu trên stack của main thread và được cả hai peer thread tham chiếu gián tiếp qua ptr. myid.p0 và myid.p1 Các instance của một local automatic variable lần lượt nằm trên stack của peer thread 0 và 1.
+Ghi chú:
+
+- ptr Một global variable được main thread ghi và peer thread đọc.
+
+- cnt Một static variable chỉ có một instance trong memory, được hai peer thread đọc và ghi.
+
+- i.m Một local automatic variable lưu trên stack của main thread. Mặc dù giá trị của nó được truyền cho peer thread, peer thread không bao giờ tham chiếu nó trên stack, do đó nó không được dùng chung.
+
+- msgs.m Một local automatic variable lưu trên stack của main thread và được cả hai peer thread tham chiếu gián tiếp qua ptr.
+
+- myid.p0 và myid.p1 Các instance của một local automatic variable lần lượt nằm trên stack của peer thread 0 và 1.
 
 B. Các variable ptr, cnt và msgs được nhiều hơn một thread tham chiếu, do đó được dùng chung.
 

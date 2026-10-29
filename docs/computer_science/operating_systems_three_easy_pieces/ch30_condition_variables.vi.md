@@ -148,7 +148,9 @@ Vấn đề là race condition tinh tế. Cụ thể, parent gọi thr_join(), k
 
 > MẸO: LUÔN GIỮ LOCK KHI SIGNAL
 >
-> Dù không bắt buộc trong mọi trường hợp, đơn giản và tốt nhất có lẽ là giữ lock khi signal với condition variable. Ví dụ trên cần giữ lock để đúng; một số trường hợp có lẽ không cần, nhưng nên tránh. Vì vậy để đơn giản, giữ lock khi gọi signal. Chiều ngược, giữ lock khi gọi wait, không chỉ là mẹo mà bắt buộc theo semantics của wait: wait luôn (a) giả định lock được giữ khi gọi, (b) release lock khi cho caller sleep, và (c) re-acquires lock ngay trước khi trả về. Vì vậy tổng quát hóa mẹo là đúng: giữ lock khi signal hoặc wait, bạn luôn ổn.
+> Dù không bắt buộc trong mọi trường hợp, đơn giản và tốt nhất có lẽ là giữ lock khi signal với condition variable. Ví dụ trên cần giữ lock để đúng; một số trường hợp có lẽ không cần, nhưng nên tránh. Vì vậy để đơn giản, giữ lock khi gọi signal.
+>
+> Chiều ngược, giữ lock khi gọi wait, không chỉ là mẹo mà bắt buộc theo semantics của wait: wait luôn (a) giả định lock được giữ khi gọi, (b) release lock khi cho caller sleep, và (c) re-acquires lock ngay trước khi trả về. Vì vậy tổng quát hóa mẹo là đúng: giữ lock khi signal hoặc wait, bạn luôn ổn.
 
 Hy vọng ví dụ join đơn giản cho thấy vài yêu cầu cơ bản để dùng condition variable đúng. Để bảo đảm hiểu, chúng ta xem ví dụ phức tạp hơn: bài toán producer/consumer hay bounded-buffer.
 

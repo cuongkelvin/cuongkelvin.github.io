@@ -24,17 +24,17 @@ Mạch điện tử bên trong máy tính hiện đại là mạch số. Điện
 
 Tín hiệu đúng (về logic), hay 1.
 
-#### deasserted signal
+### deasserted signal
 
 Tín hiệu sai (về logic), hay 0.
 
 Các khối logic được chia thành hai loại tùy có chứa memory hay không. Khối không có memory gọi là combinational; output của khối combinational chỉ phụ thuộc input hiện tại. Với khối có memory, output có thể phụ thuộc cả input và giá trị lưu trong memory, được gọi là state của khối logic. Trong mục này và mục tiếp theo, chúng ta chỉ tập trung vào combinational logic. Sau khi giới thiệu các phần tử memory trong Mục A.8, chúng ta mô tả cách thiết kế sequential logic, là logic bao gồm state.
 
-#### combinational logic
+### combinational logic
 
 Hệ thống logic có các khối không chứa memory, do đó tính cùng output khi có cùng input.
 
-#### sequential logic
+### sequential logic
 
 Nhóm phần tử logic chứa memory, nên giá trị phụ thuộc input cũng như nội dung hiện tại của memory.
 
@@ -374,27 +374,27 @@ Trong mục này, chúng ta giới thiệu hardware description language Verilog
 
 Verilog là một trong hai hardware description language chính; ngôn ngữ kia là VHDL. Verilog được dùng nhiều hơn đôi chút trong công nghiệp và dựa trên C, khác VHDL dựa trên Ada. Người đọc quen C nói chung sẽ thấy cơ sở Verilog dùng trong phụ lục dễ theo dõi. Người đã quen VHDL sẽ thấy khái niệm đơn giản, miễn đã tiếp xúc cú pháp C.
 
-#### Verilog
+### Verilog
 
 Một trong hai hardware description language phổ biến nhất.
 
-#### VHDL
+### VHDL
 
 Một trong hai hardware description language phổ biến nhất.
 
 Verilog có thể chỉ định định nghĩa behavioral lẫn structural của hệ thống số. Behavioral specification mô tả hệ thống số hoạt động về chức năng như thế nào. Structural specification mô tả tổ chức chi tiết, thường bằng mô tả phân cấp. Structural specification có thể mô tả hệ thống phần cứng theo phân cấp phần tử cơ bản như gate và switch. Vì vậy có thể dùng Verilog mô tả nội dung chính xác các truth table và datapath của mục trước.
 
-#### behavioral specification
+### behavioral specification
 
 Mô tả cách hệ thống số hoạt động về chức năng.
 
-#### structural specification
+### structural specification
 
 Mô tả cách hệ thống số được tổ chức qua kết nối phân cấp các phần tử.
 
 Với sự xuất hiện công cụ hardware synthesis, phần lớn người thiết kế nay dùng Verilog hoặc VHDL để chỉ mô tả structural datapath, dựa vào logic synthesis tạo control từ mô tả behavioral. Ngoài ra, phần lớn hệ thống CAD cung cấp thư viện phong phú các thành phần chuẩn hóa như ALU, multiplexor, register file, memory, khối logic lập trình được, cùng gate cơ bản.
 
-#### hardware synthesis tools
+### hardware synthesis tools
 
 Phần mềm Computer-aided design có thể tạo thiết kế gate-level dựa trên mô tả behavioral của hệ thống số.
 
@@ -914,7 +914,7 @@ Clock cần trong sequential logic để quyết định khi nào cập nhật p
 
 Cơ chế clocking trong đó mọi thay đổi state xảy ra trên clock edge.
 
-#### clocking methodology
+### clocking methodology
 
 Phương pháp xác định khi nào dữ liệu hợp lệ và ổn định so với clock.
 
@@ -924,7 +924,7 @@ Phương pháp xác định khi nào dữ liệu hợp lệ và ổn định so 
 
 Trong phương pháp edge-triggered, cạnh lên hoặc cạnh xuống clock là active và gây thay đổi state. Như sẽ thấy ở mục tiếp, các state element trong thiết kế edge-triggered được triển khai để nội dung chỉ đổi trên active clock edge. Chọn cạnh nào active phụ thuộc công nghệ triển khai và không ảnh hưởng các khái niệm thiết kế logic.
 
-#### state element
+### state element
 
 Phần tử memory.
 
@@ -932,7 +932,7 @@ Clock edge hoạt động như tín hiệu lấy mẫu, khiến giá trị input
 
 Ràng buộc chính trong hệ có clock, cũng gọi synchronous system, là tín hiệu ghi vào state element phải hợp lệ khi active clock edge xảy ra. Tín hiệu hợp lệ nếu ổn định (không đổi) và giá trị không đổi nữa cho tới khi input đổi. Vì mạch combinational không được có feedback, nếu input combinational logic unit không đổi, output cuối cùng sẽ hợp lệ.
 
-#### synchronous system
+### synchronous system
 
 Memory system dùng clock, trong đó tín hiệu dữ liệu chỉ được đọc khi clock cho biết giá trị tín hiệu ổn định.
 
@@ -952,11 +952,11 @@ Trong phần còn lại phụ lục và Chương 4, thường bỏ tín hiệu c
 
 Sau khi thảo luận cách clocking cập nhật state element, có thể nói cách xây state element.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Đôi khi người thiết kế thấy hữu ích nếu một số ít state element đổi trên clock edge đối diện phần lớn phần tử khác. Điều này đòi hỏi cực kỳ cẩn thận vì ảnh hưởng cả input và output state element. Vì sao vẫn làm? Xét trường hợp lượng combinational logic trước và sau state element đủ nhỏ để mỗi phần hoạt động trong one-half clock cycle thay vì một cycle đầy đủ thông thường. Khi đó có thể ghi state element trên clock edge ứng với nửa cycle, vì cả input và output dùng được sau one-half clock cycle. Nơi thường dùng là register file, việc đọc hoặc ghi đơn thuần thường thực hiện trong nửa clock cycle thông thường. Chương 4 dùng ý tưởng này để giảm overhead pipeline.
 
-#### register file
+### register file
 
 State element gồm tập register có thể đọc, ghi bằng cách cung cấp số register cần truy cập.
 
@@ -1187,7 +1187,7 @@ Như đã thấy, hệ thống logic số chia thành combinational và sequenti
 
 Hàm sequential logic gồm tập input, output, hàm next-state ánh xạ current state và input tới state mới, và hàm output ánh xạ current state cùng có thể input tới tập output được assert.
 
-#### next-state function
+### next-state function
 
 Hàm combinational xác định next state của finite-state machine từ input và current state.
 
@@ -1249,7 +1249,7 @@ Khối combinational logic thường dùng logic có cấu trúc như PLA. PLA c
 
 Để cho thấy cách viết control bằng Verilog, Hình A.10.4 cho phiên bản dành synthesis. Với hàm control đơn giản này, Mealy machine không hữu ích, nhưng kiểu đặc tả này được dùng Chương 5 triển khai hàm control là Mealy machine ít state hơn Moore controller.
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 Số state nhỏ nhất của Moore machine để Mealy machine có thể ít state hơn là bao nhiêu?
 
@@ -1305,7 +1305,7 @@ Với ràng buộc clock period này, hai clock cũng có thể tới theo thứ
 
 Các thiết kế Edge-triggered có hai nhược điểm: chúng cần thêm logic và đôi khi có thể chậm hơn. Chỉ cần so sánh D flip-flop với latch level-sensitive được sử dụng để xây dựng flip-flop cũng thấy thiết kế edge-triggered cần nhiều logic hơn. Một lựa chọn khác là sử dụng clocking level-sensitive. Vì thay đổi state trong phương pháp level-sensitive không diễn ra tức thời, cơ chế level-sensitive hơi phức tạp hơn và cần chú ý thêm để hoạt động chính xác.
 
-#### level-sensitive clocking
+### level-sensitive clocking
 
 Phương pháp timing trong đó state đổi ở mức clock cao hoặc thấp, nhưng không tức thời như thiết kế edge-triggered.
 
@@ -1371,31 +1371,31 @@ Integrated circuit chứa combinational logic và có thể thiết bị memory,
 
 FPD thường chia hai nhóm: programmable logic device (PLD) thuần combinational, và field programmable gate array (FPGA) cung cấp cả combinational logic lẫn flip-flops. PLD có hai dạng: simple PLD (SPLD), thường là PLA hoặc programmable array logic (PAL), và complex PLD cho nhiều khối logic cùng kết nối cấu hình giữa khối. PLA trong PLD nghĩa là PLA có and-plane, or-plane lập trình được. PAL giống PLA nhưng or-plane cố định.
 
-#### programmable logic device (PLD)
+### programmable logic device (PLD)
 
 Integrated circuit chứa combinational logic có chức năng được người dùng cuối cấu hình.
 
-#### field programmable gate array (FPGA)
+### field programmable gate array (FPGA)
 
 Integrated circuit cấu hình được, chứa cả khối combinational logic và flip-flops.
 
-#### simple programmable logic device (SPLD)
+### simple programmable logic device (SPLD)
 
 Programmable logic device thường chứa một PAL hoặc PLA.
 
-#### programmable array logic (PAL)
+### programmable array logic (PAL)
 
 Chứa and-plane lập trình được theo sau bởi or-plane cố định.
 
 Trước FPGA nên nói cách cấu hình FPD. Cấu hình về bản chất là chọn nơi tạo hoặc ngắt kết nối. Cấu trúc gate, register tĩnh nhưng kết nối cấu hình được. Bằng cấu hình kết nối, người dùng quyết định hàm logic triển khai. Với PLA cấu hình được, chọn kết nối and-plane, or-plane quyết định hàm logic. Kết nối FPD vĩnh viễn hoặc cấu hình lại được. Kết nối vĩnh viễn tạo hoặc phá kết nối hai wire. FPLD hiện tại đều dùng công nghệ antifuse, cho tạo kết nối lúc lập trình rồi giữ vĩnh viễn. Cách khác cấu hình CMOS FPLD là SRAM. SRAM được nạp khi power-on, nội dung điều khiển switch rồi quyết định đường kim loại nào nối. Ưu điểm SRAM control là cấu hình lại FPD bằng đổi nội dung SRAM. Nhược điểm SRAM-based có two-fold: cấu hình volatile, phải nạp lại khi power-on, và dùng transistor active làm switch tăng nhẹ điện trở kết nối.
 
-#### antifuse
+### antifuse
 
 Cấu trúc integrated circuit khi lập trình tạo kết nối vĩnh viễn giữa hai wire.
 
 FPGA gồm logic và thiết bị memory, thường cấu trúc mảng two-dimensional với hành lang chia row, column dùng global interconnect giữa cell. Mỗi cell kết hợp gate và flip-flops, lập trình được cho chức năng cụ thể. Vì về cơ bản là RAM nhỏ lập trình được, chúng cũng gọi lookup table (LUT). FPGA mới chứa khối phức tạp hơn như phần adder, block RAM xây register file. Một số FPGA thậm chí chứa core RISC-V 64-bit!
 
-#### lookup tables (LUTs)
+### lookup tables (LUTs)
 
 Trong field programmable device, tên cell vì chúng gồm ít logic và RAM.
 

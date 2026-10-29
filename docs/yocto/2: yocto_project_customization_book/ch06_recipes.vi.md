@@ -520,7 +520,7 @@ PROVIDES = "udev"
 
 Trong cả hai recipe, `PROVIDES` đều được đặt thành `udev`, vì vậy cả hai recipe đều có thể có alias với tên chung là `udev`.
 
-Điều này hữu ích khi nhiều hơn một package cung cấp một chức năng chung, và chúng ta muốn yêu cầu phụ thuộc vào chức năng đó thay vì vào tên package hiện thực nó.
+Điều này hữu ích khi nhiều hơn một package cung cấp một chức năng chung, và chúng ta muốn yêu cầu phụ thuộc vào chức năng đó thay vì vào tên package triển khai nó.
 
 > Khi build một package, tên recipe `PN` luôn được ngầm prepend vào `PROVIDES`, vì vậy các thiết lập ở trên với dấu `=` hoàn toàn hoạt động được; tuy nhiên, để tránh nhầm lẫn, chúng ta nên dùng dấu `+=` trực quan hơn.
 
@@ -536,9 +536,9 @@ Khi đó developer có thể xác định recipe nào được ưu tiên và do 
 PREFERRED_PROVIDER_udev = "systemd"
 ```
 
-Điều này cho phép developer tách chức năng khỏi các package hiện thực chúng (điều này sẽ rõ ràng hơn từ Chương 8 trở đi).
+Điều này cho phép developer tách chức năng khỏi các package triển khai chúng (điều này sẽ rõ ràng hơn từ Chương 8 trở đi).
 
-Ngoài việc cung cấp recipe dưới các tên thay thế, cơ chế `PROVIDES` còn được dùng để hiện thực các virtual target. Các virtual target này đã được giới thiệu trong Mục 3.4.2 khi chúng ta nhắc đến các target `virtual/xserver` hoặc `virtual/kernel`, nơi chúng tương ứng với một chức năng cụ thể nào đó (trong ví dụ là X server và Linux). Các recipe cung cấp chức năng đang xét liệt kê các virtual target trong `PROVIDES`, còn các recipe phụ thuộc vào chức năng đang xét có thể đưa các virtual target vào `DEPENDS` để để ngỏ việc chọn provider. Như ở trên, biến `PREFERRED_PROVIDER` được dùng để chọn recipe cụ thể nào cung cấp một virtual target.
+Ngoài việc cung cấp recipe dưới các tên thay thế, cơ chế `PROVIDES` còn được dùng để triển khai các virtual target. Các virtual target này đã được giới thiệu trong Mục 3.4.2 khi chúng ta nhắc đến các target `virtual/xserver` hoặc `virtual/kernel`, nơi chúng tương ứng với một chức năng cụ thể nào đó (trong ví dụ là X server và Linux). Các recipe cung cấp chức năng đang xét liệt kê các virtual target trong `PROVIDES`, còn các recipe phụ thuộc vào chức năng đang xét có thể đưa các virtual target vào `DEPENDS` để để ngỏ việc chọn provider. Như ở trên, biến `PREFERRED_PROVIDER` được dùng để chọn recipe cụ thể nào cung cấp một virtual target.
 
 Bây giờ, là vấn đề cuối cùng của mục này, chúng ta nên có cái nhìn in-depth hơn về biến `SRC_URI`. Chúng ta đã nói rằng biến này cho BitBake biết cần lấy những file nào cho quá trình build và lấy chúng như thế nào. Tuy nhiên, đã đến lúc làm một số ví dụ để hiểu rõ cách dùng nó.
 

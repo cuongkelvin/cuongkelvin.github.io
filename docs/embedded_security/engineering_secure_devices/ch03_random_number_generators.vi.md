@@ -6,7 +6,7 @@ Tính ngẫu nhiên là đối trọng tự nhiên của tính tất định. Tr
 
 Một số người lập luận rằng tính ngẫu nhiên thực sự chỉ có trong các quá trình quantum-mechanical (và họ có thể đúng), nhưng các thí nghiệm lượng tử thường khó thực hiện bên trong một chip complementary metal–oxide semiconductor (CMOS) tiêu chuẩn. Mặt khác, nhiều ứng dụng bảo mật tuyệt đối đòi hỏi một nguồn số ngẫu nhiên để đạt được mức bảo vệ dự định của chúng.
 
-Chương này bắt đầu với các ứng dụng đòi hỏi tính ngẫu nhiên để được coi là an toàn. Nó giới thiệu một cách phổ biến để tạo ra tính ngẫu nhiên bên trong một vi mạch và ý tưởng đằng sau *true randomness* (tính ngẫu nhiên thực sự). Ngoài ra, tôi giải thích khái niệm *pseudorandomness* (giả ngẫu nhiên) và tại sao nó cần thiết cho các kịch bản thực tế. Cuối cùng, tôi cung cấp ba công cụ đơn giản bạn có thể dùng để đánh giá các tập số ngẫu nhiên nhằm tìm ra các lỗi hiện thực khả dĩ.
+Chương này bắt đầu với các ứng dụng đòi hỏi tính ngẫu nhiên để được coi là an toàn. Nó giới thiệu một cách phổ biến để tạo ra tính ngẫu nhiên bên trong một vi mạch và ý tưởng đằng sau *true randomness* (tính ngẫu nhiên thực sự). Ngoài ra, tôi giải thích khái niệm *pseudorandomness* (giả ngẫu nhiên) và tại sao nó cần thiết cho các kịch bản thực tế. Cuối cùng, tôi cung cấp ba công cụ đơn giản bạn có thể dùng để đánh giá các tập số ngẫu nhiên nhằm tìm ra các lỗi triển khai khả dĩ.
 
 <a id="ch00lev1_27"></a>
 
@@ -52,9 +52,9 @@ Bằng mắt thường, chúng ta có thể thấy rằng [Hình 3-2b](#ch03fig0
 
 ## True Random Number Generator
 
-Nhiệm vụ chính của một *true random number generator (TRNG)*, đôi khi còn được gọi là *nondeterministic random bit generator (NRBG)*, không gì khác hơn là tạo ra tính ngẫu nhiên “thực sự.” Chúng ta có thể hiện thực một *entropy source* (nguồn entropy) như <a id="page_54"></a>được mô tả trong *Special Publication 800-90B* của NIST, thực hiện các thí nghiệm (ở thang vi mô) và xuất kết quả của chúng thành các bit ngẫu nhiên để đạt được tính ngẫu nhiên thực sự. Một cách ẩn dụ, hãy tưởng tượng một người tí hon cỡ nano đang tung đồng xu đều đặn và điều khiển các transistor theo kết quả sấp hay ngửa.
+Nhiệm vụ chính của một *true random number generator (TRNG)*, đôi khi còn được gọi là *nondeterministic random bit generator (NRBG)*, không gì khác hơn là tạo ra tính ngẫu nhiên “thực sự.” Chúng ta có thể triển khai một *entropy source* (nguồn entropy) như <a id="page_54"></a>được mô tả trong *Special Publication 800-90B* của NIST, thực hiện các thí nghiệm (ở thang vi mô) và xuất kết quả của chúng thành các bit ngẫu nhiên để đạt được tính ngẫu nhiên thực sự. Một cách ẩn dụ, hãy tưởng tượng một người tí hon cỡ nano đang tung đồng xu đều đặn và điều khiển các transistor theo kết quả sấp hay ngửa.
 
-Các nguồn entropy vật lý có thể là việc truyền photon qua một tấm gương semi-transparent, việc quan sát một quá trình phân rã nguyên tử phóng xạ, hay thậm chí một bức tường đèn dung nham (*[https://blog.cloudflare.com/randomness-101-lavarand-in-production](https://blog.cloudflare.com/randomness-101-lavarand-in-production)*). Tuy nhiên, tất cả những ý tưởng này đều khó hiện thực trong các thiết kế CMOS, nghĩa là các nhà sản xuất chip thường dựa vào các hiệu ứng vật lý liên quan đến nhiễu nhiệt và nhiễu điện tử có sẵn trong IC.
+Các nguồn entropy vật lý có thể là việc truyền photon qua một tấm gương semi-transparent, việc quan sát một quá trình phân rã nguyên tử phóng xạ, hay thậm chí một bức tường đèn dung nham (*[https://blog.cloudflare.com/randomness-101-lavarand-in-production](https://blog.cloudflare.com/randomness-101-lavarand-in-production)*). Tuy nhiên, tất cả những ý tưởng này đều khó triển khai trong các thiết kế CMOS, nghĩa là các nhà sản xuất chip thường dựa vào các hiệu ứng vật lý liên quan đến nhiễu nhiệt và nhiễu điện tử có sẵn trong IC.
 
 <a id="ch00lev2_32"></a>
 
@@ -68,7 +68,7 @@ Một mạch phổ biến để trích xuất và tích lũy nhiễu như vậy 
 
 Giả sử đầu vào của inverter ngoài cùng bên trái là *high*, đầu ra của nó sẽ là *low*, đầu ra của inverter thứ hai sẽ là *high*, và tín hiệu đầu ra cuối cùng lại là *low*. Đưa đầu ra cuối cùng trở lại đường đầu vào đầu tiên dẫn đến một sự không khớp, khiến mọi inverter thay đổi đầu ra của chúng tương ứng. Như bạn có lẽ đã để ý, mạch ổn định này sẽ không bao giờ đứng yên mà sẽ dao động ở một tần số nhất định.
 
-Trong một thế giới hoàn hảo, tín hiệu đầu ra của RO sẽ hoàn toàn tất định, và tần số dao động của nó cũng vậy. Tuy nhiên, trong thực tế, hành vi phụ thuộc vào các đặc tính vật lý của hiện thực và trạng thái vật lý mà nó đang ở. Cả hai dẫn đến *jitter* trong tín hiệu RO, điều này đến lượt nó làm cho tần số thay đổi, đôi khi cao hơn một chút, đôi khi thấp hơn một chút. Nói ngắn gọn, tín hiệu và tần số của nó chịu ảnh hưởng của nhiễu. Mặc dù chúng ta vẫn có thể dự đoán một phần hành vi của RO, một số đặc tính thực sự bắt nguồn từ tính ngẫu nhiên. Trong nhiều trường hợp, đây là bước đầu tiên hướng tới tính ngẫu nhiên “thực sự” trong vi mạch.
+Trong một thế giới hoàn hảo, tín hiệu đầu ra của RO sẽ hoàn toàn tất định, và tần số dao động của nó cũng vậy. Tuy nhiên, trong thực tế, hành vi phụ thuộc vào các đặc tính vật lý của bản triển khai và trạng thái vật lý mà nó đang ở. Cả hai dẫn đến *jitter* trong tín hiệu RO, điều này đến lượt nó làm cho tần số thay đổi, đôi khi cao hơn một chút, đôi khi thấp hơn một chút. Nói ngắn gọn, tín hiệu và tần số của nó chịu ảnh hưởng của nhiễu. Mặc dù chúng ta vẫn có thể dự đoán một phần hành vi của RO, một số đặc tính thực sự bắt nguồn từ tính ngẫu nhiên. Trong nhiều trường hợp, đây là bước đầu tiên hướng tới tính ngẫu nhiên “thực sự” trong vi mạch.
 
 Vì một oscillator đơn lẻ chỉ cung cấp “một chút” entropy, nhiều oscillator thường được kết hợp để tạo ra một TRNG. [Hình 3-4](#ch03fig04) cho thấy một cách đơn giản mà các tín hiệu oscillator này có thể được lấy mẫu bởi các flip-flops, được kết hợp bằng một phép XOR, rồi được lấy mẫu lần nữa để thu được một bit ngẫu nhiên duy nhất có entropy cao.
 
@@ -84,7 +84,7 @@ Tuy nhiên, trong các thiết bị thương mại, chúng ta khó có thể mô
 
 Tình trạng hoạt động của entropy source *nên được cung cấp* cho người dùng TRNG vì cần thông báo cho hệ thống trong trường hợp entropy source không hoạt động. Nếu không, thiết bị có thể dựa vào các số ngẫu nhiên mà thực chất toàn là số không. Do đó, đối với các TRNG high-quality, ít nhất ba thủ tục kiểm tra giám sát chức năng đúng của entropy source của chúng:
 
-**Startup test** Một số entropy source phải chạy thành công qua một giai đoạn khởi tạo để tạo ra các bit ngẫu nhiên high-quality. Ví dụ, đối với các mạch oscillator-based, sự dao động dự định phải khởi động và không bị kẹt trong trạng thái non-oscillating. Do đó, TRNG phải hiện thực một startup test giám sát cẩn thận giai đoạn khởi động của entropy source và báo lỗi nếu nó thất bại.
+**Startup test** Một số entropy source phải chạy thành công qua một giai đoạn khởi tạo để tạo ra các bit ngẫu nhiên high-quality. Ví dụ, đối với các mạch oscillator-based, sự dao động dự định phải khởi động và không bị kẹt trong trạng thái non-oscillating. Do đó, TRNG phải triển khai một startup test giám sát cẩn thận giai đoạn khởi động của entropy source và báo lỗi nếu nó thất bại.
 
 **Total failure test** Các ảnh hưởng môi trường, như thay đổi nhiệt độ, điện áp nguồn, hay các cuộc tấn công có chủ đích, có thể dẫn đến việc đột ngột mất chức năng đúng của một entropy source. Total failure test theo dõi các bit đầu ra của entropy source để phát hiện những sự kiện như vậy và phát ra cảnh báo khi chúng xảy ra.
 
@@ -96,7 +96,7 @@ Mặc dù TRNG là cách duy nhất để tạo ra tính ngẫu nhiên “thực
 
 ## Pseudorandom Number Generator
 
-Các *pseudorandom number generator (PRNG)* là kiểu ngược lại của TRNG và còn được gọi là *deterministic random bit generator (DRBG)* vì, trái với TRNG, hành vi của chúng hoàn toàn tất định và chúng không chứa entropy source. Cả hai đặc tính đều là ưu điểm của PRNG vì chúng làm cho PRNG đáng tin cậy và bền vững trước các tác động môi trường, đồng thời cho phép các hiện thực high-speed.
+Các *pseudorandom number generator (PRNG)* là kiểu ngược lại của TRNG và còn được gọi là *deterministic random bit generator (DRBG)* vì, trái với TRNG, hành vi của chúng hoàn toàn tất định và chúng không chứa entropy source. Cả hai đặc tính đều là ưu điểm của PRNG vì chúng làm cho PRNG đáng tin cậy và bền vững trước các tác động môi trường, đồng thời cho phép các bản triển khai high-speed.
 
 Các yêu cầu then chốt đối với thuật toán PRNG là *backtracking resistance* và *prediction resistance*. Cả hai đều giả định rằng kẻ tấn công đã có quyền truy cập vào state (đầu ra) hiện tại của một PRNG. Yêu cầu thứ nhất khi đó đòi hỏi đối thủ không thể suy ra bất kỳ giá trị state trước đó nào từ thông tin này, trong khi yêu cầu thứ hai đòi hỏi kẻ tấn công không thể dự đoán các giá trị đầu ra trong tương lai của thuật toán PRNG. Những tuyên bố này có thể nhắc bạn rằng hash function là các hàm one-way hay rằng việc mã hóa bằng block cipher không thể bị đảo ngược nếu không có key tương ứng—và bạn sẽ đúng. Những thuật toán này khá phù hợp cho nhiệm vụ đang xét.
 
@@ -110,7 +110,7 @@ Có thể bạn đã nghe về các linear feedback shift register (LFSR) và PR
 
 Ngoài việc lựa chọn vững chắc một thuật toán PRNG, *seeding* là một trong những phần quan trọng nhất của việc dùng PRNG. Với seeding, một PRNG được khởi tạo bằng dữ liệu có đủ entropy để đáp ứng mục tiêu bảo mật mong muốn. Ví dụ, nếu yêu cầu security level 128-bit, PRNG phải <a id="page_57"></a>được seed bằng một chuỗi bit có ít nhất 128 bit entropy. Ngoài ra, thông tin này phải được coi là bí mật và không bao giờ được tiết lộ cho kẻ tấn công.
 
-Tùy chọn, chúng ta có thể hiện thực việc *reseeding* thường xuyên, nghĩa là entropy pool của một instance PRNG được cập nhật bằng entropy “mới.” Hơn nữa, chúng ta có thể cá nhân hóa việc khởi tạo PRNG bằng cách thêm một giá trị duy nhất như số serial của thiết bị, một nonce hay một timestamp. Tuy nhiên, hãy cẩn thận, vì dữ liệu bổ sung này luôn được coi là *hoàn toàn không có entropy*, vì nó có thể được công khai mà không làm tổn hại bảo mật.
+Tùy chọn, chúng ta có thể triển khai việc *reseeding* thường xuyên, nghĩa là entropy pool của một instance PRNG được cập nhật bằng entropy “mới.” Hơn nữa, chúng ta có thể cá nhân hóa việc khởi tạo PRNG bằng cách thêm một giá trị duy nhất như số serial của thiết bị, một nonce hay một timestamp. Tuy nhiên, hãy cẩn thận, vì dữ liệu bổ sung này luôn được coi là *hoàn toàn không có entropy*, vì nó có thể được công khai mà không làm tổn hại bảo mật.
 
 <a id="ch00lev1_31"></a>
 
@@ -148,15 +148,15 @@ Trong case study này, tôi phân tích các tính năng RNG phần cứng của
 
 ### *RNG phần cứng và entropy source*
 
-Xem *Reference Manual RM0436* của ST cho các thiết bị STM32MP157F, có rất nhiều thông tin về RNG được tích hợp. Ở đầu phần tương ứng, ST viết rằng RNG được hiện thực có thể được dùng làm cơ sở cho một cấu trúc DRBG NIST-compliant và rằng nó đã được kiểm thử thành công với bộ test AIS-32 của Văn phòng Liên bang Đức về An ninh Thông tin (BSI).
+Xem *Reference Manual RM0436* của ST cho các thiết bị STM32MP157F, có rất nhiều thông tin về RNG được tích hợp. Ở đầu phần tương ứng, ST viết rằng RNG được triển khai có thể được dùng làm cơ sở cho một cấu trúc DRBG NIST-compliant và rằng nó đã được kiểm thử thành công với bộ test AIS-32 của Văn phòng Liên bang Đức về An ninh Thông tin (BSI).
 
 > **CẢNH BÁO**
 >
-> *Hãy cẩn thận, vì bản thân RNG được hiện thực không tương đương với một NIST DRBG. Một phần sau của reference manual nói rằng một PRNG được phê duyệt phải được thêm vào bên trên TRNG này nếu cần một DRBG NIST-compliant với security level 128-bit.*
+> *Hãy cẩn thận, vì bản thân RNG được triển khai không tương đương với một NIST DRBG. Một phần sau của reference manual nói rằng một PRNG được phê duyệt phải được thêm vào bên trên TRNG này nếu cần một DRBG NIST-compliant với security level 128-bit.*
 
-Nhìn kỹ hơn vào manual, bạn sẽ đọc thấy rằng TRNG được hiện thực dùng hai nguồn nhiễu analog, và mỗi nguồn chứa ba RO free-running được XOR để trộn đầu ra của chúng. Kết quả XOR sau đó được lấy mẫu bởi một tín hiệu clock chuyên dụng và được hậu xử lý để loại bỏ độ lệch khả dĩ của các bit thô. Hơn nữa, một giai đoạn conditioning “tăng tốc độ entropy,” nhưng quá trình đó không được mô tả chi tiết hơn. Đầu ra cuối cùng chứa 128 bit dữ liệu ngẫu nhiên được cung cấp cho Advanced High-performance Bus (AHB) 32-bit qua một buffer first-in, first-out (FIFO).
+Nhìn kỹ hơn vào manual, bạn sẽ đọc thấy rằng TRNG được triển khai dùng hai nguồn nhiễu analog, và mỗi nguồn chứa ba RO free-running được XOR để trộn đầu ra của chúng. Kết quả XOR sau đó được lấy mẫu bởi một tín hiệu clock chuyên dụng và được hậu xử lý để loại bỏ độ lệch khả dĩ của các bit thô. Hơn nữa, một giai đoạn conditioning “tăng tốc độ entropy,” nhưng quá trình đó không được mô tả chi tiết hơn. Đầu ra cuối cùng chứa 128 bit dữ liệu ngẫu nhiên được cung cấp cho Advanced High-performance Bus (AHB) 32-bit qua một buffer first-in, first-out (FIFO).
 
-Về việc giám sát liên tục các nguồn nhiễu, ST đã hiện thực một repetition count test. Ví dụ, một lỗi được báo nếu một nguồn nhiễu xuất ra hơn 64 bit có cùng giá trị hay 32 lần lặp lại cùng một mẫu 2-bit. Một status register có thể truy cập qua AHB cho thấy các lỗi đã xảy ra.
+Về việc giám sát liên tục các nguồn nhiễu, ST đã triển khai một repetition count test. Ví dụ, một lỗi được báo nếu một nguồn nhiễu xuất ra hơn 64 bit có cùng giá trị hay 32 lần lặp lại cùng một mẫu 2-bit. Một status register có thể truy cập qua AHB cho thấy các lỗi đã xảy ra.
 
 Tin tốt ở điểm này là vi mạch được chọn cung cấp một RNG phần cứng. Như thường lệ, việc đánh giá chất lượng của module này đối với người dùng là khó, nhưng nếu chúng ta tin tưởng một nhà sản xuất và năng lực bảo mật của họ, RNG phần cứng này có thể là một asset có giá trị.
 
@@ -209,9 +209,9 @@ Các bài kiểm tra này bắt nguồn từ tài liệu yêu cầu cryptography
 
 ### *Architecture RNG của Linux*
 
-Giống như mọi OS lớn khác, Linux có khái niệm RNG và hiện thực PRNG riêng. Nó được giới thiệu lần đầu năm 1994 và, vào thời điểm đó, architecture của nó dựa trên các thao tác SHA-1 vì các thuật toán mã hóa mạnh nằm trong diện hạn chế xuất khẩu của Mỹ.
+Giống như mọi OS lớn khác, Linux có khái niệm RNG và bản triển khai PRNG riêng. Nó được giới thiệu lần đầu năm 1994 và, vào thời điểm đó, architecture của nó dựa trên các thao tác SHA-1 vì các thuật toán mã hóa mạnh nằm trong diện hạn chế xuất khẩu của Mỹ.
 
-Tuy nhiên, kể từ phiên bản 5.17 của Linux kernel, SHA-1 đã bị loại bỏ hoàn toàn khỏi code. Các instance PRNG giờ dựa trên cipher ChaCha20, trong khi hàm nén của *entropy pool* được hiện thực bằng thao tác hash-update của *BLAKE2s*, một hash function cũng dựa trên ChaCha. Phiên bản 5.18 đưa vào nhiều cải tiến bổ sung khác cho RNG của Linux (ví dụ, liên quan đến boot-time entropy).
+Tuy nhiên, kể từ phiên bản 5.17 của Linux kernel, SHA-1 đã bị loại bỏ hoàn toàn khỏi code. Các instance PRNG giờ dựa trên cipher ChaCha20, trong khi hàm nén của *entropy pool* được triển khai bằng thao tác hash-update của *BLAKE2s*, một hash function cũng dựa trên ChaCha. Phiên bản 5.18 đưa vào nhiều cải tiến bổ sung khác cho RNG của Linux (ví dụ, liên quan đến boot-time entropy).
 
 <a id="page_60"></a>Entropy pool là một memory buffer nội bộ 256-bit thu thập dữ liệu từ một tập các nguồn nhiễu và được dùng để cấp cho instance cơ sở của một PRNG ChaCha20. Nếu có một RNG phần cứng trên nền tảng đang xét, như chúng ta đã thấy với thiết bị STM32MP157F, entropy mà nó cung cấp có thể được tích hợp vào entropy pool thông qua interface `add_hwgenerator_randomness`. Ước lượng lượng entropy của nó phụ thuộc vào giá trị chất lượng entropy được cung cấp trong code driver của nó. Với thiết bị của tôi, giá trị đó được cho là 900, nghĩa là mỗi bit RNG cung cấp một lượng entropy khoảng 900/1,024 = 0.879 bit.
 
@@ -348,7 +348,7 @@ Cuối cùng, case study này đã minh họa sự đa dạng của các lớp p
 
 Nếu bạn chịu trách nhiệm phát triển và kiểm thử một thiết kế RNG mới, bạn sẽ muốn dùng nhiều thuật toán phân tích thống kê khác nhau như được mô tả trong *Special Publication 800-22* của NIST hay được cung cấp bởi bộ Dieharder, nhưng chỉ rất ít người trên hành tinh này thực sự thiết kế RNG mới.
 
-Tuy nhiên, nhiều người *dùng và xử lý* số ngẫu nhiên, điều có thể dẫn đến các lỗi hiện thực thực tế, đặc biệt ở mức ứng dụng. Một số lỗi này có thể được tìm ra bằng cách áp dụng các công cụ tương đối đơn giản. Case study này giải thích hai cách tiếp cận như vậy và minh họa cách phát hiện các vấn đề phổ biến bằng chúng.
+Tuy nhiên, nhiều người *dùng và xử lý* số ngẫu nhiên, điều có thể dẫn đến các lỗi triển khai thực tế, đặc biệt ở mức ứng dụng. Một số lỗi này có thể được tìm ra bằng cách áp dụng các công cụ tương đối đơn giản. Case study này giải thích hai cách tiếp cận như vậy và minh họa cách phát hiện các vấn đề phổ biến bằng chúng.
 
 <a id="ch00lev2_41"></a>
 
@@ -460,7 +460,7 @@ Trong một số trường hợp, cần giới hạn không gian đầu ra của
 
 Đôi khi chúng ta phải dựa vào các ứng dụng là hộp đen. Chúng ta không thể đánh giá phần bên trong của phần mềm, càng không thể đánh giá chất lượng xử lý số ngẫu nhiên. Tuy nhiên, rất có thể một ứng dụng khởi tạo PRNG riêng của nó, có lẽ vì lý do performance hay để dễ dùng. Có thể nó thậm chí được seed bởi một RNG mạnh OS-provided. Tuy nhiên, nếu PRNG tùy chỉnh có thiết kế yếu, các vấn đề bảo mật có thể phát sinh.
 
-Cho test case này, tôi cố ý hiện thực một PRNG yếu. Về cơ bản nó là một bộ đếm 16-bit đã được sửa đổi, được seed bởi RNG của Linux. Nó không hợp lý lắm nhưng cũng không hoàn toàn phi thực tế; developer có thể rất sáng tạo. Như trong trường hợp đầu tiên, tôi trích xuất 1MB dữ liệu kiểm thử từ instance PRNG này và vẽ phân phối byte của nó như được thể hiện trong [Hình 3-7](#ch03fig07). Nó cho thấy một phân phối hoàn hảo. Mặc dù điều đó có thể đã đáng ngờ, nó không trực tiếp chỉ ra một điểm yếu.
+Cho test case này, tôi cố ý triển khai một PRNG yếu. Về cơ bản nó là một bộ đếm 16-bit đã được sửa đổi, được seed bởi RNG của Linux. Nó không hợp lý lắm nhưng cũng không hoàn toàn phi thực tế; developer có thể rất sáng tạo. Như trong trường hợp đầu tiên, tôi trích xuất 1MB dữ liệu kiểm thử từ instance PRNG này và vẽ phân phối byte của nó như được thể hiện trong [Hình 3-7](#ch03fig07). Nó cho thấy một phân phối hoàn hảo. Mặc dù điều đó có thể đã đáng ngờ, nó không trực tiếp chỉ ra một điểm yếu.
 
 <a id="ch03fig07"></a>![](images/03fig07.jpg)
 
@@ -487,7 +487,7 @@ Hai trong ba công cụ nén đã giảm kích thước file đi hơn 12 lần. 
 
 Tính ngẫu nhiên là một con quái vật khó nhằn. Tuy nhiên, sau khi đọc chương này, hẳn đã rõ rằng tính ngẫu nhiên là tuyệt đối cần thiết cho bảo mật và nó xứng đáng được xem xét cẩn thận đối với các thành phần phần cứng và phần mềm liên quan.
 
-Tôi đã giải thích một số điều cơ bản về entropy source trong vi mạch CMOS và cách chúng tạo ra tính ngẫu nhiên “thực sự” từ nhiễu—ví dụ, nhiễu có trong các mạch dao động. Hơn nữa, tôi đã thảo luận nhu cầu về PRNG và các thuộc tính có lợi của chúng như hành vi đáng tin cậy và cung cấp dữ liệu high-speed. Cả TRNG lẫn PRNG đều liên quan và nên được hiện thực kết hợp để xây dựng một RNG an toàn và đáng tin cậy cho embedded system.
+Tôi đã giải thích một số điều cơ bản về entropy source trong vi mạch CMOS và cách chúng tạo ra tính ngẫu nhiên “thực sự” từ nhiễu—ví dụ, nhiễu có trong các mạch dao động. Hơn nữa, tôi đã thảo luận nhu cầu về PRNG và các thuộc tính có lợi của chúng như hành vi đáng tin cậy và cung cấp dữ liệu high-speed. Cả TRNG lẫn PRNG đều liên quan và nên được triển khai kết hợp để xây dựng một RNG an toàn và đáng tin cậy cho embedded system.
 
 Trong case study đầu tiên, tôi đã đi qua các lớp ngẫu nhiên trong một hệ thống real-world—bắt đầu từ các nguồn nhiễu vật lý được tích hợp trong các thiết bị STM32MP157F, đến việc tích hợp chúng trong Linux kernel, đến architecture phức tạp của chính RNG của Linux. Cuối cùng, tôi bổ sung rằng ngay cả ở mức ứng dụng, việc xử lý sai RNG và dữ liệu của chúng có thể dẫn đến điểm yếu. Nếu bạn quan tâm đến chi tiết của RNG Linux và sự phát triển của chúng theo thời gian, hãy tham khảo các tài liệu phân tích RNG Linux định kỳ từ BSI của Đức.
 

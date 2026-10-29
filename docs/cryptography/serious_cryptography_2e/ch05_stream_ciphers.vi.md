@@ -40,7 +40,7 @@ Hai cách tiếp cận này định nghĩa kiến trúc high-level của stream 
 
 ## Các stream cipher Hardware-Oriented
 
-Khi các cryptographer nói về hardware, ý họ là application-specific integrated circuit (ASIC), programmable logic device (PLD) và field-programmable gate array (FPGA). Một implementation hardware của cipher là một mạch điện tử hiện thực cryptographic algorithm ở mức bit và không thể dùng cho việc gì khác; nói cách khác, mạch đó là hardware chuyên dụng. Mặt khác, các implementation software của cryptographic algorithm chỉ đơn giản cho bộ vi xử lý biết cần thực thi những instruction nào để chạy algorithm. Những instruction này thao tác trên byte hoặc word rồi gọi tới các phần mạch điện tử hiện thực các phép toán general-purpose như phép cộng và phép nhân. Software làm việc với byte hoặc word 32 hoặc 64 bit, trong khi hardware làm việc với bit. Những stream cipher đầu tiên làm việc với bit để tránh các phép toán phức tạp theo word và nhờ đó hiệu quả hơn trong hardware, nền tảng đích của chúng vào thời đó.
+Khi các cryptographer nói về hardware, ý họ là application-specific integrated circuit (ASIC), programmable logic device (PLD) và field-programmable gate array (FPGA). Một implementation hardware của cipher là một mạch điện tử triển khai cryptographic algorithm ở mức bit và không thể dùng cho việc gì khác; nói cách khác, mạch đó là hardware chuyên dụng. Mặt khác, các implementation software của cryptographic algorithm chỉ đơn giản cho bộ vi xử lý biết cần thực thi những instruction nào để chạy algorithm. Những instruction này thao tác trên byte hoặc word rồi gọi tới các phần mạch điện tử triển khai các phép toán general-purpose như phép cộng và phép nhân. Software làm việc với byte hoặc word 32 hoặc 64 bit, trong khi hardware làm việc với bit. Những stream cipher đầu tiên làm việc với bit để tránh các phép toán phức tạp theo word và nhờ đó hiệu quả hơn trong hardware, nền tảng đích của chúng vào thời đó.
 
 Stream cipher chủ yếu được dùng cho các implementation hardware vì chúng rẻ hơn block cipher. Chúng cần ít memory hơn và ít cổng logic hơn block cipher, và do đó chiếm diện tích nhỏ hơn trên mạch tích hợp, giúp giảm chi phí chế tạo. Ví dụ, nếu tính theo gate-equivalents, thước đo diện tích tiêu chuẩn cho mạch tích hợp, bạn có thể tìm thấy những stream cipher chiếm ít hơn 1,000 gate-equivalents; ngược lại, các block cipher software-oriented điển hình cần ít nhất 10,000 gate-equivalents, khiến crypto đắt hơn một bậc độ lớn so với khi dùng stream cipher.
 
@@ -48,7 +48,7 @@ Tuy nhiên, ngày nay block cipher không còn đắt hơn stream cipher nữa�
 
 Trong mục tiếp theo, tôi sẽ giải thích cơ chế cơ bản đằng sau các hardware stream cipher, gọi là feedback shift register (FSR). Gần như mọi hardware stream cipher đều dựa vào FSR theo cách này hay cách khác, dù đó là cipher A5/1 được dùng trong điện thoại di động 2G hay cipher Grain-128a gần đây hơn.
 
-> **LƯU Ý** Block cipher tiêu chuẩn đầu tiên, Data Encryption Standard (DES), được tối ưu cho hardware chứ không phải software. Khi chính phủ Hoa Kỳ chuẩn hóa DES vào những năm 1970, phần lớn các ứng dụng đích là các implementation hardware. Vì vậy, không có gì ngạc nhiên khi các S-boxes trong DES nhỏ và tính nhanh khi được hiện thực như một mạch logic trong hardware nhưng lại kém hiệu quả trong software. Khác với DES, Advanced Encryption Standard (AES) hiện nay làm việc với byte và do đó hiệu quả hơn DES trong software.
+> **LƯU Ý** Block cipher tiêu chuẩn đầu tiên, Data Encryption Standard (DES), được tối ưu cho hardware chứ không phải software. Khi chính phủ Hoa Kỳ chuẩn hóa DES vào những năm 1970, phần lớn các ứng dụng đích là các implementation hardware. Vì vậy, không có gì ngạc nhiên khi các S-boxes trong DES nhỏ và tính nhanh khi được triển khai như một mạch logic trong hardware nhưng lại kém hiệu quả trong software. Khác với DES, Advanced Encryption Standard (AES) hiện nay làm việc với byte và do đó hiệu quả hơn DES trong software.
 
 ### Feedback Shift Register (Feedback Shift Registers)
 
@@ -218,7 +218,7 @@ trong đó L<sub>1</sub>, L<sub>2</sub>, . . . , L<sub>128</sub> là các bit c�
 
 ![p126_12](images/ch05_stream_ciphers/p126_12.png)
 
-Function này được chọn cẩn thận để tối đa hóa độ mạnh cryptography đồng thời tối thiểu hóa chi phí hiện thực. Nó có bậc đại số 4 vì số hạng có nhiều biến nhất của nó có bốn biến (cụ thể là N<sub>33</sub>N<sub>35</sub>N<sub>36</sub>N<sub>40</sub>). Hơn nữa, g không thể được xấp xỉ bằng một function tuyến tính vì nó phi tuyến ở mức cao. Ngoài ra, bên cạnh g, Grain-128a XOR bit đi ra từ LFSR để đưa kết quả trở lại làm bit mới ngoài cùng bên phải của NFSR.
+Function này được chọn cẩn thận để tối đa hóa độ mạnh cryptography đồng thời tối thiểu hóa chi phí triển khai. Nó có bậc đại số 4 vì số hạng có nhiều biến nhất của nó có bốn biến (cụ thể là N<sub>33</sub>N<sub>35</sub>N<sub>36</sub>N<sub>40</sub>). Hơn nữa, g không thể được xấp xỉ bằng một function tuyến tính vì nó phi tuyến ở mức cao. Ngoài ra, bên cạnh g, Grain-128a XOR bit đi ra từ LFSR để đưa kết quả trở lại làm bit mới ngoài cùng bên phải của NFSR.
 
 Filter function h là một function phi tuyến khác; nó lấy 9 bit từ NFSR và 7 bit từ LFSR rồi kết hợp chúng theo cách bảo đảm các tính chất cryptography tốt.
 
@@ -300,7 +300,7 @@ Software stream cipher làm việc với byte hoặc word 32- hoặc 64-bit thay
 
 Ngày nay, software stream cipher được quan tâm đáng kể vì một vài lý do. Thứ nhất, vì nhiều thiết bị tích hợp CPU mạnh và hardware đã trở nên rẻ hơn, nhu cầu về các cipher bit-oriented nhỏ đã giảm đi. Ví dụ, hai stream cipher trong tiêu chuẩn truyền thông di động 4G (SNOW3G của châu Âu và ZUC của Trung Quốc) làm việc với word 32-bit chứ không phải bit, khác với A5/1 cũ hơn.
 
-Thứ hai, stream cipher đã trở nên phổ biến hơn trong software trên sự mất mát của block cipher, đặc biệt sau thất bại của padding oracle attack nhắm vào block cipher ở CBC mode. Ngoài ra, stream cipher dễ đặc tả và hiện thực hơn block cipher: thay vì trộn bit message và bit key với nhau, stream cipher chỉ hấp thụ các bit key như một bí mật. Thực tế, một trong những stream cipher phổ biến nhất thực ra là một block cipher đội lốt: AES ở counter mode (CTR).
+Thứ hai, stream cipher đã trở nên phổ biến hơn trong software trên sự mất mát của block cipher, đặc biệt sau thất bại của padding oracle attack nhắm vào block cipher ở CBC mode. Ngoài ra, stream cipher dễ đặc tả và triển khai hơn block cipher: thay vì trộn bit message và bit key với nhau, stream cipher chỉ hấp thụ các bit key như một bí mật. Thực tế, một trong những stream cipher phổ biến nhất thực ra là một block cipher đội lốt: AES ở counter mode (CTR).
 
 Một thiết kế software stream cipher, được dùng bởi SNOW3G và ZUC, sao chép hardware cipher và các FSR của chúng, thay bit bằng byte hoặc word. Nhưng đây không phải là những thiết kế thú vị nhất đối với một cryptographer. Tại thời điểm viết sách này, hai thiết kế được quan tâm nhất là RC4 và Salsa20, được dùng trong rất nhiều hệ thống, dù thực tế là một trong hai đã bị phá hoàn toàn.
 
@@ -368,7 +368,7 @@ Nhưng đây mới là những vấn đề thực sự với thủ thuật nonce
 
 Khai thác những điểm yếu đó đòi hỏi quyền truy cập vào cả ciphertext lẫn keystream—tức là known plaintext hoặc chosen plaintext. Nhưng điều đó đủ dễ: known plaintext xuất hiện khi các frame Wi-Fi đóng gói dữ liệu có header đã biết, và chosen plaintext xuất hiện khi kẻ tấn công đưa vào plaintext đã biết được mã hóa bằng key mục tiêu. Kết cục là các attack hoạt động được trong thực tế, chứ không chỉ trên giấy.
 
-Sau khi những attack đầu tiên nhắm vào WEP xuất hiện năm 2001, các nhà nghiên cứu đã tìm ra những attack nhanh hơn, cần ít ciphertext hơn. Ngày nay, bạn thậm chí có thể tìm thấy các công cụ như aircrack-ng hiện thực toàn bộ attack, từ việc nghe lén mạng (network sniffing) đến cryptanalysis.
+Sau khi những attack đầu tiên nhắm vào WEP xuất hiện năm 2001, các nhà nghiên cứu đã tìm ra những attack nhanh hơn, cần ít ciphertext hơn. Ngày nay, bạn thậm chí có thể tìm thấy các công cụ như aircrack-ng triển khai toàn bộ attack, từ việc nghe lén mạng (network sniffing) đến cryptanalysis.
 
 Sự không an toàn của WEP là do cả những điểm yếu trong RC4, vốn nhận một key one-use duy nhất thay vì một key và một nonce (như ở bất kỳ stream cipher tử tế nào), lẫn những điểm yếu trong chính thiết kế của WEP.
 
@@ -398,7 +398,7 @@ Attack tổng quát hóa được để khôi phục nhiều hơn một byte pla
 
 ### Salsa20
 
-Salsa20 là một cipher software-oriented đơn giản, được tối ưu cho các CPU hiện đại, đã được hiện thực trong rất nhiều protocol và thư viện, cùng với biến thể của nó, ChaCha. Người thiết kế nó, cryptographer đáng kính Daniel J. Bernstein, đã nộp Salsa20 vào cuộc thi eSTREAM năm 2005 và giành được một vị trí trong danh mục software của eSTREAM. Sự đơn giản và tốc độ của Salsa20 đã khiến nó được các developer ưa chuộng.
+Salsa20 là một cipher software-oriented đơn giản, được tối ưu cho các CPU hiện đại, đã được triển khai trong rất nhiều protocol và thư viện, cùng với biến thể của nó, ChaCha. Người thiết kế nó, cryptographer đáng kính Daniel J. Bernstein, đã nộp Salsa20 vào cuộc thi eSTREAM năm 2005 và giành được một vị trí trong danh mục software của eSTREAM. Sự đơn giản và tốc độ của Salsa20 đã khiến nó được các developer ưa chuộng.
 
 Salsa20 là một stream cipher counter-based—nó tạo keystream bằng cách xử lý lặp đi lặp lại một counter được tăng lên cho mỗi block. Như Hình 5-10 cho thấy, core algorithm của Salsa20 biến đổi một block 512-bit bằng một key (K), một nonce (N) và một giá trị counter (Ctr). Sau đó, Salsa20 cộng kết quả vào giá trị ban đầu của block để tạo ra một keystream block. (Nếu algorithm trả về trực tiếp permutation của core làm đầu ra, Salsa20 sẽ hoàn toàn không an toàn vì nó có thể bị đảo ngược. Phép cộng cuối cùng với secret state ban đầu K || N || Ctr làm cho phép biến đổi key-to-keystream-block không khả nghịch.)
 
@@ -514,7 +514,7 @@ Trong attack thực tế nhắm vào Salsa20/8, để xác định lần đoán 
 
 ## Những gì có thể sai (How Things Can Go Wrong)
 
-Đáng tiếc là có nhiều thứ có thể sai với stream cipher, từ những thiết kế mong manh, không an toàn đến những algorithm mạnh nhưng được hiện thực sai. Tôi sẽ tìm hiểu từng loại vấn đề tiềm ẩn trong các mục sau.
+Đáng tiếc là có nhiều thứ có thể sai với stream cipher, từ những thiết kế mong manh, không an toàn đến những algorithm mạnh nhưng được triển khai sai. Tôi sẽ tìm hiểu từng loại vấn đề tiềm ẩn trong các mục sau.
 
 ### Dùng lại nonce (Nonce Reuse)
 
@@ -528,7 +528,7 @@ Một số stream cipher được thiết kế trong những năm 2010 đã cố
 
 Dù bản chất đã yếu, RC4 có thể còn yếu hơn nữa nếu bạn tối ưu hóa implementation của nó một cách mù quáng. Ví dụ, hãy xét một bài dự thi trong Underhanded C Contest năm 2007, một cuộc thi không chính thức nơi các lập trình viên viết code benign-looking nhưng thực ra chứa một function độc hại.
 
-Đây là cách nó hoạt động. Cách ngây thơ để hiện thực dòng swap(S[i], S[j]) trong algorithm của RC4 là làm như sau, như code Python này cho thấy:
+Đây là cách nó hoạt động. Cách ngây thơ để triển khai dòng swap(S[i], S[j]) trong algorithm của RC4 là làm như sau, như code Python này cho thấy:
 
 ```
 buf = S[i]
@@ -544,7 +544,7 @@ y = x ⊕ y
 x = x ⊕ y
 ```
 
-Điều này có tác dụng vì dòng thứ hai đặt y thành x ⊕ y ⊕ y = x, và dòng thứ ba đặt x thành x ⊕ y ⊕ x ⊕ y ⊕ y = y. Dùng thủ thuật này để hiện thực RC4 cho ra implementation trong Listing 5-5 (phỏng theo chương trình của David Wagner và Philippe Biondi nộp cho Underhanded C Contest năm 2007, và có trên mạng tại http://www.underhanded-c.org/_page_id_16.html).
+Điều này có tác dụng vì dòng thứ hai đặt y thành x ⊕ y ⊕ y = x, và dòng thứ ba đặt x thành x ⊕ y ⊕ x ⊕ y ⊕ y = y. Dùng thủ thuật này để triển khai RC4 cho ra implementation trong Listing 5-5 (phỏng theo chương trình của David Wagner và Philippe Biondi nộp cho Underhanded C Contest năm 2007, và có trên mạng tại http://www.underhanded-c.org/_page_id_16.html).
 
 ```
 #define TOBYTE(x) (x) & 255

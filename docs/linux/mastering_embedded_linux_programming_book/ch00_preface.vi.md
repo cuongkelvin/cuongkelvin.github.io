@@ -18,7 +18,7 @@ Chương 3, Tất cả về bootloader, giải thích vai trò của bootloader 
 
 Chương 4, Cấu hình và build kernel, cung cấp thông tin về cách chọn một Linux kernel cho hệ thống nhúng và cấu hình nó cho phần cứng bên trong thiết bị. Chương này cũng đề cập cách port Linux sang phần cứng mới.
 
-Chương 5, Xây dựng root filesystem, giới thiệu những ý tưởng đằng sau phần user space của một bản hiện thực embedded Linux thông qua hướng dẫn step-by-step về cách cấu hình một root filesystem.
+Chương 5, Xây dựng root filesystem, giới thiệu những ý tưởng đằng sau phần user space của một bản triển khai embedded Linux thông qua hướng dẫn step-by-step về cách cấu hình một root filesystem.
 
 Chương 6, Chọn build system, đề cập hai build system embedded Linux thường dùng, Buildroot và The Yocto Project, vốn tự động hóa các bước được mô tả trong bốn chương trước.
 
@@ -30,7 +30,7 @@ Chương 9, Xây dựng chiến lược lưu trữ, bàn về những thách th�
 
 Chương 10, Cập nhật phần mềm ngoài thực địa, xem xét nhiều cách cập nhật phần mềm sau khi thiết bị đã được triển khai, bao gồm cả các bản cập nhật Over-the-Air (OTA) được quản lý hoàn toàn. Các chủ đề chính được bàn đến là độ tin cậy và bảo mật.
 
-Chương 11, Giao tiếp với device driver, mô tả cách các device driver của kernel tương tác với phần cứng bằng cách hiện thực một driver đơn giản. Chương này cũng mô tả các cách khác nhau để gọi device driver từ user space.
+Chương 11, Giao tiếp với device driver, mô tả cách các device driver của kernel tương tác với phần cứng bằng cách triển khai một driver đơn giản. Chương này cũng mô tả các cách khác nhau để gọi device driver từ user space.
 
 Chương 12, Làm prototype với Add-On board, minh họa cách làm prototype phần cứng và phần mềm nhanh chóng bằng một image Debian pre-built cho BeaglePlay cùng với các add-on board ngoại vi của MikroElektronika.
 

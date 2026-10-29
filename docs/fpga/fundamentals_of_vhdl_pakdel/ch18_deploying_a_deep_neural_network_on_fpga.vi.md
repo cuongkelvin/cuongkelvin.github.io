@@ -2,7 +2,7 @@
 
 ## 18.1 Giới thiệu
 
-Trong mục này, chúng ta sẽ triển khai một model deep neural network (DNN) trên FPGA bằng Simulink và Vivado. Trước hết, chúng ta tải một dataset từ Kaggle phù hợp cho việc triển khai DNN, và dùng MATLAB, chúng ta huấn luyện model dựa trên việc cực tiểu hóa cost function. Chúng ta dùng diabetes dataset để dự đoán bệnh nhân có bị tiểu đường hay không dựa trên nhiều tham số input khác nhau. Sau đó, chúng ta hiện thực model DNN đã huấn luyện bằng HDL Coder và tạo code VHDL có thể synthesize. Cuối cùng, dùng Vivado, chúng ta chạy synthesis analysis và simulation để kiểm chứng project VHDL đã thiết kế.
+Trong mục này, chúng ta sẽ triển khai một model deep neural network (DNN) trên FPGA bằng Simulink và Vivado. Trước hết, chúng ta tải một dataset từ Kaggle phù hợp cho việc triển khai DNN, và dùng MATLAB, chúng ta huấn luyện model dựa trên việc cực tiểu hóa cost function. Chúng ta dùng diabetes dataset để dự đoán bệnh nhân có bị tiểu đường hay không dựa trên nhiều tham số input khác nhau. Sau đó, chúng ta triển khai model DNN đã huấn luyện bằng HDL Coder và tạo code VHDL có thể synthesize. Cuối cùng, dùng Vivado, chúng ta chạy synthesis analysis và simulation để kiểm chứng project VHDL đã thiết kế.
 
 ## 18.2 Dataset Kaggle
 
@@ -44,7 +44,7 @@ Neural network có thể được dùng cho rất nhiều loại tác vụ, bao 
 
 Model toán học của một neuron được mô tả trong Hình 18.3.
 
-Trong số hạng w<sub>ki</sub> , k biểu diễn số thứ tự layer và i biểu diễn số thứ tự instance. Chúng ta cũng có phương trình sau.
+Trong số hạng w<sub>ki</sub>, k biểu diễn số thứ tự layer và i biểu diễn số thứ tự instance. Chúng ta cũng có phương trình sau.
 
 ![p0371_eq18_1](images/ch18_deploying_a_deep_neural_network_on_fpga/p0371_eq18_1.png) (18.1)
 
@@ -64,7 +64,7 @@ Sau đó, chúng ta sẽ có phương trình sau.
 
 ![p0372_eq18_3](images/ch18_deploying_a_deep_neural_network_on_fpga/p0372_eq18_3.png) (18.3)
 
-Lưu ý: Trong biểu diễn ma trận của tổng có trọng số u , các weight của các layer nên được sắp xếp thành một vector hàng, còn các input instance nên được sắp xếp thành một vector cột. Khi tổng có trọng số u đã được tính, output của neuron có thể được tính bằng cách đưa u qua activation function, như được minh họa trong phương trình sau.
+Lưu ý: Trong biểu diễn ma trận của tổng có trọng số u, các weight của các layer nên được sắp xếp thành một vector hàng, còn các input instance nên được sắp xếp thành một vector cột. Khi tổng có trọng số u đã được tính, output của neuron có thể được tính bằng cách đưa u qua activation function, như được minh họa trong phương trình sau.
 
 ![p0372_eq18_4](images/ch18_deploying_a_deep_neural_network_on_fpga/p0372_eq18_4.png) (18.4)
 
@@ -224,6 +224,7 @@ p4 = polyfit(x4, y4, degree);
 zf2 = polyval(p2,x2);
 zf3 = polyval(p3,x3);
 zf4 = polyval(p4,x4);
+
 x1 = -10:dx:-3;
 zf1 = zeros(1,length(x1));
 
@@ -269,7 +270,7 @@ p4 =
     0.0713    0.7429
 ```
 
-Ở đây, phần tử đầu tiên biểu diễn hệ số góc, và phần tử thứ hai biểu diễn offset của phương trình đường thẳng. Chúng ta có 0.0713 ≈ 0.072, 0.2571 ≈ 0.22, 0.2094 ≈ 0.21 và 0.7429 ≈ 0.78 trong Phương trình (18.6). Bây giờ, để hiện thực xấp xỉ tuyến tính từng đoạn của hàm sigmoid trong HDL Coder, chúng ta dùng m-file sau (sig_approx2.m).
+Ở đây, phần tử đầu tiên biểu diễn hệ số góc, và phần tử thứ hai biểu diễn offset của phương trình đường thẳng. Chúng ta có 0.0713 ≈ 0.072, 0.2571 ≈ 0.22, 0.2094 ≈ 0.21 và 0.7429 ≈ 0.78 trong Phương trình (18.6). Bây giờ, để triển khai xấp xỉ tuyến tính từng đoạn của hàm sigmoid trong HDL Coder, chúng ta dùng m-file sau (sig_approx2.m).
 
 ```
 clear all; close all; clc
@@ -310,6 +311,7 @@ c1 = fi(0.22,nt);
 
 m2 = fi(0.21,nt);
 c2 = fi(0.5,nt);
+
 m3 = fi(0.072,nt);
 c3 = fi(0.78,nt);
 
@@ -421,6 +423,7 @@ clear all; close all; clc
 
 f = @(x) (exp(x) - exp(-x))./(exp(x) + exp(-x));
 x = linspace(-5,5,200);
+
 for k = 1:length(x)
     y(k) = tanh_pw_HDL(x(k));
 end
@@ -504,6 +507,7 @@ Yout = All_Data(:,end);
 X = mapminmax(Xin');
 Y = mapminmax(Yout',0,1);
 Len = length(Y);
+
 %Training and Testing Data
 Prob = 0.8;
 NTr = round(Prob*Len);
@@ -555,6 +559,7 @@ b1d = net.b{1};
 
 W2d = net.LW{2,1};  % Hidden Layer 1
 b2d = net.b{2};
+
 W3d = net.LW{3,2};  % Output Layer
 b3d = net.b{3};
 
@@ -646,7 +651,7 @@ title('Age');
 xlabel('Years');
 ```
 
-Nếu bỏ comment và chạy m-file (Train_NN_Model.m), các biểu đồ histogram của diabetes dataset sẽ được hiển thị. Ngoài ra, chúng ta đã dùng 80% dữ liệu cho training và 20% cho testing. Neural network gồm một input layer có kích thước bằng số input feature (tám neuron), hidden layer 1 (layer 1) với 3 neuron, hidden layer 2 (layer 2) với bốn neuron, và một output layer (layer 3) với một neuron. Activation function cho layer 1 và layer 2 là tanh (‘tansig’); tuy nhiên, với output layer (layer 3), activation function là sigmoid (‘logsig’). Ngoài ra, chúng ta lưu các tham số neural network đã huấn luyện (weight và bias) vào file “Trained_NN_ Model.mat.” Bây giờ, chúng ta có thể chạy m-file MATLAB (Train_NN_Model.m) và xem cửa sổ huấn luyện neural network, như được thể hiện trong Hình 18.11.
+Nếu bỏ comment và chạy m-file (Train_NN_Model.m), các biểu đồ histogram của diabetes dataset sẽ được hiển thị. Ngoài ra, chúng ta đã dùng 80% dữ liệu cho training và 20% cho testing. Neural network gồm một input layer có kích thước bằng số input feature (tám neuron), hidden layer 1 (layer 1) với 3 neuron, hidden layer 2 (layer 2) với bốn neuron, và một output layer (layer 3) với một neuron. Activation function cho layer 1 và layer 2 là tanh (‘tansig’); tuy nhiên, với output layer (layer 3), activation function là sigmoid (‘logsig’). Ngoài ra, chúng ta lưu các tham số neural network đã huấn luyện (weight và bias) vào file “Trained_NN_Model.mat.” Bây giờ, chúng ta có thể chạy m-file MATLAB (Train_NN_Model.m) và xem cửa sổ huấn luyện neural network, như được thể hiện trong Hình 18.11.
 
 Ngoài ra, model Simulink của feedforward neural network được tạo ra, như được mô tả trong Hình 18.12.
 
@@ -745,6 +750,7 @@ Nếu chạy m-file đó, đoạn text sau được hiển thị trong MATLAB co
 
 ```
 Accuracy_Sim =
+
  70.1299
 ```
 
@@ -786,7 +792,7 @@ ytan = NN_Layer_Tanh_HDL(Bias,Weight,X);
 
 MATLAB function (Hidden_Layer1) được thể hiện trong Hình 18.23.
 
-Code cho function “Convert_Data_to_Fixed_Point” trong m-file MATLAB (Train_NN_ Model.m) như sau.
+Code cho function “Convert_Data_to_Fixed_Point” trong m-file MATLAB (Train_NN_Model.m) như sau.
 
 ```
 function XTest_FixedPoint = Convert_Data_to_Fixed_Point(XFeatures, XTest)
@@ -818,13 +824,7 @@ else
     % ensure
     FL = 1+ceil(-log2(min_fractional)); % 1 is added (manually)
 end
-```
 
-![p0393_32](images/ch18_deploying_a_deep_neural_network_on_fpga/p0393_32.png)
-
-Hình 18.23 MATLAB function (Hidden_Layer1).
-
-```
 % 3. Calculate WL
 % WL = number of bits of the integer part of max value + 1 bit for sign +
 % FL
@@ -843,6 +843,10 @@ fprintf('\nWord Length (WL): %d bits\n', WL);
 fprintf('\nFraction Length (WL): %d bits\n\n\n', FL);
 end
 ```
+
+![p0393_32](images/ch18_deploying_a_deep_neural_network_on_fpga/p0393_32.png)
+
+Hình 18.23 MATLAB function (Hidden_Layer1).
 
 Ngoài ra, code cho function “Convert_Parameters_to_Fixed_Point” trong m-file MATLAB (Train_NN_Model.m) như sau.
 
@@ -968,13 +972,6 @@ function ysig = NN_Layer_Sigmoid_HDL(Bias,Weight,X)
 % X = Instances of input features should be arranged as column vector
 % Bias = It ca be row or column vactor
 % y = It is output vector arranged as column vector containing outputs
-```
-
-![p0396_33](images/ch18_deploying_a_deep_neural_network_on_fpga/p0396_33.png)
-
-Hình 18.24 Thiết kế deep neural network.
-
-```
 % from all neurons of given layer
 % Note: All inputs of this function should be in fixed point format
 
@@ -992,6 +989,10 @@ for k = 1:Nodes
     ysig(k) = y;
 end
 ```
+
+![p0396_33](images/ch18_deploying_a_deep_neural_network_on_fpga/p0396_33.png)
+
+Hình 18.24 Thiết kế deep neural network.
 
 MATLAB function “BinaryPrediction” ở Hình 18.24 được định nghĩa bằng code sau.
 

@@ -54,7 +54,7 @@ Nếu bạn là một phần của một nhóm kỹ thuật tự hào về các 
 
 ## Các chức năng thiết yếu của thiết bị
 
-Nói rằng một cuộc tấn công flooding không được ảnh hưởng đến chức năng của thiết bị thì dễ, nhưng việc hiện thực thực tế các biện pháp bảo vệ đòi hỏi những cân nhắc chi tiết hơn bạn có thể kỳ vọng. Rõ ràng là khả năng giao tiếp có thể bị ảnh hưởng bởi tải thông điệp cao và có thể bị giảm hay thậm chí mất hoàn toàn, điều ảnh hưởng đến mọi tính năng thiết bị phụ thuộc vào dữ liệu nhận được từ các thực thể khác và có thể cả các thao tác cần truyền dữ liệu từ thiết bị của bạn tới các bên tham gia mạng khác. Những tác động này là không thể tránh khỏi từ góc nhìn của thiết bị và đòi hỏi các biện pháp giảm thiểu tương ứng.
+Nói rằng một cuộc tấn công flooding không được ảnh hưởng đến chức năng của thiết bị thì dễ, nhưng việc triển khai thực tế các biện pháp bảo vệ đòi hỏi những cân nhắc chi tiết hơn bạn có thể kỳ vọng. Rõ ràng là khả năng giao tiếp có thể bị ảnh hưởng bởi tải thông điệp cao và có thể bị giảm hay thậm chí mất hoàn toàn, điều ảnh hưởng đến mọi tính năng thiết bị phụ thuộc vào dữ liệu nhận được từ các thực thể khác và có thể cả các thao tác cần truyền dữ liệu từ thiết bị của bạn tới các bên tham gia mạng khác. Những tác động này là không thể tránh khỏi từ góc nhìn của thiết bị và đòi hỏi các biện pháp giảm thiểu tương ứng.
 
 Part 4-2 của tiêu chuẩn công nghiệp IEC 62443 đề cập các yêu cầu bảo mật kỹ thuật cho các linh kiện công nghiệp, và nó bao gồm yêu cầu cụ thể CR 7.1 xử lý việc bảo vệ DoS trên embedded system. Đòi hỏi trung tâm của nó là một thiết bị nên duy trì các *chức năng thiết yếu* (essential function) của nó ngay cả dưới một cuộc tấn công DoS và khi đang hoạt động ở *degraded mode* (chế độ suy giảm). Nếu bạn muốn đáp ứng yêu cầu này, câu hỏi hiển nhiên bạn phải đặt ra trước tiên là, “Các chức năng thiết yếu của thiết bị của tôi thực sự là gì?”
 
@@ -150,7 +150,7 @@ Những cách tiếp cận này nên được xem xét trong quá trình thiết
 
 <a id="ch00lev1_84"></a>
 
-## Các lựa chọn hiện thực hardware-level
+## Các lựa chọn triển khai hardware-level
 
 Architecture phần cứng của một thiết bị định nghĩa các điều kiện tài nguyên tính toán cơ bản của nó. Trong quá trình phát triển, các IC cho nhiều mục đích khác nhau được chọn, bao gồm microcontroller, SoC multicore và FPGA, nhưng cũng cả các chip chuyên dụng như Ethernet PHY xử lý giao tiếp mạng ở tầng physical.
 
@@ -166,11 +166,11 @@ Nếu tính bền vững trước network flooding là một trong những mối
 
 *Hình 10-2: Một architecture với tiền xử lý lưu lượng mạng*
 
-Một ví dụ cụ thể về architecture như vậy là một *communication preprocessor* (bộ tiền xử lý giao tiếp) hiện thực một TCP/IP stack và lo việc xử lý các packet mạng và payload của chúng. Việc truyền dữ liệu liên quan giữa processor chính và đơn vị tiền xử lý được thực hiện qua một interface tốt nhất là đơn giản. Trong trường hợp một cuộc tấn công flooding hay chỉ là tải mạng rất cao vì lý do không rõ, đơn vị giao tiếp có khả năng bị cạn kiệt tài nguyên, nhưng processor ứng dụng phía sau nó sẽ không bị tác động và sẽ có thể thực hiện các chức năng thiết yếu của thiết bị.
+Một ví dụ cụ thể về architecture như vậy là một *communication preprocessor* (bộ tiền xử lý giao tiếp) triển khai một TCP/IP stack và lo việc xử lý các packet mạng và payload của chúng. Việc truyền dữ liệu liên quan giữa processor chính và đơn vị tiền xử lý được thực hiện qua một interface tốt nhất là đơn giản. Trong trường hợp một cuộc tấn công flooding hay chỉ là tải mạng rất cao vì lý do không rõ, đơn vị giao tiếp có khả năng bị cạn kiệt tài nguyên, nhưng processor ứng dụng phía sau nó sẽ không bị tác động và sẽ có thể thực hiện các chức năng thiết yếu của thiết bị.
 
 Việc dùng một *hardware packet filtering unit* (đơn vị lọc packet phần cứng) là ví dụ thứ hai của cách tiếp cận này. Ở đây, network stack vẫn nằm trên đơn vị xử lý chính, và bộ tiền xử lý chỉ được dùng để lọc luồng packet mạng đến network interface của thiết bị. Các quy tắc lọc có thể, ví dụ, bao gồm giới hạn tốc độ để bảo đảm processor ứng dụng của bạn chỉ nhận số lượng packet mà nó có thể xử lý.
 
-Một architecture như vậy có thể được hiện thực bằng các IC mạng cụ thể cung cấp chức năng này, nhưng, tại thời điểm viết sách, những IC này khá hiếm trong embedded system. Đối với các thiết bị có FPGA, bộ điều khiển MAC có thể được hiện thực bằng logic số, theo sau là một core packet-filtering tùy chỉnh trước khi chuyển dữ liệu mạng tới CPU chính.
+Một architecture như vậy có thể được triển khai bằng các IC mạng cụ thể cung cấp chức năng này, nhưng, tại thời điểm viết sách, những IC này khá hiếm trong embedded system. Đối với các thiết bị có FPGA, bộ điều khiển MAC có thể được triển khai bằng logic số, theo sau là một core packet-filtering tùy chỉnh trước khi chuyển dữ liệu mạng tới CPU chính.
 
 > <a id="page_188"></a>**CẢNH BÁO**
 >
@@ -186,7 +186,7 @@ Nếu bền vững số xuất hiện quá muộn trong danh sách yêu cầu v�
 
 *Hình 10-3: Dùng architecture multicore cho tính bền vững*
 
-Ngày càng nhiều SoC cho embedded system hiện thực *asymmetric multiprocessing (AMP)*. Chúng bao gồm một hay nhiều core high-performance dùng để chạy các OS feature-rich, như Linux, và một hay nhiều core nhỏ hơn, ví dụ, vượt trội trong các ứng dụng real-time. Một cách tiếp cận hướng tới tăng tính bền vững có thể là cấp phát các chức năng thiết yếu như task điều khiển cho core real-time chuyên dụng, như được chỉ ra bởi [Hình 10-3](#ch10fig03)a. Các cấu trúc tương tự khả thi trên các SoC kết hợp hard processor với các soft core nằm trong FPGA fabric.
+Ngày càng nhiều SoC cho embedded system triển khai *asymmetric multiprocessing (AMP)*. Chúng bao gồm một hay nhiều core high-performance dùng để chạy các OS feature-rich, như Linux, và một hay nhiều core nhỏ hơn, ví dụ, vượt trội trong các ứng dụng real-time. Một cách tiếp cận hướng tới tăng tính bền vững có thể là cấp phát các chức năng thiết yếu như task điều khiển cho core real-time chuyên dụng, như được chỉ ra bởi [Hình 10-3](#ch10fig03)a. Các cấu trúc tương tự khả thi trên các SoC kết hợp hard processor với các soft core nằm trong FPGA fabric.
 
 Nếu thiết bị của bạn chạy trên một SoC *symmetric multiprocessing (SMP)*—nghĩa là nó có hai, bốn, tám hay thậm chí nhiều core cùng loại hơn—bạn vẫn có các lựa chọn để cải thiện tính bền vững. Architecture trong [Hình 10-3](#ch10fig03)b nhằm tách các task mạng khỏi các chức năng thiết yếu bằng cách gắn các process của chúng vào các core chuyên dụng. Khái niệm này được biết đến là *core pinning*, hay *processor affinity*, và phải được OS của bạn hỗ trợ.
 
@@ -222,7 +222,7 @@ Nhiều thiết bị hiện đại, feature-rich dựa vào các library và cô
 
 #### Tổ hợp OS hypervisor-based
 
-Một số nhà sản xuất muốn kết hợp các ưu điểm real-time của RTOS với nhiều library và khả năng của Linux. Trong những trường hợp này, một lớp trừu tượng khác được đưa vào bên dưới các OS đó: một *hypervisor* đảm nhận nhiệm vụ cấp phát tài nguyên phần cứng và qua đó đóng vai trò quan trọng trong việc tách các chức năng thiết yếu (có lẽ chạy trên một RTOS) khỏi các chức năng hỗ trợ được hiện thực trong Linux. Những thiết lập này làm tăng thêm độ phức tạp của architecture phần mềm sản phẩm của bạn.
+Một số nhà sản xuất muốn kết hợp các ưu điểm real-time của RTOS với nhiều library và khả năng của Linux. Trong những trường hợp này, một lớp trừu tượng khác được đưa vào bên dưới các OS đó: một *hypervisor* đảm nhận nhiệm vụ cấp phát tài nguyên phần cứng và qua đó đóng vai trò quan trọng trong việc tách các chức năng thiết yếu (có lẽ chạy trên một RTOS) khỏi các chức năng hỗ trợ được triển khai trong Linux. Những thiết lập này làm tăng thêm độ phức tạp của architecture phần mềm sản phẩm của bạn.
 
 <a id="ch00lev2_125"></a>
 
@@ -258,15 +258,15 @@ Những vấn đề như vậy có thể được đưa vào ở nhiều giai đ
 
 Thiết kế protocol là một nhiệm vụ phức tạp, nhưng nhiều công ty đi theo con đường này và phát triển định dạng thông điệp và giao tiếp độc quyền riêng của họ. Nếu bạn ở trong tình huống như vậy, hãy bảo đảm làm hết sức để loại bỏ các lỗi logic trong protocol của mình.
 
-Thứ nhất, bạn có thể làm điều đó ở mức khái niệm bằng cách đặt những câu hỏi như: Khoảng hợp lệ cho mỗi giá trị trong thông điệp của chúng ta là gì? Một bên tham gia mạng có thể buộc thiết bị của chúng ta vào một trạng thái không xác định không? Tính hợp lệ và tính hợp lý của các giá trị thông điệp có được xác minh trước khi chúng được dùng không? Thứ hai, việc kiểm thử hiện thực protocol của bạn bằng các thông điệp chỉ đáp ứng một phần đặc tả hay thậm chí cố ý tìm cách thao túng trạng thái thiết bị có thể hữu ích để phát hiện lỗ hổng.
+Thứ nhất, bạn có thể làm điều đó ở mức khái niệm bằng cách đặt những câu hỏi như: Khoảng hợp lệ cho mỗi giá trị trong thông điệp của chúng ta là gì? Một bên tham gia mạng có thể buộc thiết bị của chúng ta vào một trạng thái không xác định không? Tính hợp lệ và tính hợp lý của các giá trị thông điệp có được xác minh trước khi chúng được dùng không? Thứ hai, việc kiểm thử bản triển khai protocol của bạn bằng các thông điệp chỉ đáp ứng một phần đặc tả hay thậm chí cố ý tìm cách thao túng trạng thái thiết bị có thể hữu ích để phát hiện lỗ hổng.
 
 <a id="ch00lev2_127"></a>
 
-### *Hiện thực việc xác thực đầu vào và bên gửi*
+### *Triển khai việc xác thực đầu vào và bên gửi*
 
 Trong nhiều kịch bản embedded system, đối thủ có thể giao tiếp trực tiếp với một thiết bị—ví dụ, qua mạng. Ngay cả khi phần mềm client chính thức *nên* được dùng để tương tác với thiết bị của bạn, kẻ tấn công có thể đơn giản tự tạo các thông điệp bị thao túng của riêng họ, nên thiết bị không nên tin tưởng bất kỳ packet nào đến network interface của chúng.
 
-Các lệnh trọng yếu, như chuyển sang chế độ cập nhật và dừng mọi hoạt động, chỉ nên được cho phép sau khi authenticity của bên gửi đã được xác minh thành công. Do đó, thái độ mặc định của developer nên là *kỳ vọng* đầu vào độc hại và hiện thực các cơ chế xác thực và lọc đầu vào phù hợp tương ứng, dù ở mức firewall hay bên trong ứng dụng xử lý payload của thông điệp.
+Các lệnh trọng yếu, như chuyển sang chế độ cập nhật và dừng mọi hoạt động, chỉ nên được cho phép sau khi authenticity của bên gửi đã được xác minh thành công. Do đó, thái độ mặc định của developer nên là *kỳ vọng* đầu vào độc hại và triển khai các cơ chế xác thực và lọc đầu vào phù hợp tương ứng, dù ở mức firewall hay bên trong ứng dụng xử lý payload của thông điệp.
 
 <a id="ch00lev2_128"></a>
 
@@ -378,7 +378,7 @@ Tóm lại, chúng ta có thể thấy rằng low-latency kernel của bản ph�
 
 ### *Đo trên real-time kernel*
 
-Nếu tính bền vững là một trong những yêu cầu hàng đầu của bạn, bạn có thể muốn tìm một bản phân phối Linux hiện thực một kernel có thể chiếm quyền hoàn toàn để đáp ứng các ràng buộc real-time. May mắn thay, ST cung cấp layer Yocto `meta-st-x-linux-rt` cho thiết bị STM32MP157F. Sau khi thêm nó vào build system của mình, tôi chỉ <a id="page_195"></a>phải đặt `MACHINE=stm32mp15-rt` và re-create (tạo lại) môi trường build trước khi có thể dùng `bitbake` để tạo image `st-image-core` và một Linux kernel với `CONFIG_PREEMPT_RT` được bật.
+Nếu tính bền vững là một trong những yêu cầu hàng đầu của bạn, bạn có thể muốn tìm một bản phân phối Linux triển khai một kernel có thể chiếm quyền hoàn toàn để đáp ứng các ràng buộc real-time. May mắn thay, ST cung cấp layer Yocto `meta-st-x-linux-rt` cho thiết bị STM32MP157F. Sau khi thêm nó vào build system của mình, tôi chỉ <a id="page_195"></a>phải đặt `MACHINE=stm32mp15-rt` và re-create (tạo lại) môi trường build trước khi có thể dùng `bitbake` để tạo image `st-image-core` và một Linux kernel với `CONFIG_PREEMPT_RT` được bật.
 
 Sau khi boot image mới, tôi double-checked (kiểm tra kỹ lại) rằng kernel thực sự cung cấp khả năng real-time. Đầu ra trong [Listing 10-5](#ch10list05) cho thấy tính năng `PREEMPT_RT` điển hình như mong muốn.
 

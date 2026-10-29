@@ -245,22 +245,22 @@ Hãy tưởng tượng một trong hai thread (Thread 1) đi vào vùng code nà
 
 Giờ điều tệ hơn xảy ra: Thread 2 được chọn chạy và đi vào cùng đoạn code. Nó cũng thực thi instruction đầu tiên, lấy giá trị counter và đưa vào eax của mình (hãy nhớ: khi chạy, mỗi thread có register riêng; các register được virtualize bởi code context-switch lưu và khôi phục chúng). Lúc này counter vẫn là 50, nên Thread 2 có eax=50. Tiếp theo, giả sử Thread 2 thực thi hai instruction kế tiếp, tăng eax thêm 1 (thành eax=51), rồi lưu nội dung eax vào counter (address 0x8049a1c). Vì vậy global variable counter giờ có giá trị 51.
 
-|  | (sau instruction) |
-|---|---|
-| OS Thread 1 Thread 2 | PC %eax counter |
-| trước critical section | 100 0 50 |
-| mov 0x8049a1c, %eax | 105 50 50 |
-| add $0x1, %eax | 108 51 50 |
-| interrupt |  |
-| lưu state của T1 |  |
-| khôi phục state của T2 | 100 0 50 |
-| mov 0x8049a1c, %eax | 105 50 50 |
-| add $0x1, %eax | 108 51 50 |
-| mov %eax, 0x8049a1c | 113 51 51 |
-| interrupt |  |
-| lưu state của T2 |  |
-| khôi phục state của T1 | 108 51 51 |
-| mov %eax, 0x8049a1c | 113 51 51 |
+|  |  |  | (sau instruction) |  |  |
+|---|---|---|---|---|---|
+| OS | Thread 1 | Thread 2 | PC | %eax | counter |
+|  | trước critical section |  | 100 | 0 | 50 |
+|  | mov 0x8049a1c, %eax |  | 105 | 50 | 50 |
+|  | add $0x1, %eax |  | 108 | 51 | 50 |
+| interrupt |  |  |  |  |  |
+| lưu state của T1 |  |  |  |  |  |
+| khôi phục state của T2 |  |  | 100 | 0 | 50 |
+|  |  | mov 0x8049a1c, %eax | 105 | 50 | 50 |
+|  |  | add $0x1, %eax | 108 | 51 | 50 |
+|  |  | mov %eax, 0x8049a1c | 113 | 51 | 51 |
+| interrupt |  |  |  |  |  |
+| lưu state của T2 |  |  |  |  |  |
+| khôi phục state của T1 |  |  | 108 | 51 | 51 |
+|  | mov %eax, 0x8049a1c |  | 113 | 51 | 51 |
 
 Hình 26.7: Vấn đề: Nhìn thật gần
 
@@ -346,7 +346,11 @@ Chẳng hạn, tưởng tượng có hai process đang chạy. Giả sử cả h
 
 > MẸO: SỬ DỤNG ATOMIC OPERATION
 >
-> Atomic operation là một trong những kỹ thuật nền tảng mạnh nhất khi xây dựng hệ thống máy tính, từ computer architecture đến concurrent code (đang nghiên cứu ở đây), file system (sắp nghiên cứu), database management system và cả distributed system [L+93]. Ý tưởng biến một chuỗi hành động thành atomic được diễn tả đơn giản bằng “tất cả hoặc không có gì”; phải thể hiện như thể tất cả hành động muốn nhóm lại đều đã xảy ra, hoặc không hành động nào xảy ra, không để lộ state in-between. Đôi khi, việc nhóm nhiều hành động thành một atomic action được gọi là transaction, ý tưởng được phát triển rất chi tiết trong thế giới database và transaction processing [GR92]. Khi khám phá concurrency, chúng ta dùng synchronization primitive để biến chuỗi instruction ngắn thành khối thực thi atomic, nhưng như sẽ thấy, atomicity còn rộng hơn nhiều. Chẳng hạn, file system sử dụng kỹ thuật như journaling hoặc copy-on-write để chuyển đổi state on-disk theo cách atomic, điều thiết yếu để hoạt động đúng khi hệ thống gặp sự cố. Nếu chưa hiểu, đừng lo — bạn sẽ hiểu trong một chương sau.
+> Atomic operation là một trong những kỹ thuật nền tảng mạnh nhất khi xây dựng hệ thống máy tính, từ computer architecture đến concurrent code (đang nghiên cứu ở đây), file system (sắp nghiên cứu), database management system và cả distributed system [L+93].
+>
+> Ý tưởng biến một chuỗi hành động thành atomic được diễn tả đơn giản bằng “tất cả hoặc không có gì”; phải thể hiện như thể tất cả hành động muốn nhóm lại đều đã xảy ra, hoặc không hành động nào xảy ra, không để lộ state in-between. Đôi khi, việc nhóm nhiều hành động thành một atomic action được gọi là transaction, ý tưởng được phát triển rất chi tiết trong thế giới database và transaction processing [GR92].
+>
+> Khi khám phá concurrency, chúng ta dùng synchronization primitive để biến chuỗi instruction ngắn thành khối thực thi atomic, nhưng như sẽ thấy, atomicity còn rộng hơn nhiều. Chẳng hạn, file system sử dụng kỹ thuật như journaling hoặc copy-on-write để chuyển đổi state on-disk theo cách atomic, điều thiết yếu để hoạt động đúng khi hệ thống gặp sự cố. Nếu chưa hiểu, đừng lo — bạn sẽ hiểu trong một chương sau.
 
 .
 

@@ -84,7 +84,7 @@ Tôi mới chỉ gặp một cấu hình như vậy một lần, trong một h�
 
 Linux kernel không quan tâm đến bố cục file và thư mục ngoài việc tồn tại chương trình được chỉ định bởi `init=` hoặc `rdinit=`, vì vậy bạn có thể tự do đặt mọi thứ ở bất cứ đâu. Ví dụ, hãy so sánh bố cục file của một thiết bị chạy Android với bố cục của một bản phân phối Linux desktop. Chúng gần như hoàn toàn khác nhau.
 
-Tuy nhiên, nhiều chương trình mong đợi một số file nhất định ở những vị trí nhất định, và việc các thiết bị dùng bố cục tương tự giúp ích cho các developer chúng ta. Bố cục cơ bản của hầu hết các hệ thống Linux được định nghĩa trong Filesystem Hierarchy Standard (FHS), có tại `https://refspecs.linuxfoundation.org/fhs.shtml`. FHS bao quát mọi bản hiện thực của hệ điều hành Linux, từ lớn nhất đến nhỏ nhất. Các thiết bị nhúng có xu hướng dùng một tập con dựa trên nhu cầu của chúng, nhưng mỗi thiết bị thường bao gồm những thư mục sau:
+Tuy nhiên, nhiều chương trình mong đợi một số file nhất định ở những vị trí nhất định, và việc các thiết bị dùng bố cục tương tự giúp ích cho các developer chúng ta. Bố cục cơ bản của hầu hết các hệ thống Linux được định nghĩa trong Filesystem Hierarchy Standard (FHS), có tại `https://refspecs.linuxfoundation.org/fhs.shtml`. FHS bao quát mọi bản triển khai của hệ điều hành Linux, từ lớn nhất đến nhỏ nhất. Các thiết bị nhúng có xu hướng dùng một tập con dựa trên nhu cầu của chúng, nhưng mỗi thiết bị thường bao gồm những thư mục sau:
 
 - `/bin`: Các chương trình thiết yếu cho mọi người dùng
 
@@ -270,9 +270,9 @@ Shell chỉ là một cách khởi chạy các chương trình khác. Một shel
 
 Nguồn gốc của BusyBox không liên quan gì đến embedded Linux. Bruce Perens bắt đầu project vào năm 1996 cho trình cài đặt Debian để có thể boot Linux từ một đĩa mềm 1.44 MB. Thật trùng hợp, đây cũng là cỡ dung lượng lưu trữ trên các thiết bị cùng thời, vì vậy cộng đồng embedded Linux nhanh chóng đón nhận nó. BusyBox đã nằm ở trung tâm của embedded Linux kể từ đó.
 
-BusyBox được viết từ đầu để thực hiện các chức năng thiết yếu của những tiện ích Linux thiết yếu đó. Các developer tận dụng quy tắc 80/20: 80% hữu ích nhất của một chương trình được hiện thực trong 20% code. Vì vậy, các công cụ BusyBox hiện thực một tập con chức năng của các công cụ tương đương trên desktop, nhưng chúng làm đủ để hữu ích trong hầu hết các trường hợp.
+BusyBox được viết từ đầu để thực hiện các chức năng thiết yếu của những tiện ích Linux thiết yếu đó. Các developer tận dụng quy tắc 80/20: 80% hữu ích nhất của một chương trình được triển khai trong 20% code. Vì vậy, các công cụ BusyBox triển khai một tập con chức năng của các công cụ tương đương trên desktop, nhưng chúng làm đủ để hữu ích trong hầu hết các trường hợp.
 
-Một mẹo khác mà BusyBox dùng là kết hợp tất cả các công cụ vào một binary duy nhất, giúp dễ dàng chia sẻ code giữa chúng. Nó hoạt động như sau: BusyBox là một tập hợp các applet, mỗi applet export hàm `main` của nó ở dạng `<applet>_main`. Ví dụ, lệnh `cat` được hiện thực trong `coreutils/cat.c` và export `cat_main`. Hàm `main` của BusyBox chuyển lời gọi tới applet đúng, dựa trên các đối số command-line.
+Một mẹo khác mà BusyBox dùng là kết hợp tất cả các công cụ vào một binary duy nhất, giúp dễ dàng chia sẻ code giữa chúng. Nó hoạt động như sau: BusyBox là một tập hợp các applet, mỗi applet export hàm `main` của nó ở dạng `<applet>_main`. Ví dụ, lệnh `cat` được triển khai trong `coreutils/cat.c` và export `cat_main`. Hàm `main` của BusyBox chuyển lời gọi tới applet đúng, dựa trên các đối số command-line.
 
 Để đọc một file, bạn có thể khởi chạy BusyBox với tên của applet bạn muốn chạy, theo sau là các đối số mà applet mong đợi:
 
@@ -344,7 +344,7 @@ Giờ hãy xem một lựa chọn thay thế cho Busybox, được gọi là Toy
 
 #### ToyBox – một lựa chọn thay thế cho BusyBox
 
-BusyBox không phải là lựa chọn duy nhất. Còn có ToyBox, mà bạn có thể tìm thấy tại `https://landley.net/toybox/`. Project được bắt đầu bởi Rob Landley, người trước đây là maintainer của BusyBox. ToyBox có cùng mục tiêu với BusyBox nhưng nhấn mạnh hơn vào việc tuân thủ các chuẩn (đặc biệt là POSIX-2008 và LSB 4.1) và ít chú trọng hơn vào khả năng tương thích với các phần mở rộng GNU của các chuẩn đó. ToyBox nhỏ hơn BusyBox, một phần vì nó hiện thực ít applet hơn.
+BusyBox không phải là lựa chọn duy nhất. Còn có ToyBox, mà bạn có thể tìm thấy tại `https://landley.net/toybox/`. Project được bắt đầu bởi Rob Landley, người trước đây là maintainer của BusyBox. ToyBox có cùng mục tiêu với BusyBox nhưng nhấn mạnh hơn vào việc tuân thủ các chuẩn (đặc biệt là POSIX-2008 và LSB 4.1) và ít chú trọng hơn vào khả năng tương thích với các phần mở rộng GNU của các chuẩn đó. ToyBox nhỏ hơn BusyBox, một phần vì nó triển khai ít applet hơn.
 
 License của ToyBox là BSD thay vì GPL v2, khiến nó tương thích với các hệ điều hành có user space BSD-licensed như Android. Vì vậy, ToyBox được đi kèm trên mọi thiết bị Android mới. Kể từ bản phát hành 0.8.3, `Makefile` của Toybox có thể build một hệ thống Linux đầy đủ boot tới dấu nhắc shell khi chỉ được cung cấp source của Linux và ToyBox.
 
@@ -881,7 +881,7 @@ Tạo device node tĩnh bằng `mknod` vất vả và không linh hoạt. Tuy nh
 
 LƯU Ý QUAN TRỌNG
 
-Mặc dù cả `mdev` và `udev` đều tự tạo device node, dễ hơn là cứ để `devtmpfs` làm việc đó và dùng `mdev/udev` như một lớp bên trên để hiện thực chính sách đặt quyền sở hữu và quyền truy cập. Cách tiếp cận `devtmpfs` là cách duy nhất dễ bảo trì để tạo device node trước khi user space khởi động.
+Mặc dù cả `mdev` và `udev` đều tự tạo device node, dễ hơn là cứ để `devtmpfs` làm việc đó và dùng `mdev/udev` như một lớp bên trên để triển khai chính sách đặt quyền sở hữu và quyền truy cập. Cách tiếp cận `devtmpfs` là cách duy nhất dễ bảo trì để tạo device node trước khi user space khởi động.
 
 Sau khi giới thiệu `devtmpfs`, tôi sẽ mô tả cách `mdev` được dùng để gán quyền sở hữu và quyền truy cập cho device node lúc khởi động.
 
@@ -975,7 +975,7 @@ Bạn cũng cần cấu hình một chương trình DHCP client. BusyBox có m�
 
 ### Các thành phần mạng cho glibc
 
-glibc dùng một cơ chế được gọi là name service switch (NSS) để điều khiển cách các tên được phân giải thành số cho mạng và người dùng. Username có thể được phân giải thành UID qua file `/etc/passwd`, và các dịch vụ mạng như HTTP có thể được phân giải thành số cổng dịch vụ qua `/etc/services`. Tất cả điều này được cấu hình bởi `/etc/nsswitch.conf`; xem trang manual `nss(5)` để biết đầy đủ chi tiết. Sau đây là một ví dụ đơn giản đủ cho hầu hết các bản hiện thực embedded Linux:
+glibc dùng một cơ chế được gọi là name service switch (NSS) để điều khiển cách các tên được phân giải thành số cho mạng và người dùng. Username có thể được phân giải thành UID qua file `/etc/passwd`, và các dịch vụ mạng như HTTP có thể được phân giải thành số cổng dịch vụ qua `/etc/services`. Tất cả điều này được cấu hình bởi `/etc/nsswitch.conf`; xem trang manual `nss(5)` để biết đầy đủ chi tiết. Sau đây là một ví dụ đơn giản đủ cho hầu hết các bản triển khai embedded Linux:
 
 ```
 passwd:    files
@@ -1181,7 +1181,7 @@ Trong embedded Linux, không hiếm việc link tĩnh device driver vào kernel 
 
 Giờ chúng ta đã biết cách mount root filesystem qua mạng bằng NFS, có thể bạn đang tự hỏi liệu có cách nào để cũng nạp kernel, device tree và `initramfs` qua mạng không. Nếu làm được điều này, thì thành phần duy nhất cần được ghi vào bộ lưu trữ trên target là bootloader. Mọi thứ khác có thể được nạp từ máy host. Điều này sẽ tiết kiệm thời gian, vì bạn không cần liên tục flash lại target. Bạn thậm chí có thể làm việc trong khi các driver lưu trữ flash vẫn đang được phát triển (chuyện này có xảy ra).
 
-Trivial File Transfer Protocol (TFTP) là câu trả lời. TFTP là một giao thức truyền file rất đơn giản, được thiết kế để dễ hiện thực trong các bootloader như U-Boot.
+Trivial File Transfer Protocol (TFTP) là câu trả lời. TFTP là một giao thức truyền file rất đơn giản, được thiết kế để dễ triển khai trong các bootloader như U-Boot.
 
 Để bắt đầu, bạn cần cài đặt một TFTP daemon trên máy host. Package cần cài trên Ubuntu có tên là `tftpd-hpa`:
 
@@ -1248,7 +1248,7 @@ Khi bạn đã giải quyết được vấn đề kết nối, U-Boot nạp cá
 
 Một trong những điểm mạnh của Linux là nó hỗ trợ nhiều loại root filesystem, vì vậy nó có thể được điều chỉnh cho rất nhiều nhu cầu khác nhau. Chúng ta đã thấy có thể xây dựng thủ công một root filesystem đơn giản chỉ với một số ít thành phần. BusyBox đặc biệt hữu ích ở khía cạnh này.
 
-Bằng cách đi qua quy trình từng bước một, chúng ta đã hiểu được một số hoạt động cơ bản của các hệ thống Linux, bao gồm cấu hình mạng và tài khoản người dùng. Tuy nhiên, task này nhanh chóng trở nên không thể quản lý được khi các thiết bị phức tạp hơn. Thêm vào đó, luôn có mối lo ever-present rằng có thể có một lỗ hổng bảo mật trong bản hiện thực mà chúng ta không để ý.
+Bằng cách đi qua quy trình từng bước một, chúng ta đã hiểu được một số hoạt động cơ bản của các hệ thống Linux, bao gồm cấu hình mạng và tài khoản người dùng. Tuy nhiên, task này nhanh chóng trở nên không thể quản lý được khi các thiết bị phức tạp hơn. Thêm vào đó, luôn có mối lo ever-present rằng có thể có một lỗ hổng bảo mật trong bản triển khai mà chúng ta không để ý.
 
 Trong chương tiếp theo, tôi sẽ cho bạn thấy cách dùng một build system nhúng có thể làm cho quá trình tạo một hệ thống embedded Linux dễ dàng và đáng tin cậy hơn nhiều. Tôi sẽ bắt đầu bằng việc xem Buildroot rồi chuyển sang xem Yocto Project phức tạp hơn nhưng mạnh mẽ.
 

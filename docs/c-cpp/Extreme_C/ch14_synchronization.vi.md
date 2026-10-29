@@ -26,7 +26,7 @@ Về nhóm thứ hai, chúng chỉ phát sinh sau khi một cách sửa được
 
 Ví dụ, giả sử rằng bạn có một số tác vụ đều có quyền đọc/ghi vào cùng một nguồn dữ liệu dùng chung. Sau khi chạy các tác vụ nhiều lần, bạn phát hiện ra rằng các thuật toán của bạn, được viết cho các tác vụ khác nhau, không hoạt động như chúng được dự định. Điều này dẫn đến các crash bất ngờ hay các lỗi logic xảy ra ngẫu nhiên. Vì việc xảy ra crash và kết quả sai là ngẫu nhiên và không thể dự đoán trong trường hợp của bạn, bạn có thể hợp lý giả định rằng đó có thể là các vấn đề concurrency.
 
-Bạn bắt đầu phân tích các thuật toán hết lần này đến lần khác, và cuối cùng bạn tìm ra vấn đề; có một *data race* trên<a id="_idIndexMarker919"></a> nguồn dữ liệu dùng chung. Giờ bạn cần nghĩ ra một cách sửa cố gắng kiểm soát việc truy cập vào nguồn dữ liệu dùng chung. Bạn hiện thực một giải pháp và chạy lại hệ thống, và thật bất ngờ, bạn phát hiện ra rằng đôi khi một số tác vụ không bao giờ có cơ hội truy cập nguồn dữ liệu. Về mặt kỹ thuật, chúng ta nói rằng những tác vụ này bị *starved* (bỏ đói). Một vấn đề mới, với <a id="_idIndexMarker920"></a>bản chất hoàn toàn khác với vấn đề đầu tiên, đã được đưa vào bởi các thay đổi của bạn!
+Bạn bắt đầu phân tích các thuật toán hết lần này đến lần khác, và cuối cùng bạn tìm ra vấn đề; có một *data race* trên<a id="_idIndexMarker919"></a> nguồn dữ liệu dùng chung. Giờ bạn cần nghĩ ra một cách sửa cố gắng kiểm soát việc truy cập vào nguồn dữ liệu dùng chung. Bạn triển khai một giải pháp và chạy lại hệ thống, và thật bất ngờ, bạn phát hiện ra rằng đôi khi một số tác vụ không bao giờ có cơ hội truy cập nguồn dữ liệu. Về mặt kỹ thuật, chúng ta nói rằng những tác vụ này bị *starved* (bỏ đói). Một vấn đề mới, với <a id="_idIndexMarker920"></a>bản chất hoàn toàn khác với vấn đề đầu tiên, đã được đưa vào bởi các thay đổi của bạn!
 
 Do đó, giờ chúng ta có hai nhóm vấn đề concurrency khác nhau, đó là:
 
@@ -329,7 +329,7 @@ Tiếp theo, chúng ta sẽ nói <a id="_idIndexMarker945"></a>về ba trong s�
 
   Trong một tình huống deadlock, mọi tác vụ đều bị kẹt và đang chờ nhau. Nhưng thường có những tình huống mà chỉ một phần tác vụ, chỉ một hoặc hai trong số chúng, bị kẹt và phần còn lại<a id="_idIndexMarker954"></a> có thể tiếp tục. Chúng ta gọi chúng là các tình huống *semi-deadlock*. Chúng ta sẽ thấy thêm về những tình huống semi-deadlock này trong các phần sắp tới.
 
-- **Priority inversion** (đảo ngược độ ưu tiên): Có những tình huống mà, sau khi dùng một kỹ thuật synchronization<a id="_idIndexMarker955"></a>, một tác vụ có độ ưu tiên cao hơn để dùng một tài nguyên dùng chung bị chặn phía sau một tác vụ có độ ưu tiên thấp và bằng cách này, độ ưu tiên của chúng bị đảo ngược. Đây là một loại vấn đề thứ cấp khác có thể xảy ra do một kỹ thuật synchronization được hiện thực sai.
+- **Priority inversion** (đảo ngược độ ưu tiên): Có những tình huống mà, sau khi dùng một kỹ thuật synchronization<a id="_idIndexMarker955"></a>, một tác vụ có độ ưu tiên cao hơn để dùng một tài nguyên dùng chung bị chặn phía sau một tác vụ có độ ưu tiên thấp và bằng cách này, độ ưu tiên của chúng bị đảo ngược. Đây là một loại vấn đề thứ cấp khác có thể xảy ra do một kỹ thuật synchronization được triển khai sai.
 
 Starvation không tồn tại mặc định trong một hệ thống concurrent; khi không có kỹ thuật synchronization nào được áp đặt lên task scheduler của hệ điều hành, hệ thống là công bằng và không cho phép tác vụ nào bị bỏ đói. Chỉ việc có một số cơ chế kiểm soát được lập trình viên dùng mới có thể dẫn đến starvation. Tương tự, việc xảy ra deadlock cũng không tồn tại trong một hệ thống concurrent cho đến khi lập trình viên can thiệp. Lý do chính cho hầu hết các tình huống deadlock là khi các lock được dùng theo cách mà mọi tác vụ trong một hệ thống concurrent đều đang chờ nhau giải phóng lock. Nói chung, deadlock là một vấn đề phổ biến hơn starvation trong một hệ thống concurrent.
 
@@ -353,7 +353,7 @@ Có một hệ thống concurrent hoàn toàn mới có nghĩa là có các vấ
 
 Việc dùng một kỹ thuật kiểm soát phù hợp để đồng bộ hóa một số tác vụ và khiến chúng tuân theo một thứ tự cụ thể phụ thuộc vào môi trường concurrent first-hand. Ví dụ, các cơ chế kiểm soát được dùng trong một chương trình multi-processing có thể khác với các phương pháp được dùng trong một chương trình multithreading.
 
-Vì điều này, chúng ta không thể thảo luận chi tiết về các cơ chế kiểm soát ở đây mà không dùng code C thật. Do đó chúng ta sẽ thảo luận chúng theo một cách trừu tượng đúng với mọi hệ thống concurrent, bất kể phương pháp hiện thực của chúng. Các kỹ thuật và khái niệm sau do đó hợp lệ trong mọi hệ thống concurrent, nhưng hiện thực của chúng phụ thuộc rất nhiều vào bản chất thực sự của môi trường xung quanh và chính hệ thống.
+Vì điều này, chúng ta không thể thảo luận chi tiết về các cơ chế kiểm soát ở đây mà không dùng code C thật. Do đó chúng ta sẽ thảo luận chúng theo một cách trừu tượng đúng với mọi hệ thống concurrent, bất kể phương pháp triển khai của chúng. Các kỹ thuật và khái niệm sau do đó hợp lệ trong mọi hệ thống concurrent, nhưng bản triển khai của chúng phụ thuộc rất nhiều vào bản chất thực sự của môi trường xung quanh và chính hệ thống.
 
 <a id="_idParaDest-196"></a>
 
@@ -363,7 +363,7 @@ Như một giải pháp chung, để<a id="_idIndexMarker960"></a> buộc một 
 
 Khi tác vụ sau có thể hoàn tất việc thực thi instruction của nó, thì có hai lựa chọn khả dụng. Hoặc chính tác vụ thứ nhất kiểm tra lại và thấy rằng tác vụ sau đã làm xong công việc của mình hoặc phải có một cách để tác vụ sau thông báo cho tác vụ thứ nhất và cho nó biết rằng giờ nó có thể tiếp tục thực thi instruction của mình.
 
-Kịch bản<a id="_idIndexMarker965"></a> được mô tả tương tự một tình huống trong đó hai <a id="_idIndexMarker966"></a>người cố gắng làm một việc gì đó theo một thứ tự đã định. Một trong số họ phải chờ người kia hoàn thành công việc của mình, và chỉ khi đó người kia mới có thể tiếp tục làm công việc của riêng mình. Chúng ta có thể nói rằng gần như mọi cơ chế kiểm soát đều dùng một cách tiếp cận tương tự điều này, nhưng các hiện thực<a id="_idIndexMarker967"></a> của nó rất đa dạng, và chúng chủ yếu phụ thuộc vào các cơ chế có sẵn trong một môi trường cụ thể. Chúng tôi sẽ giải thích một trong những môi trường này, một hệ thống POSIX-compliant, và các cơ chế có sẵn trong nó, trong phần cuối của chương này.
+Kịch bản<a id="_idIndexMarker965"></a> được mô tả tương tự một tình huống trong đó hai <a id="_idIndexMarker966"></a>người cố gắng làm một việc gì đó theo một thứ tự đã định. Một trong số họ phải chờ người kia hoàn thành công việc của mình, và chỉ khi đó người kia mới có thể tiếp tục làm công việc của riêng mình. Chúng ta có thể nói rằng gần như mọi cơ chế kiểm soát đều dùng một cách tiếp cận tương tự điều này, nhưng các bản triển khai<a id="_idIndexMarker967"></a> của nó rất đa dạng, và chúng chủ yếu phụ thuộc vào các cơ chế có sẵn trong một môi trường cụ thể. Chúng tôi sẽ giải thích một trong những môi trường này, một hệ thống POSIX-compliant, và các cơ chế có sẵn trong nó, trong phần cuối của chương này.
 
 Hãy giải thích kỹ thuật kiểm soát trên, vốn là trung tâm của mọi kỹ thuật khác, bằng một ví dụ. *Ví dụ 14.6*, được thể hiện trong *Code Box 14-8*, là một hệ thống gồm hai tác vụ concurrent, và chúng ta muốn định nghĩa invariant constraint là **có A trước, và sau đó B được in ra trong output**. Không có cơ chế kiểm soát nào được áp dụng, nó trông như code box sau:
 
@@ -428,7 +428,7 @@ Trong phần tiếp theo, chúng ta sẽ thực hiện kịch bản chờ đã t
 
 Thay vì dùng một vòng lặp busy-wait như <a id="_idIndexMarker975"></a>đã thảo luận trong <a id="_idIndexMarker976"></a>phần trước, một kịch bản khác cũng có thể được tưởng tượng. Tác vụ `Q` có thể đi ngủ thay vì busy-waiting trên flag `Done` và tác vụ `P` có thể thông báo cho nó về sự thay đổi của flag khi nó làm cho flag thành `True`.
 
-Nói cách khác, tác vụ `Q` đi ngủ ngay khi nó thấy flag không phải là `True` và để tác vụ `P` có được lõi CPU nhanh hơn và thực thi logic của mình. Đổi lại, tác vụ `P` sẽ đánh thức tác vụ `Q` sau khi sửa đổi flag thành `True`. Thực tế, cách <a id="_idIndexMarker977"></a>tiếp cận này là hiện thực *de facto* trong hầu hết các hệ điều hành để tránh busy-waits và đưa các cơ chế kiểm soát vào cuộc một cách hiệu quả hơn.
+Nói cách khác, tác vụ `Q` đi ngủ ngay khi nó thấy flag không phải là `True` và để tác vụ `P` có được lõi CPU nhanh hơn và thực thi logic của mình. Đổi lại, tác vụ `P` sẽ đánh thức tác vụ `Q` sau khi sửa đổi flag thành `True`. Thực tế, cách <a id="_idIndexMarker977"></a>tiếp cận này là bản triển khai *de facto* trong hầu hết các hệ điều hành để tránh busy-waits và đưa các cơ chế kiểm soát vào cuộc một cách hiệu quả hơn.
 
 Đoạn pseudo-code sau minh họa cách dùng cách tiếp cận này để viết lại giải pháp cho ví dụ được đưa ra trong phần trước:
 
@@ -574,7 +574,7 @@ Trong hệ thống trên, chúng ta có hai shared state khác nhau: một semap
 
 Để đi vào một<a id="_idIndexMarker992"></a> critical section, một tác vụ nên thực thi instruction `EnterCriticalSection(S)`. Nếu một tác vụ khác đã ở trong critical section của riêng nó, instruction `EnterCriticalSection(S)` trở thành blocking và không kết thúc, và vì vậy tác vụ hiện tại nên chờ cho đến khi semaphore cho phép nó đi qua và vào critical section của mình.
 
-Instruction `EnterCriticalSection(S)` có thể có các hiện thực khác nhau tùy theo kịch bản. Nó có thể đơn giản là một busy-wait, hoặc nó có thể chỉ làm cho tác vụ đang chờ đi vào chế độ ngủ. Cách tiếp cận sau phổ biến hơn, và các tác vụ đang chờ critical section của chúng thường đi ngủ.
+Instruction `EnterCriticalSection(S)` có thể có các cách triển khai khác nhau tùy theo kịch bản. Nó có thể đơn giản là một busy-wait, hoặc nó có thể chỉ làm cho tác vụ đang chờ đi vào chế độ ngủ. Cách tiếp cận sau phổ biến hơn, và các tác vụ đang chờ critical section của chúng thường đi ngủ.
 
 Trong ví dụ trên, semaphore `S` được dùng theo cách mà chỉ một tác vụ có thể đi vào critical section của nó. Nhưng semaphore tổng quát hơn, và chúng có thể cho phép nhiều hơn một tác vụ (tối đa một số lượng nhất định được định nghĩa khi tạo semaphore) đi vào critical section của chúng. Một semaphore chỉ cho phép một tác vụ đi vào critical section tại một thời điểm thường <a id="_idIndexMarker993"></a>được gọi là một *binary semaphore* hay một *mutex*. Mutex phổ biến hơn semaphore rất nhiều, và bạn sẽ luôn thấy chúng trong code concurrent. POSIX API phơi ra cả semaphore lẫn mutex, và bạn có thể dùng chúng tùy theo tình huống.
 
@@ -752,13 +752,13 @@ Do đó, khi instruction `2.3` được thực thi như một atomic instruction
 
 Lưu ý cuối cùng trong phần này, khi một tác vụ đã lock một mutex, nó không thể lock nó lần nữa, và việc cố lock nó thêm thường dẫn đến một tình huống deadlock. Chỉ một *recursive mutex* mới có thể được lock nhiều lần bởi một tác vụ duy nhất. Lưu ý rằng trong khi một recursive mutex bị lock (bất kể bao nhiêu lần), mọi tác vụ khác sẽ bị chặn khi cố lock nó. Các thao tác lock và unlock<a id="_idIndexMarker1016"></a> luôn đi theo cặp, do đó nếu một tác vụ đã lock một recursive mutex hai lần, nó cũng nên unlock nó hai lần.
 
-Cho đến giờ, chúng ta đã thảo luận và dùng kỹ thuật sleep/notify trong một số ví dụ. Bạn sẽ chỉ hiểu đầy đủ kỹ thuật sleep/notify khi bạn được giới thiệu một khái niệm mới: condition variable. Condition variable cùng với mutex đã xây dựng một nền tảng cho việc hiện thực các kỹ thuật kiểm soát, vốn đồng bộ hóa hiệu quả nhiều tác vụ trên một tài nguyên dùng chung duy nhất. Nhưng trước đó, hãy nói về một giải pháp khả dĩ khác cho *ví dụ 14.6*.
+Cho đến giờ, chúng ta đã thảo luận và dùng kỹ thuật sleep/notify trong một số ví dụ. Bạn sẽ chỉ hiểu đầy đủ kỹ thuật sleep/notify khi bạn được giới thiệu một khái niệm mới: condition variable. Condition variable cùng với mutex đã xây dựng một nền tảng cho việc triển khai các kỹ thuật kiểm soát, vốn đồng bộ hóa hiệu quả nhiều tác vụ trên một tài nguyên dùng chung duy nhất. Nhưng trước đó, hãy nói về một giải pháp khả dĩ khác cho *ví dụ 14.6*.
 
 <a id="_idParaDest-200"></a>
 
 ## Spin lock
 
-Trước khi bắt đầu nói về<a id="_idIndexMarker1017"></a> condition variable và cách thực sự mà kỹ thuật sleep/notify nên được hiện thực, hãy lùi lại một chút và dùng busy-waiting cùng với mutex để viết một giải pháp mới cho *ví dụ 14.6*. Để nhắc lại, ví dụ là về **có A trước và sau đó B được in ra standard output**.
+Trước khi bắt đầu nói về<a id="_idIndexMarker1017"></a> condition variable và cách thực sự mà kỹ thuật sleep/notify nên được triển khai, hãy lùi lại một chút và dùng busy-waiting cùng với mutex để viết một giải pháp mới cho *ví dụ 14.6*. Để nhắc lại, ví dụ là về **có A trước và sau đó B được in ra standard output**.
 
 Sau đây là giải pháp được đề xuất dùng một mutex được trang bị thuật toán spin locking. Mutex hoạt động như một memory barrier, nên chúng ta sẽ không có vấn đề memory visibility nào, và nó đồng bộ hóa hiệu quả các tác vụ `P` và `Q` trên flag dùng chung `Done`:
 
@@ -788,7 +788,7 @@ Concurrent System {
 
 *Code Box 14-18: Giải pháp cho ví dụ 14.6 dùng một mutex và các thuật toán spin locking*
 
-Đoạn pseudo-code trên là giải pháp đầu tiên có thể được viết thành code C hợp lệ dùng POSIX threading API. Không pseudo-code nào được đưa ra trước đây có thể được viết thành chương trình thật vì hoặc chúng quá trừu tượng để được hiện thực hoặc chúng gây vấn đề trong một số kịch bản nhất định, như khi được chạy trong một hệ thống có nhiều đơn vị xử lý. Nhưng pseudo-code trên có thể được dịch sang bất kỳ ngôn ngữ lập trình nào hỗ trợ concurrency.
+Đoạn pseudo-code trên là giải pháp đầu tiên có thể được viết thành code C hợp lệ dùng POSIX threading API. Không pseudo-code nào được đưa ra trước đây có thể được viết thành chương trình thật vì hoặc chúng quá trừu tượng để được triển khai hoặc chúng gây vấn đề trong một số kịch bản nhất định, như khi được chạy trong một hệ thống có nhiều đơn vị xử lý. Nhưng pseudo-code trên có thể được dịch sang bất kỳ ngôn ngữ lập trình nào hỗ trợ concurrency.
 
 Trong code trên, chúng ta đang<a id="_idIndexMarker1018"></a> dùng *spinlock*, vốn đơn giản là các thuật toán busy-waiting. Bất cứ khi nào bạn lock một spinlock mutex, nó đi vào một vòng lặp busy-wait cho đến khi mutex trở nên sẵn có và sau đó nó tiếp tục.
 
@@ -804,7 +804,7 @@ Trong phần tiếp theo, chúng ta khám phá condition variable và các thu�
 
 ### Condition variable
 
-Các giải pháp mà chúng tôi đã đưa ra trong<a id="_idIndexMarker1020"></a> các phần trước để thỏa mãn *ví dụ 14.6* không thể được hiện thực bằng một ngôn ngữ lập trình vì chúng ta không biết làm thế nào để đặt một tác vụ vào chế độ ngủ và làm thế nào để thông báo cho một tác vụ khác bằng lập trình. Trong phần này, chúng tôi sẽ giới thiệu condition variable, một khái niệm mới có thể giúp chúng ta làm cho một tác vụ chờ và được thông báo tương ứng.
+Các giải pháp mà chúng tôi đã đưa ra trong<a id="_idIndexMarker1020"></a> các phần trước để thỏa mãn *ví dụ 14.6* không thể được triển khai bằng một ngôn ngữ lập trình vì chúng ta không biết làm thế nào để đặt một tác vụ vào chế độ ngủ và làm thế nào để thông báo cho một tác vụ khác bằng lập trình. Trong phần này, chúng tôi sẽ giới thiệu condition variable, một khái niệm mới có thể giúp chúng ta làm cho một tác vụ chờ và được thông báo tương ứng.
 
 Condition variable là các biến (hay đối tượng) đơn giản có thể được dùng để đặt một tác vụ vào chế độ ngủ hay thông báo cho các tác vụ đang ngủ khác và đánh thức chúng. Lưu ý rằng chế độ ngủ được thảo luận ở đây khác với việc ngủ trong một số giây hay mili giây để tạo độ trễ, và nó đặc biệt có nghĩa là tác vụ không muốn nhận thêm phần CPU nào nữa. Giống như mutex được dùng để bảo vệ một critical section, condition variable được dùng để cho phép *signaling* (báo hiệu) giữa các tác vụ khác nhau.
 
@@ -839,13 +839,13 @@ Concurrent System {
 
 *Code Box 14-19: Giải pháp cho ví dụ 14.6 dùng một condition variable*
 
-Giải pháp trên là cách đúng đắn nhất để dùng condition variable nhằm hiện thực thứ tự nghiêm ngặt giữa hai instruction trong một hệ thống concurrent. Các instruction `1.4` và `2.3` đang dùng condition variable `CV`. Như bạn có thể thấy, thao tác `Sleep` cần biết về cả mutex `M` lẫn condition variable `CV` vì nó cần unlock `M` khi tác vụ `Q` sắp đi ngủ và có lại lock trên `M` khi nó đã được thông báo.
+Giải pháp trên là cách đúng đắn nhất để dùng condition variable nhằm triển khai thứ tự nghiêm ngặt giữa hai instruction trong một hệ thống concurrent. Các instruction `1.4` và `2.3` đang dùng condition variable `CV`. Như bạn có thể thấy, thao tác `Sleep` cần biết về cả mutex `M` lẫn condition variable `CV` vì nó cần unlock `M` khi tác vụ `Q` sắp đi ngủ và có lại lock trên `M` khi nó đã được thông báo.
 
 Lưu ý rằng khi tác vụ `Q` được thông báo, nó tiếp tục logic của mình bên trong thao tác `Sleep`, và việc lock `M` lần nữa là một phần của điều đó. Instruction `1.4` cũng chỉ hoạt động khi bạn đã có được lock trên `M`, nếu không race condition sẽ xảy ra. Sẽ là một thử thách tốt và có lợi nếu đi qua các interleaving khả dĩ và xem mutex và condition variable trên sẽ áp đặt thứ tự mong muốn giữa các instruction `1.1` và `2.6` mọi lúc như thế nào.
 
 Là một định nghĩa cuối cùng trong phần này, một đối tượng mutex cùng với một condition variable thường được gọi là một đối tượng *monitor*. Chúng ta<a id="_idIndexMarker1023"></a> cũng có một design pattern concurrency-related gọi là *monitor object*, là về việc dùng kỹ thuật trên để sắp xếp lại các instruction trong một số tác vụ concurrent.
 
-Trong các phần trước<a id="_idIndexMarker1024"></a>, chúng tôi đã cho thấy semaphore, mutex và condition variable cùng với các thuật toán lock, unlock, sleep và notify có thể được dùng như thế nào để hiện thực các cơ chế kiểm soát được dùng để áp đặt một thứ tự nghiêm ngặt giữa một số instruction trong các tác vụ concurrent khác nhau và để bảo vệ các critical section. Những khái niệm này sẽ được dùng trong các chương sắp tới để viết các chương trình multithreaded và multi-process bằng C. Phần tiếp theo sẽ nói về hỗ trợ concurrency trong chuẩn POSIX đã được hiện thực và cung cấp bởi nhiều hệ điều hành Unix-like.
+Trong các phần trước<a id="_idIndexMarker1024"></a>, chúng tôi đã cho thấy semaphore, mutex và condition variable cùng với các thuật toán lock, unlock, sleep và notify có thể được dùng như thế nào để triển khai các cơ chế kiểm soát được dùng để áp đặt một thứ tự nghiêm ngặt giữa một số instruction trong các tác vụ concurrent khác nhau và để bảo vệ các critical section. Những khái niệm này sẽ được dùng trong các chương sắp tới để viết các chương trình multithreaded và multi-process bằng C. Phần tiếp theo sẽ nói về hỗ trợ concurrency trong chuẩn POSIX đã được triển khai và cung cấp bởi nhiều hệ điều hành Unix-like.
 
 <a id="_idParaDest-202"></a>
 
@@ -853,7 +853,7 @@ Trong các phần trước<a id="_idIndexMarker1024"></a>, chúng tôi đã cho 
 
 Như chúng tôi đã giải thích trong các <a id="_idIndexMarker1025"></a>phần trước, concurrency hay multitasking là một chức năng<a id="_idIndexMarker1026"></a> do kernel của một hệ điều hành cung cấp. Không phải mọi kernel đều concurrent ngay từ khi ra đời, nhưng hầu hết chúng đều hỗ trợ concurrency ngày nay. Thật thú vị khi biết rằng phiên bản đầu tiên của Unix không concurrent, nhưng nó đã có được tính năng này rất sớm sau khi ra đời.
 
-Nếu bạn còn nhớ *Chương 10*, *Unix – Lịch sử và Architecture*, chúng tôi đã giải thích single Unix specification và POSIX đã cố gắng chuẩn hóa API được phơi ra bởi vòng shell trong một hệ điều hành Unix-like như thế nào. Concurrency đã là một phần của những chuẩn này từ lâu, và cho đến nay, nó đã cho phép nhiều developer viết các chương trình concurrent cho các hệ điều hành POSIX-compliant. Hỗ trợ concurrency trong POSIX đã được dùng rộng rãi và được hiện thực trong một phạm vi rộng lớn các hệ điều hành, như Linux và macOS.
+Nếu bạn còn nhớ *Chương 10*, *Unix – Lịch sử và Architecture*, chúng tôi đã giải thích single Unix specification và POSIX đã cố gắng chuẩn hóa API được phơi ra bởi vòng shell trong một hệ điều hành Unix-like như thế nào. Concurrency đã là một phần của những chuẩn này từ lâu, và cho đến nay, nó đã cho phép nhiều developer viết các chương trình concurrent cho các hệ điều hành POSIX-compliant. Hỗ trợ concurrency trong POSIX đã được dùng rộng rãi và được triển khai trong một phạm vi rộng lớn các hệ điều hành, như Linux và macOS.
 
 Concurrency trong một hệ điều hành POSIX-compliant nói chung được cung cấp theo hai cách. Bạn có thể hoặc có một chương trình concurrent <a id="_idIndexMarker1027"></a>thực thi dưới dạng một số process khác nhau, được gọi là *multi-processing*, hoặc bạn <a id="_idIndexMarker1028"></a>có thể có chương trình concurrent của mình chạy dưới dạng một số thread khác nhau như một phần của cùng một process, được gọi là *multithreading*. Trong phần này, chúng ta sẽ nói về hai phương pháp này và so sánh chúng từ góc nhìn của một lập trình viên. Nhưng trước đó, chúng ta cần biết thêm về phần bên trong của một kernel hỗ trợ concurrency. Phần tiếp theo giải thích ngắn gọn những gì bạn sẽ tìm thấy trong một kernel như vậy.
 
@@ -902,7 +902,7 @@ Có nhiều ví dụ trong đó một số process đang thực hiện một s�
 
 Những process này cần liên tục chia sẻ các mẩu thông tin để giữ cho cluster hoạt động. Có nhiều ví dụ khác về những hệ thống phân tán như vậy với nhiều node, như Gluster, Kafka và các mạng tiền mã hóa. Tất cả chúng đều cần rất nhiều sự giao tiếp qua lại và message-passing giữa các process nằm trên các node khác nhau để duy trì hoạt động.
 
-Chừng nào các process hay thread đang hoạt động mà không có shared state nào ở giữa, không có nhiều khác biệt giữa multi-processing và multithreading. Có lẽ bạn có thể dùng process thay cho thread và ngược lại. Nhưng khi đưa vào một shared state giữa chúng, chúng ta thấy một khác biệt lớn giữa việc dùng process hay thread, hay thậm chí kết hợp cả hai. Một khác biệt nằm ở các kỹ thuật synchronization có sẵn. Dù các API được phơi ra để dùng những cơ chế này ít nhiều giống nhau, độ phức tạp của việc làm việc trong các môi trường multi-process cao hơn nhiều và các hiện thực bên dưới khác nhau. Một khác biệt khác giữa multi-processing và multithreading là các kỹ thuật chúng ta dùng để có shared state. Trong khi thread có thể dùng mọi kỹ thuật có sẵn cho process, chúng có lợi thế xa xỉ là có thể dùng cùng một vùng memory để chia sẻ một state. Như bạn sẽ thấy trong các chương sắp tới, điều này tạo ra một khác biệt lớn.
+Chừng nào các process hay thread đang hoạt động mà không có shared state nào ở giữa, không có nhiều khác biệt giữa multi-processing và multithreading. Có lẽ bạn có thể dùng process thay cho thread và ngược lại. Nhưng khi đưa vào một shared state giữa chúng, chúng ta thấy một khác biệt lớn giữa việc dùng process hay thread, hay thậm chí kết hợp cả hai. Một khác biệt nằm ở các kỹ thuật synchronization có sẵn. Dù các API được phơi ra để dùng những cơ chế này ít nhiều giống nhau, độ phức tạp của việc làm việc trong các môi trường multi-process cao hơn nhiều và các cách triển khai bên dưới khác nhau. Một khác biệt khác giữa multi-processing và multithreading là các kỹ thuật chúng ta dùng để có shared state. Trong khi thread có thể dùng mọi kỹ thuật có sẵn cho process, chúng có lợi thế xa xỉ là có thể dùng cùng một vùng memory để chia sẻ một state. Như bạn sẽ thấy trong các chương sắp tới, điều này tạo ra một khác biệt lớn.
 
 Để giải thích thêm, một process có một memory private, và các process khác không thể đọc hay sửa đổi nó, nên không dễ dàng dùng memory của process để chia sẻ một thứ gì đó với các process khác. Nhưng điều này đơn giản hơn nhiều với thread. Mọi thread trong cùng một process đều có quyền truy cập vào cùng memory của process; do đó chúng có thể dùng nó để lưu một shared state.
 
@@ -936,9 +936,9 @@ Tiếp theo, bạn có thể tìm thấy các kỹ thuật có thể được pr
 
   Những biến này được gọi là biến môi trường, và chúng có thể truy cập được bởi các process bên trong hệ thống.
 
-Ví dụ, phương pháp này được dùng rất nhiều trong các hiện thực CGI được giới thiệu ở đoạn đầu tiên của phần này, đặc biệt khi process web server chính muốn truyền dữ liệu yêu cầu HTTP cho interpreter process được sinh ra.
+Ví dụ, phương pháp này được dùng rất nhiều trong các bản triển khai CGI được giới thiệu ở đoạn đầu tiên của phần này, đặc biệt khi process web server chính muốn truyền dữ liệu yêu cầu HTTP cho interpreter process được sinh ra.
 
-Về các kỹ thuật kiểm soát để làm cho một số thread/process được đồng bộ hóa, bạn sẽ thấy rằng các kỹ thuật được dùng trong các môi trường multi-processing và multithreading dùng chung một API rất giống nhau do chuẩn POSIX cung cấp. Nhưng có lẽ hiện thực bên dưới của một mutex hay một condition variable khác nhau trong cách dùng multithreading và multiprocessing. Chúng tôi sẽ đưa ra các ví dụ về điều này trong các chương sắp tới.
+Về các kỹ thuật kiểm soát để làm cho một số thread/process được đồng bộ hóa, bạn sẽ thấy rằng các kỹ thuật được dùng trong các môi trường multi-processing và multithreading dùng chung một API rất giống nhau do chuẩn POSIX cung cấp. Nhưng có lẽ bản triển khai bên dưới của một mutex hay một condition variable khác nhau trong cách dùng multithreading và multiprocessing. Chúng tôi sẽ đưa ra các ví dụ về điều này trong các chương sắp tới.
 
 <a id="_idParaDest-205"></a>
 
@@ -963,7 +963,7 @@ Trong chương này, chúng ta đã thảo luận về các vấn đề mà chú
 - Chúng ta đã trình bày các vấn đề concurrency. Các vấn đề nội tại tồn tại trong mọi hệ thống concurrent khi các interleaving khác nhau làm không thỏa mãn các invariant constraint của một hệ thống.
 - Chúng ta đã thảo luận các vấn đề post-synchronization chỉ xảy ra sau khi dùng một kỹ thuật synchronization một cách kém cỏi và sai lầm.
 - Chúng ta đã khám phá các cơ chế kiểm soát được dùng để giữ các invariant constraint được thỏa mãn.
-- Semaphore là công cụ then chốt trong việc hiện thực các cơ chế kiểm soát. Mutex là một loại semaphore đặc biệt chỉ cho phép một tác vụ tại một thời điểm đi vào một critical section dựa trên các điều kiện mutual exclusion.
+- Semaphore là công cụ then chốt trong việc triển khai các cơ chế kiểm soát. Mutex là một loại semaphore đặc biệt chỉ cho phép một tác vụ tại một thời điểm đi vào một critical section dựa trên các điều kiện mutual exclusion.
 - Các đối tượng monitor đóng gói một mutex và một condition variable có thể được dùng trong các tình huống khi một tác vụ đang chờ một điều kiện được đáp ứng.
 - Cuối cùng chúng ta đã thực hiện bước đầu tiên hướng tới việc phát triển concurrency bằng việc giới thiệu multi-processing và multithreading trong chuẩn POSIX.
 

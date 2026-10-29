@@ -18,7 +18,7 @@ Năm 2002, việc cố xây dựng một architecture như microservices sẽ đ
 
 ## Định nghĩa software architecture
 
-<a id="ix_ch01-introduction-asciidoc0"></a><a id="ix_ch01-introduction-asciidoc1"></a>Vậy software architecture là gì? [Hình 1-1](#fig-introduction-defining) minh họa cách chúng tôi thích nghĩ về software architecture. Định nghĩa này có bốn chiều. <a id="id705"></a><a id="id706"></a>Software architecture của một hệ thống gồm một *architecture style* làm điểm khởi đầu, kết hợp với các *architecture characteristics* mà nó phải hỗ trợ, các *logical component* để hiện thực hành vi của nó, và cuối cùng là các *architecture decision* biện minh cho tất cả. Cấu trúc của hệ thống được biểu thị bằng các đường đen đậm đỡ architecture. Chúng ta sẽ đi nhanh qua các chiều này theo thứ tự mà kiến trúc sư phân tích chúng, và các chương tiếp theo sẽ cung cấp thêm chi tiết.
+<a id="ix_ch01-introduction-asciidoc0"></a><a id="ix_ch01-introduction-asciidoc1"></a>Vậy software architecture là gì? [Hình 1-1](#fig-introduction-defining) minh họa cách chúng tôi thích nghĩ về software architecture. Định nghĩa này có bốn chiều. <a id="id705"></a><a id="id706"></a>Software architecture của một hệ thống gồm một *architecture style* làm điểm khởi đầu, kết hợp với các *architecture characteristics* mà nó phải hỗ trợ, các *logical component* để triển khai hành vi của nó, và cuối cùng là các *architecture decision* biện minh cho tất cả. Cấu trúc của hệ thống được biểu thị bằng các đường đen đậm đỡ architecture. Chúng ta sẽ đi nhanh qua các chiều này theo thứ tự mà kiến trúc sư phân tích chúng, và các chương tiếp theo sẽ cung cấp thêm chi tiết.
 
 <a id="fig-introduction-defining"></a>
 
@@ -42,13 +42,13 @@ Năm 2002, việc cố xây dựng một architecture như microservices sẽ đ
 
 *Hình 1-3. Logical component cấu trúc hành vi của hệ thống*
 
-Một khi kiến trúc sư đã phân tích các architectural characteristics và logical component mà hệ thống cần (cả hai được mô tả chi tiết sau), họ biết đủ để chọn một architecture style phù hợp làm điểm khởi đầu cho việc hiện thực giải pháp của mình [Hình 1-4](#fosa_2e_update_0105).
+Một khi kiến trúc sư đã phân tích các architectural characteristics và logical component mà hệ thống cần (cả hai được mô tả chi tiết sau), họ biết đủ để chọn một architecture style phù hợp làm điểm khởi đầu cho việc triển khai giải pháp của mình [Hình 1-4](#fosa_2e_update_0105).
 
 <a id="fosa_2e_update_0105"></a>
 
 ![](images/fsa2_0104.png)
 
-*Hình 1-4. Việc chọn một architectural style bao gồm tìm con đường hiện thực dễ nhất cho một tập yêu cầu cho trước*
+*Hình 1-4. Việc chọn một architectural style bao gồm tìm con đường triển khai dễ nhất cho một tập yêu cầu cho trước*
 
 <a id="id709"></a>Chiều thứ tư định nghĩa software architecture là *architecture decision*, vốn định nghĩa các quy tắc về cách một hệ thống nên được xây dựng. Ví dụ, một kiến trúc sư có thể đưa ra quyết định rằng chỉ các layer Business và Services trong một layered architecture mới có thể truy cập database (xem [Hình 1-5](#fig-introduction-decisions)), hạn chế layer Presentation thực hiện các lời gọi database trực tiếp. Architecture decision tạo thành các ràng buộc của hệ thống và chỉ dẫn các nhóm phát triển về những gì được phép và không được phép.
 
@@ -185,7 +185,7 @@ Những kiến trúc sư thành công nhất mà chúng tôi biết có kiến t
 
 <a id="id732"></a><a id="id733"></a><a id="id734"></a><a id="id735"></a><a id="id736"></a>*Một kiến trúc sư được kỳ vọng có kỹ năng giao tiếp giữa người với người xuất sắc, bao gồm làm việc nhóm, điều phối và lãnh đạo.*
 
-Là những người làm công nghệ, developer và kiến trúc sư có xu hướng thích giải quyết các vấn đề kỹ thuật, không phải các vấn đề con người, nên kỹ năng lãnh đạo và giao tiếp xuất sắc là một kỳ vọng khó khăn. Tuy nhiên, như [Gerald Weinberg](https://oreil.ly/wyDB8) nổi tiếng với câu nói, “Bất kể họ nói gì với bạn, đó luôn là vấn đề con người.” Sự định hướng mà kiến trúc sư cung cấp không chỉ mang tính kỹ thuật—nó bao gồm việc dẫn dắt các nhóm phát triển qua quá trình hiện thực architecture. Kỹ năng lãnh đạo chiếm *ít nhất một nửa* những gì cần để trở thành một kiến trúc sư phần mềm hiệu quả, bất kể vai trò hay chức danh.
+Là những người làm công nghệ, developer và kiến trúc sư có xu hướng thích giải quyết các vấn đề kỹ thuật, không phải các vấn đề con người, nên kỹ năng lãnh đạo và giao tiếp xuất sắc là một kỳ vọng khó khăn. Tuy nhiên, như [Gerald Weinberg](https://oreil.ly/wyDB8) nổi tiếng với câu nói, “Bất kể họ nói gì với bạn, đó luôn là vấn đề con người.” Sự định hướng mà kiến trúc sư cung cấp không chỉ mang tính kỹ thuật—nó bao gồm việc dẫn dắt các nhóm phát triển qua quá trình triển khai architecture. Kỹ năng lãnh đạo chiếm *ít nhất một nửa* những gì cần để trở thành một kiến trúc sư phần mềm hiệu quả, bất kể vai trò hay chức danh.
 
 Ngành công nghiệp tràn ngập các kiến trúc sư phần mềm, tất cả cạnh tranh cho một số lượng vị trí có hạn. Những người có kỹ năng lãnh đạo và giao tiếp mạnh nổi bật giữa đám đông. Ngược lại, chúng tôi đã biết nhiều kiến trúc sư phần mềm là những nhà công nghệ xuất sắc nhưng gặp khó khăn trong việc dẫn dắt nhóm, huấn luyện và cố vấn developer, hay truyền đạt ý tưởng và các architecture decision và nguyên tắc. Không cần phải nói, những kiến trúc sư đó gặp khó khăn trong việc giữ việc làm.
 
@@ -213,7 +213,7 @@ Cuốn sách này gồm ba phần:
 
 **[Phần I](part1_foundations.vi.md#part1-foundations): Nền tảng**
 
-Phần I định nghĩa các thành phần then chốt của software architecture, tập trung vào hai yếu tố then chốt của cấu trúc architecture: architectural characteristics và logical component. Phân tích từng thứ đòi hỏi các kỹ thuật khác nhau, mà chúng tôi trình bày sâu. Đầu ra của các hoạt động này cung cấp cho kiến trúc sư phần mềm đủ thông tin để chọn một architectural style phù hợp, tạo khung đỡ cho triết lý chung của việc hiện thực.
+Phần I định nghĩa các thành phần then chốt của software architecture, tập trung vào hai yếu tố then chốt của cấu trúc architecture: architectural characteristics và logical component. Phân tích từng thứ đòi hỏi các kỹ thuật khác nhau, mà chúng tôi trình bày sâu. Đầu ra của các hoạt động này cung cấp cho kiến trúc sư phần mềm đủ thông tin để chọn một architectural style phù hợp, tạo khung đỡ cho triết lý chung của việc triển khai.
 
 **[Phần II](part2_architecture_styles.vi.md#part2-styles): Các architecture style**
 

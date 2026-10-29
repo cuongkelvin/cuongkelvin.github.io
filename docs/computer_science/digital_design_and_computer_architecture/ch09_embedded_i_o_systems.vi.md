@@ -65,7 +65,7 @@ Embedded system dùng processor để điều khiển tương tác với môi tr
 
 ### 9.3.1 Board RED-V
 
-Để trình bày cụ thể, mục này minh họa embedded system I/O trong bối cảnh một hệ thống thực. Cụ thể, chúng ta tập trung vào system-on-chip (SoC) FE310-G002 của SiFive, chứa RISC-V processor 32-bit 320 MHz hiện thực RV32IMAC architecture—tức base integer instruction set 32-bit (RV32I) cùng extension multiply/divide (M), atomic memory access (A) và compressed instruction 16-bit (C). MCU này có trên development board HiFive của SiFive cũng như các development board third-party như dòng RED-V của SparkFun (có cả footprint Arduino và Thing Plus). Mỗi phần mô tả I/O interface sẽ được theo sau bởi ví dụ cụ thể chạy trên FE310. Mọi ví dụ đã được kiểm tra trên RED-V RedBoard của SparkFun và có thể dễ dàng chạy trên development board HiFive hoặc điều chỉnh cho RED-V Thing Plus Board.
+Để trình bày cụ thể, mục này minh họa embedded system I/O trong bối cảnh một hệ thống thực. Cụ thể, chúng ta tập trung vào system-on-chip (SoC) FE310-G002 của SiFive, chứa RISC-V processor 32-bit 320 MHz triển khai RV32IMAC architecture—tức base integer instruction set 32-bit (RV32I) cùng extension multiply/divide (M), atomic memory access (A) và compressed instruction 16-bit (C). MCU này có trên development board HiFive của SiFive cũng như các development board third-party như dòng RED-V của SparkFun (có cả footprint Arduino và Thing Plus). Mỗi phần mô tả I/O interface sẽ được theo sau bởi ví dụ cụ thể chạy trên FE310. Mọi ví dụ đã được kiểm tra trên RED-V RedBoard của SparkFun và có thể dễ dàng chạy trên development board HiFive hoặc điều chỉnh cho RED-V Thing Plus Board.
 
 > Trong toàn bộ chương này, RED-V RedBoard được gọi đơn giản là RED-V.
 
@@ -79,15 +79,13 @@ Form factor của RED-V RedBoard được thiết kế theo footprint Arduino R3
 
 > Chú ý: Nối 5 V vào một I/O 3.3 V có thể làm hỏng I/O và có thể cả FE310. Nếu dùng voltmeter đo I/O pin, hãy cẩn thận để không vô tình tạo tiếp xúc giữa VUSB hoặc VBAT với pin gần đó!
 
-Việc duy trì tương thích với footprint Arduino R3 dẫn đến nhiều tên cho mỗi pin: silkscreen (chữ in trên board) ghi số pin Arduino chuẩn, nhưng pinout RED-V được ghi ở Hình e9.2 cho cả số pin Arduino lẫn số pin GPIO (general-purpose I/O) tương ứng của FE310. Ví
+Việc duy trì tương thích với footprint Arduino R3 dẫn đến nhiều tên cho mỗi pin: silkscreen (chữ in trên board) ghi số pin Arduino chuẩn, nhưng pinout RED-V được ghi ở Hình e9.2 cho cả số pin Arduino lẫn số pin GPIO (general-purpose I/O) tương ứng của FE310. Ví dụ, như Hình e9.2, GPIO5 (FE310 pin 5) tương ứng với D13 (Arduino pin 13). Board RED-V Thing Plus không có cách đặt tên pin Arduino-compatible, nên cũng tránh được việc một pin có nhiều số. Cũng hãy chú ý trong Hình e9.2 rằng một số GPIO pin có nhiều mục đích. Ví dụ, GPIO18 (D2) còn có thể đóng vai trò transmit line cho UART 1 (UART1_TX), như sẽ mô tả sau.
 
 ![fige9_02](images/ch09/fige9_02.png)
 
 Hình e9.2 (a) RED-V RedBoard; (b) RED-V Thing Plus Board
 
 (Ảnh SparkFun cung cấp, dùng theo CC BY 2.0)
-
-dụ, như Hình e9.2, GPIO5 (FE310 pin 5) tương ứng với D13 (Arduino pin 13). Board RED-V Thing Plus không có cách đặt tên pin Arduino-compatible, nên cũng tránh được việc một pin có nhiều số. Cũng hãy chú ý trong Hình e9.2 rằng một số GPIO pin có nhiều mục đích. Ví dụ, GPIO18 (D2) còn có thể đóng vai trò transmit line cho UART 1 (UART1\_TX), như sẽ mô tả sau.
 
 > SiFive được thành lập năm 2015 bởi ba nhà nghiên cứu từ University of California, Berkeley: Krste Asanović, Yunsup Lee và Andrew Waterman. Tầm nhìn của SiFive là khiến việc phát triển custom silicon nhanh hơn và có chi phí dễ tiếp cận hơn bao giờ hết. Tập trung vào RISC-V instruction set architecture (ISA) mở, họ đã phát triển nền tảng cho phép system-level design của custom chip. Có thể tìm thêm thông tin, gồm datasheet FE310-G002, tại sifive.com.
 
@@ -233,9 +231,7 @@ Như thảo luận ở Mục C.8.5 trong phụ lục, structure trong C là các
 
 Bắt đầu thư viện EasyREDVIO bằng cách viết function `pinMode`, `digitalRead` và `digitalWrite` để cấu hình hướng của pin và đọc hoặc ghi pin.
 
-- Function `pinMode` nhận hai input: pin number và mode. Ví
-
-dụ, `pinMode(5, INPUT)` đặt GPIO pin 5 làm input, và `pinMode(17,`
+- Function `pinMode` nhận hai input: pin number và mode. Ví dụ, `pinMode(5, INPUT)` đặt GPIO pin 5 làm input, và `pinMode(17,`
 
 `OUTPUT)` đặt GPIO pin 17 làm output.
 
@@ -394,11 +390,7 @@ Bảng e9.4 Memory map register SPI
 
 Được phép in lại Bảng 65 SiFive FE310-G0002 Manual, © 2019 SiFive, Inc.
 
-Bảng e9.4 cho thấy control register gắn với SPI1, còn Bảng e9.5 cho thấy field của các register chính. `sckdiv` (xem Bảng e9.4) cấu hình SPI clock frequency bằng cách chỉ divisor (`div`) cho input peripheral clock đã chọn—trên board RED-V, tần số mặc định của peripheral clock là 16 MHz. Tần số SPI clock là
-
-![eq_p580](images/ch09/eq_p580.png)
-
-breadboard hoặc hàng chục MHz trên printed circuit board không có termination), kết nối SPI có thể trở nên không đáng tin cậy do phản xạ, crosstalk hoặc vấn đề signal integrity khác.
+Bảng e9.4 cho thấy control register gắn với SPI1, còn Bảng e9.5 cho thấy field của các register chính. `sckdiv` (xem Bảng e9.4) cấu hình SPI clock frequency bằng cách chỉ divisor (`div`) cho input peripheral clock đã chọn—trên board RED-V, tần số mặc định của peripheral clock là 16 MHz. Tần số SPI clock được cho bởi $f_{sck} = \frac{f_{in}}{2(div + 1)}$. Ví dụ, nếu `div` = 15, serial clock là $f_{sck} = \frac{16\,\text{MHz}}{2(15 + 1)}$ = 500 kHz. Nếu tần số quá cao (>\~1 MHz trên breadboard hoặc hàng chục MHz trên printed circuit board không có termination), kết nối SPI có thể trở nên không đáng tin cậy do phản xạ, crosstalk hoặc vấn đề signal integrity khác.
 
 > Configuration register có nhiều bit không dùng hoặc “reserved”. Những bit này có thể được dùng trong phiên bản chip tương lai, nên không được ghi vào để tránh hậu quả ngoài ý muốn trong tương lai.
 
@@ -667,9 +659,7 @@ Serial port device driver code trong `EasyREDVIO.h` được cho ở Ví dụ co
 
 Function `main` trong Ví dụ code e9.6 minh họa việc in ra console và đọc từ console bằng function `putStrSerial` và `getStrSerial`.
 
-#### Ví dụ code e9.5 ĐỌC VÀ GHI CHARACTER (CHAR)
-
-TỚI TERMINAL BẰNG UART
+#### Ví dụ code e9.5 ĐỌC VÀ GHI CHARACTER (CHAR) TỚI TERMINAL BẰNG UART
 
 ```
 void uartInit(uint32_t baud) {
@@ -708,9 +698,7 @@ Embedded system thường cần đo thời gian. Ví dụ, lò vi sóng cần ti
 
 FE310 có system timer với counter free-running 64-bit tăng theo clock signal được cung cấp từ ngoài. Trên RED-V, clock source này là oscillator 32.768 kHz (thuận tiện bằng 2<sup>15</sup> Hz). Hình e9.16 cho memory map của system timer. Nó nằm trong block core-local interruptor (CLINT). `mtime` chứa giá trị hiện tại 64-bit của counter. Có thể đọc hoặc ghi nó; vì vậy, để khởi động lại timer, có thể ghi không vào đó. `mtimecmp` là register 64-bit chứa timer comparison value, và `msip` là machine-mode software interrupt register. Khi counter đạt giá trị trong `mtimecmp`, least significant bit của register `msip` được set thành 1. Dùng register `msip` và `mtimecmp` là cách hiệu quả để kiểm tra delay đã diễn ra. Bảng e9.7 cho memory address của các register này.
 
-#### Ví dụ code e9.6 ĐỌC VÀ GHI STRING TỚI TERMINAL
-
-BẰNG UART
+#### Ví dụ code e9.6 ĐỌC VÀ GHI STRING TỚI TERMINAL BẰNG UART
 
 ```
 #include "EasyREDVIO.h"
@@ -770,7 +758,7 @@ GPIO5 (D13) drive activity LED trên board RED-V. Chương trình ở Ví dụ c
 
 ### 9.3.7 Analog I/O
 
-Thế giới thực là thế giới analog. Nhiều embedded system cần analog input và output để giao tiếp với thế giới. Chúng dùng analog-to-digital converter (ADC) để lượng tử hóa analog signal thành digital value, và digital-to-analog-converters (DAC) để làm ngược lại. Hình e9.15 cho ký hiệu của các thành phần này. Converter như vậy được đặc trưng bởi resolution, dynamic range, sampling rate và accuracy. Ví dụ, ADC có thể có resolution N = 12-bit trên dải V<sub>ref</sub><sup>−</sup> đến V<sub>ref</sub><sup>+</sup> từ 0 đến 5 V, với sampling rate f<sub>s</sub> = 44 kHz và accuracy ±3 least significant bit (lsb). Sampling rate cũng được ghi bằng sample mỗi giây (sps), trong đó 1 sps = 1 Hz. Quan hệ giữa analog input voltage V<sub>in</sub>(t) và digital sample X\[n = t / f<sub>s</sub>\] là
+Thế giới thực là thế giới analog. Nhiều embedded system cần analog input và output để giao tiếp với thế giới. Chúng dùng analog-to-digital converter (ADC) để lượng tử hóa analog signal thành digital value, và digital-to-analog-converters (DAC) để làm ngược lại. Hình e9.15 cho ký hiệu của các thành phần này. Converter như vậy được đặc trưng bởi resolution, dynamic range, sampling rate và accuracy. Ví dụ, ADC có thể có resolution N = 12-bit trên dải V<sub>ref</sub><sup>−</sup> đến V<sub>ref</sub><sup>+</sup> từ 0 đến 5 V, với sampling rate f<sub>s</sub> = 44 kHz và accuracy ±3 least significant bit (lsb). Sampling rate cũng được ghi bằng sample mỗi giây (sps), trong đó 1 sps = 1 Hz. Quan hệ giữa analog input voltage V<sub>in</sub>(t) và digital sample X[n = t / f<sub>s</sub>] là
 
 #### Ví dụ code e9.8 NHẤP NHÁY ACTIVITY LED
 
@@ -892,9 +880,9 @@ int main(void) {
 
 Hình e9.17 Signal Pulse-width modulated PWM
 
-FE310 có ba PWM peripheral; như Bảng e9.3, mỗi PWM có bốn PWM output, tổng cộng 12 PWM output có thể dùng. Output trên PWM0 có precision 8-bit, còn PWM1 và PWM2 có precision 16-bit. Trong mục này, ta chỉ cách dùng PWM2, nhưng cấu hình và sử dụng hai PWM peripheral còn lại theo các bước tương tự. PWM2 có bốn output (PWM2\_PWM0, PWM2\_PWM1, PWM2\_PWM2, PWM2\_PWM3) trên pin GPIO10-13 bằng pin function IOF1.
+FE310 có ba PWM peripheral; như Bảng e9.3, mỗi PWM có bốn PWM output, tổng cộng 12 PWM output có thể dùng. Output trên PWM0 có precision 8-bit, còn PWM1 và PWM2 có precision 16-bit. Trong mục này, ta chỉ cách dùng PWM2, nhưng cấu hình và sử dụng hai PWM peripheral còn lại theo các bước tương tự. PWM2 có bốn output (PWM2_PWM0, PWM2_PWM1, PWM2_PWM2, PWM2_PWM3) trên pin GPIO10-13 bằng pin function IOF1.
 
-PWM có vài waveform generation mode, nhưng ta tập trung tạo PWM waveform như Hình e9.17. Để làm vậy, peripheral được cấu hình repeating mode, trong đó comparator 0 (`pwmcmp0`) đặt chu kỳ và comparator 1 (`pwmcmp1`) đặt thời gian low. Các thời gian này tính theo đơn vị scaled clock period T<sub>cs</sub>. Ví dụ, như Hình e9.17, nếu scaled clock period bằng 0.5 μs (2 MHz) và `pwmcmp0` = 5 thì PWM2\_PWM1 (pin 11) dao động với chu kỳ 5 × 0.5 μs = 2.5 μs (400 kHz). Nếu `pwmcmp1` = 3 thì duty cycle bằng 1−(3/5) = 40%.
+PWM có vài waveform generation mode, nhưng ta tập trung tạo PWM waveform như Hình e9.17. Để làm vậy, peripheral được cấu hình repeating mode, trong đó comparator 0 (`pwmcmp0`) đặt chu kỳ và comparator 1 (`pwmcmp1`) đặt thời gian low. Các thời gian này tính theo đơn vị scaled clock period T<sub>cs</sub>. Ví dụ, như Hình e9.17, nếu scaled clock period bằng 0.5 μs (2 MHz) và `pwmcmp0` = 5 thì PWM2_PWM1 (pin 11) dao động với chu kỳ 5 × 0.5 μs = 2.5 μs (400 kHz). Nếu `pwmcmp1` = 3 thì duty cycle bằng 1−(3/5) = 40%.
 
 Bảng e9.8 Configuration register PWM2
 
@@ -902,7 +890,7 @@ Bảng e9.8 Configuration register PWM2
 
 Điều chỉnh/in với phép Bảng 89 SiFive FE310-G002 Manual, ©2019 SiFive, Inc.
 
-Bảng e9.8 cho memory map của các register PWM2. Trong mục này, ta mô tả các bước cần để cấu hình output PWM1\_PWM1; PWM khác và output của chúng được cấu hình theo quy trình tương tự.
+Bảng e9.8 cho memory map của các register PWM2. Trong mục này, ta mô tả các bước cần để cấu hình output PWM1_PWM1; PWM khác và output của chúng được cấu hình theo quy trình tương tự.
 
 Bảng e9.9 cho bitfield trong PWM configuration register `pwmcfg`. Lưu ý phần lớn bit không được clear khi system reset,
 
@@ -992,8 +980,8 @@ Bảng e9.10 Field register `mcause`
 
 | Bit | Tên field | Mô tả |
 |---|---|---|
-| \[9:0\] | Exception Code | Code xác định exception gần nhất |
-| \[30:10\] | Reserved |  |
+| [9:0] | Exception Code | Code xác định exception gần nhất |
+| [30:10] | Reserved |  |
 | 31 | Interrupt | 1 nếu trap do interrupt; còn lại 0 |
 
 Được phép in lại Bảng 22 SiFive FE310-G0002 Manual, ©2019 SiFive, Inc.
@@ -1049,7 +1037,7 @@ void reset_timer(int count_val) {
 }
 ```
 
-Sau khi thiết lập trap handler, ta đăng ký bằng cách đặt địa chỉ vào register `mtvec`. Cấu trúc của nó ở Bảng e9.11. `mtvec` là register 32-bit, trong đó bit \[31:2\] giữ bit \[31:2\] của địa chỉ trap handler function (bit \[1:0\] tự động được coi là 0 vì instruction phải word aligned trong bộ nhớ). Bit \[1:0\] của `mtvec` được dùng thay vào đó để cấu hình exception được xử lý ở direct hay vector mode. Trong direct mode, bất kể interrupt hay exception nào xảy ra, ta nhảy tới function address do `mtvec[31:2]` chỉ định. Đây là mode dùng ở đây. Trong vectored mode, ta nhảy tới memory address khác nhau tùy interrupt được kích hoạt.
+Sau khi thiết lập trap handler, ta đăng ký bằng cách đặt địa chỉ vào register `mtvec`. Cấu trúc của nó ở Bảng e9.11. `mtvec` là register 32-bit, trong đó bit [31:2] giữ bit [31:2] của địa chỉ trap handler function (bit [1:0] tự động được coi là 0 vì instruction phải word aligned trong bộ nhớ). Bit [1:0] của `mtvec` được dùng thay vào đó để cấu hình exception được xử lý ở direct hay vector mode. Trong direct mode, bất kể interrupt hay exception nào xảy ra, ta nhảy tới function address do `mtvec[31:2]` chỉ định. Đây là mode dùng ở đây. Trong vectored mode, ta nhảy tới memory address khác nhau tùy interrupt được kích hoạt.
 
 Sau khi cấu hình trap handler và thiết lập timer interrupt service routine, ta hoàn tất bằng cách enable machine timer interrupt qua việc set bit 7, machine timer interrupt enable (`MTIE`), trong machine interrupt enable register `mie`, và enable interrupt toàn cục bằng cách
 
@@ -1069,8 +1057,8 @@ Bảng e9.11 Field register `mtvec`
 
 | Bit | Tên field | Mô tả |
 |---|---|---|
-| \[1:0\] | MODE | Đặt mode xử lý direct (`00`) hoặc vectored (`10`) |
-| \[31:2\] | BASE\[31:2\] | Base address của `trap_handler` |
+| [1:0] | MODE | Đặt mode xử lý direct (`00`) hoặc vectored (`10`) |
+| [31:2] | BASE[31:2] | Base address của `trap_handler` |
 
 Điều chỉnh/in với phép Bảng 18 SiFive FE310-G0002 Manual, ©2019 SiFive, Inc.
 
@@ -1275,7 +1263,7 @@ Hình e9.22(a) cho timing từng scan line. Toàn dòng dài 32 μs. Hình e9.22
 
 Hình e9.23 cho pinout của female connector từ video source. Thông tin pixel được truyền bằng ba analog voltage cho đỏ, xanh lá và xanh dương. Mỗi voltage từ 0 đến 0.7 V; dương hơn nghĩa là sáng hơn. Voltage phải bằng 0 trong front porch và back porch. Video signal phải tạo theo real time với tốc độ cao, khó thực hiện trên microcontroller nhưng dễ trên FPGA. Display black-and-white đơn giản có thể tạo bằng lái cả ba color pin tới 0 hoặc 0.7 V, dùng voltage divider nối digital output pin. Ngược lại, color monitor dùng video DAC có ba D/A converter riêng để lái độc lập ba color pin.
 
-Hình e9.24 cho FPGA lái VGA monitor qua triple video DAC 8-bit ADV7125. DAC nhận 8 bit R, G, B từ FPGA. Nó cũng nhận signal SYNC\_b được lái active low bất cứ khi nào HSYNC hoặc VSYNC assert. Video DAC tạo ba output current lái các đường analog đỏ, xanh lá, xanh dương, thường là transmission line 75 Ω có parallel termination ở cả video DAC lẫn monitor. Resistor R<sub>SET</sub> đặt scale output current để đạt toàn dải màu. Clock rate tùy resolution và refresh rate; có thể tới 330 MHz với model DAC fast-grade ADV7125JSTZ330.
+Hình e9.24 cho FPGA lái VGA monitor qua triple video DAC 8-bit ADV7125. DAC nhận 8 bit R, G, B từ FPGA. Nó cũng nhận signal SYNC_b được lái active low bất cứ khi nào HSYNC hoặc VSYNC assert. Video DAC tạo ba output current lái các đường analog đỏ, xanh lá, xanh dương, thường là transmission line 75 Ω có parallel termination ở cả video DAC lẫn monitor. Resistor R<sub>SET</sub> đặt scale output current để đạt toàn dải màu. Clock rate tùy resolution và refresh rate; có thể tới 330 MHz với model DAC fast-grade ADV7125JSTZ330.
 
 ![fige9_22](images/ch09/fige9_22.png)
 
@@ -1446,7 +1434,7 @@ endmodule
 
 Hiện có nhiều chuẩn wireless communication, gồm Wi-Fi, ZigBee và Bluetooth. Các chuẩn phức tạp và cần integrated circuit tinh vi, nhưng ngày càng nhiều module giấu độ phức tạp và cung cấp interface đơn giản cho người dùng. Một module là BlueSMiRF, interface Bluetooth wireless easy-to-use có thể dùng thay serial cable.
 
-Bluetooth là wireless standard do Ericsson phát triển ban đầu năm 1994 để giao tiếp low-power, moderate-speed trong khoảng 5–100 mét, tùy transmitter power. Nó thường nối tai nghe với điện thoại hoặc bàn phím với máy tính. Khác infrared communication link, nó không đòi đường nhìn thẳng giữa thiết bị.
+Bluetooth là wireless standard do Ericsson phát triển ban đầu năm 1994 để giao tiếp low-power, moderate-speed trong khoảng 5–100 mét, tùy transmitter power. Nó thường nối tai nghe với điện thoại hoặc bàn phím với máy tính. Khác infrared communication link, nó không đòi hỏi đường nhìn thẳng giữa thiết bị.
 
 Bluetooth hoạt động trong băng industrial-scientific- medical (ISM) 2.4 GHz không cần cấp phép. Nó định nghĩa 79 radio channel cách nhau 1 MHz, bắt đầu tại 2402 MHz. Nó nhảy qua channel theo pattern pseudo- random để tránh interference liên tục với thiết bị khác như wireless router cùng băng. Như Bảng e9.13, transmitter được phân ba power level, quyết định range và công suất tiêu thụ. Trong basic rate mode, nó chạy 1 Mbit/giây bằng Gaussian frequency shift keying (FSK). FSK thường truyền mỗi bit tại frequency f<sub>c</sub> ± f<sub>d</sub>, với f<sub>c</sub> là center frequency của channel và f<sub>d</sub> là offset ít nhất 115 kHz. Chuyển frequency đột ngột giữa bit tốn thêm bandwidth. Gaussian FSK làm trơn thay đổi frequency để dùng spectrum tốt hơn. Hình e9.26 cho frequency được truyền với chuỗi 0 và 1 trên channel 2402 MHz bằng FSK và GFSK.
 
@@ -1464,7 +1452,7 @@ Module BlueSMiRF Silver trong Hình e9.27(a) chứa Bluetooth radio Class 2, mod
 
 Hình e9.26 Waveform FSK/GFSK
 
-Hình e9.28 cho schematic của link như vậy. Pin TX BlueSMiRF nối RX RED-V và ngược lại. RTS và CTS nối nhau để BlueSMiRF tự handshake.
+Hình e9.28 minh họa schematic cho một kết nối như vậy. Pin TX của BlueSMiRF được nối với pin RX của RED-V và ngược lại. Các pin RTS và CTS được nối với nhau để BlueSMiRF tự thực hiện handshake với chính nó.
 
 BlueSMiRF mặc định 115.2 kbaud với 8 data bit, 1 stop bit, không parity hoặc flow control. Nó dùng digital logic level 3.3 V, nên không cần RS-232 transceiver để nối device 3.3 V khác.
 
@@ -1480,11 +1468,11 @@ Hình e9.27 (a) Module BlueSMiRF, (b) USB dongle
 
 Hình e9.29 DC motor
 
-Để dùng interface, cắm USB Bluetooth dongle vào PC rồi cấp nguồn RED-V và BlueSMiRF. Đèn STAT đỏ của BlueSMiRF nhấp nháy, cho biết đang chờ kết nối. Mở icon Bluetooth trong system tray PC và dùng Add Bluetooth Device Wizard pair dongle với BlueSMiRF. Passkey mặc định là 1234. Ghi lại COM port được gán dongle. Sau đó giao tiếp như qua serial cable. Lưu ý dongle thường chạy 9600 baud và PuTTY phải được cấu hình tương ứng.
+Để sử dụng interface này, hãy cắm một USB Bluetooth dongle vào PC. Cấp nguồn cho RED-V và BlueSMiRF. Đèn STAT màu đỏ trên BlueSMiRF sẽ nhấp nháy, cho biết thiết bị đang chờ thiết lập kết nối. Mở biểu tượng Bluetooth trong system tray của PC và sử dụng Add Bluetooth Device Wizard để ghép đôi dongle với BlueSMiRF. Passkey mặc định của BlueSMiRF là 1234. Ghi lại COM port được gán cho dongle. Sau đó, việc giao tiếp có thể diễn ra giống như qua serial cable. Lưu ý rằng dongle thường hoạt động ở 9600 baud và phải cấu hình PuTTY tương ứng.
 
 ### 9.4.4 Điều khiển motor
 
-Ứng dụng lớn khác của microcontroller là lái actuator như motor. Phần này mô tả ba loại: DC motor, servo motor và stepper motor. DC motor cần drive current lớn, thường cỡ 1 A; GPIO không thể lái trực tiếp, nên cần driver mạnh như H-bridge giữa MCU và motor. Nếu muốn biết vị trí hiện tại, còn cần shaft encoder. Servo nhận signal pulse-width modulated để chỉ vị trí trong dải góc hạn chế. Chúng rất dễ kết nối nhưng không mạnh bằng và không phù hợp quay liên tục. Stepper nhận chuỗi pulse, mỗi pulse quay một góc cố định gọi step. Chúng đắt hơn và vẫn cần H-bridge lái dòng lớn, nhưng vị trí được điều khiển chính xác.
+Một ứng dụng quan trọng khác của microcontroller là điều khiển các actuator như motor. Mục này mô tả ba loại motor: DC motor, servo motor và stepper motor. DC motor cần drive current lớn, thường ở mức khoảng 1 A. Vì vậy, GPIO của microcontroller không thể điều khiển chúng trực tiếp, và phải nối một driver mạnh như H-bridge giữa microcontroller và motor. Motor cũng cần shaft encoder nếu người dùng muốn biết vị trí hiện tại của motor. Servo motor nhận một signal pulse-width modulated để chỉ định vị trí trong một khoảng góc giới hạn. Chúng rất dễ giao tiếp, nhưng công suất không lớn bằng và không phù hợp để quay liên tục. Stepper motor nhận một chuỗi pulse, mỗi pulse làm motor quay một góc cố định được gọi là step. Chúng đắt hơn và vẫn cần H-bridge để điều khiển dòng điện lớn, nhưng có thể điều khiển chính xác vị trí.
 
 Motor có thể dùng dòng đáng kể và gây glitch trên power supply, ảnh hưởng digital logic. Một cách giảm vấn đề là dùng power supply hoặc battery cho motor riêng với digital logic.
 
@@ -1494,11 +1482,11 @@ DC motor
 
 Hình e9.30 H-bridge
 
-Hình e9.29 cho cấu trúc brushed DC motor. Đây là device two-terminal, chứa permanent magnet đứng yên gọi stator và electromagnet quay gọi rotor hoặc armature nối shaft. Đầu rotor nối vòng kim loại chia đôi gọi commutator. Metal brush gắn power lug (input terminal) cọ commutator, cấp dòng cho electromagnet rotor. Điều này tạo magnetic field làm rotor quay để thẳng hàng với stator field. Khi rotor quay một phần vòng và gần thẳng hàng, brush chạm phía đối diện commutator, đảo chiều dòng và magnetic field, khiến nó tiếp tục quay mãi.
+Hình e9.29 minh họa cấu trúc của một brushed DC motor. Motor là thiết bị two-terminal. Nó chứa các nam châm vĩnh cửu đứng yên gọi là stator và một nam châm điện quay gọi là rotor hoặc armature được nối với trục. Đầu trước của rotor nối với một vòng kim loại chia đôi gọi là commutator. Các chổi kim loại gắn với đầu nối nguồn (input terminal) cọ vào commutator, cung cấp dòng điện cho nam châm điện của rotor. Điều này tạo ra từ trường trong rotor khiến rotor quay để thẳng hàng với từ trường của stator. Khi rotor đã quay được một phần vòng và gần thẳng hàng với stator, các chổi chạm vào những phía đối diện của commutator, đảo chiều dòng điện và từ trường, khiến rotor tiếp tục quay liên tục.
 
 DC motor thường quay hàng nghìn vòng/phút (RPM) với torque rất thấp. Phần lớn hệ thêm gear train để giảm tốc xuống mức hợp lý và tăng torque. Hãy tìm gear train được thiết kế phù hợp motor. Pittman sản xuất nhiều DC motor high-quality cùng accessory, còn toy motor rẻ phổ biến trong giới hobbyist.
 
-DC motor cần dòng và điện áp đáng kể để cấp công suất lớn cho load. Dòng cũng cần đảo được để motor quay hai chiều. Phần lớn MCU không đủ dòng lái trực tiếp, nên dùng H-bridge. Về khái niệm nó chứa bốn switch điều khiển điện, như Hình e9.30(a). Tên H-bridge vì bố trí switch giống chữ H. A và D đóng, dòng đi trái sang phải, motor quay một chiều. B và C đóng, dòng phải sang trái, motor quay chiều kia. A,C hoặc B,D đóng ép voltage motor về 0, khiến motor active brake. Nếu không switch nào đóng, motor coast tới dừng. Switch trong H-bridge là power transistor chịu dòng một hoặc nhiều ampere. H-bridge còn chứa digital logic để điều khiển switch thuận tiện. MCU cấp digital input low-current để điều khiển output high-current của H-bridge.
+Một DC motor cần dòng điện và điện áp đáng kể để cung cấp công suất lớn cho tải. Dòng điện cũng phải đảo chiều được để motor có thể quay theo cả hai hướng. Phần lớn microcontroller không thể cung cấp đủ dòng điện để điều khiển trực tiếp một DC motor. Thay vào đó, chúng sử dụng một H-bridge, về nguyên lý gồm bốn switch được điều khiển bằng điện, như trong Hình e9.30(a). Nó được gọi là H-bridge vì cách bố trí các switch giống chữ H. Nếu các switch A và D đóng, dòng điện chạy từ trái sang phải qua motor và motor quay theo một hướng. Nếu B và C đóng, dòng điện chạy từ phải sang trái qua motor và motor quay theo hướng ngược lại. Nếu A và C hoặc B và D đóng, điện áp hai đầu motor bị ép về 0, khiến motor chủ động hãm lại. Nếu không có switch nào đóng, motor sẽ tiếp tục quay theo quán tính cho đến khi dừng. Các switch trong H-bridge là power transistor, tức là chúng chịu được dòng điện lớn từ một ampere trở lên. H-bridge cũng chứa một số digital logic để điều khiển các switch một cách thuận tiện. Microcontroller cung cấp digital input low-current để điều khiển output high-current của H-bridge.
 
 Khi dòng motor đổi đột ngột, inductance của electromagnet tạo voltage spike lớn có thể làm hỏng power transistor. Vì vậy nhiều H-bridges còn có protection diode song song switch, như Hình e9.30(b). Nếu inductive kick đẩy một terminal motor trên V<sub>motor</sub> hoặc dưới ground, diode ON và clamp voltage ở mức an toàn. H-bridges có thể tỏa công suất lớn, nên cần heat sink để giữ mát.
 
@@ -1512,7 +1500,7 @@ Lời giải Hình e9.31 cho cặp DC motor do RED-V điều khiển qua Texas I
 
 Hình e9.31 Điều khiển motor với dual H-bridge
 
-Bảng e9.14 mô tả cách input mỗi H-bridge điều khiển motor. MCU lái enable bằng PWM để điều khiển tốc độ; bốn pin khác điều khiển hướng từng motor.
+Bảng e9.14 mô tả cách các input của từng H-bridge điều khiển một motor. Microcontroller điều khiển các signal enable bằng một signal PWM để điều chỉnh tốc độ của các motor. Nó điều khiển bốn pin còn lại để xác định hướng quay của từng motor.
 
 PWM được cấu hình khoảng 5 kHz, duty cycle từ 0% đến 100%. Bất kỳ PWM frequency cao hơn nhiều bandwidth motor đều cho hiệu ứng chuyển động mượt. Quan hệ duty cycle với tốc độ là nonlinear; dưới một duty cycle nào đó motor hoàn toàn không chuyển động.
 
@@ -1594,17 +1582,17 @@ int  main(void) {
 
 Hình e9.32 Shaft encoder: (a) đĩa, (b) quadrature output
 
-Ví dụ trước không có cách đo vị trí từng motor. Hai motor khó khớp tuyệt đối, nên một motor có thể nhanh hơn chút, khiến robot lệch hướng. Để giải quyết, một số hệ thêm shaft encoder. Hình e9.32(a) là encoder đơn giản gồm đĩa có khe gắn shaft motor, LED một bên và light sensor bên kia. Encoder tạo pulse mỗi lần khe quay qua LED. MCU đếm pulse đo tổng góc shaft đã quay. Hai cặp LED/sensor cách nửa độ rộng khe cho quadrature output như Hình e9.32(b), chỉ cả hướng và góc. Đôi khi encoder thêm lỗ cho biết shaft tại index position.
+Trong ví dụ trước, không có cách nào đo vị trí của từng motor. Hai motor khó có thể hoàn toàn giống nhau, nên một motor có khả năng quay nhanh hơn motor còn lại một chút, khiến robot lệch khỏi hướng di chuyển. Để giải quyết vấn đề này, một số hệ thống bổ sung shaft encoder. Hình e9.32(a) minh họa một shaft encoder đơn giản gồm một đĩa có các khe, được gắn vào trục motor. Một LED được đặt ở một bên và một cảm biến ánh sáng được đặt ở bên còn lại. Shaft encoder tạo ra một pulse mỗi khi một khe quay qua LED. Microcontroller có thể đếm những pulse này để đo tổng góc mà trục đã quay. Bằng cách sử dụng hai cặp LED/cảm biến đặt cách nhau nửa độ rộng của một khe, một shaft encoder cải tiến có thể tạo ra các quadrature output như trong Hình e9.32(b), cho biết cả hướng quay lẫn góc quay của trục. Đôi khi, shaft encoder có thêm một lỗ để chỉ báo khi trục ở một index position.
 
 Servo motor
 
-Servo motor là DC motor tích hợp gear train, shaft encoder và control logic để dễ dùng hơn. Góc quay hạn chế, thường 180°. Hình e9.33 cho servo mở nắp để thấy gear. Servo có interface 3-pin: power thường 5 V, ground và control input. Control thường là signal pulse-width modulated 50 Hz. Control logic lái shaft tới vị trí do duty cycle input quyết định. Shaft encoder thường là rotary potentiometer tạo voltage phụ thuộc vị trí shaft.
+Servo motor là một DC motor được tích hợp với gear train, shaft encoder và một số control logic để dễ sử dụng hơn. Nó có phạm vi quay giới hạn, thường là 180°. Hình e9.33 minh họa một servo đã tháo nắp để thấy các bánh răng. Servo motor có interface 3-pin gồm nguồn điện (thường là 5 V), ground và một control input. Control input thường là một signal pulse-width modulated 50 Hz. Control logic của servo điều khiển trục đến vị trí được xác định bởi duty cycle của control input. Shaft encoder của servo thường là một potentiometer xoay tạo ra điện áp phụ thuộc vào vị trí của trục.
 
 ![fige9_33](images/ch09/fige9_33.png)
 
 Hình e9.33 Servo motor SG90
 
-Trong servo điển hình quay 180 độ, pulse width 1 ms đưa shaft tới 0°, 1.5 ms tới 90°, 2 ms tới 180°. Ví dụ Hình e9.34 cho pulse width 1.5 ms. Lái ngoài range có thể khiến motor đụng mechanical stop và hỏng. Nguồn servo đến từ power pin thay vì control pin, nên control nối trực tiếp MCU không cần H-bridge. Servo thường dùng trong remote-control model airplane và robot nhỏ vì nhỏ, nhẹ, thuận tiện. Có thể khó tìm motor với datasheet đầy đủ. Pin giữa dây đỏ thường power, dây đen/nâu thường ground.
+Trong một servo motor điển hình có phạm vi quay 180 độ, pulse width 1 ms đưa trục đến 0°, 1.5 ms đưa trục đến 90° và 2 ms đưa trục đến 180°. Ví dụ, Hình e9.34 minh họa một control signal có pulse width 1.5 ms. Điều khiển servo vượt khỏi phạm vi của nó có thể khiến nó va vào các điểm chặn cơ khí và bị hỏng. Nguồn điện của servo đến từ power pin thay vì control pin, nên đường điều khiển có thể nối trực tiếp với microcontroller mà không cần H-bridge. Servo motor thường được sử dụng trong mô hình máy bay remote-control và robot nhỏ vì chúng nhỏ, nhẹ và thuận tiện. Việc tìm một motor có datasheet đầy đủ có thể khó khăn. Pin ở giữa có dây màu đỏ thường là nguồn điện, còn dây màu đen hoặc nâu thường là ground.
 
 ![fige9_34](images/ch09/fige9_34.png)
 
@@ -1618,7 +1606,7 @@ Hình e9.35 Điều khiển servo motor
 
 Thiết kế hệ thống trong đó RED-V lái servo motor đến góc mong muốn.
 
-Lời giải Hình e9.35 cho sơ đồ nối servo SG90, gồm màu dây trên cable. Servo dùng nguồn 4.0–7.2 V, dòng tới 0.5 A nếu phải tạo lực lớn, nhưng load nhẹ có thể chạy trực tiếp nguồn RED-V. Một dây mang PWM, có thể ở logic level 5 hoặc 3.3 V. Code cấu hình PWM và tính duty cycle phù hợp góc, lần lượt đặt servo ở 0°, 90°, 180°.
+Lời giải Hình e9.35 minh họa sơ đồ kết nối với một servo motor SG90, bao gồm màu của các dây trên cáp servo. Servo hoạt động với nguồn điện từ 4.0 đến 7.2 V. Nó có thể tiêu thụ dòng điện đến 0.5 A nếu phải tạo ra lực lớn, nhưng có thể hoạt động trực tiếp từ nguồn điện của RED-V nếu tải nhẹ. Một dây duy nhất mang signal PWM, có thể được cung cấp ở logic level 5 hoặc 3.3 V. Code cấu hình việc tạo PWM và tính duty cycle phù hợp với góc mong muốn. Nó lần lượt đặt servo ở các vị trí 0°, 90° và 180°.
 
 #### Ví dụ code e9.19 DRIVER SERVO MOTOR
 
@@ -1648,11 +1636,11 @@ int main(void) {
 }
 ```
 
-Cũng có thể chuyển servo thường thành continuous rotation servo bằng tháo cẩn thận, bỏ mechanical stop và thay potentiometer bằng fixed voltage divider. Nhiều website hướng dẫn chi tiết từng servo. Khi đó PWM điều khiển velocity thay position: 1.5 ms dừng, 2 ms tiến hết tốc, 1 ms lùi hết tốc. Continuous rotation servo có thể thuận tiện và rẻ hơn DC motor đơn giản ghép H-bridge, gear train.
+Cũng có thể chuyển một servo thông thường thành continuous rotation servo bằng cách cẩn thận tháo nó ra, loại bỏ điểm chặn cơ khí và thay potentiometer bằng một bộ chia điện áp cố định. Nhiều website cung cấp hướng dẫn chi tiết cho các servo cụ thể. Khi đó, PWM sẽ điều khiển vận tốc thay vì vị trí, với 1.5 ms biểu thị dừng, 2 ms biểu thị quay tiến ở tốc độ tối đa và 1 ms biểu thị quay lùi ở tốc độ tối đa. Continuous rotation servo có thể thuận tiện hơn và ít tốn kém hơn một DC motor đơn giản kết hợp với H-bridge và gear train.
 
 Stepper motor
 
-Stepper motor tiến các step rời rạc khi pulse được áp luân phiên vào input. Step thường vài độ, cho định vị chính xác và quay liên tục. Motor nhỏ thường có hai bộ coil gọi phase, nối bipolar hoặc unipolar. Với cùng kích thước, bipolar mạnh và rẻ hơn nhưng cần H-bridge driver; unipolar lái được bằng transistor switch. Phần này tập trung bipolar hiệu quả hơn.
+Stepper motor chuyển động theo các step rời rạc khi các pulse được đưa luân phiên vào các input. Kích thước mỗi step thường là vài độ, cho phép định vị chính xác và quay liên tục. Các stepper motor nhỏ thường có hai bộ cuộn dây gọi là phase, được nối theo cấu hình bipolar hoặc unipolar. Với cùng kích thước, bipolar motor có công suất lớn hơn và giá rẻ hơn, nhưng cần driver H-bridge, còn unipolar motor có thể được điều khiển bằng các transistor hoạt động như switch. Mục này tập trung vào bipolar stepper motor, là loại hiệu quả hơn.
 
 Hình e9.36(a) là bipolar motor two-phase đơn giản, step 90-degree. Rotor là permanent magnet một cực bắc, một cực nam. Stator là electromagnet gồm hai cặp coil tạo hai phase. Vì vậy motor Two-phase bipolar có bốn terminal. Hình e9.36(b) cho symbol stepper, mô hình hai coil như inductor. Motor thực thêm gearing để giảm output step, tăng torque.
 
@@ -1660,7 +1648,7 @@ Hình e9.36(a) là bipolar motor two-phase đơn giản, step 90-degree. Rotor l
 
 Hình e9.36 Motor bipolar Two-phase: (a) sơ đồ đơn giản, (b) symbol
 
-Hình e9.37 cho ba drive sequence phổ biến của bipolar motor two-phase. Hình e9.37(a) là wave drive theo AB–CD–BA–DC. BA nghĩa coil AB được cấp dòng ngược; đó là nguồn tên bipolar. Rotor quay 90 độ mỗi step. Hình e9.37(b) là two-phase-on theo (AB, CD)–(BA, CD)–(BA, DC)–(AB, DC). (AB, CD) chỉ cả hai coil được cấp đồng thời. Rotor vẫn quay 90 độ mỗi step nhưng nằm giữa hai pole position, cho torque cao nhất vì cả hai coil cùng cấp công suất. Hình e9.37(c) là half-step theo (AB, CD)–CD–(BA, CD)–BA–(BA, DC)– DC–(AB, DC)–AB. Rotor quay 45 độ mỗi half-step. Tốc độ pattern tiến quyết định tốc độ motor. Đảo hướng bằng cùng sequence theo thứ tự ngược.
+Hình e9.37 minh họa ba drive sequence phổ biến cho một bipolar motor two-phase. Hình e9.37(a) minh họa wave drive, trong đó các cuộn dây được cấp điện theo trình tự AB–CD–BA–DC. Lưu ý rằng BA có nghĩa là cuộn dây AB được cấp điện với dòng điện chạy theo hướng ngược lại; đây là nguồn gốc của tên gọi bipolar. Rotor quay 90 độ ở mỗi step. Hình e9.37(b) minh họa two-phase-on drive theo mẫu (AB, CD)–(BA, CD)–(BA, DC)–(AB, DC). (AB, CD) biểu thị rằng cả hai cuộn dây AB và CD được cấp điện đồng thời. Rotor vẫn quay 90 độ ở mỗi step, nhưng tự căn chỉnh vào vị trí nằm giữa hai pole position. Cách này tạo ra torque cao nhất vì cả hai cuộn dây đều cung cấp công suất cùng lúc. Hình e9.37(c) minh họa half-step drive theo mẫu (AB, CD)–CD–(BA, CD)–BA–(BA, DC)– DC–(AB, DC)–AB. Rotor quay 45 độ ở mỗi half-step. Tốc độ chuyển tiếp giữa các phần của mẫu quyết định tốc độ motor. Để đảo hướng quay của motor, các drive sequence tương tự được áp dụng theo thứ tự ngược lại.
 
 ![fige9_37](images/ch09/fige9_37.png)
 
@@ -1672,13 +1660,13 @@ Trong motor thực, rotor có nhiều pole để góc giữa các step nhỏ hơ
 
 Hình e9.38 Dòng bipolar stepper direct drive: (a) chậm, (b) nhanh, (c) nhanh với chopper drive
 
-Torque motor tỷ lệ coil current. Dòng do voltage áp vào, inductance L và resistance R quyết định. Cách đơn giản nhất gọi direct voltage drive hoặc L/R drive: áp V trực tiếp coil. Dòng tăng tới I = V/R với time constant L/R như Hình e9.38(a), tốt khi quay chậm. Nhưng ở tốc độ cao, dòng không đủ thời gian lên đầy như Hình e9.38(b), làm torque giảm.
+Torque của motor tỷ lệ thuận với dòng điện qua cuộn dây. Dòng điện này được xác định bởi điện áp đặt vào, inductance L và resistance R của cuộn dây. Chế độ hoạt động đơn giản nhất được gọi là direct voltage drive hoặc L/R drive, trong đó điện áp V được đặt trực tiếp lên cuộn dây. Dòng điện tăng dần đến I = V/R với time constant được xác định bởi L/R, như trong Hình e9.38(a). Cách này hoạt động tốt ở tốc độ thấp. Tuy nhiên, ở tốc độ cao hơn, dòng điện không có đủ thời gian để tăng đến mức đầy đủ, như trong Hình e9.38(b), và torque giảm xuống.
 
 ![fige9_39](images/ch09/fige9_39.png)
 
 Hình e9.39 Bipolar stepper AIRPAX LB82773-M1
 
-Cách hiệu quả hơn lái stepper là pulse-width modulate voltage cao hơn. Voltage cao khiến dòng đạt mức đầy nhanh hơn, rồi tắt trong phần off của PWM để tránh quá tải motor. Voltage được modulate hoặc chop để duy trì dòng gần mức mong muốn. Đây là chopper constant current drive, Hình e9.38(c). Controller dùng resistor nhỏ nối tiếp motor, đo voltage drop để cảm dòng, rồi đưa enable tới H-bridge để tắt drive khi dòng đạt mức muốn. MCU về nguyên tắc tạo được waveform đúng, nhưng dùng stepper motor controller dễ hơn. L297 của ST Microelectronics thuận tiện, nhất là ghép dual H-bridge L298 có current sensing pin và peak current 2 A. Đáng tiếc L298 không có DIP nên khó breadboard. Application note AN460, AN470 của ST là tài liệu giá trị cho stepper designer.
+Một cách hiệu quả hơn để điều khiển stepper motor là áp dụng điều chế pulse-width cho một điện áp cao hơn. Điện áp cao khiến dòng điện tăng đến mức đầy đủ nhanh hơn; sau đó, điện áp được tắt (trong phần off của duty cycle PWM) để tránh làm motor quá tải. Tiếp theo, điện áp được điều chế hoặc ngắt theo xung để duy trì dòng điện gần mức mong muốn. Cách này được gọi là chopper constant current drive và được minh họa trong Hình e9.38(c). Controller sử dụng một resistor nhỏ mắc nối tiếp với motor để đo dòng điện đang được cấp thông qua sụt áp, và đưa signal enable đến H-bridge để ngắt drive khi dòng điện đạt mức mong muốn. Về nguyên tắc, microcontroller có thể tạo ra các waveform thích hợp, nhưng sử dụng stepper motor controller sẽ dễ hơn. Controller L297 của ST Microelectronics là một lựa chọn thuận tiện, đặc biệt khi kết hợp với dual H-bridge L298 có các pin cảm biến dòng điện và khả năng chịu dòng đỉnh 2 A. Đáng tiếc, L298 không có package DIP nên khó lắp trên breadboard hơn. Các application note AN460 và AN470 của ST là những tài liệu tham khảo có giá trị cho người thiết kế stepper motor.
 
 #### Ví dụ e9.14 BIPOLAR STEPPER MOTOR DIRECT WAVE DRIVE
 
@@ -1694,7 +1682,7 @@ Hình e9.40 Bipolar stepper direct drive với H-bridge
 
 Phần lớn processor dùng memory-mapped I/O giao tiếp thế giới thực. MCU cung cấp các peripheral cơ bản gồm general-purpose, serial, analog I/O và timer.
 
-Chương này cung cấp nhiều ví dụ I/O cụ thể dùng microcontroller FE310 RISC-V trên SparkFun RED-V RedBoard. Embedded designer liên tục gặp processor và peripheral mới. Nguyên tắc tích hợp embedded I/O đơn giản là tra datasheet xác định peripheral sẵn có, pin và register memory-mapped I/O liên quan. Sau đó thường khá dễ viết device driver đơn giản khởi tạo register, truyền hoặc nhận data.
+Chương này đã cung cấp nhiều ví dụ cụ thể về I/O sử dụng microcontroller FE310 RISC-V trên SparkFun RED-V RedBoard. Các nhà thiết kế embedded system liên tục gặp những processor và peripheral mới. Nguyên tắc chung để tích hợp embedded I/O đơn giản là tham khảo datasheet để xác định những peripheral sẵn có, cùng các pin và register memory-mapped I/O liên quan. Sau đó, thường có thể dễ dàng viết một device driver đơn giản để khởi tạo các register của peripheral và truyền hoặc nhận data.
 
 Với chuẩn phức tạp như USB, viết device driver là công việc rất chuyên biệt, tốt nhất do chuyên gia hiểu chi tiết device và USB protocol stack thực hiện. Designer không chuyên nên chọn processor có device driver đã được kiểm chứng và code ví dụ cho device mình quan tâm.
 

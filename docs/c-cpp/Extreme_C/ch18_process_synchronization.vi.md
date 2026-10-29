@@ -672,10 +672,10 @@ int main(int argc, char** argv) {
   init_shared_resource();
   // Parent process needs to initialize the control mechanism
   init_control_mechanism();
- while(!is_canceled()) {
- fprintf(stdout, "Working ...\n");
- sleep(1);
- }
+  while(!is_canceled()) {
+    fprintf(stdout, "Working ...\n");
+    sleep(1);
+  }
   fprintf(stdout, "Cancel signal is received.\n");
   shutdown_shared_resource();
   shutdown_control_mechanism();
@@ -920,7 +920,7 @@ Như bạn thấy, chúng ta chỉ<a id="_idIndexMarker1286"></a> sao chép code
 
 ### Bước 2 – Class bộ đếm số nguyên 32-bit dùng chung
 
-Code box sau<a id="_idIndexMarker1287"></a> chứa khai báo của class bộ đếm dùng chung, vốn là một bộ đếm số nguyên 32-bit. Class này kế thừa từ class shared memory. Như bạn có thể đã để ý, chúng ta đang dùng cách tiếp cận thứ hai mà chúng tôi đã mô tả trong *Chương 8*, *Inheritance và Polymorphism*, để hiện thực quan hệ inheritance:
+Code box sau<a id="_idIndexMarker1287"></a> chứa khai báo của class bộ đếm dùng chung, vốn là một bộ đếm số nguyên 32-bit. Class này kế thừa từ class shared memory. Như bạn có thể đã để ý, chúng ta đang dùng cách tiếp cận thứ hai mà chúng tôi đã mô tả trong *Chương 8*, *Inheritance và Polymorphism*, để triển khai quan hệ inheritance:
 
 ```
 struct shared_int32_t;
@@ -938,7 +938,7 @@ int32_t shared_int32_getvalue(struct shared_int32_t* obj);
 
 *Code Box 18-19 [ExtremeC_examples_chapter18_4_shared_int32.h]: Public interface của class bộ đếm dùng chung*
 
-Và code box sau cho thấy hiện thực của các hàm đã khai báo ở trên:
+Và code box sau cho thấy bản triển khai của các hàm đã khai báo ở trên:
 
 ```
 #include "ExtremeC_examples_chapter18_4_shared_mem.h"
@@ -1007,7 +1007,7 @@ void shared_mutex_make_consistent(struct shared_mutex_t* obj);
 
 Như bạn thấy, class trên có ba behavior được phơi ra như kỳ vọng; `shared_mutex_lock`, `shared_mutex_unlock` và `shared_mutex_make_consistent`. Nhưng có một ngoại lệ, đó là behavior `shared_mutex_make_consistent` chỉ có sẵn trong các hệ thống POSIX không dựa trên macOS (Apple). Đó là vì *robust mutex* không được các hệ thống Apple hỗ trợ. Chúng ta sẽ thảo luận robust mutex là gì trong các đoạn sắp tới. Lưu ý rằng chúng ta đã dùng macro `__APPLE__` để phát hiện xem chúng ta có đang biên dịch trên một hệ thống Apple hay không.
 
-Code box sau cho thấy hiện thực của class trên:
+Code box sau cho thấy bản triển khai của class trên:
 
 ```
 #include "ExtremeC_examples_chapter18_4_shared_mem.h"
@@ -1156,7 +1156,7 @@ Ba behavior được phơi ra; `shared_cond_wait`, `shared_cond_timedwait` và `
 
 Ở trên, chúng ta đã thêm một phiên bản mới của behavior chờ; `shared_cond_timedwait`. Nó chờ signal trong một khoảng thời gian được chỉ định và sau đó nó hết thời gian chờ (time out) nếu condition variable không nhận được signal. Mặt khác, `shared_cond_wait` không bao giờ thoát cho đến khi nó nhận được một loại signal nào đó. Chúng ta sẽ dùng phiên bản chờ có thời hạn trong *ví dụ 18.4*. Lưu ý rằng cả hai behavior function chờ đều nhận một pointer tới mutex dùng chung đồng hành giống như những gì chúng ta đã thấy trong các môi trường multi-threaded.
 
-Code box sau chứa hiện thực thực sự của class condition variable<a id="_idIndexMarker1296"></a> dùng chung:
+Code box sau chứa bản triển khai thực sự của class condition variable<a id="_idIndexMarker1296"></a> dùng chung:
 
 ```
 #include "ExtremeC_examples_chapter18_4_shared_mem.h"
@@ -1283,7 +1283,7 @@ Lưu ý rằng vì mọi condition variable đều có một mutex đồng hành
 
 ### Bước 5 – Logic chính
 
-Code<a id="_idIndexMarker1299"></a> box sau chứa logic chính được hiện thực cho ví dụ của chúng ta:
+Code<a id="_idIndexMarker1299"></a> box sau chứa logic chính được triển khai cho ví dụ của chúng ta:
 
 ```
 #include "ExtremeC_examples_chapter18_4_shared_int32.h"
@@ -1504,7 +1504,7 @@ Trong chương này, chúng ta đã hoàn tất thảo luận về các môi tr�
 
 - Named semaphore là gì và nó có thể được tạo và dùng bởi nhiều process như thế nào.
 - Named mutex là gì và nó nên được dùng với một vùng shared memory như thế nào.
-- Chúng tôi đã đưa ra một ví dụ về việc điều phối kết thúc trong đó một số process đang chờ một dấu hiệu để kết thúc và signal được nhận và xử lý bởi một trong các process và được lan truyền tới các process khác. Chúng tôi đã hiện thực ví dụ này bằng mutex dùng chung.
+- Chúng tôi đã đưa ra một ví dụ về việc điều phối kết thúc trong đó một số process đang chờ một dấu hiệu để kết thúc và signal được nhận và xử lý bởi một trong các process và được lan truyền tới các process khác. Chúng tôi đã triển khai ví dụ này bằng mutex dùng chung.
 - Named condition variable là gì và nó có thể trở thành dùng chung và có tên bằng một vùng shared memory như thế nào.
 - Chúng tôi đã minh họa một ví dụ khác về các process đếm. Trong ví dụ này, chúng ta đã dùng inheritance để giảm lượng code trùng lặp cho các đối tượng mutex và condition variable có một vùng shared memory liên kết.
 - Chúng ta đã khám phá ngắn gọn những khác biệt và thách thức có trong một hệ thống phân tán.

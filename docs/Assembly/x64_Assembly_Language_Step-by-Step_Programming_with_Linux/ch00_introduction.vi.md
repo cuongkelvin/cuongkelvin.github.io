@@ -56,7 +56,7 @@ Bạn sẽ cần một phần mềm miễn phí tên là SASM, là một môi tr
 
 Bạn không cần phải biết trước cách tải về, cài đặt và cấu hình những công cụ này bởi vì, vào những thời điểm thích hợp, tôi sẽ trình bày toàn bộ việc cài đặt và cấu hình công cụ cần thiết.
 
-Xin lưu ý rằng những bản hiện thực Unix khác không dựa trên Linux kernel có thể không hoạt động chính xác theo cùng một cách ở bên dưới. Chẳng hạn, BSD Unix dùng những quy ước khác để thực hiện system call, và các phiên bản Unix khác như Solaris thì nằm ngoài kinh nghiệm của tôi.
+Xin lưu ý rằng những bản triển khai Unix khác không dựa trên Linux kernel có thể không hoạt động chính xác theo cùng một cách ở bên dưới. Chẳng hạn, BSD Unix dùng những quy ước khác để thực hiện system call, và các phiên bản Unix khác như Solaris thì nằm ngoài kinh nghiệm của tôi.
 
 Hãy nhớ rằng *cuốn sách này nói về architecture x64*. Trong chừng mực x64 bao hàm x86, tôi cũng sẽ dạy các thành phần của architecture x86. Khoảng cách giữa x86 32-bit và x64 64-bit hẹp hơn *rất nhiều* so với khoảng cách giữa x86 16-bit và x86 32-bit. Nếu bạn đã có nền tảng vững chắc về x86 32-bit, bạn sẽ lướt qua phần lớn cuốn sách này như ngựa phi nước đại. Nếu bạn làm được vậy, tuyệt—chỉ xin bạn nhớ rằng cuốn sách này dành cho những người mới bắt đầu lập trình trên CPU Intel.
 

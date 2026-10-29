@@ -175,11 +175,7 @@ if (!ctlr->send_msg && !ctlr->recv_msg){
 EXPORT_SYMBOL_GPL(packt_register_controller);
 ```
 
-Trong hai function này, chúng ta minh họa controller allocation operation và registration operation. Allocation method cấp phát memory và khởi tạo cơ bản, để driver làm phần còn lại. Lưu ý sau khi đăng ký controller, nó xuất hiện dưới `/sys/devices` trong sysfs. Mọi device thêm vào bus này xuất hiện dưới `/sys/devices/packt-`
-
-```
-0/.
-```
+Trong hai function này, chúng ta minh họa controller allocation operation và registration operation. Allocation method cấp phát memory và khởi tạo cơ bản, để driver làm phần còn lại. Lưu ý sau khi đăng ký controller, nó xuất hiện dưới `/sys/devices` trong sysfs. Mọi device thêm vào bus này xuất hiện dưới `/sys/devices/packt-0/`.
 
 ### Đăng ký bus
 
@@ -423,11 +419,7 @@ Bây giờ đã định nghĩa data structure, hãy tìm hiểu cơ chế bên d
 
 Trước khi đi tiếp, hãy định nghĩa một số thuật ngữ dùng xuyên suốt chương:
 
-- sysfs: sysfs là in-memory virtual filesystem thể hiện kernel object hierarchy, được trừu tượng hóa bằng instance `struct`
-
-```
-kobject.
-```
+- sysfs: sysfs là in-memory virtual filesystem thể hiện kernel object hierarchy, được trừu tượng hóa bằng instance `struct` `kobject`.
 
 - Attribute: Attribute (hoặc sysfs attribute) xuất hiện như file trong sysfs. Trong kernel, nó có thể được map tới bất kỳ thứ gì: biến, device property, buffer hoặc thứ hữu ích nào với driver cần được export ra bên ngoài.
 
@@ -645,10 +637,9 @@ retval = kobject_init_and_add(&bar_kobj, &bar_ktype,
                               NULL, "bar_name");
 ```
 
-Khi dùng xong `kset`, có thể giải phóng bằng `kset_unregister()`, sau đó nó được giải phóng động khi không còn dùng. Code sau giải phóng đối tượng trong ví dụ của chúng ta
+Khi dùng xong `kset`, có thể giải phóng bằng `kset_unregister()`, sau đó nó được giải phóng động khi không còn dùng. Code sau giải phóng đối tượng trong ví dụ của chúng ta `kset`:
 
 ```
-kset:
 kset_unregister(example_kset);
 ```
 
@@ -689,10 +680,9 @@ Trong data structure này, `attr` là attribute biểu diễn file cần tạo, 
 
 Dùng structure `kobj_attribute` chứa bên ngoài giúp phát triển tổng quát hơn và tăng tính linh hoạt của attribute. Theo cách này, pointer tới `attr` được truyền cho function `store` hoặc `show`, không chỉ dùng xác định attribute đang truy cập mà còn lấy data structure chứa nó (tức `kobj_attribute`), từ đó có thể gọi method `show`/`store` của attribute. Để làm vậy, có thể dùng macro `container_of` lấy pointer tới embedding structure.
 
-Sau đây là đoạn trích từ `lib/kobject.c`, minh họa cơ chế tổng quát này trong cả method `show` và `store` của sysfs operations element kernel-provided: `kobj_sysfs_ops`. Thành phần này cũng là sysfs operations data structure (thành phần `kobj_type->sysfs_ops`) được dùng bởi
+Sau đây là đoạn trích từ `lib/kobject.c`, minh họa cơ chế tổng quát này trong cả method `show` và `store` của sysfs operations element kernel-provided: `kobj_sysfs_ops`. Thành phần này cũng là sysfs operations data structure (thành phần `kobj_type->sysfs_ops`) được dùng bởi `dynamic_kobj_ktype`:
 
 ```
-dynamic_kobj_ktype:
 static ssize_t kobj_attr_show(struct kobject *kobj,
                      struct attribute *attr, char *buf)
 {
@@ -1283,11 +1273,7 @@ int bus_create_file(struct bus_type *bus,
 }
 ```
 
-Để một công đôi việc, code trên cũng cho thấy `device_create_file()`, `bus_create_file()`, `driver_create_file()` và `class_create_file()` đều gọi nội bộ tới
-
-```
-sysfs_create_file().
-```
+Để một công đôi việc, code trên cũng cho thấy `device_create_file()`, `bus_create_file()`, `driver_create_file()` và `class_create_file()` đều gọi nội bộ tới `sysfs_create_file()`.
 
 Khi dùng xong mỗi attribute object tương ứng, phải gọi removal method thích hợp. Code sau thể hiện các lựa chọn có thể:
 

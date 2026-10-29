@@ -2,23 +2,23 @@
 
 # <a id="page_69"></a>4 HIỆN THỰC CRYPTOGRAPHY (CRYPTOGRAPHIC IMPLEMENTATIONS)
 
-Trong [Chương 2](ch02_cryptography.vi.md#ch02), tôi đã đưa ra một cái nhìn tổng quan về các thuật toán cryptography, các tham số của chúng và các use case điển hình. Tuy nhiên, một thuật toán toán học vẫn còn cách rất xa các *hiện thực* cryptography an toàn và hiệu quả.
+Trong [Chương 2](ch02_cryptography.vi.md#ch02), tôi đã đưa ra một cái nhìn tổng quan về các thuật toán cryptography, các tham số của chúng và các use case điển hình. Tuy nhiên, một thuật toán toán học vẫn còn cách rất xa các *bản triển khai* cryptography an toàn và hiệu quả.
 
-Trong phần lớn các ứng dụng, cryptography không đóng vai trò chủ đạo. Nó giống một thứ xấu cần thiết để bảo vệ các asset của thiết bị và của doanh nghiệp hơn. Do đó, developer và product manager rất muốn có các hiện thực cryptography chạy tức thì, không chiếm memory và không tiêu thụ năng lượng. Dĩ nhiên, điều đó là không thể, nhưng nó là một điểm thảo luận quan trọng trong nhiều trường hợp. Các hiện thực kém hiệu quả thậm chí có thể dẫn đến việc loại bỏ các tính năng bảo mật, làm giảm chất lượng sản phẩm, hay ít nhất là những lời bình phẩm khó chịu từ các đồng nghiệp không tập trung vào bảo mật.
+Trong phần lớn các ứng dụng, cryptography không đóng vai trò chủ đạo. Nó giống một thứ xấu cần thiết để bảo vệ các asset của thiết bị và của doanh nghiệp hơn. Do đó, developer và product manager rất muốn có các bản triển khai cryptography chạy tức thì, không chiếm memory và không tiêu thụ năng lượng. Dĩ nhiên, điều đó là không thể, nhưng nó là một điểm thảo luận quan trọng trong nhiều trường hợp. Các bản triển khai kém hiệu quả thậm chí có thể dẫn đến việc loại bỏ các tính năng bảo mật, làm giảm chất lượng sản phẩm, hay ít nhất là những lời bình phẩm khó chịu từ các đồng nghiệp không tập trung vào bảo mật.
 
-Trong chương này, tôi sẽ thảo luận các yêu cầu đối với hiện thực cryptography và các lựa chọn dành cho developer. Các phần tiếp theo giới thiệu các ví dụ về tối ưu hóa thuật toán cho crypto đối xứng và bất đối xứng. Case study cuối cùng phân tích và thảo luận các đặc tính performance của các hiện thực crypto trong phần cứng và phần mềm trên một thiết bị STM32MP157F.
+Trong chương này, tôi sẽ thảo luận các yêu cầu đối với bản triển khai cryptography và các lựa chọn dành cho developer. Các phần tiếp theo giới thiệu các ví dụ về tối ưu hóa thuật toán cho crypto đối xứng và bất đối xứng. Case study cuối cùng phân tích và thảo luận các đặc tính performance của các bản triển khai crypto trong phần cứng và phần mềm trên một thiết bị STM32MP157F.
 
 <a id="ch00lev1_35"></a>
 
-## <a id="page_70"></a>Ngữ cảnh hiện thực và yêu cầu
+## <a id="page_70"></a>Ngữ cảnh triển khai và yêu cầu
 
 Developer chọn vi mạch trung tâm từ sớm trong các giai đoạn thiết kế sản phẩm và phát triển architecture vì nhiều quyết định tiếp theo phụ thuộc vào nó. Vi mạch đó có thể là một microcontroller single-core, một hệ thống multicore đồng nhất hay không đồng nhất, một field-programmable gate array (FPGA), hay thậm chí một system-on-chip (SoC) kết hợp processor, ngoại vi và có thể cả FPGA trong một package duy nhất.
 
 Nếu một processor điển hình được chọn, nhiều tham số ảnh hưởng đến performance chung, bao gồm cả performance crypto. Những tham số này bắt đầu từ *instruction set architecture*, hay *ISA* (ví dụ, ARM, RISC-V hay MIPS), và độ rộng dữ liệu (8-bit, 16-bit, 32-bit, 64-bit hay thậm chí hơn). Số lượng core và tần số tối đa của chúng cũng có liên quan đáng kể. Riêng đối với các thao tác cryptography, điều thú vị là xem liệu có các instruction crypto chuyên dụng không, như phần mở rộng AES New Instructions (AES-NI) của Intel, hay liệu chip đang xét có đi kèm một crypto coprocessor không.
 
-Trong các hệ thống dành cho ứng dụng công nghiệp, ô tô hay datacenter, việc cân nhắc các vi mạch có bao gồm một phần FPGA có thể là thú vị như một cách tận dụng các thuộc tính high-performance hay các bảo đảm real-time mà các thiết kế phần cứng số có thể cung cấp. Bên cạnh tần số tối đa được hỗ trợ, FPGA có các đặc tính cụ thể như số lượng lookup table, flip-flops, các khối random access memory (RAM), bộ nhân và các lựa chọn tương tự có thể đặt ra giới hạn cho các hiện thực cryptography.
+Trong các hệ thống dành cho ứng dụng công nghiệp, ô tô hay datacenter, việc cân nhắc các vi mạch có bao gồm một phần FPGA có thể là thú vị như một cách tận dụng các thuộc tính high-performance hay các bảo đảm real-time mà các thiết kế phần cứng số có thể cung cấp. Bên cạnh tần số tối đa được hỗ trợ, FPGA có các đặc tính cụ thể như số lượng lookup table, flip-flops, các khối random access memory (RAM), bộ nhân và các lựa chọn tương tự có thể đặt ra giới hạn cho các bản triển khai cryptography.
 
-Dù bạn chọn loại đơn vị xử lý nào, nó đều đòi hỏi memory bên trong và/hoặc bên ngoài. Thông thường, cả memory volatile như RAM lẫn memory nonvolatile như flash memory, thẻ nhớ hay solid-state drive (SSD) đều cần thiết. Bên cạnh kích thước của chúng, vốn chỉ ảnh hưởng đến các hiện thực cryptography trên các thiết bị rất resource-constrained, tốc độ đọc và ghi của chúng có thể ảnh hưởng đến performance tổng thể của một ứng dụng crypto.
+Dù bạn chọn loại đơn vị xử lý nào, nó đều đòi hỏi memory bên trong và/hoặc bên ngoài. Thông thường, cả memory volatile như RAM lẫn memory nonvolatile như flash memory, thẻ nhớ hay solid-state drive (SSD) đều cần thiết. Bên cạnh kích thước của chúng, vốn chỉ ảnh hưởng đến các bản triển khai cryptography trên các thiết bị rất resource-constrained, tốc độ đọc và ghi của chúng có thể ảnh hưởng đến performance tổng thể của một ứng dụng crypto.
 
 Cuối cùng nhưng không kém phần quan trọng, tốc độ truyền của các interface có dây và không dây của thiết bị (ví dụ, Wi-Fi, Bluetooth, Ethernet và các bus độc quyền) giới hạn băng thông cho giao tiếp, bao gồm cả các kênh được bảo vệ bằng cryptography.
 
@@ -26,71 +26,71 @@ Cuối cùng nhưng không kém phần quan trọng, tốc độ truyền của 
 >
 > *Đôi khi trên thực tế, architecture thiết bị và phần cứng đã ít nhiều cố định khi performance cryptography được thảo luận, và bạn phải tận dụng tốt nhất những gì có. Tuy nhiên, đừng ngại đóng góp các yêu cầu performance crypto ngay từ giai đoạn sớm. Ví dụ, nếu ứng dụng dự định của bạn đòi hỏi hàng nghìn chữ ký mỗi giây, yêu cầu đó chắc chắn phải được xem xét khi lựa chọn phần cứng.*
 
-Nhìn vấn đề này từ phía ứng dụng, bạn có thể áp đặt nhiều loại yêu cầu lên các hiện thực crypto. Trong khi *latency* mô tả thời gian xử lý một khối dữ liệu duy nhất từ đầu vào đến đầu ra, *throughput* định nghĩa lượng dữ liệu có thể được xử lý trong một khoảng thời gian cho trước.
+Nhìn vấn đề này từ phía ứng dụng, bạn có thể áp đặt nhiều loại yêu cầu lên các bản triển khai crypto. Trong khi *latency* mô tả thời gian xử lý một khối dữ liệu duy nhất từ đầu vào đến đầu ra, *throughput* định nghĩa lượng dữ liệu có thể được xử lý trong một khoảng thời gian cho trước.
 
-<a id="page_71"></a>Đối với các hiện thực phần mềm trên các thiết bị resource-constrained, có thể cần giới hạn kích thước code tĩnh của binary đã biên dịch phải được lưu trong memory volatile và/hoặc nonvolatile. Hơn nữa, việc sử dụng memory động trong runtime có thể là một yếu tố liên quan. Mặt khác, các hiện thực FPGA phải khởi tạo tĩnh các thành phần số, đó là lý do tại sao, ngoài performance, hiệu quả của các thiết kế phần cứng số cho crypto thường được so sánh bằng số lượng tài nguyên FPGA bị chiếm dụng.
+<a id="page_71"></a>Đối với các bản triển khai phần mềm trên các thiết bị resource-constrained, có thể cần giới hạn kích thước code tĩnh của binary đã biên dịch phải được lưu trong memory volatile và/hoặc nonvolatile. Hơn nữa, việc sử dụng memory động trong runtime có thể là một yếu tố liên quan. Mặt khác, các bản triển khai FPGA phải khởi tạo tĩnh các thành phần số, đó là lý do tại sao, ngoài performance, hiệu quả của các thiết kế phần cứng số cho crypto thường được so sánh bằng số lượng tài nguyên FPGA bị chiếm dụng.
 
-Vì nhiều thiết bị IoT là battery-powered và một số thậm chí dựa vào energy harvesting (thu hoạch năng lượng), mức tiêu thụ năng lượng của các hiện thực cryptography cũng có thể là một yêu cầu xác đáng.
+Vì nhiều thiết bị IoT là battery-powered và một số thậm chí dựa vào energy harvesting (thu hoạch năng lượng), mức tiêu thụ năng lượng của các bản triển khai cryptography cũng có thể là một yêu cầu xác đáng.
 
-Mọi thông tin về ngữ cảnh hiện thực của một thiết bị đều liên quan đến các quyết định crypto vững chắc và hiệu quả. Và trong một số trường hợp, có thể cần tìm ra các thỏa hiệp hợp lý giữa việc tiêu thụ tài nguyên và bảo mật.
+Mọi thông tin về ngữ cảnh triển khai của một thiết bị đều liên quan đến các quyết định crypto vững chắc và hiệu quả. Và trong một số trường hợp, có thể cần tìm ra các thỏa hiệp hợp lý giữa việc tiêu thụ tài nguyên và bảo mật.
 
 <a id="ch00lev1_36"></a>
 
-## Lựa chọn hiện thực crypto
+## Lựa chọn triển khai crypto
 
-Chúng ta đã thấy nhiều vấn đề hiện thực trong những thập kỷ qua dẫn đến các lỗ hổng. Nếu bạn không muốn tự mình có những trải nghiệm quý giá nhưng mệt mỏi như vậy, hãy xem xét các cryptographic library hiện có đã được tối ưu và trưởng thành như OpenSSL, LibreTLS, Mbed TLS và wolfSSL, chỉ để kể tên một vài cái trong lĩnh vực embedded system.
+Chúng ta đã thấy nhiều vấn đề triển khai trong những thập kỷ qua dẫn đến các lỗ hổng. Nếu bạn không muốn tự mình có những trải nghiệm quý giá nhưng mệt mỏi như vậy, hãy xem xét các cryptographic library hiện có đã được tối ưu và trưởng thành như OpenSSL, LibreTLS, Mbed TLS và wolfSSL, chỉ để kể tên một vài cái trong lĩnh vực embedded system.
 
 Tuy nhiên, vấn đề này dẫn chúng ta đến một câu hỏi mà nhiều developer gặp phải trong quá trình phát triển: Làm thế nào bạn chọn một crypto library cụ thể cho một thiết bị hay một ứng dụng? Quyết định phụ thuộc phần lớn vào các yêu cầu cụ thể của bạn, nếu đã được nêu tường minh, và các framework cũng như ngôn ngữ lập trình bạn làm việc cùng. Danh sách sau mô tả bốn tình huống điển hình:
 
 **Tự do lựa chọn** Đôi khi chỉ có mục tiêu bảo vệ dự định được quy định—ví dụ, giao tiếp phải được bảo vệ bằng authenticated encryption, không có thêm chi tiết. Đây có thể là trường hợp của một tính năng company-internal không có phụ thuộc bên ngoài. Trong những tình huống như vậy, nhiều thuật toán cryptography có thể được cân nhắc. Ví dụ, cả AES-GCM lẫn ChaCha20-Poly1305 đều có thể là lựa chọn phù hợp. Đánh giá performance trên thiết bị đích là hợp lý trong kịch bản này. Hãy kiểm thử cả hai thuật toán với một tập tham số và nhiều crypto library khác nhau để thu được một giải pháp hiệu quả nhất có thể.
 
-**Yêu cầu performance khắt khe** Trong một số trường hợp, cryptography là thiết yếu và phải đáp ứng các đòi hỏi cao về performance—ví dụ, nếu một ứng dụng đòi hỏi hàng nghìn digital signature mỗi giây. Vì ECDSA nhanh hơn RSA trong việc tạo chữ ký, thuật toán có lẽ nên dựa trên ECC. Tuy nhiên, bạn vẫn phải chọn loại đường cong. Kiểm thử một tập đường cong từ các crypto library có sẵn trên phần cứng đang xét là cách nên làm khi chọn cấu hình best-performing. Nếu các yêu cầu của bạn không thể đạt được, <a id="page_72"></a>việc thay phần cứng hay hiện thực một giải pháp tùy chỉnh, được tối ưu có thể là các lựa chọn.
+**Yêu cầu performance khắt khe** Trong một số trường hợp, cryptography là thiết yếu và phải đáp ứng các đòi hỏi cao về performance—ví dụ, nếu một ứng dụng đòi hỏi hàng nghìn digital signature mỗi giây. Vì ECDSA nhanh hơn RSA trong việc tạo chữ ký, thuật toán có lẽ nên dựa trên ECC. Tuy nhiên, bạn vẫn phải chọn loại đường cong. Kiểm thử một tập đường cong từ các crypto library có sẵn trên phần cứng đang xét là cách nên làm khi chọn cấu hình best-performing. Nếu các yêu cầu của bạn không thể đạt được, <a id="page_72"></a>việc thay phần cứng hay triển khai một giải pháp tùy chỉnh, được tối ưu có thể là các lựa chọn.
 
 **Ràng buộc tài nguyên khắt khe** Các thiết bị dựa trên microcontroller nhỏ có mặt trong một phần lớn IoT. Tuy nhiên, những linh kiện đó thường có đặc tính performance yếu hơn đáng kể so với các thiết bị Linux-based. Mặc dù nhiều cryptography state-of-the-art có thể chạy trên những processor này, các yêu cầu về latency, throughput, số kết nối cần phục vụ và nhiều thứ khác nữa phải được lựa chọn cẩn thận. Các đánh giá thực tế trên phần cứng đích là thiết yếu.
 
-**Thuật toán và security level cố định** Nếu thuật toán và kích thước key được cố định từ trước (ví dụ, vì lo ngại về tương thích), phạm vi giảm đi đáng kể. Tuy nhiên, nếu hiện thực cụ thể chưa được cố định, một so sánh performance nhanh giữa các library vẫn có thể có giá trị và mở khóa tiềm năng performance.
+**Thuật toán và security level cố định** Nếu thuật toán và kích thước key được cố định từ trước (ví dụ, vì lo ngại về tương thích), phạm vi giảm đi đáng kể. Tuy nhiên, nếu bản triển khai cụ thể chưa được cố định, một so sánh performance nhanh giữa các library vẫn có thể có giá trị và mở khóa tiềm năng performance.
 
-Mặc dù chương này tập trung mạnh vào performance, latency và throughput hoàn toàn không phải là những đặc tính chất lượng duy nhất cần xem xét đối với các hiện thực cryptography. Đặc biệt đối với các ứng dụng bảo mật, hai thuộc tính sau có thể tạo ra khác biệt đáng kể, ngay cả khi chúng dẫn đến performance thấp hơn:
+Mặc dù chương này tập trung mạnh vào performance, latency và throughput hoàn toàn không phải là những đặc tính chất lượng duy nhất cần xem xét đối với các bản triển khai cryptography. Đặc biệt đối với các ứng dụng bảo mật, hai thuộc tính sau có thể tạo ra khác biệt đáng kể, ngay cả khi chúng dẫn đến performance thấp hơn:
 
-**Minh bạch và rõ ràng** Code dễ đọc, dễ hiểu và có tài liệu là tuyệt vời. Nó giảm sai sót, giả định và hiểu lầm. Hơn nữa, những thuộc tính đó tạo ra sự đáng tin cậy cho developer và sản phẩm của họ. Điều đó càng đúng hơn đối với các hiện thực cryptography. Code spaghetti, việc tối ưu hóa đến mức tột cùng khiến code hoàn toàn không thể hiểu được, và các cấu trúc rời rạc có thể là lý do để bỏ qua các hiện thực bất chấp performance vượt trội của chúng.
+**Minh bạch và rõ ràng** Code dễ đọc, dễ hiểu và có tài liệu là tuyệt vời. Nó giảm sai sót, giả định và hiểu lầm. Hơn nữa, những thuộc tính đó tạo ra sự đáng tin cậy cho developer và sản phẩm của họ. Điều đó càng đúng hơn đối với các bản triển khai cryptography. Code spaghetti, việc tối ưu hóa đến mức tột cùng khiến code hoàn toàn không thể hiểu được, và các cấu trúc rời rạc có thể là lý do để bỏ qua các bản triển khai bất chấp performance vượt trội của chúng.
 
 **Hỗ trợ và bảo trì** Phần mềm open source đã cho phép phát triển những dự án đáng kinh ngạc. Tuy nhiên, một số dự án không well-documented cũng không được hỗ trợ. Nếu các lỗ hổng được tìm thấy và báo cáo, có thể không có ai sửa chúng ngay. Dĩ nhiên, điều tương tự cũng có thể đúng với phần mềm thương mại và closed source. Điểm chính là, bạn cần chú ý đến việc một library cụ thể đã được bảo trì như thế nào trong quá khứ và đến bất kỳ dấu hiệu cảnh báo nào có thể cho thấy việc ngừng bảo trì trong tương lai gần, đặc biệt đối với các cryptographic library.
 
 > **CẢNH BÁO**
 >
-> *Đừng tự phát triển các hiện thực crypto của riêng bạn trừ khi bạn có lý do rất chính đáng để làm vậy!*
+> *Đừng tự phát triển các bản triển khai crypto của riêng bạn trừ khi bạn có lý do rất chính đáng để làm vậy!*
 
 Dù bạn chọn thuật toán crypto nào, các vấn đề có thể nảy sinh vào một ngày nào đó trong tương lai do tính toán lượng tử hay các thành công mới trong cryptanalysis. Do đó, hợp lý khi theo cách tiếp cận *crypto agility*, nghĩa là các thuật toán (ví dụ, một block cipher) có thể dễ dàng được thay bằng một thuật toán khác cùng loại.
 
 <a id="ch00lev1_37"></a>
 
-## <a id="page_73"></a>Các lựa chọn hiện thực AES
+## <a id="page_73"></a>Các lựa chọn triển khai AES
 
-Trong phần này, tôi muốn làm sáng tỏ các lựa chọn cần cân nhắc nếu bạn phải cấu hình hay phân tích một hiện thực AES. AES được dùng làm ví dụ ở đây, nhưng vì nhiều symmetric cipher và hash function khác cũng có cấu trúc round-based và các thao tác tương tự, bạn có thể áp dụng những hiểu biết này cho các thuật toán khác.
+Trong phần này, tôi muốn làm sáng tỏ các lựa chọn cần cân nhắc nếu bạn phải cấu hình hay phân tích một bản triển khai AES. AES được dùng làm ví dụ ở đây, nhưng vì nhiều symmetric cipher và hash function khác cũng có cấu trúc round-based và các thao tác tương tự, bạn có thể áp dụng những hiểu biết này cho các thuật toán khác.
 
 <a id="ch00lev2_44"></a>
 
 ### *Architecture cơ bản*
 
-Một cân nhắc cơ bản là độ rộng thao tác của dữ liệu được xử lý. Trong các hiện thực phần mềm tối ưu, độ rộng được chọn để tận dụng độ rộng dữ liệu của phần cứng bên dưới. Tuy nhiên, sự không khớp có thể dẫn đến vấn đề. Chẳng hạn, các hiện thực 8-bit trên central processing unit (CPU) 32-bit thiếu performance, và các hiện thực 32-bit trên CPU 8-bit có thể không biên dịch được hoặc dẫn đến các phép biến đổi kém hiệu quả.
+Một cân nhắc cơ bản là độ rộng thao tác của dữ liệu được xử lý. Trong các bản triển khai phần mềm tối ưu, độ rộng được chọn để tận dụng độ rộng dữ liệu của phần cứng bên dưới. Tuy nhiên, sự không khớp có thể dẫn đến vấn đề. Chẳng hạn, các bản triển khai 8-bit trên central processing unit (CPU) 32-bit thiếu performance, và các bản triển khai 32-bit trên CPU 8-bit có thể không biên dịch được hoặc dẫn đến các phép biến đổi kém hiệu quả.
 
-Trong các hiện thực FPGA, độ rộng thao tác của một hiện thực có thể được chọn tùy ý. Nếu performance chậm hơn là chấp nhận được và trọng tâm là dùng ít tài nguyên, một hiện thực 8-bit là phù hợp. Mặt khác, nếu cần performance cao, có lẽ chúng ta muốn thao tác với độ rộng dữ liệu 128-bit. Nếu mong muốn một hiện thực *cân bằng* (với một trade-off hợp lý giữa tài nguyên cần thiết và performance), một architecture 32-bit có thể là một lựa chọn vững chắc.
+Trong các bản triển khai FPGA, độ rộng thao tác của một bản triển khai có thể được chọn tùy ý. Nếu performance chậm hơn là chấp nhận được và trọng tâm là dùng ít tài nguyên, một bản triển khai 8-bit là phù hợp. Mặt khác, nếu cần performance cao, có lẽ chúng ta muốn thao tác với độ rộng dữ liệu 128-bit. Nếu mong muốn một bản triển khai *cân bằng* (với một trade-off hợp lý giữa tài nguyên cần thiết và performance), một architecture 32-bit có thể là một lựa chọn vững chắc.
 
 AES cần mở rộng một key cho trước thành một tập round key. Việc key expansion này có thể được thực hiện một lần ở đầu để cải thiện performance trong quá trình mã hóa và giải mã dữ liệu khối lượng lớn. Tuy nhiên, lựa chọn thứ hai là thực hiện nó on the fly, ngay trước khi round key tương ứng cần cho các thao tác. Có được lợi thế về mức tiêu thụ memory động vì chỉ một round key duy nhất phải được lưu trong memory thay vì mọi round key.
 
-Đối với các thuật toán round-based như AES, việc hiện thực một cấu trúc vòng lặp để chạy qua các vòng cần thiết có vẻ tự nhiên. Tuy nhiên, việc liên tục xử lý và kiểm tra một biến vòng lặp làm giảm performance tối đa. Ngay cả khi một phép so sánh và một lệnh rẽ nhánh có điều kiện không mất đến vài giây, chúng sẽ làm suy giảm throughput tổng thể. Thuật ngữ *loop unrolling* mô tả một cách tiếp cận bạn có thể thấy trong các hiện thực high-speed: một vòng lặp được thay bằng một chuỗi code biểu diễn mọi vòng AES để đạt được sự tăng performance với cái giá là kích thước binary lớn hơn.
+Đối với các thuật toán round-based như AES, việc triển khai một cấu trúc vòng lặp để chạy qua các vòng cần thiết có vẻ tự nhiên. Tuy nhiên, việc liên tục xử lý và kiểm tra một biến vòng lặp làm giảm performance tối đa. Ngay cả khi một phép so sánh và một lệnh rẽ nhánh có điều kiện không mất đến vài giây, chúng sẽ làm suy giảm throughput tổng thể. Thuật ngữ *loop unrolling* mô tả một cách tiếp cận bạn có thể thấy trong các bản triển khai high-speed: một vòng lặp được thay bằng một chuỗi code biểu diễn mọi vòng AES để đạt được sự tăng performance với cái giá là kích thước binary lớn hơn.
 
 <a id="ch00lev2_45"></a>
 
 ### *Các thao tác được tối ưu*
 
-S-box của AES thường được biểu diễn dưới dạng một bảng nhằm thực hiện một phép thay thế phi tuyến. Do đó, nó thường được hiện thực như một lookup table hằng trong các hiện thực phần mềm. Tuy nhiên, đó không phải là lựa chọn duy nhất. Nếu các bảng tĩnh không phù hợp với yêu cầu của bạn, bạn có thể tạo các bảng thay thế một cách động trong RAM. Ngoài ra, đối với các thiết kế phần cứng số, một hiện thực mạch Boolean được biết đến là *Canright S-box* có thể được dùng.
+S-box của AES thường được biểu diễn dưới dạng một bảng nhằm thực hiện một phép thay thế phi tuyến. Do đó, nó thường được triển khai như một lookup table hằng trong các bản triển khai phần mềm. Tuy nhiên, đó không phải là lựa chọn duy nhất. Nếu các bảng tĩnh không phù hợp với yêu cầu của bạn, bạn có thể tạo các bảng thay thế một cách động trong RAM. Ngoài ra, đối với các thiết kế phần cứng số, một bản triển khai mạch Boolean được biết đến là *Canright S-box* có thể được dùng.
 
-<a id="page_74"></a>Một trong những cách tiếp cận phổ biến nhất để hiện thực AES theo cách tối ưu là kết hợp các thao tác vòng `SubBytes()`, `ShiftRows()` và `MixColumns()` để thu được một chuỗi rất hiệu quả gồm bốn lần tra bảng và bốn phép XOR cho mỗi cột mỗi vòng, đôi khi còn được biết đến là hiện thực *T-tables*. Nó đòi hỏi bốn bảng chứa 256 word 4-byte, cộng lại thành yêu cầu memory 4KB lần lượt cho mã hóa và giải mã. Các tối ưu hóa tiếp theo có thể giảm memory bảng cần thiết xuống 1KB với cái giá là ba phép xoay (rotation) bổ sung cho mỗi cột mỗi vòng.
+<a id="page_74"></a>Một trong những cách tiếp cận phổ biến nhất để triển khai AES theo cách tối ưu là kết hợp các thao tác vòng `SubBytes()`, `ShiftRows()` và `MixColumns()` để thu được một chuỗi rất hiệu quả gồm bốn lần tra bảng và bốn phép XOR cho mỗi cột mỗi vòng, đôi khi còn được biết đến là triển khai *T-tables*. Nó đòi hỏi bốn bảng chứa 256 word 4-byte, cộng lại thành yêu cầu memory 4KB lần lượt cho mã hóa và giải mã. Các tối ưu hóa tiếp theo có thể giảm memory bảng cần thiết xuống 1KB với cái giá là ba phép xoay (rotation) bổ sung cho mỗi cột mỗi vòng.
 
 > **LƯU Ý**
 >
-> *Ghi nhớ những lựa chọn cơ bản này có thể giúp bạn ước lượng các đặc tính performance của các hiện thực cho trước, nhưng nó cũng có thể cho phép bạn suy ra chi tiết hiện thực của một thiết bị cho trước khi nhìn vào dữ liệu performance của nó.*
+> *Ghi nhớ những lựa chọn cơ bản này có thể giúp bạn ước lượng các đặc tính performance của các bản triển khai cho trước, nhưng nó cũng có thể cho phép bạn suy ra chi tiết triển khai của một thiết bị cho trước khi nhìn vào dữ liệu performance của nó.*
 
 Rõ ràng, các nền tảng cung cấp instruction chuyên dụng cho việc tăng tốc AES hay các crypto coprocessor cụ thể cho phép tối ưu hóa performance thêm nữa. Một số crypto library đã được chuẩn bị để hỗ trợ những tối ưu hóa này—ví dụ, các instruction AES-NI phổ biến. Tuy nhiên, trên embedded system, không có gì bất thường khi bạn phải bỏ công sức để tận dụng tăng tốc phần cứng trong ứng dụng của mình.
 
@@ -98,9 +98,9 @@ Mặc dù cải thiện performance chắc chắn là động lực phổ biến
 
 <a id="ch00lev1_38"></a>
 
-## Đặc tính hiện thực của RSA và ECDSA
+## Đặc tính triển khai của RSA và ECDSA
 
-Các hiện thực asymmetric cryptography như RSA và ECDSA khác với các hiện thực cryptography đối xứng. Các lựa chọn bất đối xứng không có cấu trúc vòng chứa một tập phép biến đổi, mà thay vào đó xây dựng trên các bài toán toán học đòi hỏi các phép toán số học trên các số lớn. Do đó, performance real-world của các thuật toán này phụ thuộc ở một mức độ nhất định vào hiệu quả của *multiple-precision arithmetic* (số học đa độ chính xác), còn được biết đến là *bignum arithmetic*.
+Các bản triển khai asymmetric cryptography như RSA và ECDSA khác với các bản triển khai cryptography đối xứng. Các lựa chọn bất đối xứng không có cấu trúc vòng chứa một tập phép biến đổi, mà thay vào đó xây dựng trên các bài toán toán học đòi hỏi các phép toán số học trên các số lớn. Do đó, performance real-world của các thuật toán này phụ thuộc ở một mức độ nhất định vào hiệu quả của *multiple-precision arithmetic* (số học đa độ chính xác), còn được biết đến là *bignum arithmetic*.
 
 Trở ngại đầu tiên mà các library này phải vượt qua là thực tế đơn giản rằng các processor điển hình hỗ trợ các thao tác dữ liệu 32-bit và 64-bit, nhưng RSA, ví dụ, dựa trên các số nguyên có độ dài 2,048, 4,096 hay thậm chí nhiều bit hơn. Vấn đề này có thể được giải quyết bằng cách chia những số dài đó thành một mảng các *limb*, thường bằng độ rộng dữ liệu tối đa của CPU.
 
@@ -120,9 +120,9 @@ Một khía cạnh quan trọng của thuật toán square-and-multiply đối v
 
 ### *Đặc thù của ECDSA*
 
-Vì ECDSA thao tác trên các elliptic curve xử lý các số nhỏ hơn đáng kể, các thao tác private-key nhanh hơn đáng kể so với các thao tác tương ứng của RSA. Tuy nhiên, các loại đường cong khác nhau tạo điều kiện cho các hiện thực và tối ưu hóa khác nhau. Mặc dù việc chọn một đường cong phù hợp liên quan đến các cân nhắc toán học và lòng tin, performance không nên bị bỏ qua hoàn toàn trong quá trình này vì tồn tại những khác biệt đáng kể giữa mọi lựa chọn.
+Vì ECDSA thao tác trên các elliptic curve xử lý các số nhỏ hơn đáng kể, các thao tác private-key nhanh hơn đáng kể so với các thao tác tương ứng của RSA. Tuy nhiên, các loại đường cong khác nhau tạo điều kiện cho các bản triển khai và tối ưu hóa khác nhau. Mặc dù việc chọn một đường cong phù hợp liên quan đến các cân nhắc toán học và lòng tin, performance không nên bị bỏ qua hoàn toàn trong quá trình này vì tồn tại những khác biệt đáng kể giữa mọi lựa chọn.
 
-Các hiện thực FPGA và phần cứng nội bộ để hỗ trợ asymmetric cryptography ít phổ biến hơn nhiều so với cryptography đối xứng. Bạn có thể tìm thấy chúng trong các IC bảo mật chuyên dụng, ví dụ, cung cấp xác thực bằng digital signature, cũng như trong các thiết bị SoC hỗ trợ xác minh digital signature để bảo vệ quá trình boot của chúng. Tuy nhiên, thông thường bạn sẽ không biết nhiều chi tiết về những hiện thực này, và bạn sẽ không có quyền truy cập tùy ý vào các interface của chúng.
+Các bản triển khai FPGA và phần cứng nội bộ để hỗ trợ asymmetric cryptography ít phổ biến hơn nhiều so với cryptography đối xứng. Bạn có thể tìm thấy chúng trong các IC bảo mật chuyên dụng, ví dụ, cung cấp xác thực bằng digital signature, cũng như trong các thiết bị SoC hỗ trợ xác minh digital signature để bảo vệ quá trình boot của chúng. Tuy nhiên, thông thường bạn sẽ không biết nhiều chi tiết về những bản triển khai này, và bạn sẽ không có quyền truy cập tùy ý vào các interface của chúng.
 
 <a id="ch00lev1_39"></a>
 
@@ -132,9 +132,9 @@ Trong case study này, tôi khám phá performance của một tập đa dạng 
 
 <a id="page_76"></a>SoC đang xét dựa trên một ARM Cortex-A7 dual core chạy ở tối đa 800 MHz. Nó đi kèm hai loại cryptographic coprocessor. Core *CRYP1* cung cấp DES, Triple DES và AES ở các mode hoạt động khác nhau. Module hash *HASH1* cung cấp tăng tốc cho SHA-1, MD5, SHA-224, SHA-256 và các thao tác HMAC tương ứng. Cả hai chạy ở khoảng 266 MHz.
 
-Trong các test case sau, công cụ command line OpenSSL được dùng để đánh giá performance vì nó thường có sẵn trên các hệ thống Linux và các hiện thực phần mềm của nó đã được tối ưu cao và phù hợp cho nhiệm vụ của chúng ta.
+Trong các test case sau, công cụ command line OpenSSL được dùng để đánh giá performance vì nó thường có sẵn trên các hệ thống Linux và các bản triển khai phần mềm của nó đã được tối ưu cao và phù hợp cho nhiệm vụ của chúng ta.
 
-Lời gọi `openssl speed -elapsed -evp` `algorithm-to-test` luôn được dùng để chạy các bài kiểm tra. Tùy chọn `-elapsed` định nghĩa rằng throughput được tính dựa trên thời gian wall-clock đã trôi qua thay vì thời gian CPU dành cho user space. Cách sau sẽ làm sai lệch kết quả, đặc biệt khi dùng hỗ trợ phần cứng. Flag `-evp` là viết tắt của *envelope* và bật một crypto interface high-level tổng quát có thể dùng cả hiện thực phần mềm lẫn phần cứng, tùy theo tính khả dụng.
+Lời gọi `openssl speed -elapsed -evp` `algorithm-to-test` luôn được dùng để chạy các bài kiểm tra. Tùy chọn `-elapsed` định nghĩa rằng throughput được tính dựa trên thời gian wall-clock đã trôi qua thay vì thời gian CPU dành cho user space. Cách sau sẽ làm sai lệch kết quả, đặc biệt khi dùng hỗ trợ phần cứng. Flag `-evp` là viết tắt của *envelope* và bật một crypto interface high-level tổng quát có thể dùng cả bản triển khai phần mềm lẫn phần cứng, tùy theo tính khả dụng.
 
 Đầu ra console thu được luôn bao gồm các tham số biên dịch như được thể hiện trong [Listing 4-1](#ch04list01) và một danh sách kết quả kiểm tra tính bằng byte mỗi giây cho tập kích thước dữ liệu đầu vào sau: 16 byte, 64 byte, 256 byte, 1,024 byte, 8,192 byte và 16,384 byte.
 
@@ -213,7 +213,7 @@ AES-256-GCM       9052.80k    10844.44k   ...     12126.89k    12113.24k
 
 Nếu bảo mật có độ ưu tiên cao hơn throughput, việc chọn AES-256-GCM vẫn mang lại performance hợp lý là 12.1MBps. Tuy nhiên, nếu performance là tính năng then chốt của bạn, bạn có thể đạt được yêu cầu bảo mật tối thiểu về bảo vệ confidentiality với AES-128-CTR ở tốc độ gần gấp đôi—cụ thể là 22.9MBps.
 
-Đến đây, có thể bạn nhớ rằng các hiện thực phần mềm của stream cipher ChaCha thường vượt trội so với các hiện thực của AES. Và vì có lẽ bạn là kiểu người muốn đưa sản phẩm của mình đến sự hoàn hảo, bạn nên kiểm tra xem phần mềm đang xét có hỗ trợ thuật toán này không, như được thể hiện trong [Listing 4-4](#ch04list04).
+Đến đây, có thể bạn nhớ rằng các bản triển khai phần mềm của stream cipher ChaCha thường vượt trội so với các bản triển khai của AES. Và vì có lẽ bạn là kiểu người muốn đưa sản phẩm của mình đến sự hoàn hảo, bạn nên kiểm tra xem phần mềm đang xét có hỗ trợ thuật toán này không, như được thể hiện trong [Listing 4-4](#ch04list04).
 
 ```
 # openssl list -cipher-algorithms | grep -i chacha
@@ -248,9 +248,9 @@ Nếu nhóm của bạn sẵn lòng chuyển từ AES sang ChaCha20, họ có th
 
 <a id="ch00lev2_49"></a>
 
-### *Hiện thực phần mềm so với phần cứng cho việc hash SHA-256*
+### *Bản triển khai phần mềm so với phần cứng cho việc hash SHA-256*
 
-Hãy tưởng tượng thiết bị của bạn tạo ra các logfile được chia ở mức 100MB và bạn muốn ký những file đó để bảo vệ integrity và authenticity trước khi chúng rời khỏi thiết bị. Vì kích thước dữ liệu đầu vào tương đối lớn, performance của thao tác ký chủ yếu được quyết định bởi bước hash chứ không phải bởi việc <a id="page_79"></a>ký bất đối xứng ở cuối. Do đó, việc so sánh hiện thực phần mềm của SHA-256 với bộ tăng tốc đi kèm module phần cứng *HASH1* của thiết bị STM32MP157F có thể đáng giá.
+Hãy tưởng tượng thiết bị của bạn tạo ra các logfile được chia ở mức 100MB và bạn muốn ký những file đó để bảo vệ integrity và authenticity trước khi chúng rời khỏi thiết bị. Vì kích thước dữ liệu đầu vào tương đối lớn, performance của thao tác ký chủ yếu được quyết định bởi bước hash chứ không phải bởi việc <a id="page_79"></a>ký bất đối xứng ở cuối. Do đó, việc so sánh bản triển khai phần mềm của SHA-256 với bộ tăng tốc đi kèm module phần cứng *HASH1* của thiết bị STM32MP157F có thể đáng giá.
 
 [Listing 4-6](#ch04list06) cho thấy mọi hash function được phần cứng hỗ trợ và có sẵn thông qua các driver tương ứng của chúng.
 
@@ -265,7 +265,7 @@ driver       : stm32-sha1
 
 *Listing 4-6: Các thuật toán SHA được phần cứng STM32MP157F hỗ trợ*
 
-Việc tăng tốc phần cứng có thể được cung cấp cho công cụ command line OpenSSL bằng cách nạp kernel module `cryptodev` rồi thêm `-engine devcrypto` vào các tham số kiểm tra tốc độ. [Listing 4-7](#ch04list07) cho thấy so sánh cơ bản giữa hiện thực phần mềm SHA-256 của OpenSSL và thao tác hardware-supported.
+Việc tăng tốc phần cứng có thể được cung cấp cho công cụ command line OpenSSL bằng cách nạp kernel module `cryptodev` rồi thêm `-engine devcrypto` vào các tham số kiểm tra tốc độ. [Listing 4-7](#ch04list07) cho thấy so sánh cơ bản giữa bản triển khai phần mềm SHA-256 của OpenSSL và thao tác hardware-supported.
 
 ```
 # openssl speed -elapsed -evp sha-256
@@ -311,7 +311,7 @@ sha-256          68021.40k
 
 *Listing 4-8: Phân tích performance khi hash 100MB dữ liệu bằng SHA-256*
 
-Các con số thu được cho thấy hiện thực phần mềm không hưởng lợi từ dữ liệu đầu vào lớn, nhưng hiện thực phần cứng có thể nâng throughput lên khoảng 68.0MBps.
+Các con số thu được cho thấy bản triển khai phần mềm không hưởng lợi từ dữ liệu đầu vào lớn, nhưng bản triển khai phần cứng có thể nâng throughput lên khoảng 68.0MBps.
 
 Các sanity check là những bước nhỏ có thể giảm sai sót, hiểu lầm và thậm chí cả lỗ hổng. Tôi chắc chắn khuyên bạn thực hiện chúng khi dùng crypto phần cứng.
 
@@ -354,7 +354,7 @@ Kết luận đầu tiên là 62.26 – 0.18 – 2.08 = 60.00 giây không đư�
 
 ![](images/f081-01.jpg)
 
-Con số này ít nhất đúng bậc độ lớn, nhưng nó vẫn cho thấy 60.00 – 15.82 = 44.18 giây bị “mất” trong các tác vụ OS, driver và các quá trình phần cứng khác như truyền bus. Nếu performance là mục tiêu tối thượng của bạn, profiling và tối ưu hóa các hiện thực driver có thể là bước tiếp theo.
+Con số này ít nhất đúng bậc độ lớn, nhưng nó vẫn cho thấy 60.00 – 15.82 = 44.18 giây bị “mất” trong các tác vụ OS, driver và các quá trình phần cứng khác như truyền bus. Nếu performance là mục tiêu tối thượng của bạn, profiling và tối ưu hóa các bản triển khai driver có thể là bước tiếp theo.
 
 <a id="ch00lev2_50"></a>
 
@@ -362,7 +362,7 @@ Con số này ít nhất đúng bậc độ lớn, nhưng nó vẫn cho thấy 6
 
 Các thao tác của asymmetric cryptography tốn kém về mặt tính toán. Tuy nhiên, điều quan trọng là có ý niệm về việc chúng tốn kém *đến mức nào* và các lựa chọn có sẵn khác nhau về performance như thế nào.
 
-Các đầu ra phân tích đầu tiên trong [Listing 4-10](#ch04list010) cho thấy tác động đáng kể của độ dài key trong các hiện thực RSA.
+Các đầu ra phân tích đầu tiên trong [Listing 4-10](#ch04list010) cho thấy tác động đáng kể của độ dài key trong các bản triển khai RSA.
 
 ```
 # openssl speed -elapsed rsa1024 rsa2048 rsa4096
@@ -397,7 +397,7 @@ Khi nói đến ECDSA, công cụ OpenSSL cung cấp một tập đường cong 
 
 *Listing 4-11: Performance ký và xác minh của các đường cong NIST được chọn*
 
-Chúng ta có thể thấy ngay rằng đường cong NIST P-256 nhanh hơn rất nhiều so với các đường cong khác nhờ cấu trúc và hiện thực được tối ưu cao. Hơn nữa, rất khó đưa ra các ước lượng sơ bộ về hệ số chi phí performance (ví dụ, như đối với RSA). Đo một hiện thực cụ thể trên một nền tảng cụ thể thường là cách nên làm.
+Chúng ta có thể thấy ngay rằng đường cong NIST P-256 nhanh hơn rất nhiều so với các đường cong khác nhờ cấu trúc và bản triển khai được tối ưu cao. Hơn nữa, rất khó đưa ra các ước lượng sơ bộ về hệ số chi phí performance (ví dụ, như đối với RSA). Đo một bản triển khai cụ thể trên một nền tảng cụ thể thường là cách nên làm.
 
 Về việc so sánh ECDSA và RSA, P-224 của NIST và RSA-2048, vốn có security level tương tự, khác nhau về performance ký khoảng 3 lần, nghiêng về phía ECDSA. Nhưng về tốc độ xác minh, RSA-2048 nhanh hơn đường cong P-224 hơn 11 lần.
 
@@ -426,10 +426,10 @@ Giả sử bạn được tự do chọn một thuật toán chữ ký bất đ�
 
 ## Tóm tắt
 
-Performance không phải là tất cả. Tuy nhiên, khi nói đến việc hiện thực các thuật toán cryptography, đó là một thuộc tính bạn không bao giờ nên bỏ qua. Bên cạnh bản thân bảo mật, performance là một trong những đặc tính chất lượng cơ bản của crypto.
+Performance không phải là tất cả. Tuy nhiên, khi nói đến việc triển khai các thuật toán cryptography, đó là một thuộc tính bạn không bao giờ nên bỏ qua. Bên cạnh bản thân bảo mật, performance là một trong những đặc tính chất lượng cơ bản của crypto.
 
-Một số embedded system có những hạn chế nghiêm ngặt về năng lực xử lý, kích thước memory hay mức tiêu thụ điện, khiến các hiện thực được tối ưu trở thành điều cần thiết. Nếu không, crypto có thể thua trong một cuộc thảo luận trade-off. Các thiết bị khác phục vụ các mục đích chuyên dụng trong mạng hay xử lý dữ liệu và đòi hỏi các hiện thực crypto high-speed. Đôi khi các yêu cầu performance có thể được đáp ứng bằng việc dùng các software library hiệu quả, nhưng các kịch bản khác đòi hỏi các thiết kế phần cứng số cụ thể trong FPGA (vốn là một lĩnh vực kỹ thuật riêng) hay các coprocessor phần cứng được xây dựng chính xác cho nhiệm vụ này.
+Một số embedded system có những hạn chế nghiêm ngặt về năng lực xử lý, kích thước memory hay mức tiêu thụ điện, khiến các bản triển khai được tối ưu trở thành điều cần thiết. Nếu không, crypto có thể thua trong một cuộc thảo luận trade-off. Các thiết bị khác phục vụ các mục đích chuyên dụng trong mạng hay xử lý dữ liệu và đòi hỏi các bản triển khai crypto high-speed. Đôi khi các yêu cầu performance có thể được đáp ứng bằng việc dùng các software library hiệu quả, nhưng các kịch bản khác đòi hỏi các thiết kế phần cứng số cụ thể trong FPGA (vốn là một lĩnh vực kỹ thuật riêng) hay các coprocessor phần cứng được xây dựng chính xác cho nhiệm vụ này.
 
-Hãy lưu ý rằng ngay cả khi các thuật toán crypto bạn chọn an toàn từ góc nhìn toán học và có các đặc tính performance tốt, chúng không nhất thiết bền vững trước các implementation attack như side-channel analysis và fault injection. *The Hardware Hacking Handbook* của Jasper van Woudenberg và Colin O’Flynn (No Starch Press, 2021) đầy các ví dụ và hiểu biết thực tế về cách phá vỡ và bảo vệ các hiện thực crypto. *Power Analysis Attacks: Revealing the Secrets of Smart Cards* của Stefan Mangard, Elisabeth Oswald và Thomas Popp (Springer, 2007) cũng là một cuốn kinh điển để đi sâu hơn vào lĩnh vực này.
+Hãy lưu ý rằng ngay cả khi các thuật toán crypto bạn chọn an toàn từ góc nhìn toán học và có các đặc tính performance tốt, chúng không nhất thiết bền vững trước các implementation attack như side-channel analysis và fault injection. *The Hardware Hacking Handbook* của Jasper van Woudenberg và Colin O’Flynn (No Starch Press, 2021) đầy các ví dụ và hiểu biết thực tế về cách phá vỡ và bảo vệ các bản triển khai crypto. *Power Analysis Attacks: Revealing the Secrets of Smart Cards* của Stefan Mangard, Elisabeth Oswald và Thomas Popp (Springer, 2007) cũng là một cuốn kinh điển để đi sâu hơn vào lĩnh vực này.
 
-Ngoài ra, hãy nhớ rằng những biện pháp bảo vệ nâng cao như vậy thường đi kèm sự giảm performance crypto. Hãy bảo đảm xác định càng sớm càng tốt trong vòng đời phát triển của bạn liệu sản phẩm có đòi hỏi các hiện thực crypto được gia cố đặc biệt hay không.
+Ngoài ra, hãy nhớ rằng những biện pháp bảo vệ nâng cao như vậy thường đi kèm sự giảm performance crypto. Hãy bảo đảm xác định càng sớm càng tốt trong vòng đời phát triển của bạn liệu sản phẩm có đòi hỏi các bản triển khai crypto được gia cố đặc biệt hay không.

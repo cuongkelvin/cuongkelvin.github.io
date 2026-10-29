@@ -76,7 +76,7 @@ Một GNU toolchain chứa các thành phần sau:
 
 - Các công cụ cho binary file (`objdump`, `nm`, `objcopy`, `readelf`, `strip`, v.v.): Đây là một phần của package binutils.
 
-Các thành phần này đủ để build các ứng dụng bare-metal, các bootloader như U-Boot, hoặc các hệ điều hành như Linux kernel, vì chúng không cần thư viện C và tự hiện thực các hàm thư viện C mà chúng cần. Tuy nhiên, với các ứng dụng Linux user space, cần một thư viện C POSIX-compliant. Thư viện GNU C, `glibc`, là thư viện C mặc định dùng trong Yocto Project, còn `musl`, một thư viện C nhỏ hơn, là lựa chọn thay thế được hỗ trợ, phổ biến cho các thiết bị resource-constrained. Trên embedded system, chúng ta không chỉ cần một toolchain mà cần một toolchain cross-compilation. Đó là vì chúng ta build trên một host computer nhưng chạy các binary kết quả trên target, thường là một architecture khác. Trên thực tế, có một số loại toolchain, dựa trên architecture của machine build toolchain (build machine), machine chạy toolchain (host machine), và machine chạy các binary do toolchain build ra (target machine). Các tổ hợp phổ biến nhất là:
+Các thành phần này đủ để build các ứng dụng bare-metal, các bootloader như U-Boot, hoặc các hệ điều hành như Linux kernel, vì chúng không cần thư viện C và tự triển khai các hàm thư viện C mà chúng cần. Tuy nhiên, với các ứng dụng Linux user space, cần một thư viện C POSIX-compliant. Thư viện GNU C, `glibc`, là thư viện C mặc định dùng trong Yocto Project, còn `musl`, một thư viện C nhỏ hơn, là lựa chọn thay thế được hỗ trợ, phổ biến cho các thiết bị resource-constrained. Trên embedded system, chúng ta không chỉ cần một toolchain mà cần một toolchain cross-compilation. Đó là vì chúng ta build trên một host computer nhưng chạy các binary kết quả trên target, thường là một architecture khác. Trên thực tế, có một số loại toolchain, dựa trên architecture của machine build toolchain (build machine), machine chạy toolchain (host machine), và machine chạy các binary do toolchain build ra (target machine). Các tổ hợp phổ biến nhất là:
 
 - Native: Ví dụ là một máy x86 chạy một toolchain cũng được build trên máy x86, tạo binary để chạy trên máy x86. Điều này phổ biến ở máy tính desktop.
 
@@ -1871,7 +1871,7 @@ Khi đó chúng ta có thể làm việc trực tiếp trong thư mục local m�
 
 ## Làm việc với GNU make
 
-GNU make là một bản hiện thực make cho các hệ thống Linux. Nó được rất nhiều dự án open source sử dụng, kể cả Linux kernel. Quá trình build được quản lý bởi một `Makefile`, file này cho `make` biết cách build source code.
+GNU make là một bản triển khai make cho các hệ thống Linux. Nó được rất nhiều dự án open source sử dụng, kể cả Linux kernel. Quá trình build được quản lý bởi một `Makefile`, file này cho `make` biết cách build source code.
 
 ### Cách thực hiện...
 
@@ -2040,7 +2040,7 @@ Nếu cần truyền thêm các tùy chọn cấu hình cho `cmake`, có thể d
 
 ### Chuẩn bị
 
-SCons parse các file `SConstruct`, và theo mặc định nó không truyền environment vào build system. Điều này nhằm tránh các vấn đề build do khác biệt environment. Đây là một điều phức tạp với Yocto, vì nó cấu hình environment với các thiết lập toolchain cross-compilation. SCons không định nghĩa một cách chuẩn để hỗ trợ cross-compilation, nên mỗi dự án sẽ hiện thực nó khác nhau. Với một ví dụ đơn giản như chương trình `helloworld`, chúng ta chỉ cần khởi tạo các biến `CC, LINKFLAGS` và `PATH` trong file `SConstruct` từ environment bên ngoài như sau:
+SCons parse các file `SConstruct`, và theo mặc định nó không truyền environment vào build system. Điều này nhằm tránh các vấn đề build do khác biệt environment. Đây là một điều phức tạp với Yocto, vì nó cấu hình environment với các thiết lập toolchain cross-compilation. SCons không định nghĩa một cách chuẩn để hỗ trợ cross-compilation, nên mỗi dự án sẽ triển khai nó khác nhau. Với một ví dụ đơn giản như chương trình `helloworld`, chúng ta chỉ cần khởi tạo các biến `CC, LINKFLAGS` và `PATH` trong file `SConstruct` từ environment bên ngoài như sau:
 
 ```
 import os
@@ -2536,7 +2536,7 @@ Dòng này sẽ thêm đối số kernel command-line video được chỉ đị
 
 ### Còn nữa...
 
-Giờ chúng ta có thể bổ sung ứng dụng Qt5 cho image framebuffer. Trước bản phát hành Qt5, Qt có bản hiện thực window system riêng (QWS). Qt5 dùng các Qt platform plugin thay vào đó:
+Giờ chúng ta có thể bổ sung ứng dụng Qt5 cho image framebuffer. Trước bản phát hành Qt5, Qt có bản triển khai window system riêng (QWS). Qt5 dùng các Qt platform plugin thay vào đó:
 
 - Với các ứng dụng single-process có một cửa sổ chính, Qt5 khuyến nghị plugin EGLFS, plugin này dùng tăng tốc hardware đồ họa bên dưới, nhưng có thể dùng các plugin khác như LinuxFB hoặc DirectFB
 
@@ -2681,7 +2681,7 @@ Hệ thống X Windows cung cấp framework cho một môi trường GUI — nh�
 
 ### Chuẩn bị
 
-Bản hiện thực tham chiếu của hệ thống X Windows là X.Org server, được phát hành theo các license dễ dãi như MIT. Nó dùng mô hình client/server, với server giao tiếp với nhiều chương trình client, phục vụ đầu vào của người dùng và nhận output đồ họa. Giao thức X11 là network-transparent, nên client và server có thể chạy trên các máy khác nhau với architecture và hệ điều hành khác nhau. Tuy nhiên, phần lớn thời gian cả hai chạy trên cùng một máy và giao tiếp bằng local socket. Các đặc tả giao diện người dùng, như nút bấm hay kiểu menu, không được định nghĩa trong X11, việc này được để lại cho các ứng dụng window manager khác, thường là một phần của các desktop environment như Gnome hoặc K Desktop Environment (KDE). X11 có các driver input và video để xử lý hardware. Ví dụ, nó có `fbdev`, một framebuffer driver có thể xuất ra một Linux framebuffer non-accelerated, và `evdev`, một Linux input device driver chung, hỗ trợ chuột, bàn phím, bảng vẽ và màn hình cảm ứng.
+Bản triển khai tham chiếu của hệ thống X Windows là X.Org server, được phát hành theo các license dễ dãi như MIT. Nó dùng mô hình client/server, với server giao tiếp với nhiều chương trình client, phục vụ đầu vào của người dùng và nhận output đồ họa. Giao thức X11 là network-transparent, nên client và server có thể chạy trên các máy khác nhau với architecture và hệ điều hành khác nhau. Tuy nhiên, phần lớn thời gian cả hai chạy trên cùng một máy và giao tiếp bằng local socket. Các đặc tả giao diện người dùng, như nút bấm hay kiểu menu, không được định nghĩa trong X11, việc này được để lại cho các ứng dụng window manager khác, thường là một phần của các desktop environment như Gnome hoặc K Desktop Environment (KDE). X11 có các driver input và video để xử lý hardware. Ví dụ, nó có `fbdev`, một framebuffer driver có thể xuất ra một Linux framebuffer non-accelerated, và `evdev`, một Linux input device driver chung, hỗ trợ chuột, bàn phím, bảng vẽ và màn hình cảm ứng.
 
 Thiết kế của hệ thống X11 Windows khiến nó nặng nề với thiết bị embedded, và dù một thiết bị mạnh như i.MX6 quad-core dùng nó không có vấn đề gì, nhiều thiết bị embedded chọn các giải pháp đồ họa khác. Tuy nhiên, có nhiều ứng dụng đồ họa, phần lớn từ môi trường desktop, chạy trên hệ thống X11 Windows.
 
@@ -3150,7 +3150,7 @@ Khi đã cài, bạn có thể dùng nó từ target, như sau:
 
 Cho tới Java SE phiên bản 8, Oracle cung cấp một phiên bản Java SE embedded commercially-licensed và royalties-based. Tuy nhiên, Java SE Embedded 8 là bản phát hành Java SE embedded cuối cùng mà Oracle sẽ cung cấp.
 
-Giải pháp open source thay thế cho Oracle Java SE embedded là Open Java Development Kit (OpenJDK), một bản hiện thực open source của Java SE được cấp phép theo GPLv2, với ngoại lệ classpath, nghĩa là các ứng dụng được phép link mà không bị ràng buộc bởi license GPL. Recipe này sẽ cho thấy cách build OpenJDK bằng Yocto và tích hợp Java Runtime Environment (JRE) vào target image.
+Giải pháp open source thay thế cho Oracle Java SE embedded là Open Java Development Kit (OpenJDK), một bản triển khai open source của Java SE được cấp phép theo GPLv2, với ngoại lệ classpath, nghĩa là các ứng dụng được phép link mà không bị ràng buộc bởi license GPL. Recipe này sẽ cho thấy cách build OpenJDK bằng Yocto và tích hợp Java Runtime Environment (JRE) vào target image.
 
 ### Chuẩn bị
 
@@ -3162,7 +3162,7 @@ Các thành phần chính của OpenJDK là:
 
 - Java compiler, javac
 
-Ban đầu, OpenJDK cần được build bằng một JDK độc quyền. Tuy nhiên, dự án IcedTea cho phép chúng ta build OpenJDK bằng GNU classpath, GNU Compiler for Java (GCJ), và bootstrap một JDK để build OpenJDK. Nó cũng bổ sung cho OpenJDK một số thành phần còn thiếu có trên Java SE như plugin trình duyệt web và các bản hiện thực web start.
+Ban đầu, OpenJDK cần được build bằng một JDK độc quyền. Tuy nhiên, dự án IcedTea cho phép chúng ta build OpenJDK bằng GNU classpath, GNU Compiler for Java (GCJ), và bootstrap một JDK để build OpenJDK. Nó cũng bổ sung cho OpenJDK một số thành phần còn thiếu có trên Java SE như plugin trình duyệt web và các bản triển khai web start.
 
 Yocto có thể build OpenJDK bằng layer `meta-java`, layer này có các recipe để cross-compiling OpenJDK bằng IcedTea. Có thể theo dõi và đóng góp vào các thảo luận phát triển bằng cách truy cập mailing list phát triển tại `http://lists.openembedded.org/mailman/listinfo/openembedded-devel`.
 

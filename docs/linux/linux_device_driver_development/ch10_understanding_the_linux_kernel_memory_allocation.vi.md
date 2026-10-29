@@ -82,11 +82,7 @@ Với virtual address, bạn có thể phân biệt đó là địa chỉ kernel
 
 - `ZONE_HIGHMEM`: Chứa memory page frame tại và trên 896 MB.
 
-Tuy nhiên, trên hệ thống 512 MB sẽ không có `ZONE_HIGHMEM`, có 16 MB cho `ZONE_DMA` và 496 MB cho
-
-```
-ZONE_NORMAL.
-```
+Tuy nhiên, trên hệ thống 512 MB sẽ không có `ZONE_HIGHMEM`, có 16 MB cho `ZONE_DMA` và 496 MB cho `ZONE_NORMAL`.
 
 Từ những nội dung trên, có thể hoàn thiện định nghĩa logical address: đó là địa chỉ trong kernel-space được map tuyến tính lên physical address, và physical address tương ứng có thể lấy bằng offset. Kernel virtual address giống logical address ở chỗ là mapping từ địa chỉ kernel space sang physical address. Tuy nhiên, khác biệt là kernel virtual address không phải lúc nào cũng có cùng linear mapping one-to-one tới physical location như logical address.
 
@@ -159,7 +155,7 @@ Bây giờ đã có tổng quan process address space và thấy nó gồm tập
 
 ## Tìm hiểu khái niệm VMA
 
-Trong kernel, process memory mapping được tổ chức thành area, mỗi area gọi là VMA. Trong mỗi process đang chạy trên hệ thống Linux, code section, từng mapped file region (ví dụ library), hoặc từng memory mapping riêng biệt (nếu có) được hiện thực bằng VMA. VMA là structure architecture-independent, có permission và access control flag, được định nghĩa bằng start address và length. Size của chúng luôn là bội số page size (`PAGE_SIZE`). VMA gồm một số page, mỗi page có entry trong page table (Page Table Entry (PTE)).
+Trong kernel, process memory mapping được tổ chức thành area, mỗi area gọi là VMA. Trong mỗi process đang chạy trên hệ thống Linux, code section, từng mapped file region (ví dụ library), hoặc từng memory mapping riêng biệt (nếu có) được biểu diễn bằng VMA. VMA là structure architecture-independent, có permission và access control flag, được định nghĩa bằng start address và length. Size của chúng luôn là bội số page size (`PAGE_SIZE`). VMA gồm một số page, mỗi page có entry trong page table (Page Table Entry (PTE)).
 
 VMA được biểu diễn trong kernel bằng instance `struct vma_area`, định nghĩa như sau:
 
@@ -239,11 +235,7 @@ Với process có identifier `<PID>`, có thể lấy toàn bộ memory mapping 
 [...]
 ```
 
-Mỗi dòng trong đoạn trích trên biểu diễn VMA và các field tương ứng với mẫu `{address`
-
-```
-(start-end)} {permissions} {offset} {device (major:minor)} {inode} {pathname (image)}
-```
+Mỗi dòng trong đoạn trích trên biểu diễn VMA và các field tương ứng với mẫu `{address` `(start-end)} {permissions} {offset} {device (major:minor)} {inode} {pathname (image)}`
 
 :
 
@@ -320,7 +312,7 @@ Linux có thể hỗ trợ tối đa bốn paging level. Tuy nhiên, số level 
 
 - Page Table Entry (PTE): Đây là các leaf của tree. Nó là array `pte_t`, trong đó mỗi entry trỏ tới physical page.
 
-LƯU Ý Không phải lúc nào cũng dùng mọi level. MMU của i.MX6 chỉ hỗ trợ page table two-level (PGD và PTE), cũng là trường hợp của gần như mọi CPU 32-bit. Khi đó, PUD và PMD đơn giản bị bỏ qua.
+  LƯU Ý Không phải lúc nào cũng dùng mọi level. MMU của i.MX6 chỉ hỗ trợ page table two-level (PGD và PTE), cũng là trường hợp của gần như mọi CPU 32-bit. Khi đó, PUD và PMD đơn giản bị bỏ qua.
 
 Cần biết MMU không lưu mapping nào. Mapping là data structure nằm trong RAM. Thay vào đó, CPU có special register gọi là Page Table Base Register (PTBR) hoặc Translation Table Base Register 0 (TTBR0), trỏ tới base (entry 0) của page table level-1 (top-level) (PGD) của process. Đó chính là nơi field `pdg` của `struct mm_struct` trỏ tới: `current->mm.pgd == TTBR0`.
 
@@ -503,7 +495,7 @@ Có nhiều loại slab allocator trong kernel, tùy nhu cầu gọn nhẹ, cach
 
 - SLUB (unqueued allocator), khá đơn giản và cần ít instruction hơn. Đây là memory allocator thay thế next-generation, cải tiến và thay thế SLAB. Nó dựa trên mô hình SLAB nhưng sửa một số thiếu sót của SLAB, đặc biệt trên hệ thống có nhiều processor. Đây đã và vẫn là memory allocator mặc định trong Linux kernel từ kernel 2.6.23 (`CONFIG_SLUB=y`). Xem patch này: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=a0acd820807680d2ccc4ef3448387fcdbf152c73.
 
-LƯU Ý Thuật ngữ slab đã trở thành tên chung chỉ chiến lược cấp phát memory dùng object cache, cho phép cấp phát và giải phóng kernel object hiệu quả. Không nên nhầm với allocator cùng tên SLAB, ngày nay đã được SLUB thay thế.
+  LƯU Ý Thuật ngữ slab đã trở thành tên chung chỉ chiến lược cấp phát memory dùng object cache, cho phép cấp phát và giải phóng kernel object hiệu quả. Không nên nhầm với allocator cùng tên SLAB, ngày nay đã được SLUB thay thế.
 
 ## Cấp phát bằng họ kmalloc
 
@@ -696,17 +688,11 @@ LƯU Ý Page fault trong interrupt context gây double fault interrupt, thườn
 
 Xét memory region hoặc data cần chia sẻ giữa hai hoặc nhiều task. Copy on Write (CoW) (được dùng nhiều với system call `fork()`) là cơ chế cho phép operating system không cấp phát memory ngay và không copy nó cho từng task chia sẻ data, cho tới khi một task sửa đổi (ghi vào) nó — khi đó memory được cấp phát cho private copy (vì thế có tên CoW). Xét shared memory page để mô tả bên dưới cách `page fault handler` quản lý CoW:
 
-1\. Khi page cần được chia sẻ, page table entry (có target đánh dấu un-writable) trỏ tới shared page này được thêm
+1\. Khi page cần được chia sẻ, page table entry (có target đánh dấu un-writable) trỏ tới shared page này được thêm vào process page table của từng process truy cập shared page. Đây là initial mapping.
 
-vào process page table của từng process truy cập shared page. Đây là initial mapping.
+2\. Mapping dẫn tới tạo VMA cho mỗi process, được thêm vào VMA list của từng process. Shared page được gắn với các VMA này (tức VMA đã tạo cho mỗi process), lần này được đánh dấu có thể ghi. Không có gì khác xảy ra chừng nào chưa process nào thử sửa nội dung shared page.
 
-2\. Mapping dẫn tới tạo VMA cho mỗi process, được thêm vào VMA list của từng process. Shared page được
-
-gắn với các VMA này (tức VMA đã tạo cho mỗi process), lần này được đánh dấu có thể ghi. Không có gì khác xảy ra chừng nào chưa process nào thử sửa nội dung shared page.
-
-3\. Khi một process thử ghi vào shared page (ở lần ghi đầu tiên), `fault handler` nhận thấy khác biệt
-
-giữa PTE flag (đã đánh dấu un-writable) và VMA flag (đánh dấu có thể ghi), nghĩa là "Này, đây là CoW." Sau đó nó cấp phát physical page, gán cho PTE đã thêm trước đó (thay shared page đã gán), cập nhật PTE flag (một flag tương ứng đánh dấu PTE có thể ghi), flush TLB entry, rồi thực thi function `do_wp_page()`, copy nội dung từ shared address tới vị trí mới, riêng cho process đã phát lệnh ghi. Những lần ghi sau của process này được thực hiện trên private copy, không phải shared page.
+3\. Khi một process thử ghi vào shared page (ở lần ghi đầu tiên), `fault handler` nhận thấy khác biệt giữa PTE flag (đã đánh dấu un-writable) và VMA flag (đánh dấu có thể ghi), nghĩa là "Này, đây là CoW." Sau đó nó cấp phát physical page, gán cho PTE đã thêm trước đó (thay shared page đã gán), cập nhật PTE flag (một flag tương ứng đánh dấu PTE có thể ghi), flush TLB entry, rồi thực thi function `do_wp_page()`, copy nội dung từ shared address tới vị trí mới, riêng cho process đã phát lệnh ghi. Những lần ghi sau của process này được thực hiện trên private copy, không phải shared page.
 
 Giờ có thể khép lại phần mở rộng về cấp phát process memory mà chúng ta đã quen thuộc. Chúng ta cũng đã học lazy allocation và CoW là gì, đồng thời có thể kết thúc tìm hiểu cấp phát memory in-kernel. Tại đây, có thể chuyển sang I/O memory operation để giao tiếp hardware device.
 
@@ -865,11 +851,7 @@ void *kmap(struct page *page)
 }
 ```
 
-`kmap_high()` và `kunmap_high()`, định nghĩa trong `mm/highmem.c`, là cốt lõi các triển khai này. Tuy nhiên, `kmap()` map page vào kernel space bằng tập page table physically contiguous được cấp phát trong boot. Vì các page table đều kết nối, dễ di chuyển mà không phải tham khảo page directory liên tục. Cần lưu ý page table `kmap` tương ứng kernel virtual address bắt đầu từ `PKMAP BASE`, khác nhau theo architecture, và reference count cho page table entry được giữ trong array riêng gọi là
-
-```
-pkmap_count.
-```
+`kmap_high()` và `kunmap_high()`, định nghĩa trong `mm/highmem.c`, là cốt lõi các triển khai này. Tuy nhiên, `kmap()` map page vào kernel space bằng tập page table physically contiguous được cấp phát trong boot. Vì các page table đều kết nối, dễ di chuyển mà không phải tham khảo page directory liên tục. Cần lưu ý page table `kmap` tương ứng kernel virtual address bắt đầu từ `PKMAP BASE`, khác nhau theo architecture, và reference count cho page table entry được giữ trong array riêng gọi là `pkmap_count`.
 
 Page frame của page cần map vào kernel space được truyền cho `kmap()` làm argument `struct *page`, có thể là normal page hoặc `HIGHMEM` page; trong trường hợp đầu, `kmap()` đơn giản return direct-mapped address. Với page `HIGHMEM`, `kmap()` tìm trong page table `kmap` (đã cấp phát lúc boot) entry chưa dùng — tức entry có giá trị `pkmap_count` bằng 0. Nếu không có, nó sleep và chờ process khác `kunmap` một page. Khi tìm được entry chưa dùng, nó chèn physical page address của page muốn map, đồng thời tăng reference count `pkmap_count` tương ứng page table entry, và return virtual address cho caller. `page->virtual` của page struct cũng được cập nhật phản ánh mapped address.
 
@@ -900,20 +882,20 @@ Lời gọi thành công return `0`, còn khi thất bại return error code âm
 
 - `pfn`: Biểu diễn page frame number của physical memory region cần map. Để lấy page frame number này, phải xét cách memory được cấp phát:
 
-- Với memory cấp phát bằng `kmalloc()` hoặc allocation API khác return kernel logical address (ví dụ `__get_free_pages()` với flag `GFP_KERNEL`), có thể lấy `pfn` như sau (lấy physical address và right-shifting địa chỉ này `PAGE_SHIFT` lần):
+  - Với memory cấp phát bằng `kmalloc()` hoặc allocation API khác return kernel logical address (ví dụ `__get_free_pages()` với flag `GFP_KERNEL`), có thể lấy `pfn` như sau (lấy physical address và right-shifting địa chỉ này `PAGE_SHIFT` lần):
 
 ```
     unsigned long pfn =
       virt_to_phys((void *)kmalloc_area)>>PAGE_SHIFT;
 ```
 
-- Với memory cấp phát bằng `alloc_pages()`, có thể dùng như sau (trong đó `page` là pointer được return khi cấp phát):
+  - Với memory cấp phát bằng `alloc_pages()`, có thể dùng như sau (trong đó `page` là pointer được return khi cấp phát):
 
 ```
     unsigned long pfn = page_to_pfn(page)
 ```
 
-- Cuối cùng, với memory cấp phát bằng `vmalloc()`, có thể dùng như sau:
+  - Cuối cùng, với memory cấp phát bằng `vmalloc()`, có thể dùng như sau:
 
 ```
     unsigned long pfn = vmalloc_to_pfn(vmalloc_area);
@@ -923,15 +905,15 @@ Lời gọi thành công return `0`, còn khi thất bại return error code âm
 
 - `flags`: Biểu diễn protection được yêu cầu cho VMA mới. Driver có thể thay đổi giá trị cuối nhưng nên dùng giá trị mặc định ban đầu (trong `vma->vm_page_prot`) làm nền bằng OR operator (`|` trong ngôn ngữ C). Giá trị mặc định này do user space đặt. Một số flag như sau:
 
-- `VM_IO`, chỉ định memory-mapped I/O của device.
+  - `VM_IO`, chỉ định memory-mapped I/O của device.
 
-- `VM_PFNMAP`, chỉ định page range được quản lý không có `struct page` bên dưới, chỉ PFN thuần túy. Chủ yếu dùng cho I/O memory mapping. Nói cách khác, base page chỉ là raw PFN mapping và không có struct page tương ứng.
+  - `VM_PFNMAP`, chỉ định page range được quản lý không có `struct page` bên dưới, chỉ PFN thuần túy. Chủ yếu dùng cho I/O memory mapping. Nói cách khác, base page chỉ là raw PFN mapping và không có struct page tương ứng.
 
-- `VM_DONTCOPY`, báo kernel không copy VMA này khi fork.
+  - `VM_DONTCOPY`, báo kernel không copy VMA này khi fork.
 
-- `VM_DONTEXPAND`, ngăn VMA mở rộng bằng `mremap()`.
+  - `VM_DONTEXPAND`, ngăn VMA mở rộng bằng `mremap()`.
 
-- `VM_DONTDUMP`, ngăn VMA được đưa vào core dump, ngay cả khi `VM_IO` tắt.
+  - `VM_DONTDUMP`, ngăn VMA được đưa vào core dump, ngay cả khi `VM_IO` tắt.
 
 Memory mapping làm việc với memory region là bội số `PAGE_SIZE`; vì vậy, ví dụ nên cấp phát toàn bộ page thay vì dùng buffer do `kmalloc` cấp phát. `kmalloc()` có thể return (nếu yêu cầu size non-multiple `PAGE_SIZE`) pointer không page-aligned; khi đó dùng địa chỉ không align như vậy với `remap_pfn_range()` là ý tưởng rất tệ. Không gì bảo đảm địa chỉ do `kmalloc()` return là page-aligned, nên có thể làm hỏng slab internal data structure. Thay vào đó, nên dùng `kmalloc(PAGE_SIZE * npages` hoặc tốt hơn là page allocation API (hay tương tự vì những function này luôn return pointer page-aligned).
 
@@ -971,11 +953,7 @@ while (length > 0) {
 }
 ```
 
-Trong đoạn trích trên, `length` tương ứng VMA size (`length = vma->vm_end - vma->vm_start`). `pfn` được tính cho mỗi page, và start address cho mapping tiếp theo được tăng `PAGE_SIZE` để map page tiếp theo trong region. Giá trị ban đầu của `start` là `start =`
-
-```
-vma->vm_start.
-```
+Trong đoạn trích trên, `length` tương ứng VMA size (`length = vma->vm_end - vma->vm_start`). `pfn` được tính cho mỗi page, và start address cho mapping tiếp theo được tăng `PAGE_SIZE` để map page tiếp theo trong region. Giá trị ban đầu của `start` là `start = vma->vm_start`.
 
 Tuy nhiên, từ trong kernel, memory do `vmalloc` cấp phát có thể được dùng bình thường. Dùng theo page chỉ cần cho mục đích remapping.
 
@@ -1065,9 +1043,7 @@ if (buffer_size < (size + offset))
     return -EINVAL;
 ```
 
-3\. Tính PFN tương ứng page chứa `offset` trong buffer. Lưu ý cách lấy PFN
-
-phụ thuộc cách buffer được cấp phát:
+3\. Tính PFN tương ứng page chứa `offset` trong buffer. Lưu ý cách lấy PFN phụ thuộc cách buffer được cấp phát:
 
 ```
 unsigned long pfn;
@@ -1076,15 +1052,13 @@ pfn = virt_to_phys(buffer + offset) >> PAGE_SHIFT;
 
 4\. Đặt flag thích hợp, disable caching nếu cần:
 
-- Disable caching bằng `vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);`.
+  - Disable caching bằng `vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);`.
 
-- Đặt flag `VM_IO` nếu cần: `vma->vm_flags |= VM_IO;`. Nó cũng ngăn VMA được đưa vào core dump của process.
+  - Đặt flag `VM_IO` nếu cần: `vma->vm_flags |= VM_IO;`. Nó cũng ngăn VMA được đưa vào core dump của process.
 
-- Ngăn VMA bị swap out: `vma->vm_flags |= VM_DONTEXPAND | VM_DONTDUMP`. Trong kernel trước phiên bản 3.7, dùng `VM_RESERVED`.
+  - Ngăn VMA bị swap out: `vma->vm_flags |= VM_DONTEXPAND | VM_DONTDUMP`. Trong kernel trước phiên bản 3.7, dùng `VM_RESERVED`.
 
-5\. Gọi `remap_pfn_range()` với PFN đã tính, `size` và protection flag. Chúng ta dùng
-
-`vm_iomap_memory()` trong trường hợp I/O memory mapping:
+5\. Gọi `remap_pfn_range()` với PFN đã tính, `size` và protection flag. Chúng ta dùng `vm_iomap_memory()` trong trường hợp I/O memory mapping:
 
 ```
 if (remap_pfn_range(vma, vma->vm_start, pfn,

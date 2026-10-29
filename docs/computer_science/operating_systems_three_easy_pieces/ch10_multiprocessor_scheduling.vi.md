@@ -115,15 +115,19 @@ Tùy policy của queue, mỗi CPU giờ có hai job để chọn chạy. Ví d�
 
 MQMS có ưu điểm rõ ràng so với SQMS là về bản chất scalable hơn. Số CPU tăng thì số queue cũng tăng, nên lock và cache contention không trở thành vấn đề trung tâm. Ngoài ra, MQMS vốn cung cấp cache affinity; job ở cùng CPU nên hưởng lợi dùng lại nội dung cache.
 
-Nhưng nếu chú ý, bạn có thể thấy vấn đề mới, căn bản của cách multi-queue: load imbalance. Giả sử cùng thiết lập trên (bốn job, hai CPU), nhưng một job (C) hoàn tất. Queue giờ như sau: Nếu chạy policy round-robin trên mỗi queue, ta thấy schedule kết quả:
+Nhưng nếu chú ý, bạn có thể thấy vấn đề mới, căn bản của cách multi-queue: load imbalance. Giả sử cùng thiết lập trên (bốn job, hai CPU), nhưng một job (C) hoàn tất. Queue giờ như sau:
 
 ![p0124_8](images/ch10_multiprocessor_scheduling/p0124_8.png)
 
+Nếu chạy policy round-robin trên mỗi queue, ta thấy schedule kết quả:
+
 ![p0124_9](images/ch10_multiprocessor_scheduling/p0124_9.png)
 
-Như sơ đồ cho thấy, A nhận gấp đôi CPU so với B và D, không phải điều mong muốn. Tệ hơn, nếu A và C cùng hoàn tất, chỉ còn B, D. Queue sẽ như sau: Kết quả CPU 0 bị idle! (chèn nhạc kịch tính, đáng sợ tại đây) Vì vậy timeline sử dụng CPU trông buồn bã:
+Như sơ đồ cho thấy, A nhận gấp đôi CPU so với B và D, không phải điều mong muốn. Tệ hơn, nếu A và C cùng hoàn tất, chỉ còn B, D. Queue sẽ như sau:
 
 ![p0124_10](images/ch10_multiprocessor_scheduling/p0124_10.png)
+
+Kết quả CPU 0 bị idle! (chèn nhạc kịch tính, đáng sợ tại đây) Vì vậy timeline sử dụng CPU trông buồn bã:
 
 ![p0124_11](images/ch10_multiprocessor_scheduling/p0124_11.png)
 

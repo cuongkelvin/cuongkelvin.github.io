@@ -2,7 +2,7 @@
 
 ## 15.1 Flowchart của bộ nhân
 
-Trong mục này, chúng ta sẽ hiện thực một bộ nhân bằng flowchart trong Simulink. Các thuật toán dựa trên state flowchart trong HDL Coder để lập trình VHDL bằng Vivado được bàn chi tiết. Flowchart của bộ nhân (P = A × B) được thể hiện trong Hình 15.1. Chúng ta giả định rằng B ≠ 0 và ban đầu P = 0.
+Trong mục này, chúng ta sẽ triển khai một bộ nhân bằng flowchart trong Simulink. Các thuật toán dựa trên state flowchart trong HDL Coder để lập trình VHDL bằng Vivado được bàn chi tiết. Flowchart của bộ nhân (P = A × B) được thể hiện trong Hình 15.1. Chúng ta giả định rằng B ≠ 0 và ban đầu P = 0.
 
 ![p0286_1](images/ch15_flowcharts_in_simulink_for_vhdl_code_generation/p0286_1.png)
 
@@ -27,7 +27,7 @@ ans =
 00011
 ```
 
-Khi bắt đầu flowchart trong môi trường Stateflow của Simulink, chúng ta bắt đầu với state ban đầu (S0) bằng cách khởi tạo tất cả các output về không hoặc về các giá trị định sẵn dùng các constant được định nghĩa trong m-file MATLAB. Sau đó, chúng ta hiện thực flowchart step-by-step, coi mỗi bước là một state riêng trong Stateflow. Nếu gặp một thao tác phức tạp, chúng ta chia nó thành nhiều bước hay nhiều state để rõ ràng và dễ quản lý. Các constant được định nghĩa trong m-file được đặt làm parameter, còn các variable trung gian được định nghĩa là local trong Stateflow Model Explorer. Chúng ta gán các input cho các local variable và tương tự định nghĩa các input và output trong Model Explorer. Khi thực hiện bất kỳ phép toán số học nào bên trong một state, hãy bảo đảm chuyển nó sang định dạng fixed-point bằng lệnh fi. Ví dụ, chúng ta có code sau.
+Khi bắt đầu flowchart trong môi trường Stateflow của Simulink, chúng ta bắt đầu với state ban đầu (S0) bằng cách khởi tạo tất cả các output về không hoặc về các giá trị định sẵn dùng các constant được định nghĩa trong m-file MATLAB. Sau đó, chúng ta triển khai flowchart step-by-step, coi mỗi bước là một state riêng trong Stateflow. Nếu gặp một thao tác phức tạp, chúng ta chia nó thành nhiều bước hay nhiều state để rõ ràng và dễ quản lý. Các constant được định nghĩa trong m-file được đặt làm parameter, còn các variable trung gian được định nghĩa là local trong Stateflow Model Explorer. Chúng ta gán các input cho các local variable và tương tự định nghĩa các input và output trong Model Explorer. Khi thực hiện bất kỳ phép toán số học nào bên trong một state, hãy bảo đảm chuyển nó sang định dạng fixed-point bằng lệnh fi. Ví dụ, chúng ta có code sau.
 
 ```
 P = fi(P+A,0,14,0); % Perform P = P + A and save it as 14-bit unsigned number
@@ -219,9 +219,9 @@ Hình 15.26 Các waveform đã mô phỏng.
 
 ## 15.2 Flowchart của bộ tính GCD
 
-Trong mục này, chúng ta sẽ hiện thực thuật toán tính GCD trực tiếp từ flowchart của nó bằng HDL Coder và mô phỏng thiết kế trong môi trường MATLAB Simulink để kiểm chứng chức năng. Tiếp theo, chúng ta sẽ dùng HDL Coder để tạo code VHDL có thể synthesize từ bộ tính GCD đã thiết kế được hiện thực trong Stateflow. Cuối cùng, chúng ta sẽ synthesize và hiện thực code VHDL đã tạo bằng Xilinx Vivado. Flowchart của bộ tính GCD được thể hiện trong Hình 15.27.
+Trong mục này, chúng ta sẽ triển khai thuật toán tính GCD trực tiếp từ flowchart của nó bằng HDL Coder và mô phỏng thiết kế trong môi trường MATLAB Simulink để kiểm chứng chức năng. Tiếp theo, chúng ta sẽ dùng HDL Coder để tạo code VHDL có thể synthesize từ bộ tính GCD đã thiết kế được triển khai trong Stateflow. Cuối cùng, chúng ta sẽ synthesize và triển khai code VHDL đã tạo bằng Xilinx Vivado. Flowchart của bộ tính GCD được thể hiện trong Hình 15.27.
 
-Để hiện thực hiệu quả thuật toán thiết kế hệ thống số trực tiếp từ flowchart, chúng ta cần phân tích kỹ flowchart và xác định các input, output, constant và variable trung gian. Ngoài ra, chúng ta nên khởi tạo các constant và input bằng một MATLAB script riêng (m-file) dùng các fixed-point numeric object như “numerictype” và “fi”, như đã mô tả ở mục trước. Khi bắt đầu flowchart trong Stateflow bên trong Simulink, hãy bắt đầu với state ban đầu (S0) bằng cách khởi tạo tất cả các output về không hoặc về các giá trị định sẵn dùng các constant đã được định nghĩa trước trong m-file. Sau đó, hiện thực flowchart step-by-step, coi mỗi bước là một state riêng trong Stateflow chart. Nếu bạn gặp một thao tác phức tạp, hãy chia nó thành nhiều bước hay nhiều state để rõ ràng và dễ quản lý. Các constant được định nghĩa trong m-file nên được thêm làm parameter, và các variable trung gian nên được định nghĩa là local variable trong Model Explorer của Stateflow trong Simulink. Các input nên được gán cho local variable. Tương tự, chúng ta định nghĩa các input và output trong Model Explorer. Khi bạn thực hiện bất kỳ phép toán số học nào ở bất kỳ state nào, hãy bảo đảm chuyển nó sang fixed point bằng function “fi”, như đã bàn ở mục trước. Ngoài ra, tốt hơn là cân nhắc dùng MATLAB function hoặc Simulink function để đơn giản hóa và làm gọn flowchart bên trong Stateflow. Stateflow chart của bộ tính GCD được mô tả trong Hình 15.28.
+Để triển khai hiệu quả thuật toán thiết kế hệ thống số trực tiếp từ flowchart, chúng ta cần phân tích kỹ flowchart và xác định các input, output, constant và variable trung gian. Ngoài ra, chúng ta nên khởi tạo các constant và input bằng một MATLAB script riêng (m-file) dùng các fixed-point numeric object như “numerictype” và “fi”, như đã mô tả ở mục trước. Khi bắt đầu flowchart trong Stateflow bên trong Simulink, hãy bắt đầu với state ban đầu (S0) bằng cách khởi tạo tất cả các output về không hoặc về các giá trị định sẵn dùng các constant đã được định nghĩa trước trong m-file. Sau đó, triển khai flowchart step-by-step, coi mỗi bước là một state riêng trong Stateflow chart. Nếu bạn gặp một thao tác phức tạp, hãy chia nó thành nhiều bước hay nhiều state để rõ ràng và dễ quản lý. Các constant được định nghĩa trong m-file nên được thêm làm parameter, và các variable trung gian nên được định nghĩa là local variable trong Model Explorer của Stateflow trong Simulink. Các input nên được gán cho local variable. Tương tự, chúng ta định nghĩa các input và output trong Model Explorer. Khi bạn thực hiện bất kỳ phép toán số học nào ở bất kỳ state nào, hãy bảo đảm chuyển nó sang fixed point bằng function “fi”, như đã bàn ở mục trước. Ngoài ra, tốt hơn là cân nhắc dùng MATLAB function hoặc Simulink function để đơn giản hóa và làm gọn flowchart bên trong Stateflow. Stateflow chart của bộ tính GCD được mô tả trong Hình 15.28.
 
 Các parameter (constant) đã được định nghĩa sẵn bên trong m-file (FC_Parameters.m) như code sau.
 
@@ -230,13 +230,7 @@ clear all; close all; clc
 N = 7; %nbits
 nt1 = numerictype(0,1,0);
 nt2 = numerictype(0,N,0);
-```
 
-![p0298_27](images/ch15_flowcharts_in_simulink_for_vhdl_code_generation/p0298_27.png)
-
-Hình 15.27 Flowchart của bộ tính GCD.
-
-```
 % 1-bit constants
 a0 = fi(0,nt1);
 a1 = fi(1,nt1);
@@ -249,6 +243,10 @@ Bin = fi(13,nt2);
 A0 = fi(0,nt2);
 B0 = fi(0,nt2);
 ```
+
+![p0298_27](images/ch15_flowcharts_in_simulink_for_vhdl_code_generation/p0298_27.png)
+
+Hình 15.27 Flowchart của bộ tính GCD.
 
 Để dùng các constant này bên trong Stateflow, chúng ta nên chạy m-file. Các variable A0, B0, a0 và a1 là các parameter fixed-point được định nghĩa trong m-file. A và B là các variable local hay trung gian. Ngoài ra, Ain, Bin và Start là các input, còn GCD và Done là các output. Từ View → Model Explorer → Model Explorer, chúng ta mở cửa sổ Model Explorer để thêm parameter, local variable, input và output cho thiết kế Stateflow ở Hình 15.28. Trong cửa sổ Model Explorer, chúng ta click vào Add trên thanh menu, chọn tùy chọn Data, và bắt đầu thêm các variable được định nghĩa trong Stateflow chart. Danh sách đầy đủ các variable đã thêm cho Stateflow chart được thể hiện trong Hình 15.29.
 
@@ -364,9 +362,9 @@ Hình 15.41 Các waveform đã mô phỏng.
 
 ## 15.3 Flowchart của phép nhân Booth
 
-Trong mục này, chúng ta sẽ hiện thực thuật toán nhân Booth trực tiếp từ flowchart của nó. Chúng ta sẽ mô phỏng thiết kế trong môi trường MATLAB Simulink để kiểm chứng chức năng. Sau đó, chúng ta sẽ dùng HDL Coder để tạo code VHDL có thể synthesize từ thuật toán nhân Booth đã thiết kế được hiện thực trong Stateflow, và cuối cùng, chúng ta sẽ synthesize và hiện thực code VHDL đã tạo bằng Xilinx Vivado. Flowchart của thuật toán nhân Booth được thể hiện trong Hình 15.42. Để hiện thực thuật toán thiết kế hệ thống số trực tiếp từ flowchart, chúng ta phải phân tích kỹ nó và xác định các input, output, constant và variable trung gian. Các constant và input nên được khởi tạo bằng một MATLAB script riêng (m-file), trong đó tất cả các giá trị được định nghĩa bằng các fixed-point numeric object như “numerictype” và “fi”, như đã mô tả ở các mục trước. Chúng ta thường bắt đầu với state ban đầu (S0) bằng cách khởi tạo tất cả các output về không hoặc về các giá trị định sẵn, dùng các constant đã được định nghĩa trước trong m-file.
+Trong mục này, chúng ta sẽ triển khai thuật toán nhân Booth trực tiếp từ flowchart của nó. Chúng ta sẽ mô phỏng thiết kế trong môi trường MATLAB Simulink để kiểm chứng chức năng. Sau đó, chúng ta sẽ dùng HDL Coder để tạo code VHDL có thể synthesize từ thuật toán nhân Booth đã thiết kế được triển khai trong Stateflow, và cuối cùng, chúng ta sẽ synthesize và triển khai code VHDL đã tạo bằng Xilinx Vivado. Flowchart của thuật toán nhân Booth được thể hiện trong Hình 15.42. Để triển khai thuật toán thiết kế hệ thống số trực tiếp từ flowchart, chúng ta phải phân tích kỹ nó và xác định các input, output, constant và variable trung gian. Các constant và input nên được khởi tạo bằng một MATLAB script riêng (m-file), trong đó tất cả các giá trị được định nghĩa bằng các fixed-point numeric object như “numerictype” và “fi”, như đã mô tả ở các mục trước. Chúng ta thường bắt đầu với state ban đầu (S0) bằng cách khởi tạo tất cả các output về không hoặc về các giá trị định sẵn, dùng các constant đã được định nghĩa trước trong m-file.
 
-Sau đó, chúng ta hiện thực flowchart từng bước một, coi mỗi bước là một state riêng trong Stateflow của Simulink. Nếu gặp một thao tác phức tạp, tốt hơn là chia nó thành nhiều bước hay nhiều state để rõ ràng và dễ quản lý. Các constant được định nghĩa trong m-file được khai báo làm parameter, còn các variable trung gian được định nghĩa là local variable trong Model Explorer của Stateflow. Các input được gán cho local variable và tương tự, các input và output cũng được định nghĩa trong Model Explorer. Khi thực hiện bất kỳ phép toán số học nào ở bất kỳ state nào, chúng ta nên bảo đảm các giá trị được chuyển sang fixed point bằng “fi”, như đã bàn ở các mục trước. Cũng nên cân nhắc dùng MATLAB function hoặc Simulink function để đơn giản hóa và làm gọn thiết kế flowchart trong Stateflow của Simulink. Sơ đồ Stateflow cho thuật toán nhân Booth được mô tả trong Hình 15.43. Bạn nên lưu ý rằng trong Hình 15.43, Q<sub>−1</sub> được biểu diễn là Qm1. Để lấy least significant bit (LSB) của Q, chúng ta có thể dùng getlsb(Q) hoặc bitget(Q,1). Lệnh để thực hiện phép dịch phải 1-bit cho variable A là bitsra(A,1). Ngoài ra, để đặt most significant bit (MSB) của Q (bit thứ bảy trong trường hợp này) bằng LSB của A, chúng ta dùng lệnh bitset(Q,7,getlsb(A)). Hơn nữa, để nối các variable A và Q, chúng ta dùng lệnh bitconcat(A,Q), như được minh họa trong Hình 15.43.
+Sau đó, chúng ta triển khai flowchart từng bước một, coi mỗi bước là một state riêng trong Stateflow của Simulink. Nếu gặp một thao tác phức tạp, tốt hơn là chia nó thành nhiều bước hay nhiều state để rõ ràng và dễ quản lý. Các constant được định nghĩa trong m-file được khai báo làm parameter, còn các variable trung gian được định nghĩa là local variable trong Model Explorer của Stateflow. Các input được gán cho local variable và tương tự, các input và output cũng được định nghĩa trong Model Explorer. Khi thực hiện bất kỳ phép toán số học nào ở bất kỳ state nào, chúng ta nên bảo đảm các giá trị được chuyển sang fixed point bằng “fi”, như đã bàn ở các mục trước. Cũng nên cân nhắc dùng MATLAB function hoặc Simulink function để đơn giản hóa và làm gọn thiết kế flowchart trong Stateflow của Simulink. Sơ đồ Stateflow cho thuật toán nhân Booth được mô tả trong Hình 15.43. Bạn nên lưu ý rằng trong Hình 15.43, Q<sub>−1</sub> được biểu diễn là Qm1. Để lấy least significant bit (LSB) của Q, chúng ta có thể dùng getlsb(Q) hoặc bitget(Q,1). Lệnh để thực hiện phép dịch phải 1-bit cho variable A là bitsra(A,1). Ngoài ra, để đặt most significant bit (MSB) của Q (bit thứ bảy trong trường hợp này) bằng LSB của A, chúng ta dùng lệnh bitset(Q,7,getlsb(A)). Hơn nữa, để nối các variable A và Q, chúng ta dùng lệnh bitconcat(A,Q), như được minh họa trong Hình 15.43.
 
 ![p0306_42](images/ch15_flowcharts_in_simulink_for_vhdl_code_generation/p0306_42.png)
 
@@ -401,6 +399,7 @@ Ai = fi(0,nt);
 nt1 = numerictype(0,1,0);
 a0 = fi(0,nt1);
 a1 = fi(1,nt1);
+
 % 2-bit constants
 nt2 = numerictype(0,2,0);
 b0 = fi(0,nt2);
@@ -522,7 +521,7 @@ Hình 15.54 Chạy synthesis thành công.
 
 Như được minh họa trong Hình 15.54, synthesis đã hoàn tất thành công, và chúng ta có thể click vào button Cancel. Sau đó, chúng ta mở schematic trong tab RTL Analysis, như được thể hiện trong Hình 15.55.
 
-Bây giờ, chúng ta có thể mô phỏng project bằng cách chọn Flow → Run Simulation → Run Behavioral Simulation. Trong cửa sổ simulation vừa mở, chúng ta click vào button Restart. Sau đó, trong cửa sổ waveform, chúng ta right-click vào “clk”, chọn tùy chọn “Force Clock…”, và cấu hình thiết lập của nó như được minh họa trong Hình 15.20. Ngoài ra, chúng ta right-click vào “reset” và “clk_enable”, chọn tùy chọn “Force Constant…”, và force giá trị của nó thành 1, như được thể hiện trong Hình 15.21. Chúng ta right-click vào “Qin”, chọn tùy chọn “Force Constant…”, và force giá trị của nó thành unsigned decimal 15. Tương tự, chúng ta force giá trị constant “Min” thành unsigned decimal 20. Cuối cùng, chúng ta right-click vào “Start”, chọn tùy chọn “Force Clock…”, và đặt thiết lập của nó như được thể hiện trong Hình 15.23. Sau đó, chúng ta click một lần vào button Run for 20 ns như được thể hiện trong Hình 15.24. Chúng ta right-click lần nữa vào “reset” và force giá trị của nó về không như được mô tả trong Hình 15.25. Sau đó, chúng ta click vào button Run for 20 ns nhiều lần và click vào button Zoom Fit trong cửa sổ waveforms. Chúng ta cũng chọn Q0m1, Count, Product_ tmp, Q0m1_tmp và Count_tmp rồi right-click và chọn Radix → Unsigned Decimal, sau đó chúng ta có các waveform đã mô phỏng, như được mô tả trong Hình 15.56.
+Bây giờ, chúng ta có thể mô phỏng project bằng cách chọn Flow → Run Simulation → Run Behavioral Simulation. Trong cửa sổ simulation vừa mở, chúng ta click vào button Restart. Sau đó, trong cửa sổ waveform, chúng ta right-click vào “clk”, chọn tùy chọn “Force Clock…”, và cấu hình thiết lập của nó như được minh họa trong Hình 15.20. Ngoài ra, chúng ta right-click vào “reset” và “clk_enable”, chọn tùy chọn “Force Constant…”, và force giá trị của nó thành 1, như được thể hiện trong Hình 15.21. Chúng ta right-click vào “Qin”, chọn tùy chọn “Force Constant…”, và force giá trị của nó thành unsigned decimal 15. Tương tự, chúng ta force giá trị constant “Min” thành unsigned decimal 20. Cuối cùng, chúng ta right-click vào “Start”, chọn tùy chọn “Force Clock…”, và đặt thiết lập của nó như được thể hiện trong Hình 15.23. Sau đó, chúng ta click một lần vào button Run for 20 ns như được thể hiện trong Hình 15.24. Chúng ta right-click lần nữa vào “reset” và force giá trị của nó về không như được mô tả trong Hình 15.25. Sau đó, chúng ta click vào button Run for 20 ns nhiều lần và click vào button Zoom Fit trong cửa sổ waveforms. Chúng ta cũng chọn Q0m1, Count, Product_tmp, Q0m1_tmp và Count_tmp rồi right-click và chọn Radix → Unsigned Decimal, sau đó chúng ta có các waveform đã mô phỏng, như được mô tả trong Hình 15.56.
 
 ![p0314_55](images/ch15_flowcharts_in_simulink_for_vhdl_code_generation/p0314_55.png)
 
@@ -534,7 +533,7 @@ Hình 15.56 Các waveform đã mô phỏng.
 
 ## 15.4 Flowchart của một hệ thống điều khiển công nghiệp
 
-Trong mục này, chúng ta sẽ hiện thực một hệ thống điều khiển công nghiệp trực tiếp từ flowchart của nó. Chúng ta sẽ mô phỏng thiết kế trong môi trường MATLAB Simulink để kiểm chứng chức năng. Sau đó, chúng ta sẽ dùng HDL Coder để tạo code VHDL có thể synthesize từ hệ thống điều khiển công nghiệp đã thiết kế được hiện thực trong môi trường Stateflow của Simulink. Cuối cùng, chúng ta sẽ synthesize và hiện thực code VHDL đã tạo bằng Xilinx Vivado. Trình tự hoạt động của hệ thống được minh họa trong Hình 15.57 như sau:
+Trong mục này, chúng ta sẽ triển khai một hệ thống điều khiển công nghiệp trực tiếp từ flowchart của nó. Chúng ta sẽ mô phỏng thiết kế trong môi trường MATLAB Simulink để kiểm chứng chức năng. Sau đó, chúng ta sẽ dùng HDL Coder để tạo code VHDL có thể synthesize từ hệ thống điều khiển công nghiệp đã thiết kế được triển khai trong môi trường Stateflow của Simulink. Cuối cùng, chúng ta sẽ synthesize và triển khai code VHDL đã tạo bằng Xilinx Vivado. Trình tự hoạt động của hệ thống được minh họa trong Hình 15.57 như sau:
 
 • Ban đầu hộp được đặt ở LS1 (LS1 đóng).
 
@@ -568,7 +567,7 @@ en_cnt0 = fi(0,0,4,0);
 cnt_val = fi(8,0,4,0);
 ```
 
-Để dùng các constant này bên trong Stateflow, trước hết chúng ta cần chạy m-file. Các parameter cnt_ val, en_cnt0, a0 và a1 là các parameter fixed-point được định nghĩa bên trong m-file. encoder_cnt là một variable local hay trung gian. Ngoài ra, start, ls1, ls2, emg_stop và encoder là các input, còn State và motor là các output. Từ View → Model Explorer → Model Explorer, chúng ta mở cửa sổ Model Explorer để thêm parameter, local variable, input và output cho thiết kế Stateflow ở Hình 15.59. Trong cửa sổ Model Explorer, chúng ta click vào menu Add trên thanh menu và chọn tùy chọn Data rồi bắt đầu thêm các variable được định nghĩa trong Stateflow chart. Danh sách đầy đủ các variable đã thêm của Stateflow chart được thể hiện trong Hình 15.60.
+Để dùng các constant này bên trong Stateflow, trước hết chúng ta cần chạy m-file. Các parameter cnt_val, en_cnt0, a0 và a1 là các parameter fixed-point được định nghĩa bên trong m-file. encoder_cnt là một variable local hay trung gian. Ngoài ra, start, ls1, ls2, emg_stop và encoder là các input, còn State và motor là các output. Từ View → Model Explorer → Model Explorer, chúng ta mở cửa sổ Model Explorer để thêm parameter, local variable, input và output cho thiết kế Stateflow ở Hình 15.59. Trong cửa sổ Model Explorer, chúng ta click vào menu Add trên thanh menu và chọn tùy chọn Data rồi bắt đầu thêm các variable được định nghĩa trong Stateflow chart. Danh sách đầy đủ các variable đã thêm của Stateflow chart được thể hiện trong Hình 15.60.
 
 Chúng ta cũng đánh dấu tùy chọn Create output for monitoring và nhập Data name là State và Enum name là FSM, như được minh họa trong Hình 15.60. Các variable input và output của flowchart được minh họa trong Hình 15.61.
 
@@ -656,7 +655,7 @@ Hình 15.70 Cửa sổ HDL Check Report.
 
 Hình 15.71 Cửa sổ Code Generation Report.
 
-Code VHDL được tạo ra thành công, và cửa sổ Code Generation Report được hiển thị như được mô tả trong Hình 15.71. Bây giờ, chúng ta chạy Vivado và tạo một project tên “Ind_Cont_ Sys” rồi click button Next. Sau đó chúng ta chọn loại project là RTL project và click button Next. Trong cửa sổ Add Sources, trước khi thêm các file VHDL đã tạo, chúng ta copy và paste ba file VHDL đã tạo ở Hình 15.71 vào thư mục Ind_Cont_Sys của project Vivado. Bây giờ, bằng cách click vào button Add Files, chúng ta có thể thêm chúng vào project như được thể hiện trong Hình 15.72.
+Code VHDL được tạo ra thành công, và cửa sổ Code Generation Report được hiển thị như được mô tả trong Hình 15.71. Bây giờ, chúng ta chạy Vivado và tạo một project tên “Ind_Cont_Sys” rồi click button Next. Sau đó chúng ta chọn loại project là RTL project và click button Next. Trong cửa sổ Add Sources, trước khi thêm các file VHDL đã tạo, chúng ta copy và paste ba file VHDL đã tạo ở Hình 15.71 vào thư mục Ind_Cont_Sys của project Vivado. Bây giờ, bằng cách click vào button Add Files, chúng ta có thể thêm chúng vào project như được thể hiện trong Hình 15.72.
 
 Tiếp theo, chúng ta chọn development board Xilinx và click vào button Next. Cuối cùng, chúng ta click vào button Finish để tạo project Ind_Cont_Sys với các file VHDL đã tạo được thêm vào. Sau đó, chúng ta chạy synthesis như được minh họa trong Hình 15.73.
 

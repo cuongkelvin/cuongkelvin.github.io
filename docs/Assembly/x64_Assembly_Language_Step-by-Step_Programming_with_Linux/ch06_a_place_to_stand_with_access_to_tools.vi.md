@@ -12,7 +12,7 @@ Các hệ điều hành cổ xưa như DOS cho chúng ta “chỗ đứng” the
 
 Theo một số cách, điều thú vị nhất về DOS 2.0 là nó được tạo ra như một phiên bản “dumbed-down” của một hệ điều hành mạnh hơn nhiều, Unix, vốn được các phòng nghiên cứu của AT&T phát triển trong thập niên 1960 và 1970. Vào thời điểm IBM PC xuất hiện, Unix chỉ chạy trên các mainframe và minicomputer lớn, đắt tiền. PC không có đủ sức mạnh tính toán thô để tự chạy Unix, nhưng DOS 2.0 được tạo ra với một filesystem phân cấp rất giống filesystem của Unix, và dòng lệnh của nó cung cấp quyền truy cập vào một tập con các công cụ hoạt động rất giống các công cụ Unix.
 
-PC x86 lớn lên qua nhiều năm, và đến khoảng năm 1990, các CPU của Intel đã đủ mạnh để chạy một hệ điều hành được mô phỏng theo Unix. Trong khi đó, Unix “lớn xuống” cho đến khi hai bên gặp nhau ở đâu đó ở giữa. Năm 1991, lập trình viên trẻ người Phần Lan Linus Torvalds đã viết một bản “trông giống” Unix có thể chạy trên một PC 386-based rẻ tiền. Nó được mô phỏng theo một hiện thực của Unix gọi là Minix, vốn được viết ở Hà Lan vào cuối thập niên 1980 như một bản trông giống Unix có khả năng chạy trên các máy tính nhỏ. Hệ điều hành Linux của Torvalds rốt cuộc đã thống trị thế giới Unix.
+PC x86 lớn lên qua nhiều năm, và đến khoảng năm 1990, các CPU của Intel đã đủ mạnh để chạy một hệ điều hành được mô phỏng theo Unix. Trong khi đó, Unix “lớn xuống” cho đến khi hai bên gặp nhau ở đâu đó ở giữa. Năm 1991, lập trình viên trẻ người Phần Lan Linus Torvalds đã viết một bản “trông giống” Unix có thể chạy trên một PC 386-based rẻ tiền. Nó được mô phỏng theo một bản triển khai của Unix gọi là Minix, vốn được viết ở Hà Lan vào cuối thập niên 1980 như một bản trông giống Unix có khả năng chạy trên các máy tính nhỏ. Hệ điều hành Linux của Torvalds rốt cuộc đã thống trị thế giới Unix.
 
 Linux là chỗ đứng của chúng ta, và đó là một chỗ đứng tốt. Nhưng về mặt tiếp cận công cụ, cũng sẽ hữu ích nếu có một kiểu bàn làm việc phần mềm được thiết kế đặc biệt cho loại công việc chúng ta đang làm vào lúc đó. Trình xử lý văn bản là bàn làm việc để viết và in nội dung (chủ yếu là) văn bản. PowerPoint và các bản sao của nó là bàn làm việc để tạo bài thuyết trình, và cứ thế.
 
@@ -220,7 +220,7 @@ Linux hoạt động theo cùng cách. Nói đơn giản nhất, Linux *chính l
 
 ### Linux Console
 
-Có vô số chương trình terminal emulator cho Linux và các hiện thực Unix khác như BSD. Ubuntu và Kubuntu đi kèm một chương trình gọi là GNOME Terminal, và bạn có thể tải về và cài đặt nhiều chương trình khác từ package manager của distro. Chương trình tôi dùng cho các phần thảo luận trong cuốn sách này và khuyên dùng nói chung có tên là Konsole. Hãy cài nó nếu bạn chưa cài.
+Có vô số chương trình terminal emulator cho Linux và các cách triển khai Unix khác như BSD. Ubuntu và Kubuntu đi kèm một chương trình gọi là GNOME Terminal, và bạn có thể tải về và cài đặt nhiều chương trình khác từ package manager của distro. Chương trình tôi dùng cho các phần thảo luận trong cuốn sách này và khuyên dùng nói chung có tên là Konsole. Hãy cài nó nếu bạn chưa cài.
 
 Khi bạn mở một chương trình terminal emulator dưới Linux, bạn nhận được một dòng lệnh văn bản với một con trỏ nhấp nháy, rất giống dòng lệnh DOS cũ hay tiện ích Command Prompt trong Windows. Chương trình terminal cố hết sức để hoạt động giống một trong những serial terminal CRT DEC cũ từ Thời đại Thứ nhất của Unix. Theo mặc định, một chương trình terminal emulator dùng bàn phím và màn hình PC cho input và output của nó. Và thứ mà nó kết nối tới là một thiết bị Linux đặc biệt gọi là *dev/console*, là một thiết bị được định nghĩa trước cung cấp khả năng giao tiếp với chính hệ thống Linux.
 
@@ -238,7 +238,7 @@ Cuốn sách này được viết bằng bảng chữ cái Roman cho độc gi�
 
 Khi IBM phát hành chiếc PC nguyên thủy năm 1981, nó có kèm các glyph mà IBM đã tạo ra cho các terminal mainframe của mình nhiều năm trước đó để cho phép vẽ các hộp trên những màn hình terminal text-only không thể hiển thị đồ họa pixel. Những glyph này hóa ra hữu ích để phân định các biểu mẫu fill-in và những thứ khác. Character set ROM-based của PC rốt cuộc được gọi là Code [Page 437](ch12_heading_out_to_c.vi.md#Page_437), bao gồm rất nhiều ký hiệu khác như bốn chất của bộ bài.
 
-Một lược đồ character encoding tương tự sau đó được dùng trong hiện thực Unix của IBM, AIX, và được gọi là IBM-850. IBM-850 bao gồm một tập con các ký tự box-draw trong CP437, cộng với rất nhiều ký tự bảng chữ cái Roman có dấu bổ trợ, để cho phép hiển thị đúng văn bản bằng các ngôn ngữ khác ngoài tiếng Anh.
+Một lược đồ character encoding tương tự sau đó được dùng trong bản triển khai Unix của IBM, AIX, và được gọi là IBM-850. IBM-850 bao gồm một tập con các ký tự box-draw trong CP437, cộng với rất nhiều ký tự bảng chữ cái Roman có dấu bổ trợ, để cho phép hiển thị đúng văn bản bằng các ngôn ngữ khác ngoài tiếng Anh.
 
 Các terminal emulator Linux theo mặc định không mã hóa lược đồ CP437 cũng như lược đồ IBM-850 (và do đó cả các ký tự box-border của nó). Lược đồ encoding IBM-850 có sẵn, nhưng bạn phải chọn nó từ các menu. Nhân tiện, vào thời điểm viết sách này, tôi chưa từng thấy một terminal emulator Linux nào có khả năng hiển thị character set CP437 nguyên thủy của IBM. Có thể có, nhưng CP437 bị coi là lỗi thời, và việc đòi hỏi nó để chạy một chương trình bạn viết sẽ làm người dùng khó chịu.
 

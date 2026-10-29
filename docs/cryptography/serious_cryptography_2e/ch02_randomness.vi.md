@@ -116,7 +116,7 @@ Hãy nói sơ qua về cách PRNG giải quyết các mối lo ngại security h
 
 ### PRNG Fortuna (The PRNG Fortuna)
 
-Fortuna là một cấu trúc PRNG được dùng trong Windows, ban đầu được Niels Ferguson và Bruce Schneier thiết kế vào năm 2003. Fortuna đã thay thế Yarrow, một thiết kế năm 1998 của John Kelsey và Bruce Schneier từng được dùng trong thời gian dài trong các hệ điều hành macOS và iOS và đã được Fortuna thay thế. Tôi sẽ không đưa ra đặc tả của Fortuna ở đây hay chỉ cho bạn cách hiện thực nó, nhưng tôi sẽ cố gắng giải thích cách nó hoạt động. Bạn sẽ tìm thấy mô tả đầy đủ về Fortuna trong Chương 9 của Cryptography Engineering của Ferguson, Schneier và Kohno (Wiley, 2010).
+Fortuna là một cấu trúc PRNG được dùng trong Windows, ban đầu được Niels Ferguson và Bruce Schneier thiết kế vào năm 2003. Fortuna đã thay thế Yarrow, một thiết kế năm 1998 của John Kelsey và Bruce Schneier từng được dùng trong thời gian dài trong các hệ điều hành macOS và iOS và đã được Fortuna thay thế. Tôi sẽ không đưa ra đặc tả của Fortuna ở đây hay chỉ cho bạn cách triển khai nó, nhưng tôi sẽ cố gắng giải thích cách nó hoạt động. Bạn sẽ tìm thấy mô tả đầy đủ về Fortuna trong Chương 9 của Cryptography Engineering của Ferguson, Schneier và Kohno (Wiley, 2010).
 
 Memory bên trong của Fortuna bao gồm:
 
@@ -132,9 +132,9 @@ Nói một cách đơn giản nhất, Fortuna hoạt động như sau:
 
 • next(N) cập nhật K bằng dữ liệu từ một hoặc nhiều entropy pool, trong đó việc chọn entropy pool chủ yếu phụ thuộc vào số lần cập nhật K đã được thực hiện. Sau đó, N bit được yêu cầu được tạo ra bằng cách mã hóa C với K làm key. Nếu mã hóa C là không đủ, Fortuna mã hóa C + 1, rồi C + 2, v.v., để có đủ bit.
 
-Dù các thao tác của Fortuna trông khá đơn giản, hiện thực chúng một cách đúng đắn lại rất khó. Trước hết, bạn cần làm đúng mọi chi tiết của algorithm—cách chọn entropy pool, loại cipher được dùng trong next, cách xử lý khi không nhận được entropy nào, v.v. Dù các đặc tả định nghĩa phần lớn các chi tiết, chúng không có một bộ test toàn diện để kiểm tra một implementation có đúng hay không, điều này khiến khó bảo đảm rằng implementation Fortuna của bạn sẽ hoạt động như mong đợi.
+Dù các thao tác của Fortuna trông khá đơn giản, triển khai chúng một cách đúng đắn lại rất khó. Trước hết, bạn cần làm đúng mọi chi tiết của algorithm—cách chọn entropy pool, loại cipher được dùng trong next, cách xử lý khi không nhận được entropy nào, v.v. Dù các đặc tả định nghĩa phần lớn các chi tiết, chúng không có một bộ test toàn diện để kiểm tra một implementation có đúng hay không, điều này khiến khó bảo đảm rằng implementation Fortuna của bạn sẽ hoạt động như mong đợi.
 
-Ngay cả khi Fortuna được hiện thực đúng, các lỗi security vẫn có thể xảy ra vì những lý do khác ngoài việc dùng một algorithm sai. Ví dụ, Fortuna có thể không nhận ra nếu các RNG không tạo ra đủ bit ngẫu nhiên, và kết quả là Fortuna sẽ tạo ra các bit pseudorandom lower-quality, hoặc nó có thể ngừng cung cấp bit pseudorandom hoàn toàn.
+Ngay cả khi Fortuna được triển khai đúng, các lỗi security vẫn có thể xảy ra vì những lý do khác ngoài việc dùng một algorithm sai. Ví dụ, Fortuna có thể không nhận ra nếu các RNG không tạo ra đủ bit ngẫu nhiên, và kết quả là Fortuna sẽ tạo ra các bit pseudorandom lower-quality, hoặc nó có thể ngừng cung cấp bit pseudorandom hoàn toàn.
 
 Một rủi ro khác vốn có trong các implementation của Fortuna nằm ở khả năng để lộ các seed file liên quan cho kẻ tấn công. Dữ liệu trong các seed file của Fortuna được dùng để cung cấp entropy cho Fortuna thông qua các lần gọi refresh khi chưa có RNG ngay—ví dụ, ngay sau khi khởi động lại hệ thống và trước khi các RNG của hệ thống ghi nhận được bất kỳ sự kiện không thể đoán trước nào. Tuy nhiên, nếu cùng một seed file được dùng hai lần, Fortuna sẽ tạo ra cùng một chuỗi bit hai lần. Vì vậy, các seed file nên được xóa sau khi dùng để bảo đảm chúng không bị dùng lại.
 
@@ -184,7 +184,7 @@ $ openssl rand <number of bytes> -out <output file>
 
 ## Các PRNG Real-World
 
-Hãy chuyển sự chú ý sang việc hiện thực PRNG trong thế giới thực. Bạn sẽ tìm thấy các PRNG crypto trong hệ điều hành (OS) của phần lớn các nền tảng, từ máy để bàn và laptop đến các embedded system như router và set-top box, cũng như máy ảo, điện thoại di động, v.v. Phần lớn các PRNG này dựa trên software, nhưng những PRNG thuần hardware được dùng bởi các ứng dụng chạy trên OS và đôi khi bởi các PRNG khác chạy trên các cryptographic library hoặc ứng dụng.
+Hãy chuyển sự chú ý sang việc triển khai PRNG trong thế giới thực. Bạn sẽ tìm thấy các PRNG crypto trong hệ điều hành (OS) của phần lớn các nền tảng, từ máy để bàn và laptop đến các embedded system như router và set-top box, cũng như máy ảo, điện thoại di động, v.v. Phần lớn các PRNG này dựa trên software, nhưng những PRNG thuần hardware được dùng bởi các ứng dụng chạy trên OS và đôi khi bởi các PRNG khác chạy trên các cryptographic library hoặc ứng dụng.
 
 Tiếp theo, chúng ta sẽ xem xét những PRNG được triển khai rộng rãi nhất: cho Linux, Android và nhiều hệ thống Unix-based khác; trong Windows; và trong các bộ vi xử lý Intel gần đây, mà PRNG của chúng dựa trên hardware.
 

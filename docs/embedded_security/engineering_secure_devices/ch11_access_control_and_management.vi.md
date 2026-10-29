@@ -6,7 +6,7 @@ Trong các hệ thống IT, việc quản lý người dùng và quyền có tru
 
 Ngày nay, với độ phức tạp ngày càng tăng của các mô hình kinh doanh và kịch bản ứng dụng IoT, nhiều bên tham gia vào các quy trình life-cycle của thiết bị IoT—từ developer đến nhân viên bảo trì đến các nhà cung cấp dịch vụ third-party đến chính người dùng cuối. Thiết bị phải có khả năng *xử lý* tất cả các vai trò này và *tách biệt* chúng với nhau. Hơn nữa, các process và ứng dụng nội bộ chạy trên thiết bị của bạn cũng sẽ đòi hỏi các quyền khác nhau để hoàn thành mục đích của chúng. Việc hạn chế chúng theo nguyên tắc least privilege có thể cứu thiết bị của bạn khỏi thiệt hại nghiêm trọng.
 
-Chương này bắt đầu bằng việc xem xét nhiều tình huống mà access control có thể đóng góp quan trọng vào bảo mật thiết bị. Sau đó, tôi giải thích các khái niệm phổ biến bạn có thể dùng để hiện thực các hạn chế truy cập trên thiết bị chạy Linux. Case study ở cuối chương hé lộ các khả năng thực tế của việc hạn chế process bằng công cụ AppArmor.
+Chương này bắt đầu bằng việc xem xét nhiều tình huống mà access control có thể đóng góp quan trọng vào bảo mật thiết bị. Sau đó, tôi giải thích các khái niệm phổ biến bạn có thể dùng để triển khai các hạn chế truy cập trên thiết bị chạy Linux. Case study ở cuối chương hé lộ các khả năng thực tế của việc hạn chế process bằng công cụ AppArmor.
 
 <a id="ch00lev1_89"></a>
 
@@ -48,7 +48,7 @@ Trong quá trình thiết kế phần cứng, các cuộc thảo luận về tru
 
 Để có bảo mật cao hơn, thậm chí có khả năng tích hợp một cấu trúc lưới dẫn điện vào vỏ nhựa, liên tục chạy tín hiệu trên các đường của nó để phát hiện mọi sự can thiệp vào vỏ. Những cơ chế như vậy đã được dùng trong các thiết bị đầu cuối thanh toán.
 
-<a id="page_202"></a>Một phần quan trọng của việc phát triển firmware là đặc tả các system user, vai trò của họ, các thư mục, file ban đầu và quyền tương ứng. Ngay cả khi điều này thoạt nghe có vẻ tầm thường, hãy bảo đảm tính đến toàn bộ phạm vi các use case dự định của thiết bị. Kết quả phải được hiện thực trong build system bạn chọn (ví dụ, Yocto hay Buildroot) và nên được giám sát về tính đúng đắn trong suốt toàn bộ quá trình phát triển.
+<a id="page_202"></a>Một phần quan trọng của việc phát triển firmware là đặc tả các system user, vai trò của họ, các thư mục, file ban đầu và quyền tương ứng. Ngay cả khi điều này thoạt nghe có vẻ tầm thường, hãy bảo đảm tính đến toàn bộ phạm vi các use case dự định của thiết bị. Kết quả phải được triển khai trong build system bạn chọn (ví dụ, Yocto hay Buildroot) và nên được giám sát về tính đúng đắn trong suốt toàn bộ quá trình phát triển.
 
 Tiếp theo, bạn phải phân tích mọi ứng dụng và dịch vụ phần mềm của thiết bị. Một mặt, bạn phải chỉ định mỗi ứng dụng nên chạy trong ngữ cảnh user nào. Điều này định nghĩa các quyền mà một process có lúc runtime, điều trở nên đặc biệt quan trọng khi nó bị một tác nhân có ý đồ xấu chiếm quyền. Hãy cân nhắc kỹ xem root có phải luôn là lựa chọn tốt nhất của bạn không.
 
@@ -60,7 +60,7 @@ Dĩ nhiên, ứng dụng có thể có nhiều user “admin”: một `webadmin
 
 ### *Các cân nhắc về sản xuất*
 
-Việc sản xuất thiết bị thường không được coi là một bước quan trọng trong việc quản lý access-control, nhưng ngày càng nhiều tiêu chuẩn—ví dụ, ETSI EN 303 645 của châu Âu cho điện tử tiêu dùng—đòi hỏi thiết bị không được hiện thực mật khẩu mặc định toàn cục. Vì firmware của thiết bị thường là một artifact toàn cục tĩnh, một mật khẩu device-individual phải được tạo và đặt trong quá trình sản xuất.
+Việc sản xuất thiết bị thường không được coi là một bước quan trọng trong việc quản lý access-control, nhưng ngày càng nhiều tiêu chuẩn—ví dụ, ETSI EN 303 645 của châu Âu cho điện tử tiêu dùng—đòi hỏi thiết bị không được triển khai mật khẩu mặc định toàn cục. Vì firmware của thiết bị thường là một artifact toàn cục tĩnh, một mật khẩu device-individual phải được tạo và đặt trong quá trình sản xuất.
 
 Và không chỉ firmware phải được cá nhân hóa. Một mẩu giấy, một nhãn dán hay một phần bao bì sản phẩm cũng phải được ghi mật khẩu riêng. Quy trình này phụ thuộc nhiều vào cấu trúc firmware của thiết bị và các quy trình sản xuất của bạn.
 
@@ -148,7 +148,7 @@ Trong Linux, có nhiều công cụ để quản lý user và group. Các lệnh
 | `groupmod` | Sửa đổi thuộc tính của một group hiện có |
 | `groupdel` | Xóa một group |
 
-Khi chế tạo các thiết bị an toàn, các lệnh quan trọng nhất là `useradd` và `groupadd`, vì chúng có thể được dùng lúc image-creation để hiện thực các user và vai trò được định nghĩa trong một khái niệm access-control đi kèm.
+Khi chế tạo các thiết bị an toàn, các lệnh quan trọng nhất là `useradd` và `groupadd`, vì chúng có thể được dùng lúc image-creation để triển khai các user và vai trò được định nghĩa trong một khái niệm access-control đi kèm.
 
 Để tạo user, dĩ nhiên, tên của user mới phải được cung cấp. Các tùy chọn khác bạn có thể muốn chỉ định là *user identifier*—hay *UID* (`--uid`)—của nó, thư mục home của nó (`--home`), và liệu thư mục này có nên được tạo tự động không (`--create-home`). Ngoài ra, bạn có thể định nghĩa liệu một user group cùng tên có nên được tạo không (`--user-group`) và user nên thuộc những group nào (`--groups`). Tùy chọn `--shell` cho phép chỉ định shell được dùng sau khi đăng nhập, nhưng nó cũng có thể được dùng với `false` và `nologin` để vô hiệu hóa việc đăng nhập của user. Cuối cùng, bạn có thể đặt mật khẩu của user (ở dạng đã hash) bằng tùy chọn `--password`.
 
@@ -180,7 +180,7 @@ Về nguyên tắc, user và group cho phép chúng ta biểu diễn bất kỳ 
 
 Hãy để tôi đưa ra một ví dụ vì tính hữu ích có thể chưa hiển nhiên. Hãy tưởng tượng bạn có một thư mục tên là *internal_logs* để lưu log và dữ liệu runtime. Các file trong thư mục này được tạo bởi năm user, tất cả đều thuộc group *service*. Hai năm sau khi ra mắt thị trường, bạn đưa vào một tính năng bảo trì dự đoán mới và một user `predmain` đi kèm chỉ cần quyền đọc file *internal_logs/freqtrack.dat*, và user đó không được có khả năng ghi bất cứ thứ gì—để khoanh vùng thiệt hại trong trường hợp bị xâm phạm. Bạn không thể thêm *predmain* vào group *service* vì khi đó nó sẽ có quá nhiều quyền, và bạn không thể làm *predmain* thành owner của *freqtrack.dat* vì, một lần nữa, việc bị xâm phạm sẽ để lại cho kẻ tấn công quá nhiều quyền kiểm soát.
 
-<a id="page_207"></a>Một giải pháp là dùng access-control list (ACL), được hiện thực dựa trên các extended file attribute (xattr) của một filesystem Linux. Tùy thuộc vào hệ thống của bạn, hỗ trợ ACL phải được cài đặt, và filesystem phải được mount với tùy chọn `acl` trước khi bạn có thể dùng các công cụ command line `getfacl` và `setfacl` để lần lượt xem và thay đổi quyền ở mức fine-grained.
+<a id="page_207"></a>Một giải pháp là dùng access-control list (ACL), được triển khai dựa trên các extended file attribute (xattr) của một filesystem Linux. Tùy thuộc vào hệ thống của bạn, hỗ trợ ACL phải được cài đặt, và filesystem phải được mount với tùy chọn `acl` trước khi bạn có thể dùng các công cụ command line `getfacl` và `setfacl` để lần lượt xem và thay đổi quyền ở mức fine-grained.
 
 <a id="ch00lev1_92"></a>
 
@@ -285,7 +285,7 @@ Với những bước cơ bản này, bạn có thể đặt nền móng cho vi�
 
 May mắn thay, Linux và các bản phân phối của nó đã lo các thiết lập quyền cho nhiều file hệ thống. Hãy xem một số ví dụ cụ thể trong firmware của thiết bị STM32MP157F của tôi.
 
-Việc quản lý user và mật khẩu trên Linux được hiện thực bởi các file */etc/passwd* và */etc/shadow*. Như được thể hiện trong [Listing 11-5](#ch11list05), file thứ nhất được đánh dấu là mọi người đều đọc được vì có thể có nhiều lý do chính đáng để đọc danh sách user trên một hệ thống. Tuy nhiên, password hash thực sự của mỗi user không được đưa vào file *passwd*. Nó nằm trong file *shadow*, chỉ root mới đọc được cho mục đích xác minh đăng nhập.
+Việc quản lý user và mật khẩu trên Linux được triển khai bởi các file */etc/passwd* và */etc/shadow*. Như được thể hiện trong [Listing 11-5](#ch11list05), file thứ nhất được đánh dấu là mọi người đều đọc được vì có thể có nhiều lý do chính đáng để đọc danh sách user trên một hệ thống. Tuy nhiên, password hash thực sự của mỗi user không được đưa vào file *passwd*. Nó nằm trong file *shadow*, chỉ root mới đọc được cho mục đích xác minh đăng nhập.
 
 ```
 # ls -l /etc/passwd /etc/shadow
@@ -349,7 +349,7 @@ Web server `httpd` thể hiện một chiến lược phổ biến để hạn c
 
 ### *Cấu hình access-control cho SSH daemon*
 
-*Dropbear* là một SSH daemon gọn nhẹ đặc biệt phổ biến trên embedded system. Nó cho phép truy cập từ xa an toàn vào thiết bị, điều khiến nó hoàn toàn hữu ích nhưng cũng tuyệt đối trọng yếu. Những ứng dụng như vậy xứng đáng được xem xét riêng về các thiết lập access-control, vì nếu chúng hiện thực một “chính sách mở cửa,” đó theo đúng nghĩa đen là một lời mời đối với kẻ tấn công.
+*Dropbear* là một SSH daemon gọn nhẹ đặc biệt phổ biến trên embedded system. Nó cho phép truy cập từ xa an toàn vào thiết bị, điều khiến nó hoàn toàn hữu ích nhưng cũng tuyệt đối trọng yếu. Những ứng dụng như vậy xứng đáng được xem xét riêng về các thiết lập access-control, vì nếu chúng triển khai một “chính sách mở cửa,” đó theo đúng nghĩa đen là một lời mời đối với kẻ tấn công.
 
 [Listing 11-8](#ch11list08) cho thấy một phần các argument command line cho daemon `dropbear` đáng quan tâm từ góc nhìn access-control.
 
@@ -377,17 +377,17 @@ Vô hiệu hóa truy cập root qua SSH (`-w`) là một ý hay trong hầu hế
 >
 > *Bạn cũng có thể đổi port của SSH daemon* `dropbear` *từ 22 sang một port tùy chỉnh bằng tùy chọn* `-p`*. Đó chỉ là obscurity, nhưng nó có thể giúp thiết bị internet-connected của bạn không bị phát hiện bởi các lần quét SSH tự động.*
 
-Để lưu các thiết lập `dropbear` của bạn một cách bền vững, bạn phải thay đổi file */etc/dropbear/default* trong firmware image. Dòng quan trọng mà nó nên chứa để hiện thực các hạn chế access-control đã thảo luận là `DROPBEAR_EXTRA_ARGS="-w -T 3 -G service"`.
+Để lưu các thiết lập `dropbear` của bạn một cách bền vững, bạn phải thay đổi file */etc/dropbear/default* trong firmware image. Dòng quan trọng mà nó nên chứa để triển khai các hạn chế access-control đã thảo luận là `DROPBEAR_EXTRA_ARGS="-w -T 3 -G service"`.
 
 <a id="ch00lev1_93"></a>
 
 ## Mandatory Access Control
 
-Trong khi các khái niệm DAC thường được các developer embedded system biết đến, *mandatory access control (MAC)* thường là vùng đất chưa được khám phá. Tuy nhiên, các hiện thực MAC có thể đóng góp đáng kể vào bảo mật thiết bị và vào việc khoanh vùng thiệt hại trong trường hợp bị xâm phạm.
+Trong khi các khái niệm DAC thường được các developer embedded system biết đến, *mandatory access control (MAC)* thường là vùng đất chưa được khám phá. Tuy nhiên, các bản triển khai MAC có thể đóng góp đáng kể vào bảo mật thiết bị và vào việc khoanh vùng thiệt hại trong trường hợp bị xâm phạm.
 
 Ý tưởng cơ bản của các hệ thống MAC cho thiết bị embedded là các quyền và chính sách về cách user và process có thể tương tác với file và các tài nguyên khác được nhà sản xuất quản lý và OS thực thi. Trái với cách tiếp cận user-centric của DAC, user không thể ghi đè các quy tắc do MAC định nghĩa.
 
-Các hiện thực MAC là những công cụ mạnh, nhưng sức mạnh đi kèm trách nhiệm. *Whitelisting* là một chiến lược access-control phổ biến trong đó truy cập bị từ chối theo mặc định và chỉ được cấp nếu được cho phép tường minh. Cách tiếp cận này cũng có thể được dùng cho các hệ thống MAC để chỉ cho phép các truy cập đã định nghĩa của chủ thể vào đối tượng. Tuy nhiên, nếu bạn bỏ sót việc chỉ định một truy cập hợp lệ là “được phép,” <a id="page_212"></a>có thể vì nó hiếm khi được dùng, một ứng dụng cần nó có thể crash lúc runtime bất cứ khi nào truy cập đó xảy ra.
+Các bản triển khai MAC là những công cụ mạnh, nhưng sức mạnh đi kèm trách nhiệm. *Whitelisting* là một chiến lược access-control phổ biến trong đó truy cập bị từ chối theo mặc định và chỉ được cấp nếu được cho phép tường minh. Cách tiếp cận này cũng có thể được dùng cho các hệ thống MAC để chỉ cho phép các truy cập đã định nghĩa của chủ thể vào đối tượng. Tuy nhiên, nếu bạn bỏ sót việc chỉ định một truy cập hợp lệ là “được phép,” <a id="page_212"></a>có thể vì nó hiếm khi được dùng, một ứng dụng cần nó có thể crash lúc runtime bất cứ khi nào truy cập đó xảy ra.
 
 Nếu bạn chọn cách tiếp cận *blacklisting*—chỉ định nghĩa các trường hợp nguy hiểm mà truy cập nên bị từ chối, như malware được các trình quét virus phát hiện—xác suất làm hỏng chức năng giảm đi. Tuy nhiên, bạn phải bảo đảm rằng các quy tắc tương ứng cho hành vi độc hại mới được phát hiện được đưa vào thiết bị của bạn một cách kịp thời.
 
@@ -395,11 +395,11 @@ Nếu bạn chọn cách tiếp cận *blacklisting*—chỉ định nghĩa các
 
 ### *Linux Security Module*
 
-Vì cộng đồng Linux không thể thống nhất về một module bảo mật cụ thể, Linux đã đưa vào framework *Linux Security Module (LSM)*. Nó cho phép hiện thực nhiều hệ thống MAC khác nhau cho Linux.
+Vì cộng đồng Linux không thể thống nhất về một module bảo mật cụ thể, Linux đã đưa vào framework *Linux Security Module (LSM)*. Nó cho phép triển khai nhiều hệ thống MAC khác nhau cho Linux.
 
 Các LSM này được biên dịch vào Linux kernel và hành động nếu các hook function cụ thể được gọi trong code kernel. Các hook này được tích hợp trong mọi thủ tục liên quan đến access control bên trong OS, từ truy cập file đến tạo task đến giao tiếp liên process. Nếu tới được hook, kernel chuyển quyền điều khiển cho LSM, LSM có thể ít nhất ghi log hành động đã thực hiện hay trực tiếp quyết định có nên cấp hay từ chối truy cập dựa trên tập quy tắc riêng của nó.
 
-Các hiện thực LSM khác nhau đáng kể về khái niệm, cách cấu hình tập quy tắc và cộng đồng hỗ trợ. Tuy nhiên, chúng cũng có chung một thuộc tính: tất cả đều có tác động tiêu cực lên performance hệ thống. Các phần sau giới thiệu các hiện thực LSM phổ biến.
+Các cách triển khai LSM khác nhau đáng kể về khái niệm, cách cấu hình tập quy tắc và cộng đồng hỗ trợ. Tuy nhiên, chúng cũng có chung một thuộc tính: tất cả đều có tác động tiêu cực lên performance hệ thống. Các phần sau giới thiệu các bản triển khai LSM phổ biến.
 
 <a id="ch00lev2_145"></a>
 
@@ -407,19 +407,19 @@ Các hiện thực LSM khác nhau đáng kể về khái niệm, cách cấu hì
 
 Năm 2000, NSA công bố ý tưởng của họ về một hệ thống MAC cho Linux tới cộng đồng open source: *Security-Enhanced Linux (SELinux)*. Được các bên liên quan khác trong lĩnh vực này ủng hộ, dự án phát triển mạnh và cuối cùng được tích hợp vào phiên bản 2.6 của mainline Linux kernel năm 2003. Kể từ phiên bản 4.3, nó là LSM mặc định trong Android, và nhiều bản phân phối Linux cho ứng dụng desktop và server hỗ trợ nó.
 
-SELinux dựa vào các security policy định nghĩa đối tượng nào có thể được truy cập bởi chủ thể nào. Cho mục đích này, các đối tượng và chủ thể phải được đăng ký trong SELinux với các *label* tương ứng chứa một user, một role và một type đi kèm. Những label này định nghĩa một dạng ngữ cảnh hay domain cho chủ thể và đối tượng. Access control thực sự được hiện thực bởi *type enforcement*, vốn định nghĩa liệu một chủ thể có type cụ thể có thể truy cập một đối tượng có type cụ thể không.
+SELinux dựa vào các security policy định nghĩa đối tượng nào có thể được truy cập bởi chủ thể nào. Cho mục đích này, các đối tượng và chủ thể phải được đăng ký trong SELinux với các *label* tương ứng chứa một user, một role và một type đi kèm. Những label này định nghĩa một dạng ngữ cảnh hay domain cho chủ thể và đối tượng. Access control thực sự được triển khai bởi *type enforcement*, vốn định nghĩa liệu một chủ thể có type cụ thể có thể truy cập một đối tượng có type cụ thể không.
 
 Nhiều bản phân phối Linux cung cấp tập SELinux policy được định nghĩa trước của riêng họ để hạn chế nhiều ứng dụng và dịch vụ phổ biến. Hơn nữa, có một cơ sở dữ liệu các reference policy mà bạn có thể dùng cho mục đích của mình. Tuy nhiên, việc tạo các policy tùy chỉnh cho ứng dụng của bạn đòi hỏi know-how sâu về chức năng của chúng và hiểu biết chi tiết về các khái niệm và cấu trúc SELinux. Bạn không nên đánh giá thấp công sức mô tả đặc tính cần thiết, ngay cả khi có các công cụ hỗ trợ bạn.
 
 <a id="page_213"></a>Lúc runtime, SELinux có thể được vận hành theo ba cách. Chế độ *enforcing* dành cho sử dụng thực tế, vì nó áp dụng nghiêm ngặt mọi policy đã cho và ghi log các hoạt động tương ứng. Tuy nhiên, trong quá trình phát triển hay trong một giai đoạn kiểm thử, chế độ *permissive* phù hợp hơn. Nó xử lý mọi policy, nhưng chỉ tạo cảnh báo và dữ liệu log mà không thực thi các quy tắc đã định nghĩa. Điều này có thể cực kỳ hữu ích cho việc fine-tuning các policy tùy chỉnh và xử lý sự cố. Nếu ở chế độ *disabled*, SELinux bị tắt hoàn toàn và không bảo vệ hay hạn chế gì cả.
 
-Mặc dù (hoặc có lẽ chính vì) SELinux cung cấp vô số khả năng, nó là một công cụ khá phức tạp mà nhiều kỹ sư embedded system tránh dùng. Đây có lẽ là lý do chính khiến các hiện thực LSM khác xuất hiện và trở thành các lựa chọn thay thế phổ biến, như được mô tả trong các phần sau.
+Mặc dù (hoặc có lẽ chính vì) SELinux cung cấp vô số khả năng, nó là một công cụ khá phức tạp mà nhiều kỹ sư embedded system tránh dùng. Đây có lẽ là lý do chính khiến các cách triển khai LSM khác xuất hiện và trở thành các lựa chọn thay thế phổ biến, như được mô tả trong các phần sau.
 
 <a id="ch00lev2_146"></a>
 
 ### *AppArmor*
 
-*AppArmor* là hiện thực LSM thứ hai đạt được sự phổ biến đáng kể trong các bản phân phối Linux. Nó trở thành một phần của Linux kernel 2.6.36 năm 2010 và hiện là hệ thống MAC mặc định cho Ubuntu và SUSE Linux. Việc phát triển nó được Canonical tài trợ từ năm 2009.
+*AppArmor* là bản triển khai LSM thứ hai đạt được sự phổ biến đáng kể trong các bản phân phối Linux. Nó trở thành một phần của Linux kernel 2.6.36 năm 2010 và hiện là hệ thống MAC mặc định cho Ubuntu và SUSE Linux. Việc phát triển nó được Canonical tài trợ từ năm 2009.
 
 Access control được quản lý dựa trên các profile riêng cho từng ứng dụng. Trái với SELinux, AppArmor dùng đường dẫn filesystem để xác định chủ thể và đối tượng file, nên cú pháp dễ đọc hơn. Hơn nữa, nó cho phép một cách tiếp cận lai giữa các quy tắc whitelisting và blacklisting kiểm soát việc truy cập tài nguyên của một process. Các profile được tạo có thể hạn chế truy cập mạng và nhiều loại Linux capability, nhưng cũng cả quyền đọc, ghi và thực thi file.
 
@@ -435,13 +435,13 @@ Mỗi profile AppArmor có sẵn trên một thiết bị có thể được đ�
 
 ### *Các LSM khác và MAC non-LSM*
 
-Bên cạnh hai hiện thực LSM phổ biến, SELinux và AppArmor, bạn có thể muốn xem xét thêm các lựa chọn khác.
+Bên cạnh hai bản triển khai LSM phổ biến, SELinux và AppArmor, bạn có thể muốn xem xét thêm các lựa chọn khác.
 
 Như tên gọi gợi ý, hệ thống *Simplified Mandatory Access Control Kernel (SMACK)* được phát triển tập trung vào sự đơn giản, trái với độ phức tạp của SELinux. Nó là một phần của mainline Linux kernel từ năm 2008 và luôn được dành cho việc dùng trong embedded system. Hai dự án OS lớn hơn dựa vào các cơ chế bảo vệ của nó: OS di động Tizen được dùng trong smart TV của Samsung, và bản phân phối Linux automotive-grade dự định là một nền tảng open source cho xe hơi có kết nối. Tuy nhiên, nhìn vào website của SMACK và các Git repository của nó, có vẻ nó không còn được duy trì tích cực.
 
-Một hệ thống MAC khác dựa trên framework LSM được gọi là *TOMOYO*. Dự án được bắt đầu năm 2003 và được hợp nhất vào Linux kernel 2.6.30 năm 2009. Một lần nữa, động lực là việc sử dụng đơn giản hơn và tính dễ dùng cao hơn—ví dụ, như được hiện thực bằng việc tạo policy tự động, điều cũng cần thiết vì hệ thống MAC này không đi kèm một tập quy tắc toàn diện cho các dịch vụ phổ biến. Ngoài ra, TOMOYO không chỉ đóng vai trò một hiện thực MAC mà còn hỗ trợ phân tích hành vi hệ thống. Nó có ba phiên bản: 1.*x*, 2.*x* và AKARI. Phiên bản thứ nhất đòi hỏi vá kernel cụ thể và do đó thường không phải là lựa chọn đầu tiên của bạn. AKARI và TOMOYO 2.*x* dùng framework LSM. Tại thời điểm viết sách, AKARI cung cấp thêm một vài tính năng, nhưng TOMOYO 2.*x* đang bắt kịp.
+Một hệ thống MAC khác dựa trên framework LSM được gọi là *TOMOYO*. Dự án được bắt đầu năm 2003 và được hợp nhất vào Linux kernel 2.6.30 năm 2009. Một lần nữa, động lực là việc sử dụng đơn giản hơn và tính dễ dùng cao hơn—ví dụ, như được triển khai bằng việc tạo policy tự động, điều cũng cần thiết vì hệ thống MAC này không đi kèm một tập quy tắc toàn diện cho các dịch vụ phổ biến. Ngoài ra, TOMOYO không chỉ đóng vai trò một bản triển khai MAC mà còn hỗ trợ phân tích hành vi hệ thống. Nó có ba phiên bản: 1.*x*, 2.*x* và AKARI. Phiên bản thứ nhất đòi hỏi vá kernel cụ thể và do đó thường không phải là lựa chọn đầu tiên của bạn. AKARI và TOMOYO 2.*x* dùng framework LSM. Tại thời điểm viết sách, AKARI cung cấp thêm một vài tính năng, nhưng TOMOYO 2.*x* đang bắt kịp.
 
-Mặc dù framework LSM cung cấp vô số khả năng để tích hợp các module bảo mật tùy chỉnh, không phải ai trong cộng đồng cũng hài lòng với hiện thực của nó, đặc biệt khi xét đến overhead performance mà nó tạo ra. Do đó, cũng tồn tại các hệ thống MAC non-LSM nhắm tới performance cao hơn hay các tính năng module bảo mật nâng cao. Tuy nhiên, vì những hiện thực đó không thuộc mainline kernel và phải được tích hợp bằng cách áp dụng một tập patch tùy chỉnh, chúng có thể chỉ là một lựa chọn nếu bạn thực sự không thể đạt được yêu cầu của mình với các hiện thực LSM phổ biến.
+Mặc dù framework LSM cung cấp vô số khả năng để tích hợp các module bảo mật tùy chỉnh, không phải ai trong cộng đồng cũng hài lòng với bản triển khai của nó, đặc biệt khi xét đến overhead performance mà nó tạo ra. Do đó, cũng tồn tại các hệ thống MAC non-LSM nhắm tới performance cao hơn hay các tính năng module bảo mật nâng cao. Tuy nhiên, vì những bản triển khai đó không thuộc mainline kernel và phải được tích hợp bằng cách áp dụng một tập patch tùy chỉnh, chúng có thể chỉ là một lựa chọn nếu bạn thực sự không thể đạt được yêu cầu của mình với các bản triển khai LSM phổ biến.
 
 <a id="ch00lev1_94"></a>
 
@@ -747,6 +747,6 @@ Case study đơn giản này đã cho thấy tính khả thi cơ bản của vi�
 
 Access control là một chủ đề cực kỳ rộng có thể tự nó lấp đầy cả một cuốn sách. Nó bao gồm các cấu hình cơ bản về user, group, cấu trúc thư mục và quyền truy cập (như được thảo luận trong chương này cho hệ thống DAC của Linux), việc vô hiệu hóa các tính năng và công cụ debug phần cứng không dành cho end user, và lĩnh vực phức tạp của các MAC policy OS-enforced phải được fine-tuned theo hành vi riêng và nhu cầu resource-access của một ứng dụng cụ thể. Và dù tôi không kỳ vọng bạn đầu tư toàn bộ thời gian để thiết kế các thiết lập access-control hoàn hảo, không có cách nào né tránh vấn đề này trong kỹ thuật chế tạo thiết bị an toàn.
 
-Trên thực tế, chúng ta phải tìm ra những thỏa hiệp khả thi trên thực tế. Một cách tiếp cận whitelisting hoàn toàn có thể khó hiện thực và có thể dẫn đến các ứng dụng bị hỏng nếu cấu hình sai, điều mà bảo mật sẽ bị đổ lỗi. Mặt khác, blacklisting sẽ không thể ngay lập tức bắt được các mối đe dọa mới xuất hiện ngoài hiện trường. Độ chi tiết tinh của quyền chỉ có thể được quản lý theo thời gian nếu bạn sẵn lòng bỏ ra công sức đáng kể, nhưng nếu khái niệm access-control của bạn quá đơn giản, đối thủ của bạn sẽ cảm ơn bạn vì đã dọn đi chướng ngại vật khó chịu trên đường.
+Trên thực tế, chúng ta phải tìm ra những thỏa hiệp khả thi trên thực tế. Một cách tiếp cận whitelisting hoàn toàn có thể khó triển khai và có thể dẫn đến các ứng dụng bị hỏng nếu cấu hình sai, điều mà bảo mật sẽ bị đổ lỗi. Mặt khác, blacklisting sẽ không thể ngay lập tức bắt được các mối đe dọa mới xuất hiện ngoài hiện trường. Độ chi tiết tinh của quyền chỉ có thể được quản lý theo thời gian nếu bạn sẵn lòng bỏ ra công sức đáng kể, nhưng nếu khái niệm access-control của bạn quá đơn giản, đối thủ của bạn sẽ cảm ơn bạn vì đã dọn đi chướng ngại vật khó chịu trên đường.
 
 Cuối cùng, tôi muốn chỉ ra rằng các cơ chế access-control luôn có liên hệ mạnh với việc bảo vệ system-integrity, như được mô tả trong [Chương 8](ch08_secure_boot_and_system_integrity.vi.md#ch08). Hãy tưởng tượng nếu bạn đã tỉ mỉ định nghĩa một tập quy tắc truy cập hoàn hảo chỉ để phát hiện ra rằng kẻ tấn công có thể đặt lại tất cả chúng thành 777 trong vài phút. Điều đó sẽ rất đau.

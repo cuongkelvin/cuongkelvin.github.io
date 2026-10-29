@@ -48,7 +48,11 @@ Mô tả thực tế từ man page: select() kiểm tra các tập I/O descripto
 
 > BỔ SUNG: BLOCKING VÀ NON-BLOCKING INTERFACE
 >
-> Blocking (hoặc synchronous) interface hoàn thành toàn bộ công việc trước khi trả về cho caller; non-blocking (hoặc asynchronous) interface bắt đầu một công việc nhưng trả về ngay, nhờ đó công việc cần làm có thể tiếp tục được thực hiện ở background. Thủ phạm thường gặp trong blocking call là một dạng I/O nào đó. Chẳng hạn, nếu lời gọi phải đọc disk mới hoàn tất, nó có thể block, chờ I/O request đã gửi tới disk trả về. Non-blocking interface có thể được dùng trong bất kỳ phong cách lập trình nào (ví dụ với thread), nhưng là thiết yếu trong cách tiếp cận event-based, vì một lời gọi block sẽ làm mọi hoạt động tiến triển dừng lại.
+> Blocking (hoặc synchronous) interface hoàn thành toàn bộ công việc trước khi trả về cho caller; non-blocking (hoặc asynchronous) interface bắt đầu một công việc nhưng trả về ngay, nhờ đó công việc cần làm có thể tiếp tục được thực hiện ở background.
+>
+> Thủ phạm thường gặp trong blocking call là một dạng I/O nào đó. Chẳng hạn, nếu lời gọi phải đọc disk mới hoàn tất, nó có thể block, chờ I/O request đã gửi tới disk trả về.
+>
+> Non-blocking interface có thể được dùng trong bất kỳ phong cách lập trình nào (ví dụ với thread), nhưng là thiết yếu trong cách tiếp cận event-based, vì một lời gọi block sẽ làm mọi hoạt động tiến triển dừng lại.
 
 Có vài điểm về select(). Trước tiên, lưu ý rằng nó cho phép kiểm tra descriptor có thể đọc cũng như có thể ghi hay không; trường hợp đầu giúp server xác định một packet mới đã đến và cần xử lý, còn trường hợp sau giúp service biết khi nào có thể trả lời (tức outbound queue chưa đầy).
 
@@ -170,9 +174,11 @@ Một điều có thể bạn nhận thấy là kiểm tra I/O đã hoàn tất 
 > ```
 > #include <stdio.h>
 > #include <signal.h>
+>
 > void handle(int arg) {
 >     printf("stop wakin’ me up...\n");
 > }
+>
 > int main(int argc, char *argv[]) {
 >     signal(SIGHUP, handle);
 >     while (1)

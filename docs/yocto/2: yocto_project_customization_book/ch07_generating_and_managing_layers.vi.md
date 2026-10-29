@@ -653,7 +653,7 @@ devmem2-dev_2.0-r0_armv8a.ipk  devmem2_2.0-r0_armv8a.ipk
 >
 > Cũng lưu ý rằng các file IPKG thường nằm trong một thư mục con theo machine, trùng với `MACHINE`, nhưng không phải trong mọi trường hợp (đây là một trong những trường hợp đặc biệt như vậy).
 
-Mọi điều này gợi ý chúng ta tạo một tiện ích mới, có thể gọi là `cy-vars`, có thể xem xét mọi biến này bằng các lệnh đơn giản. Một hiện thực khả dĩ được trình bày trong file `meta-cy/scripts/cy-vars`, có thể lấy từ Git repository của chúng tôi tại `https://github.com/Apress/Yocto-Project-Customization-for-Linux`.
+Mọi điều này gợi ý chúng ta tạo một tiện ích mới, có thể gọi là `cy-vars`, có thể xem xét mọi biến này bằng các lệnh đơn giản. Một bản triển khai khả dĩ được trình bày trong file `meta-cy/scripts/cy-vars`, có thể lấy từ Git repository của chúng tôi tại `https://github.com/Apress/Yocto-Project-Customization-for-Linux`.
 
 Nếu thực thi tiện ích, chúng ta có output sau:
 
@@ -933,7 +933,7 @@ pathname /bin/vi is provided by: busybox [symlink: /bin/busybox.nosuid]
 pathname /bin/zcat is provided by: gzip [symlink: /bin/zcat.gzip]
 ```
 
-Subcommand được hiện thực như dưới đây:
+Subcommand được triển khai như dưới đây:
 
 ```
 find-path)
@@ -998,7 +998,7 @@ package python3-debugger is not present
 package python3-shell is present
 ```
 
-Subcommand được hiện thực như dưới đây:
+Subcommand được triển khai như dưới đây:
 
 ```
 chk-pkg)

@@ -121,7 +121,7 @@ Việc gửi cập nhật phụ thuộc vào việc MVC nằm trong một proces
 
 ### Observer
 
-Observer pattern là một cách liên kết một chức năng nào đó với một hoặc nhiều view. Pattern này có một *subject*—thực thể được quan sát—và một hoặc nhiều *observer* của subject đó. Các observer cần tự đăng ký với subject; sau đó, khi trạng thái của subject thay đổi, các observer được thông báo. Pattern này thường được dùng để hiện thực MVC (và các biến thể của nó)— ví dụ, như một cách thông báo cho các view khác nhau về những thay đổi đối với model.
+Observer pattern là một cách liên kết một chức năng nào đó với một hoặc nhiều view. Pattern này có một *subject*—thực thể được quan sát—và một hoặc nhiều *observer* của subject đó. Các observer cần tự đăng ký với subject; sau đó, khi trạng thái của subject thay đổi, các observer được thông báo. Pattern này thường được dùng để triển khai MVC (và các biến thể của nó)— ví dụ, như một cách thông báo cho các view khác nhau về những thay đổi đối với model.
 
 **Lợi ích:**
 
@@ -136,11 +136,11 @@ Observer pattern là một cách liên kết một chức năng nào đó với 
 
 ### Memento
 
-Memento pattern là một cách phổ biến để hiện thực tactic undo. Pattern này có ba component chính: *originator*, *caretaker* và *memento*. Originator đang xử lý một dòng sự kiện làm thay đổi trạng thái của nó (bắt nguồn từ tương tác người dùng). Caretaker đang gửi các sự kiện tới originator khiến nó thay đổi trạng thái. Khi caretaker sắp thay đổi trạng thái của originator, nó có thể yêu cầu một memento—một snapshot của trạng thái hiện có—và có thể dùng artifact này để khôi phục trạng thái hiện có đó nếu cần, chỉ bằng cách chuyển memento trở lại originator. Bằng cách này, caretaker không biết gì về cách trạng thái được quản lý; memento đơn giản là một abstraction mà caretaker sử dụng.
+Memento pattern là một cách phổ biến để triển khai tactic undo. Pattern này có ba component chính: *originator*, *caretaker* và *memento*. Originator đang xử lý một dòng sự kiện làm thay đổi trạng thái của nó (bắt nguồn từ tương tác người dùng). Caretaker đang gửi các sự kiện tới originator khiến nó thay đổi trạng thái. Khi caretaker sắp thay đổi trạng thái của originator, nó có thể yêu cầu một memento—một snapshot của trạng thái hiện có—và có thể dùng artifact này để khôi phục trạng thái hiện có đó nếu cần, chỉ bằng cách chuyển memento trở lại originator. Bằng cách này, caretaker không biết gì về cách trạng thái được quản lý; memento đơn giản là một abstraction mà caretaker sử dụng.
 
 **Lợi ích:**
 
-- Lợi ích hiển nhiên của pattern này là bạn ủy thác quy trình phức tạp của việc hiện thực undo, và việc tìm ra trạng thái nào cần giữ lại, cho class thực sự tạo ra và quản lý trạng thái đó. Do đó, abstraction của originator được bảo toàn và phần còn lại của hệ thống không cần biết các chi tiết.
+- Lợi ích hiển nhiên của pattern này là bạn ủy thác quy trình phức tạp của việc triển khai undo, và việc tìm ra trạng thái nào cần giữ lại, cho class thực sự tạo ra và quản lý trạng thái đó. Do đó, abstraction của originator được bảo toàn và phần còn lại của hệ thống không cần biết các chi tiết.
 
 **Các tradeoff:**
 

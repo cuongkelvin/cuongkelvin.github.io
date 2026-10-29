@@ -1367,7 +1367,7 @@ post_handler: p->addr = 0x8014d608, status = 0x80070013
 
 ### Còn nữa...
 
-Một probe `jprobe` được hiện thực bằng một `kprobe`. Nó đặt một breakpoint tại symbol hoặc địa chỉ đã cho (nhưng phải là instruction đầu tiên của một function), và tạo một bản sao của một phần stack. Khi được chạm tới, nó nhảy tới handler với cùng register và stack như function được probe. Handler phải có cùng danh sách đối số và kiểu trả về như function được probe, và gọi hàm `jprobe_return()` trước khi return để trả quyền điều khiển cho `kprobes`. Sau đó stack và trạng thái CPU gốc được khôi phục và function được probe được gọi.
+Một probe `jprobe` được triển khai bằng một `kprobe`. Nó đặt một breakpoint tại symbol hoặc địa chỉ đã cho (nhưng phải là instruction đầu tiên của một function), và tạo một bản sao của một phần stack. Khi được chạm tới, nó nhảy tới handler với cùng register và stack như function được probe. Handler phải có cùng danh sách đối số và kiểu trả về như function được probe, và gọi hàm `jprobe_return()` trước khi return để trả quyền điều khiển cho `kprobes`. Sau đó stack và trạng thái CPU gốc được khôi phục và function được probe được gọi.
 
 Sau đây là một ví dụ về `jprobe` trong syscall open, trong file `meta-bsp-custom/recipes-kernel/open-jprobe/files/jprobe_open.c`:
 

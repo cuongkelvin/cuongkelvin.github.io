@@ -17,7 +17,7 @@ Chúng tôi bắt đầu bằng việc đưa ra tổng quan về ADD và các b�
 
 ## 20.1 Attribute-Driven Design
 
-Thiết kế architecture cho các hệ thống phần mềm không khác gì thiết kế nói chung: Nó bao gồm việc đưa ra quyết định, và làm việc với các vật liệu và kỹ năng sẵn có, để thỏa mãn các yêu cầu và ràng buộc. Trong thiết kế architecture, chúng ta biến các quyết định về architectural driver thành các structure, như trong [Hình 20.1](#ch20fig01). Architectural driver bao gồm các architecturally significant requirement (ASR—chủ đề của [Chương 19](ch19_architecturally_significant_requirements.vi.md#ch19)), nhưng cũng bao gồm chức năng, ràng buộc, các mối quan tâm về architecture và mục đích thiết kế. Các structure thu được sau đó được dùng để dẫn dắt dự án theo nhiều cách mà chúng tôi đã trình bày trong [Chương 2](ch02_why_is_software_architecture_important.vi.md#ch02): Chúng dẫn dắt việc phân tích và xây dựng. Chúng đóng vai trò nền tảng để đào tạo một thành viên mới của dự án. Chúng dẫn dắt việc ước tính chi phí và tiến độ, việc lập team, phân tích và giảm thiểu rủi ro, và tất nhiên là việc hiện thực.
+Thiết kế architecture cho các hệ thống phần mềm không khác gì thiết kế nói chung: Nó bao gồm việc đưa ra quyết định, và làm việc với các vật liệu và kỹ năng sẵn có, để thỏa mãn các yêu cầu và ràng buộc. Trong thiết kế architecture, chúng ta biến các quyết định về architectural driver thành các structure, như trong [Hình 20.1](#ch20fig01). Architectural driver bao gồm các architecturally significant requirement (ASR—chủ đề của [Chương 19](ch19_architecturally_significant_requirements.vi.md#ch19)), nhưng cũng bao gồm chức năng, ràng buộc, các mối quan tâm về architecture và mục đích thiết kế. Các structure thu được sau đó được dùng để dẫn dắt dự án theo nhiều cách mà chúng tôi đã trình bày trong [Chương 2](ch02_why_is_software_architecture_important.vi.md#ch02): Chúng dẫn dắt việc phân tích và xây dựng. Chúng đóng vai trò nền tảng để đào tạo một thành viên mới của dự án. Chúng dẫn dắt việc ước tính chi phí và tiến độ, việc lập team, phân tích và giảm thiểu rủi ro, và tất nhiên là việc triển khai.
 
 <a id="ch20fig01"></a>
 
@@ -107,7 +107,7 @@ Một khi thiết kế được thực hiện trong iteration đã được phâ
 
 ### Lặp lại nếu cần (Iterate If Necessary)
 
-Bạn nên thực hiện thêm các iteration và lặp lại các bước 2–7 cho mọi driver đã được xem xét. Tuy nhiên, thường thì kiểu lặp lại này sẽ không khả thi vì các ràng buộc về thời gian hoặc nguồn lực buộc bạn phải dừng các hoạt động thiết kế và chuyển sang hiện thực.
+Bạn nên thực hiện thêm các iteration và lặp lại các bước 2–7 cho mọi driver đã được xem xét. Tuy nhiên, thường thì kiểu lặp lại này sẽ không khả thi vì các ràng buộc về thời gian hoặc nguồn lực buộc bạn phải dừng các hoạt động thiết kế và chuyển sang triển khai.
 
 Tiêu chí để đánh giá liệu có cần thêm design iteration không là gì? Hãy để *rủi ro* dẫn đường. Ít nhất bạn nên đã giải quyết các driver có mức ưu tiên cao nhất. Lý tưởng nhất, bạn nên chắc chắn rằng các driver then chốt đã được thỏa mãn hoặc, ít nhất, rằng thiết kế là “đủ tốt” để thỏa mãn chúng.
 
@@ -285,7 +285,7 @@ Một công cụ khác có thể được dùng để theo dõi tiến độ thi
 
 Vào lúc bắt đầu một iteration, các đầu vào của quá trình thiết kế trở thành các mục trong backlog. Ban đầu (ở bước 1), các mục trong backlog của bạn cho design round này nên nằm ở cột “Not Yet Addressed” của board. Khi bạn bắt đầu một design iteration, ở bước 2, các mục backlog tương ứng với các driver mà bạn giải quyết trong mục tiêu của design iteration nên được chuyển sang cột “Partially Addressed”. Cuối cùng, một khi bạn hoàn thành một iteration và việc phân tích các quyết định thiết kế cho thấy một driver cụ thể đã được giải quyết (bước 7), mục đó nên được chuyển sang cột “Completely Addressed” của board.
 
-Điều quan trọng là thiết lập các tiêu chí rõ ràng cho phép một driver được chuyển sang cột “Partially Addressed” hoặc “Completely Addressed”. Một tiêu chí cho “Completely Addressed” có thể là, ví dụ, driver đã được phân tích hoặc đã được hiện thực trong một prototype, và bạn xác định rằng các yêu cầu cho driver đó đã được thỏa mãn. Các driver được chọn cho một iteration cụ thể có thể không được giải quyết hoàn toàn trong iteration đó. Trong trường hợp đó, chúng nên ở lại cột “Partially Addressed”.
+Điều quan trọng là thiết lập các tiêu chí rõ ràng cho phép một driver được chuyển sang cột “Partially Addressed” hoặc “Completely Addressed”. Một tiêu chí cho “Completely Addressed” có thể là, ví dụ, driver đã được phân tích hoặc đã được triển khai trong một prototype, và bạn xác định rằng các yêu cầu cho driver đó đã được thỏa mãn. Các driver được chọn cho một iteration cụ thể có thể không được giải quyết hoàn toàn trong iteration đó. Trong trường hợp đó, chúng nên ở lại cột “Partially Addressed”.
 
 Có thể hữu ích nếu chọn một kỹ thuật cho phép bạn phân biệt các mục trên board theo mức ưu tiên của chúng. Ví dụ, bạn có thể dùng các màu khác nhau cho các mục tùy theo mức ưu tiên.
 
@@ -307,7 +307,7 @@ Phiên bản đầu tiên của ADD, ban đầu được gọi là “Architectu
 
 Một mô tả về ADD 2.0 sau đó được công bố năm 2006. Đó là phương pháp đầu tiên tập trung cụ thể vào các QA và việc đạt được chúng thông qua việc lựa chọn các loại structure khác nhau và biểu diễn chúng qua view. Phiên bản 2.0 của ADD được tài liệu hóa lần đầu trong một SEI Technical Report [Wojcik 06].
 
-Phiên bản ADD được mô tả trong chương này là ADD 3.0. Một số cải tiến quan trọng so với phiên bản gốc bao gồm việc cân nhắc nhiều hơn đến việc lựa chọn các công nghệ hiện thực như những design concept chính, xem xét thêm các driver như mục đích thiết kế và các mối quan tâm về architecture, biến việc tài liệu hóa ban đầu và phân tích thành các bước tường minh của quá trình thiết kế, và cung cấp hướng dẫn về cách bắt đầu quá trình thiết kế và cách dùng nó trong các bối cảnh Agile. Cả một cuốn sách [Cervantes 16] dành riêng cho thiết kế architecture bằng ADD 3.0. Một số khái niệm của ADD 3.0 được giới thiệu lần đầu trong một *IEEE Software* [Cervantes 13].
+Phiên bản ADD được mô tả trong chương này là ADD 3.0. Một số cải tiến quan trọng so với phiên bản gốc bao gồm việc cân nhắc nhiều hơn đến việc lựa chọn các công nghệ triển khai như những design concept chính, xem xét thêm các driver như mục đích thiết kế và các mối quan tâm về architecture, biến việc tài liệu hóa ban đầu và phân tích thành các bước tường minh của quá trình thiết kế, và cung cấp hướng dẫn về cách bắt đầu quá trình thiết kế và cách dùng nó trong các bối cảnh Agile. Cả một cuốn sách [Cervantes 16] dành riêng cho thiết kế architecture bằng ADD 3.0. Một số khái niệm của ADD 3.0 được giới thiệu lần đầu trong một *IEEE Software* [Cervantes 13].
 
 George Fairbanks đã viết một cuốn sách hấp dẫn mô tả một quy trình thiết kế architecture risk-driven, có tựa đề *Just Enough Software Architecture: A Risk-Driven Approach* [Fairbanks 10].
 

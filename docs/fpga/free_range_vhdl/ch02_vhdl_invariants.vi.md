@@ -69,7 +69,9 @@ Như bạn sẽ sớm thấy, ngôn ngữ VHDL có các statement if, case và l
 
 • Mỗi statement case được kết thúc bằng một end case;
 
-• Mỗi statement loop có một statement end loop; tương ứng Nói chung, bạn không nên quá bận tâm về việc ghi nhớ cú pháp code, vì nhiều khả năng bạn sẽ dùng một editor đủ tinh vi để có code snippet (cụ thể là Gedit[^1]). Một lập trình viên giỏi phân biệt mình bằng những cách khác chứ không phải bằng việc nhớ cú pháp code một cách hoàn hảo.
+• Mỗi statement loop có một statement end loop; tương ứng
+
+Nói chung, bạn không nên quá bận tâm về việc ghi nhớ cú pháp code, vì nhiều khả năng bạn sẽ dùng một editor đủ tinh vi để có code snippet (cụ thể là Gedit[^1]). Một lập trình viên giỏi phân biệt mình bằng những cách khác chứ không phải bằng việc nhớ cú pháp code một cách hoàn hảo.
 
 ## 2.7 Identifier
 

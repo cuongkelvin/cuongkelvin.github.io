@@ -18,11 +18,11 @@ Theo kinh nghiệm của tôi, spiral model của Boehm, bao gồm các invarian
 
 *Hình 5.1: Cách tiếp cận được đề xuất.[⏎](#b5fig5_1)*
 
-Các cách tiếp cận V-model và waterfall ngụ ý rằng việc kiểm chứng và kiểm thử chỉ bắt đầu sau khi việc hiện thực đã hoàn tất — trái ngược hoàn toàn với kiểm thử “shift-left”. ISO 26262-2 nêu đích danh *“sự phụ thuộc nặng nề vào kiểm thử ở cuối chu kỳ phát triển sản phẩm”* như một ví dụ về văn hóa an toàn kém. [Hình 7-2](ch07_foundational_analyses.vi.md#fig7_2) trong ISO/PAS 8800 minh họa một quy trình phát triển theo mô hình V, nhưng phủ lên nó một vòng lặp để chỉ ra rằng đó không phải là một chữ V duy nhất: thay vào đó, nó là cơ sở của một cách tiếp cận lặp.
+Các cách tiếp cận V-model và waterfall ngụ ý rằng việc kiểm chứng và kiểm thử chỉ bắt đầu sau khi việc triển khai đã hoàn tất — trái ngược hoàn toàn với kiểm thử “shift-left”. ISO 26262-2 nêu đích danh *“sự phụ thuộc nặng nề vào kiểm thử ở cuối chu kỳ phát triển sản phẩm”* như một ví dụ về văn hóa an toàn kém. [Hình 7-2](ch07_foundational_analyses.vi.md#fig7_2) trong ISO/PAS 8800 minh họa một quy trình phát triển theo mô hình V, nhưng phủ lên nó một vòng lặp để chỉ ra rằng đó không phải là một chữ V duy nhất: thay vào đó, nó là cơ sở của một cách tiếp cận lặp.
 
 Tài liệu tham khảo [<a id="b5refbib5_3"></a>[3](#refbib5_3)] của Thor Myklebust *et al* đề cập đến câu hỏi những phần nào của quy trình agile SCRUM cần được thay đổi để nó phù hợp với việc phát triển phần mềm safety-critical: ba thực hành agile được mở rộng cho môi trường an toàn và “SafeScrum” thu được trông giống spiral model của Boehm, có thể với thời gian ngắn hơn cho mỗi vòng xoắn ốc.
 
-IEC TS 61508-3-2 đề xuất một cách tiếp cận rất khác, dùng formal method để xác nhận tính đúng đắn của từng bước phát triển: chứng minh bằng toán học tính nhất quán của các yêu cầu, chứng minh rằng thiết kế thỏa mãn các yêu cầu (an toàn) và chứng minh rằng phần hiện thực (chương trình) thỏa mãn thiết kế. Phương pháp được đề xuất là một phương pháp tinh chỉnh (refinement): thiết kế là một refinement hình thức của các yêu cầu và phần hiện thực là một refinement hình thức của thiết kế.
+IEC TS 61508-3-2 đề xuất một cách tiếp cận rất khác, dùng formal method để xác nhận tính đúng đắn của từng bước phát triển: chứng minh bằng toán học tính nhất quán của các yêu cầu, chứng minh rằng thiết kế thỏa mãn các yêu cầu (an toàn) và chứng minh rằng phần triển khai (chương trình) thỏa mãn thiết kế. Phương pháp được đề xuất là một phương pháp tinh chỉnh (refinement): thiết kế là một refinement hình thức của các yêu cầu và phần triển khai là một refinement hình thức của thiết kế.
 
 ## 5.2 Các nhiệm vụ cần thiết
 
@@ -36,13 +36,13 @@ Trong quá trình phát triển, một số nhiệm vụ nhất định phải �
 
 - *Chu kỳ kiểm chứng thiết kế.* Khi các phần tử của thiết kế đã được chọn, thiết kế phải được kiểm chứng: nó có xử lý được mọi tình huống khả dĩ không, thiết bị có thể bị treo cứng và không tiến triển không, v.v.? Các kỹ thuật mạnh nhất ở đây là formal method ([Chương 18](ch18_formal_verification.vi.md)) và discrete event simulation ([Mục 17.2](ch17_semi_formal_verification.vi.md#sec17_2)).
 
-- *Chu kỳ hiện thực.* Một khi thiết kế đã được kiểm chứng, việc hiện thực bắt đầu và phải chọn các pattern để hiện thực và kiểm chứng phần hiện thực của sản phẩm.
+- *Chu kỳ triển khai.* Một khi thiết kế đã được kiểm chứng, việc triển khai bắt đầu và phải chọn các pattern để triển khai và kiểm chứng phần triển khai của sản phẩm.
 
-  Trong thực tế, việc hiện thực thường bắt đầu trước khi thiết kế được kiểm chứng đầy đủ, có thể là để kiểm tra hiệu quả của các thuật toán được đề xuất, và việc làm prototype này được các tiêu chuẩn khuyến khích. Như [Hình 5.1](#fig5_1) minh họa, nếu có một định nghĩa hình thức của thiết kế, việc viết code có thể được tự động hóa.
+  Trong thực tế, việc triển khai thường bắt đầu trước khi thiết kế được kiểm chứng đầy đủ, có thể là để kiểm tra hiệu quả của các thuật toán được đề xuất, và việc làm prototype này được các tiêu chuẩn khuyến khích. Như [Hình 5.1](#fig5_1) minh họa, nếu có một định nghĩa hình thức của thiết kế, việc viết code có thể được tự động hóa.
 
 Tôi đã tránh nói liệu các chu kỳ này chỉ được thực hiện một lần cho việc phát triển một thiết bị (một quy trình waterfall), hay được thực hiện cho mỗi chức năng, có lẽ lặp lại mỗi vài tuần (một quy trình agile) hoặc thậm chí hằng ngày (eXtreme programming).
 
-Có thể lưu ý một điểm từ danh sách trên: tôi đã nhấn mạnh vào thiết kế và kiểm chứng thiết kế nhiều hơn là vào hiện thực và kiểm chứng hiện thực. Điều đó là có chủ ý, và trong [Chương 18](ch18_formal_verification.vi.md) tôi cố gắng biện minh cho điều này và cho khẳng định của tôi rằng các kỹ năng cần cho thiết kế và cho hiện thực khác nhau đủ nhiều để khó có khả năng một người có thể làm cả hai.
+Có thể lưu ý một điểm từ danh sách trên: tôi đã nhấn mạnh vào thiết kế và kiểm chứng thiết kế nhiều hơn là vào triển khai và kiểm chứng triển khai. Điều đó là có chủ ý, và trong [Chương 18](ch18_formal_verification.vi.md) tôi cố gắng biện minh cho điều này và cho khẳng định của tôi rằng các kỹ năng cần cho thiết kế và cho triển khai khác nhau đủ nhiều để khó có khả năng một người có thể làm cả hai.
 
 Một điểm khác được [Hình 5.1](#fig5_1) nhấn mạnh là vai trò trung tâm của safety case. Mọi phân tích và quyết định được đưa ra trong dự án đều phải trở thành các phần tử của safety case như được mô tả trong [Chương 6](ch06_the_safety_case.vi.md), nơi cũng gợi ý rằng safety case nên là động lực dẫn dắt dự án chứ không phải là một artifact được tạo ra như một hoạt động “wrap-up” vào cuối dự án.
 

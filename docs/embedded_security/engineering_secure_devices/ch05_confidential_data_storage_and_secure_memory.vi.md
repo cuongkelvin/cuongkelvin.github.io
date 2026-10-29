@@ -14,7 +14,7 @@ Chương này bắt đầu bằng việc xem xét dữ liệu nên được lưu
 
 Việc xác định dữ liệu bí mật và nhận thức về các mối đe dọa liên quan luôn là bước đầu tiên hướng tới việc bảo vệ nó. Các ví dụ sau nhằm tạo ra tư duy cần thiết.
 
-Hãy tưởng tượng bộ phận nghiên cứu của bạn phát minh ra một thuật toán engine-control siêu hiệu quả giúp một chiếc xe chạy tốn ít nhiên liệu hơn đáng kể so với các sản phẩm cạnh tranh. Mặc dù có lẽ bạn đã nộp bằng sáng chế, điều đó có thể không đủ để bảo vệ thiết bị của bạn khỏi việc làm nhái và sao chép. Giá trị của phát minh chỉ trở thành hiện thực nếu bạn hiện thực nó trong thiết bị điều khiển của mình. Ở đó, nó có thể có sẵn dưới dạng một file thực thi phần mềm đã biên dịch hay có thể là một phần của một kernel module. Cả hai đều được lưu trong filesystem của thiết bị, và nếu kẻ tấn công có thể đọc filesystem, họ có thể reverse engineering thuật toán của bạn và hưởng lợi trực tiếp từ khoản đầu tư nghiên cứu của bạn. Tình huống này rõ ràng là điều bạn muốn tránh, nghĩa là bạn phải bảo vệ confidentiality của hiện thực thuật toán điều khiển.
+Hãy tưởng tượng bộ phận nghiên cứu của bạn phát minh ra một thuật toán engine-control siêu hiệu quả giúp một chiếc xe chạy tốn ít nhiên liệu hơn đáng kể so với các sản phẩm cạnh tranh. Mặc dù có lẽ bạn đã nộp bằng sáng chế, điều đó có thể không đủ để bảo vệ thiết bị của bạn khỏi việc làm nhái và sao chép. Giá trị của phát minh chỉ trở thành hiện thực nếu bạn triển khai nó trong thiết bị điều khiển của mình. Ở đó, nó có thể có sẵn dưới dạng một file thực thi phần mềm đã biên dịch hay có thể là một phần của một kernel module. Cả hai đều được lưu trong filesystem của thiết bị, và nếu kẻ tấn công có thể đọc filesystem, họ có thể reverse engineering thuật toán của bạn và hưởng lợi trực tiếp từ khoản đầu tư nghiên cứu của bạn. Tình huống này rõ ràng là điều bạn muốn tránh, nghĩa là bạn phải bảo vệ confidentiality của bản triển khai thuật toán điều khiển.
 
 Một số thiết bị gia dụng và tiêu dùng chứa nhiều nội dung media như ảnh và video, và việc sản xuất chúng chẳng hề rẻ. Lưu trữ chúng công khai trong filesystem của thiết bị hiếm khi là một ý hay. Kẻ tấn công có thể sao chép chúng, tải lên nền tảng trực tuyến ưa thích của họ và dùng lại cho mục đích riêng, điều không chỉ có thể gây thiệt hại tài chính mà còn làm tổn hại danh tiếng của sản phẩm và công ty bạn.
 
@@ -34,7 +34,7 @@ Embedded system thường có một tổ hợp thuộc tính độc hại. Thứ
 
 Tuy nhiên, từ một góc nhìn thực dụng hơn, câu hỏi luôn là, “Một đối thủ phải bỏ ra bao nhiêu công sức để đạt được một hiểu biết toàn diện về thiết bị đang xét, bao gồm cả các bí mật của nó?”
 
-Hãy xem xét ví dụ tài sản trí tuệ mà tôi đã đề cập trước đó. Hãy tưởng tượng bạn chịu trách nhiệm giữ bí mật hiện thực phần mềm của một thuật toán rất tinh vi, mặc dù nó phải được lưu và dùng bên trong thiết bị của bạn. Một số người có thể ngay lập tức nghĩ rằng việc đọc firmware từ flash memory, xác định file thực thi và reverse engineering thuật toán là rất phức tạp, nên họ cho rằng mình không cần bất kỳ biện pháp bảo vệ nào.
+Hãy xem xét ví dụ tài sản trí tuệ mà tôi đã đề cập trước đó. Hãy tưởng tượng bạn chịu trách nhiệm giữ bí mật bản triển khai phần mềm của một thuật toán rất tinh vi, mặc dù nó phải được lưu và dùng bên trong thiết bị của bạn. Một số người có thể ngay lập tức nghĩ rằng việc đọc firmware từ flash memory, xác định file thực thi và reverse engineering thuật toán là rất phức tạp, nên họ cho rằng mình không cần bất kỳ biện pháp bảo vệ nào.
 
 Giả định đó có thể đúng với những kẻ tấn công như script kiddie. Tuy nhiên, hãy xem xét những tội phạm tìm kiếm lợi ích tài chính. Đối với họ, việc dump flash memory và mount một filesystem có vẻ không phải là quá nhiều công sức. Hơn nữa, các công cụ miễn phí và open source như Radare2 và Ghidra cho phép bất kỳ ai quan tâm thực hiện ít nhất là reverse engineering phần mềm cơ bản. Nếu confidentiality có độ ưu tiên cao hơn trong sản phẩm của bạn, những kẻ tấn công này chắc chắn nên nằm trong phạm vi xem xét.
 
@@ -62,7 +62,7 @@ Một đối thủ hoạt động trong kernel space là eCryptfs. Mặc dù eCr
 
 Ngày nay, các filesystem như ext4, F2FS và UBIFS trực tiếp hỗ trợ lưu trữ file được mã hóa. So với stacked filesystem, điều này cho phép tích hợp và vận hành hiệu quả hơn.
 
-Những bên dùng phổ biến cách tiếp cận FBE native này bao gồm các OS Android và Chrome. Các tính năng nền tảng được hiện thực trong Linux kernel và dùng crypto API của kernel để mã hóa. Công cụ user-space để cấu hình và quản lý các thư mục được mã hóa được gọi là `fscrypt`.
+Những bên dùng phổ biến cách tiếp cận FBE native này bao gồm các OS Android và Chrome. Các tính năng nền tảng được triển khai trong Linux kernel và dùng crypto API của kernel để mã hóa. Công cụ user-space để cấu hình và quản lý các thư mục được mã hóa được gọi là `fscrypt`.
 
 <a id="ch00lev2_53"></a>
 
@@ -86,7 +86,7 @@ Nếu, theo quan điểm của bạn, vị trí, số lượng và kích thướ
 
 ### *Passphrase*
 
-Dù bạn chọn hiện thực nào, một vấn đề lớn sẽ luôn còn đó: mọi công cụ đều đòi hỏi một passphrase để hoặc trực tiếp mở khóa các thư mục và volume được bảo vệ, hoặc để mở khóa một key file sau đó được dùng để mở khóa dữ liệu được mã hóa. Ngay cả từ *passphrase* cũng cho thấy khái niệm này dành cho người dùng nhập credential như chúng ta làm trên PC lúc boot.
+Dù bạn chọn bản triển khai nào, một vấn đề lớn sẽ luôn còn đó: mọi công cụ đều đòi hỏi một passphrase để hoặc trực tiếp mở khóa các thư mục và volume được bảo vệ, hoặc để mở khóa một key file sau đó được dùng để mở khóa dữ liệu được mã hóa. Ngay cả từ *passphrase* cũng cho thấy khái niệm này dành cho người dùng nhập credential như chúng ta làm trên PC lúc boot.
 
 Tuy nhiên, hầu hết các embedded system không có người dùng tích cực ngồi trước chúng, có thể nhập passphrase để mở khóa hard-disk encryption khi khởi động. Câu hỏi thường gặp tiếp theo là, “Giấu bí mật mở khóa việc mã hóa ở đâu?”
 
@@ -94,15 +94,15 @@ Tuy nhiên, hầu hết các embedded system không có người dùng tích c�
 
 ## Secure memory trong phần cứng
 
-Thỉnh thoảng, tôi nghe người ta (và các công ty) nói rằng *secure memory* được hiện thực trong phần cứng là giải pháp cho vấn đề credential của embedded system. Tuy nhiên, điều đó chỉ đúng một phần.
+Thỉnh thoảng, tôi nghe người ta (và các công ty) nói rằng *secure memory* được triển khai trong phần cứng là giải pháp cho vấn đề credential của embedded system. Tuy nhiên, điều đó chỉ đúng một phần.
 
-Một ưu điểm của secure memory hardware-based là nó hiện thực một sự phân tách vật lý mạnh giữa memory nonvolatile cổ điển, nơi lưu firmware, và một module bảo mật chuyên dụng, chỉ có thể được truy cập qua một interface cụ thể. Hơn nữa, nó cho phép phát hiện hay chống can thiệp (tamper), và các bit được lưu có thể được chôn sâu bên trong một con chip, khiến các cuộc tấn công phần cứng trở nên khó khăn và đòi hỏi thiết bị tinh vi.
+Một ưu điểm của secure memory hardware-based là nó triển khai một sự phân tách vật lý mạnh giữa memory nonvolatile cổ điển, nơi lưu firmware, và một module bảo mật chuyên dụng, chỉ có thể được truy cập qua một interface cụ thể. Hơn nữa, nó cho phép phát hiện hay chống can thiệp (tamper), và các bit được lưu có thể được chôn sâu bên trong một con chip, khiến các cuộc tấn công phần cứng trở nên khó khăn và đòi hỏi thiết bị tinh vi.
 
 Tuy nhiên, cách tiếp cận này cũng có nhược điểm. Hiển nhiên nhất, chỉ một lượng nhỏ dữ liệu, thường là cryptographic key, có thể được lưu trong memory được bảo vệ như vậy. Ngoài ra, những bí mật này thường *phải rời khỏi* module bảo mật để phục vụ mục đích của chúng, như mở khóa một container LUKS. Trong những trường hợp như vậy, kẻ tấn công có thể bắt được các key trên đường đi qua một đường giao tiếp.
 
 <a id="page_90"></a>Trong quá khứ, vấn đề này đã bị khai thác trên thực tế khi các module bảo mật bên ngoài chuyển bí mật tới CPU chính và đối thủ nghe lén các đường mạch PCB vật lý. Các cuộc tấn công khác chủ động giao tiếp với secure memory và, ví dụ, yêu cầu nó mã hóa, giải mã hay ký dữ liệu tùy ý cho kẻ tấn công. Vì vậy, chỉ đơn thuần *có* một secure memory không làm tăng đáng kể bảo mật của thiết bị bạn; nó còn phải được *tích hợp* một cách an toàn.
 
-Như thường lệ, việc dùng secure memory có hợp lý hay không phụ thuộc vào ứng dụng cụ thể và chi tiết hiện thực. Thường thì nó ít nhất thêm một lớp kiến thức mà kẻ tấn công cần có—cụ thể là quan sát giao tiếp secure memory lúc thiết bị đang chạy thay vì “chỉ” trích xuất bí mật từ firmware hay filesystem. Hãy xem xét các lựa chọn liên quan đến secure memory.
+Như thường lệ, việc dùng secure memory có hợp lý hay không phụ thuộc vào ứng dụng cụ thể và chi tiết triển khai. Thường thì nó ít nhất thêm một lớp kiến thức mà kẻ tấn công cần có—cụ thể là quan sát giao tiếp secure memory lúc thiết bị đang chạy thay vì “chỉ” trích xuất bí mật từ firmware hay filesystem. Hãy xem xét các lựa chọn liên quan đến secure memory.
 
 <a id="ch00lev2_56"></a>
 
@@ -162,11 +162,11 @@ Thuật ngữ mô tả những biện pháp đối phó như vậy là *obfuscat
 - Tích hợp các biện pháp anti-debugging để ngăn cản việc phân tích
 - Chia bí mật thành nhiều phần, lưu chúng ở các nơi khác nhau và chỉ ghép chúng lại lúc runtime
 
-Danh sách này không đầy đủ, và mỗi gạch đầu dòng có thể được hiện thực theo nhiều cách và với nhiều mức độ sáng tạo. Nếu bạn không thể tự làm, có các công cụ cung cấp chức năng obfuscation code tự động. Tuy nhiên, những công cụ như vậy phải được đối xử thận trọng vì mỗi công cụ obfuscation cho trước cũng có thể có một công cụ đối ứng, một công cụ *deobfuscation*, đảo ngược độ phức tạp đã thêm vào và để lại cho kẻ tấn công code mà họ có thể phân tích hiệu quả hơn nhiều.
+Danh sách này không đầy đủ, và mỗi gạch đầu dòng có thể được triển khai theo nhiều cách và với nhiều mức độ sáng tạo. Nếu bạn không thể tự làm, có các công cụ cung cấp chức năng obfuscation code tự động. Tuy nhiên, những công cụ như vậy phải được đối xử thận trọng vì mỗi công cụ obfuscation cho trước cũng có thể có một công cụ đối ứng, một công cụ *deobfuscation*, đảo ngược độ phức tạp đã thêm vào và để lại cho kẻ tấn công code mà họ có thể phân tích hiệu quả hơn nhiều.
 
 Năm 2002, một ý tưởng gọi là *white-box cryptography* xuất hiện trong các thảo luận học thuật như một cách để khắc phục vấn đề giấu bí mật trong phần mềm. Cách tiếp cận này nhằm thực hiện các thao tác cryptography trong phần mềm mà không làm lộ bí mật nền tảng. Điều đó có nghĩa là cryptographic key được dùng sẽ khuếch tán vào các thao tác của một thuật toán crypto.
 
-Các khái niệm white-box cryptography đầu tiên biến đổi các cipher có key hardcode thành các lần tra bảng key-dependent và chèn các giá trị ngẫu nhiên vào các tính toán nội bộ, các giá trị này sẽ che (mask) dữ liệu ở một thời điểm nào đó và gỡ che (demask) nó sau đó. Tuy nhiên, không ngạc nhiên, điều này dẫn đến overhead đáng kể về kích thước binary và performance, và những hiện thực đó cũng đã bị phá vỡ bởi cryptanalysis. Mặc dù giới học thuật chưa tìm ra giải pháp hoàn hảo cho vấn đề này, nhiều công ty phần mềm dùng một dạng white-box cryptography nào đó trong sản phẩm của họ—ví dụ, trong các ứng dụng di động cho phép người dùng tải binary về và phân tích nó.
+Các khái niệm white-box cryptography đầu tiên biến đổi các cipher có key hardcode thành các lần tra bảng key-dependent và chèn các giá trị ngẫu nhiên vào các tính toán nội bộ, các giá trị này sẽ che (mask) dữ liệu ở một thời điểm nào đó và gỡ che (demask) nó sau đó. Tuy nhiên, không ngạc nhiên, điều này dẫn đến overhead đáng kể về kích thước binary và performance, và những bản triển khai đó cũng đã bị phá vỡ bởi cryptanalysis. Mặc dù giới học thuật chưa tìm ra giải pháp hoàn hảo cho vấn đề này, nhiều công ty phần mềm dùng một dạng white-box cryptography nào đó trong sản phẩm của họ—ví dụ, trong các ứng dụng di động cho phép người dùng tải binary về và phân tích nó.
 
 Dù bạn áp dụng obfuscation tùy chỉnh, công cụ thương mại hay các cách tiếp cận white-box crypto học thuật, bạn nên luôn ghi nhớ một cách tiếp cận của kẻ tấn công khi giấu bí mật trong binary phần mềm: code lifting. Trong những trường hợp này, binary được dùng “nguyên trạng”—ví dụ, để mở khóa một container LUKS. Bản thân secret key không đáng quan tâm đối với kẻ tấn công nếu họ chỉ cần dùng file thực thi như một chiếc chìa khóa mở két được mã hóa. Điều này có thể diễn ra tại chỗ, hoặc file đáng quan tâm có thể được trích xuất và thực thi trong một môi trường attacker-controlled.
 
@@ -174,7 +174,7 @@ Dù bạn áp dụng obfuscation tùy chỉnh, công cụ thương mại hay cá
 
 ## <a id="page_93"></a>Lưu trữ mật khẩu an toàn
 
-Xác thực password-based là một phương pháp phổ biến để xác minh người dùng hợp lệ khi đăng nhập, nhưng nó cũng được dùng để mở khóa các volume và container được mã hóa. Lẽ tự nhiên, mật khẩu là dữ liệu bí mật. Lưu chúng dưới dạng plaintext trong một file hay một file thực thi để so sánh trong quá trình xác minh khiến cuộc sống của kẻ tấn công trở nên dễ dàng. Một khi bị trích xuất, chúng có thể được dùng thành công để truy cập dữ liệu bí mật. Tuy nhiên, mã hóa truyền thống, như đã thảo luận như một biện pháp bảo vệ cho các lớp dữ liệu khác, thường không phù hợp ở đây. Quá trình xác minh đặc thù của mật khẩu cho phép hiện thực một cách tiếp cận lưu trữ an toàn khác: *password hash*.
+Xác thực password-based là một phương pháp phổ biến để xác minh người dùng hợp lệ khi đăng nhập, nhưng nó cũng được dùng để mở khóa các volume và container được mã hóa. Lẽ tự nhiên, mật khẩu là dữ liệu bí mật. Lưu chúng dưới dạng plaintext trong một file hay một file thực thi để so sánh trong quá trình xác minh khiến cuộc sống của kẻ tấn công trở nên dễ dàng. Một khi bị trích xuất, chúng có thể được dùng thành công để truy cập dữ liệu bí mật. Tuy nhiên, mã hóa truyền thống, như đã thảo luận như một biện pháp bảo vệ cho các lớp dữ liệu khác, thường không phù hợp ở đây. Quá trình xác minh đặc thù của mật khẩu cho phép triển khai một cách tiếp cận lưu trữ an toàn khác: *password hash*.
 
 Thuộc tính one-way của hash function hữu ích trong việc ngăn kẻ tấn công lấy lại mật khẩu từ hash value của nó, ngay cả khi đã trích xuất được từ thiết bị. Việc xác minh vẫn hoạt động vì một mật khẩu cho trước có thể được hash hiệu quả và so sánh với giá trị đã lưu. Tuy nhiên, trong trường hợp tầm thường này, kẻ tấn công có thể tính trước các *rainbow table*, là các tập hợp lớn hash value cho hàng triệu mật khẩu, có thể thậm chí mọi mật khẩu khả dĩ có, ví dụ, 10 ký tự. Để bảo vệ trước những cuộc tấn công như vậy, một *salt* ngẫu nhiên được thêm vào quá trình password-hashing, làm cho mỗi hash là duy nhất và khiến mọi rainbow table trở nên vô dụng.
 
@@ -190,7 +190,7 @@ Do đó, đối với các sản phẩm future-proof, việc dùng các đại d
 
 ## Case Study: Container file được mã hóa trên Linux
 
-Trong case study này, hãy giả định rằng một trong các thiết bị legacy của bạn không có bất kỳ cơ chế lưu trữ an toàn nào được hiện thực cho dữ liệu bí mật. Khi tham quan một <a id="page_94"></a>hội chợ quốc tế, các thành viên trong nhóm kỹ thuật của bạn nhận ra rằng một đối thủ cạnh tranh hiện chưa được biết đến đang dùng một trong các ứng dụng GUI độc quyền của bạn và nội dung media đi kèm mà bạn đã tốn rất nhiều công sức sản xuất để phù hợp với nhu cầu của đối tượng mục tiêu.
+Trong case study này, hãy giả định rằng một trong các thiết bị legacy của bạn không có bất kỳ cơ chế lưu trữ an toàn nào được triển khai cho dữ liệu bí mật. Khi tham quan một <a id="page_94"></a>hội chợ quốc tế, các thành viên trong nhóm kỹ thuật của bạn nhận ra rằng một đối thủ cạnh tranh hiện chưa được biết đến đang dùng một trong các ứng dụng GUI độc quyền của bạn và nội dung media đi kèm mà bạn đã tốn rất nhiều công sức sản xuất để phù hợp với nhu cầu của đối tượng mục tiêu.
 
 Trở về, bạn thảo luận vấn đề với nhóm và ban quản lý. Sau một cuộc điều tra ban đầu, rõ ràng là việc đánh cắp dữ liệu chẳng đòi hỏi gì hơn ngoài việc mở thiết bị của bạn ra và đọc nội dung từ flash memory, điều mà đối thủ của bạn hiển nhiên đã làm thành công. Để hạn chế thiệt hại trong tương lai, bạn quyết định thiết lập ít nhất một mức bảo vệ cơ bản bằng cách dùng các container LUKS. Thiết bị flash memory hiện tại của bạn có dung lượng 256MB. Hệ thống Linux cơ bản và mọi công cụ đi kèm chiếm khoảng 136MB. Các file thực thi độc quyền của bạn cùng với các file dữ liệu và cấu hình của chúng tổng cộng khoảng 19MB, trong khi nội dung video high-quality chiếm 73MB.
 
@@ -377,7 +377,7 @@ Vẫn còn mất lần lượt 4MB và 13MB, nhưng không gian còn lại vừa
 
 Sau khi giải quyết những vấn đề bất ngờ, non-security-related này, câu hỏi cuối cùng về cách mở khóa an toàn các container đã tạo vẫn còn đó. Vì bạn không có secure element trong thiết bị và CPU chính của bạn không cung cấp OTP memory cho mục đích này, bạn có thể quyết định giấu quá trình mở khóa trong một file thực thi trong *initramfs* của mình, được thực thi lúc boot. Nói rõ ràng, bạn sẽ không giành được giải thưởng nào cho “security by design” với cách tiếp cận như vậy, nhưng nó có thể nâng cao rào cản cho các cuộc tấn công thành công.
 
-Bạn có thể cân nhắc đưa vào các định danh hệ thống hardware-based, như được mô tả trong [Chương 6](ch06_secure_device_identity.vi.md#ch06), để dẫn xuất một bí mật mở khóa device-unique thay vì một giải pháp software-only toàn cục có thể dễ dàng được giả lập off-device. Hơn nữa, bạn có thể hiện thực các phương pháp chia sẻ bí mật như chia nội dung key-file thành nhiều mảnh và kết hợp chúng một cách động để thu được bí mật cuối cùng lúc runtime, điều ít nhất gây cản trở các cuộc tấn công phân tích tĩnh đơn giản. Trong mọi trường hợp, bạn phải nhận thức rằng một kẻ tấn công đã có được quyền root có thể vượt qua tất cả những điều đó và truy cập filesystem đã giải mã lúc runtime. Và cho thế hệ sản phẩm tiếp theo, bạn sẽ ưu tiên lưu trữ an toàn ngay từ ngày đầu tiên.
+Bạn có thể cân nhắc đưa vào các định danh hệ thống hardware-based, như được mô tả trong [Chương 6](ch06_secure_device_identity.vi.md#ch06), để dẫn xuất một bí mật mở khóa device-unique thay vì một giải pháp software-only toàn cục có thể dễ dàng được giả lập off-device. Hơn nữa, bạn có thể triển khai các phương pháp chia sẻ bí mật như chia nội dung key-file thành nhiều mảnh và kết hợp chúng một cách động để thu được bí mật cuối cùng lúc runtime, điều ít nhất gây cản trở các cuộc tấn công phân tích tĩnh đơn giản. Trong mọi trường hợp, bạn phải nhận thức rằng một kẻ tấn công đã có được quyền root có thể vượt qua tất cả những điều đó và truy cập filesystem đã giải mã lúc runtime. Và cho thế hệ sản phẩm tiếp theo, bạn sẽ ưu tiên lưu trữ an toàn ngay từ ngày đầu tiên.
 
 <a id="ch00lev1_48"></a>
 

@@ -784,7 +784,7 @@ Khi xem code kernel bằng một source debugger, bạn phải nhớ rằng kern
 
 kgdb là tên được đặt cho các kernel GDB stub đã là một phần của mainline Linux từ nhiều năm nay. Có một user manual trong kernel DocBook, và bạn có thể tìm thấy phiên bản trực tuyến tại `https://kernel.org/doc/html/v6.6/dev-tools/kgdb.html`.
 
-Trong hầu hết các trường hợp, bạn sẽ kết nối tới `kgdb` qua giao diện serial, thường được dùng chung với serial console. Do đó, cách hiện thực này được gọi là kgdboc, viết tắt của kgdb over console. Để hoạt động, nó đòi hỏi một platform `tty` driver hỗ trợ I/O polling thay vì interrupt, vì `kgdb` phải tắt interrupt khi giao tiếp với GDB. Một vài nền tảng hỗ trợ `kgdb` qua USB, và đã có các phiên bản hoạt động qua Ethernet nhưng, thật không may, chưa cái nào được đưa vào mainline Linux.
+Trong hầu hết các trường hợp, bạn sẽ kết nối tới `kgdb` qua giao diện serial, thường được dùng chung với serial console. Do đó, cách triển khai này được gọi là kgdboc, viết tắt của kgdb over console. Để hoạt động, nó đòi hỏi một platform `tty` driver hỗ trợ I/O polling thay vì interrupt, vì `kgdb` phải tắt interrupt khi giao tiếp với GDB. Một vài nền tảng hỗ trợ `kgdb` qua USB, và đã có các phiên bản hoạt động qua Ethernet nhưng, thật không may, chưa cái nào được đưa vào mainline Linux.
 
 Các lưu ý tương tự về tối ưu và stack frame áp dụng cho kernel, với hạn chế là kernel được viết với giả định mức tối ưu ít nhất là `-O1`. Bạn có thể ghi đè các compile flag của kernel bằng cách đặt `KCFLAGS` trước khi chạy `make`.
 

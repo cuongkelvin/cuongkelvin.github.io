@@ -105,7 +105,7 @@ Intermediary thường được đưa vào trong quá trình tích hợp để g
 
 #### Hạn chế đường giao tiếp (Restrict Communication Paths)
 
-Tactic này hạn chế tập các element mà một element cho trước có thể giao tiếp. Trong thực tế, tactic này được hiện thực bằng cách hạn chế khả năng nhìn thấy của một element (khi developer không thể nhìn thấy một interface, họ không thể dùng nó) và bằng authorization (tức là chỉ cho phép các element được ủy quyền truy cập). Tactic restrict communication paths được thấy trong các service-oriented architecture (SOA), trong đó các request point-to-point không được khuyến khích, thay vào đó buộc mọi request phải đi qua một enterprise service bus để việc định tuyến và tiền xử lý có thể được thực hiện một cách nhất quán.
+Tactic này hạn chế tập các element mà một element cho trước có thể giao tiếp. Trong thực tế, tactic này được triển khai bằng cách hạn chế khả năng nhìn thấy của một element (khi developer không thể nhìn thấy một interface, họ không thể dùng nó) và bằng authorization (tức là chỉ cho phép các element được ủy quyền truy cập). Tactic restrict communication paths được thấy trong các service-oriented architecture (SOA), trong đó các request point-to-point không được khuyến khích, thay vào đó buộc mọi request phải đi qua một enterprise service bus để việc định tuyến và tiền xử lý có thể được thực hiện một cách nhất quán.
 
 #### Tuân thủ tiêu chuẩn (Adhere to Standards)
 
@@ -117,11 +117,11 @@ Việc áp dụng một tiêu chuẩn có thể là một integrability tactic h
 
 #### Trừu tượng hóa các service chung (Abstract Common Services)
 
-Khi hai element cung cấp các service tương tự nhau nhưng không hoàn toàn giống nhau, có thể hữu ích khi che giấu cả hai element cụ thể đằng sau một sự trừu tượng hóa chung cho một service tổng quát hơn. Sự trừu tượng hóa này có thể được hiện thực dưới dạng một interface chung được cả hai hiện thực, hoặc có thể bao gồm một intermediary chuyển các request cho service trừu tượng thành các request cụ thể hơn cho các element ẩn đằng sau sự trừu tượng hóa đó. Việc đóng gói thu được che giấu chi tiết của các element khỏi các component khác trong hệ thống. Xét về integrability, điều này có nghĩa là các component trong tương lai có thể được tích hợp với một sự trừu tượng hóa duy nhất thay vì được tích hợp riêng rẽ với từng element cụ thể.
+Khi hai element cung cấp các service tương tự nhau nhưng không hoàn toàn giống nhau, có thể hữu ích khi che giấu cả hai element cụ thể đằng sau một sự trừu tượng hóa chung cho một service tổng quát hơn. Sự trừu tượng hóa này có thể được triển khai dưới dạng một interface chung được cả hai bản triển khai, hoặc có thể bao gồm một intermediary chuyển các request cho service trừu tượng thành các request cụ thể hơn cho các element ẩn đằng sau sự trừu tượng hóa đó. Việc đóng gói thu được che giấu chi tiết của các element khỏi các component khác trong hệ thống. Xét về integrability, điều này có nghĩa là các component trong tương lai có thể được tích hợp với một sự trừu tượng hóa duy nhất thay vì được tích hợp riêng rẽ với từng element cụ thể.
 
 Khi tactic abstract common services được kết hợp với một intermediary (chẳng hạn như một wrapper hoặc adapter), nó cũng có thể chuẩn hóa các biến thể cú pháp và ngữ nghĩa giữa các element cụ thể. Ví dụ, chúng ta thấy điều này khi các hệ thống dùng nhiều cảm biến cùng loại từ các nhà sản xuất khác nhau, mỗi loại có device driver, độ chính xác hoặc đặc tính thời gian riêng, nhưng architecture cung cấp một interface chung cho chúng. Một ví dụ khác, trình duyệt của bạn có thể chấp nhận nhiều loại plug-ins ad-blocking khác nhau, nhưng nhờ plug-in interface, bản thân trình duyệt có thể hoàn toàn không cần biết đến lựa chọn của bạn.
 
-Việc trừu tượng hóa các service chung cho phép sự nhất quán khi xử lý các mối quan tâm chung về infrastructure (ví dụ: chuyển đổi, cơ chế security và logging). Khi các tính năng này thay đổi, hoặc khi các phiên bản mới của các component hiện thực các tính năng này thay đổi, các thay đổi có thể được thực hiện ở ít chỗ hơn. Một abstract service thường được ghép với một intermediary có thể thực hiện xử lý để che giấu các khác biệt cú pháp và ngữ nghĩa dữ liệu giữa các element cụ thể.
+Việc trừu tượng hóa các service chung cho phép sự nhất quán khi xử lý các mối quan tâm chung về infrastructure (ví dụ: chuyển đổi, cơ chế security và logging). Khi các tính năng này thay đổi, hoặc khi các phiên bản mới của các component triển khai các tính năng này thay đổi, các thay đổi có thể được thực hiện ở ít chỗ hơn. Một abstract service thường được ghép với một intermediary có thể thực hiện xử lý để che giấu các khác biệt cú pháp và ngữ nghĩa dữ liệu giữa các element cụ thể.
 
 ### Thích ứng (Adapt)
 
@@ -145,7 +145,7 @@ Tactic này thường được áp dụng trong quá trình tích hợp; tuy nhi
 
 #### Cấu hình hành vi (Configure Behavior)
 
-Tactic configure behavior được dùng bởi các software component được hiện thực để có thể cấu hình theo những cách định sẵn, cho phép chúng tương tác dễ dàng hơn với nhiều loại component. Hành vi của một component có thể được cấu hình trong giai đoạn build (compile lại với một flag khác), trong quá trình khởi tạo hệ thống (đọc một file cấu hình hoặc lấy dữ liệu từ database), hoặc trong runtime (chỉ định một phiên bản protocol như một phần của các request). Một ví dụ đơn giản là cấu hình một component để hỗ trợ các phiên bản khác nhau của một tiêu chuẩn trên các interface của nó. Việc bảo đảm có sẵn nhiều tùy chọn làm tăng khả năng các giả định của *S* và của một *C* trong tương lai sẽ khớp nhau.
+Tactic configure behavior được dùng bởi các software component được triển khai để có thể cấu hình theo những cách định sẵn, cho phép chúng tương tác dễ dàng hơn với nhiều loại component. Hành vi của một component có thể được cấu hình trong giai đoạn build (compile lại với một flag khác), trong quá trình khởi tạo hệ thống (đọc một file cấu hình hoặc lấy dữ liệu từ database), hoặc trong runtime (chỉ định một phiên bản protocol như một phần của các request). Một ví dụ đơn giản là cấu hình một component để hỗ trợ các phiên bản khác nhau của một tiêu chuẩn trên các interface của nó. Việc bảo đảm có sẵn nhiều tùy chọn làm tăng khả năng các giả định của *S* và của một *C* trong tương lai sẽ khớp nhau.
 
 Việc tích hợp hành vi có thể cấu hình vào các phần của *S* là một integrability tactic cho phép *S* hỗ trợ một phạm vi rộng hơn các *C* tiềm năng. Tactic này có khả năng giải quyết các chiều khoảng cách cú pháp, ngữ nghĩa dữ liệu, ngữ nghĩa hành vi và thời gian.
 
@@ -210,7 +210,7 @@ Ba pattern đầu tiên đều xoay quanh tactic tailor interface, và được 
 
 ### Pattern Service-Oriented Architecture
 
-Pattern service-oriented architecture (SOA) mô tả một tập các component phân tán cung cấp và/hoặc sử dụng các service. Trong một SOA, các component *service provider* và các component *service consumer* có thể dùng các ngôn ngữ hiện thực và nền tảng khác nhau. Các service phần lớn là các thực thể độc lập: Service provider và service consumer thường được deploy độc lập, và thường thuộc về các hệ thống khác nhau hoặc thậm chí các tổ chức khác nhau. Các component có các interface mô tả các service mà chúng yêu cầu từ các component khác và các service mà chúng cung cấp. Các quality attribute của một service có thể được đặc tả và bảo đảm bằng một service level agreement (SLA), đôi khi có thể ràng buộc về mặt pháp lý. Các component thực hiện tính toán của mình bằng cách yêu cầu service từ nhau. Giao tiếp giữa các service thường được thực hiện bằng các tiêu chuẩn web service như WSDL (Web Services Description Language) hoặc SOAP (Simple Object Access Protocol).
+Pattern service-oriented architecture (SOA) mô tả một tập các component phân tán cung cấp và/hoặc sử dụng các service. Trong một SOA, các component *service provider* và các component *service consumer* có thể dùng các ngôn ngữ triển khai và nền tảng khác nhau. Các service phần lớn là các thực thể độc lập: Service provider và service consumer thường được deploy độc lập, và thường thuộc về các hệ thống khác nhau hoặc thậm chí các tổ chức khác nhau. Các component có các interface mô tả các service mà chúng yêu cầu từ các component khác và các service mà chúng cung cấp. Các quality attribute của một service có thể được đặc tả và bảo đảm bằng một service level agreement (SLA), đôi khi có thể ràng buộc về mặt pháp lý. Các component thực hiện tính toán của mình bằng cách yêu cầu service từ nhau. Giao tiếp giữa các service thường được thực hiện bằng các tiêu chuẩn web service như WSDL (Web Services Description Language) hoặc SOAP (Simple Object Access Protocol).
 
 SOA pattern liên quan đến microservice architecture pattern (xem [Chương 5](ch05_deployability.vi.md#ch05)). Tuy nhiên, các microservice architecture được giả định là tạo thành một hệ thống duy nhất và được quản lý bởi một tổ chức duy nhất, trong khi SOA cung cấp các component có thể tái sử dụng được giả định là không đồng nhất và được quản lý bởi các tổ chức khác nhau.
 
@@ -218,7 +218,7 @@ SOA pattern liên quan đến microservice architecture pattern (xem [Chương 5
 
 - Các service được thiết kế để được nhiều loại client sử dụng, khiến chúng trở nên tổng quát hơn. Nhiều tổ chức thương mại sẽ cung cấp và tiếp thị service của họ với mục tiêu được chấp nhận rộng rãi.
 - Các service là độc lập. Cách duy nhất để truy cập một service là thông qua interface của nó và thông qua message trên mạng. Do đó, một service và phần còn lại của hệ thống không tương tác với nhau ngoại trừ thông qua interface của chúng.
-- Các service có thể được hiện thực một cách không đồng nhất, dùng bất kỳ ngôn ngữ và công nghệ nào phù hợp nhất.
+- Các service có thể được triển khai một cách không đồng nhất, dùng bất kỳ ngôn ngữ và công nghệ nào phù hợp nhất.
 
 **Các tradeoff:**
 
@@ -256,7 +256,7 @@ Cuốn sách *Design Patterns: Elements of Reusable Object-Oriented Software* [G
 
 1. Hãy nghĩ về một lần tích hợp mà bạn đã thực hiện trước đây—có thể là tích hợp một library hoặc một framework vào code của bạn. Hãy xác định các “khoảng cách” khác nhau mà bạn đã phải xử lý, như đã thảo luận trong [Mục 7.1](#sec7_1). Khoảng cách nào trong số đó đòi hỏi nhiều công sức nhất để giải quyết?
 2. Hãy viết một concrete integrability scenario cho một hệ thống mà bạn đang làm việc (có thể là một scenario khám phá cho một component nào đó mà bạn đang cân nhắc tích hợp).
-3. Bạn nghĩ integrability tactic nào sẽ dễ hiện thực nhất trong thực tế, và tại sao? Tactic nào sẽ khó nhất, và tại sao?
+3. Bạn nghĩ integrability tactic nào sẽ dễ triển khai nhất trong thực tế, và tại sao? Tactic nào sẽ khó nhất, và tại sao?
 4. Nhiều integrability tactic tương tự các modifiability tactic. Nếu bạn làm cho hệ thống của mình có modifiability cao, điều đó có tự động có nghĩa là nó sẽ dễ tích hợp vào một bối cảnh khác không?
 5. Một cách dùng tiêu chuẩn của SOA là thêm tính năng giỏ hàng vào một trang e-commerce. Những nền tảng SOA thương mại nào cung cấp các service giỏ hàng khác nhau? Các thuộc tính của các giỏ hàng là gì? Các thuộc tính này có thể được khám phá tại runtime không?
 6. Hãy viết một chương trình truy cập Google Play Store, thông qua API của nó, và trả về danh sách các ứng dụng dự báo thời tiết cùng các thuộc tính của chúng.

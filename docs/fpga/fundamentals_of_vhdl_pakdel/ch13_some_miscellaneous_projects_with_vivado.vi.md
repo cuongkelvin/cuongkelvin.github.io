@@ -2,7 +2,7 @@
 
 ## 13.1 Giới thiệu
 
-Trong bối cảnh digital design phát triển nhanh chóng, Xilinx Vivado Design Suite nổi bật như một công cụ không thể thiếu đối với kỹ sư và người đam mê. Các tính năng mạnh mẽ của nó đáp ứng nhiều loại ứng dụng, từ các project field-programmable gate array (FPGA) đơn giản đến các thiết kế system-on-chip (SoC) phức tạp. Chương này đi sâu vào một tập các project khác nhau minh họa tính linh hoạt của Vivado, nối kiến thức lý thuyết với hiện thực thực tế. Khi bắt đầu hành trình qua các project khác nhau này, chúng ta sẽ khám phá các khía cạnh khác nhau của thiết kế phần cứng, từ hiện thực mạch cơ bản đến các khái niệm nâng cao hơn như xử lý tín hiệu và tích hợp hệ thống. Mỗi project thể hiện những khả năng riêng của Vivado, làm nổi bật giao diện user-friendly, các công cụ kiểm chứng thiết kế toàn diện, và sự tích hợp liền mạch với các workflow simulation và synthesis.
+Trong bối cảnh digital design phát triển nhanh chóng, Xilinx Vivado Design Suite nổi bật như một công cụ không thể thiếu đối với kỹ sư và người đam mê. Các tính năng mạnh mẽ của nó đáp ứng nhiều loại ứng dụng, từ các project field-programmable gate array (FPGA) đơn giản đến các thiết kế system-on-chip (SoC) phức tạp. Chương này đi sâu vào một tập các project khác nhau minh họa tính linh hoạt của Vivado, nối kiến thức lý thuyết với bản triển khai thực tế. Khi bắt đầu hành trình qua các project khác nhau này, chúng ta sẽ khám phá các khía cạnh khác nhau của thiết kế phần cứng, từ bản triển khai mạch cơ bản đến các khái niệm nâng cao hơn như xử lý tín hiệu và tích hợp hệ thống. Mỗi project thể hiện những khả năng riêng của Vivado, làm nổi bật giao diện user-friendly, các công cụ kiểm chứng thiết kế toàn diện, và sự tích hợp liền mạch với các workflow simulation và synthesis.
 
 ## 13.2 Project giao diện I2C
 
@@ -89,11 +89,11 @@ Cuối cùng, chúng ta có thể build và tạo file ELF rồi liên kết nó
 
 ## 13.3 Bộ tạo Sine-Cosine CORDIC bằng VHDL
 
-CORDIC (Coordinate Rotation Digital Computer) là một thuật toán được dùng để thực hiện nhiều loại hàm toán học, đặc biệt là các phép tính lượng giác, hyperbolic, mũ và logarit. Nó hiệu quả cho việc hiện thực bằng phần cứng vì chỉ cần các phép dịch và cộng, khiến nó phù hợp với kiến trúc FPGA. Trong ngữ cảnh VHDL (VHSIC Hardware Description Language) và Vivado, một design suite do Xilinx cung cấp để phát triển FPGA và SoC, CORDIC có thể được hiện thực như một thiết kế VHDL. Việc này bao gồm tạo các entity định nghĩa thuật toán CORDIC để tính các hàm khác nhau, chẳng hạn sine, cosine và tangent, với hiệu quả phần cứng. Các tính năng chính của VHDL CORDIC trong Vivado được liệt kê như sau:
+CORDIC (Coordinate Rotation Digital Computer) là một thuật toán được dùng để thực hiện nhiều loại hàm toán học, đặc biệt là các phép tính lượng giác, hyperbolic, mũ và logarit. Nó hiệu quả cho việc triển khai bằng phần cứng vì chỉ cần các phép dịch và cộng, khiến nó phù hợp với kiến trúc FPGA. Trong ngữ cảnh VHDL (VHSIC Hardware Description Language) và Vivado, một design suite do Xilinx cung cấp để phát triển FPGA và SoC, CORDIC có thể được triển khai như một thiết kế VHDL. Việc này bao gồm tạo các entity định nghĩa thuật toán CORDIC để tính các hàm khác nhau, chẳng hạn sine, cosine và tangent, với hiệu quả phần cứng. Các tính năng chính của VHDL CORDIC trong Vivado được liệt kê như sau:
 
-1. Hiện thực thuật toán:
+1. Bản triển khai thuật toán:
 
-• Thuật toán CORDIC có thể được hiện thực bằng VHDL để thực hiện nhiều phép tính toán học khác nhau với số lượng tài nguyên phần cứng tối thiểu.
+• Thuật toán CORDIC có thể được triển khai bằng VHDL để thực hiện nhiều phép tính toán học khác nhau với số lượng tài nguyên phần cứng tối thiểu.
 
 • Code VHDL thường bao gồm các cấu trúc lặp để xử lý các thao tác quay và sự hội tụ của các góc.
 
@@ -103,17 +103,17 @@ CORDIC (Coordinate Rotation Digital Computer) là một thuật toán được d
 
 3. Biểu diễn Fixed-Point:
 
-• CORDIC thường dùng số học fixed-point, vốn well-suited cho các hiện thực FPGA để cân bằng giữa độ chính xác và mức sử dụng tài nguyên.
+• CORDIC thường dùng số học fixed-point, vốn well-suited cho các bản triển khai FPGA để cân bằng giữa độ chính xác và mức sử dụng tài nguyên.
 
 4. Tham số hóa:
 
-• Các hiện thực CORDIC có thể được tham số hóa cho các yêu cầu độ chính xác khác nhau (số lần lặp, bit-width, v.v.), cho phép người thiết kế tối ưu cho tốc độ hoặc mức sử dụng tài nguyên.
+• Các bản triển khai CORDIC có thể được tham số hóa cho các yêu cầu độ chính xác khác nhau (số lần lặp, bit-width, v.v.), cho phép người thiết kế tối ưu cho tốc độ hoặc mức sử dụng tài nguyên.
 
 5. Tích hợp với các thiết kế khác:
 
 • Các module CORDIC có thể được tích hợp với các component digital signal processing (DSP) khác trong một thiết kế FPGA, chẳng hạn bộ lọc, để nâng cao chức năng.
 
-Hiện thực CORDIC bằng VHDL trong môi trường Vivado cung cấp một cách hiệu quả để thực hiện các phép tính toán học phức tạp với FPGA. Bằng cách tận dụng các đặc tính của thuật toán CORDIC, người thiết kế có thể đạt hiệu năng cao trong khi giảm thiểu tiêu thụ tài nguyên, nhờ đó khiến nó trở thành lựa chọn phổ biến cho các ứng dụng trong xử lý tín hiệu, truyền thông và hệ thống điều khiển. Trong mục này, chúng ta sẽ tạo các waveform sine và cosine bằng VHDL CORDIC trong Vivado. Cửa sổ thiết lập CORDIC IP core được minh họa trong Hình 13.3.
+Triển khai CORDIC bằng VHDL trong môi trường Vivado cung cấp một cách hiệu quả để thực hiện các phép tính toán học phức tạp với FPGA. Bằng cách tận dụng các đặc tính của thuật toán CORDIC, người thiết kế có thể đạt hiệu năng cao trong khi giảm thiểu tiêu thụ tài nguyên, nhờ đó khiến nó trở thành lựa chọn phổ biến cho các ứng dụng trong xử lý tín hiệu, truyền thông và hệ thống điều khiển. Trong mục này, chúng ta sẽ tạo các waveform sine và cosine bằng VHDL CORDIC trong Vivado. Cửa sổ thiết lập CORDIC IP core được minh họa trong Hình 13.3.
 
 Sau khi tìm CORDIC IP core trong IP catalog và cấu hình các thiết lập như được minh họa trong Hình 13.3, click button OK. Thao tác này mở ra một cửa sổ mới, nơi chúng ta nên click button Generate, như được thể hiện trong Hình 13.4.
 
@@ -230,7 +230,7 @@ Các waveform của phase, cos và sin trong Waveforms Window được mô tả 
 
 ## 13.4 Trailing Edge PWM bằng VHDL
 
-Trong mục này, chúng ta sẽ hiện thực một trailing edge PWM bằng VHDL trong Vivado. Vậy, chúng ta tạo một project VHDL mới trong Vivado, và thêm file PWM_carrier.vhd vào thư mục Design Sources, như được minh họa trong Hình 13.16.
+Trong mục này, chúng ta sẽ triển khai một trailing edge PWM bằng VHDL trong Vivado. Vậy, chúng ta tạo một project VHDL mới trong Vivado, và thêm file PWM_carrier.vhd vào thư mục Design Sources, như được minh họa trong Hình 13.16.
 
 Sau đó, chúng ta click vào button Finish, như được thể hiện trong Hình 13.17.
 
@@ -594,7 +594,7 @@ Chúng ta thiết lập cửa sổ Force Clock cho “clk” như được thể
 
 Sau đó, chúng ta chạy simulation trong 100 μs như được minh họa trong Hình 13.58.
 
-Sau khi mô phỏng 100 μs , chúng ta right-click vào “rst” và đặt Force value là 1, như được thể hiện trong Hình 13.59.
+Sau khi mô phỏng 100 μs, chúng ta right-click vào “rst” và đặt Force value là 1, như được thể hiện trong Hình 13.59.
 
 Chúng ta click vào button Simulation for 100 μs lần nữa và click vào button Zoom Fit. Các waveform signal thu được được mô tả trong Hình 13.60.
 
@@ -626,7 +626,7 @@ Hình 13.57 Thiết lập cửa sổ Force Clock cho “clk”.
 
 ![p0239_58](images/ch13_some_miscellaneous_projects_with_vivado/p0239_58.png)
 
-Hình 13.58 Chạy simulation trong 100 μs .
+Hình 13.58 Chạy simulation trong 100 μs.
 
 ![p0240_59](images/ch13_some_miscellaneous_projects_with_vivado/p0240_59.png)
 
@@ -644,7 +644,7 @@ Waveform thu được của “lut_sig” được thể hiện trong Hình 13.6
 
 Để thực hiện phép quay 180-degree trong half-cycle âm, chúng ta định nghĩa một signal “state” và sửa code trước đó cho phù hợp. Sau đó chúng ta chạy behavioral simulation như được mô tả trong Hình 13.63.
 
-Chúng ta restart simulation, đặt giá trị “rst” bằng không, force clock “clk”, và chạy simulation trong 100 μs . Sau đó, như trước, chúng ta đặt giá trị “rst” bằng 1 và tiếp tục chạy simulation nhiều lần mỗi lần 100 μs . Kết quả là waveform “sine” được tạo ra như mong đợi, như được thể hiện trong Hình 13.64.
+Chúng ta restart simulation, đặt giá trị “rst” bằng không, force clock “clk”, và chạy simulation trong 100 μs. Sau đó, như trước, chúng ta đặt giá trị “rst” bằng 1 và tiếp tục chạy simulation nhiều lần mỗi lần 100 μs. Kết quả là waveform “sine” được tạo ra như mong đợi, như được thể hiện trong Hình 13.64.
 
 ![p0241_62](images/ch13_some_miscellaneous_projects_with_vivado/p0241_62.png)
 
@@ -690,7 +690,7 @@ Hình 13.69 Module “sine_lut” đã được thêm vào cửa sổ Diagram.
 
 ## 13.6 PWM đối xứng bằng VHDL
 
-Trong mục này, chúng ta sẽ hiện thực một PWM carrier đối xứng để tạo PWM, và so sánh nó với một sóng sine để tạo signal PWM two-level, có thể được dùng sau này trong các bộ biến đổi điện tử công suất. Trước đây chúng ta đã hiện thực một trial PWM carrier trong Mục 13.3 *(ghi chú: sách in "trial" và "Section 13.3"; đúng là PWM carrier trailing edge ở Mục 13.4)*. Bây giờ, chúng ta sẽ thực hiện một số thay đổi trong trial PWM để nó thành một counter up–down đối xứng. Code cho file PWM_CAR.vhd như sau.
+Trong mục này, chúng ta sẽ triển khai một PWM carrier đối xứng để tạo PWM, và so sánh nó với một sóng sine để tạo signal PWM two-level, có thể được dùng sau này trong các bộ biến đổi điện tử công suất. Trước đây chúng ta đã triển khai một trial PWM carrier trong Mục 13.3 *(ghi chú: sách in "trial" và "Section 13.3"; đúng là PWM carrier trailing edge ở Mục 13.4)*. Bây giờ, chúng ta sẽ thực hiện một số thay đổi trong trial PWM để nó thành một counter up–down đối xứng. Code cho file PWM_CAR.vhd như sau.
 
 ```
 library IEEE;
@@ -788,13 +788,6 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.all;
 
 entity PWM_CAR is
-```
-
-![p0248_77](images/ch13_some_miscellaneous_projects_with_vivado/p0248_77.png)
-
-Hình 13.77 Chọn Radix là Unsigned Decimal cho “carrier”.
-
-```
     generic(
         pwm_step: integer :=2
         );
@@ -838,6 +831,10 @@ begin
 end process;
 ```
 
+![p0248_77](images/ch13_some_miscellaneous_projects_with_vivado/p0248_77.png)
+
+Hình 13.77 Chọn Radix là Unsigned Decimal cho “carrier”.
+
 Sau đó, chúng ta tạo một block design tên “top” để mở cửa sổ Diagram, như được thể hiện trong Hình 13.78.
 
 Chúng ta right-click vào file PWM_CAR.vhd, rồi chọn tùy chọn Add Module to Block Design, và module PWM_CAR được thêm vào cửa sổ Diagram như được mô tả lần lượt trong Hình 13.79 và 13.80.
@@ -868,7 +865,7 @@ Hình 13.79 Chọn tùy chọn Add Module to Block Design.
 
 Hình 13.80 Module PWM_CAR đã được thêm vào cửa sổ Diagram.
 
-Trong cửa sổ waveforms, chúng ta click vào button Restart, force clock cho “clk”, và force giá trị hằng bằng không cho “rst”, “car” và “sig”. Tiếp theo, chúng ta chạy trong 100 μs . Sau đó, chúng ta đổi force value của “rst” thành 1, và chạy simulation thêm 100 μs nữa. Bây giờ, chúng ta đổi force value của “car” thành 5h (=5) và chạy thêm 100 μs nữa. Cuối cùng, chúng ta đổi force value của “sig” thành 10 h (=16) trong thêm 100 μs nữa. Chúng ta có thể thấy tất cả các signal trên cửa sổ waveforms trong Hình 13.89.
+Trong cửa sổ waveforms, chúng ta click vào button Restart, force clock cho “clk”, và force giá trị hằng bằng không cho “rst”, “car” và “sig”. Tiếp theo, chúng ta chạy trong 100 μs. Sau đó, chúng ta đổi force value của “rst” thành 1, và chạy simulation thêm 100 μs nữa. Bây giờ, chúng ta đổi force value của “car” thành 5h (=5) và chạy thêm 100 μs nữa. Cuối cùng, chúng ta đổi force value của “sig” thành 10 h (=16) trong thêm 100 μs nữa. Chúng ta có thể thấy tất cả các signal trên cửa sổ waveforms trong Hình 13.89.
 
 Sau khi simulation thành công, chúng ta có thể thêm module “compare” vào cửa sổ Diagram như được mô tả trong Hình 13.90.
 
@@ -970,7 +967,7 @@ Hình 13.100 Chọn Waveform Style là Analog cho “sine_0”.
 
 Trong cửa sổ waveforms, chúng ta restart simulation, rồi right-click vào các port carrier_0 và sine_0, và chọn waveform style của chúng là Analog, như được thể hiện lần lượt trong Hình 13.99 và 13.100.
 
-Cuối cùng, chúng ta chạy simulation trong 100 μs , và click vào button Zoom Fit để xem các signal trên cửa sổ waveforms, như được mô tả trong Hình 13.101.
+Cuối cùng, chúng ta chạy simulation trong 100 μs, và click vào button Zoom Fit để xem các signal trên cửa sổ waveforms, như được mô tả trong Hình 13.101.
 
 Như bạn có thể thấy, tần số của sóng sine cao hơn tần số của PWM carrier. Tuy nhiên, trong thực tế, tần số của sóng sine phải thấp hơn nhiều so với PWM carrier. Vậy, chúng ta cần giảm tần số của sóng sine. Như bạn biết, chúng ta chỉ có 500 giá trị trong LUT của sóng sine, vậy chúng ta cần tăng con số này – ví dụ, lên 10000 giá trị. Do đó, chúng ta dùng code sau trong Google Colab để tạo 10000 giá trị LUT cho nửa chu kỳ sóng sine.
 
@@ -1047,7 +1044,7 @@ Bây giờ, với code đã sửa cho file “sine_lut.vhd”, nếu mô phỏng
 
 ![p0260_102](images/ch13_some_miscellaneous_projects_with_vivado/p0260_102.png)
 
-Hình 13.102 Xóa file “top_ wrapper” khỏi project.
+Hình 13.102 Xóa file “top_wrapper” khỏi project.
 
 ![p0260_103](images/ch13_some_miscellaneous_projects_with_vivado/p0260_103.png)
 

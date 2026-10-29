@@ -130,7 +130,7 @@ Buildroot và Yocto đều được thiết kế để cross-compile các image 
 
 ### Kiểm thử tự động trên phần cứng thật
 
-Một trong những thách thức lớn nhất khi phát hành phần cứng là hiện thực kiểm thử hardware-in-the-loop (HIL). Giống như cross-compilation, kiểm thử tự động có thể được thực hiện dễ dàng trên cloud với QEMU, nhưng không gì thay thế được việc kiểm thử phần mềm trên phần cứng dự định của nó. Khi an toàn là mối quan tâm, kiểm thử HIL là một nghĩa vụ, không phải một biện pháp phòng ngừa. Thách thức nằm ở cách tự động hóa nó. Đây là lý do kiểm thử HIL thường đòi hỏi nhiều công sức như viết code phần mềm.
+Một trong những thách thức lớn nhất khi phát hành phần cứng là triển khai kiểm thử hardware-in-the-loop (HIL). Giống như cross-compilation, kiểm thử tự động có thể được thực hiện dễ dàng trên cloud với QEMU, nhưng không gì thay thế được việc kiểm thử phần mềm trên phần cứng dự định của nó. Khi an toàn là mối quan tâm, kiểm thử HIL là một nghĩa vụ, không phải một biện pháp phòng ngừa. Thách thức nằm ở cách tự động hóa nó. Đây là lý do kiểm thử HIL thường đòi hỏi nhiều công sức như viết code phần mềm.
 
 Hình thức kiểm thử HIL hiệu quả nhất là mô phỏng thế giới thực. Phần cứng tương tác với thế giới thực thông qua cảm biến và cơ cấu chấp hành. Nó nhận input từ cảm biến và gửi output tới cơ cấu chấp hành qua các giao diện truyền thông như I2C, SPI và CAN. Chúng ta mô phỏng thế giới thực bằng cách mô hình hóa nó bằng phần mềm. Mô hình phần mềm này chạy trên một máy Linux riêng. Nó gửi và nhận thông điệp qua các giao diện truyền thông khác nhau giống như các cảm biến và cơ cấu chấp hành trong hệ thống thực. Ví dụ, để kiểm thử một bộ sạc EV, chúng ta sẽ nối một PCB trên bàn thử nghiệm với một pin giả chạy mô hình của chúng ta.
 

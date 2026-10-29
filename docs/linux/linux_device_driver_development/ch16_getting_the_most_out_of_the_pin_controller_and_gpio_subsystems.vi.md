@@ -28,13 +28,13 @@ Linux kernel GPIO subsystem không chỉ là GPIO toggling. Nó gắn chặt pin
 
 - Pin controller: Device hoặc controller bên dưới (đúng hơn là nhóm register) cho phép pin multiplexing (còn gọi pinmux hoặc pinmuxing) để tái sử dụng cùng pin cho mục đích khác nhau. Ngoài pinmuxing, nó cho phép pin configuration, tức cấu hình electronic property của pin. Sau đây là một số property:
 
-- Biasing, tức đặt operating condition ban đầu, ví dụ nối pin xuống ground hoặc tới Vdd. Không nhầm với pull up và pull down, là property khác.
+  - Biasing, tức đặt operating condition ban đầu, ví dụ nối pin xuống ground hoặc tới Vdd. Không nhầm với pull up và pull down, là property khác.
 
-- Pin debounce, khoảng thời gian sau đó state được xem là hợp lệ. Ví dụ ngăn nhận nhiều lần nhấn phím trên keypad gắn với GPIO line.
+  - Pin debounce, khoảng thời gian sau đó state được xem là hợp lệ. Ví dụ ngăn nhận nhiều lần nhấn phím trên keypad gắn với GPIO line.
 
-- Slew rate, xác định pin toggle giữa hai logic state nhanh thế nào. Cho phép kiểm soát rise time và fall time của output signal. Cần trade-off vì thay đổi state nhanh tiêu thụ nhiều điện và tạo spike, nên ưu tiên slew rate thấp, ngoại trừ quick control signal như parallel interface: EIM, EB\&, SPI hoặc SDRAM cần toggle nhanh.
+  - Slew rate, xác định pin toggle giữa hai logic state nhanh thế nào. Cho phép kiểm soát rise time và fall time của output signal. Cần trade-off vì thay đổi state nhanh tiêu thụ nhiều điện và tạo spike, nên ưu tiên slew rate thấp, ngoại trừ quick control signal như parallel interface: EIM, EB\&, SPI hoặc SDRAM cần toggle nhanh.
 
-- Pull Up/Down resistor
+  - Pull Up/Down resistor
 
 - GPIO controller: Device cho phép điều khiển pin khi đặt trong GPIO mode. Cho phép đổi GPIO direction và value.
 
@@ -614,7 +614,11 @@ static irqreturn_t pcf857x_irq(int irq,
 
 Threaded GPIO IRQ chip được phân biệt bằng việc đặt flag `.can_sleep` trên `struct` `gpio_chip` thành `true`, chỉ chip có thể sleep khi truy cập GPIO.
 
-LƯU Ý Nhắc lại `gpio_irq_chip.handler` là interrupt flow handler. Đây là high-level IRQ-events handler, gọi handler bên dưới do client driver đăng ký bằng `request_irq()` hoặc `request_threaded_irq()`. Giá trị phụ thuộc IRQ là edge-triggered hay level-triggered. Thường là IRQ core function định sẵn, một trong `handle_simple_irq`, `handle_edge_irq` và `handle_level_irq`. Tất cả là kernel helper function làm một số operation trước và sau khi gọi IRQ handler thực. Khi parent IRQ handler gọi `generic_handle_irq()` hoặc `handle_nested_irq()`, IRQ core tìm IRQ descriptor structure (cách Linux nhìn interrupt) tương ứng Linux IRQ number truyền làm argument (`struct irq_desc *desc = irq_to_desc(irq)`) và gọi `generic_handle_irq_desc()` trên descriptor, dẫn tới `desc->handle_irq(desc)`. Lưu ý `desc->handle_irq` tương ứng high-level IRQ handler cung cấp trước đó, đã gán cho IRQ descriptor bằng `irq_set_chip_and_handler()` trong mapping IRQ. Mapping các GPIO IRQ được làm trong `gpiochip_irq_map`, callback `.map` của default IRQ domain operation table (`gpiochip_domain_ops`) mà GPIO core gán cho GPIO IRQ chip nếu driver không cung cấp. Tóm lại, `desc->handle_irq = gpio_irq_chip.handler`, có thể là `handle_level_irq`, `handle_simple_irq`, `handle_edge_irq` hoặc (hiếm) function driver-provided.
+LƯU Ý Nhắc lại `gpio_irq_chip.handler` là interrupt flow handler. Đây là high-level IRQ-events handler, gọi handler bên dưới do client driver đăng ký bằng `request_irq()` hoặc `request_threaded_irq()`. Giá trị phụ thuộc IRQ là edge-triggered hay level-triggered. Thường là IRQ core function định sẵn, một trong `handle_simple_irq`, `handle_edge_irq` và `handle_level_irq`. Tất cả là kernel helper function làm một số operation trước và sau khi gọi IRQ handler thực.
+
+Khi parent IRQ handler gọi `generic_handle_irq()` hoặc `handle_nested_irq()`, IRQ core tìm IRQ descriptor structure (cách Linux nhìn interrupt) tương ứng Linux IRQ number truyền làm argument (`struct irq_desc *desc = irq_to_desc(irq)`) và gọi `generic_handle_irq_desc()` trên descriptor, dẫn tới `desc->handle_irq(desc)`. Lưu ý `desc->handle_irq` tương ứng high-level IRQ handler cung cấp trước đó, đã gán cho IRQ descriptor bằng `irq_set_chip_and_handler()` trong mapping IRQ. Mapping các GPIO IRQ được làm trong `gpiochip_irq_map`, callback `.map` của default IRQ domain operation table (`gpiochip_domain_ops`) mà GPIO core gán cho GPIO IRQ chip nếu driver không cung cấp.
+
+Tóm lại, `desc->handle_irq = gpio_irq_chip.handler`, có thể là `handle_level_irq`, `handle_simple_irq`, `handle_edge_irq` hoặc (hiếm) function driver-provided.
 
 Ví dụ thêm IRQ chip support vào GPIO chip
 
@@ -807,10 +811,9 @@ Muốn map PIN `GPIO_5_29` với PIN number `89` trong pin controller number spa
 
 Trong đoạn trích trước, 1 GPIO line từ GPIO line thứ 29 của GPIO bank5 được map tới pin range từ 89 trên pin controller `pinctrl`.
 
-Để minh họa trên platform thực, xét SoC i.MX6 có 32 GPIO mỗi bank. Sau đây là đoạn pin controller node của i.MX6 SoC, khai báo trong `arch/arm/boot/dts/imx6qdl.dtsi`, có driver `drivers/pinctrl/freescale/pinctrl-`
+Để minh họa trên platform thực, xét SoC i.MX6 có 32 GPIO mỗi bank. Sau đây là đoạn pin controller node của i.MX6 SoC, khai báo trong `arch/arm/boot/dts/imx6qdl.dtsi`, có driver `drivers/pinctrl/freescale/pinctrl-imx6dl.c`:
 
 ```
-imx6dl.c:
 iomuxc: pinctrl@20e0000 {
     compatible = "fsl,imx6dl-iomuxc", "fsl,imx6q-iomuxc";
     reg = <0x20e0000 0x4000>;
@@ -865,11 +868,11 @@ Sau đây là property cần cho mỗi GPIO hog definition, được biểu di�
 
 - Chỉ một property sau có thể được chỉ định, scan theo thứ tự liệt kê. Nghĩa là khi nhiều property hiện diện, chúng được tìm theo thứ tự ở đây, kết quả khớp đầu tiên được coi là intended configuration:
 
-- `input`: Property chỉ GPIO direction nên đặt thành input.
+  - `input`: Property chỉ GPIO direction nên đặt thành input.
 
-- `output-low`: Property chỉ GPIO nên cấu hình output với initial state value low.
+  - `output-low`: Property chỉ GPIO nên cấu hình output với initial state value low.
 
-- `output-high`: Property chỉ GPIO direction nên đặt output với initial value high.
+  - `output-high`: Property chỉ GPIO direction nên đặt output với initial value high.
 
 Property tùy chọn là `line-name`: GPIO label name. Nếu không có, dùng node name.
 
@@ -1389,9 +1392,9 @@ Sysfs đã thống trị GPIO management từ user space khá lâu. Dù dự ki�
 
 - `/sys/class/gpio/`: Nơi mọi thứ bắt đầu. Có hai special file `export` và `unexport`, cùng số directory bằng số GPIO controller đăng ký với hệ thống:
 
-- `export`: Ghi GPIO number vào file để yêu cầu kernel export quyền điều khiển GPIO tới user space. Ví dụ gõ `echo 21 > export` tạo node `gpio21` (dẫn tới subdirectory cùng tên) cho GPIO `#21`, nếu GPIO chưa được kernel code yêu cầu.
+  - `export`: Ghi GPIO number vào file để yêu cầu kernel export quyền điều khiển GPIO tới user space. Ví dụ gõ `echo 21 > export` tạo node `gpio21` (dẫn tới subdirectory cùng tên) cho GPIO `#21`, nếu GPIO chưa được kernel code yêu cầu.
 
-- `unexport`: Đảo ngược tác dụng export tới user space bằng ghi cùng GPIO number vào file. Ví dụ node `gpio21` export bằng file `export` bị xóa khi gõ `echo 21 > unexport`.
+  - `unexport`: Đảo ngược tác dụng export tới user space bằng ghi cùng GPIO number vào file. Ví dụ node `gpio21` export bằng file `export` bị xóa khi gõ `echo 21 > unexport`.
 
 Khi đăng ký `gpio_chip` thành công, directory entry với path như `/sys/class/gpio/gpiochipX/` được tạo, với `X` là GPIO controller base (controller cung cấp GPIO bắt đầu tại `#X`), có attribute sau:
 
@@ -1399,21 +1402,17 @@ Khi đăng ký `gpio_chip` thành công, directory entry với path như `/sys/c
 
 - `label`, được cung cấp để chẩn đoán (không luôn duy nhất).
 
-- `ngpio`, cho biết controller cung cấp bao nhiêu GPIO (`N` tới `N + ngpio - 1`). Giống định nghĩa trong
-
-```
-gpio_chip.ngpios.
-```
+- `ngpio`, cho biết controller cung cấp bao nhiêu GPIO (`N` tới `N + ngpio - 1`). Giống định nghĩa trong `gpio_chip.ngpios`.
 
 - `/sys/class/gpio/gpioN/`: Directory tương ứng GPIO line `N`, được export bằng file `export` hoặc trực tiếp từ kernel. `/sys/class/gpio/gpio42/` (cho GPIO `#42`) là ví dụ. Directory chứa read/write attribute sau:
 
-- `direction`: Dùng file lấy/đặt GPIO direction. Giá trị chấp nhận là string `in` hoặc `out`. Attribute thường được ghi và ghi value `out` mặc định khởi tạo GPIO value là `low`. Để bảo đảm glitch-free, có thể ghi value low và high để cấu hình GPIO output với initial value đó. Tuy nhiên, nếu GPIO export từ kernel (xem function `gpiod_export()` hoặc `gpio_export()`), attribute không có, đồng thời không cho đổi direction.
+  - `direction`: Dùng file lấy/đặt GPIO direction. Giá trị chấp nhận là string `in` hoặc `out`. Attribute thường được ghi và ghi value `out` mặc định khởi tạo GPIO value là `low`. Để bảo đảm glitch-free, có thể ghi value low và high để cấu hình GPIO output với initial value đó. Tuy nhiên, nếu GPIO export từ kernel (xem function `gpiod_export()` hoặc `gpio_export()`), attribute không có, đồng thời không cho đổi direction.
 
-- `value`: Có thể dùng lấy hoặc đặt GPIO line state tùy direction input/output. Nếu GPIO cấu hình output, ghi value non-zero đặt output high, còn ghi `0` đặt output low. Nếu pin có thể thiết lập là interrupt-generating line và đã thiết lập, có thể dùng system function `poll()` trên file, return khi interrupt xảy ra. Phải đặt event `POLLPRI` và `POLLERR` khi dùng `poll()`. Nếu thay bằng `select()`, file descriptor nên đặt trong `exceptfds`. Sau khi `poll()` return, user code nên `lseek()` tới đầu sysfs file rồi đọc value mới hoặc đóng file, re-open để đọc. Cùng nguyên tắc đã bàn với pollable sysfs attribute.
+  - `value`: Có thể dùng lấy hoặc đặt GPIO line state tùy direction input/output. Nếu GPIO cấu hình output, ghi value non-zero đặt output high, còn ghi `0` đặt output low. Nếu pin có thể thiết lập là interrupt-generating line và đã thiết lập, có thể dùng system function `poll()` trên file, return khi interrupt xảy ra. Phải đặt event `POLLPRI` và `POLLERR` khi dùng `poll()`. Nếu thay bằng `select()`, file descriptor nên đặt trong `exceptfds`. Sau khi `poll()` return, user code nên `lseek()` tới đầu sysfs file rồi đọc value mới hoặc đóng file, re-open để đọc. Cùng nguyên tắc đã bàn với pollable sysfs attribute.
 
-- `edge` xác định signal edge cho function `poll()` hoặc `select()` return. Giá trị chấp nhận là `none`, `rising`, `failing` hoặc `both`. File đọc/ghi này chỉ tồn tại nếu GPIO cấu hình được thành interrupt-generating input pin.
+  - `edge` xác định signal edge cho function `poll()` hoặc `select()` return. Giá trị chấp nhận là `none`, `rising`, `failing` hoặc `both`. File đọc/ghi này chỉ tồn tại nếu GPIO cấu hình được thành interrupt-generating input pin.
 
-- `active_low`: Khi đọc, return `0` (cho `false`) hoặc `1` (nghĩa `true`). Ghi value khác 0 đảo attribute `value` cho cả đọc và ghi. Cấu hình hỗ trợ `poll()`/`select()` hiện có và sau đó qua attribute `edge` cho rising/falling edge sẽ theo thiết lập này.
+  - `active_low`: Khi đọc, return `0` (cho `false`) hoặc `1` (nghĩa `true`). Ghi value khác 0 đảo attribute `value` cho cả đọc và ghi. Cấu hình hỗ trợ `poll()`/`select()` hiện có và sau đó qua attribute `edge` cho rising/falling edge sẽ theo thiết lập này.
 
 Sau đây là chuỗi command ngắn minh họa sysfs interface điều khiển GPIO từ user space:
 
@@ -1462,23 +1461,17 @@ Kernel Linux GPIO user space sysfs đã deprecated và ngừng phát triển. N�
 
 `Libgpiod` cung cấp C API cho phép tận dụng tối đa mọi GPIO chip đăng ký trên hệ thống. Ngoài ra cũng hỗ trợ C++ và Python. API được ghi tài liệu rõ, quá rộng để trình bày toàn bộ ở đây. Use case cơ bản thường theo bước:
 
-1\. Mở GPIO chip character device mong muốn bằng một function `gpiod_chip_open*`, như
+1\. Mở GPIO chip character device mong muốn bằng một function `gpiod_chip_open*`, như `gpiod_chip_open_by_name()` hoặc `gpiod_chip_open_lookup()`. Return pointer tới `struct gpiod_chip`, dùng trong API call tiếp theo.
 
-`gpiod_chip_open_by_name()` hoặc `gpiod_chip_open_lookup()`. Return pointer tới `struct gpiod_chip`, dùng trong API call tiếp theo.
+2\. Lấy handle tới GPIO line mong muốn bằng gọi `gpiod_chip_get_line()`, return pointer tới instance `struct gpiod_line`. Trong khi API trước return handle tới một GPIO line, có thể dùng `gpiod_chip_get_lines()` nếu cần nhiều line một lần. `gpiod_chip_get_lines()` return pointer tới instance `struct gpiod_line_bulk`, dùng sau cho bulk operation. API khác có thể return tập GPIO handle là `gpiod_chip_get_all_lines()`, return mọi line của GPIO chip trong `struct gpiod_line_bulk`. Khi có tập GPIO object như vậy, có thể yêu cầu GPIO line tại index cụ thể cục bộ trong bulk object bằng API `gpiod_line_bulk_get_line()`.
 
-2\. Lấy handle tới GPIO line mong muốn bằng gọi `gpiod_chip_get_line()`, return pointer tới instance
+3\. Yêu cầu dùng line làm input hoặc output bằng `gpiod_line_request_input()` hoặc `gpiod_line_request_output()`. Với bulk operation trên tập GPIO line, có thể dùng `gpiod_line_request_bulk_input()` hoặc `gpiod_line_request_bulk_output()` thay thế.
 
-`struct gpiod_line`. Trong khi API trước return handle tới một GPIO line, có thể dùng `gpiod_chip_get_lines()` nếu cần nhiều line một lần. `gpiod_chip_get_lines()` return pointer tới instance `struct gpiod_line_bulk`, dùng sau cho bulk operation. API khác có thể return tập GPIO handle là `gpiod_chip_get_all_lines()`, return mọi line của GPIO chip trong `struct gpiod_line_bulk`. Khi có tập GPIO object như vậy, có thể yêu cầu GPIO line tại index cụ thể cục bộ trong bulk object bằng API `gpiod_line_bulk_get_line()`.
+4\. Đọc value input GPIO line bằng gọi `gpiod_line_get_value()` cho một GPIO hoặc `gpiod_line_get_value_bulk()` cho tập GPIO. Với output GPIO line, đặt level bằng `gpiod_line_set_value()` cho một line hoặc `gpiod_line_set_value_bulk()` cho tập output GPIO.
 
-3\. Yêu cầu dùng line làm input hoặc output bằng `gpiod_line_request_input()` hoặc
+5\. Khi xong, giải phóng line bằng `gpiod_line_release()` hoặc `gpiod_line_release_bulk()`.
 
-`gpiod_line_request_output()`. Với bulk operation trên tập GPIO line, có thể dùng `gpiod_line_request_bulk_input()` hoặc `gpiod_line_request_bulk_output()` thay thế.
-
-4\. Đọc value input GPIO line bằng gọi `gpiod_line_get_value()` cho một GPIO hoặc
-
-`gpiod_line_get_value_bulk()` cho tập GPIO. Với output GPIO line, đặt level bằng `gpiod_line_set_value()` cho một line hoặc `gpiod_line_set_value_bulk()` cho tập output GPIO.
-
-5\. Khi xong, giải phóng line bằng `gpiod_line_release()` hoặc `gpiod_line_release_bulk()`. 6. Khi mọi GPIO line đã giải phóng, có thể giải phóng chip tương ứng bằng `gpiod_chip_close()` trên từng chip.
+6\. Khi mọi GPIO line đã giải phóng, có thể giải phóng chip tương ứng bằng `gpiod_chip_close()` trên từng chip.
 
 Gọi `gpiod_line_release()` khi dùng xong GPIO line. Line cần giải phóng truyền làm parameter. Nếu cần giải phóng tập GPIO, nên dùng `gpiod_line_release_bulk()` thay thế. Lưu ý nếu line chưa được yêu cầu cùng nhau (không qua `gpiod_line_request_bulk()`), hành vi `gpiod_line_release_bulk()` không xác định.
 
@@ -1773,11 +1766,11 @@ Directory chứa attribute sau:
 
 - `new_device`: Dùng yêu cầu kernel tạo instance aggregated GPIO controller bằng ghi string mô tả GPIO cần aggregate. File `new_device` hiểu định dạng `[<gpioA>] [<gpiochipB> <offsets>] ...`:
 
-- `<gpioA>` là GPIO line name.
+  - `<gpioA>` là GPIO line name.
 
-- `<gpiochipB>` là GPIO chip label.
+  - `<gpiochipB>` là GPIO chip label.
 
-- `<offsets>` là danh sách GPIO offset và/hoặc GPIO offset range comma-separated, range biểu thị bằng dấu gạch ngang.
+  - `<offsets>` là danh sách GPIO offset và/hoặc GPIO offset range comma-separated, range biểu thị bằng dấu gạch ngang.
 
 - `delete_device`: Dùng yêu cầu kernel hủy aggregated GPIO controller sau khi dùng.
 
@@ -1800,11 +1793,7 @@ Sau khi dùng, có thể hủy aggregated GPIO controller vừa tạo bằng l�
 $ echo gpio-aggregator.0 > delete_device
 ```
 
-Từ ví dụ trước, GPIO chip sinh ra sau aggregation là `gpiochip12`, có ba GPIO line. Thay `gpioinfo gpio-aggregator.0`, có thể dùng `gpioinfo`
-
-```
-gpiochip12.
-```
+Từ ví dụ trước, GPIO chip sinh ra sau aggregation là `gpiochip12`, có ba GPIO line. Thay `gpioinfo gpio-aggregator.0`, có thể dùng `gpioinfo` `gpiochip12`.
 
 ### Aggregate GPIO từ device tree
 
@@ -1892,11 +1881,7 @@ Có thể đổi GPIO chip device file ownership để cho user hoặc group tru
 # chmod 660 /dev/gpiochip9
 ```
 
-GPIO chip do aggregator tạo có thể được lấy từ sysfs tại
-
-```
-/sys/bus/platform/devices/gpio-aggregator/.
-```
+GPIO chip do aggregator tạo có thể được lấy từ sysfs tại `/sys/bus/platform/devices/gpio-aggregator/`.
 
 ### Aggregate GPIO bằng generic GPIO driver
 

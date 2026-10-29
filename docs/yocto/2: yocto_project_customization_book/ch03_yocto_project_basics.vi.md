@@ -162,7 +162,7 @@ ALTERNATIVE_TARGET = "${bindir}/vim.tiny"
 
 Recipe này rất thú vị vì nó cho thấy cách nó require một số chỉ dẫn khác từ file `vim.inc`, rồi thêm một số thiết lập đặc biệt. Tức là, nó append chuỗi `(with tiny features)` vào biến `SUMMARY`, biến mô tả package, và thêm tùy chọn `tiny` vào biến `PACKAGECONFIG`, biến chỉ dẫn cho build system cách compile package, sau đó nó chỉ cài ứng dụng `vim.tiny`, là phiên bản tiny của ứng dụng Vim chính (và nổi tiếng).
 
-Một khía cạnh thiết yếu khác về recipe là chúng cũng có thể được hiện thực bằng append file (các file có hậu tố `.bbappend` trong tên). Các file recipe đặc biệt này (gọi là append file) được dùng để append metadata vào các recipe khác cùng tên; ví dụ, chúng ta có thể append metadata vào file `myrecipe.bb` bằng file `myrecipe.bbappend`.
+Một khía cạnh thiết yếu khác về recipe là chúng cũng có thể được triển khai bằng append file (các file có hậu tố `.bbappend` trong tên). Các file recipe đặc biệt này (gọi là append file) được dùng để append metadata vào các recipe khác cùng tên; ví dụ, chúng ta có thể append metadata vào file `myrecipe.bb` bằng file `myrecipe.bbappend`.
 
 > Chính xác hơn, append file phải có cùng tên gốc với recipe tương ứng. Ví dụ, append file `myrecipe_2.3.bbappend` phải áp dụng cho file `myrecipe_2.3.bb`. Điều này có nghĩa là tên file recipe gốc và append file phụ thuộc vào số phiên bản, vì vậy nếu recipe tương ứng được đổi tên để cập nhật lên phiên bản mới hơn, file `.bbappend` tương ứng cũng phải được đổi tên.
 >
@@ -546,7 +546,7 @@ Một lần nữa, trong file `local.conf.sample`, chúng ta có thể thấy ph
 
 Biến `TMPDIR` được dùng để chỉ định nơi đặt mọi file tạm, ngoài shared state cache, do build system của Yocto Project tạo ra. Theo mặc định, thư mục này có tên là `tmp`, và nó nằm trong build directory (tức là theo mặc định là `${TOPDIR}/tmp`).
 
-Thư mục này có thể được để trong build directory, vì ngay cả khi chuyển nó đi như `DL_DIR` và `SSTATE_DIR`, chúng ta cũng không được hưởng lợi ích từ việc dùng chung các file được tạo ra. Tuy nhiên, nếu quyết định chuyển nó, chúng ta phải chú ý tới filesystem mà `TMPDIR` dùng, filesystem này phải có ngữ nghĩa filesystem tiêu chuẩn (phải hỗ trợ tên file mixed-case, POSIX file locking và inode bền vững). Ví dụ, do nhiều vấn đề với NFS (Network File System) và bug trong một số hiện thực, NFS không đáp ứng yêu cầu tối thiểu này, vì vậy `TMPDIR` không thể nằm trên NFS!
+Thư mục này có thể được để trong build directory, vì ngay cả khi chuyển nó đi như `DL_DIR` và `SSTATE_DIR`, chúng ta cũng không được hưởng lợi ích từ việc dùng chung các file được tạo ra. Tuy nhiên, nếu quyết định chuyển nó, chúng ta phải chú ý tới filesystem mà `TMPDIR` dùng, filesystem này phải có ngữ nghĩa filesystem tiêu chuẩn (phải hỗ trợ tên file mixed-case, POSIX file locking và inode bền vững). Ví dụ, do nhiều vấn đề với NFS (Network File System) và bug trong một số bản triển khai, NFS không đáp ứng yêu cầu tối thiểu này, vì vậy `TMPDIR` không thể nằm trên NFS!
 
 Một biến quan trọng khác trong `local.conf.sample` là `DISTRO`:
 

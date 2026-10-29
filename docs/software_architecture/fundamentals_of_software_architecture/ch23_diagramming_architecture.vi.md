@@ -54,7 +54,7 @@ Nhiều công cụ vẽ hỗ trợ việc vẽ đường nối giữa các hình
 
 > **Dùng layer theo ngữ nghĩa, không phải để trang trí (Use Layers Semantically, Not Decoratively)**
 >
-> <a id="id1593"></a><a id="id1594"></a>Chúng tôi thích các công cụ vẽ hỗ trợ layer, nhưng chúng tôi đề nghị dùng chúng *theo ngữ nghĩa*—tức là theo những cách đóng góp ý nghĩa cho hình ảnh tổng thể. Ví dụ, layer nền của mỗi sơ đồ nên đại diện cho topology của architecture: các container, database, phụ thuộc, broker và các phần tử cốt lõi khác của nó. Layer này nên tập trung vào architecture thay vì hiện thực; chẳng hạn, ghi rõ “giao tiếp đồng bộ” thay vì nêu tên một giao thức cụ thể. Layer tiếp theo nên chứa các chi tiết hiện thực: loại database nào, giao thức giao tiếp nào, v.v.
+> <a id="id1593"></a><a id="id1594"></a>Chúng tôi thích các công cụ vẽ hỗ trợ layer, nhưng chúng tôi đề nghị dùng chúng *theo ngữ nghĩa*—tức là theo những cách đóng góp ý nghĩa cho hình ảnh tổng thể. Ví dụ, layer nền của mỗi sơ đồ nên đại diện cho topology của architecture: các container, database, phụ thuộc, broker và các phần tử cốt lõi khác của nó. Layer này nên tập trung vào architecture thay vì bản triển khai; chẳng hạn, ghi rõ “giao tiếp đồng bộ” thay vì nêu tên một giao thức cụ thể. Layer tiếp theo nên chứa các chi tiết triển khai: loại database nào, giao thức giao tiếp nào, v.v.
 >
 > Dùng layer theo cách này khiến sơ đồ có thể mở rộng: có thể thêm các layer theo bối cảnh khác để trình bày ranh giới domain-driven design, phạm vi transaction, hoặc bất kỳ meta-information nào khác mà kiến trúc sư muốn đối chiếu với topology của architecture.
 

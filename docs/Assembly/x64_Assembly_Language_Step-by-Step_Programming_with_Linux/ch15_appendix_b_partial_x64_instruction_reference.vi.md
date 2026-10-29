@@ -1,6 +1,6 @@
 # <a id="Page_501"></a>PHỤ LỤC B Tài liệu tham khảo một phần instruction x64
 
-Tùy theo cách bạn đếm, architecture x64 giờ có hơn 1,000 machine instruction. Đừng hoảng sợ: rất nhiều machine instruction trong số đó có thể chỉ được hệ điều hành dùng ở protected mode. Một số lượng lớn trong số chúng hiện thực toán floating-point, thứ mà vì lý do chỗ trang tôi không thể trình bày trong cuốn sách này. Khá nhiều cái được chuyên biệt hóa cao cho những việc như mã hóa và giải mã nhanh.
+Tùy theo cách bạn đếm, architecture x64 giờ có hơn 1,000 machine instruction. Đừng hoảng sợ: rất nhiều machine instruction trong số đó có thể chỉ được hệ điều hành dùng ở protected mode. Một số lượng lớn trong số chúng triển khai toán floating-point, thứ mà vì lý do chỗ trang tôi không thể trình bày trong cuốn sách này. Khá nhiều cái được chuyên biệt hóa cao cho những việc như mã hóa và giải mã nhanh.
 
 Trong phụ lục này, tôi sẽ trình bày những bản tóm tắt ngắn về các machine instruction thông dụng nhất, những instruction mà bạn có khả năng dùng nhiều nhất khi còn là người mới bắt đầu viết các chương trình userspace. Nếu bạn muốn một tài liệu tham khảo instruction đầy đủ hơn (và hoàn toàn có thẩm quyền), hãy xem tài liệu instruction set của Intel:
 
@@ -20,7 +20,7 @@ Site này về cơ bản cho phép bạn nhấp quanh và tìm các instruction 
 
 ## Những gì đã bị loại khỏi x64
 
-Trong quá trình tiến hóa của các CPU x86, các instruction đã được thêm vào và loại bỏ qua mỗi thế hệ. Hầu hết chúng khá bí hiểm, nhưng có vài instruction mà bạn có thể đã học khi là người mới bắt đầu trong kỷ nguyên 32-bit mà giờ không còn khả dụng. Hầu hết những instruction now-obsolete này có từ những hiện thực x86 sớm nhất. Sau đây là những instruction phổ biến nhất:
+Trong quá trình tiến hóa của các CPU x86, các instruction đã được thêm vào và loại bỏ qua mỗi thế hệ. Hầu hết chúng khá bí hiểm, nhưng có vài instruction mà bạn có thể đã học khi là người mới bắt đầu trong kỷ nguyên 32-bit mà giờ không còn khả dụng. Hầu hết những instruction now-obsolete này có từ những bản triển khai x86 sớm nhất. Sau đây là những instruction phổ biến nhất:
 
 - Các instruction toán BCD: `AAA`, `AAS`, `AAD`, `AAM`, `DAA` và `DAS`. Những instruction này đã không cần thiết trong nhiều thập kỷ, và chúng chiếm chỗ quý giá trong việc mã hóa instruction binary.
 - Các instruction push-all và pop-all: `PUSHA`, `POPA`, `PUSHAD` và `POPAD`. Giờ có 16 register general-purpose, mỗi register có kích thước 8 byte. Đó là rất nhiều dữ liệu để di chuyển cùng một lúc. Giờ các register phải được push và pop riêng lẻ.

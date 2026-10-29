@@ -278,7 +278,7 @@ Trong các phần<a id="_idIndexMarker1721"></a> sau, chúng ta sẽ nói về C
 
 > **Lưu ý**:
 >
-> Đây là link chính để<a id="_idIndexMarker1723"></a> đọc thêm về GNU Make, vốn là hiện thực của Make được tạo ra [for the GNU project: https://www.gnu.org/software/make/manual](https://www.gnu.org/software/make/manual/html_node/index.html)/html_node/index.html (cho dự án GNU).
+> Đây là link chính để<a id="_idIndexMarker1723"></a> đọc thêm về GNU Make, vốn là bản triển khai của Make được tạo ra [for the GNU project: https://www.gnu.org/software/make/manual](https://www.gnu.org/software/make/manual/html_node/index.html)/html_node/index.html (cho dự án GNU).
 
 <a id="_idParaDest-339"></a>
 

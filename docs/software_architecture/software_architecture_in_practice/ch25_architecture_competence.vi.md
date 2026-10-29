@@ -55,7 +55,7 @@ Mục này tóm tắt nhiều loại nhiệm vụ của kiến trúc sư. Không
 
 ![](images/data-url-image117.jpeg)
 
-Kiến trúc sư cũng thường xuyên thực hiện nhiều nhiệm vụ khác, như dẫn dắt code review hoặc tham gia lập kế hoạch kiểm thử. Trong nhiều dự án, kiến trúc sư xắn tay giúp đỡ việc hiện thực và kiểm thử thực tế, ở các vùng then chốt. Dù quan trọng, nói một cách chặt chẽ thì đây không phải là các nhiệm vụ architecture.
+Kiến trúc sư cũng thường xuyên thực hiện nhiều nhiệm vụ khác, như dẫn dắt code review hoặc tham gia lập kế hoạch kiểm thử. Trong nhiều dự án, kiến trúc sư xắn tay giúp đỡ việc triển khai và kiểm thử thực tế, ở các vùng then chốt. Dù quan trọng, nói một cách chặt chẽ thì đây không phải là các nhiệm vụ architecture.
 
 ### Kỹ năng (Skills)
 

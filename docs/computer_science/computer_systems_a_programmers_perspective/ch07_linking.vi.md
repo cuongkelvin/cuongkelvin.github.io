@@ -56,13 +56,13 @@ linux> gcc -Og -o prog main.c sum.c
 
 Hình 7.2 tóm tắt hoạt động của driver khi chuyển chương trình ví dụ từ một ASCII source file thành một executable object file. (Nếu muốn tự xem các bước này, hãy chạy gcc với tùy chọn -v.) Trước tiên, driver chạy C preprocessor (cpp),[^1] chuyển C source file main.c thành một file trung gian ASCII main.i:
 
-![p0709_1](images/ch07_linking/p0709_1.png)
-
-**Hình 7.2 Static linking. Linker kết hợp các relocatable object file để tạo thành executable object file prog .**
-
 ```
 cpp [other arguments] main.c /tmp/main.i
 ```
+
+![p0709_1](images/ch07_linking/p0709_1.png)
+
+**Hình 7.2 Static linking. Linker kết hợp các relocatable object file để tạo thành executable object file prog .**
 
 Tiếp theo, driver chạy C compiler (cc1), chuyển main.i thành một file assembly-language ASCII main.s:
 
@@ -210,8 +210,7 @@ Sự phân biệt giữa COMMON và .bss khá tinh tế. Các phiên bản gcc h
 
 | COMMON | Global variable chưa khởi tạo |
 |---|---|
-| .bss | Static variable chưa khởi tạo và global variable hoặc static variable được |
-|  | khởi tạo bằng không |
+| .bss | Static variable chưa khởi tạo và global variable hoặc static variable được khởi tạo bằng không |
 
 Lý do của sự phân biệt có vẻ tùy ý này bắt nguồn từ cách linker thực hiện symbol resolution, mà chúng ta sẽ giải thích trong Mục 7.6.
 
@@ -226,7 +225,7 @@ Num:    Value          Size Type    Bind   Vis      Ndx Name
 
 Trong ví dụ này, chúng ta thấy một entry cho definition của global symbol main, một function 24-byte nằm tại offset (tức value) bằng không trong section .text. Tiếp theo là definition của global symbol array, một object 8-byte nằm tại offset bằng không trong section .data. Entry cuối cùng bắt nguồn từ reference tới external symbol sum. readelf nhận diện mỗi section bằng một index số nguyên. Ndx=1 biểu thị section .text, còn Ndx=3 biểu thị section .data.
 
-#### Bài tập thực hành 7.1 (lời giải trang 753)
+### Bài tập thực hành 7.1 (lời giải trang 753)
 
 Bài toán này liên quan đến các module m.o và swap.o trong Hình 7.5. Với mỗi symbol được định nghĩa hoặc tham chiếu trong swap.o, hãy cho biết nó có symbol table entry trong section .symtab của module swap.o hay không. Nếu có, hãy chỉ ra module định nghĩa symbol (swap.o hoặc m.o), loại symbol (local, global hoặc extern) và section (.text, .data, .bss hoặc COMMON) mà nó được gán vào trong module.
 
@@ -242,7 +241,7 @@ Bài toán này liên quan đến các module m.o và swap.o trong Hình 7.5. V�
 7       swap();                            7   {
 8       return 0;                          8       int temp;
 9   }                                      9
-                              code/link/m.c<sup>10</sup> bufp1 = &amp;buf[1];
+                              code/link/m.c10      bufp1 = &amp;buf[1];
                                            11      temp = *bufp0;
                                            12      *bufp0 = *bufp1;
                                            13      *bufp1 = temp;
@@ -419,18 +418,18 @@ Việc áp dụng quy tắc 2 và 3 có thể gây ra những bug run-time âm t
  8   int main()
  9   {
 10       f();
-11      printf("x = 0x%x y = 0x%x \n",
-12  x, y);
-13      return 0;
-14    }
+11       printf("x = 0x%x y = 0x%x \n",
+12              x, y);
+13       return 0;
+14   }
 
- 1    /* bar5.c */
- 2    double x;
-3
- 4    void f()
- 5    {
- 6      x = -0.0;
- 7    }
+ 1   /* bar5.c */
+ 2   double x;
+ 3
+ 4   void f()
+ 5   {
+ 6       x = -0.0;
+ 7   }
 ```
 
 Trên máy x86-64/Linux, double dài 8 byte và int dài 4 byte. Trên hệ thống của chúng ta, địa chỉ x là 0x601020 và địa chỉ y là 0x601024. Vì vậy, phép gán x = -0.0 tại dòng 6 của bar5.c sẽ ghi đè các vị trí bộ nhớ dành cho x và y (dòng 5 và 6 trong foo5.c) bằng biểu diễn double-precision floating-point của số không âm!
@@ -556,6 +555,16 @@ linux> ar rcs libvector.a addvec.o multvec.o
 ```
 linux> gcc -c main2.c
 linux> gcc -static -o prog2c main2.o ./libvector.a
+```
+
+hoặc tương đương,
+
+```
+linux> gcc -c main2.c
+linux> gcc -static -o prog2c main2.o -L. -lvector
+```
+
+```
                                                         code/link/main2.c
  1   #include <stdio.h>
  2   #include "vector.h"
@@ -578,13 +587,6 @@ linux> gcc -static -o prog2c main2.o ./libvector.a
 ![p0724_3](images/ch07_linking/p0724_3.png)
 
 **Hình 7.8 Linking với static library.**
-
-hoặc tương đương,
-
-```
-linux> gcc -c main2.c
-linux> gcc -static -o prog2c main2.o -L. -lvector
-```
 
 Hình 7.8 tóm tắt hoạt động của linker. Đối số -static cho compiler driver biết linker cần tạo một executable object file được link hoàn chỉnh, có thể được load vào bộ nhớ và chạy mà không cần linking thêm tại load time. Đối số -lvector là cách viết tắt của libvector.a, và đối số -L. yêu cầu linker tìm libvector.a trong thư mục hiện tại.
 
@@ -652,6 +654,8 @@ ELF định nghĩa 32 loại relocation khác nhau, nhiều loại khá khó hi�
 
 R_X86_64_PC32. Relocate một reference sử dụng địa chỉ PC-relative 32-bit. Nhớ lại từ Mục 3.6.3 rằng địa chỉ PC-relative là offset tính từ giá trị run-time hiện tại của program counter (PC). Khi CPU thực thi instruction sử dụng PC-relative addressing, nó tạo effective address (ví dụ, đích của call instruction) bằng cách cộng giá trị 32-bit được mã hóa trong instruction với giá trị run-time hiện tại của PC, luôn là địa chỉ instruction tiếp theo trong bộ nhớ.
 
+R_X86_64_32. Relocate một reference sử dụng địa chỉ tuyệt đối 32-bit. Với absolute addressing, CPU trực tiếp dùng giá trị 32-bit được mã hóa trong instruction làm effective address mà không sửa đổi thêm.
+
 ```
                                                      code/link/elfstructs.c
 1   typedef struct {
@@ -664,8 +668,6 @@ R_X86_64_PC32. Relocate một reference sử dụng địa chỉ PC-relative 32-
 ```
 
 **Hình 7.9 ELF relocation entry. Mỗi entry xác định một reference phải được relocate và chỉ định cách tính reference đã sửa đổi.**
-
-R_X86_64_32. Relocate một reference sử dụng địa chỉ tuyệt đối 32-bit. Với absolute addressing, CPU trực tiếp dùng giá trị 32-bit được mã hóa trong instruction làm effective address mà không sửa đổi thêm.
 
 Hai loại relocation này hỗ trợ small code model của x86-64, giả định tổng kích thước code và dữ liệu trong executable object file nhỏ hơn 2 GB và do đó có thể được truy cập tại run-time bằng địa chỉ PC-relative 32-bit. Small code model là mặc định của gcc. Chương trình lớn hơn 2 GB có thể được compile bằng flag -mcmodel=medium (medium code model) và -mcmodel=large (large code model), nhưng chúng ta sẽ không thảo luận các trường hợp đó.
 
@@ -871,9 +873,8 @@ Chúng ta đã thấy cách linker hợp nhất nhiều object file thành một
 
 **Hình 7.13 Một ELF executable object file điển hình.**
 
-code/link/prog-exe.d
-
 ```
+                                                                            code/link/prog-exe.d
     Read-only code segment
 1   LOAD off    0x0000000000000000 vaddr 0x0000000000400000 paddr 0x0000000000400000 align 2**21
 2        filesz 0x000000000000069c memsz 0x000000000000069c flags r-x
@@ -952,13 +953,13 @@ linux> gcc -shared -fpic -o libvector.so addvec.c multvec.c
 
 Flag -fpic yêu cầu compiler tạo position-independent code (sẽ nói thêm trong mục tiếp theo). Flag -shared yêu cầu linker tạo shared object file. Sau khi tạo thư viện, chúng ta link nó vào chương trình ví dụ trong Hình 7.7:
 
-![p0737_6](images/ch07_linking/p0737_6.png)
-
-**Hình 7.16 Dynamic linking với shared library.**
-
 ```
 linux> gcc -o prog2l main2.c ./libvector.so
 ```
+
+![p0737_6](images/ch07_linking/p0737_6.png)
+
+**Hình 7.16 Dynamic linking với shared library.**
 
 Lệnh này tạo executable object file prog2l ở dạng có thể được link với libvector.so tại run time. Ý tưởng cơ bản là thực hiện một phần linking theo cách static khi tạo executable file, rồi hoàn tất quá trình linking theo cách dynamic khi chương trình được load. Cần nhận ra rằng tại thời điểm này, không code section hay data section nào từ libvector.so thực sự được sao chép vào executable prog2l. Thay vào đó, linker sao chép một số thông tin relocation và symbol table để cho phép resolve reference tới code và dữ liệu trong libvector.so tại load time.
 
@@ -1028,6 +1029,9 @@ Hình 7.17 thể hiện cách sử dụng interface này để link động shar
 
 ```
 linux> gcc -rdynamic -o prog2r dll.c -ldl
+```
+
+```
                                                            code/link/dll.c
  1   #include <stdio.h>
  2   #include <stdlib.h>
@@ -1113,11 +1117,11 @@ Hình 7.19 thể hiện cách PLT và GOT phối hợp để resolve địa ch�
 
 Procedure linkage table (PLT). PLT là một array các code entry 16-byte. PLT[0] là entry đặc biệt nhảy vào dynamic linker. Mỗi hàm shared library được executable gọi có một PLT entry riêng. Mỗi entry này chịu trách nhiệm gọi một hàm cụ thể. PLT[1] (không được thể hiện ở đây) gọi hàm khởi động hệ thống (__libc_start_main), khởi tạo môi trường thực thi, gọi hàm main và xử lý giá trị trả về của nó. Các entry bắt đầu từ PLT[2] gọi những hàm do user code gọi. Trong ví dụ, PLT[2] gọi addvec và PLT[3] (không được thể hiện) gọi printf.
 
+Global offset table (GOT). Như đã thấy, GOT là một array các address entry 8-byte. Khi được sử dụng cùng PLT, GOT[0] và GOT[1] chứa thông tin mà dynamic linker sử dụng khi resolve địa chỉ hàm. GOT[2] là entry point của dynamic linker trong module ld-linux.so. Mỗi entry còn lại tương ứng với một hàm được gọi mà địa chỉ cần được resolve tại run time. Mỗi entry có PLT entry tương ứng. Ví dụ, GOT[4] và PLT[2] tương ứng với addvec. Ban đầu, mỗi GOT entry trỏ tới instruction thứ hai trong PLT entry tương ứng.
+
 ![p0743_8](images/ch07_linking/p0743_8.png)
 
 **Hình 7.19 Sử dụng PLT và GOT để gọi external function. Dynamic linker resolve địa chỉ addvec trong lần đầu hàm được gọi.**
-
-Global offset table (GOT). Như đã thấy, GOT là một array các address entry 8-byte. Khi được sử dụng cùng PLT, GOT[0] và GOT[1] chứa thông tin mà dynamic linker sử dụng khi resolve địa chỉ hàm. GOT[2] là entry point của dynamic linker trong module ld-linux.so. Mỗi entry còn lại tương ứng với một hàm được gọi mà địa chỉ cần được resolve tại run time. Mỗi entry có PLT entry tương ứng. Ví dụ, GOT[4] và PLT[2] tương ứng với addvec. Ban đầu, mỗi GOT entry trỏ tới instruction thứ hai trong PLT entry tương ứng.
 
 Hình 7.19(a) thể hiện cách GOT và PLT phối hợp để resolve theo cơ chế lazy địa chỉ run-time của hàm addvec trong lần đầu nó được gọi:
 
@@ -1327,6 +1331,9 @@ malloc(20) = 0x21bb090
 malloc(20) = 0x21bb0b0
 malloc(384) = 0x21bb0d0
  20:47:36 up 85 days,  6:04,  1 user,  load average: 0.10, 0.04, 0.05
+```
+
+```
                                                                code/link/interpose/mymalloc.c
  1   #ifdef RUNTIME
  2   #define _GNU_SOURCE
@@ -1523,10 +1530,9 @@ Khi chương trình này được compile và thực thi trên hệ thống Linu
 
 A. p.o → libx.a → p.o
 
-```
 B. p.o → libx.a → liby.a and liby.a → libx.a
+
 C. p.o → libx.a → liby.a → libz.a and liby.a → libx.a → libz.a
-```
 
 7.11 ◆◆ Program header trong Hình 7.14 cho biết data segment chiếm 0x230 byte trong bộ nhớ. Tuy nhiên, chỉ 0x228 byte đầu tiên trong số đó đến từ các section của executable file. Điều gì gây ra chênh lệch này?
 

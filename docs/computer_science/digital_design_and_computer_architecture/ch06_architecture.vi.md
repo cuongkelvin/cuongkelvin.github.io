@@ -25,7 +25,7 @@ Phần cứng máy tính chỉ hiểu 1 và 0, nên instruction được mã hó
 
 Instruction set của các architecture khác nhau giống các phương ngữ khác nhau hơn là các ngôn ngữ khác nhau. Hầu hết architecture đều định nghĩa instruction cơ bản—như cộng, trừ và branch—hoạt động trên bộ nhớ hoặc register. Khi đã học một instruction set, việc hiểu những instruction set khác khá đơn giản.
 
-Computer architecture không xác định cách hiện thực phần cứng bên dưới. Thường có nhiều cách hiện thực phần cứng khác nhau cho cùng một architecture. Ví dụ, Intel và Advanced Micro Devices (AMD) đều bán nhiều microprocessor thuộc cùng x86 architecture. Tất cả microprocessor này có thể chạy cùng chương trình, nhưng dùng phần cứng bên dưới khác nhau. Vì vậy, chúng có các trade-offs về hiệu năng, giá và điện năng. Một số microprocessor được tối ưu cho server high-performance, trong khi số khác được tối ưu cho thời lượng pin dài trong thiết bị hoặc laptop. Cách bố trí cụ thể register, bộ nhớ, arithmetic/logical unit (ALU) và các building block khác để tạo thành microprocessor gọi là microarchitecture và là chủ đề của Chương 7.
+Computer architecture không xác định cách triển khai phần cứng bên dưới. Thường có nhiều cách triển khai phần cứng khác nhau cho cùng một architecture. Ví dụ, Intel và Advanced Micro Devices (AMD) đều bán nhiều microprocessor thuộc cùng x86 architecture. Tất cả microprocessor này có thể chạy cùng chương trình, nhưng dùng phần cứng bên dưới khác nhau. Vì vậy, chúng có các trade-offs về hiệu năng, giá và điện năng. Một số microprocessor được tối ưu cho server high-performance, trong khi số khác được tối ưu cho thời lượng pin dài trong thiết bị hoặc laptop. Cách bố trí cụ thể register, bộ nhớ, arithmetic/logical unit (ALU) và các building block khác để tạo thành microprocessor gọi là microarchitecture và là chủ đề của Chương 7.
 
 > ![note_p323](images/ch06/note_p323.png)
 >
@@ -105,7 +105,7 @@ Trong các ví dụ high-level language, comment single-line bắt đầu bằng
 
 Nguyên tắc thiết kế 2: Làm cho trường hợp thường gặp diễn ra nhanh.
 
-RISC-V instruction set làm cho trường hợp thường gặp diễn ra nhanh bằng cách chỉ bao gồm instruction đơn giản, thường dùng. Số instruction được giữ nhỏ để phần cứng cần giải mã instruction và operand có thể đơn giản, nhỏ và nhanh. Những operation phức tạp hơn, ít phổ biến hơn được thực hiện bằng chuỗi nhiều instruction đơn giản. Vì vậy, RISC-V là reduced instruction set computer (RISC) architecture. Architecture có nhiều instruction phức tạp, như x86 architecture của Intel, là complex instruction set computer (CISC). Ví dụ, x86 định nghĩa instruction “string move” sao chép một string (chuỗi ký tự) từ phần này của bộ nhớ sang phần khác. Operation như vậy cần nhiều, thậm chí hàng trăm instruction đơn giản trên RISC machine. Tuy nhiên, cái giá của việc hiện thực instruction phức tạp trong CISC architecture là phần cứng và overhead bổ sung khiến instruction đơn giản chậm lại.
+RISC-V instruction set làm cho trường hợp thường gặp diễn ra nhanh bằng cách chỉ bao gồm instruction đơn giản, thường dùng. Số instruction được giữ nhỏ để phần cứng cần giải mã instruction và operand có thể đơn giản, nhỏ và nhanh. Những operation phức tạp hơn, ít phổ biến hơn được thực hiện bằng chuỗi nhiều instruction đơn giản. Vì vậy, RISC-V là reduced instruction set computer (RISC) architecture. Architecture có nhiều instruction phức tạp, như x86 architecture của Intel, là complex instruction set computer (CISC). Ví dụ, x86 định nghĩa instruction “string move” sao chép một string (chuỗi ký tự) từ phần này của bộ nhớ sang phần khác. Operation như vậy cần nhiều, thậm chí hàng trăm instruction đơn giản trên RISC machine. Tuy nhiên, cái giá của việc triển khai instruction phức tạp trong CISC architecture là phần cứng và overhead bổ sung khiến instruction đơn giản chậm lại.
 
 RISC architecture, như RISC-V, giảm thiểu độ phức tạp phần cứng và phần mã hóa instruction cần thiết bằng cách giữ tập instruction phân biệt nhỏ. Ví dụ, instruction set có 64 instruction đơn giản sẽ cần log<sub>2</sub>64 = 6 bit mã hóa operation, trong khi instruction set có 256 instruction cần log<sub>2</sub>256 = 8 bit mã hóa mỗi instruction. Trong CISC machine, dù instruction phức tạp có thể ít khi được dùng, chúng vẫn thêm overhead cho mọi instruction, kể cả instruction đơn giản.
 
@@ -181,9 +181,7 @@ Assembly Code RISC-V
 >
 > Nhà toán học và khoa học máy tính người Anh, được coi là người sáng lập khoa học máy tính lý thuyết và trí tuệ nhân tạo. Ông phát minh Turing machine, mô hình toán học về tính toán biểu diễn một processor trừu tượng. Ông cũng phát triển một máy điện cơ để giải mã thông điệp được mã hóa trong Thế chiến II, giúp rút ngắn chiến tranh và cứu hàng triệu sinh mạng. Năm 1952, Turing bị truy tố vì hành vi đồng tính và bị buộc điều trị triệt sản hóa học thay cho án tù. Hai năm sau, ông chết do ngộ độc cyanide. Turing Award, vinh dự cao nhất trong lĩnh vực máy tính, được đặt tên để tôn vinh ông và trao hằng năm từ năm 1966. Hiện giải đi kèm khoản tiền thưởng \$1 triệu.
 
-#### Ví dụ 6.1 DỊCH CODE HIGH-LEVEL SANG ASSEMBLY
-
-LANGUAGE
+#### Ví dụ 6.1 DỊCH CODE HIGH-LEVEL SANG ASSEMBLY LANGUAGE
 
 Dịch code high-level sau sang RISC-V assembly language. Giả sử biến `a−c` được giữ trong register `s0−s2`, còn `f−j` trong `s3−s7`.
 
@@ -275,7 +273,7 @@ Assembly Code RISC-V
   addi s6, zero, −78  # y = −78
 ```
 
-> Data type `int` trong C biểu diễn một số signed, tức số nguyên two’s complement. Đặc tả C yêu cầu `int` rộng ít nhất 16 bit nhưng không yêu cầu kích thước cụ thể. Phần lớn compiler hiện đại (gồm compiler cho RV32I) dùng 32 bit, nên `int` biểu diễn số trong khoảng \[−2<sup>31</sup>, 2<sup>31</sup>− 1\]. C cũng định nghĩa `int32_t` là số nguyên two’s complement 32-bit, nhưng tên này gõ bất tiện hơn.
+> Data type `int` trong C biểu diễn một số signed, tức số nguyên two’s complement. Đặc tả C yêu cầu `int` rộng ít nhất 16 bit nhưng không yêu cầu kích thước cụ thể. Phần lớn compiler hiện đại (gồm compiler cho RV32I) dùng 32 bit, nên `int` biểu diễn số trong khoảng [−2<sup>31</sup>, 2<sup>31</sup>− 1]. C cũng định nghĩa `int32_t` là số nguyên two’s complement 32-bit, nhưng tên này gõ bất tiện hơn.
 
 Khi tạo immediate lớn, nếu immediate 12-bit trong `addi` âm (tức bit 11 bằng 1), upper immediate trong `lui` phải tăng thêm một. Hãy nhớ `addi` sign-extends immediate 12-bit, nên immediate âm sẽ có toàn 1 ở 20 bit phía trên. Vì toàn 1 là −1 trong two’s complement, cộng toàn 1 vào upper immediate dẫn đến trừ 1 khỏi upper immediate. Ví dụ code 6.9 cho thấy trường hợp như vậy, với immediate mong muốn là 0xFEEDA987. `lui s2, 0xFEEDB` đặt 0xFEEDB000 vào `s2`. Upper immediate 20-bit mong muốn, 0xFEEDA, được tăng thêm 1. 0x987 là biểu diễn 12-bit của −1657, nên `addi s2, s2, −1657` cộng `s2` với immediate 12-bit đã sign- extended (0xFEEDB000 + 0xFFFFF987 = 0xFEEDA987), rồi đặt kết quả vào `s2`, đúng như mong muốn.
 
@@ -321,7 +319,7 @@ Hình 6.1 Bộ nhớ byte-addressable RISC-V hiển thị: (a) byte address và 
 
 Load word instruction, `lw`, đọc một data word từ bộ nhớ vào register. Ví dụ code 6.10 load memory word 2, nằm tại địa chỉ 8, vào `a` (`s7`). Trong C, số trong ngoặc vuông là index hay word number, được thảo luận thêm ở Mục 6.3.6. Instruction `lw` chỉ memory address bằng một offset cộng với base register. Hãy nhớ mỗi data word dài 4 byte, nên word address bằng bốn lần word number. Word số 0 ở địa chỉ 0, word 1 ở địa chỉ 4, word 2 ở địa chỉ 8, v.v. Trong ví dụ này, base register zero được cộng với offset 8 để có địa chỉ 8, hay word 2. Sau khi load word instruction (`lw`) được thực thi ở Ví dụ code 6.10, `s7` giữ giá trị 0x01EE2842, tức giá trị dữ liệu được lưu tại memory address 8 trong Hình 6.1.
 
-> Nhiều cách hiện thực RISC-V yêu cầu địa chỉ word-aligned—tức word address chia hết cho bốn—cho `lw` và `sw`. Một số architecture, như x86, cho phép đọc và ghi dữ liệu non-word-aligned, nhưng số khác yêu cầu alignment nghiêm ngặt để đơn giản. Trong sách này, chúng ta giả định alignment nghiêm ngặt. Dĩ nhiên, byte address cho load byte và store byte, `lb` và `sb` (thảo luận ở Mục 6.3.6), không cần word aligned.
+> Nhiều cách triển khai RISC-V yêu cầu địa chỉ word-aligned—tức word address chia hết cho bốn—cho `lw` và `sw`. Một số architecture, như x86, cho phép đọc và ghi dữ liệu non-word-aligned, nhưng số khác yêu cầu alignment nghiêm ngặt để đơn giản. Trong sách này, chúng ta giả định alignment nghiêm ngặt. Dĩ nhiên, byte address cho load byte và store byte, `lb` và `sb` (thảo luận ở Mục 6.3.6), không cần word aligned.
 
 Store word instruction, `sw`, ghi một data word từ register vào bộ nhớ. Ví dụ code 6.11 ghi giá trị 42 từ register `t3` vào memory word 5, nằm tại địa chỉ 20.
 
@@ -366,7 +364,7 @@ Program counter—còn gọi là PC—theo dõi instruction hiện tại. PC gi�
 
 ### 6.3.2 Logical Instruction, Shift Instruction và Multiply Instruction
 
-RISC-V architecture định nghĩa nhiều logical instruction và arithmetic instruction. Chúng ta giới thiệu ngắn gọn các instruction này ở đây vì chúng cần thiết để hiện thực cấu trúc higher-level.
+RISC-V architecture định nghĩa nhiều logical instruction và arithmetic instruction. Chúng ta giới thiệu ngắn gọn các instruction này ở đây vì chúng cần thiết để triển khai cấu trúc higher-level.
 
 #### Ví dụ code 6.11 GHI BỘ NHỚ
 
@@ -532,7 +530,7 @@ L1: sub s0, s1, s4 # apples = oranges − h
 
 Switch/case Statement\*
 
-Switch/case statement, còn gọi đơn giản là case statement, thực thi một trong vài block code tùy điều kiện. Nếu không điều kiện nào được thỏa mãn, default block được thực thi. Case statement tương đương chuỗi if/else statement lồng nhau. Ví dụ code 6.17 cho thấy hai đoạn code high-level có cùng chức năng: chúng tính xem cần nhả \$20, \$50 hay \$100 từ ATM (máy rút tiền tự động) tùy nút được nhấn. Cách hiện thực RISC-V assembly giống nhau cho cả hai đoạn code high-level.
+Switch/case statement, còn gọi đơn giản là case statement, thực thi một trong vài block code tùy điều kiện. Nếu không điều kiện nào được thỏa mãn, default block được thực thi. Case statement tương đương chuỗi if/else statement lồng nhau. Ví dụ code 6.17 cho thấy hai đoạn code high-level có cùng chức năng: chúng tính xem cần nhả \$20, \$50 hay \$100 từ ATM (máy rút tiền tự động) tùy nút được nhấn. Cách triển khai RISC-V assembly giống nhau cho cả hai đoạn code high-level.
 
 #### Ví dụ code 6.16 IF/ELSE STATEMENT
 
@@ -668,7 +666,7 @@ for (initialization; condition; loop operation)
 
 Code khởi tạo thực thi trước khi for loop bắt đầu. Điều kiện được kiểm tra ở đầu mỗi lần lặp. Nếu điều kiện không được thỏa mãn, loop thoát. Nếu điều kiện được thỏa mãn, statement (hoặc các statement) trong loop body được thực thi. Loop operation thực thi vào cuối mỗi lần lặp.
 
-Ví dụ code 6.20 cộng các số từ 0 đến 9. Loop variable, ở đây là `i`, được khởi tạo thành 0 và tăng vào cuối mỗi lần lặp. For loop thực thi chừng nào `i` còn nhỏ hơn 10. Lưu ý ví dụ này cũng minh họa so sánh tương đối. Loop kiểm tra điều kiện \< để tiếp tục, nên assembly code kiểm tra điều kiện ngược, \>=, để thoát loop.
+Ví dụ code 6.20 cộng các số từ 0 đến 9. Loop variable, ở đây là `i`, được khởi tạo thành 0 và tăng vào cuối mỗi lần lặp. For loop thực thi chừng nào `i` còn nhỏ hơn 10. Lưu ý ví dụ này cũng minh họa so sánh tương đối. Loop kiểm tra điều kiện < để tiếp tục, nên assembly code kiểm tra điều kiện ngược, >=, để thoát loop.
 
 For loop đặc biệt hữu ích để truy cập lượng lớn dữ liệu tương tự được lưu trong memory array, sẽ thảo luận tiếp theo.
 
@@ -742,7 +740,7 @@ Ví dụ code 6.21 là thuật toán nâng điểm, cộng 10 điểm vào mỗi
 
 Byte và ký tự
 
-Số trong khoảng \[−128, 127\] có thể lưu trong một byte thay vì cả word. Vì bàn phím tiếng Anh có ít hơn 256 ký tự, ký tự tiếng Anh thường được biểu diễn bằng byte. Ngôn ngữ C dùng type `char` để biểu diễn byte hoặc ký tự.
+Số trong khoảng [−128, 127] có thể lưu trong một byte thay vì cả word. Vì bàn phím tiếng Anh có ít hơn 256 ký tự, ký tự tiếng Anh thường được biểu diễn bằng byte. Ngôn ngữ C dùng type `char` để biểu diễn byte hoặc ký tự.
 
 > Ngôn ngữ lập trình khác, như Java, dùng character encoding khác, nổi bật nhất là Unicode. Unicode dùng 16 bit biểu diễn mỗi ký tự nên hỗ trợ dấu, umlaut và các ngôn ngữ châu Á. Xem thêm thông tin tại www.unicode.org.
 
@@ -915,9 +913,7 @@ Function `simple` ở Ví dụ code 6.22 không hữu ích lắm vì không nh�
 
 Theo quy ước RISC-V, calling function `main` đặt function argument từ trái sang phải vào input register `a0` đến `a7` trước khi gọi function. Called function `diffofsums` lưu return value trong return register `a0`. Khi function có hơn tám argument được gọi, input argument bổ sung được đặt trên stack, sẽ được thảo luận tiếp theo.
 
-#### Ví dụ code 6.23 FUNCTION CALL VỚI ARGUMENT VÀ
-
-RETURN VALUE
+#### Ví dụ code 6.23 FUNCTION CALL VỚI ARGUMENT VÀ RETURN VALUE
 
 Code High-Level
 
@@ -1056,9 +1052,7 @@ Preserved register gồm `s0` đến `s11` (vì thế có tên saved), `sp` và 
 
 Ví dụ code 6.25 cho thấy phiên bản `diffofsums` cải tiến hơn, chỉ lưu `s3` trên stack. `t0` và `t1` là nonpreserved register nên không cần lưu.
 
-#### Ví dụ code 6.25 FUNCTION LƯU PRESERVED REGISTER
-
-TRÊN STACK
+#### Ví dụ code 6.25 FUNCTION LƯU PRESERVED REGISTER TRÊN STACK
 
 Assembly Code RISC-V
 
@@ -1124,7 +1118,7 @@ diffofsums:
 
 Recursive Function Call
 
-Recursive function là nonleaf function tự gọi chính nó. Recursive function đóng vai trò cả caller lẫn callee, phải lưu cả preserved register lẫn nonpreserved register. Ví dụ, function giai thừa có thể viết thành recursive function. Hãy nhớ factorial(n) = n × (n – 1) × (n – 2) × ⋯ × 2 × 1. Có thể viết đệ quy factorial(n) = n × factorial(n – 1), như Ví dụ code 6.28. Giai thừa của 1 đơn giản là 1. Để tiện tham chiếu program address, chúng ta cho chương trình bắt đầu tại địa chỉ 0x8500. Theo quy tắc callee save, `factorial` là nonleaf function nên phải lưu `ra`. Theo quy tắc caller save, `factorial` sẽ cần `n` sau khi tự gọi, nên phải lưu `a0`. Vì vậy, nó push cả hai register lên stack ngay từ đầu. Sau đó nó kiểm tra `n` ≤ 1 hay không. Nếu đúng, nó đặt return value 1 vào `a0`, khôi phục stack pointer rồi return về caller. Nó không phải khôi phục `ra` trong trường hợp này vì register chưa bị thay đổi. Nếu `n` \> 1, function gọi đệ quy `factorial(n−1)`. Sau đó nó khôi phục giá trị `n` và return address register (`ra`) từ stack, thực hiện phép nhân và return kết quả. Lưu ý function khéo léo khôi phục `n` vào `t1` để không ghi đè giá trị vừa được return. Multiply instruction (`mul a0, t1, a0`) nhân `n` (`t1`) với giá trị được return (`a0`), đặt kết quả vào `a0`, return register.
+Recursive function là nonleaf function tự gọi chính nó. Recursive function đóng vai trò cả caller lẫn callee, phải lưu cả preserved register lẫn nonpreserved register. Ví dụ, function giai thừa có thể viết thành recursive function. Hãy nhớ factorial(n) = n × (n – 1) × (n – 2) × ⋯ × 2 × 1. Có thể viết đệ quy factorial(n) = n × factorial(n – 1), như Ví dụ code 6.28. Giai thừa của 1 đơn giản là 1. Để tiện tham chiếu program address, chúng ta cho chương trình bắt đầu tại địa chỉ 0x8500. Theo quy tắc callee save, `factorial` là nonleaf function nên phải lưu `ra`. Theo quy tắc caller save, `factorial` sẽ cần `n` sau khi tự gọi, nên phải lưu `a0`. Vì vậy, nó push cả hai register lên stack ngay từ đầu. Sau đó nó kiểm tra `n` ≤ 1 hay không. Nếu đúng, nó đặt return value 1 vào `a0`, khôi phục stack pointer rồi return về caller. Nó không phải khôi phục `ra` trong trường hợp này vì register chưa bị thay đổi. Nếu `n` > 1, function gọi đệ quy `factorial(n−1)`. Sau đó nó khôi phục giá trị `n` và return address register (`ra`) từ stack, thực hiện phép nhân và return kết quả. Lưu ý function khéo léo khôi phục `n` vào `t1` để không ghi đè giá trị vừa được return. Multiply instruction (`mul a0, t1, a0`) nhân `n` (`t1`) với giá trị được return (`a0`), đặt kết quả vào `a0`, return register.
 
 #### Ví dụ code 6.27 NONLEAF FUNCTION CALL
 
@@ -1294,13 +1288,13 @@ Bảng 6.4 Pseudoinstruction
 | `nop` | `addi zero, zero, 0` | không thực hiện operation |  |
 | `li s8, 0x7EF` | `addi s8, zero, 0x7EF` | load immediate 12-bit | `s8 = 0x7EF` |
 | `li s8, 0x56789DEF` | `lui s8, 0x5678A` `addi s8, s8, 0xDEF` | load immediate 32-bit | `s8 = 0x56789DEF` |
-| `bgt s1, t3, L3` | `blt t3, s1, L3` | branch nếu \> | `if (s1 > t3), PC = L3` |
+| `bgt s1, t3, L3` | `blt t3, s1, L3` | branch nếu > | `if (s1 > t3), PC = L3` |
 | `bgez t2, L7` | `bge t2, zero, L7` | branch nếu ≥ 0 | `if (t2 ≥ 0), PC = L7` |
 | `call L1` | `jal L1` | gọi function ở gần | `PC = L1, ra = PC + 4` |
 | `call L5` | `auipc ra, imm`<sub>`31:12`</sub> `jalr ra, ra, imm`<sub>`11:0`</sub> | gọi function ở xa | `PC = L5, ra = PC + 4` |
 | `ret` | `jalr zero, ra, 0` | return từ function | `PC = ra` |
 
-Bảng 6.4 cho ví dụ pseudoinstruction và RISC-V instruction dùng để hiện thực chúng. Ví dụ, move instruction (`mv`) sao chép nội dung register sang register khác. Load immediate pseudoinstruction (`li`) load hằng số 32-bit bằng cách kết hợp instruction `lui` và `addi`. Nếu hằng số biểu diễn được trong 12 bit, `li` được dịch thành instruction `addi`. No operation pseudoinstruction (`nop`, đọc “no op”) không thực hiện operation. PC tăng thêm 4 khi nó thực thi, nhưng không register hay giá trị bộ nhớ khác nào thay đổi. Pseudoinstruction `call` thực hiện procedure call. Nếu call đến function ở gần, `call` được dịch thành instruction `jalr`. Tuy nhiên, nếu function ở xa, `call` được dịch thành hai RISC-V instruction: `auipc` và `jalr`. Ví dụ, `auipc s1, 0xABCDE` cộng 0xABCDE000 với PC, đặt kết quả vào `s1`. Vì vậy, nếu PC là 0x02000000 thì `s1` giờ giữ 0xADCDE000. Sau đó `jalr ra, s1, 0x730` nhảy đến địa chỉ `s1` + 0x730 (0xADCDE730) và đặt PC+4 vào `ra`. Pseudoinstruction `ret` return từ function. Nó được dịch thành `jalr x0, ra, 0`. Bảng B.7 trong Phụ lục B liệt kê RV32I pseudoinstruction phổ biến nhất. Phụ lục B được in ở mặt trong bìa sách.
+Bảng 6.4 cho ví dụ pseudoinstruction và RISC-V instruction dùng để triển khai chúng. Ví dụ, move instruction (`mv`) sao chép nội dung register sang register khác. Load immediate pseudoinstruction (`li`) load hằng số 32-bit bằng cách kết hợp instruction `lui` và `addi`. Nếu hằng số biểu diễn được trong 12 bit, `li` được dịch thành instruction `addi`. No operation pseudoinstruction (`nop`, đọc “no op”) không thực hiện operation. PC tăng thêm 4 khi nó thực thi, nhưng không register hay giá trị bộ nhớ khác nào thay đổi. Pseudoinstruction `call` thực hiện procedure call. Nếu call đến function ở gần, `call` được dịch thành instruction `jalr`. Tuy nhiên, nếu function ở xa, `call` được dịch thành hai RISC-V instruction: `auipc` và `jalr`. Ví dụ, `auipc s1, 0xABCDE` cộng 0xABCDE000 với PC, đặt kết quả vào `s1`. Vì vậy, nếu PC là 0x02000000 thì `s1` giờ giữ 0xADCDE000. Sau đó `jalr ra, s1, 0x730` nhảy đến địa chỉ `s1` + 0x730 (0xADCDE730) và đặt PC+4 vào `ra`. Pseudoinstruction `ret` return từ function. Nó được dịch thành `jalr x0, ra, 0`. Bảng B.7 trong Phụ lục B liệt kê RV32I pseudoinstruction phổ biến nhất. Phụ lục B được in ở mặt trong bìa sách.
 
 > Nop thường được dùng tạo độ trễ chính xác trong chương trình.
 
@@ -1344,9 +1338,7 @@ Hình 6.14 Thêm machine code cho instruction R-type
 
 > Instruction R-type có 17 bit op code và funct code, đủ biểu diễn 2<sup>17</sup> = 131,072 instruction khác nhau. Điều này có vẻ quá dư thừa khi đến nay chúng ta định nghĩa chưa đến một chục instruction R-type. Tuy nhiên, chỉ cần 15 bit khác để mã hóa source register và destination register. Không gian instruction set lớn này khiến RISC-V có khả năng mở rộng cao. Ví dụ, RISC-V F Extension thêm floating-point instruction, được mô tả thêm ở Mục 6.6.4 và Phụ lục B.
 
-#### Ví dụ 6.3 DỊCH ASSEMBLY INSTRUCTION R-TYPE THÀNH
-
-MACHINE CODE
+#### Ví dụ 6.3 DỊCH ASSEMBLY INSTRUCTION R-TYPE THÀNH MACHINE CODE
 
 Dịch RISC-V assembly instruction sau sang machine language:
 
@@ -1374,9 +1366,7 @@ Hình 6.16 Instruction format I-type
 
 Hình 6.17 Machine code cho instruction I-type
 
-#### Ví dụ 6.4 DỊCH ASSEMBLY INSTRUCTION I-TYPE THÀNH
-
-MACHINE CODE
+#### Ví dụ 6.4 DỊCH ASSEMBLY INSTRUCTION I-TYPE THÀNH MACHINE CODE
 
 Dịch assembly instruction sau sang machine language.
 
@@ -1392,7 +1382,7 @@ Instruction I-type có immediate field 12-bit nhưng immediate được dùng tr
 
 Hình 6.18 Machine code của instruction I-type ở Ví dụ 6.4
 
-> Hãy nhớ số two’s complement M-bit được sign-extended thành số N-bit (N\>M) bằng cách sao chép sign bit (bit quan trọng nhất) của số M-bit vào mọi bit trên của số N-bit. Sign-extending một số two’s complement không làm đổi giá trị. Ví dụ, 1101<sub>2</sub> là số two’s complement 4-bit
+> Hãy nhớ số two’s complement M-bit được sign-extended thành số N-bit (N>M) bằng cách sao chép sign bit (bit quan trọng nhất) của số M-bit vào mọi bit trên của số N-bit. Sign-extending một số two’s complement không làm đổi giá trị. Ví dụ, 1101<sub>2</sub> là số two’s complement 4-bit
 >
 > biểu diễn −3<sub>10</sub>. Khi được sign-extended thành 8 bit, nó trở thành 11111101<sub>2</sub> và vẫn
 >
@@ -1428,9 +1418,7 @@ Branch (`beq`, `bne`, `blt`, `bge`, `bltu` và `bgeu`) dùng instruction format 
 
 Với instruction B-type, rs1 và rs2 là hai source register, còn immediate branch offset 13-bit, imm<sub>12:0</sub> , cho số byte giữa branch instruction và BTA. Ở đây, BTA nằm bốn instruction sau instruction `beq`, tức 4 × 4 = 16 byte sau `beq`. Vì vậy, branch offset là 16. Chỉ bit 12:1 được mã hóa trong instruction vì bit 0 của branch offset luôn bằng 0.
 
-#### Ví dụ 6.5 MÃ HÓA ASSEMBLY INSTRUCTION B-TYPE THÀNH
-
-MACHINE CODE
+#### Ví dụ 6.5 MÃ HÓA ASSEMBLY INSTRUCTION B-TYPE THÀNH MACHINE CODE
 
 Xét đoạn RISC-V assembly code sau. Instruction address được viết bên trái mỗi instruction. Dịch branch if not equal instruction (`bne`) thành machine code.
 
@@ -1526,9 +1514,7 @@ Branch instruction và jump and link instruction (`jal`) dùng PC-relative addre
 
 Để diễn giải machine language, phải giải mã các trường của mỗi instruction word 32-bit. Instruction khác nhau dùng format khác nhau nhưng mọi format cùng có opcode field 7-bit. Vì vậy, nơi bắt đầu tốt nhất là xem opcode để xác định instruction R-, I-, S/B- hay U/J-type.
 
-#### Ví dụ 6.6 DỊCH MACHINE LANGUAGE SANG ASSEMBLY
-
-LANGUAGE
+#### Ví dụ 6.6 DỊCH MACHINE LANGUAGE SANG ASSEMBLY LANGUAGE
 
 Dịch machine language code sau sang assembly language.
 
@@ -1560,7 +1546,7 @@ Chương trình viết bằng machine language là chuỗi số 32-bit biểu di
 >
 > Nhà toán học người Anh viết chương trình máy tính đầu tiên, tính các số Bernoulli bằng Analytical Engine của Charles Babbage. Bà là con gái nhà thơ Lord Byron.
 
-Instruction trong stored program được lấy, hay fetch, từ bộ nhớ và thực thi bởi processor. Ngay cả chương trình lớn, phức tạp cũng chỉ là chuỗi truy cập bộ nhớ và thực thi instruction. Hình 6.29 cho thấy machine instruction được lưu trong bộ nhớ thế nào. Trong chương trình RISC-V, instruction thường được lưu bắt đầu từ địa chỉ thấp, nhưng điều này có thể khác tùy cách hiện thực. Hình 6.29 cho thấy code lưu giữa địa chỉ 0x00000830 và 0x0000083C. Hãy nhớ bộ nhớ RISC-V là byte-addressable, nên instruction address tăng 4, không phải 1.
+Instruction trong stored program được lấy, hay fetch, từ bộ nhớ và thực thi bởi processor. Ngay cả chương trình lớn, phức tạp cũng chỉ là chuỗi truy cập bộ nhớ và thực thi instruction. Hình 6.29 cho thấy machine instruction được lưu trong bộ nhớ thế nào. Trong chương trình RISC-V, instruction thường được lưu bắt đầu từ địa chỉ thấp, nhưng điều này có thể khác tùy cách triển khai. Hình 6.29 cho thấy code lưu giữa địa chỉ 0x00000830 và 0x0000083C. Hãy nhớ bộ nhớ RISC-V là byte-addressable, nên instruction address tăng 4, không phải 1.
 
 Để chạy hay thực thi stored program, processor fetch instruction tuần tự từ bộ nhớ. Instruction vừa fetch sau đó được digital hardware giải mã và thực thi. Địa chỉ instruction hiện tại được giữ trong program counter (PC) register 32-bit. Để thực thi code trong Hình 6.29, PC được khởi tạo thành địa chỉ 0x00000830. Processor fetch instruction tại memory address đó rồi thực thi instruction 0x01498933 (`add s2, s3, s4`). Sau đó processor tăng PC thêm 4 thành 0x00000834, fetch và thực thi instruction đó, rồi lặp lại.
 
@@ -1600,7 +1586,7 @@ Dynamic Data Segment
 
 > RISC-V yêu cầu `sp` duy trì alignment 16-byte để tương thích với quad-precision RISC-V base instruction set, RV128I, hoạt động trên dữ liệu 128-bit (tức 16-byte). Vì vậy, `sp` giảm theo bội số 16 để tạo chỗ trên stack, ngay cả khi cần ít stack space hơn. Chúng ta lướt qua yêu cầu này ở Mục 6.3.7 để nhấn mạnh chức năng thay vì quy ước.
 
-Dynamic data segment chứa stack và heap. Dữ liệu trong segment này chưa được biết lúc start-up mà được cấp phát và deal-located động trong suốt quá trình thực thi chương trình.
+Dynamic data segment chứa stack và heap. Dữ liệu trong segment này chưa được biết lúc start-up mà được cấp phát và deallocated động trong suốt quá trình thực thi chương trình.
 
 Khi start-up, operating system thiết lập stack pointer (`sp`, register `x2`) trỏ đến đỉnh stack, ở đây là 0xBFFFFFF0. Stack thường phát triển xuống dưới như minh họa. Stack gồm vùng lưu trữ tạm và local variable, như array, không vừa register. Như thảo luận ở Mục 6.3.7, function cũng dùng stack để lưu và khôi phục register. Mỗi stack frame được truy cập theo thứ tự last-in-first-out.
 
@@ -1801,7 +1787,7 @@ Chương trình sau đó đặt `f` và `g` (tức 2 và 3) vào argument regist
 gcc –O1 –g prog.c –o prog
 ```
 
-Lệnh này tạo executable output file tên `prog`. Flag `–O1` yêu cầu compiler thực hiện tối ưu cơ bản thay vì tạo code cực kỳ kém hiệu quả. Flag `–g` bảo compiler đưa thông tin debug vào file.
+Lệnh này tạo ra một executable output file có tên `prog`. Flag `–O1` yêu cầu compiler thực hiện các tối ưu hóa cơ bản thay vì tạo code cực kỳ kém hiệu quả. Flag `–g` yêu cầu compiler đưa thông tin phục vụ debug vào file.
 
 Để xem các bước trung gian, ta có thể dùng flag `–S` của GCC để compile mà không assemble hoặc link.
 
@@ -1825,7 +1811,7 @@ hoặc
 gcc –O1 –g –c prog.c –o prog.o
 ```
 
-Assembler duyệt assembly code hai lượt. Lượt đầu, assembler gán instruction address và tìm mọi symbol, như label và tên global variable. Tên và địa chỉ symbol được giữ trong symbol table. Lượt thứ hai qua code, assembler tạo machine language code. Địa chỉ label lấy từ symbol table. Machine language code và symbol table được lưu trong object file.
+Assembler duyệt assembly code hai lượt. Trong lượt đầu, assembler gán các instruction address và tìm tất cả các symbol, chẳng hạn label và tên global variable. Tên và địa chỉ của các symbol được lưu trong một symbol table. Trong lượt duyệt code thứ hai, assembler tạo machine language code. Địa chỉ của các label được lấy từ symbol table. Machine language code và symbol table được lưu trong object file.
 
 Ta có thể disassemble object file bằng lệnh `objdump` để xem assembly language code bên cạnh machine language code.
 
@@ -2039,7 +2025,7 @@ Exception handler dùng bốn register special-purpose, gọi là control and st
 
 > RISC-V định nghĩa rất nhiều CSR, tất cả phải được khởi tạo lúc start-up.
 
-> Giá trị `mcause` có thể được phân loại thành interrupt hoặc exception, như cột left-most trong Bảng 6.6, tức bit 31 của `mcause`. Bit \[30:0\] của `mcause` giữ exception code, chỉ nguyên nhân interrupt hoặc exception.
+> Giá trị `mcause` có thể được phân loại thành interrupt hoặc exception, như cột left-most trong Bảng 6.6, tức bit 31 của `mcause`. Bit [30:0] của `mcause` giữ exception code, chỉ nguyên nhân interrupt hoặc exception.
 
 Sau khi nhảy đến địa chỉ trong `mtvec`, exception handler đọc register `mcause` để xem nguyên nhân exception và phản ứng thích hợp (ví dụ đọc bàn phím khi hardware interrupt). Sau đó nó hủy chương trình hoặc return về chương trình bằng instruction `mret`, machine exception return, nhảy đến địa chỉ trong `mepc`. Giữ PC của instruction gây exception trong `mepc` tương tự dùng `ra` lưu return address trong instruction `jal`. Exception handler phải dùng program register (`x1−x31`) để xử lý exception, nên dùng bộ nhớ do `mscratch` trỏ đến để lưu và khôi phục các register này.
 
@@ -2069,7 +2055,7 @@ Instruction Exception-Related
 
 Exception handler dùng instruction đặc biệt để xử lý exception. Những instruction này gọi là privileged instruction vì truy cập CSR. Chúng thuộc base RV32I instruction set (xem Phụ lục B, Bảng B.8). Register `mepc` và `mcause` không thuộc RISC-V program register (`x1−x31`), nên exception handler phải chuyển các register special-purpose (CSR) này vào program register để đọc và thao tác. RISC-V dùng ba instruction để đọc, ghi hoặc vừa đọc vừa ghi CSR: `csrr` (read CSR), `csrw` (write CSR) và `csrrw` (read/write CSR). Ví dụ, `csrr t1, mcause` đọc giá trị trong `mcause` vào `t1`; `csrw mepc, t2` ghi giá trị trong `t2` vào `mepc`; còn `csrrw t1, mscratch, t0` đồng thời đọc giá trị trong `mscratch` vào `t1` và ghi giá trị trong `t0` vào `mscratch`.
 
-> `csrrw` là RISC-V instruction thực tế (xem Bảng B.8 trong Phụ lục B), nhưng `csrr` và `csrw` là pseudoinstruction. `csrr` được hiện thực thành `csrrs` `rd, CSR, x0`, còn `csrw` thành `csrrw` `x0, CSR, rs1`.
+> `csrrw` là RISC-V instruction thực tế (xem Bảng B.8 trong Phụ lục B), nhưng `csrr` và `csrw` là pseudoinstruction. `csrr` được triển khai thành `csrrs` `rd, CSR, x0`, còn `csrw` thành `csrrw` `x0, CSR, rs1`.
 
 Tóm tắt Exception Handling
 
@@ -2143,7 +2129,7 @@ exit:
 > bne  t3, t4, overflow
 > ```
 >
-> Ở dạng phương trình, overflow = (`t2` \< 0) \& (`t0` ≥ `t1`) \| (`t2` ≥ 0) \& (`t0` \< `t1`)
+> Ở dạng phương trình, overflow = (`t2` < 0) \& (`t0` ≥ `t1`) \| (`t2` ≥ 0) \& (`t0` < `t1`)
 >
 > Diễn đạt bằng lời, overflow xảy ra khi một operand âm (`t3` = 1) và kết quả không nhỏ hơn operand kia
 >
@@ -2173,7 +2159,7 @@ Như mô tả ở Mục 6.3.6, byte load có phiên bản signed (`lb`) và unsi
 
 ### 6.6.4 Instruction Floating-Point
 
-RISC-V architecture định nghĩa extension floating-point tùy chọn gọi là RVF, RVD và RVQ, lần lượt hoạt động trên số floating-point single-, double- và quad-precision. RVF/D/Q định nghĩa 32 register floating-point, `f0` đến `f31`, có độ rộng tương ứng 32, 64 hoặc 128 bit. Khi processor hiện thực nhiều extension floating-point, nó dùng phần dưới register floating-point cho instruction lower- precision. `f0` đến `f31` tách biệt program register (còn gọi integer register), `x0` đến `x31`. Giống program register, register floating- point được dành cho mục đích nhất định theo quy ước, như Bảng 6.7.
+RISC-V architecture định nghĩa extension floating-point tùy chọn gọi là RVF, RVD và RVQ, lần lượt hoạt động trên số floating-point single-, double- và quad-precision. RVF/D/Q định nghĩa 32 register floating-point, `f0` đến `f31`, có độ rộng tương ứng 32, 64 hoặc 128 bit. Khi processor triển khai nhiều extension floating-point, nó dùng phần dưới register floating-point cho instruction lower- precision. `f0` đến `f31` tách biệt program register (còn gọi integer register), `x0` đến `x31`. Giống program register, register floating- point được dành cho mục đích nhất định theo quy ước, như Bảng 6.7.
 
 Bảng B.3 trong Phụ lục B liệt kê mọi instruction floating-point. Computation instruction và comparison instruction dùng cùng mnemonic cho mọi precision, thêm `.s`, `.d` hoặc `.q` ở cuối để chỉ precision. Ví dụ, `fadd.s`, `fadd.d` và `fadd.q` lần lượt thực hiện phép cộng single-, double- và quad-precision. Instruction floating-point khác gồm `fsub`, `fmul`, `fdiv`, `fsqrt`, `fmadd` (multiply-add) và `fmin`. Truy cập bộ nhớ dùng instruction riêng cho mỗi precision. Load gồm `flw`, `fld` và `flq`, còn store gồm `fsw`, `fsd` và `fsq`.
 
@@ -2498,9 +2484,9 @@ Mục này đã giới thiệu sơ bộ một số khác biệt giữa RISC-V ar
 
 RISC-V (RV32I) là architecture 32-bit vì hoạt động trên dữ liệu 32-bit. RISC-V architecture có 32 register general-purpose. Về nguyên tắc, gần như mọi register đều dùng được cho mọi mục đích. Tuy nhiên, theo quy ước, register nhất định dành cho mục đích nhất định để dễ lập trình và để function do người khác nhau viết giao tiếp dễ dàng. Ví dụ, register 0 (`zero`) luôn giữ hằng số 0, `ra` giữ return address sau instruction `jal`, và `a0` đến `a7` giữ argument của function. `a0` đến `a1` giữ return value của function. RISC-V có memory system byte-addressable với địa chỉ 32-bit. Instruction dài 32 bit và word-aligned để truy cập hiệu quả. Chương này đã thảo luận RISC-V instruction thường dùng nhất.
 
-Sức mạnh của việc định nghĩa computer architecture là chương trình viết cho một architecture có thể chạy trên nhiều cách hiện thực khác nhau của architecture đó. Ví dụ, chương trình viết cho Intel Pentium processor năm 1993 thường vẫn chạy được (và nhanh hơn nhiều) trên Intel i9 hoặc AMD Ryzen processor năm 2021.
+Sức mạnh của việc định nghĩa computer architecture là chương trình viết cho một architecture có thể chạy trên nhiều cách triển khai khác nhau của architecture đó. Ví dụ, chương trình viết cho Intel Pentium processor năm 1993 thường vẫn chạy được (và nhanh hơn nhiều) trên Intel i9 hoặc AMD Ryzen processor năm 2021.
 
-Trong phần đầu sách, chúng ta học circuit level và logic level của abstraction. Trong chương này, chúng ta nhảy lên architecture level. Chương tiếp theo nghiên cứu microarchitecture, cách bố trí digital building block để hiện thực processor architecture.
+Trong phần đầu sách, chúng ta học circuit level và logic level của abstraction. Trong chương này, chúng ta nhảy lên architecture level. Chương tiếp theo nghiên cứu microarchitecture, cách bố trí digital building block để triển khai processor architecture.
 
 Microarchitecture là liên kết giữa phần cứng và phần mềm. Chúng tôi tin đây là một trong những chủ đề thú vị nhất của toàn bộ kỹ thuật: Bạn sẽ học xây dựng microprocessor riêng!
 
@@ -2530,9 +2516,9 @@ Bài tập 6.5 Cho biết cách các string trong Bài tập 6.3 được lưu t
 
 Bài tập 6.6 Lặp lại Bài tập 6.5 cho các string trong Bài tập 6.4.
 
-Bài tập 6.7 Instruction `nor` không thuộc RISC-V instruction set vì có thể hiện thực cùng chức năng bằng instruction hiện có. Viết một đoạn assembly code ngắn có chức năng sau: `s3 = s4` NOR `s5`. Dùng ít instruction nhất có thể.
+Bài tập 6.7 Instruction `nor` không thuộc RISC-V instruction set vì có thể triển khai cùng chức năng bằng instruction hiện có. Viết một đoạn assembly code ngắn có chức năng sau: `s3 = s4` NOR `s5`. Dùng ít instruction nhất có thể.
 
-Bài tập 6.8 Instruction `nand` không thuộc RISC-V instruction set vì có thể hiện thực cùng chức năng bằng instruction hiện có. Viết một đoạn assembly code ngắn có chức năng sau: `s3 = s4` NAND `s5`. Dùng ít instruction nhất có thể.
+Bài tập 6.8 Instruction `nand` không thuộc RISC-V instruction set vì có thể triển khai cùng chức năng bằng instruction hiện có. Viết một đoạn assembly code ngắn có chức năng sau: `s3 = s4` NAND `s5`. Dùng ít instruction nhất có thể.
 
 Bài tập 6.9 Chuyển các đoạn code high-level sau sang RISC-V assembly language. Giả sử biến số nguyên (signed) `g` và `h` lần lượt nằm trong register `a0` và `a1`. Viết comment rõ ràng cho code.
 
@@ -2635,7 +2621,7 @@ void strcpy(char dst[], char src[]) {
 }
 ```
 
-(a) Hiện thực function `strcpy` bằng RISC-V assembly code. Dùng `t0` cho `i`.
+(a) Triển khai function `strcpy` bằng RISC-V assembly code. Dùng `t0` cho `i`.
 
 (b) Vẽ stack trước, trong và sau function call `strcpy`. Giả sử `sp` = 0xFFC000 ngay trước khi `strcpy` được gọi.
 
@@ -2695,7 +2681,7 @@ segment hoặc PC nhảy đến vị trí ngoài chương trình);
 
 (c) Lặp lại phần (b) với các sửa đổi instruction sau: (1) Thay instruction tại địa chỉ 0x8504 và 0x8528 bằng nop. (2) Thay instruction tại địa chỉ 0x8518 bằng nop. (3) Thay instruction tại địa chỉ 0x8530 bằng nop.
 
-Bài tập 6.21 Ben Bitdiddle cố tính function f(a, b) = 2a + 3b với b không âm. Anh lạm dụng function call và đệ quy, tạo code high-level sau cho function `f` và `g`.
+Bài tập 6.21 Ben Bitdiddle đang cố tính hàm f(a, b) = 2a + 3b với b không âm. Anh lạm dụng function call và đệ quy, tạo ra code high-level sau cho các hàm `f` và `g`.
 
 ```
 // high-level code for functions f and g
@@ -3042,7 +3028,7 @@ int sub(int a, int b) {
 }
 ```
 
-(a) Hiện thực đoạn C code bằng RISC-V assembly language. Dùng `s4` giữ biến `i`. Nhớ xử lý stack pointer đúng cách. Array được lưu trên stack của function `setArray` (xem cuối Mục 6.3.7). Viết comment rõ ràng cho code.
+(a) Triển khai đoạn C code bằng RISC-V assembly language. Dùng `s4` giữ biến `i`. Nhớ xử lý stack pointer đúng cách. Array được lưu trên stack của function `setArray` (xem cuối Mục 6.3.7). Viết comment rõ ràng cho code.
 
 (b) Giả sử `setArray` là function được gọi đầu tiên. Vẽ trạng thái stack trước khi gọi `setArray` và trong mỗi function call. Chỉ stack address cùng tên register và biến lưu trên stack; đánh dấu vị trí `sp`; đánh dấu rõ từng stack frame. Giả sử `sp` bắt đầu tại 0x8000.
 
@@ -3172,9 +3158,7 @@ Bài tập 6.48 Trong bài này, bạn thiết kế extension unit thay thế ch
 
 Hình 6.38 Immediate encoding thay thế
 
-instruction, Instr<sub>31:20</sub>, mã hóa signed immediate 12-bit.
-
-Output là immediate sign-extended 32-bit, ImmExt<sub>31:0</sub>.
+instruction, Instr<sub>31:20</sub>, mã hóa signed immediate 12-bit. Output là immediate sign-extended 32-bit, ImmExt<sub>31:0</sub>.
 
 (b) Mở rộng sign-extension unit ở phần (a) để còn sign-extend immediate 12-bit trong instruction S-type. Sửa input nếu cần và tái sử dụng phần cứng khi có thể.
 

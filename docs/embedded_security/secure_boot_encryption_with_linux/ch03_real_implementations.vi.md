@@ -1,4 +1,4 @@
-# 3. Các hiện thực thực tế
+# 3. Các bản triển khai thực tế
 
 Rodolfo Giometti
 
@@ -58,7 +58,7 @@ Trong output ở trên, chúng ta thấy một số phân vùng; tuy nhiên, đ�
 
 Trong danh sách trên, phân vùng duy nhất được mã hóa là `/root`, còn các phân vùng khác ở dạng plain text. Điều này hoàn toàn không phải là vấn đề, vì trong các phân vùng boot và factory, mọi image kernel và rootfs đều được mã hóa, còn trong `/data`, chúng ta nên cẩn thận mã hóa mọi file nhạy cảm nằm trong số các binary cập nhật.
 
-Được rồi, bây giờ chúng ta có thể xem chi tiết một số schema hiện thực secure boot khả thi, mỗi schema có ưu và nhược điểm riêng.
+Được rồi, bây giờ chúng ta có thể xem chi tiết một số schema triển khai secure boot khả thi, mỗi schema có ưu và nhược điểm riêng.
 
 ## 3.1 Rescue Schema
 
@@ -126,7 +126,7 @@ Những dữ liệu này được dùng trong quá trình factory-reset để d�
 - Trường thứ tư là kích thước của phân vùng (`0` nghĩa là kéo dài đến cuối thiết bị).
 - Trường thứ năm là loại filesystem sẽ được dùng trên phân vùng.
 
-> Một lưu ý về file `dek`: file này chứa encryption key chính của hệ thống nhưng mang tính vendor-specific. Thực tế, các ví dụ ở trên đến từ một hệ thống được bảo mật hiện thực trên một máy iMX8-based, và dòng CPU này dùng một cách đặc biệt để lưu encryption key chính: đó là một file đã được bọc, trong trường hợp này.
+> Một lưu ý về file `dek`: file này chứa encryption key chính của hệ thống nhưng mang tính vendor-specific. Thực tế, các ví dụ ở trên đến từ một hệ thống bảo mật được triển khai trên một máy iMX8-based, và dòng CPU này dùng một cách đặc biệt để lưu encryption key chính: đó là một file đã được bọc, trong trường hợp này.
 
 > Các hệ thống khác chỉ đơn giản lưu key này trong một vùng được bảo vệ (thường là một số fuse được bảo vệ), nên trên những hệ thống này, file này hoàn toàn không có.
 
@@ -267,7 +267,7 @@ OK, bây giờ kernel khởi động và thực thi chương trình `/sbin/init`
 
 Lưu ý rằng kernel cũng truyền cho user space các tham số đặc biệt khác (`device`, `boot_schema` và `root_name`) mà chúng ta có thể dùng để thiết lập và chạy đúng các ứng dụng của mình.
 
-Một cách hiện thực khả thi cho code bên trong chương trình `init` có thể được thực hiện theo các bước sau:
+Một cách triển khai khả thi cho code bên trong chương trình `init` có thể được thực hiện theo các bước sau:
 
 1) Mount phân vùng boot vào thư mục `/boot`, và nạp encryption key của root filesystem:
 
@@ -457,7 +457,7 @@ Trong giai đoạn này, hệ thống tạo ra encryption key của root filesys
 
 Lưu ý rằng kernel cũng truyền cho user space một số tham số (`device`, `boot_schema` và `root_name`) mà chúng ta có thể dùng để thiết lập và chạy đúng các ứng dụng của mình tùy theo điều kiện boot hiện tại.
 
-Một cách hiện thực khả thi cho code bên trong chương trình `init` có thể được thực hiện theo các bước sau:
+Một cách triển khai khả thi cho code bên trong chương trình `init` có thể được thực hiện theo các bước sau:
 
 1) Khởi tạo một số biến sẽ được dùng về sau và di chuyển dữ liệu GTP về cuối đĩa bằng tiện ích `sgdisk`:
 
@@ -805,7 +805,7 @@ U-Boot khởi động, cố gắng định vị thư mục chứa các file cậ
 ...
 ```
 
-Tham số chỉ định việc thực hiện một lần boot bình thường là `initramfs_update`, và giờ metacode U-Boot hiện thực các bước này trông như sau:
+Tham số chỉ định việc thực hiện một lần boot bình thường là `initramfs_update`, và giờ metacode U-Boot thực hiện các bước này trông như sau:
 
 ```
 ...
@@ -866,7 +866,7 @@ Ngoài các symbolic link, mọi file đều giống với những gì chúng ta
 
 > Lưu ý rằng file `dek` không có mặt vì nó đã được `bundle-update.sh` nối vào fitimage (như được trình bày bên dưới). Tuy nhiên, đây là một trường hợp vendor-specific, vì đối với các hệ thống không dùng nó, thư mục `/data/update` theo mặc định sẽ trông như ở trên.
 
-Một cách hiện thực khả thi cho phần cốt lõi của `bundle-update.sh` được trình bày dưới đây:
+Một cách triển khai khả thi cho phần cốt lõi của `bundle-update.sh` được trình bày dưới đây:
 
 ```
 ...
@@ -910,7 +910,7 @@ exit 0
 
 Nhiệm vụ của công cụ ở trên chỉ là chuẩn bị thư mục `/data/update` với mọi file cần thiết để thực hiện một lần boot đúng cách với các file mới này. Thực tế, dễ thấy nó hoạt động thế nào: biến `UPDATE_DIR` được khởi tạo với đường dẫn well-known `/data/update/`, và một khi chúng ta cung cấp file chứa các bản cập nhật, nó dùng hàm `blob_extract_and_link` để cài đặt đúng cách các file này. Ở bước cuối cùng, nó báo cho bootloader thực thi thủ tục system-update ở lần boot tiếp theo bằng cách đặt `bootmode` thành giá trị `update`.
 
-Bây giờ, trong lần khởi động hệ thống kế tiếp, bootloader nạp `fitimage` mới (như đã giải thích ở trên), rồi thủ tục system-update bắt đầu. Một cách hiện thực khả thi cho code bên trong chương trình `init` có thể được thực hiện theo các bước sau:
+Bây giờ, trong lần khởi động hệ thống kế tiếp, bootloader nạp `fitimage` mới (như đã giải thích ở trên), rồi thủ tục system-update bắt đầu. Một cách triển khai khả thi cho code bên trong chương trình `init` có thể được thực hiện theo các bước sau:
 
 1) Đặt một số biến về giá trị mặc định của chúng:
 
@@ -1942,4 +1942,4 @@ Và bản phát hành mới giờ được thực thi.
 
 ## 3.3 Tóm tắt
 
-Chương này đã khám phá việc hiện thực thực tế các hệ điều hành Linux-based đáng tin cậy và an toàn cho nhiều loại thiết bị embedded và công nghiệp khác nhau. Trọng tâm chính được đặt vào việc bảo đảm khôi phục và cập nhật hệ thống một cách đáng tin cậy mà không cần sự can thiệp chuyên biệt của người dùng, điều này đòi hỏi tổ chức cẩn thận các thành phần hệ thống trên thiết bị lưu trữ. Chúng tôi đã đi sâu vào việc phân vùng thiết bị lưu trữ và logic của quá trình boot (cụ thể là rescue schema), vốn là nền tảng để xây dựng các hệ thống embedded Linux mạnh mẽ, an toàn và dễ bảo trì.
+Chương này đã khám phá việc triển khai thực tế các hệ điều hành Linux-based đáng tin cậy và an toàn cho nhiều loại thiết bị embedded và công nghiệp khác nhau. Trọng tâm chính được đặt vào việc bảo đảm khôi phục và cập nhật hệ thống một cách đáng tin cậy mà không cần sự can thiệp chuyên biệt của người dùng, điều này đòi hỏi tổ chức cẩn thận các thành phần hệ thống trên thiết bị lưu trữ. Chúng tôi đã đi sâu vào việc phân vùng thiết bị lưu trữ và logic của quá trình boot (cụ thể là rescue schema), vốn là nền tảng để xây dựng các hệ thống embedded Linux mạnh mẽ, an toàn và dễ bảo trì.

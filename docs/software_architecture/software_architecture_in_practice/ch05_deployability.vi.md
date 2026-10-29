@@ -60,13 +60,13 @@ Ba cách quan trọng để đo chất lượng của pipeline như sau:
 
 > **DevOps**
 >
-> DevOps—từ ghép của “development” và “operations”—là một khái niệm gắn chặt với continuous deployment. Nó là một phong trào (rất giống phong trào Agile), một mô tả về một tập thực hành và công cụ (một lần nữa, rất giống phong trào Agile), và một công thức marketing được các nhà cung cấp bán những công cụ đó quảng bá. Mục tiêu của DevOps là rút ngắn time to market (hay time to release). Mục tiêu là rút ngắn đáng kể thời gian từ khi một developer thực hiện thay đổi đối với một hệ thống hiện có—hiện thực một tính năng hoặc sửa một bug—đến khi hệ thống đến tay người dùng cuối, so với các thực hành phát triển phần mềm truyền thống.
+> DevOps—từ ghép của “development” và “operations”—là một khái niệm gắn chặt với continuous deployment. Nó là một phong trào (rất giống phong trào Agile), một mô tả về một tập thực hành và công cụ (một lần nữa, rất giống phong trào Agile), và một công thức marketing được các nhà cung cấp bán những công cụ đó quảng bá. Mục tiêu của DevOps là rút ngắn time to market (hay time to release). Mục tiêu là rút ngắn đáng kể thời gian từ khi một developer thực hiện thay đổi đối với một hệ thống hiện có—triển khai một tính năng hoặc sửa một bug—đến khi hệ thống đến tay người dùng cuối, so với các thực hành phát triển phần mềm truyền thống.
 >
 > Một định nghĩa hình thức của DevOps nắm bắt cả tần suất phát hành lẫn khả năng sửa bug theo yêu cầu:
 >
 > > DevOps là một tập thực hành nhằm giảm thời gian từ khi commit một thay đổi vào hệ thống đến khi thay đổi đó được đưa vào production bình thường, đồng thời bảo đảm chất lượng cao. [Bass 15]
 >
-> Hiện thực DevOps là một nỗ lực cải tiến quy trình. DevOps không chỉ bao hàm các yếu tố văn hóa và tổ chức của bất kỳ nỗ lực cải tiến quy trình nào, mà còn dựa mạnh vào công cụ và thiết kế architecture. Tất nhiên, mọi môi trường đều khác nhau, nhưng các công cụ và sự tự động hóa mà chúng tôi mô tả có thể được tìm thấy trong các tool chain điển hình được xây dựng để hỗ trợ DevOps.
+> Triển khai DevOps là một nỗ lực cải tiến quy trình. DevOps không chỉ bao hàm các yếu tố văn hóa và tổ chức của bất kỳ nỗ lực cải tiến quy trình nào, mà còn dựa mạnh vào công cụ và thiết kế architecture. Tất nhiên, mọi môi trường đều khác nhau, nhưng các công cụ và sự tự động hóa mà chúng tôi mô tả có thể được tìm thấy trong các tool chain điển hình được xây dựng để hỗ trợ DevOps.
 >
 > Chiến lược continuous deployment mà chúng tôi mô tả ở đây là trái tim về khái niệm của DevOps. Đến lượt mình, kiểm thử tự động là một thành phần cực kỳ quan trọng của continuous deployment, và công cụ cho việc đó thường là rào cản công nghệ lớn nhất đối với DevOps. Một số dạng DevOps bao gồm việc ghi log và giám sát post-deployment các log đó, để tự động phát hiện lỗi tại “trụ sở chính”, hoặc thậm chí giám sát để hiểu trải nghiệm người dùng. Tất nhiên, điều này đòi hỏi một khả năng “phone home” hoặc gửi log trong hệ thống, điều có thể khả thi hoặc không, được phép hoặc không, trong một số hệ thống.
 >
@@ -130,7 +130,7 @@ Một deployment được kích hoạt bởi việc phát hành một software e
 
 **Hình 5.2** *Mục tiêu của các deployability tactic*
 
-Các tactic cho deployability được thể hiện trong [Hình 5.3](#ch05fig03). Trong nhiều trường hợp, những tactic này sẽ được cung cấp, ít nhất là một phần, bởi một CI/CD (continuous integration/continuous deployment) infrastructure mà bạn mua thay vì tự xây dựng. Trong trường hợp đó, công việc của bạn với tư cách kiến trúc sư thường là chọn và đánh giá (thay vì hiện thực) các deployability tactic phù hợp và tổ hợp tactic phù hợp.
+Các tactic cho deployability được thể hiện trong [Hình 5.3](#ch05fig03). Trong nhiều trường hợp, những tactic này sẽ được cung cấp, ít nhất là một phần, bởi một CI/CD (continuous integration/continuous deployment) infrastructure mà bạn mua thay vì tự xây dựng. Trong trường hợp đó, công việc của bạn với tư cách kiến trúc sư thường là chọn và đánh giá (thay vì triển khai) các deployability tactic phù hợp và tổ hợp tactic phù hợp.
 
 <a id="ch05fig03"></a>
 
@@ -214,13 +214,13 @@ Có thể có hai pattern khác nhau cho chiến lược thay thế hoàn toàn,
 
 **e.** Lặp lại các bước trên cho đến khi mọi instance của phiên bản cũ đã được thay thế.
 
-[Hình 5.4](#ch05fig04) cho thấy một quy trình rolling upgrade như được hiện thực bởi công cụ Asgard của Netflix trên nền tảng cloud EC2 của Amazon.
+[Hình 5.4](#ch05fig04) cho thấy một quy trình rolling upgrade như được triển khai bởi công cụ Asgard của Netflix trên nền tảng cloud EC2 của Amazon.
 
 <a id="ch05fig04"></a>
 
 ![](images/data-url-image96.jpeg)
 
-**Hình 5.4** *Lưu đồ của rolling upgrade pattern như được hiện thực bởi công cụ Asgard của Netflix*
+**Hình 5.4** *Lưu đồ của rolling upgrade pattern như được triển khai bởi công cụ Asgard của Netflix*
 
 **Lợi ích:**
 
@@ -270,7 +270,7 @@ Như trong canary testing, các DNS server và cấu hình discovery-service đ�
 
 **Các tradeoff:**
 
-- A/B testing đòi hỏi hiện thực các phương án, một trong số đó sẽ bị loại bỏ.
+- A/B testing đòi hỏi triển khai các phương án, một trong số đó sẽ bị loại bỏ.
 - Các lớp người dùng khác nhau, và đặc điểm của họ, cần được xác định up front.
 
 <a id="sec5_7"></a>
@@ -295,6 +295,6 @@ Microservice và quá trình chuyển đổi sang microservice được mô tả
 2. Hãy viết một concrete deployability scenario cho phần mềm của một chiếc xe hơi (chẳng hạn như Tesla).
 3. Hãy viết một concrete deployability scenario cho một app smartphone. Giờ hãy viết một scenario cho infrastructure server-side giao tiếp với app này.
 4. Nếu bạn cần hiển thị kết quả của một thao tác tìm kiếm, bạn sẽ thực hiện A/B testing hay chỉ đơn giản dùng màu mà Google đã chọn? Tại sao?
-5. Tham chiếu đến các structure được mô tả trong [Chương 1](ch01_what_is_software_architecture.vi.md#ch01), những structure nào sẽ liên quan đến việc hiện thực tactic package dependencies? Bạn có dùng uses structure không? Tại sao có hoặc tại sao không? Có những structure nào khác bạn cần xem xét không?
-6. Tham chiếu đến các structure được mô tả trong [Chương 1](ch01_what_is_software_architecture.vi.md#ch01), những structure nào sẽ liên quan đến việc hiện thực tactic manage service interactions? Bạn có dùng uses structure không? Tại sao có hoặc tại sao không? Có những structure nào khác bạn cần xem xét không?
+5. Tham chiếu đến các structure được mô tả trong [Chương 1](ch01_what_is_software_architecture.vi.md#ch01), những structure nào sẽ liên quan đến việc triển khai tactic package dependencies? Bạn có dùng uses structure không? Tại sao có hoặc tại sao không? Có những structure nào khác bạn cần xem xét không?
+6. Tham chiếu đến các structure được mô tả trong [Chương 1](ch01_what_is_software_architecture.vi.md#ch01), những structure nào sẽ liên quan đến việc triển khai tactic manage service interactions? Bạn có dùng uses structure không? Tại sao có hoặc tại sao không? Có những structure nào khác bạn cần xem xét không?
 7. Trong những hoàn cảnh nào bạn sẽ thích roll forward lên một phiên bản service mới hơn là roll back về một phiên bản trước? Khi nào roll forward là một lựa chọn tồi?

@@ -133,7 +133,7 @@ Developer là những người thông minh với kiến thức hữu ích. Cộn
 
 ## Kiến trúc sư phần mềm với vai trò nhà lãnh đạo (The Software Architect as a Leader)
 
-<a id="ix_ch25-negotiation-skills-asciidoc9"></a><a id="ix_ch25-negotiation-skills-asciidoc10"></a>Một kiến trúc sư phần mềm cũng là một nhà lãnh đạo, hướng dẫn một development team khi họ hiện thực architecture. Chúng tôi khẳng định rằng khoảng 50% của việc là một kiến trúc sư phần mềm hiệu quả là có kỹ năng con người tốt, bao gồm điều phối và lãnh đạo. Trong mục này, chúng tôi thảo luận các kỹ thuật lãnh đạo cho kiến trúc sư phần mềm.
+<a id="ix_ch25-negotiation-skills-asciidoc9"></a><a id="ix_ch25-negotiation-skills-asciidoc10"></a>Một kiến trúc sư phần mềm cũng là một nhà lãnh đạo, hướng dẫn một development team khi họ triển khai architecture. Chúng tôi khẳng định rằng khoảng 50% của việc là một kiến trúc sư phần mềm hiệu quả là có kỹ năng con người tốt, bao gồm điều phối và lãnh đạo. Trong mục này, chúng tôi thảo luận các kỹ thuật lãnh đạo cho kiến trúc sư phần mềm.
 
 <a id="id252"></a>
 
@@ -169,7 +169,7 @@ Với vai trò nhà lãnh đạo, người điều phối và người đàm ph�
 
 <a id="ix_ch25-negotiation-skills-asciidoc13"></a>Một kiến trúc sư phần mềm hiệu quả phải thực dụng, nhưng có tầm nhìn. Phấn đấu cho sự cân bằng này không dễ như nghe; nó đòi hỏi mức trưởng thành khá cao và thực hành đáng kể để đạt được.
 
-<a id="id1656"></a>Một *người có tầm nhìn* (visionary) là người suy nghĩ hoặc lập kế hoạch cho tương lai với trí tưởng tượng hoặc sự khôn ngoan. Có tầm nhìn nghĩa là áp dụng tư duy chiến lược vào một vấn đề, đó chính xác là điều kiến trúc sư làm. Kiến trúc sư lập kế hoạch cho tương lai và bảo đảm architecture họ xây dựng vẫn còn sức sống (hợp lệ và hữu ích) trong một thời gian dài. Tuy nhiên, kiến trúc sư thường trở nên quá lý thuyết trong kế hoạch và thiết kế, tạo ra những giải pháp quá khó hiện thực—hoặc thậm chí khó hiểu.
+<a id="id1656"></a>Một *người có tầm nhìn* (visionary) là người suy nghĩ hoặc lập kế hoạch cho tương lai với trí tưởng tượng hoặc sự khôn ngoan. Có tầm nhìn nghĩa là áp dụng tư duy chiến lược vào một vấn đề, đó chính xác là điều kiến trúc sư làm. Kiến trúc sư lập kế hoạch cho tương lai và bảo đảm architecture họ xây dựng vẫn còn sức sống (hợp lệ và hữu ích) trong một thời gian dài. Tuy nhiên, kiến trúc sư thường trở nên quá lý thuyết trong kế hoạch và thiết kế, tạo ra những giải pháp quá khó triển khai—hoặc thậm chí khó hiểu.
 
 <a id="id1657"></a>Giờ hãy xét mặt kia của đồng xu, đó là *thực dụng* (pragmatic). Thực dụng nghĩa là xử lý mọi thứ một cách hợp lý và thực tế theo cách dựa trên những cân nhắc *thực tiễn* thay vì *lý thuyết*. Dù kiến trúc sư cần có tầm nhìn, họ cũng cần áp dụng những giải pháp thực tiễn, thực tế. Thực dụng khi tạo một giải pháp kiến trúc nghĩa là tính đến:
 
@@ -189,7 +189,7 @@ Ví dụ, hãy xét một kiến trúc sư đối mặt với những đợt tă
 
 *Hình 25-3. Kiến trúc sư giỏi tìm ra sự cân bằng giữa thực dụng và có tầm nhìn*
 
-Duy trì sự cân bằng tốt giữa thực dụng và có tầm nhìn là một cách tuyệt vời để giành được sự tôn trọng với tư cách kiến trúc sư. Các stakeholder kinh doanh đánh giá cao những giải pháp có tầm nhìn nằm trong một tập ràng buộc, và developer đánh giá cao việc có một giải pháp thực tiễn (thay vì lý thuyết) để hiện thực.
+Duy trì sự cân bằng tốt giữa thực dụng và có tầm nhìn là một cách tuyệt vời để giành được sự tôn trọng với tư cách kiến trúc sư. Các stakeholder kinh doanh đánh giá cao những giải pháp có tầm nhìn nằm trong một tập ràng buộc, và developer đánh giá cao việc có một giải pháp thực tiễn (thay vì lý thuyết) để triển khai.
 
 Một kiến trúc sư thực dụng trước tiên sẽ xem xét những yếu tố nào đang giới hạn elasticity của hệ thống. Tìm và cô lập mọi nút cổ chai sẽ là một cách tiếp cận đầu tiên thực tiễn cho vấn đề này. Database có đang tạo ra nút cổ chai đối với một số service được gọi hoặc các nguồn bên ngoài cần thiết khác không? Nếu có, liệu một phần dữ liệu có thể được cache để giảm các lời gọi tới database không?<a id="id1658"></a>
 

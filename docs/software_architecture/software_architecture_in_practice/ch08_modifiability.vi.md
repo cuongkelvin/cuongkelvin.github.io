@@ -22,7 +22,7 @@ Ví dụ, cơ chế đơn giản nhất để thực hiện một thay đổi l�
 
 Ở đầu kia của phổ là một application generator, chẳng hạn như một user interface builder. Builder nhận đầu vào là một mô tả của UI được thiết kế, tạo ra thông qua các kỹ thuật thao tác trực tiếp, và sau đó có thể tạo ra source code. Chi phí đưa vào cơ chế là chi phí mua UI builder, có thể đáng kể. Chi phí sử dụng cơ chế là chi phí tạo ra đầu vào để đưa vào builder (chi phí này có thể đáng kể hoặc không đáng kể), chi phí chạy builder (gần bằng không), và cuối cùng là chi phí của bất kỳ kiểm thử nào được thực hiện trên kết quả (thường ít hơn nhiều so với hand-coding).
 
-Xa hơn nữa trên phổ là các hệ thống phần mềm tự khám phá môi trường, học hỏi và tự sửa đổi để đáp ứng mọi thay đổi. Với những hệ thống đó, chi phí thực hiện sửa đổi bằng không, nhưng khả năng đó đã được mua cùng với việc hiện thực và kiểm thử các cơ chế học, vốn có thể đã khá tốn kém.
+Xa hơn nữa trên phổ là các hệ thống phần mềm tự khám phá môi trường, học hỏi và tự sửa đổi để đáp ứng mọi thay đổi. Với những hệ thống đó, chi phí thực hiện sửa đổi bằng không, nhưng khả năng đó đã được mua cùng với việc triển khai và kiểm thử các cơ chế học, vốn có thể đã khá tốn kém.
 
 Với *N* sửa đổi tương tự nhau, một lập luận đơn giản hóa để biện minh cho một cơ chế thay đổi là
 
@@ -103,7 +103,7 @@ Giờ chúng ta chuyển sang các tactic giảm coupling giữa các module. C�
 - *Encapsulate*. Xem phần thảo luận trong [Chương 7](ch07_integrability.vi.md#ch07).
 - *Use an intermediary*. Xem phần thảo luận trong [Chương 7](ch07_integrability.vi.md#ch07).
 - *Abstract common services*. Xem phần thảo luận trong [Chương 7](ch07_integrability.vi.md#ch07).
-- *Restrict dependencies.* Tactic này hạn chế những module mà một module cho trước tương tác hoặc phụ thuộc vào. Trong thực tế, tactic này được hiện thực bằng cách hạn chế khả năng nhìn thấy của một module (khi developer không thể nhìn thấy một interface, họ không thể dùng nó) và bằng authorization (chỉ cho phép các module được ủy quyền truy cập). Tactic restrict dependencies được thấy trong các layered architecture, trong đó một layer chỉ được phép dùng các layer thấp hơn (đôi khi chỉ layer thấp hơn kế tiếp), và trong việc dùng wrapper, khi các thực thể bên ngoài chỉ có thể nhìn thấy (và do đó phụ thuộc vào) wrapper, chứ không phải chức năng bên trong mà nó bọc.
+- *Restrict dependencies.* Tactic này hạn chế những module mà một module cho trước tương tác hoặc phụ thuộc vào. Trong thực tế, tactic này được triển khai bằng cách hạn chế khả năng nhìn thấy của một module (khi developer không thể nhìn thấy một interface, họ không thể dùng nó) và bằng authorization (chỉ cho phép các module được ủy quyền truy cập). Tactic restrict dependencies được thấy trong các layered architecture, trong đó một layer chỉ được phép dùng các layer thấp hơn (đôi khi chỉ layer thấp hơn kế tiếp), và trong việc dùng wrapper, khi các thực thể bên ngoài chỉ có thể nhìn thấy (và do đó phụ thuộc vào) wrapper, chứ không phải chức năng bên trong mà nó bọc.
 
 ### Trì hoãn binding (Defer Binding)
 
@@ -184,7 +184,7 @@ Một số điểm về trình tự này đáng được lưu ý:
 
 **Các tradeoff:**
 
-- Pattern này được hiện thực sao cho giao tiếp diễn ra qua mạng, có thể thậm chí là Internet. Do đó, message có thể bị trễ do tắc nghẽn mạng, dẫn đến suy giảm (hoặc ít nhất là không thể dự đoán) performance.
+- Pattern này được triển khai sao cho giao tiếp diễn ra qua mạng, có thể thậm chí là Internet. Do đó, message có thể bị trễ do tắc nghẽn mạng, dẫn đến suy giảm (hoặc ít nhất là không thể dự đoán) performance.
 - Với các client giao tiếp với server qua một mạng được chia sẻ bởi các ứng dụng khác, phải có các biện pháp đặc biệt để đạt được security (đặc biệt là tính bí mật) và duy trì tính toàn vẹn.
 
 ### Pattern Plug-in (Microkernel)
@@ -193,7 +193,7 @@ Pattern plug-in có hai loại element—các element cung cấp một tập ch�
 
 Các ví dụ sử dụng bao gồm những trường hợp sau:
 
-- Chức năng cốt lõi có thể là một hệ điều hành stripped-down (microkernel) cung cấp các cơ chế cần thiết để hiện thực các service của hệ điều hành, chẳng hạn như quản lý không gian địa chỉ low-level, quản lý thread và giao tiếp liên process (IPC). Các plug-ins cung cấp chức năng thực sự của hệ điều hành, chẳng hạn như device driver, quản lý tác vụ và quản lý request I/O.
+- Chức năng cốt lõi có thể là một hệ điều hành stripped-down (microkernel) cung cấp các cơ chế cần thiết để triển khai các service của hệ điều hành, chẳng hạn như quản lý không gian địa chỉ low-level, quản lý thread và giao tiếp liên process (IPC). Các plug-ins cung cấp chức năng thực sự của hệ điều hành, chẳng hạn như device driver, quản lý tác vụ và quản lý request I/O.
 - Chức năng cốt lõi là một sản phẩm cung cấp service cho người dùng của nó. Các plug-ins cung cấp portability, chẳng hạn như khả năng tương thích hệ điều hành hoặc khả năng tương thích library hỗ trợ. Các plug-ins cũng có thể cung cấp chức năng bổ sung không có trong sản phẩm cốt lõi. Ngoài ra, chúng có thể đóng vai trò adapter để cho phép tích hợp với các hệ thống bên ngoài (xem [Chương 7](ch07_integrability.vi.md#ch07)).
 
 **Lợi ích:**
@@ -246,7 +246,7 @@ Pattern publish-subscribe có ba loại element:
 - Trong một số trường hợp, một component không thể chắc chắn sẽ mất bao lâu để nhận được một message đã publish. Nói chung, performance của hệ thống và việc quản lý tài nguyên khó suy luận hơn trong các hệ thống publish-subscribe.
 - Việc dùng pattern này có thể ảnh hưởng tiêu cực đến tính tất định của các hệ thống đồng bộ. Thứ tự mà các method được gọi, như kết quả của một event, có thể khác nhau trong một số implementation.
 - Việc dùng pattern publish-subscribe có thể ảnh hưởng tiêu cực đến testability. Những thay đổi có vẻ nhỏ trong event bus—chẳng hạn như thay đổi component nào được gắn với event nào—có thể có tác động rộng đến hành vi của hệ thống và quality of service.
-- Một số implementation publish-subscribe hạn chế các cơ chế có sẵn để hiện thực security (integrity) một cách linh hoạt. Vì publisher không biết danh tính của subscriber của mình, và ngược lại, mã hóa end-to-end bị hạn chế. Message từ một publisher tới event bus có thể được mã hóa riêng, và message từ event bus tới một subscriber có thể được mã hóa riêng; tuy nhiên, bất kỳ giao tiếp mã hóa end-to-end nào cũng đòi hỏi mọi publisher và subscriber liên quan phải dùng chung một key.
+- Một số implementation publish-subscribe hạn chế các cơ chế có sẵn để triển khai security (integrity) một cách linh hoạt. Vì publisher không biết danh tính của subscriber của mình, và ngược lại, mã hóa end-to-end bị hạn chế. Message từ một publisher tới event bus có thể được mã hóa riêng, và message từ event bus tới một subscriber có thể được mã hóa riêng; tuy nhiên, bất kỳ giao tiếp mã hóa end-to-end nào cũng đòi hỏi mọi publisher và subscriber liên quan phải dùng chung một key.
 
 <a id="sec8_5"></a>
 

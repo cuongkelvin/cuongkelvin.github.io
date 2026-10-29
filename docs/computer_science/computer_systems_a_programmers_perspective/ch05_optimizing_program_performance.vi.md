@@ -119,7 +119,7 @@ Tuy nhiên, xét code sau cho f:
 
 Function này có side effect—sửa một phần trạng thái global của chương trình. Đổi số lần gọi thay đổi hành vi. Cụ thể, gọi func1 return 0 + 1 + 2 + 3 = 6, còn func2 return 4 · 0 = 0, giả sử cả hai bắt đầu với global variable counter bằng 0.
 
-#### Ghi chú Tối ưu function call bằng inline substitution
+### Ghi chú Tối ưu function call bằng inline substitution
 
 Code có function call được tối ưu bằng quá trình inline substitution (hoặc “inlining”), thay function call bằng code phần thân function. Ví dụ, có thể mở rộng func1 bằng cách thay vào bốn instance của f:
 
@@ -145,7 +145,9 @@ Biến đổi vừa giảm overhead function call vừa cho phép tối ưu thê
 6   }
 ```
 
-Code này tái hiện chính xác hành vi func1 với định nghĩa f cụ thể. Phiên bản gcc gần đây cố thực hiện dạng tối ưu này khi có tùy chọn command-line -finline hoặc mức -O1 trở lên. Đáng tiếc, gcc chỉ thử inlining với function định nghĩa trong một file. Nghĩa là không áp dụng cho trường hợp phổ biến: tập library function định nghĩa trong file này nhưng được function file khác gọi.
+Code này tái hiện chính xác hành vi func1 với định nghĩa f cụ thể.
+
+Phiên bản gcc gần đây cố thực hiện dạng tối ưu này khi có tùy chọn command-line -finline hoặc mức -O1 trở lên. Đáng tiếc, gcc chỉ thử inlining với function định nghĩa trong một file. Nghĩa là không áp dụng cho trường hợp phổ biến: tập library function định nghĩa trong file này nhưng được function file khác gọi.
 
 Đôi khi tốt nhất là ngăn compiler thực hiện inline substitution. Một trường hợp là code được kiểm tra bằng symbolic debugger như gdb, mô tả ở Mục 3.10.2. Nếu function call bị tối ưu loại bỏ qua inline substitution, mọi nỗ lực trace hoặc đặt breakpoint cho lời gọi sẽ thất bại. Trường hợp thứ hai là đánh giá hiệu năng bằng profiling, như Mục 5.14.1. Lời gọi function bị inline substitution loại bỏ không được profile chính xác.
 
@@ -206,7 +208,7 @@ Với tập điểm dữ liệu (x<sub>1</sub>, y<sub>1</sub>), . . . (x<sub>n</
 
 Có thể suy ra thuật toán tính m và b bằng cách lấy đạo hàm E(m, b) theo m và b rồi cho bằng 0.
 
-#### Bài tập thực hành 5.2 (lời giải trang 609)
+### Bài tập thực hành 5.2 (lời giải trang 609)
 
 Sau trong chương, chúng ta bắt đầu từ một function và tạo nhiều biến thể giữ nguyên hành vi nhưng có đặc tính hiệu năng khác nhau. Với ba biến thể, chúng ta thấy run time (clock cycle) xấp xỉ bởi các function sau:
 
@@ -222,10 +224,6 @@ Với giá trị n nào mỗi phiên bản nhanh nhất trong ba phiên bản? N
 
 Để minh họa cách biến đổi có hệ thống một chương trình trừu tượng thành code hiệu quả hơn, chúng ta dùng ví dụ xuyên suốt dựa trên vector data structure ở Hình 5.3. Vector được biểu diễn bằng hai khối bộ nhớ: header và data array. Header là structure khai báo như sau:
 
-![p0542_4](images/ch05_optimizing_program_performance/p0542_4.png)
-
-**Hình 5.3 Abstract data type vector. Vector được biểu diễn bằng thông tin header cùng array có độ dài chỉ định.**
-
 ```
                                                           code/opt/vec.h
 1   /* Create abstract data type for vector */
@@ -235,6 +233,10 @@ Với giá trị n nào mỗi phiên bản nhanh nhất trong ba phiên bản? N
 5   } vec_rec, *vec_ptr;
                                                           code/opt/vec.h
 ```
+
+![p0542_4](images/ch05_optimizing_program_performance/p0542_4.png)
+
+**Hình 5.3 Abstract data type vector. Vector được biểu diễn bằng thông tin header cùng array có độ dài chỉ định.**
 
 Khai báo dùng data_t chỉ data type của các phần tử bên dưới. Khi đánh giá, chúng ta đo hiệu năng code với dữ liệu số nguyên (int, long trong C) và floating-point (float, double trong C). Điều này được thực hiện bằng biên dịch và chạy riêng với các khai báo kiểu khác nhau, như khai báo data type long sau:
 
@@ -782,10 +784,6 @@ Một số phép toán trong Hình 5.13 tạo giá trị không tương ứng re
 
 Với đoạn code tạo vòng lặp, có thể phân loại register được truy cập thành bốn nhóm:
 
-![p0564_8](images/ch05_optimizing_program_performance/p0564_8.png)
-
-**Hình 5.14 Trừu tượng hóa phép toán combine4 thành đồ thị data-flow. Chúng ta sắp xếp lại các toán tử trong Hình 5.13 để thể hiện data dependency rõ hơn (a), rồi chỉ giữ các phép toán dùng giá trị của lượt lặp này để tạo giá trị mới cho lượt tiếp theo (b).**
-
 Read-only. Chúng được dùng làm giá trị nguồn, dưới dạng dữ liệu hoặc để tính địa chỉ bộ nhớ, nhưng không bị sửa trong vòng lặp. Register read-only duy nhất trong vòng lặp combine4 là %rax.
 
 Write-only. Chúng làm đích của các phép toán data-movement. Không có register như vậy trong vòng lặp này.
@@ -793,6 +791,10 @@ Write-only. Chúng làm đích của các phép toán data-movement. Không có 
 Local. Chúng được cập nhật và dùng trong vòng lặp, nhưng không có phụ thuộc từ lượt này sang lượt khác. Các condition code register là ví dụ: chúng được cmp cập nhật và jne dùng, nhưng phụ thuộc chỉ nằm trong từng lượt lặp.
 
 Loop. Chúng vừa làm giá trị nguồn vừa làm đích cho vòng lặp, với giá trị sinh ở một lượt được dùng ở lượt khác. Chúng ta thấy %rdx và %xmm0 là loop register của combine4, tương ứng giá trị chương trình data+i và acc.
+
+![p0564_8](images/ch05_optimizing_program_performance/p0564_8.png)
+
+**Hình 5.14 Trừu tượng hóa phép toán combine4 thành đồ thị data-flow. Chúng ta sắp xếp lại các toán tử trong Hình 5.13 để thể hiện data dependency rõ hơn (a), rồi chỉ giữ các phép toán dùng giá trị của lượt lặp này để tạo giá trị mới cho lượt tiếp theo (b).**
 
 Như sẽ thấy, chuỗi phép toán giữa các loop register quyết định data dependency performance-limiting.
 
@@ -955,7 +957,7 @@ Có thể thấy gcc chuyển đổi tham chiếu array trong code C trực ti�
 
 **Hình 5.20 Biểu diễn Data-flow của combine5 trên vector độ dài n. Dù vòng lặp đã unroll theo hệ số 2, vẫn có n thao tác mul trên critical path.**
 
-#### Thông tin thêm Để compiler unroll vòng lặp
+### Thông tin thêm Để compiler unroll vòng lặp
 
 Compiler có thể dễ dàng thực hiện loop unrolling. Nhiều compiler làm việc này trong tập các tối ưu hóa. gcc thực hiện một số dạng loop unrolling khi được gọi với mức tối ưu hóa 3 trở lên.
 
@@ -1170,9 +1172,9 @@ Kết hợp instruction gcc, loop unrolling và nhiều accumulator, chúng ta �
 
 #### Ghi chú Web OPT:SIMD Đạt tính song song cao hơn bằng vector instruction (tiếp theo)
 
-|  |  | Số nguyên |  |  |  |  | Floating point |  |
+|  | Số nguyên |  |  |  | Floating point |  |  |  |
 |---|---|---|---|---|---|---|---|---|
-|  | int |  |  | long | int |  |  | long |
+|  | int |  | long |  | int |  | long |  |
 | Phương pháp | + | * | + | * | + | * | + | * |
 | Scalar 10 × 10 | 0.54 | 1.01 | 0.55 | 1.00 | 1.01 | 0.51 | 1.01 | 0.52 |
 | Giới hạn throughput scalar | 0.50 | 0.50 | 1.00 | 1.00 | 1.00 | 1.00 | 0.50 | 0.50 |
@@ -1493,6 +1495,10 @@ Giờ có thể hiểu đặc tính hiệu năng write_read. Hình 5.37 minh h�
 
 Như hai ví dụ cho thấy, triển khai memory operation có nhiều điểm tinh tế. Với register operation, processor xác định instruction nào ảnh hưởng instruction nào khi decode. Với memory operation, processor không thể dự đoán tương tác cho đến khi tính địa chỉ load và store. Xử lý memory operation hiệu quả là then chốt cho nhiều chương trình. Memory subsystem dùng nhiều tối ưu, như parallelism tiềm năng khi thao tác độc lập.
 
+![p0597_30](images/ch05_optimizing_program_performance/p0597_30.png)
+
+**Hình 5.37 Biểu diễn Data-flow của write_read. Khi hai địa chỉ không khớp, critical path duy nhất là giảm cnt (Ví dụ A). Khi khớp, chuỗi lưu, load và tăng dữ liệu tạo critical path (Ví dụ B).**
+
 #### Bài tập thực hành 5.10 (lời giải trang 613)
 
 Ví dụ khác về code có tương tác load-store tiềm năng là function sao chép nội dung array sau:
@@ -1505,10 +1511,6 @@ Ví dụ khác về code có tương tác load-store tiềm năng là function s
 5           dest[i] = src[i];
 6   }
 ```
-
-![p0597_30](images/ch05_optimizing_program_performance/p0597_30.png)
-
-**Hình 5.37 Biểu diễn Data-flow của write_read. Khi hai địa chỉ không khớp, critical path duy nhất là giảm cnt (Ví dụ A). Khi khớp, chuỗi lưu, load và tăng dữ liệu tạo critical path (Ví dụ B).**
 
 Giả sử a là array độ dài 1,000, khởi tạo để mỗi phần tử a[i] bằng i.
 
@@ -1627,7 +1629,9 @@ Từ dữ liệu lời gọi, thường suy ra được thông tin hữu ích v�
 
 Có một số đặc tính gprof cần lưu ý:
 
-- Đo thời gian không thật chính xác. Nó dựa trên đếm khoảng thời gian đơn giản: chương trình đã biên dịch duy trì counter cho mỗi function ghi thời gian thực thi. Operating system ngắt chương trình theo khoảng đều δ. Giá trị δ điển hình từ 1.0 đến 10.0 millisecond. Sau đó xác định function đang thực thi lúc interrupt và tăng counter tương ứng thêm δ. Dĩ nhiên, function có thể vừa bắt đầu và sắp xong nhưng vẫn bị tính toàn bộ thời gian từ interrupt trước. Function khác có thể chạy giữa hai interrupt nên không bị tính thời gian nào. Trong thời gian dài, cơ chế hoạt động khá tốt: về thống kê, mỗi function được tính theo thời gian thực thi tương đối. Tuy nhiên, với chương trình chạy dưới khoảng 1 giây, các số chỉ nên coi là ước lượng thô.
+- Đo thời gian không thật chính xác. Nó dựa trên đếm khoảng thời gian đơn giản: chương trình đã biên dịch duy trì counter cho mỗi function ghi thời gian thực thi. Operating system ngắt chương trình theo khoảng đều δ. Giá trị δ điển hình từ 1.0 đến 10.0 millisecond. Sau đó xác định function đang thực thi lúc interrupt và tăng counter tương ứng thêm δ. Dĩ nhiên, function có thể vừa bắt đầu và sắp xong nhưng vẫn bị tính toàn bộ thời gian từ interrupt trước. Function khác có thể chạy giữa hai interrupt nên không bị tính thời gian nào.
+
+  Trong thời gian dài, cơ chế hoạt động khá tốt: về thống kê, mỗi function được tính theo thời gian thực thi tương đối. Tuy nhiên, với chương trình chạy dưới khoảng 1 giây, các số chỉ nên coi là ước lượng thô.
 
 - Thông tin lời gọi khá tin cậy nếu không có inline substitution. Chương trình đã biên dịch duy trì counter cho mỗi tổ hợp caller và callee. Counter phù hợp tăng mỗi lần gọi procedure.
 
@@ -1839,7 +1843,9 @@ Lời giải Bài tập 5.3 (trang 548) Bài tập đơn giản nhưng cần nh�
 
 Lời giải Bài tập 5.4 (trang 552) Assembly code cho thấy cơ hội tối ưu khéo léo mà gcc phát hiện. Nên nghiên cứu kỹ để hiểu điểm tinh tế của tối ưu code.
 
-A. Trong code ít tối ưu, register %xmm0 chỉ làm giá trị tạm, được đặt và dùng mỗi iteration. Trong code tối ưu hơn, nó giống variable acc của combine4, tích lũy tích các phần tử vector. Tuy nhiên, khác combine4 là vị trí dest được cập nhật mỗi iteration bởi vmovsd thứ hai. Có thể thấy bản tối ưu hoạt động như code C sau:
+A. Trong code ít tối ưu, register %xmm0 chỉ làm giá trị tạm, được đặt và dùng mỗi iteration. Trong code tối ưu hơn, nó giống variable acc của combine4, tích lũy tích các phần tử vector. Tuy nhiên, khác combine4 là vị trí dest được cập nhật mỗi iteration bởi vmovsd thứ hai.
+
+   Có thể thấy bản tối ưu hoạt động như code C sau:
 
 ```
  1   /* Make sure dest updated on each iteration */
@@ -1881,43 +1887,40 @@ C. Dù mỗi iteration poly cần hai phép nhân thay vì một, chỉ một ph
 Lời giải Bài tập 5.7 (trang 568) Code sau trực tiếp theo quy tắc đã nêu để unroll vòng lặp hệ số k:
 
 ```
-1   void unroll5(vec_ptr v, data_t *dest)
-2   {
-3       long i;
-4       long length = vec_length(v);
-5       long limit = length-4;
-6       data_t *data = get_vec_start(v);
-7       data_t acc = IDENT;
-8
-            9       /* Combine 5 elements at a time */
-           10       for (i = 0; i < limit; i+=5) {
-           11           acc = acc OP data[i]   OP data[i+1];
-           12           acc = acc OP data[i+2] OP data[i+3];
-           13           acc = acc OP data[i+4];
-           14       }
-           15
-           16       /* Finish any remaining elements */
-           17       for (; i < length; i++) {
-           18           acc = acc OP data[i];
-           19       }
-           20       *dest = acc;
-           21   }
+ 1   void unroll5(vec_ptr v, data_t *dest)
+ 2   {
+ 3       long i;
+ 4       long length = vec_length(v);
+ 5       long limit = length-4;
+ 6       data_t *data = get_vec_start(v);
+ 7       data_t acc = IDENT;
+ 8
+ 9       /* Combine 5 elements at a time */
+10       for (i = 0; i < limit; i+=5) {
+11           acc = acc OP data[i]   OP data[i+1];
+12           acc = acc OP data[i+2] OP data[i+3];
+13           acc = acc OP data[i+4];
+14       }
+15
+16       /* Finish any remaining elements */
+17       for (; i < length; i++) {
+18           acc = acc OP data[i];
+19       }
+20       *dest = acc;
+21   }
 ```
 
 Lời giải Bài tập 5.8 (trang 581) Bài tập cho thấy thay đổi nhỏ tạo khác biệt hiệu năng lớn, nhất là máy out-of-order. Hình 5.39 vẽ ba phép nhân cho một iteration. Ô xanh nằm trên critical path—phải tính tuần tự để tạo giá trị mới cho loop variable r. Ô nhạt có thể tính song song với critical path. Với vòng lặp có P phép toán trên critical path, mỗi iteration cần ít nhất 5P clock cycle và tính tích ba phần tử, cho cận dưới CPE 5P /3. Từ đó, cận dưới là 5.00 cho A1, 3.33 cho A2 và A5, 1.67 cho A3 và A4. Chúng ta chạy trên Intel Core i7 Haswell và thấy đạt được các CPE này.
+
+![p0613_32](images/ch05_optimizing_program_performance/p0613_32.png)
+
+**Hình 5.39 Data dependency giữa phép nhân cho các trường hợp Bài tập 5.8. Các thao tác trong ô xanh tạo critical path của iteration.**
 
 Lời giải Bài tập 5.9 (trang 589) Đây là ví dụ nữa: thay đổi nhỏ phong cách code giúp compiler dễ nhận cơ hội dùng conditional move:
 
 ```
 while (i1 < n && i2 < n) {
     long v1 = src1[i1];
-```
-
-![p0613_32](images/ch05_optimizing_program_performance/p0613_32.png)
-
-**Hình 5.39 Data dependency giữa phép nhân cho các trường hợp Bài tập 5.8. Các thao tác trong ô xanh tạo critical path của iteration.**
-
-```
     long v2 = src2[i2];
     long take1 = v1 < v2;
     dest[id++] = take1 ? v1 : v2;

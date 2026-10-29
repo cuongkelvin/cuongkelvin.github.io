@@ -236,7 +236,7 @@ Slab allocator còn vượt phần lớn cách segregated list bằng cách gi�
 
 Vì coalescing thiết yếu cho allocator, một số cách được thiết kế xoay quanh việc đơn giản hóa coalescing. Binary buddy allocator [K65] là ví dụ tốt.
 
-Trong hệ thống này, về khái niệm free memory ban đầu là không gian lớn kích thước 2N. Khi yêu cầu memory, việc tìm không gian trống chia đôi đệ quy cho đến khi thấy block đủ chứa yêu cầu (chia đôi tiếp sẽ quá nhỏ). Lúc đó, block yêu cầu được trả cho user. Đây là ví dụ không gian trống 64KB được chia khi tìm block 7KB:
+Trong hệ thống này, về khái niệm free memory ban đầu là không gian lớn kích thước 2<sup>N</sup>. Khi yêu cầu memory, việc tìm không gian trống chia đôi đệ quy cho đến khi thấy block đủ chứa yêu cầu (chia đôi tiếp sẽ quá nhỏ). Lúc đó, block yêu cầu được trả cho user. Đây là ví dụ không gian trống 64KB được chia khi tìm block 7KB:
 
 ![p0191_17](images/ch17_free_space_management/p0191_17.png)
 

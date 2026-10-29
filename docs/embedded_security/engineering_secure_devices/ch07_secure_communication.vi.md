@@ -78,7 +78,7 @@ Một thuộc tính chung khác của TLS là nó dùng certificate X.509 để 
 
 ### *TLS 1.3*
 
-TLS 1.3 được đặc tả trong RFC 8446 và là *chính* phiên bản mà các kỹ sư sản phẩm nên hiện thực và sử dụng. [Hình 7-1](#ch07fig01) minh họa quá trình handshake cho xác thực lẫn nhau, ví dụ, có thể là một phần của một kịch bản giao tiếp machine-to-machine.
+TLS 1.3 được đặc tả trong RFC 8446 và là *chính* phiên bản mà các kỹ sư sản phẩm nên triển khai và sử dụng. [Hình 7-1](#ch07fig01) minh họa quá trình handshake cho xác thực lẫn nhau, ví dụ, có thể là một phần của một kịch bản giao tiếp machine-to-machine.
 
 <a id="page_125"></a><a id="ch07fig01"></a>![](images/07fig01.jpg)
 
@@ -100,9 +100,9 @@ Nếu client và server chia sẻ một PSK, TLS 1.3 cung cấp một mode zero 
 
 So với TLS 1.2, TLS 1.3 đã giảm đáng kể tập thuật toán crypto khả dĩ có thể được dùng. Đây là một cải tiến bảo mật mạnh, vì nó ngăn chặn các *downgrade attack* cố tác động vào việc thương lượng tham số crypto để buộc dùng các thuật toán yếu. Trong quá trình dọn dẹp này, *cipher suite*, một tập các thuật toán crypto được hỗ trợ, đã được thu gọn để chỉ chứa crypto đối xứng.
 
-Đối với cryptography đối xứng này, TLS 1.3 đòi hỏi hiện thực cipher suite `TLS_AES_128_GCM_SHA256`, nghĩa là AES với key 128-bit phải hoạt động trong GCM mode, và hash function SHA-256 phải có sẵn để được dùng như một HMAC-based extract-and-expand key derivation function (HKDF), vốn liên quan đến việc dẫn xuất các bí mật TLS. Các cipher suite bổ sung `TLS_AES_256_GCM_SHA384` và `TLS_CHACHA20_POLY1305_SHA256` cũng nên được hiện thực nhưng không bắt buộc. Hai cipher suite dựa trên CCM mode hoàn thiện năm lựa chọn khả dĩ cho crypto đối xứng trong TLS 1.3, và tất cả đều thuộc lớp các thuật toán AEAD hiện đại.
+Đối với cryptography đối xứng này, TLS 1.3 đòi hỏi triển khai cipher suite `TLS_AES_128_GCM_SHA256`, nghĩa là AES với key 128-bit phải hoạt động trong GCM mode, và hash function SHA-256 phải có sẵn để được dùng như một HMAC-based extract-and-expand key derivation function (HKDF), vốn liên quan đến việc dẫn xuất các bí mật TLS. Các cipher suite bổ sung `TLS_AES_256_GCM_SHA384` và `TLS_CHACHA20_POLY1305_SHA256` cũng nên được triển khai nhưng không bắt buộc. Hai cipher suite dựa trên CCM mode hoàn thiện năm lựa chọn khả dĩ cho crypto đối xứng trong TLS 1.3, và tất cả đều thuộc lớp các thuật toán AEAD hiện đại.
 
-Về các thuật toán digital signature và certificate, các hiện thực TLS 1.3 phải hỗ trợ RSA PSS và PKCS1 kết hợp với SHA-256, nhưng cũng cả ECDSA dựa trên đường cong NIST `secp256r1` và SHA-256. Đường cong bắt buộc cho ECDHE cũng là `secp256r1`, nhưng RFC khuyến nghị hiện thực thêm X25519. DHE dựa trên các nhóm trường hữu hạn (finite field) cũng khả thi.
+Về các thuật toán digital signature và certificate, các bản triển khai TLS 1.3 phải hỗ trợ RSA PSS và PKCS1 kết hợp với SHA-256, nhưng cũng cả ECDSA dựa trên đường cong NIST `secp256r1` và SHA-256. Đường cong bắt buộc cho ECDHE cũng là `secp256r1`, nhưng RFC khuyến nghị triển khai thêm X25519. DHE dựa trên các nhóm trường hữu hạn (finite field) cũng khả thi.
 
 <a id="ch00lev2_78"></a>
 
@@ -124,15 +124,15 @@ Bên cạnh những khác biệt security-related đó, TLS 1.2 cũng thiếu m�
 
 #### Sử dụng an toàn
 
-Chìa khóa cho việc cấu hình an toàn TLS 1.2 nằm ở việc hạn chế mạnh các tùy chọn của nó. Hiện thực của bạn phải không cho phép các cipher đã deprecated như 3DES, RC4, các export cipher bị làm yếu, CBC mode, và (dĩ nhiên) cipher `NULL`. Việc trao đổi key dựa trên RSA key transport cũng như DH ẩn danh đều phải bị từ chối. Hơn nữa, các tùy chọn như nén dữ liệu phải bị vô hiệu hóa để giảm attack surface.
+Chìa khóa cho việc cấu hình an toàn TLS 1.2 nằm ở việc hạn chế mạnh các tùy chọn của nó. Bản triển khai của bạn phải không cho phép các cipher đã deprecated như 3DES, RC4, các export cipher bị làm yếu, CBC mode, và (dĩ nhiên) cipher `NULL`. Việc trao đổi key dựa trên RSA key transport cũng như DH ẩn danh đều phải bị từ chối. Hơn nữa, các tùy chọn như nén dữ liệu phải bị vô hiệu hóa để giảm attack surface.
 
-Nhìn theo chiều ngược lại, cấu hình của bạn chỉ nên bật các cipher suite hiện thực trao đổi key DHE và ECDHE và các cipher AEAD đối xứng kết hợp với hash function từ họ SHA-2, nghĩa là TLS 1.2 có thể được cắt gọn để hoạt động tương tự TLS 1.3 và cung cấp các kênh giao tiếp an toàn.
+Nhìn theo chiều ngược lại, cấu hình của bạn chỉ nên bật các cipher suite triển khai trao đổi key DHE và ECDHE và các cipher AEAD đối xứng kết hợp với hash function từ họ SHA-2, nghĩa là TLS 1.2 có thể được cắt gọn để hoạt động tương tự TLS 1.3 và cung cấp các kênh giao tiếp an toàn.
 
 <a id="ch00lev2_79"></a>
 
 ### *Yêu cầu đối với thiết bị và hạ tầng*
 
-Giả sử bạn đã quyết định rằng TLS là con đường cho thiết bị của mình và bạn muốn biến nó thành hiện thực, bạn vẫn còn một số yêu cầu cần xem xét trước khi hiện thực một giao tiếp semi-secure một cách helter-skelter (hấp tấp, lộn xộn). Từ góc nhìn thiết bị, bạn nên phân tích ít nhất năm khía cạnh:
+Giả sử bạn đã quyết định rằng TLS là con đường cho thiết bị của mình và bạn muốn biến nó thành hiện thực, bạn vẫn còn một số yêu cầu cần xem xét trước khi triển khai một giao tiếp semi-secure một cách helter-skelter (hấp tấp, lộn xộn). Từ góc nhìn thiết bị, bạn nên phân tích ít nhất năm khía cạnh:
 
 **Private-key storage** (lưu trữ private key) Nếu thiết bị của bạn phải có khả năng tự xác thực bằng cách ký dữ liệu bằng một private key, nó cần một nơi an toàn để lưu bí mật đó theo cách giữ kín.
 
@@ -156,7 +156,7 @@ Use case phổ biến nhất của TLS là HyperText Transfer Protocol Secure (H
 
 TLS dựa trên TCP, nhưng có cách nào để bảo vệ các ứng dụng như Voice over IP (VoIP) hay game trực tuyến vốn dựa trên UDP hay các protocol stateless khác không? Có, bạn có thể dùng một biến thể gọi là *Datagram Transport Layer Security (DTLS)*. DTLS 1.2 và DTLS 1.3 lần lượt dựa trên TLS 1.2 và TLS 1.3. Chúng bảo đảm cùng mức bảo mật như các phiên bản TCP-based tương ứng nhưng có thể xử lý việc mất và sắp xếp lại thứ tự packet.
 
-Khi nói đến các hiện thực TLS, OpenSSL có lẽ là phổ biến nhất trên các hệ thống Linux cũng như trong lĩnh vực embedded system. Tuy nhiên, nếu sự minh bạch source code hay footprint nhỏ là điều sản phẩm của bạn quan tâm, Mbed TLS có thể đáng để xem xét. Hơn nữa, có các hiện thực bằng vô số ngôn ngữ lập trình, như Rustls cho cộng đồng Rust.
+Khi nói đến các bản triển khai TLS, OpenSSL có lẽ là phổ biến nhất trên các hệ thống Linux cũng như trong lĩnh vực embedded system. Tuy nhiên, nếu sự minh bạch source code hay footprint nhỏ là điều sản phẩm của bạn quan tâm, Mbed TLS có thể đáng để xem xét. Hơn nữa, có các bản triển khai bằng vô số ngôn ngữ lập trình, như Rustls cho cộng đồng Rust.
 
 <a id="ch00lev1_59"></a>
 
@@ -166,7 +166,7 @@ Trong vài năm qua với tư cách giáo sư, tôi đã thấy nhiều dự án
 
 Tuy nhiên, nếu tôi yêu cầu một kênh giao tiếp an toàn cho nội dung thông điệp hiển nhiên là nhạy cảm, tôi thường nhận được những câu trả lời như “Nhưng đây chỉ là proof of concept thôi!” hay “Không còn thời gian để giải quyết chủ đề phức tạp này.” Và, “Sao thầy lúc nào cũng hỏi những câu khó chịu như vậy?”
 
-Trong case study này, tôi sẽ thiết lập dịch vụ MQTT broker Eclipse Mosquitto trên board STM32MP157F-DK2 của mình và cấu hình nó đúng cách cho giao tiếp an toàn dựa trên TLS. Hơn nữa, tôi sẽ kiểm thử động hiện thực để tìm các cấu hình sai.
+Trong case study này, tôi sẽ thiết lập dịch vụ MQTT broker Eclipse Mosquitto trên board STM32MP157F-DK2 của mình và cấu hình nó đúng cách cho giao tiếp an toàn dựa trên TLS. Hơn nữa, tôi sẽ kiểm thử động bản triển khai để tìm các cấu hình sai.
 
 <a id="ch00lev2_81"></a>
 
@@ -319,7 +319,7 @@ Như được thể hiện trong [Hình 7-3](#ch07fig03), Wireshark cũng cung c
 
 Tin tốt là tôi đã tạo certificate đúng, nghĩa là tôi đã đưa đúng server name của thiết bị vào làm common name trong certificate ➊. Tuy nhiên, cũng xuất hiện nhiều mục `FAILED` ➋. Điều này xảy ra vì certificate của tôi không thuộc các certificate store phổ biến của Android, Windows, Mozilla và tương tự, điều chưa bao giờ nằm trong kế hoạch, nhưng nếu bạn hướng tới khả năng tương thích tin cậy rộng rãi cho certificate của mình, bài kiểm tra này có thể quan trọng đối với bạn.
 
-Phần chính của kết quả là về các cipher suite và phiên bản TLS mà một server chấp nhận. Kết quả trong [Listing 7-7](#ch07list07) cho thấy các phiên bản TLS đã deprecated và các cipher suite tương ứng của chúng đều bị MQTT broker được hiện thực từ chối như dự định. Các thiết lập mặc định của `mosquitto` có vẻ đã cấm việc dùng những protocol và cipher cũ này.
+Phần chính của kết quả là về các cipher suite và phiên bản TLS mà một server chấp nhận. Kết quả trong [Listing 7-7](#ch07list07) cho thấy các phiên bản TLS đã deprecated và các cipher suite tương ứng của chúng đều bị MQTT broker được triển khai từ chối như dự định. Các thiết lập mặc định của `mosquitto` có vẻ đã cấm việc dùng những protocol và cipher cũ này.
 
 ```
 ...
@@ -368,7 +368,7 @@ Như được thể hiện trong [Listing 7-8](#ch07list08), các thiết lập 
 
 *Listing 7-8: Các cipher TLS 1.2 được cung cấp*
 
-Đầu ra cho thấy hiện thực đang xét vẫn cung cấp các lựa chọn cho phép trao đổi key RSA-based (`TLS_RSA_WITH_...`) và các lựa chọn khác vẫn dùng CBC mode cho việc mã hóa AES dữ liệu ứng dụng. Cả hai đều không được TLS 1.3 hỗ trợ và không còn được khuyến nghị.
+Đầu ra cho thấy bản triển khai đang xét vẫn cung cấp các lựa chọn cho phép trao đổi key RSA-based (`TLS_RSA_WITH_...`) và các lựa chọn khác vẫn dùng CBC mode cho việc mã hóa AES dữ liệu ứng dụng. Cả hai đều không được TLS 1.3 hỗ trợ và không còn được khuyến nghị.
 
 Hiểu biết này cho phép chúng ta điều chỉnh lại file *mosquitto.conf* bằng cách chỉ định tham số `ciphers`, như được thể hiện trong [Listing 7-9](#ch07list09).
 
@@ -423,7 +423,7 @@ Một cách tiếp cận thực dụng có thể là coi TLS 1.3 và các crypto
 
 <a id="page_136"></a>Ngoài ra, nếu lưu lượng bus CAN của bạn chứa các thông điệp bí mật, và integrity cũng nằm trong danh sách mong muốn của bạn, AES-GCM hay ChaCha20-Poly1305 có thể là các ứng viên phù hợp. Nếu kịch bản của bạn cho phép quản lý và phân phối các bí mật pre-shared, bạn có thể tránh được các thuật toán key-exchange tốn kém. Nếu không, DHE hay ECDHE, như được TLS 1.3 dùng, có thể là các thuật toán bạn chọn.
 
-Điều này nghe có vẻ khá hời hợt và, ở một mức độ nào đó, đúng là vậy, vì bạn phải làm rõ hàng trăm chi tiết trên con đường đến hiện thực cụ thể của mình. Tuy nhiên, thông tin này cho bạn một số định hướng về việc hành trình của bạn cần đi đâu.
+Điều này nghe có vẻ khá hời hợt và, ở một mức độ nào đó, đúng là vậy, vì bạn phải làm rõ hàng trăm chi tiết trên con đường đến bản triển khai cụ thể của mình. Tuy nhiên, thông tin này cho bạn một số định hướng về việc hành trình của bạn cần đi đâu.
 
 <a id="ch00lev1_61"></a>
 
@@ -435,7 +435,7 @@ Dĩ nhiên, trong một số use case, availability của dữ liệu được t
 
 Tiếp cận vấn đề này ở mức logic có nghĩa là gửi thông điệp nhiều lần hay thêm dữ liệu dự phòng được tạo bởi các mã error-detecting như checksum CRC hay các thuật toán error-correcting như mã Hamming. Điều này hữu ích cho việc truyền qua các kênh nhiễu hay không đáng tin cậy và để xử lý các sự kiện gây nhiễu bắt nguồn, ví dụ, từ nhiễu điện từ hay bức xạ vũ trụ. Tuy nhiên, những biện pháp này không cung cấp sự bảo vệ đầy đủ trước việc cố ý phá hủy và gián đoạn liên tục một đường giao tiếp vật lý.
 
-Cách duy nhất để có khả năng phục hồi trong những tình huống như vậy là hiện thực nhiều kênh giao tiếp vật lý. Một ví dụ phổ biến là *ring topology* (cấu trúc mạng vòng), được dùng trong nhiều hạ tầng công nghiệp để kết nối các thiết bị với nhau theo một cấu trúc ring-like. Tuy nhiên, cấu hình đó đòi hỏi các thiết bị phải có hai network interface, trái và phải, và các thông điệp luôn phải được gửi theo cả hai hướng và có thể được nhận trên hai interface khác nhau.
+Cách duy nhất để có khả năng phục hồi trong những tình huống như vậy là triển khai nhiều kênh giao tiếp vật lý. Một ví dụ phổ biến là *ring topology* (cấu trúc mạng vòng), được dùng trong nhiều hạ tầng công nghiệp để kết nối các thiết bị với nhau theo một cấu trúc ring-like. Tuy nhiên, cấu hình đó đòi hỏi các thiết bị phải có hai network interface, trái và phải, và các thông điệp luôn phải được gửi theo cả hai hướng và có thể được nhận trên hai interface khác nhau.
 
 Điều này dẫn đến công sức kỹ thuật và linh kiện trên mỗi thiết bị, và việc lắp đặt toàn bộ hệ thống trở nên đắt hơn. Ngoài ra, độ trễ giao tiếp phụ thuộc vào số lượng thiết bị trong vòng, và băng thông phải được chia sẻ giữa mọi bên tham gia mạng. Tuy nhiên, sự dự phòng vật lý này bền vững trước các thông điệp bị hỏng, cáp bị gãy hay bị cắt<a id="page_137"></a>, và thậm chí việc thay thế thiết bị trong quá trình hệ thống vận hành. Tiêu chuẩn quốc tế IEC 62439 mô tả nhiều cách để đạt được tính sẵn sàng cao trong các mạng công nghiệp, ví dụ, dựa trên ring topology hay mesh topology.
 
@@ -445,7 +445,7 @@ Cách duy nhất để có khả năng phục hồi trong những tình huống 
 
 IoT và phiên bản công nghiệp tương ứng của nó không thể tồn tại nếu không có giao tiếp an toàn. Một loạt protection goal từ confidentiality đến integrity đến authenticity, và thậm chí availability, được đòi hỏi đối với các kênh giao tiếp hiện đại. Bên cạnh các khả năng cryptography cần thiết, thiết bị cần hỗ trợ các protocol state-of-the-art như TLS 1.3 để đạt được security level cao. Trong một số use case, nơi việc mất thông điệp là trọng yếu và cần có các phương tiện giao tiếp vật lý dự phòng, thiết bị thậm chí phải cung cấp nhiều interface giao tiếp.
 
-Case study của chương này đã cho thấy một hiện thực ví dụ của một MQTT-broker với giao tiếp TLS-based và các tham số cấu hình cần thiết. Nó cho thấy rằng phân tích bảo mật kỹ lưỡng kết quả cuối cùng có thể giúp phát hiện các cấu hình sai và các cipher suite yếu mà một dịch vụ cung cấp.
+Case study của chương này đã cho thấy một bản triển khai ví dụ của một MQTT-broker với giao tiếp TLS-based và các tham số cấu hình cần thiết. Nó cho thấy rằng phân tích bảo mật kỹ lưỡng kết quả cuối cùng có thể giúp phát hiện các cấu hình sai và các cipher suite yếu mà một dịch vụ cung cấp.
 
 Mặc dù TLS là một trong những security protocol phổ biến và được ưa chuộng nhất, còn nhiều protocol khác tồn tại dành cho các ứng dụng chuyên dụng. Ví dụ, Internet Protocol security (IPsec) có thể được dùng để thiết lập một virtual private network (VPN) ở tầng OSI 3, trong khi protocol SSH cho phép quản trị viên truy cập thiết bị từ xa. Ở tầng OSI 2, ý tưởng Time-Sensitive Networking (TSN) đảm nhận việc tách biệt các kênh giao tiếp trên một môi trường vật lý dùng chung, trong khi IEEE 802.1AE (còn được biết đến là *MACsec*) nhắm tới giao tiếp được bảo vệ.
 

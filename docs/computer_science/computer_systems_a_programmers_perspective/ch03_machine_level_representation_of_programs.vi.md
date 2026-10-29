@@ -138,6 +138,11 @@ File assembly-code chứa nhiều khai báo, bao gồm tập dòng sau:
 ```
 multstore:
   pushq   %rbx
+  movq    %rdx, %rbx
+  call    mult2
+  movq    %rax, (%rbx)
+  popq    %rbx
+  ret
 ```
 
 #### Ghi chú Làm sao hiển thị biểu diễn byte của chương trình?
@@ -149,14 +154,6 @@ multstore:
 ```
 
 yêu cầu hiển thị (viết tắt ‘x’) 14 byte (‘b’) hex-formatted (cũng là ‘x’) bắt đầu tại địa chỉ function multstore. Bạn sẽ thấy gdb có nhiều tính năng hữu ích để phân tích chương trình machine-level, như sẽ thảo luận trong Mục 3.10.2.
-
-```
-movq    %rdx, %rbx
-call    mult2
-movq    %rax, (%rbx)
-popq    %rbx
-ret
-```
 
 Mỗi dòng thụt vào trong code tương ứng một machine instruction. Ví dụ, instruction pushq yêu cầu đẩy nội dung register %rbx lên program stack. Mọi thông tin tên local variable hoặc data type đã bị loại bỏ.
 
@@ -220,8 +217,8 @@ int main() {
     return 0;
 }
 long mult2(long a, long b) {
-long s = a * b;
-return s;
+    long s = a * b;
+    return s;
 }
 ```
 
@@ -506,12 +503,12 @@ Hình 3.6 cũng mô tả instruction cltq. Instruction này không có operand�
 Với mỗi dòng assembly language sau, hãy xác định hậu tố instruction thích hợp dựa trên operand. (Ví dụ, mov có thể viết lại thành movb, movw, movl hoặc movq.)
 
 ```
-mov     %eax, (%rsp)
-mov     (%rax), %dx
-mov     $0xFF, %bl
-mov     (%rsp,%rdx,4), %dl
-mov     (%rdx), %rax
-mov     %dx, (%rax)
+mov____ %eax, (%rsp)
+mov____ (%rax), %dx
+mov____ $0xFF, %bl
+mov____ (%rsp,%rdx,4), %dl
+mov____ (%rdx), %rax
+mov____ %dx, (%rax)
 ```
 
 #### Ghi chú So sánh instruction di chuyển byte
@@ -635,9 +632,7 @@ Nhớ rằng khi cast trong C vừa đổi kích thước vừa đổi “signed
 |---|---|---|
 | long | long | movq (%rdi), %rax<br>movq %rax, (%rsi) |
 | char | int | \_\_\_\_\_\_<br>\_\_\_\_\_\_ |
-
 | char | unsigned | \_\_\_\_\_\_<br>\_\_\_\_\_\_ |
-|---|---|---|
 | unsigned char | long | \_\_\_\_\_\_<br>\_\_\_\_\_\_ |
 | int | char | \_\_\_\_\_\_<br>\_\_\_\_\_\_ |
 | unsigned | unsigned char | \_\_\_\_\_\_<br>\_\_\_\_\_\_ |
@@ -679,9 +674,9 @@ Hai thao tác di chuyển dữ liệu cuối dùng để push dữ liệu lên p
 | pushq S | R[%rsp ] ← R[ %rsp ] − 8;<br>M[R[ %rsp ]] ← S | Push quad word |
 | popq D | D ← M[R[%rsp ]];<br>R[%rsp ] ← R[ %rsp ] + 8 | Pop quad word |
 
-![p0227_3](images/ch03_machine_level_representation_of_programs/p0227_3.png)
-
 **Hình 3.8 Instruction push và pop.**
+
+![p0227_3](images/ch03_machine_level_representation_of_programs/p0227_3.png)
 
 **Hình 3.9 Minh họa hoạt động stack. Theo quy ước, stack được vẽ đảo ngược nên “top” nằm ở đáy. Với x86-64, stack tăng về địa chỉ thấp hơn, nên push gồm giảm stack pointer (register %rsp ) và lưu vào bộ nhớ, còn pop gồm đọc từ bộ nhớ rồi tăng stack pointer.**
 
@@ -745,9 +740,7 @@ Giả sử register %rbx chứa p và %rdx chứa q. Điền bảng sau bằng c
 | leaq (%rdx,%rbx), %rax | ______ |
 | leaq (%rdx,%rbx,3), %rax | ______ |
 | leaq 2(%rbx,%rbx,7), %rax | ______ |
-
 | leaq 0xE(,%rdx,3), %rax | ______ |
-|---|---|
 | leaq 6(%rbx,%rdx,7), %rax | ______ |
 
 Để minh họa cách dùng leaq trong code đã biên dịch, xét chương trình C sau:
@@ -1153,11 +1146,12 @@ A.   cmpl    %esi, %edi
 
 B.   cmpw    %si, %di
      setge   %al
-C. cmpb %sil, %dil
-setbe %al
 
-D. cmpq %rsi, %rdi
-setne %a
+C.   cmpb    %sil, %dil
+     setbe   %al
+
+D.   cmpq    %rsi, %rdi
+     setne   %a
 ```
 
 #### Bài tập thực hành 3.14 (lời giải trang 366)
@@ -1730,18 +1724,18 @@ test:
   leaq    12(%rsi), %rbx
   testq   %rdi, %rdi
   jge     .L2
-              movq    %rdi, %rbx
-              imulq   %rsi, %rbx
-              movq    %rdi, %rdx
-              orq     %rsi, %rdx
-              cmpq    %rsi, %rdi
-              cmovge  %rdx, %rbx
-              ret
-            .L2:
-              idivq   %rsi, %rdi
-              cmpq    $10, %rsi
-              cmovge  %rdi, %rbx
-              ret
+  movq    %rdi, %rbx
+  imulq   %rsi, %rbx
+  movq    %rdi, %rdx
+  orq     %rsi, %rdx
+  cmpq    %rsi, %rdi
+  cmovge  %rdx, %rbx
+  ret
+.L2:
+  idivq   %rsi, %rdi
+  cmpq    $10, %rsi
+  cmovge  %rdi, %rbx
+  ret
 ```
 
 Điền các biểu thức còn thiếu trong code C.
@@ -1962,12 +1956,12 @@ Với code C có dạng tổng quát
 ```
 short loop_while(short a, short b)
 {
-short result = ______;
-while (______) {
-result = ______;
-a = ______;
-}
-return result;
+    short result = ______;
+    while (______) {
+        result = ______;
+        a = ______;
+    }
+    return result;
 }
 ```
 
@@ -2009,47 +2003,17 @@ Tiếp đó, có thể chuyển nó thành goto code như sau
 t = test-expr;
 if (!t)
     goto done;
-        loop:
-            body-statement
-            t = test-expr;
-            if (t)
-                goto loop;
-        done:
+loop:
+    body-statement
+    t = test-expr;
+    if (t)
+        goto loop;
+done:
 ```
 
 Với chiến lược triển khai này, compiler thường có thể tối ưu hóa phép kiểm tra ban đầu, chẳng hạn xác định rằng điều kiện kiểm tra sẽ luôn được thỏa mãn.
 
 Ví dụ, Hình 3.21 trình bày cùng code C cho hàm giai thừa như Hình 3.20, nhưng minh họa kết quả biên dịch khi gcc nhận tùy chọn command-line -O1. Hình 3.21(c) trình bày assembly code thực tế được sinh ra, còn Hình 3.21(b) diễn giải assembly code này thành biểu diễn C dễ đọc hơn. Tham chiếu goto code này, chúng ta thấy vòng lặp sẽ bị bỏ qua nếu n ≤ 1 với giá trị n ban đầu. Bản thân vòng lặp có cùng cấu trúc tổng quát với code được sinh cho phiên bản do-while của hàm (Hình 3.19). Tuy nhiên, một điểm thú vị là phép kiểm tra vòng lặp (dòng 9 của assembly code) đã đổi từ n > 1 trong code C ban đầu thành n ≠ 1. Compiler đã xác định rằng chỉ có thể vào vòng lặp khi n > 1, và giảm n đi một sẽ cho n > 1 hoặc n = 1. Do đó, phép kiểm tra n ≠ 1 sẽ tương đương phép kiểm tra n ≤ 1.
-
-#### Bài tập thực hành 3.25 (lời giải trang 371)
-
-Với code C có dạng tổng quát
-
-```
-long loop_while2(long a, long b)
-{
-    long result = ______;
-    while (______) {
-        result = ______;
-        b = ______;
-    }
-    return result;
-}
-```
-
-gcc, chạy với tùy chọn command-line -O1, tạo ra code sau:
-
-```
-    a in %rdi, b in %rsi
-1   loop_while2:
-2     testq   %rsi, %rsi
-3     jle     .L8
-4     movq    %rsi, %rax
-5   .L7:
-6     imulq   %rdi, %rax
-7     subq    %rdi, %rsi
-8     testq   %rsi, %rsi
-```
 
 (a) Code C
 
@@ -2105,7 +2069,34 @@ long fact_while_gd_goto(long n)
 
 **Hình 3.21 Code C và assembly cho phiên bản while của hàm giai thừa sử dụng phép chuyển đổi guarded-do. Hàm fact_while_gd_goto minh họa hoạt động của phiên bản assembly-code.**
 
+#### Bài tập thực hành 3.25 (lời giải trang 371)
+
+Với code C có dạng tổng quát
+
 ```
+long loop_while2(long a, long b)
+{
+    long result = ______;
+    while (______) {
+        result = ______;
+        b = ______;
+    }
+    return result;
+}
+```
+
+gcc, chạy với tùy chọn command-line -O1, tạo ra code sau:
+
+```
+     a in %rdi, b in %rsi
+ 1   loop_while2:
+ 2     testq   %rsi, %rsi
+ 3     jle     .L8
+ 4     movq    %rsi, %rax
+ 5   .L7:
+ 6     imulq   %rdi, %rax
+ 7     subq    %rdi, %rsi
+ 8     testq   %rsi, %rsi
  9     jg      .L7
 10     rep; ret
 11   .L8:
@@ -2215,10 +2206,10 @@ long fact_for(long n)
 {
     long i;
     long result = 1;
-                for (i = 2; i <= n; i++)
-                    result *= i;
-                return result;
-            }
+    for (i = 2; i <= n; i++)
+        result *= i;
+    return result;
+}
 ```
 
 Như được trình bày, cách tự nhiên để viết hàm giai thừa bằng vòng lặp for là nhân các thừa số từ 2 đến n, nên hàm này khá khác code đã trình bày bằng vòng lặp while hoặc do-while.
@@ -2311,18 +2302,18 @@ Compiler C gcc sinh assembly code sau:
 ```
     test fun_b(unsigned test x)
     x in %rdi
-1   test_two:
-2     movl    $1, %edx
-            3     movl    $65, %eax
-            4   .L10:
-            5     movq    %rdi, %rcx
-            6     andl    $1, %ecx
-            7     addq    %rax, %rax
-            8     orq     %rcx, %rax
-            9     shrq    %rdi           Shift right by 1
-           10     addq    $1, %rdx
-           11     jne     .L10
-           12     rep; ret
+ 1   test_two:
+ 2     movl    $1, %edx
+ 3     movl    $65, %eax
+ 4   .L10:
+ 5     movq    %rdi, %rcx
+ 6     andl    $1, %ecx
+ 7     addq    %rax, %rax
+ 8     orq     %rcx, %rax
+ 9     shrq    %rdi           Shift right by 1
+10     addq    $1, %rdx
+11     jne     .L10
+12     rep; ret
 ```
 
 Reverse engineer hoạt động của code này rồi thực hiện những yêu cầu sau:
@@ -2758,18 +2749,18 @@ Disassembled code của hai function first và last được trình bày dưới
 
 Mỗi instruction này được gán một label, tương tự các label trong Hình 3.27(a). Bắt đầu với việc main gọi first(10), hãy điền bảng sau để theo dõi việc thực thi instruction cho đến khi chương trình quay lại main.
 
-| Instruction | Giá trị trạng thái (lúc bắt đầu) |  |
-|---|---|---|
-| Label PC Instruction | %rdi %rsi %rax %rsp | *%rsp Mô tả |
-| M1 0x400560 callq | 10 — — 0x7fffffffe820 | — Gọi first(10) |
-| F1 ______ ______ | ______ ______ ______ ______ | ______ ______ |
-| F2 ______ ______ | ______ ______ ______ ______ | ______ ______ |
-| F3 ______ ______ | ______ ______ ______ ______ | ______ ______ |
-| L1 ______ ______ | ______ ______ ______ ______ | ______ ______ |
-| L2 ______ ______ | ______ ______ ______ ______ | ______ ______ |
-| L3 ______ ______ | ______ ______ ______ ______ | ______ ______ |
-| F4 ______ ______ | ______ ______ ______ ______ | ______ ______ |
-| M2 ______ ______ | ______ ______ ______ ______ | ______ ______ |
+|  | Instruction |  |  |  | Giá trị trạng thái (lúc bắt đầu) |  |  |  |
+|---|---|---|---|---|---|---|---|---|
+| Label | PC | Instruction | %rdi | %rsi | %rax | %rsp | *%rsp | Mô tả |
+| M1 | 0x400560 | callq | 10 | — | — | 0x7fffffffe820 | — | Gọi first(10) |
+| F1 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
+| F2 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
+| F3 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
+| L1 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
+| L2 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
+| L3 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
+| F4 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
+| M2 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
 
 ### 3.7.3 Truyền dữ liệu
 
@@ -2793,25 +2784,6 @@ Khi một function có hơn sáu argument thuộc kiểu nguyên, các argument 
 Để có ví dụ về truyền argument, xét function C proc trong Hình 3.29(a). Function này có tám argument, bao gồm các số nguyên có số byte khác nhau (8, 4, 2 và 1), cùng các kiểu pointer khác nhau, mỗi pointer có 8 byte.
 
 Assembly code được sinh ra cho proc được trình bày trong Hình 3.29(b). Sáu argument đầu tiên được truyền trong register. Hai argument cuối được truyền trên stack, như mô tả trong sơ đồ Hình 3.30. Sơ đồ thể hiện trạng thái stack trong khi proc thực thi. Có thể thấy return address được đẩy lên stack như một phần của lời gọi procedure. Vì vậy, hai argument nằm ở các vị trí 8 và 16 tương đối với stack pointer. Trong code, có thể thấy các phiên bản khác nhau của instruction add được sử dụng tùy theo kích thước operand: addq cho a1 (long), addl cho a2 (int), addw cho a3 (short) và addb cho a4 (char). Lưu ý instruction movl ở dòng 6 đọc 4 byte từ bộ nhớ; instruction addb tiếp theo chỉ sử dụng byte low-order.
-
-#### Bài tập thực hành 3.33 (lời giải trang 375)
-
-Một function C procprob có bốn argument u, a, v và b. Mỗi argument là một số signed hoặc một pointer đến số signed, trong đó các số có kích thước khác nhau. Function có phần thân như sau:
-
-```
-*u += a;
-*v += b;
-return sizeof(a) + sizeof(b);
-```
-
-Nó được biên dịch thành code x86-64 sau:
-
-```
-1   procprob:
-2     movslq  %edi, %rdi
-3     addq    %rdi, (%rdx)
-4     addb    %sil, (%rcx)
-```
 
 (a) Code C
 
@@ -2857,7 +2829,23 @@ void proc(long  a1, long  *a1p,
 
 **Hình 3.30 Cấu trúc stack frame của function proc . Các argument a4 và a4p được truyền trên stack.**
 
+#### Bài tập thực hành 3.33 (lời giải trang 375)
+
+Một function C procprob có bốn argument u, a, v và b. Mỗi argument là một số signed hoặc một pointer đến số signed, trong đó các số có kích thước khác nhau. Function có phần thân như sau:
+
 ```
+*u += a;
+*v += b;
+return sizeof(a) + sizeof(b);
+```
+
+Nó được biên dịch thành code x86-64 sau:
+
+```
+1   procprob:
+2     movslq  %edi, %rdi
+3     addq    %rdi, (%rdx)
+4     addb    %sil, (%rcx)
 5     movl    $6, %eax
 6     ret
 ```
@@ -3258,6 +3246,10 @@ Data type row3_t được định nghĩa là một array gồm ba số nguyên. 
 
 Array A cũng có thể được xem là array two-dimensional gồm năm hàng và ba cột, được tham chiếu từ A[0][0] đến A[4][2]. Các phần tử array được sắp xếp trong bộ nhớ theo thứ tự row-major, nghĩa là tất cả phần tử của hàng 0, có thể viết là A[0], được theo sau bởi tất cả phần tử của hàng 1 (A[1]), v.v. Điều này được minh họa trong Hình 3.36.
 
+![p0296_9](images/ch03_machine_level_representation_of_programs/p0296_9.png)
+
+**Hình 3.36 Các phần tử array theo thứ tự row-major.**
+
 Thứ tự này là hệ quả của khai báo lồng nhau. Xem A như array gồm năm phần tử, mỗi phần tử là array gồm ba int, trước hết chúng ta có A[0], tiếp theo là A[1], v.v.
 
 Để truy cập các phần tử array đa chiều, compiler sinh code tính offset của phần tử mong muốn, rồi sử dụng một trong các instruction mov với đầu array làm base address và offset (có thể được nhân tỷ lệ) làm chỉ số. Nói chung, với array được khai báo là
@@ -3269,10 +3261,6 @@ T D[R][C];
 phần tử array D[i][j] nằm tại địa chỉ bộ nhớ
 
 ![p0295_8](images/ch03_machine_level_representation_of_programs/p0295_8.png) (3.1)
-
-![p0296_9](images/ch03_machine_level_representation_of_programs/p0296_9.png)
-
-**Hình 3.36 Các phần tử array theo thứ tự row-major.**
 
 trong đó L là kích thước data type T tính bằng byte. Ví dụ, xét array số nguyên A có kích thước 5 × 3 đã định nghĩa trước đó. Giả sử x<sub>A</sub>, i và j lần lượt nằm trong các register %rdi, %rsi và %rdx. Khi đó, có thể sao chép phần tử array A[i][j] vào register %eax bằng code sau:
 
@@ -3374,11 +3362,11 @@ Sau đây là assembly code thực tế do gcc sinh ra cho function fix_prod_ele
  8     movl    (%rdi), %edx          Read *Aptr
  9     imull   (%rcx), %edx          Multiply by *Bptr
 10     addl    %edx, %eax            Add to result
-            11     addq    $4, %rdi              Increment Aptr ++
-            12     addq    $64, %rcx             Increment Bptr += N
-            13     cmpq    %rsi, %rcx            Compare Bptr:Bend
-            14     jne     .L7                   If !=, goto loop
-            15     rep; ret                      Return</pre>
+11     addq    $4, %rdi              Increment Aptr ++
+12     addq    $64, %rcx             Increment Bptr += N
+13     cmpq    %rsi, %rcx            Compare Bptr:Bend
+14     jne     .L7                   If !=, goto loop
+15     rep; ret                      Return</pre>
 
 #### Bài tập thực hành 3.39 (lời giải trang 378)
 
@@ -3720,11 +3708,12 @@ struct S3 {
     int i[2];
     double v;
 };
-            union U3 {
-                char c;
-                int i[2];
-                double v;
-            };
+
+union U3 {
+    char c;
+    int i[2];
+    double v;
+};
 ```
 
 Khi được biên dịch trên máy Linux x86-64, offset của các field cùng tổng kích thước của các data type S3 và U3 như trong bảng sau:
@@ -3944,7 +3933,16 @@ struct {
   short  d;
   long   e;
   double f;
+  int    g;
+  char   *h;
+} rec;
 ```
+
+A. Byte offset của tất cả field trong structure là bao nhiêu?
+
+B. Tổng kích thước structure là bao nhiêu?
+
+C. Sắp xếp lại các field của structure để giảm thiểu không gian lãng phí, rồi trình bày byte offset và tổng kích thước của structure đã sắp xếp lại.
 
 #### Thông tin thêm Một trường hợp alignment bắt buộc
 
@@ -3957,18 +3955,6 @@ Do đó, mọi compiler và hệ thống run-time cho processor x86-64 phải b�
 - Stack frame của hầu hết function phải được alignment theo ranh giới 16-byte. (Yêu cầu này có một số ngoại lệ.)
 
 Các phiên bản processor x86-64 gần đây hơn triển khai các instruction đa phương tiện AVX. Ngoài việc cung cấp một tập bao hàm các instruction SSE, những processor hỗ trợ AVX còn không có yêu cầu alignment bắt buộc.
-
-```
-  int    g;
-  char   *h;
-} rec;
-```
-
-A. Byte offset của tất cả field trong structure là bao nhiêu?
-
-B. Tổng kích thước structure là bao nhiêu?
-
-C. Sắp xếp lại các field của structure để giảm thiểu không gian lãng phí, rồi trình bày byte offset và tổng kích thước của structure đã sắp xếp lại.
 
 ## 3.10 Kết hợp điều khiển và dữ liệu trong chương trình Machine-Level
 
@@ -3989,7 +3975,7 @@ biến ip là pointer đến đối tượng kiểu int, còn cpp là pointer đ
 
 - Mỗi pointer có một giá trị. Giá trị này là địa chỉ của một đối tượng thuộc kiểu được chỉ định. Giá trị đặc biệt NULL (0) cho biết pointer không trỏ đến đâu cả.
 
-- Pointer được tạo bằng toán tử ‘&’. Toán tử này có thể áp dụng cho mọi biểu thức C được phân loại là lvalue, nghĩa là biểu thức có thể xuất hiện ở vế trái phép gán. Ví dụ bao gồm biến và các phần tử của structure, union và array. Chúng ta đã thấy cách hiện thực machine-code của toán tử ‘&’ thường dùng instruction leaq để tính giá trị biểu thức, vì instruction này được thiết kế để tính địa chỉ của một tham chiếu bộ nhớ.
+- Pointer được tạo bằng toán tử ‘&’. Toán tử này có thể áp dụng cho mọi biểu thức C được phân loại là lvalue, nghĩa là biểu thức có thể xuất hiện ở vế trái phép gán. Ví dụ bao gồm biến và các phần tử của structure, union và array. Chúng ta đã thấy cách triển khai machine-code của toán tử ‘&’ thường dùng instruction leaq để tính giá trị biểu thức, vì instruction này được thiết kế để tính địa chỉ của một tham chiếu bộ nhớ.
 
 - Pointer được dereference bằng toán tử ‘*’. Kết quả là một giá trị có kiểu gắn với pointer. Dereference được triển khai bằng một tham chiếu bộ nhớ, để lưu vào hoặc lấy dữ liệu từ địa chỉ được chỉ định.
 
@@ -4071,6 +4057,22 @@ char *gets(char *s)
 {
     int c;
     char *dest = s;
+    while ((c = getchar()) != ’\n’ && c != EOF)
+        *dest++ = c;
+    if (c == EOF && dest == s)
+        /* No characters read */
+        return NULL;
+    *dest++ = ’\0’; /* Terminate string */
+    return s;
+}
+
+/* Read input line and write it back */
+void echo()
+{
+    char buf[8];  /* Way too small! */
+    gets(buf);
+    puts(buf);
+}
 ```
 
 | Lệnh | Tác dụng |
@@ -4118,25 +4120,6 @@ char *gets(char *s)
 
 **Hình 3.40 Tổ chức stack cho function echo. Array ký tự buf chỉ là một phần của trạng thái được lưu. Một thao tác ghi out-of-bounds vào buf có thể làm hỏng trạng thái chương trình.**
 
-```
-    while ((c = getchar()) != ’\n’ && c != EOF)
-        *dest++ = c;
-    if (c == EOF && dest == s)
-        /* No characters read */
-        return NULL;
-    *dest++ = ’\0’; /* Terminate string */
-    return s;
-}
-
-/* Read input line and write it back */
-void echo()
-{
-    char buf[8];  /* Way too small! */
-    gets(buf);
-    puts(buf);
-}
-```
-
 Code trước đó trình bày một cách triển khai function thư viện gets để minh họa vấn đề nghiêm trọng với function này. Nó đọc một dòng từ standard input, dừng khi gặp ký tự newline kết thúc hoặc một điều kiện lỗi nào đó. Nó sao chép string này đến vị trí được chỉ định bởi argument s và kết thúc string bằng ký tự null. Chúng ta trình bày cách sử dụng gets trong function echo, chỉ đơn giản đọc một dòng từ standard input rồi lặp lại dòng đó ra standard output.
 
 Vấn đề của gets là nó không có cách xác định đã cấp phát đủ không gian chứa toàn bộ string hay chưa. Trong ví dụ echo, chúng ta cố ý làm buffer rất nhỏ—chỉ dài tám ký tự. Mọi string dài hơn bảy ký tự đều gây ra thao tác ghi out-of-bounds.
@@ -4150,9 +4133,9 @@ Bằng cách xem assembly code do gcc sinh ra cho echo, chúng ta có thể suy 
 3     movq    %rsp, %rdi        Compute buf as %rsp
 4     call    gets              Call gets
 5     movq    %rsp, %rdi        Compute buf as %rsp
-            6     call    puts             Call puts
-            7     addq    $24, %rsp        Deallocate stack space
-            8     ret                      Return
+6     call    puts             Call puts
+7     addq    $24, %rsp        Deallocate stack space
+8     ret                      Return
 ```
 
 Hình 3.40 minh họa tổ chức stack trong khi echo thực thi. Chương trình cấp phát 24 byte trên stack bằng cách trừ 24 khỏi stack pointer (dòng 2). Ký tự buf được đặt tại đỉnh stack, có thể thấy qua việc %rsp được sao chép sang %rdi để dùng làm argument cho cả lời gọi gets lẫn puts. 16 byte giữa buf và return pointer được lưu không được sử dụng. Miễn là người dùng nhập tối đa bảy ký tự, string do gets trả về (bao gồm ký tự null kết thúc) sẽ vừa trong không gian cấp phát cho buf. Tuy nhiên, string dài hơn sẽ khiến gets ghi đè một số thông tin lưu trên stack. Khi string dài dần, các thông tin sau sẽ bị hỏng:
@@ -4519,6 +4502,20 @@ float float_mov(float v1, float *src, float *dst) {
 }
 ```
 
+và assembly code x86-64 tương ứng của nó
+
+```
+    float float_mov(float v1, float *src, float *dst)
+    v1 in %xmm0, src in %rdi, dst in %rsi
+1   float_mov:
+2     vmovaps %xmm0, %xmm1      Copy v1
+3     vmovss  (%rdi), %xmm0     Read v2 from src
+4     vmovss  %xmm1, (%rsi)     Write v1 to dst
+5     ret                       Return v2 in %xmm0
+```
+
+Trong ví dụ này, chúng ta có thể thấy instruction vmovaps được dùng để sao chép dữ liệu từ register này sang register khác, và instruction vmovss được dùng để sao chép dữ liệu từ bộ nhớ vào register XMM và từ register XMM ra bộ nhớ.
+
 | Instruction | Nguồn | Đích | Mô tả |
 |---|---|---|---|
 | vcvttss2si | X/M<sub>32</sub> | R<sub>32</sub> | Chuyển single precision thành số nguyên với truncation |
@@ -4536,20 +4533,6 @@ float float_mov(float v1, float *src, float *dst) {
 | vcvtsi2sdq | M<sub>64</sub>/R<sub>64</sub> | X | X | Chuyển số nguyên quad word thành double precision |
 
 **Hình 3.48 Các phép chuyển đổi floating-point Three-operand. Những instruction này chuyển từ kiểu dữ liệu của nguồn thứ nhất sang kiểu dữ liệu của đích. Giá trị nguồn thứ hai không ảnh hưởng đến các byte low-order của kết quả. (X: register XMM (ví dụ %xmm3 ); M<sub>32</sub>: vùng bộ nhớ 32-bit; M<sub>64</sub>: vùng bộ nhớ 64-bit)**
-
-và assembly code x86-64 tương ứng của nó
-
-```
-    float float_mov(float v1, float *src, float *dst)
-    v1 in %xmm0, src in %rdi, dst in %rsi
-1   float_mov:
-2     vmovaps %xmm0, %xmm1      Copy v1
-3     vmovss  (%rdi), %xmm0     Read v2 from src
-4     vmovss  %xmm1, (%rsi)     Write v1 to dst
-5     ret                       Return v2 in %xmm0
-```
-
-Trong ví dụ này, chúng ta có thể thấy instruction vmovaps được dùng để sao chép dữ liệu từ register này sang register khác, và instruction vmovss được dùng để sao chép dữ liệu từ bộ nhớ vào register XMM và từ register XMM ra bộ nhớ.
 
 Hình 3.47 và 3.48 trình bày các tập instruction để chuyển đổi giữa các kiểu dữ liệu floating-point và số nguyên, cũng như giữa các định dạng floating-point khác nhau. Tất cả đều là scalar instruction thao tác trên các giá trị dữ liệu riêng lẻ. Những instruction trong Hình 3.47 chuyển từ một giá trị floating-point được đọc từ register XMM hoặc bộ nhớ, và ghi kết quả vào một register general-purpose (ví dụ %rax, %ebx, v.v.). Khi chuyển giá trị floating-point thành số nguyên, chúng thực hiện truncation, làm tròn giá trị về không, đúng như yêu cầu của C và hầu hết các ngôn ngữ lập trình khác.
 
@@ -4750,16 +4733,13 @@ Code x86-64 như sau:
 4     vmulsd  %xmm0, %xmm1, %xmm0           Multiply a by x
 5     vcvtsi2sd       %edi, %xmm1, %xmm1    Convert i to double
 6     vdivsd  %xmm1, %xmm2, %xmm2           Compute b/i
+7     vsubsd  %xmm2, %xmm0, %xmm0           Subtract from a*x
+8     ret                                   Return
 ```
 
 ![p0339_19](images/ch03_machine_level_representation_of_programs/p0339_19.png)
 
 **Hình 3.49 Các phép toán số học scalar floating-point. Chúng có một hoặc hai toán hạng nguồn và một toán hạng đích.**
-
-```
-7     vsubsd  %xmm2, %xmm0, %xmm0           Subtract from a*x
-8     ret                                   Return
-```
 
 Ba đối số floating-point a, x và b được truyền trong các register XMM %xmm0–%xmm2, còn đối số số nguyên i được truyền trong register %edi. Chuỗi two-instruction chuẩn được dùng để chuyển đối số x sang double (dòng 2–3). Cần thêm một instruction chuyển đổi để chuyển đối số i sang double (dòng 5). Giá trị hàm được trả về trong register %xmm0.
 
@@ -4807,12 +4787,12 @@ Gcc tạo code sau cho hàm:
 1   funct2:
 2     vcvtsi2ss       %edi, %xmm2, %xmm2
 3     vmulss  %xmm1, %xmm2, %xmm1
-            4     vunpcklps       %xmm1, %xmm1, %xmm1
-            5     vcvtps2pd       %xmm1, %xmm2
-            6     vcvtsi2sdq      %rsi, %xmm1, %xmm1
-            7     vdivsd  %xmm1, %xmm0, %xmm0
-            8     vsubsd  %xmm0, %xmm2, %xmm0
-            9     ret
+4     vunpcklps       %xmm1, %xmm1, %xmm1
+5     vcvtps2pd       %xmm1, %xmm2
+6     vcvtsi2sdq      %rsi, %xmm1, %xmm1
+7     vdivsd  %xmm1, %xmm0, %xmm0
+8     vsubsd  %xmm0, %xmm2, %xmm0
+9     ret
 ```
 
 Viết một phiên bản C của funct2.
@@ -4875,7 +4855,7 @@ double simplefun(double x) {
 Dưới đây, chúng ta trình bày code AVX2 được tạo cho các định nghĩa EXPR khác nhau, trong đó giá trị x được chứa trong %xmm0. Tất cả đều tương ứng với một phép toán hữu ích nào đó trên các giá trị floating-point. Xác định đó là những phép toán gì. Để trả lời, bạn sẽ cần hiểu các bit pattern của những word hằng đang được đọc từ bộ nhớ.
 
 ```
-A. 1      vmovsd  .LC1(%rip), %xmm1
+A.  1     vmovsd  .LC1(%rip), %xmm1
     2     vandpd  %xmm1, %xmm0, %xmm0
     3   .LC1:
     4     .long   4294967295
@@ -4884,13 +4864,14 @@ A. 1      vmovsd  .LC1(%rip), %xmm1
     7     .long   0
 
 B.  1     vxorpd  %xmm0, %xmm0, %xmm0
-            C.  1     vmovsd  .LC2(%rip), %xmm1
-                2     vxorpd  %xmm1, %xmm0, %xmm0
-                3   .LC2:
-                4     .long   0
-                5     .long   -2147483648
-                6     .long   0
-                7     .long   0
+
+C.  1     vmovsd  .LC2(%rip), %xmm1
+    2     vxorpd  %xmm1, %xmm0, %xmm0
+    3   .LC2:
+    4     .long   0
+    5     .long   -2147483648
+    6     .long   0
+    7     .long   0
 ```
 
 ### 3.11.6 Các phép so sánh Floating-Point
@@ -5187,17 +5168,7 @@ Phần assembly code được tạo để triển khai các thao tác khác nhau
 
 Điền các phần còn thiếu của code C. Nó chứa một case rơi tiếp xuống case khác—hãy cố gắng dựng lại điều này.
 
-3.63 ◆◆ Bài toán này sẽ cho bạn cơ hội reverse engineer một câu lệnh switch từ machine code đã disassemble. Trong thủ tục sau, thân của câu lệnh switch đã bị lược bỏ:
-
 ```
-1   long switch_prob(long x, long n) {
-2       long result = x;
-3       switch(n) {
-4           /* Fill in code here */
-5
-6       }
-7       return result;
-8   }
      p1 in %rdi, p2 in %rsi, action in %edx
  1   .L8:                        MODE_E
  2     movl    $27, %eax
@@ -5227,6 +5198,19 @@ Phần assembly code được tạo để triển khai các thao tác khác nhau
 ```
 
 **Hình 3.52 Assembly code cho Bài toán 3.62. Code này triển khai các nhánh khác nhau của một câu lệnh switch.**
+
+3.63 ◆◆ Bài toán này sẽ cho bạn cơ hội reverse engineer một câu lệnh switch từ machine code đã disassemble. Trong thủ tục sau, thân của câu lệnh switch đã bị lược bỏ:
+
+```
+1   long switch_prob(long x, long n) {
+2       long result = x;
+3       switch(n) {
+4           /* Fill in code here */
+5
+6       }
+7       return result;
+8   }
+```
 
 Hình 3.53 trình bày machine code đã disassemble của thủ tục.
 
@@ -5387,7 +5371,7 @@ Code C sau có một hàm process nhận đối số và trả về giá trị l
  2       long a[2];
  3       long *p;
  4   } strA;
-5
+ 5
  6   typedef struct {
  7       long u[2];
  8       long q;
@@ -5437,11 +5421,11 @@ Gcc tạo code sau cho hai hàm này:
  7     movq    %rax, 16(%rsp)
  8     leaq    64(%rsp), %rdi
  9     call    process
-            10    movq    72(%rsp), %rax
-            11    addq    64(%rsp), %rax
-            12    addq    80(%rsp), %rax
-            13    addq    $104, %rsp
-            14    ret
+10     movq    72(%rsp), %rax
+11     addq    64(%rsp), %rax
+12     addq    80(%rsp), %rax
+13     addq    $104, %rsp
+14     ret
 ```
 
 A. Ở dòng 2 của hàm eval, chúng ta có thể thấy nó cấp phát 104 byte trên stack. Vẽ sơ đồ stack frame của eval, thể hiện các giá trị mà nó lưu trên stack trước khi gọi process.
@@ -5728,9 +5712,7 @@ Lời giải Bài toán 3.4 (trang 223) Bài tập này giúp bạn có thêm ki
 | char | int | movsbl (%rdi), %eax<br>movl %eax, (%rsi) | Chuyển char thành int<br>Lưu 4 byte |
 | char | unsigned | movsbl (%rdi), %eax<br>movl %eax, (%rsi) | Chuyển char thành int<br>Lưu 4 byte |
 | unsigned char | long | movzbl (%rdi), %eax<br>movq %rax, (%rsi) | Đọc byte và thực hiện zero-extend<br>Lưu 8 byte |
-
 | int | char | movl (%rdi), %eax<br>movb %al, (%rsi) | Đọc 4 byte<br>Lưu byte low-order |
-|---|---|---|---|
 | unsigned | unsigned | movl (%rdi), %eax | Đọc 4 byte |
 |  | char | movb %al, (%rsi) | Lưu byte low-order |
 | char | short | movsbw (%rdi), %ax<br>movw %ax, (%rsi) | Đọc byte và thực hiện sign-extend<br>Lưu 2 byte |
@@ -6010,7 +5992,9 @@ short test(short x, short y) {
 
 Lời giải Bài toán 3.22 (trang 257)
 
-A. Phép tính 14! sẽ bị overflow với int 32-bit. Như đã học trong Bài toán 2.35, khi nhận được giá trị x trong lúc cố tính n!, chúng ta có thể kiểm tra overflow bằng cách tính x/n và xem nó có bằng (n − 1)! hay không (giả sử đã đảm bảo phép tính (n − 1)! không bị overflow). Trong trường hợp này, chúng ta có 1,278,945,280/14 = 91353234.286. Một cách kiểm tra thứ hai là thấy rằng bất kỳ giai thừa nào lớn hơn 10! đều phải là bội số của 100 và do đó có hai chữ số cuối bằng không. Giá trị đúng của 14! là 87,178,291,200. Ngoài ra, chúng ta có thể lập một bảng các giai thừa được tính đến 14! với kiểu dữ liệu int, như bên dưới:
+A. Phép tính 14! sẽ bị overflow với int 32-bit. Như đã học trong Bài toán 2.35, khi nhận được giá trị x trong lúc cố tính n!, chúng ta có thể kiểm tra overflow bằng cách tính x/n và xem nó có bằng (n − 1)! hay không (giả sử đã đảm bảo phép tính (n − 1)! không bị overflow). Trong trường hợp này, chúng ta có 1,278,945,280/14 = 91353234.286. Một cách kiểm tra thứ hai là thấy rằng bất kỳ giai thừa nào lớn hơn 10! đều phải là bội số của 100 và do đó có hai chữ số cuối bằng không. Giá trị đúng của 14! là 87,178,291,200.
+
+Ngoài ra, chúng ta có thể lập một bảng các giai thừa được tính đến 14! với kiểu dữ liệu int, như bên dưới:
 
 | n | n! | Đúng? |
 |---|---|---|
@@ -6132,11 +6116,11 @@ A. Dưới đây là code C ban đầu:
 long fun_b(unsigned long x) {
     long val = 0;
     long i;
-for (i = 64; i != 0; i--) {
-val = (val << 1) | (x & 0x1);
-x >>= 1;
-}
-return val;
+    for (i = 64; i != 0; i--) {
+        val = (val << 1) | (x & 0x1);
+        x >>= 1;
+    }
+    return val;
 }
 ```
 
@@ -6214,35 +6198,34 @@ void switcher(long a, long b, long c, long *dest)
     case 0:
         val = c + 112;
         break;
-case 2:
-case 7:
-val = (c + b) << 2;
-break;
-case 4:
-val = a;
-break;
-default:
-val = b;
-}
-*dest = val;
+    case 2:
+    case 7:
+        val = (c + b) << 2;
+        break;
+    case 4:
+        val = a;
+        break;
+    default:
+        val = b;
+    }
+    *dest = val;
 }
 ```
 
 Lời giải Bài toán 3.32 (trang 280) Lần theo thực thi chương trình ở mức chi tiết này củng cố nhiều khía cạnh của việc gọi và trả về từ thủ tục. Chúng ta có thể thấy rõ cách điều khiển được truyền cho hàm khi nó được gọi, và cách hàm gọi tiếp tục khi hàm được gọi trả về. Cũng có thể thấy cách các đối số được truyền qua register %rdi và %rsi, và cách kết quả được trả về qua register %rax.
 
-Instruction Các giá trị trạng thái (lúc bắt đầu)
-
-| Nhãn PC Instruction %rdi %rsi %rax | %rsp *%rsp Mô tả |
-|---|---|
-| M1 0x400560 callq 10 — — | 0x7fffffffe820 — Gọi first(10) |
-| F1 0x400548 lea 10 — — | 0x7fffffffe818 0x400565 Bắt đầu first |
-| F2 0x40054c sub 10 11 — | 0x7fffffffe818 0x400565 |
-| F3 0x400550 callq 9 11 — | 0x7fffffffe818 0x400565 Gọi last(9, 11) |
-| L1 0x400540 mov 9 11 — | 0x7fffffffe810 0x400555 Bắt đầu last |
-| L2 0x400543 imul 9 11 9 | 0x7fffffffe810 0x400555 |
-| L3 0x400547 retq 9 11 99 | 0x7fffffffe810 0x400555 Trả về 99 từ last |
-| F4 0x400555 repz repq 9 11 99 | 0x7fffffffe818 0x400565 Trả về 99 từ first |
-| M2 0x400565 mov 9 11 99 | 0x7fffffffe820 — Tiếp tục main |
+|  | Instruction |  |  |  | Các giá trị trạng thái (lúc bắt đầu) |  |  |  |
+|---|---|---|---|---|---|---|---|---|
+| Nhãn | PC | Instruction | %rdi | %rsi | %rax | %rsp | *%rsp | Mô tả |
+| M1 | 0x400560 | callq | 10 | — | — | 0x7fffffffe820 | — | Gọi first(10) |
+| F1 | 0x400548 | lea | 10 | — | — | 0x7fffffffe818 | 0x400565 | Bắt đầu first |
+| F2 | 0x40054c | sub | 10 | 11 | — | 0x7fffffffe818 | 0x400565 |  |
+| F3 | 0x400550 | callq | 9 | 11 | — | 0x7fffffffe818 | 0x400565 | Gọi last(9, 11) |
+| L1 | 0x400540 | mov | 9 | 11 | — | 0x7fffffffe810 | 0x400555 | Bắt đầu last |
+| L2 | 0x400543 | imul | 9 | 11 | 9 | 0x7fffffffe810 | 0x400555 |  |
+| L3 | 0x400547 | retq | 9 | 11 | 99 | 0x7fffffffe810 | 0x400555 | Trả về 99 từ last |
+| F4 | 0x400555 | repz repq | 9 | 11 | 99 | 0x7fffffffe818 | 0x400565 | Trả về 99 từ first |
+| M2 | 0x400565 | mov | 9 | 11 | 99 | 0x7fffffffe820 | — | Tiếp tục main |
 
 Lời giải Bài toán 3.33 (trang 282) Bài toán này hơi khó do sự pha trộn các kích thước dữ liệu khác nhau.
 
@@ -6407,16 +6390,16 @@ Lời giải Bài toán 3.42 (trang 305) Bài toán này minh họa cách một 
 ```
     short test(struct ACE *ptr)
     ptr in %rdi
-1   test:
-2     movl    $1, %eax            result = 1
-3     jmp     .L2                 Goto middle
-            4   .L3:                        loop:
-            5     imulq   (%rdi), %rax        result *= ptr->v
-            6     movq    2(%rdi), %rdi       ptr = ptr->p
-            7   .L2:                        middle:
-            8     testq   %rdi, %rdi          Test ptr
-            9     jne     .L3                 If != NULL, goto loop
-           10     rep; ret
+ 1   test:
+ 2     movl    $1, %eax            result = 1
+ 3     jmp     .L2                 Goto middle
+ 4   .L3:                        loop:
+ 5     imulq   (%rdi), %rax        result *= ptr->v
+ 6     movq    2(%rdi), %rdi       ptr = ptr->p
+ 7   .L2:                        middle:
+ 8     testq   %rdi, %rdi          Test ptr
+ 9     jne     .L3                 If != NULL, goto loop
+10     rep; ret
 ```
 
 A. Dựa trên code có chú thích, chúng ta có thể tạo một phiên bản C:

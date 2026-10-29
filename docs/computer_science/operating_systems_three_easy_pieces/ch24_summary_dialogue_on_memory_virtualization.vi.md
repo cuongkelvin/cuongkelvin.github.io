@@ -48,7 +48,9 @@ Sinh viên: Và còn một điều quan trọng nữa: em học được rằng 
 
 Giáo sư: Góc nhìn hay đấy. Thế còn tất cả những gì ta học về swapping xuống disk?
 
-Sinh viên: Chắc chắn nghiên cứu chúng rất thú vị, và biết page replacement hoạt động thế nào cũng tốt. Một số policy cơ bản khá hiển nhiên (chẳng hạn LRU), nhưng xây dựng virtual memory system thực sự có vẻ thú vị hơn, như ta đã thấy trong nghiên cứu tình huống VMS. Nhưng không hiểu sao em thấy mechanism thú vị hơn, còn policy thì ít hơn. Giáo sư: Ồ, vì sao vậy?
+Sinh viên: Chắc chắn nghiên cứu chúng rất thú vị, và biết page replacement hoạt động thế nào cũng tốt. Một số policy cơ bản khá hiển nhiên (chẳng hạn LRU), nhưng xây dựng virtual memory system thực sự có vẻ thú vị hơn, như ta đã thấy trong nghiên cứu tình huống VMS. Nhưng không hiểu sao em thấy mechanism thú vị hơn, còn policy thì ít hơn.
+
+Giáo sư: Ồ, vì sao vậy?
 
 Sinh viên: Như thầy nói, cuối cùng giải pháp tốt nhất cho các vấn đề policy rất đơn giản: mua thêm memory. Nhưng cần hiểu mechanism để biết mọi thứ thực sự hoạt động ra sao. Nhắc đến chuyện đó...
 

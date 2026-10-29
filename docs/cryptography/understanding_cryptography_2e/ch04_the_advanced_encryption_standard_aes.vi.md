@@ -20,11 +20,11 @@ Trong chương này, bạn sẽ học:
 
 ■ Các kiến thức cơ bản về Galois field
 
-■ Hiệu quả của các hiện thực AES
+■ Hiệu quả của các bản triển khai AES
 
 ## 4.1 Giới thiệu
 
-Năm 1999, National Institute of Standards and Technology (NIST) của Mỹ chỉ ra rằng DES chỉ nên được dùng cho các hệ thống cũ, và thay vào đó nên dùng triple DES (3DES). Dù 3DES chống được brute-force attack với công nghệ ngày nay, nó có vài vấn đề. Thứ nhất, nó không hiệu quả lắm với các hiện thực software. Một nhược điểm nghiêm trọng hơn là kích thước block 64 bit, làm phát sinh một số tấn công (xem Mục 3.8) nếu các khối dữ liệu lớn được mã hóa. Kích thước block ngắn cũng khiến việc xây dựng một hash function từ 3DES khó hơn (xem Mục 11.3.1). Cuối cùng, nếu người ta lo ngại về các tấn công bằng máy tính lượng tử trong tương lai, độ dài key cỡ 256 bit là đáng mong muốn. Mọi cân nhắc này dẫn NIST tới kết luận rằng cần một block cipher hoàn toàn mới để thay thế DES.
+Năm 1999, National Institute of Standards and Technology (NIST) của Mỹ chỉ ra rằng DES chỉ nên được dùng cho các hệ thống cũ, và thay vào đó nên dùng triple DES (3DES). Dù 3DES chống được brute-force attack với công nghệ ngày nay, nó có vài vấn đề. Thứ nhất, nó không hiệu quả lắm với các bản triển khai software. Một nhược điểm nghiêm trọng hơn là kích thước block 64 bit, làm phát sinh một số tấn công (xem Mục 3.8) nếu các khối dữ liệu lớn được mã hóa. Kích thước block ngắn cũng khiến việc xây dựng một hash function từ 3DES khó hơn (xem Mục 11.3.1). Cuối cùng, nếu người ta lo ngại về các tấn công bằng máy tính lượng tử trong tương lai, độ dài key cỡ 256 bit là đáng mong muốn. Mọi cân nhắc này dẫn NIST tới kết luận rằng cần một block cipher hoàn toàn mới để thay thế DES.
 
 Năm 1997, NIST kêu gọi đề xuất cho một Advanced Encryption Standard mới. Khác với quá trình phát triển DES, việc lựa chọn thuật toán AES là một quá trình mở do NIST quản lý. Trong ba vòng đánh giá liên tiếp, NIST và cộng đồng khoa học quốc tế đã thảo luận ưu và nhược điểm của các cipher được nộp và thu hẹp số lượng ứng viên tiềm năng. Năm 2001, NIST công bố cipher Rijndael là AES mới và ban hành nó như một tiêu chuẩn Mỹ (FIPS PUB 197). Rijndael được thiết kế bởi hai nhà cryptographer trẻ người Bỉ.
 
@@ -346,7 +346,7 @@ A(x) · B(x) ≡ x<sup>3</sup>
 
 ◇
 
-Quan trọng là không nhầm lẫn phép nhân trong GF(2<sup>m</sup>) với phép nhân số nguyên, đặc biệt nếu chúng ta quan tâm tới các hiện thực software của Galois field. Nhớ lại rằng các đa thức, tức là các phần tử field, thường được lưu trong máy tính dưới dạng vector bit. Nếu xem phép nhân trong ví dụ trước, phép toán rất bất thường sau đang được thực hiện ở mức bit:
+Quan trọng là không nhầm lẫn phép nhân trong GF(2<sup>m</sup>) với phép nhân số nguyên, đặc biệt nếu chúng ta quan tâm tới các bản triển khai software của Galois field. Nhớ lại rằng các đa thức, tức là các phần tử field, thường được lưu trong máy tính dưới dạng vector bit. Nếu xem phép nhân trong ví dụ trước, phép toán rất bất thường sau đang được thực hiện ở mức bit:
 
 A · B = C
 
@@ -441,7 +441,7 @@ S-box là phần tử phi tuyến duy nhất của AES, tức là ta có
 
 ByteSub(A) + ByteSub(B) ≠ ByteSub(A + B)
 
-với hai state A và B. Phép thay thế S-box là một ánh xạ song ánh, tức là mỗi phần tử trong 2<sup>8</sup> = 256 phần tử input khả dĩ được ánh xạ one-to-one tới một phần tử output. Điều này cho phép đảo ngược S-box một cách duy nhất, điều cần cho giải mã. Trong các hiện thực software, S-box thường được hiện thực như một lookup table 256-by-8-bit với các mục cố định, như cho trong Bảng 4.3.
+với hai state A và B. Phép thay thế S-box là một ánh xạ song ánh, tức là mỗi phần tử trong 2<sup>8</sup> = 256 phần tử input khả dĩ được ánh xạ one-to-one tới một phần tử output. Điều này cho phép đảo ngược S-box một cách duy nhất, điều cần cho giải mã. Trong các bản triển khai software, S-box thường được triển khai như một lookup table 256-by-8-bit với các mục cố định, như cho trong Bảng 4.3.
 
 Ví dụ 4.8. Giả sử byte input vào S-box là A<sub>i</sub> = (C2)<sub>hex</sub>, thì giá trị được thay thế là
 
@@ -511,7 +511,7 @@ Do đó, S((C2)<sub>hex</sub>) = (25)<sub>hex</sub>, chính xác là kết quả
 
 ◇
 
-Nếu tính cả hai bước cho tất cả 256 phần tử input khả dĩ của S-box và lưu kết quả, ta thu được Bảng 4.3. Trong hầu hết các hiện thực AES, đặc biệt là trong hầu như mọi hiện thực software của AES, output của S-box không được tính tường minh như trình bày ở đây, mà thay vào đó các lookup table như Bảng 4.3 được dùng. Tuy nhiên, với các hiện thực hardware, đôi khi có lợi khi hiện thực S-boxes dưới dạng các mạch số thực sự tính inverse rồi đến ánh xạ affine.
+Nếu tính cả hai bước cho tất cả 256 phần tử input khả dĩ của S-box và lưu kết quả, ta thu được Bảng 4.3. Trong hầu hết các bản triển khai AES, đặc biệt là trong hầu như mọi bản triển khai software của AES, output của S-box không được tính tường minh như trình bày ở đây, mà thay vào đó các lookup table như Bảng 4.3 được dùng. Tuy nhiên, với các bản triển khai hardware, đôi khi có lợi khi triển khai S-boxes dưới dạng các mạch số thực sự tính inverse rồi đến ánh xạ affine.
 
 Lợi thế của việc dùng phép nghịch đảo trong GF(2<sup>8</sup>) làm hàm cốt lõi của lớp Byte Substitution là nó cung cấp mức phi tuyến cao, điều này đến lượt nó cung cấp sự bảo vệ tối ưu trước một số tấn công phân tích mạnh nhất đã biết. Bước affine “phá hủy” cấu trúc đại số của Galois field, điều này đến lượt nó là cần thiết để ngăn các tấn công khai thác phép nghịch đảo finite field.
 
@@ -551,7 +551,7 @@ Cột thứ hai của các byte output (C<sub>4</sub>,C<sub>5</sub>,C<sub>6</sub
 
 Bây giờ chúng ta thảo luận chi tiết phép nhân vector–ma trận tạo nên các phép toán MixColumn. Nhớ lại rằng mỗi byte state C<sub>i</sub> và B<sub>i</sub> là một giá trị 8-bit biểu diễn một phần tử từ GF(2<sup>8</sup>). Mọi phép tính số học liên quan tới các hệ số đều được thực hiện trong Galois field này. Với các hằng số trong ma trận, ký hiệu hệ thập lục phân được dùng: “01” chỉ đa thức GF(2<sup>8</sup>) với các hệ số (0000 0001), tức là phần tử 1 của Galois field; “02” chỉ đa thức với vector bit (0000 0010), tức là đa thức x; và “03” chỉ đa thức với vector bit (0000 0011), tức là phần tử Galois field x + 1.
 
-Các phép cộng trong phép nhân vector–ma trận là các phép cộng GF(2<sup>8</sup>), đơn giản là XOR theo bit của các byte tương ứng. Với phép nhân các hằng số, chúng ta phải hiện thực các phép nhân với các hằng số 01, 02 và 03. Chúng khá hiệu quả, và thực ra, ba hằng số được chọn sao cho hiện thực software dễ dàng. Nhân với 01 là nhân với phần tử đơn vị và không cần phép toán tường minh nào. Nhân với 02 và 03 có thể được thực hiện qua table look-up trong hai bảng 256-by-8. Như một lựa chọn khác, nhân với 02 cũng có thể được hiện thực như phép nhân với x, tức là dịch trái một bit, và rút gọn modulo với P(x) = x<sup>8</sup> + x<sup>4</sup> + x<sup>3</sup> + x + 1. Tương tự, nhân với 03, biểu diễn đa thức (x + 1), có thể được hiện thực bằng một phép dịch trái một bit và cộng giá trị gốc, sau đó rút gọn modulo với P(x).
+Các phép cộng trong phép nhân vector–ma trận là các phép cộng GF(2<sup>8</sup>), đơn giản là XOR theo bit của các byte tương ứng. Với phép nhân các hằng số, chúng ta phải triển khai các phép nhân với các hằng số 01, 02 và 03. Chúng khá hiệu quả, và thực ra, ba hằng số được chọn sao cho triển khai software dễ dàng. Nhân với 01 là nhân với phần tử đơn vị và không cần phép toán tường minh nào. Nhân với 02 và 03 có thể được thực hiện qua table look-up trong hai bảng 256-by-8. Như một lựa chọn khác, nhân với 02 cũng có thể được triển khai như phép nhân với x, tức là dịch trái một bit, và rút gọn modulo với P(x) = x<sup>8</sup> + x<sup>4</sup> + x<sup>3</sup> + x + 1. Tương tự, nhân với 03, biểu diễn đa thức (x + 1), có thể được triển khai bằng một phép dịch trái một bit và cộng giá trị gốc, sau đó rút gọn modulo với P(x).
 
 Ví dụ 4.11. Chúng ta xét hộp MixColumn ngoài cùng bên trái trong Hình 4.3 với bốn byte input:
 
@@ -643,9 +643,9 @@ AES với key 256-bit cần 15 subkey. Các subkey được lưu trong 15 × 4 =
 
 Hình 4.7 Key schedule của AES cho kích thước key 256-bit
 
-Nói chung, khi hiện thực bất kỳ key schedule nào trong ba key schedule, có hai cách tiếp cận khác nhau:
+Nói chung, khi triển khai bất kỳ key schedule nào trong ba key schedule, có hai cách tiếp cận khác nhau:
 
-1. Tính trước (Precomputation) Mọi subkey được mở rộng trước vào mảng W. Việc mã hóa (giải mã) một plaintext (ciphertext) được thực hiện sau đó. Cách tiếp cận này thường được dùng trong các hiện thực AES trên PC và server, nơi các khối dữ liệu lớn được mã hóa dưới một key. Lưu ý rằng cách tiếp cận này cần (n<sub>r</sub> + 1) · 16 byte bộ nhớ, ví dụ, 11 · 16 = 176 byte nếu kích thước key là 128 bit. Có những ứng dụng với bộ nhớ rất hạn chế, như các thiết bị nhỏ IoT-like, nơi việc tính trước này có thể khó khăn.
+1. Tính trước (Precomputation) Mọi subkey được mở rộng trước vào mảng W. Việc mã hóa (giải mã) một plaintext (ciphertext) được thực hiện sau đó. Cách tiếp cận này thường được dùng trong các bản triển khai AES trên PC và server, nơi các khối dữ liệu lớn được mã hóa dưới một key. Lưu ý rằng cách tiếp cận này cần (n<sub>r</sub> + 1) · 16 byte bộ nhớ, ví dụ, 11 · 16 = 176 byte nếu kích thước key là 128 bit. Có những ứng dụng với bộ nhớ rất hạn chế, như các thiết bị nhỏ IoT-like, nơi việc tính trước này có thể khó khăn.
 
 2. On-the-fly Một subkey mới được suy ra cho mỗi vòng AES mới trong quá trình mã hóa (giải mã) một plaintext (ciphertext). Lưu ý rằng khi giải mã ciphertext, subkey cuối cùng được XOR trước tiên với ciphertext. Do đó, cần suy ra đệ quy mọi subkey trước rồi mới bắt đầu giải mã ciphertext và tạo subkey on-the-fly. Do overhead này, việc giải mã một ciphertext luôn chậm hơn một chút so với việc mã hóa một plaintext khi dùng cách tạo subkey on-the-fly.
 
@@ -735,17 +735,17 @@ A<sub>i</sub> = S<sup>−1</sup>(B<sub>i</sub>)
 
 Vì vòng giải mã thứ nhất cần subkey cuối cùng, vòng giải mã thứ hai cần subkey second-to-last và cứ thế, chúng ta cần n<sub>r</sub> + 1 subkey theo thứ tự đảo ngược, như thể hiện trong Hình 4.8. Trong thực tế, điều này chủ yếu đạt được bằng cách tính toàn bộ key schedule trước và lưu cả 11, 13 hoặc 15 subkey, tùy theo số vòng AES đang dùng (điều này lại phụ thuộc vào ba độ dài key mà AES hỗ trợ). Việc tính trước này thường thêm một độ trễ nhỏ vào phép toán giải mã so với mã hóa.
 
-## 4.6 Hiện thực bằng Software và Hardware
+## 4.6 Triển khai bằng Software và Hardware
 
-Dưới đây, chúng tôi bình luận ngắn gọn về hiệu quả của cipher AES đối với hiện thực software và hardware.
+Dưới đây, chúng tôi bình luận ngắn gọn về hiệu quả của cipher AES đối với bản triển khai software và hardware.
 
 ### Software
 
-Khác với DES, AES có thiết kế software-friendly hơn nhiều. Một hiện thực AES đơn giản, bám trực tiếp theo mô tả data path-oriented trong chương này, rất phù hợp với các vi xử lý 8-bit, đôi khi được dùng trong các smart card đơn giản hoặc các thiết bị IoT low-cost. Với các CPU 32- và 64-bit, phổ biến trong smartphone, PC và server ngày nay, các hiện thực table-based được dùng rộng rãi. Ý tưởng cốt lõi là gộp mọi hàm vòng (trừ phép cộng key khá tầm thường) vào một table look-up. Điều này cho ra bốn bảng, mỗi bảng gồm 256 mục, trong đó mỗi mục rộng 32 bit. Các bảng này được gọi là T-Boxes. Thú vị là phương pháp bảng này đã được những người thiết kế Rijndael mô tả trong tài liệu AES gốc được nộp trong cuộc thi NIST. Bốn lần truy cập bảng cho ra 32 bit output của một vòng. Do đó, một vòng có thể được tính với 16 table look-ups. Trên một vi xử lý Intel 1.2-GHz, có thể đạt throughput 50 MByte/s (hay 400 Mbit/s). Trên nhiều vi xử lý của Intel và AMD, có các lệnh đặc biệt, gọi là AES-NI (Advanced Encryption Standard New Instructions), giúp tăng tốc việc tính AES. AES-NI cho phép throughput trong khoảng 2 GByte/s (hay 16 Gbit/s).
+Khác với DES, AES có thiết kế software-friendly hơn nhiều. Một bản triển khai AES đơn giản, bám trực tiếp theo mô tả data path-oriented trong chương này, rất phù hợp với các vi xử lý 8-bit, đôi khi được dùng trong các smart card đơn giản hoặc các thiết bị IoT low-cost. Với các CPU 32- và 64-bit, phổ biến trong smartphone, PC và server ngày nay, các bản triển khai table-based được dùng rộng rãi. Ý tưởng cốt lõi là gộp mọi hàm vòng (trừ phép cộng key khá tầm thường) vào một table look-up. Điều này cho ra bốn bảng, mỗi bảng gồm 256 mục, trong đó mỗi mục rộng 32 bit. Các bảng này được gọi là T-Boxes. Thú vị là phương pháp bảng này đã được những người thiết kế Rijndael mô tả trong tài liệu AES gốc được nộp trong cuộc thi NIST. Bốn lần truy cập bảng cho ra 32 bit output của một vòng. Do đó, một vòng có thể được tính với 16 table look-ups. Trên một vi xử lý Intel 1.2-GHz, có thể đạt throughput 50 MByte/s (hay 400 Mbit/s). Trên nhiều vi xử lý của Intel và AMD, có các lệnh đặc biệt, gọi là AES-NI (Advanced Encryption Standard New Instructions), giúp tăng tốc việc tính AES. AES-NI cho phép throughput trong khoảng 2 GByte/s (hay 16 Gbit/s).
 
 ### Hardware
 
-So với DES, AES cần nhiều tài nguyên hardware hơn để hiện thực. Tuy nhiên, nhờ mật độ tích hợp cao của các mạch tích hợp hiện đại, các mạch hardware cho AES vẫn khá nhỏ so với nhiều chức năng khác thường được hiện thực trong các mạch tích hợp hiện đại. Do đường dữ liệu rộng 128 bit, có thể được hiện thực song song, các hiện thực hardware của AES có thể đạt throughput rất cao trong công nghệ ASIC hoặc FPGA (field programmable gate array — đây là các thiết bị hardware lập trình được) hiện đại. Các hiện thực engine AES dùng một vòng duy nhất được lặp 10, 12 hoặc 14 lần (tùy theo độ dài key) có thể vượt throughput 10 Gbit/sec. Bằng cách hiện thực vài vòng như vậy song song và pipelining chúng, tốc độ có thể được tăng thêm. Có thể nói rằng mã hóa symmetric với các cipher ngày nay cực kỳ nhanh, không chỉ so với các cryptosystem asymmetric mà còn so với các thuật toán khác cần trong các hệ thống truyền thông hiện đại, như các scheme nén dữ liệu hay xử lý tín hiệu.
+So với DES, AES cần nhiều tài nguyên hardware hơn để triển khai. Tuy nhiên, nhờ mật độ tích hợp cao của các mạch tích hợp hiện đại, các mạch hardware cho AES vẫn khá nhỏ so với nhiều chức năng khác thường được triển khai trong các mạch tích hợp hiện đại. Do đường dữ liệu rộng 128 bit, có thể được triển khai song song, các bản triển khai hardware của AES có thể đạt throughput rất cao trong công nghệ ASIC hoặc FPGA (field programmable gate array — đây là các thiết bị hardware lập trình được) hiện đại. Các bản triển khai engine AES dùng một vòng duy nhất được lặp 10, 12 hoặc 14 lần (tùy theo độ dài key) có thể vượt throughput 10 Gbit/sec. Bằng cách triển khai vài vòng như vậy song song và pipelining chúng, tốc độ có thể được tăng thêm. Có thể nói rằng mã hóa symmetric với các cipher ngày nay cực kỳ nhanh, không chỉ so với các cryptosystem asymmetric mà còn so với các thuật toán khác cần trong các hệ thống truyền thông hiện đại, như các scheme nén dữ liệu hay xử lý tín hiệu.
 
 ## 4.7 Thảo luận và đọc thêm (Discussion and Further Reading)
 
@@ -755,11 +755,11 @@ Hiện tại không có tấn công phân tích nào nhắm vào AES được bi
 
 Galois Field Tài liệu tham khảo tiêu chuẩn về toán học của finite field là [174]. Một phần giới thiệu rất dễ tiếp cận nhưng ngắn gọn cũng được cho trong [46]. International Workshop on the Arithmetic of Finite Fields (WAIFI) quan tâm tới cả ứng dụng và lý thuyết của Galois field [250].
 
-Hiện thực AES Như đã nhắc trong Mục 4.6, nhiều hiện thực software dùng các lookup table đặc biệt (T-Boxes) để hiện thực AES. Một mô tả chi tiết sớm về việc xây dựng T-Boxes có thể được tìm thấy trong [85, Mục 5]. Một mô tả về hiện thực software high-speed trên CPU 32-bit và 64-bit được cho trong [183, 182]. Kỹ thuật bit-slicing, được phát triển trong bối cảnh DES, cũng áp dụng được cho AES và có thể dẫn tới code rất nhanh, như được chỉ ra trong [184].
+Bản triển khai AES Như đã nhắc trong Mục 4.6, nhiều bản triển khai software dùng các lookup table đặc biệt (T-Boxes) để triển khai AES. Một mô tả chi tiết sớm về việc xây dựng T-Boxes có thể được tìm thấy trong [85, Mục 5]. Một mô tả về triển khai software high-speed trên CPU 32-bit và 64-bit được cho trong [183, 182]. Kỹ thuật bit-slicing, được phát triển trong bối cảnh DES, cũng áp dụng được cho AES và có thể dẫn tới code rất nhanh, như được chỉ ra trong [184].
 
 Một dấu hiệu mạnh về tầm quan trọng của AES là việc đưa vào các lệnh AES đặc biệt cho CPU của AMD và Intel. Chúng là các phần mở rộng của kiến trúc tập lệnh x86, được gọi là Advanced Encryption Standard New Instructions (viết tắt AES-NI), ban đầu được Intel đề xuất năm 2008 [129]. Các lệnh cho phép các máy này tính các phép toán vòng AES đặc biệt nhanh.
 
-Có rất nhiều tài liệu về hiện thực hardware của AES. Một phần giới thiệu tốt về lĩnh vực kiến trúc hardware AES được cho trong [165, Chương 10]. Làm ví dụ về sự đa dạng của các hiện thực AES, tài liệu tham khảo [127] mô tả một hiện thực FPGA rất nhỏ với 2.2 Mbit/s và một hiện thực FPGA pipelined rất nhanh với 25 Gbit/s. Cũng có thể dùng các khối DSP (tức là các đơn vị số học nhanh) có trên các FPGA hiện đại cho AES, cũng có thể cho throughput vượt 50 Gbit/s [99]. Ý tưởng cơ bản trong mọi kiến trúc high-speed là xử lý vài block plaintext song song bằng pipelining. Ở đầu kia của phổ hiệu năng là các kiến trúc lightweight được tối ưu cho các ứng dụng như các thiết bị IoT nhỏ. Ý tưởng cơ bản ở đây là tuần tự hóa đường dữ liệu, tức là một vòng được xử lý trong vài bước thời gian. Các tài liệu tham khảo tốt là [113, 71].
+Có rất nhiều tài liệu về triển khai hardware của AES. Một phần giới thiệu tốt về lĩnh vực kiến trúc hardware AES được cho trong [165, Chương 10]. Làm ví dụ về sự đa dạng của các bản triển khai AES, tài liệu tham khảo [127] mô tả một bản triển khai FPGA rất nhỏ với 2.2 Mbit/s và một bản triển khai FPGA pipelined rất nhanh với 25 Gbit/s. Cũng có thể dùng các khối DSP (tức là các đơn vị số học nhanh) có trên các FPGA hiện đại cho AES, cũng có thể cho throughput vượt 50 Gbit/s [99]. Ý tưởng cơ bản trong mọi kiến trúc high-speed là xử lý vài block plaintext song song bằng pipelining. Ở đầu kia của phổ hiệu năng là các kiến trúc lightweight được tối ưu cho các ứng dụng như các thiết bị IoT nhỏ. Ý tưởng cơ bản ở đây là tuần tự hóa đường dữ liệu, tức là một vòng được xử lý trong vài bước thời gian. Các tài liệu tham khảo tốt là [113, 71].
 
 ## 4.8 Bài học rút ra (Lessons Learned)
 
@@ -899,9 +899,9 @@ Lưu ý rằng trong các đặc tả AES, “01” biểu diễn đa thức 1, 
 
 1. Cần bao nhiêu cổng XOR 2-input để thực hiện một phép nhân hằng với 01, 02 và 03, lần lượt, trong GF(2<sup>8</sup>)?
 
-2. Độ phức tạp cổng tổng thể của một phép nhân ma trận–vector là bao nhiêu? (Độ phức tạp cổng quan trọng khi hiện thực AES bằng hardware.)
+2. Độ phức tạp cổng tổng thể của một phép nhân ma trận–vector là bao nhiêu? (Độ phức tạp cổng quan trọng khi triển khai AES bằng hardware.)
 
-3. Độ phức tạp cổng tổng thể của một hiện thực hardware của toàn bộ lớp Diffusion là bao nhiêu? Lưu ý rằng các hoán vị không cần cổng nào.
+3. Độ phức tạp cổng tổng thể của một bản triển khai hardware của toàn bộ lớp Diffusion là bao nhiêu? Lưu ý rằng các hoán vị không cần cổng nào.
 
 4.19. Suy ra biểu diễn bit cho các hằng số vòng sau trong key schedule:
 

@@ -456,7 +456,7 @@ struct buffer_t {
 
 *Code Box 20-9 [calcser/calc_proto_ser.h]: Định nghĩa của buffer_t*
 
-Code serializer đơn giản và nó chủ yếu gồm một câu lệnh `sprintf` tạo thông điệp chuỗi phản hồi. Giờ, hãy xem hàm deserializer yêu cầu. Deserialization thường khó hiện thực hơn, và nếu bạn đi vào code base và theo dõi các lời gọi hàm, bạn sẽ thấy nó có thể phức tạp như thế nào.
+Code serializer đơn giản và nó chủ yếu gồm một câu lệnh `sprintf` tạo thông điệp chuỗi phản hồi. Giờ, hãy xem hàm deserializer yêu cầu. Deserialization thường khó triển khai hơn, và nếu bạn đi vào code base và theo dõi các lời gọi hàm, bạn sẽ thấy nó có thể phức tạp như thế nào.
 
 *Code Box 20-9* chứa hàm deserialization yêu cầu:
 
@@ -475,7 +475,7 @@ void calc_proto_ser_server_deserialize(
 
 *Code Box 20-9 [calcser/calc_proto_ser.c]: Hàm deserialization yêu cầu server-side*
 
-Hàm trên có vẻ đơn giản, nhưng thực tế nó dùng các hàm private `_deserialize` và `_parse_req_and_notify`. Những hàm này được định nghĩa trong file `calc_proto_ser.c`, chứa hiện thực thực sự của class `Serializer`.
+Hàm trên có vẻ đơn giản, nhưng thực tế nó dùng các hàm private `_deserialize` và `_parse_req_and_notify`. Những hàm này được định nghĩa trong file `calc_proto_ser.c`, chứa bản triển khai thực sự của class `Serializer`.
 
 Sẽ nặng nề <a id="_idIndexMarker1486"></a>và nằm ngoài phạm vi của cuốn sách này nếu đưa vào và thảo luận code chúng ta có cho các hàm private đã đề cập, nhưng để cho bạn một ý niệm, đặc biệt khi bạn muốn đọc source code, deserializer dùng một *ring buffer* có độ dài cố định và cố tìm `$` làm message separator.
 
@@ -725,7 +725,7 @@ int main(int argc, char** argv) {
     exit(1);
   }
   // ----------- 4. Start accepting clients ---------
- accept_forever(server_sd);
+  accept_forever(server_sd);
   return 0;
 }
 ```
@@ -750,7 +750,7 @@ void accept_forever(int server_sd) {
     int* arg = (int *)malloc(sizeof(int));
     *arg = client_sd;
     int result = pthread_create(&client_handler_thread, NULL,
- &client_handler, arg);
+            &client_handler, arg);
     if (result) {
       close(client_sd);
       close(server_sd);
@@ -787,7 +787,7 @@ void* client_handler(void *arg) {
   calc_proto_ser_set_error_callback(context.ser, error_callback);
   context.svc = calc_service_new();
   calc_service_ctor(context.svc);
- context.write_resp = &stream_write_resp;
+  context.write_resp = &stream_write_resp;
   int ret;
   char buffer[128];
   while (1) {
@@ -797,7 +797,7 @@ void* client_handler(void *arg) {
     }
     struct buffer_t buf;
     buf.data = buffer; buf.len = ret;
- calc_proto_ser_server_deserialize(context.ser, buf, NULL);
+    calc_proto_ser_server_deserialize(context.ser, buf, NULL);
   }
   calc_service_dtor(context.svc);
   calc_service_delete(context.svc);
@@ -834,7 +834,7 @@ void stream_write_resp(
   if (ret == -1) {
     fprintf(stderr, "Could not write to client: %s\n",
             strerror(errno));
- close(context->addr->sd);
+    close(context->addr->sd);
     exit(1);
   } else if (ret < buf.len) {
     fprintf(stderr, "WARN: Less bytes were written!\n");
@@ -899,13 +899,13 @@ Lưu ý rằng client cũng dùng các hàm `read` và `write` để truyền th
 void stream_client_loop(int conn_sd) {
   struct context_t context;
   context.sd = conn_sd;
- context.ser = calc_proto_ser_new();
+  context.ser = calc_proto_ser_new();
   calc_proto_ser_ctor(context.ser, &context, 128);
   calc_proto_ser_set_resp_callback(context.ser, on_response);
   calc_proto_ser_set_error_callback(context.ser, on_error);
   pthread_t reader_thread;
   pthread_create(&reader_thread, NULL,
- stream_response_reader, &context);
+          stream_response_reader, &context);
   char buf[128];
   printf("? (type quit to exit) ");
   while (1) {
@@ -936,7 +936,7 @@ void stream_client_loop(int conn_sd) {
   shutdown(conn_sd, SHUT_RD);
   calc_proto_ser_dtor(context.ser);
   calc_proto_ser_delete(context.ser);
- pthread_join(reader_thread, NULL);
+  pthread_join(reader_thread, NULL);
   printf("Bye.\n");
 }
 ```
@@ -984,7 +984,7 @@ Tiếp theo, bạn có thể thấy hàm `main` của datagram server lắng ngh
 int main(int argc, char** argv) {
   char sock_file[] = "/tmp/calc_svc.sock";
   // ----------- 1. Create socket object ------------------
- int server_sd = socket(AF_UNIX, SOCK_DGRAM, 0);
+  int server_sd = socket(AF_UNIX, SOCK_DGRAM, 0);
   if (server_sd == -1) {
     fprintf(stderr, "Could not create socket: %s\n",
             strerror(errno));
@@ -998,8 +998,8 @@ int main(int argc, char** argv) {
   memset(&addr, 0, sizeof(addr));
   addr.sun_family = AF_UNIX;
   strncpy(addr.sun_path, sock_file, sizeof(addr.sun_path) - 1);
- int result = bind(server_sd,
- (struct sockaddr*)&addr, sizeof(addr));
+  int result = bind(server_sd,
+          (struct sockaddr*)&addr, sizeof(addr));
   if (result == -1) {
     close(server_sd);
     fprintf(stderr, "Could not bind the address: %s\n",
@@ -1007,7 +1007,7 @@ int main(int argc, char** argv) {
     exit(1);
   }
   // ----------- 3. Start serving requests ---------
- serve_forever(server_sd);
+  serve_forever(server_sd);
   return 0;
 }
 ```
@@ -1041,18 +1041,18 @@ void serve_forever(int server_sd) {
       exit(1);
     }
     struct client_context_t context;
- context.addr = (struct client_addr_t*)
+    context.addr = (struct client_addr_t*)
         malloc(sizeof(struct client_addr_t));
     context.addr->server_sd = server_sd;
     context.addr->sockaddr = sockaddr;
     context.addr->socklen = socklen;
- context.ser = calc_proto_ser_new();
+    context.ser = calc_proto_ser_new();
     calc_proto_ser_ctor(context.ser, &context, 256);
     calc_proto_ser_set_req_callback(context.ser, request_callback);
     calc_proto_ser_set_error_callback(context.ser, error_callback);
     context.svc = calc_service_new();
     calc_service_ctor(context.svc);
- context.write_resp = &datagram_write_resp;
+    context.write_resp = &datagram_write_resp;
     bool_t req_found = FALSE;
     struct buffer_t buf;
     buf.data = buffer;
@@ -1099,7 +1099,7 @@ void datagram_write_resp(struct client_context_t* context,
   if (ret == -1) {
     fprintf(stderr, "Could not write to client: %s\n",
             strerror(errno));
- close(context->addr->server_sd);
+    close(context->addr->server_sd);
     exit(1);
   } else if (ret < buf.len) {
     fprintf(stderr, "WARN: Less bytes were written!\n");
@@ -1149,8 +1149,8 @@ int main(int argc, char** argv) {
   addr.sun_family = AF_UNIX;
   strncpy(addr.sun_path, client_sock_file,
           sizeof(addr.sun_path) - 1);
- int result = bind(conn_sd,
- (struct sockaddr*)&addr, sizeof(addr));
+  int result = bind(conn_sd,
+          (struct sockaddr*)&addr, sizeof(addr));
   if (result == -1) {
     close(conn_sd);
     fprintf(stderr, "Could not bind the client address: %s\n",
@@ -1163,14 +1163,14 @@ int main(int argc, char** argv) {
   addr.sun_family = AF_UNIX;
   strncpy(addr.sun_path, server_sock_file,
           sizeof(addr.sun_path) - 1);
- result = connect(conn_sd,
- (struct sockaddr*)&addr, sizeof(addr));
+  result = connect(conn_sd,
+          (struct sockaddr*)&addr, sizeof(addr));
   if (result == -1) {
     close(conn_sd);
     fprintf(stderr, "Could no connect: %s\n", strerror(errno));
     exit(1);
   }
- datagram_client_loop(conn_sd);
+  datagram_client_loop(conn_sd);
   return 0;
 }
 ```
@@ -1212,7 +1212,7 @@ int main(int argc, char** argv) {
   }
   // ----------- 2. Bind the socket file ------------------
   // Prepare the address
- struct sockaddr_in addr;
+  struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = INADDR_ANY;
@@ -1221,7 +1221,7 @@ int main(int argc, char** argv) {
   // ----------- 3. Prepare backlog ------------------
   ...
   // ----------- 4. Start accepting clients ---------
- accept_forever(server_sd);
+  accept_forever(server_sd);
   return 0;
 }
 ```
@@ -1255,13 +1255,13 @@ int main(int argc, char** argv) {
   // Find the IP address behind the hostname
   ...
   // Prepare the address
- struct sockaddr_in addr;
+  struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_addr = *((struct in_addr*)host_entry->h_addr);
   addr.sin_port = htons(6666);
   ...
- stream_client_loop(conn_sd);
+  stream_client_loop(conn_sd);
   return 0;
 }
 ```
@@ -1293,14 +1293,14 @@ int main(int argc, char** argv) {
   }
   // ----------- 2. Bind the socket file ------------------
   // Prepare the address
- struct sockaddr_in addr;
+  struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = INADDR_ANY;
   addr.sin_port = htons(9999);
   ...
   // ----------- 3. Start serving requests ---------
- serve_forever(server_sd);
+  serve_forever(server_sd);
   return 0;
 }
 ```
@@ -1330,14 +1330,14 @@ int main(int argc, char** argv) {
   ...
   // Prepare the address
   ...
- datagram_client_loop(conn_sd);
+  datagram_client_loop(conn_sd);
   return 0;
 }
 ```
 
 *Code Box 20-28 [client/udp/main.c]: Hàm main của UDP calculator client*
 
-Đó là khái niệm cuối cùng cho chương này. Trong chương này, chúng ta đã đi qua các loại socket well-known khác nhau và cùng với đó, chúng tôi đã cho thấy các trình tự listener và connector cho cả stream channel lẫn datagram channel có thể được hiện thực trong C như thế nào.
+Đó là khái niệm cuối cùng cho chương này. Trong chương này, chúng ta đã đi qua các loại socket well-known khác nhau và cùng với đó, chúng tôi đã cho thấy các trình tự listener và connector cho cả stream channel lẫn datagram channel có thể được triển khai trong C như thế nào.
 
 Có nhiều điều trong dự án calculator mà chúng ta thậm chí chưa nói đến. Do đó, rất khuyến khích đi qua code, tìm những chỗ đó, và cố gắng đọc và hiểu nó. Có một ví dụ hoạt động đầy đủ có thể giúp bạn xem xét các khái niệm trong các ứng dụng thật.
 

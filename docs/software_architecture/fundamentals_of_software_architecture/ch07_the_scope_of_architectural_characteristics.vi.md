@@ -4,7 +4,7 @@
 
 <a id="ix_ch07-scope-asciidoc0"></a>Tư duy của kiến trúc sư phần mềm phải tiến hóa cùng hệ sinh thái của chúng ta, và không ở đâu điều đó rõ ràng hơn trong việc xác định phạm vi của các architectural characteristic. Nhiều framework lỗi thời để xác định architectural characteristic có một khiếm khuyết chết người: giả định một tập architectural characteristic duy nhất cho toàn bộ hệ thống. Dù điều đó đôi khi vẫn đúng, nhiều architecture hiện đại, như microservices, chứa các architectural characteristic khác nhau ở mức service và mức hệ thống.
 
-Phạm vi của các architectural characteristic là một thước đo hữu ích cho kiến trúc sư, đặc biệt trong việc xác định architecture style phù hợp nhất để dùng làm điểm khởi đầu cho việc hiện thực. Khi chúng tôi viết cuốn sách [*Building Evolutionary Architectures*](https://evolutionaryarchitecture.com), chúng tôi cần một kỹ thuật để đo khả năng tiến hóa về cấu trúc (structural evolvability) của các architecture style cụ thể. Không thước đo hiện có nào cung cấp đúng mức chi tiết. Mục [“Structural Measures”](ch06_measuring_and_governing_architecture_characteristics.vi.md#ch-measuring-sec-structural) thảo luận nhiều metric code-level cho phép kiến trúc sư phân tích các khía cạnh cấu trúc của một architecture—nhưng không metric nào trong số đó phản ánh phạm vi. Chúng tiết lộ các chi tiết low-level về code, nhưng không thể đánh giá các component phụ thuộc bên ngoài code base (như database) vốn ảnh hưởng đến nhiều architectural characteristic, đặc biệt là các characteristic vận hành. Dù kiến trúc sư bỏ bao nhiêu công sức vào việc thiết kế một code base có performance tốt hay elastic, nếu database của hệ thống không khớp với các characteristic đó, công sức của họ sẽ không thành công.
+Phạm vi của các architectural characteristic là một thước đo hữu ích cho kiến trúc sư, đặc biệt trong việc xác định architecture style phù hợp nhất để dùng làm điểm khởi đầu cho việc triển khai. Khi chúng tôi viết cuốn sách [*Building Evolutionary Architectures*](https://evolutionaryarchitecture.com), chúng tôi cần một kỹ thuật để đo khả năng tiến hóa về cấu trúc (structural evolvability) của các architecture style cụ thể. Không thước đo hiện có nào cung cấp đúng mức chi tiết. Mục [“Structural Measures”](ch06_measuring_and_governing_architecture_characteristics.vi.md#ch-measuring-sec-structural) thảo luận nhiều metric code-level cho phép kiến trúc sư phân tích các khía cạnh cấu trúc của một architecture—nhưng không metric nào trong số đó phản ánh phạm vi. Chúng tiết lộ các chi tiết low-level về code, nhưng không thể đánh giá các component phụ thuộc bên ngoài code base (như database) vốn ảnh hưởng đến nhiều architectural characteristic, đặc biệt là các characteristic vận hành. Dù kiến trúc sư bỏ bao nhiêu công sức vào việc thiết kế một code base có performance tốt hay elastic, nếu database của hệ thống không khớp với các characteristic đó, công sức của họ sẽ không thành công.
 
 Không tìm được một thước đo tốt cho phạm vi, chúng tôi đã tự phát triển một thước đo. Chúng tôi gọi nó là *architecture quantum*.
 
@@ -24,7 +24,7 @@ Một *architecture quantum* thiết lập phạm vi cho một tập architectur
 
 - Deployment độc lập với các phần khác của architecture
 - Functional cohesion cao
-- Static coupling hiện thực bên ngoài thấp
+- Static coupling triển khai bên ngoài thấp
 - Giao tiếp đồng bộ với các quanta khác
 
 Định nghĩa này gồm nhiều phần. Hãy phân tích từng phần:
@@ -55,9 +55,9 @@ Một architecture quantum bao gồm mọi component cần thiết để hoạt 
 
 <a id="id970"></a>*Semantic coupling* mô tả coupling tự nhiên của vấn đề mà kiến trúc sư đang xây dựng giải pháp cho nó. Ví dụ, coupling vốn có của một ứng dụng order-processing bao gồm những thứ như tồn kho, catalog, giỏ hàng, khách hàng và doanh số. Bản chất của vấn đề thúc đẩy việc xây dựng một giải pháp phần mềm định nghĩa coupling này. Kiến trúc sư có ít kỹ thuật ngăn những thay đổi trong domain lan tỏa ra khắp hệ thống: một thay đổi trong domain (và do đó trong ngữ nghĩa) có nghĩa là chúng ta đang thay đổi yêu cầu của hệ thống. Dù kiến trúc sư có thể thích ứng với điều đó, không có architecture pattern thần kỳ nào ngăn việc thay đổi vấn đề cốt lõi ảnh hưởng đến architecture.
 
-**Implementation coupling (coupling hiện thực)**
+**Implementation coupling (coupling triển khai)**
 
-<a id="id971"></a>*Implementation coupling* mô tả cách một kiến trúc sư và team quyết định hiện thực các phụ thuộc cụ thể. Trong một ứng dụng order-processing, team phải xem xét nhiều ràng buộc khi thiết lập ranh giới domain. Ví dụ, tất cả dữ liệu nên nằm trong một database duy nhất, hay một phần nên được tách ra để có scalability hoặc availability tốt hơn? Chúng ta nên xây dựng một monolith hay một architecture phân tán? Câu trả lời cho những câu hỏi này ít ảnh hưởng đến semantic coupling của hệ thống, nhưng ảnh hưởng lớn đến các quyết định kiến trúc.
+<a id="id971"></a>*Implementation coupling* mô tả cách một kiến trúc sư và team quyết định triển khai các phụ thuộc cụ thể. Trong một ứng dụng order-processing, team phải xem xét nhiều ràng buộc khi thiết lập ranh giới domain. Ví dụ, tất cả dữ liệu nên nằm trong một database duy nhất, hay một phần nên được tách ra để có scalability hoặc availability tốt hơn? Chúng ta nên xây dựng một monolith hay một architecture phân tán? Câu trả lời cho những câu hỏi này ít ảnh hưởng đến semantic coupling của hệ thống, nhưng ảnh hưởng lớn đến các quyết định kiến trúc.
 
 **Static coupling (coupling tĩnh)**
 
@@ -71,11 +71,11 @@ Một architecture quantum bao gồm mọi component cần thiết để hoạt 
 
 Với những định nghĩa này trong tay, chúng ta có thể hoàn thiện định nghĩa *architecture quantum*:
 
-**Static coupling hiện thực bên ngoài thấp**
+**Static coupling triển khai bên ngoài thấp**
 
-Mức coupling hiện thực giữa các architecture quanta nên thấp. Characteristic này cũng bắt nguồn từ triết lý DDD về coupling thấp giữa các bounded context. Quanta tạo thành các khối xây dựng vận hành của architecture, nằm ở mức trừu tượng cao hơn component một bậc. Chúng thường trùng với ranh giới service. Mục tiêu này phản ánh sự ưa chuộng chung của kiến trúc sư đối với loose coupling giữa các phần khác nhau của architecture.
+Mức coupling triển khai giữa các architecture quanta nên thấp. Characteristic này cũng bắt nguồn từ triết lý DDD về coupling thấp giữa các bounded context. Quanta tạo thành các khối xây dựng vận hành của architecture, nằm ở mức trừu tượng cao hơn component một bậc. Chúng thường trùng với ranh giới service. Mục tiêu này phản ánh sự ưa chuộng chung của kiến trúc sư đối với loose coupling giữa các phần khác nhau của architecture.
 
-Nhìn chung, coupling chặt là đáng mong muốn khi cần cohesion cao, như bên trong một service hoặc subsystem. <a id="id974"></a>Chúng tôi gọi một architecture là “giòn” (brittle) khi một thay đổi hiện thực duy nhất có thể gây ra những tác dụng phụ lan tỏa không lường trước làm hỏng nhiều thứ khác (bề ngoài có vẻ không liên quan). Phạm vi coupling của hệ thống càng rộng, loose coupling càng giúp architecture bớt giòn. Ví dụ, một kiến trúc sư có thể đổi tên một trường trong một lời gọi service từ `State` thành `StateCode`, nghĩ rằng nó sẽ chỉ ảnh hưởng đến một bên gọi, rồi mới phát hiện ra nhiều phụ thuộc khác vừa bị hỏng một cách bất ngờ.
+Nhìn chung, coupling chặt là đáng mong muốn khi cần cohesion cao, như bên trong một service hoặc subsystem. <a id="id974"></a>Chúng tôi gọi một architecture là “giòn” (brittle) khi một thay đổi triển khai duy nhất có thể gây ra những tác dụng phụ lan tỏa không lường trước làm hỏng nhiều thứ khác (bề ngoài có vẻ không liên quan). Phạm vi coupling của hệ thống càng rộng, loose coupling càng giúp architecture bớt giòn. Ví dụ, một kiến trúc sư có thể đổi tên một trường trong một lời gọi service từ `State` thành `StateCode`, nghĩ rằng nó sẽ chỉ ảnh hưởng đến một bên gọi, rồi mới phát hiện ra nhiều phụ thuộc khác vừa bị hỏng một cách bất ngờ.
 
 > **Mẹo**
 >

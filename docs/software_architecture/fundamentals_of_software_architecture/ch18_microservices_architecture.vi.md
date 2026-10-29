@@ -88,13 +88,13 @@ Lặp lại là cách duy nhất để bảo đảm thiết kế service tốt. 
 
 Data isolation là một yếu tố khác cần xem xét khi nhìn vào granularity của service. <a id="id1421"></a><a id="id1422"></a>Hãy cảnh giác với Entity Trap (được thảo luận trong [“The Entity Trap”](ch08_component_based_thinking.vi.md#sec-entity-trap))—đừng đơn giản mô hình hóa các service giống với các thực thể đơn lẻ trong database. Kiến trúc sư quen dùng relational database để hợp nhất các giá trị trong một hệ thống, tạo ra một nguồn sự thật duy nhất (single source of truth), nhưng đó không còn là lựa chọn khi bạn phân tán dữ liệu khắp architecture. Vì vậy mọi kiến trúc sư phải quyết định cách họ muốn xử lý vấn đề này: hoặc xác định một domain làm nguồn sự thật cho một dữ kiện nào đó và phối hợp với nó để truy xuất giá trị, hoặc phân phối thông tin thông qua database replication hoặc caching.
 
-Dù mức data isolation này gây đau đầu, nó cũng mang lại cơ hội. Giờ đây khi không bị buộc phải hợp nhất xoay quanh một database duy nhất, mỗi team có thể chọn công nghệ database phù hợp nhất cho ngân sách, loại cấu trúc lưu trữ, characteristic vận hành, characteristic quy trình, v.v. của service mình. Một ưu điểm khác của hệ thống decoupled cao là bất kỳ team nào cũng có thể đổi hướng và chọn một database phù hợp hơn (hoặc phụ thuộc khác) mà không ảnh hưởng đến các team khác, vốn không được phép coupling với chi tiết hiện thực. (Chúng tôi đề cập data isolation và các cân nhắc về database chi tiết hơn trong [“Data Topologies”](#sec-ms-data-topologies).)
+Dù mức data isolation này gây đau đầu, nó cũng mang lại cơ hội. Giờ đây khi không bị buộc phải hợp nhất xoay quanh một database duy nhất, mỗi team có thể chọn công nghệ database phù hợp nhất cho ngân sách, loại cấu trúc lưu trữ, characteristic vận hành, characteristic quy trình, v.v. của service mình. Một ưu điểm khác của hệ thống decoupled cao là bất kỳ team nào cũng có thể đổi hướng và chọn một database phù hợp hơn (hoặc phụ thuộc khác) mà không ảnh hưởng đến các team khác, vốn không được phép coupling với chi tiết triển khai. (Chúng tôi đề cập data isolation và các cân nhắc về database chi tiết hơn trong [“Data Topologies”](#sec-ms-data-topologies).)
 
 <a id="id407"></a>
 
 ### API Layer
 
-<a id="id1423"></a>Hầu hết các microservices architecture bao gồm một API layer (thường gọi là *API Gateway*) giữa các bên tiêu thụ hệ thống (giao diện người dùng hoặc lời gọi từ các hệ thống khác) và các microservice. API layer có thể được hiện thực như một reverse-proxy đơn giản hoặc một gateway tinh vi hơn chứa các mối quan tâm cross-cutting như security, naming service, v.v. (những điều này được đề cập chi tiết hơn trong [“Operational Reuse”](#sec-operational-reuse)).
+<a id="id1423"></a>Hầu hết các microservices architecture bao gồm một API layer (thường gọi là *API Gateway*) giữa các bên tiêu thụ hệ thống (giao diện người dùng hoặc lời gọi từ các hệ thống khác) và các microservice. API layer có thể được triển khai như một reverse-proxy đơn giản hoặc một gateway tinh vi hơn chứa các mối quan tâm cross-cutting như security, naming service, v.v. (những điều này được đề cập chi tiết hơn trong [“Operational Reuse”](#sec-operational-reuse)).
 
 Dù API layer có nhiều công dụng, để trung thành với triết lý nền tảng của architecture này, chúng không nên được dùng làm mediator hay orchestrator. Mọi logic nghiệp vụ đáng kể trong architecture này nên nằm bên trong một bounded context, và đặt orchestration hay logic nghiệp vụ khác vào một mediator vi phạm quy tắc đó. Kiến trúc sư thường dùng mediator trong các architecture được phân vùng theo kỹ thuật, trong khi microservices được phân vùng theo domain một cách vững chắc.
 
@@ -108,7 +108,7 @@ Dù API layer có nhiều công dụng, để trung thành với triết lý n�
 
 <a id="ix_ch18-style-microservices-asciidoc3"></a>Vì microservices ưu tiên nhân bản hơn coupling, kiến trúc sư xử lý thế nào với các phần của architecture này thực sự có lợi từ coupling, như các mối quan tâm vận hành kiểu giám sát, logging và circuit breaker? Triết lý service-oriented architecture truyền thống là tái sử dụng càng nhiều chức năng càng tốt, cả domain lẫn vận hành. Tuy nhiên, trong microservices, kiến trúc sư cố tách hai mối quan tâm này.
 
-Khi một team đã xây dựng một số microservice, các thành viên bắt đầu nhận ra rằng mỗi microservice có những phần tử chung có lợi từ sự tương đồng. Ví dụ, nếu một tổ chức cho phép mỗi team service tự hiện thực việc giám sát, làm sao nó bảo đảm mỗi team đều làm vậy? Và tổ chức xử lý các mối quan tâm như nâng cấp thế nào—mỗi team có chịu trách nhiệm nâng cấp lên phiên bản mới của công cụ giám sát không, và việc đó sẽ mất bao lâu? <a id="ix_ch18-style-microservices-asciidoc4"></a>Pattern *Sidecar* đưa ra một giải pháp cho vấn đề này ([Hình 18-2](#fig-style-microservices-sidecar)).
+Khi một team đã xây dựng một số microservice, các thành viên bắt đầu nhận ra rằng mỗi microservice có những phần tử chung có lợi từ sự tương đồng. Ví dụ, nếu một tổ chức cho phép mỗi team service tự triển khai việc giám sát, làm sao nó bảo đảm mỗi team đều làm vậy? Và tổ chức xử lý các mối quan tâm như nâng cấp thế nào—mỗi team có chịu trách nhiệm nâng cấp lên phiên bản mới của công cụ giám sát không, và việc đó sẽ mất bao lâu? <a id="ix_ch18-style-microservices-asciidoc4"></a>Pattern *Sidecar* đưa ra một giải pháp cho vấn đề này ([Hình 18-2](#fig-style-microservices-sidecar)).
 
 <a id="fig-style-microservices-sidecar"></a>
 
@@ -196,7 +196,7 @@ Với giao tiếp bất đồng bộ, kiến trúc sư thường dùng sự ki�
 
 ### Choreography và orchestration (Choreography and Orchestration)
 
-<a id="ix_ch18-style-microservices-asciidoc10"></a><a id="ix_ch18-style-microservices-asciidoc11"></a><a id="ix_ch18-style-microservices-asciidoc12"></a>*Choreography* sử dụng cùng style giao tiếp như EDA. Các choreographed architecture không có bộ điều phối trung tâm, tôn trọng triết lý bounded context và khiến việc hiện thực các sự kiện decoupled giữa các service trở nên tự nhiên.
+<a id="ix_ch18-style-microservices-asciidoc10"></a><a id="ix_ch18-style-microservices-asciidoc11"></a><a id="ix_ch18-style-microservices-asciidoc12"></a>*Choreography* sử dụng cùng style giao tiếp như EDA. Các choreographed architecture không có bộ điều phối trung tâm, tôn trọng triết lý bounded context và khiến việc triển khai các sự kiện decoupled giữa các service trở nên tự nhiên.
 
 Trong choreography, mỗi service gọi các service khác khi cần, không có mediator trung tâm. Ví dụ, hãy xét kịch bản trong [Hình 18-7](#fig-style-microservices-choreography). Người dùng yêu cầu chi tiết về wish list của một người dùng khác. Vì service `CustomerWishList` không chứa mọi thông tin nó cần, nó thực hiện một lời gọi tới `CustomerDemographics` để truy xuất thông tin còn thiếu, rồi trả kết quả cho người dùng.
 
@@ -258,7 +258,7 @@ Trong [Hình 18-11](#fig-microservices-saga-happy), một service đóng vai tr�
 
 *Hình 18-11. Pattern Saga trong microservices architecture*
 
-<a id="id1445"></a>Nếu phần đầu tiên của transaction thành công nhưng phần thứ hai thất bại, mediator phải gửi một request tới tất cả các service tham gia khác của transaction đã thành công và bảo chúng hoàn tác request trước đó. Style phối hợp transaction này được gọi là *compensating transaction framework* (framework transaction bù trừ). Developer thường hiện thực pattern này bằng cách để mỗi request từ mediator vào trạng thái `pending` cho đến khi mediator báo thành công tổng thể. Tuy nhiên, việc tung hứng các request bất đồng bộ có thể trở nên phức tạp, đặc biệt nếu xuất hiện các request mới phụ thuộc vào trạng thái transaction đang chờ. Bất kể dùng giao thức nào, các compensating transaction tạo ra rất nhiều lưu lượng phối hợp ở mức mạng.
+<a id="id1445"></a>Nếu phần đầu tiên của transaction thành công nhưng phần thứ hai thất bại, mediator phải gửi một request tới tất cả các service tham gia khác của transaction đã thành công và bảo chúng hoàn tác request trước đó. Style phối hợp transaction này được gọi là *compensating transaction framework* (framework transaction bù trừ). Developer thường triển khai pattern này bằng cách để mỗi request từ mediator vào trạng thái `pending` cho đến khi mediator báo thành công tổng thể. Tuy nhiên, việc tung hứng các request bất đồng bộ có thể trở nên phức tạp, đặc biệt nếu xuất hiện các request mới phụ thuộc vào trạng thái transaction đang chờ. Bất kể dùng giao thức nào, các compensating transaction tạo ra rất nhiều lưu lượng phối hợp ở mức mạng.
 
 <a id="fig-microservices-saga-error"></a>
 
@@ -410,7 +410,7 @@ Microservices chắc chắn là một architecture domain-partitioned, trong đ�
 
 Hệ thống patient-monitoring này đọc đầu vào từ các thiết bị patient-monitoring, ghi lại các dấu hiệu sinh tồn, phân tích các dấu hiệu sinh tồn đó để tìm bất kỳ vấn đề hay bất thường nào, và cảnh báo một nhân viên y tế nếu phát hiện vấn đề. Mỗi dấu hiệu sinh tồn có thể được đại diện bởi một microservice riêng, phần lớn độc lập với các service và dữ liệu khác. Tuy nhiên, một ngoại lệ cho sự độc lập này sẽ là nếu một dấu hiệu sinh tồn cụ thể (như nhịp tim) cần thêm thông tin từ một dấu hiệu sinh tồn khác (như một service sleep-monitor) để phân tích dấu hiệu sinh tồn của nó nhằm tìm cảnh báo hoặc vấn đề.
 
-[Hình 18-17](#fig-style-microservices-use-case) minh họa hệ thống này có thể được thiết kế như thế nào bằng microservices architecture. Hãy chú ý cách mỗi dấu hiệu sinh tồn được hiện thực như một microservice riêng, mỗi microservice duy trì kho dữ liệu riêng cho các số đo vital-sign và dữ liệu lịch sử.
+[Hình 18-17](#fig-style-microservices-use-case) minh họa hệ thống này có thể được thiết kế như thế nào bằng microservices architecture. Hãy chú ý cách mỗi dấu hiệu sinh tồn được triển khai như một microservice riêng, mỗi microservice duy trì kho dữ liệu riêng cho các số đo vital-sign và dữ liệu lịch sử.
 
 Chức năng cảnh báo, vốn chung cho mọi service vital-signs, được đại diện bởi một *shared service* gọi là `Alert Staff`. Nó cảnh báo y tá hoặc bác sĩ nếu một service cụ thể nhận thấy có gì đó sai với một số đo. Mỗi service gửi bất đồng bộ số đo vital-signs mới nhất của mình tới một màn hình đặt trong phòng bệnh nhân, được đại diện bởi shared service `Display Vital Signs`.
 
@@ -418,7 +418,7 @@ Chức năng cảnh báo, vốn chung cho mọi service vital-signs, được đ
 
 ![](images/fsa2_1817.png)
 
-*Hình 18-17. Một hệ thống medical-monitoring cho bệnh nhân được hiện thực bằng microservices architecture*
+*Hình 18-17. Một hệ thống medical-monitoring cho bệnh nhân được triển khai bằng microservices architecture*
 
 Ví dụ này minh họa rõ một số điểm mạnh và ưu điểm của microservices architecture. Lấy *fault tolerance*: nếu một trong các service vital-sign bị crash hoặc không phản hồi, mọi service giám sát vital-sign khác vẫn hoạt động đầy đủ. Điều này đặc biệt quan trọng trong theo dõi y tế. Một siêu năng lực khác là *testability*. Nếu một developer thực hiện bảo trì service giám sát blood-pressure, phạm vi testing đủ nhỏ để họ có thể yên tâm rằng dấu hiệu sinh tồn cụ thể này được test đầy đủ, và việc bảo trì không ảnh hưởng đến các service vital-sign khác. Cuối cùng, một dấu hiệu của *evolvability* (một siêu năng lực khác của microservices) là kiến trúc sư có thể dễ dàng thêm một bộ giám sát vital-sign khác mà không ảnh hưởng đến các service khác. <a id="id1466"></a><a id="id1467"></a>
 

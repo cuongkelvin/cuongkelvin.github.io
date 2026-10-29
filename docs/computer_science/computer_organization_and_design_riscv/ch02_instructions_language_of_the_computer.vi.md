@@ -52,7 +52,7 @@ Burks, Goldstine và von Neumann, 1947
 
 Khi học cách biểu diễn instruction, bạn cũng khám phá bí mật của tính toán: khái niệm stored-program. Hơn nữa, bạn luyện kỹ năng “ngoại ngữ” bằng cách viết chương trình theo ngôn ngữ máy tính và chạy trên simulator đi kèm sách. Bạn cũng thấy tác động của ngôn ngữ lập trình và tối ưu compiler lên hiệu năng. Ta kết thúc bằng xem sự tiến hóa lịch sử của instruction set và tổng quan các phương ngữ máy tính khác.
 
-#### stored-program concept
+### stored-program concept
 
 Ý tưởng rằng instruction và dữ liệu nhiều kiểu có thể lưu trong bộ nhớ dưới dạng số nên dễ thay đổi, dẫn tới máy tính stored-program.
 
@@ -116,7 +116,7 @@ add a, b, c
 sub d, a, e
 ```
 
-#### Biên dịch câu lệnh gán C phức tạp thành RISC-V
+### Biên dịch câu lệnh gán C phức tạp thành RISC-V
 
 **Ví dụ**
 
@@ -148,7 +148,7 @@ Cuối cùng, subtract instruction trừ tổng thứ hai khỏi tổng thứ nh
 sub f, t0, t1 // f gets t0 −t1, which is (g + h) −(i + j)
 ```
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 Với một chức năng nhất định, ngôn ngữ lập trình nào có thể cần nhiều dòng code nhất? Sắp ba biểu diễn sau theo thứ tự.
 
@@ -158,7 +158,7 @@ Với một chức năng nhất định, ngôn ngữ lập trình nào có thể
 
 3. Assembly language RISC-V
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Để tăng tính di động, Java ban đầu được hình dung dựa vào software interpreter. Instruction set của interpreter này gọi là Java bytecode (xem ![p0172_7](images/ch02_instructions_language_of_the_computer/p0172_7.png) Mục 2.15), khá khác instruction set RISC-V. Để đạt hiệu năng gần chương trình C tương đương, hệ thống Java ngày nay thường biên dịch Java bytecode sang native instruction set như RISC-V. Vì việc biên dịch này thường diễn ra muộn hơn nhiều so với chương trình C, compiler Java như vậy thường gọi là Just In Time (JIT) compiler. Mục 2.12 cho thấy JIT được dùng muộn hơn compiler C trong quá trình start-up, và Mục 2.13 cho thấy hệ quả hiệu năng của biên dịch so với thông dịch chương trình Java.
 
@@ -170,7 +170,7 @@ Khác chương trình bằng ngôn ngữ high-level, toán hạng arithmetic ins
 
 Đơn vị truy cập tự nhiên khác trong máy tính, thường là nhóm 64 bit; tương ứng kích thước register trong kiến trúc RISC-V.
 
-#### word
+### word
 
 Đơn vị truy cập tự nhiên trong máy tính, thường là nhóm 32 bit.
 
@@ -188,7 +188,7 @@ Chương 4 cho thấy vai trò trung tâm của register trong xây dựng phầ
 
 Mặc dù có thể viết instruction đơn giản bằng số register từ 0 đến 31, quy ước RISC-V là x theo sau bởi số register, trừ vài tên register sẽ bàn sau.
 
-#### Biên dịch câu lệnh gán C dùng register
+### Biên dịch câu lệnh gán C dùng register
 
 **Ví dụ**
 
@@ -415,11 +415,11 @@ Ta đánh số bit 0, 1, 2, 3, … từ phải sang trái trong doubleword. Hìn
 
 Vì doubleword được vẽ theo cả chiều dọc và ngang, ngoài cùng trái và ngoài cùng phải có thể không rõ. Do đó, cụm least significant bit dùng để chỉ bit ngoài cùng phải (bit 0 phía trên) và most significant bit chỉ bit ngoài cùng trái (bit 63).
 
-#### least significant bit
+### least significant bit
 
 Bit ngoài cùng phải trong doubleword RISC-V.
 
-#### most significant bit
+### most significant bit
 
 Bit ngoài cùng trái trong doubleword RISC-V.
 
@@ -445,7 +445,7 @@ Nghĩa là số nhị phân 64-bit có thể biểu diễn bằng giá trị bit
 
 Vì những lý do sắp thấy, các số dương này gọi là số unsigned.
 
-#### Giao diện phần cứng/phần mềm
+### Giao diện phần cứng/phần mềm
 
 Cơ số 2 không tự nhiên với con người; ta có 10 ngón tay nên thấy cơ số 10 tự nhiên. Tại sao máy tính không dùng thập phân? Thực tế máy tính thương mại đầu tiên có số học thập phân. Vấn đề là máy tính vẫn dùng tín hiệu bật và tắt, nên một chữ số thập phân chỉ được biểu diễn bằng vài chữ số nhị phân. Thập phân tỏ ra kém hiệu quả đến mức máy tính sau trở lại hoàn toàn nhị phân, chỉ chuyển sang cơ số 10 cho các sự kiện input/output tương đối hiếm.
 
@@ -498,7 +498,7 @@ Biểu diễn two’s complement có ưu điểm mọi số âm có 1 ở most s
 
 Sign bit được nhân với −2<sup>63</sup>, và các bit còn lại nhân với phiên bản dương của giá trị cơ số tương ứng.
 
-#### Chuyển từ nhị phân sang thập phân
+### Chuyển từ nhị phân sang thập phân
 
 **Ví dụ**
 
@@ -517,19 +517,19 @@ Ta sẽ sớm thấy mẹo đơn giản hóa chuyển từ âm sang dương.
 
 Giống phép toán số unsigned có thể vượt khả năng biểu diễn kết quả của phần cứng, phép toán số two’s complement cũng có thể vậy. Overflow xảy ra khi bit ngoài cùng trái được giữ trong bit pattern nhị phân không giống vô hạn chữ số bên trái (sign bit sai): 0 bên trái bit pattern khi số âm hoặc 1 khi số dương.
 
-#### Giao diện phần cứng/phần mềm
+### Giao diện phần cứng/phần mềm
 
 Signed so với unsigned áp dụng cho load cũng như số học. Chức năng signed load là sao chép dấu lặp lại để lấp phần còn lại register—gọi là sign extension—nhưng mục đích là đặt biểu diễn đúng của số trong register ấy. Unsigned load chỉ điền 0 bên trái dữ liệu, vì số biểu diễn bởi bit pattern là unsigned.
 
 Khi load doubleword 64-bit vào register 64-bit, khác biệt không còn ý nghĩa; signed và unsigned load giống nhau. RISC-V cung cấp hai kiểu byte load: load byte unsigned (lbu) coi byte là số unsigned nên zero-extends để điền các bit ngoài cùng trái register, còn load byte (lb) làm việc với số nguyên signed. Vì chương trình C gần như luôn dùng byte biểu diễn ký tự thay vì số nguyên signed rất ngắn, lbu được dùng gần như độc quyền cho byte load.
 
-#### Giao diện phần cứng/phần mềm
+### Giao diện phần cứng/phần mềm
 
 Khác số signed bàn ở trên, địa chỉ bộ nhớ tự nhiên bắt đầu từ 0 và tiếp tục tới địa chỉ lớn nhất. Nói cách khác, địa chỉ âm vô nghĩa. Do đó chương trình đôi khi muốn xử lý số có thể dương hoặc âm, đôi khi chỉ dương. Một số ngôn ngữ phản ánh phân biệt này. Ví dụ C gọi nhóm trước là integer (khai báo long long int trong chương trình), nhóm sau là unsigned integer (unsigned long long int). Một số hướng dẫn phong cách C còn khuyên khai báo nhóm trước là signed long long int để phân biệt rõ.
 
 Hãy xét hai mẹo hữu ích khi làm việc với số two’s complement. Mẹo đầu là cách nhanh đổi dấu số nhị phân two’s complement. Chỉ đảo mọi 0 thành 1 và mọi 1 thành 0, rồi cộng một vào kết quả. Mẹo dựa trên nhận xét tổng một số và biểu diễn đảo của nó phải là 111 … 111<sub>two</sub>, biểu diễn −1. Vì ![p0190_19](images/ch02_instructions_language_of_the_computer/p0190_19.png), do đó ![p0190_20](images/ch02_instructions_language_of_the_computer/p0190_20.png) hoặc ![p0190_21](images/ch02_instructions_language_of_the_computer/p0190_21.png). (Ta dùng ký hiệu ![p0190_22](images/ch02_instructions_language_of_the_computer/p0190_22.png) nghĩa là đảo mọi bit trong x từ 0 thành 1 và ngược lại.)
 
-#### Mẹo đổi dấu
+### Mẹo đổi dấu
 
 **Ví dụ**
 
@@ -556,7 +556,7 @@ trước tiên được đảo rồi tăng một:
 
 Mẹo tiếp theo cho biết cách chuyển số nhị phân biểu diễn bằng n bit sang số biểu diễn bằng hơn n bit. Mẹo là lấy most significant bit của số nhỏ hơn—sign bit—và lặp lại để điền các bit mới của số lớn hơn. Các bit không phải dấu cũ chỉ sao chép vào phần phải của doubleword mới. Mẹo này thường gọi là sign extension.
 
-#### Mẹo sign extension
+### Mẹo sign extension
 
 **Ví dụ**
 
@@ -657,25 +657,25 @@ Instruction này cũng có thể biểu diễn bằng các field số nhị phâ
 
 Bố cục instruction này gọi là instruction format. Như có thể thấy khi đếm bit, instruction RISC-V này chiếm đúng 32 bit—một word, hay nửa doubleword. Theo nguyên lý thiết kế sự đơn giản ưu tiên tính đều đặn, mọi instruction RISC-V dài 32 bit.
 
-#### instruction format
+### instruction format
 
 Dạng biểu diễn instruction gồm các field số nhị phân.
 
 Để phân biệt với assembly language, ta gọi phiên bản số của instruction là machine language và chuỗi instruction như vậy là machine code.
 
-#### machine language
+### machine language
 
 Biểu diễn nhị phân dùng cho giao tiếp bên trong hệ thống máy tính.
 
 Có vẻ giờ bạn sẽ phải đọc và viết chuỗi số nhị phân dài tẻ nhạt. Ta tránh điều đó bằng cơ số cao hơn nhị phân nhưng dễ chuyển sang nhị phân. Vì gần như mọi kích thước dữ liệu máy tính là bội số 4, số hexadecimal (cơ số 16) rất phổ biến. Vì cơ số 16 là lũy thừa của 2, dễ dàng chuyển bằng thay mỗi nhóm bốn chữ số nhị phân bằng một chữ số hexadecimal và ngược lại. Hình 2.4 chuyển giữa hexadecimal và nhị phân.
 
-#### hexadecimal
+### hexadecimal
 
 Số ở cơ số 16.
 
 Vì thường xử lý các cơ số khác nhau, để tránh nhầm lẫn, ta đặt chỉ số dưới ten cho số thập phân, two cho nhị phân và hex cho hexadecimal. (Nếu không có chỉ số dưới, mặc định cơ số 10.) Nhân tiện, C và Java dùng ký hiệu 0xnnnn cho số hexadecimal.
 
-#### Từ nhị phân sang hexadecimal và ngược lại
+### Từ nhị phân sang hexadecimal và ngược lại
 
 **Ví dụ**
 
@@ -900,7 +900,7 @@ Như thấy, AND có thể áp bit pattern lên tập bit để ép 0 ở nơi b
 
 Để đặt giá trị vào một trong các biển số 0 này, có đối ngẫu AND gọi là OR. Đây là phép toán bit-by-bit đặt 1 trong kết quả nếu bit của bất kỳ toán hạng nào là 1. Cụ thể, nếu register x10 và x11 không đổi từ ví dụ trước, kết quả instruction RISC-V
 
-#### OR
+### OR
 
 Phép toán logic bit-by-bit với hai toán hạng tính 1 nếu bất kỳ toán hạng nào có 1.
 
@@ -915,13 +915,13 @@ là giá trị này trong register x9:
 
 Phép toán logic cuối có tính đảo ngược. NOT nhận một toán hạng và đặt 1 trong kết quả nếu bit toán hạng là 0, và ngược lại. Dùng ký hiệu trước, nó tính ![p0209_43](images/ch02_instructions_language_of_the_computer/p0209_43.png) .
 
-#### NOT
+### NOT
 
 Phép toán logic bit-by-bit với một toán hạng đảo bit; nghĩa là thay mọi 1 bằng 0 và mọi 0 bằng 1.
 
 Theo định dạng three-operand, người thiết kế RISC-V quyết định đưa instruction XOR (exclusive OR) thay NOT. Vì exclusive OR tạo 0 khi các bit giống nhau và 1 nếu khác nhau, tương đương NOT là xor 111…111.
 
-#### XOR
+### XOR
 
 Phép toán logic bit-by-bit với hai toán hạng tính exclusive OR của chúng. Nghĩa là chỉ tính 1 nếu giá trị ở hai toán hạng khác nhau.
 
@@ -938,11 +938,11 @@ là giá trị này trong register x9:
 
 Hình 2.8 trên cho quan hệ giữa toán tử C, Java với instruction RISC-V. Hằng hữu ích trong logical operation cũng như arithmetic operation, nên RISC-V cung cấp thêm instruction and immediate (andi), or immediate (ori) và exclusive or immediate (xori).
 
-#### Giải thích thêm
+### Giải thích thêm
 
 C cho phép định nghĩa bit field hay field trong doubleword, vừa cho phép đóng gói đối tượng trong doubleword vừa khớp giao diện áp đặt từ ngoài như thiết bị I/O. Mọi field phải vừa một doubleword. Field là số nguyên unsigned có thể ngắn chỉ 1 bit. Compiler C chèn và trích field bằng logical instruction RISC-V: andi, ori, slli và srli.
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 Những phép toán nào tách được field trong doubleword?
 
@@ -974,7 +974,7 @@ Nó nghĩa là tới câu lệnh nhãn L1 nếu giá trị register rs1 không b
 
 Instruction kiểm tra giá trị và cho phép sau đó chuyển điều khiển tới địa chỉ mới trong chương trình dựa trên kết quả kiểm tra.
 
-#### Biên dịch if-then-else thành conditional branch
+### Biên dịch if-then-else thành conditional branch
 
 **Ví dụ**
 
@@ -1017,7 +1017,7 @@ Exit:
 
 Chú ý assembler giải phóng compiler và lập trình viên assembly language khỏi việc tẻ nhạt tính địa chỉ branch, như khi tính địa chỉ dữ liệu cho load và store (xem Mục 2.12).
 
-#### Giao diện phần cứng/phần mềm
+### Giao diện phần cứng/phần mềm
 
 Compiler thường tạo branch và label nơi chúng không xuất hiện trong ngôn ngữ lập trình. Tránh gánh nặng viết label và branch tường minh là lợi ích của ngôn ngữ lập trình high-level và là lý do viết code nhanh hơn ở mức ấy.
 
@@ -1188,13 +1188,13 @@ jal x1, ProcedureAddress    // jump to ProcedureAddress and
 write return address to x1
 ```
 
-#### jump-and-link instruction
+### jump-and-link instruction
 
 Instruction branch tới địa chỉ và đồng thời lưu địa chỉ instruction tiếp trong register (thường x1 ở RISC-V).
 
 Phần link trong tên nghĩa là tạo địa chỉ hay link trỏ tới chỗ gọi để procedure trở lại địa chỉ đúng. “Link” lưu trong register x1 gọi là return address. Cần return address vì cùng procedure có thể gọi từ nhiều phần chương trình.
 
-#### return address
+### return address
 
 Link tới chỗ gọi cho phép procedure trở lại địa chỉ đúng; trong RISC-V lưu ở register x1.
 
@@ -1210,21 +1210,21 @@ Instruction jump-and-link register branch tới địa chỉ lưu trong register
 jalr x0, 0(x1).
 ```
 
-#### caller
+### caller
 
 Chương trình khởi gọi procedure và cung cấp giá trị tham số cần thiết.
 
-#### callee
+### callee
 
 Procedure thực thi chuỗi instruction được lưu dựa tham số caller cung cấp rồi trả điều khiển về caller.
 
 Ý tưởng stored-program ngầm đòi hỏi register giữ địa chỉ instruction hiện đang thực thi. Vì lý do lịch sử, register này gần như luôn gọi là program counter, viết tắt PC trong kiến trúc RISC-V, mặc dù tên hợp lý hơn là instruction address register. Instruction jal thực sự lưu PC+4 trong register đích (thường x1) để liên kết tới địa chỉ byte instruction tiếp, chuẩn bị trở về từ procedure.
 
-#### program counter (PC)
+### program counter (PC)
 
 Register chứa địa chỉ instruction trong chương trình đang được thực thi.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Instruction jump-and-link cũng có thể dùng unconditional branch trong procedure bằng dùng x0 làm destination register. Vì x0 hard-wired zero, tác dụng là bỏ return address:
 
@@ -1539,7 +1539,7 @@ sbx12, 0(x11)  // Write byte to destination
 
 Ký tự thường kết hợp thành string có số ký tự biến đổi. Có ba lựa chọn biểu diễn: (1) vị trí đầu dành cho chiều dài string, (2) biến đi kèm chứa chiều dài (như trong structure), hoặc (3) vị trí cuối được chỉ bằng ký tự đánh dấu cuối string. C dùng cách thứ ba, kết thúc string bằng byte giá trị 0 (tên null trong ASCII). Do đó string “Cal” biểu diễn trong C bằng 4 byte sau ở dạng thập phân: 67, 97, 108 và 0. (Như sẽ thấy Java dùng cách đầu.)
 
-#### Biên dịch procedure sao chép string, cho thấy cách dùng string C
+### Biên dịch procedure sao chép string, cho thấy cách dùng string C
 
 **Ví dụ**
 
@@ -1935,17 +1935,17 @@ again:lr.d x10, (x20)     // load-reserved
 
 Bất cứ khi processor chen vào sửa giá trị bộ nhớ giữa lr.d và sc.d, sc.d ghi giá trị khác không vào x11, khiến chuỗi code thử lại. Cuối chuỗi, nội dung x23 và vị trí bộ nhớ x20 chỉ định đã exchange atomic.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Mặc dù trình bày cho đồng bộ multiprocessor, atomic exchange cũng hữu ích với operating system xử lý nhiều process trên một processor. Để bảo đảm không can thiệp ở một processor, store-conditional cũng thất bại nếu processor context switch giữa hai instruction (xem Chương 5).
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Ưu điểm cơ chế load-reserved/store-conditional là dùng xây synchronization primitive khác, như atomic compare and swap hoặc atomic fetch-and-increment dùng trong vài mô hình lập trình song song. Chúng có nhiều instruction hơn giữa lr.d và sc.d nhưng không quá nhiều.
 
 Vì store-conditional thất bại sau store khác thử tới địa chỉ load reservation hoặc bất kỳ exception, cần cẩn thận chọn instruction chèn giữa hai instruction. Cụ thể chỉ integer arithmetic, forward branch và backward branch ra khỏi block load-reserved/store-conditional được phép an toàn; nếu không có thể tạo deadlock nơi processor không bao giờ hoàn thành sc.d vì page fault lặp lại. Ngoài ra số instruction giữa load-reserved và store-conditional nên ít để giảm khả năng sự kiện không liên quan hay processor cạnh tranh làm store-conditional thất bại thường xuyên.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Trong khi code trên triển khai atomic exchange, code sau nhận lock hiệu quả hơn tại vị trí trong register x20, nơi 0 nghĩa lock tự do và 1 nghĩa đã lấy lock:
 
@@ -1963,7 +1963,7 @@ Ta thả lock chỉ bằng store thường ghi 0 vào vị trí:
 sd x0, 0(x20)      // free lock by writing 0
 ```
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 Khi nào dùng primitive như load-reserved và store-conditional?
 
@@ -2520,7 +2520,7 @@ Một thách thức đối với người mới lập trình C là hiểu pointe
 
 ![p0279_76](images/ch02_instructions_language_of_the_computer/p0279_76.jpg)
 
-**HÌNH 2.28 Hai procedure C đặt array toàn zero. clear1 dùng index, clear2 dùng pointer. Procedure thứ hai cần giải thích cho người chưa quen C. Địa chỉ biến chỉ bằng &, đối tượng pointer trỏ chỉ bằng *. Khai báo nói array và p là pointer tới số nguyên. Phần đầu for trong clear2 gán địa chỉ phần tử đầu array vào pointer p. Phần thứ hai kiểm tra pointer có trỏ quá phần tử cuối không. Tăng pointer một ở phần dưới for nghĩa là dịch pointer tới đối tượng liên tiếp có kích thước khai báo. Vì p là pointer số nguyên, compiler sinh instruction RISC-V tăng p tám, số byte trong số nguyên RISC-V. Phép gán trong vòng đặt 0 vào đối tượng p trỏ.**
+**HÌNH 2.28 Hai procedure C đặt array toàn zero. clear1 dùng index, clear2 dùng pointer. Procedure thứ hai cần giải thích cho người chưa quen C. Địa chỉ biến chỉ bằng &, đối tượng pointer trỏ chỉ bằng \*. Khai báo nói array và p là pointer tới số nguyên. Phần đầu for trong clear2 gán địa chỉ phần tử đầu array vào pointer p. Phần thứ hai kiểm tra pointer có trỏ quá phần tử cuối không. Tăng pointer một ở phần dưới for nghĩa là dịch pointer tới đối tượng liên tiếp có kích thước khai báo. Vì p là pointer số nguyên, compiler sinh instruction RISC-V tăng p tám, số byte trong số nguyên RISC-V. Phép gán trong vòng đặt 0 vào đối tượng p trỏ.**
 
 Mục đích là chỉ pointer ánh xạ tới instruction RISC-V thế nào, không cổ vũ phong cách lập trình lỗi thời. Cuối mục sẽ thấy tác động tối ưu compiler hiện đại tới hai procedure.
 
@@ -2984,7 +2984,7 @@ Vì vậy phiên bản bytecode cần bảy instruction, 13 byte, chỉ hơn n�
 
 ![p0309_90](images/ch02_instructions_language_of_the_computer/p0309_90.jpg)
 
-**HÌNH E2.15.8 Java bytecode architecture so với RISC-V. Mặc dù nhiều bytecode đơn giản, các bytecode trong khoảng sáu hàng cuối (last half-dozen rows) ở trên phức tạp và dành riêng cho Java. Bytecode dài từ một đến năm byte, vì vậy có tên gọi như vậy. Mnemonic Java sử dụng tiền tố i cho số nguyên 32-bit, a cho reference (address), s cho số nguyên 16-bit (short) và b cho byte 8-bit. Chúng ta sử dụng I8 cho hằng số 8-bit và I16 cho hằng số 16-bit. RISC-V sử dụng register cho toán hạng, nhưng JVM sử dụng stack. Compiler biết kích thước tối đa của operand stack cho mỗi method và chỉ cần cấp phát không gian cho nó trong frame hiện tại. Ký hiệu trong cột Meaning như sau: TOS: đỉnh stack; NOS: vị trí ngay dưới TOS; NNOS: vị trí ngay dưới NOS; pop: loại bỏ TOS; pop2: loại bỏ TOS và NOS; push: thêm một vị trí vào stack. *NOS và *NNOS có nghĩa là truy cập vị trí memory được trỏ đến bởi địa chỉ trong stack tại những vị trí đó. Const[] chỉ runtime constant pool của một class do JVM tạo ra, còn Frame[] chỉ các biến của local method frame. Các Java bytecode còn thiếu trong Hình e2.1 gồm một số toán tử arithmetic và logic, một số thao tác quản lý stack phức tạp, so sánh với 0 và branch, hỗ trợ branch table, chuyển đổi kiểu, các biến thể khác của những instruction phức tạp Java-specific, cùng các thao tác trên data floating-point, số nguyên 64-bit (long) và ký tự 16-bit.**
+**HÌNH E2.15.8 Java bytecode architecture so với RISC-V. Mặc dù nhiều bytecode đơn giản, các bytecode trong khoảng sáu hàng cuối (last half-dozen rows) ở trên phức tạp và dành riêng cho Java. Bytecode dài từ một đến năm byte, vì vậy có tên gọi như vậy. Mnemonic Java sử dụng tiền tố i cho số nguyên 32-bit, a cho reference (address), s cho số nguyên 16-bit (short) và b cho byte 8-bit. Chúng ta sử dụng I8 cho hằng số 8-bit và I16 cho hằng số 16-bit. RISC-V sử dụng register cho toán hạng, nhưng JVM sử dụng stack. Compiler biết kích thước tối đa của operand stack cho mỗi method và chỉ cần cấp phát không gian cho nó trong frame hiện tại. Ký hiệu trong cột Meaning như sau: TOS: đỉnh stack; NOS: vị trí ngay dưới TOS; NNOS: vị trí ngay dưới NOS; pop: loại bỏ TOS; pop2: loại bỏ TOS và NOS; push: thêm một vị trí vào stack. \*NOS và \*NNOS có nghĩa là truy cập vị trí memory được trỏ đến bởi địa chỉ trong stack tại những vị trí đó. Const[] chỉ runtime constant pool của một class do JVM tạo ra, còn Frame[] chỉ các biến của local method frame. Các Java bytecode còn thiếu trong Hình e2.1 gồm một số toán tử arithmetic và logic, một số thao tác quản lý stack phức tạp, so sánh với 0 và branch, hỗ trợ branch table, chuyển đổi kiểu, các biến thể khác của những instruction phức tạp Java-specific, cùng các thao tác trên data floating-point, số nguyên 64-bit (long) và ký tự 16-bit.**
 
 ### Biên dịch cho Java
 
@@ -3209,7 +3209,7 @@ Kiểu Java chia primitive type—kiểu định trước cho number, character,
 
 Pointer dùng khắp Java thanh nhã ở nhất quán, giá phải trả là mức gián tiếp và yêu cầu phân bổ object heap. Hơn nữa trong ngôn ngữ mà vòng đời anonymous object heap-allocated độc lập vòng đời biến có tên, field, array element tham chiếu chúng, lập trình viên phải quyết định khi nào an toàn giải phóng lưu trữ heap-allocated. Java chọn garbage collection. Dĩ nhiên thay quản lý bộ nhớ người dùng tường minh bằng garbage collection cũng tăng an toàn.
 
-C++ mang lại một sự đối chiếu thú vị. Mặc dù lập trình viên có thể viết về cơ bản cùng giải pháp pointer-manipulating trong C++, vẫn còn một lựa chọn khác. Trong C++, lập trình viên có thể bỏ qua mức gián tiếp và trực tiếp thao tác trên array object thay vì array pointer đến những object đó. Để làm vậy, lập trình viên C++ thường sử dụng khả năng template, cho phép tham số hóa class hoặc function theo kiểu data mà nó thao tác. Tuy nhiên, template được biên dịch bằng cách tương đương với macro expansion. Nghĩa là, nếu khai báo một instance của sort có thể sắp xếp các kiểu X và Y, C++ sẽ tạo hai bản code cho class: một cho sort<X> và một cho sort<Y>, mỗi bản được chuyên biệt tương ứng. Giải pháp này làm tăng kích thước code để đổi lấy việc so sánh nhanh hơn (vì function call không còn gián tiếp và thậm chí có thể được inline expansion). Dĩ nhiên, lợi thế tốc độ sẽ bị triệt tiêu nếu việc hoán đổi object đòi hỏi di chuyển lượng data lớn thay vì chỉ các pointer riêng lẻ. Như thường lệ, thiết kế tốt nhất phụ thuộc vào chi tiết của bài toán.
+C++ mang lại một sự đối chiếu thú vị. Mặc dù lập trình viên có thể viết về cơ bản cùng giải pháp pointer-manipulating trong C++, vẫn còn một lựa chọn khác. Trong C++, lập trình viên có thể bỏ qua mức gián tiếp và trực tiếp thao tác trên array object thay vì array pointer đến những object đó. Để làm vậy, lập trình viên C++ thường sử dụng khả năng template, cho phép tham số hóa class hoặc function theo kiểu data mà nó thao tác. Tuy nhiên, template được biên dịch bằng cách tương đương với macro expansion. Nghĩa là, nếu khai báo một instance của sort có thể sắp xếp các kiểu X và Y, C++ sẽ tạo hai bản code cho class: một cho sort&lt;X&gt; và một cho sort&lt;Y&gt;, mỗi bản được chuyên biệt tương ứng. Giải pháp này làm tăng kích thước code để đổi lấy việc so sánh nhanh hơn (vì function call không còn gián tiếp và thậm chí có thể được inline expansion). Dĩ nhiên, lợi thế tốc độ sẽ bị triệt tiêu nếu việc hoán đổi object đòi hỏi di chuyển lượng data lớn thay vì chỉ các pointer riêng lẻ. Như thường lệ, thiết kế tốt nhất phụ thuộc vào chi tiết của bài toán.
 
 ## 2.16 Thực tế: Instruction MIPS
 

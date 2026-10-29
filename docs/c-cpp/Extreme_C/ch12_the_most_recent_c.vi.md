@@ -132,7 +132,7 @@ The argument mode points to a string beginning with one of the following letters
              if it does not exist.
      An optional "+" following "r", "w", or "a" opens the file
      for both reading and writing.  An optional "x" following "w" or
- "w+" causes the fopen() call to fail if the file already exists.
+     "w+" causes the fopen() call to fail if the file already exists.
      An optional "e" following the above causes the fopen() call to set
      the FD_CLOEXEC flag on the underlying file descriptor.
      The mode string can also include the letter "b" after either
@@ -290,7 +290,7 @@ typedef uint32_t char32_t;
 
 Các dòng trên là các câu lệnh `include` cho *ví dụ 12.3*. Như bạn có thể thấy, trong macOS chúng ta không có header `uchar.h` và chúng ta phải định nghĩa các kiểu mới cho các kiểu `char16_t` và `char32_t`. Tuy nhiên, toàn bộ chức năng của chuỗi Unicode đều được hỗ trợ. Trên Linux, chúng ta không gặp vấn đề nào với hỗ trợ Unicode trong C11.
 
-Phần tiếp theo của code <a id="_idIndexMarker869"></a>minh họa các hàm được dùng để đếm số byte và ký tự trong các loại chuỗi Unicode khác nhau. Lưu ý rằng C11 không cung cấp hàm tiện ích nào để thao tác trên chuỗi Unicode, do đó chúng ta phải viết một `strlen` mới cho chúng. Thực tế, các phiên bản hàm `strlen` của chúng ta làm nhiều hơn là chỉ trả về số ký tự; chúng cũng trả về số byte đã dùng. Các chi tiết hiện thực sẽ không được mô tả, nhưng rất khuyến khích bạn đọc chúng:
+Phần tiếp theo của code <a id="_idIndexMarker869"></a>minh họa các hàm được dùng để đếm số byte và ký tự trong các loại chuỗi Unicode khác nhau. Lưu ý rằng C11 không cung cấp hàm tiện ích nào để thao tác trên chuỗi Unicode, do đó chúng ta phải viết một `strlen` mới cho chúng. Thực tế, các phiên bản hàm `strlen` của chúng ta làm nhiều hơn là chỉ trả về số ký tự; chúng cũng trả về số byte đã dùng. Các chi tiết triển khai sẽ không được mô tả, nhưng rất khuyến khích bạn đọc chúng:
 
 ```
 typedef struct {
@@ -525,7 +525,7 @@ Hỗ trợ multithreading đã <a id="_idIndexMarker879"></a>có trong C từ l�
 
 Library threading POSIX, như tên gọi của nó ngụ ý, chỉ có sẵn trong các hệ thống POSIX-compliant như Linux và các hệ thống Unix-like khác. Do đó, nếu bạn đang ở trên một hệ điều hành non-POSIX compliant như Microsoft Windows, bạn phải dùng library do hệ điều hành cung cấp. Trong C11, một library threading chuẩn được cung cấp có thể được dùng trên mọi hệ thống đang dùng C chuẩn, bất kể nó có POSIX-compliant hay không. Đây là thay đổi lớn nhất mà chúng ta thấy trong chuẩn C11.
 
-Không may là threading của C11 chưa được hiện thực cho Linux và macOS. Do đó, chúng tôi không thể cung cấp các ví dụ hoạt động được vào thời điểm viết sách.
+Không may là threading của C11 chưa được triển khai cho Linux và macOS. Do đó, chúng tôi không thể cung cấp các ví dụ hoạt động được vào thời điểm viết sách.
 
 <a id="_idParaDest-179"></a>
 

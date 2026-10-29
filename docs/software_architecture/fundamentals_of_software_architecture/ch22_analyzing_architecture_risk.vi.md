@@ -76,7 +76,7 @@ Tiếp theo, chúng tôi mô tả một quy trình gọi là *risk storming* mà
 
 <a id="ix_ch22-analyzing-architecture-risk-asciidoc7"></a><a id="ix_ch22-analyzing-architecture-risk-asciidoc8"></a>Không kiến trúc sư nào có thể một mình xác định rủi ro tổng thể của một hệ thống, vì hai lý do. Thứ nhất, một kiến trúc sư làm việc một mình có thể bỏ sót hoặc không để ý một vùng rủi ro; thứ hai, rất ít kiến trúc sư có hiểu biết đầy đủ về *mọi* phần của hệ thống. Đây là lúc risk storming có thể giúp ích.
 
-*Risk storming* là một bài tập cộng tác để xác định rủi ro kiến trúc trong một chiều cụ thể (hoặc bối cảnh hoặc tiêu chí). Dù hầu hết các nỗ lực risk-storming có sự tham gia của nhiều kiến trúc sư, chúng tôi đặc biệt khuyến nghị đưa cả các senior developer và tech lead vào. Không chỉ họ sẽ cung cấp góc nhìn hiện thực về rủi ro kiến trúc, mà việc đưa họ vào còn giúp họ hiểu architecture tốt hơn.
+*Risk storming* là một bài tập cộng tác để xác định rủi ro kiến trúc trong một chiều cụ thể (hoặc bối cảnh hoặc tiêu chí). Dù hầu hết các nỗ lực risk-storming có sự tham gia của nhiều kiến trúc sư, chúng tôi đặc biệt khuyến nghị đưa cả các senior developer và tech lead vào. Không chỉ họ sẽ cung cấp góc nhìn triển khai về rủi ro kiến trúc, mà việc đưa họ vào còn giúp họ hiểu architecture tốt hơn.
 
 Risk storming gồm ba giai đoạn: xác định, đồng thuận và giảm thiểu. Trong giai đoạn cá nhân (giai đoạn 1), tất cả người tham gia, làm việc một mình, dùng ma trận rủi ro để gán rủi ro cho các vùng khác nhau của architecture. Giai đoạn cá nhân này của risk storming là thiết yếu để người tham gia không ảnh hưởng đến những người tham gia khác hoặc hướng sự chú ý của mọi người ra khỏi những vùng cụ thể của architecture. Trong hai giai đoạn cộng tác, tất cả người tham gia cùng làm việc để đạt được đồng thuận về các vùng rủi ro là gì và thảo luận về chúng (giai đoạn 2), và đưa ra giải pháp để giảm thiểu rủi ro (giai đoạn 3).
 
@@ -197,7 +197,7 @@ Sau khi phân tích các yêu cầu này, Logan, kiến trúc sư chịu trách 
 
 Bốn service chính trong hệ thống này là service `Case Management`, service `Nurse Profile Management`, service `Medical Records Interface` tới medical records exchange, và service `Diagnostics Engine Interface` third-party bên ngoài. Mọi giao tiếp đều dùng REST, ngoại trừ các giao thức độc quyền tới các hệ thống bên ngoài và các service call-center. Tóm lại, các vùng mà architecture phải hỗ trợ là availability, elasticity và security.
 
-Sau nhiều lần review, Logan tin rằng architecture đã sẵn sàng để hiện thực. Tuy nhiên, là một kiến trúc sư có trách nhiệm và hiệu quả, Logan quyết định tổ chức một bài tập risk-storming.
+Sau nhiều lần review, Logan tin rằng architecture đã sẵn sàng để triển khai. Tuy nhiên, là một kiến trúc sư có trách nhiệm và hiệu quả, Logan quyết định tổ chức một bài tập risk-storming.
 
 <a id="id222"></a>
 

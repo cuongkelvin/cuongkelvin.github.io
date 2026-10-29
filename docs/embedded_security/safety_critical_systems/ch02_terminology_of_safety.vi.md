@@ -50,7 +50,7 @@ Một Safety Culture là thiết yếu trong một tổ chức phát triển là
 
 Annex B của ISO 26262-2 cung cấp một danh sách các ví dụ cho thấy văn hóa an toàn tốt hoặc kém, bao gồm “groupthink” (tư duy bầy đàn; xấu), sự đa dạng trí tuệ trong nhóm (tốt), và một hệ thống khen thưởng trừng phạt những người đi short-cuts gây nguy hại cho an toàn (tốt), và một hệ thống khen thưởng ưu tiên chi phí và tiến độ (xấu).
 
-Mọi người liên quan đến việc phát triển một thiết bị safety-critical đều cần ý thức được rằng mạng sống con người có thể phụ thuộc vào chất lượng của thiết kế và hiện thực.
+Mọi người liên quan đến việc phát triển một thiết bị safety-critical đều cần ý thức được rằng mạng sống con người có thể phụ thuộc vào chất lượng của thiết kế và triển khai.
 
 Cuộc điều tra chính thức về thảm họa Deepwater Horizon (tài liệu tham khảo [<a id="b2refbib2_2"></a>[2](#refbib2_2)]) đã đề cập cụ thể đến văn hóa an toàn trong ngành dầu khí: *“Các nguyên nhân trực tiếp của vụ phun trào giếng Macondo có thể được truy ngược về một chuỗi những sai lầm có thể xác định được của BP, Halliburton và Transocean, vốn bộc lộ những thất bại mang tính hệ thống trong quản lý rủi ro đến mức chúng khiến người ta nghi ngờ văn hóa an toàn của toàn ngành.”*
 
@@ -274,7 +274,7 @@ Khi một fault gây ra một error, error đó đôi khi có thể bị bắt l
 
 *Backward Error Recovery* (phục hồi lỗi lùi).
 
-Khi phát hiện một error, hệ thống quay về (“roll back”) một trạng thái previously-stored được biết (hoặc được tin) là nhất quán và lành mạnh. Việc input có vẻ đã gây ra error sau đó được áp dụng lại hay bị loại bỏ, và client được thông báo thế nào, khác nhau giữa các hiện thực.
+Khi phát hiện một error, hệ thống quay về (“roll back”) một trạng thái previously-stored được biết (hoặc được tin) là nhất quán và lành mạnh. Việc input có vẻ đã gây ra error sau đó được áp dụng lại hay bị loại bỏ, và client được thông báo thế nào, khác nhau giữa các bản triển khai.
 
 Một trong những nhược điểm của backward error recovery là cần phải lưu dữ liệu xác định trạng thái hệ thống trước khi xử lý một request đến để nó sẵn có nếu cần rollback.
 

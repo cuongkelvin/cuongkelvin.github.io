@@ -6,7 +6,7 @@ RSA hoạt động bằng cách tạo ra một trapdoor permutation, một funct
 
 Ngoài encryption, bạn cũng có thể dùng RSA để xây dựng digital signature, trong đó chỉ chủ sở hữu private key mới có thể ký một message, và public key cho phép bất kỳ ai kiểm chứng tính hợp lệ của chữ ký.
 
-Trong chương này, bạn sẽ học cách RSA trapdoor permutation hoạt động và vì sao chỉ riêng permutation này không đủ để xây dựng encryption và signature an toàn. Tôi cũng sẽ thảo luận security của RSA liên quan đến factoring problem (xem Chương 9), các cách hiện thực RSA an toàn, và cách tấn công nó.
+Trong chương này, bạn sẽ học cách RSA trapdoor permutation hoạt động và vì sao chỉ riêng permutation này không đủ để xây dựng encryption và signature an toàn. Tôi cũng sẽ thảo luận security của RSA liên quan đến factoring problem (xem Chương 9), các cách triển khai RSA an toàn, và cách tấn công nó.
 
 Chúng ta bắt đầu bằng việc giải thích các khái niệm toán học cơ bản đằng sau RSA.
 
@@ -153,7 +153,7 @@ Vì overhead xử lý cần thiết, public-key encryption chỉ có thể xử 
 
 ### Textbook RSA signature (Textbook RSA Signatures)
 
-Một textbook RSA signature là phương pháp ký một message, x, bằng cách tính trực tiếp y = x<sup>d</sup> mod n, trong đó x có thể là bất kỳ số nào nằm giữa 1 và n – 1. Giống textbook encryption, textbook RSA signing đơn giản để đặc tả và hiện thực nhưng không an toàn trước một số attack. Một attack như vậy là một forgery tầm thường: khi để ý thấy 1<sup>d</sup> mod n = 1 và (n – 1)<sup>d</sup> mod n = n – 1, bất kể giá trị của private key d, kẻ tấn công có thể làm giả chữ ký của 1 hoặc n – 1 mà không cần biết d.
+Một textbook RSA signature là phương pháp ký một message, x, bằng cách tính trực tiếp y = x<sup>d</sup> mod n, trong đó x có thể là bất kỳ số nào nằm giữa 1 và n – 1. Giống textbook encryption, textbook RSA signing đơn giản để đặc tả và triển khai nhưng không an toàn trước một số attack. Một attack như vậy là một forgery tầm thường: khi để ý thấy 1<sup>d</sup> mod n = 1 và (n – 1)<sup>d</sup> mod n = n – 1, bất kể giá trị của private key d, kẻ tấn công có thể làm giả chữ ký của 1 hoặc n – 1 mà không cần biết d.
 
 Đáng lo ngại hơn là blinding attack. Ví dụ, giả sử bạn muốn có được chữ ký của một bên thứ ba trên một message nào đó, M, mà bạn biết họ sẽ không bao giờ cố ý ký. Để tiến hành attack này, trước tiên hãy tìm một giá trị nào đó, R, sao cho R<sup>e</sup>M mod n là một message mà nạn nhân của bạn sẽ sẵn lòng ký. Tiếp theo, bạn thuyết phục họ ký message đó và cho bạn xem chữ ký của họ, bằng S = (R<sup>e</sup>M)<sup>d</sup> mod n, tức message được nâng lên lũy thừa d. Khi có chữ ký đó, bạn có thể suy ra chữ ký của M, cụ thể là M<sup>d</sup>, nhờ một vài phép tính đơn giản.
 
@@ -199,11 +199,11 @@ Quy trình ký PSS hoạt động như sau (trong đó h là độ dài đầu r
 
 Trong thực tế, chuỗi ngẫu nhiên R (được gọi là salt t trong tiêu chuẩn RSA-PSS) thường dài bằng hash value. Ví dụ, nếu bạn dùng n = 2,048 bit và SHA-256 làm hash, giá trị L là m – h – 1 = 256 – 32 – 1 = 223 byte, và chuỗi ngẫu nhiên R thường sẽ dài 32 byte.
 
-Giống OAEP, PSS là provably secure, được chuẩn hóa, và có sẵn trong nhiều tiện ích và thư viện phần mềm cryptography, bao gồm OpenSSL và module cryptography của ngôn ngữ Go. Cũng giống OAEP, nó trông phức tạp một cách không cần thiết và dễ mắc lỗi hiện thực cũng như xử lý sai các trường hợp biên. Khác với RSA encryption, có một lựa chọn thay thế đơn giản hơn PSS để ký: không cần PRNG, chỉ với một hash function duy nhất, và không có padding.
+Giống OAEP, PSS là provably secure, được chuẩn hóa, và có sẵn trong nhiều tiện ích và thư viện phần mềm cryptography, bao gồm OpenSSL và module cryptography của ngôn ngữ Go. Cũng giống OAEP, nó trông phức tạp một cách không cần thiết và dễ mắc lỗi triển khai cũng như xử lý sai các trường hợp biên. Khác với RSA encryption, có một lựa chọn thay thế đơn giản hơn PSS để ký: không cần PRNG, chỉ với một hash function duy nhất, và không có padding.
 
 ### Chữ ký Full Domain Hash (Full Domain Hash Signatures)
 
-Full Domain Hash (FDH) là signature scheme đơn giản nhất bạn có thể tưởng tượng. Để hiện thực nó, hãy chuyển chuỗi byte Hash(M) thành một số, x, và tạo chữ ký y = x<sup>d</sup> mod n, như trong Hình 10-4.
+Full Domain Hash (FDH) là signature scheme đơn giản nhất bạn có thể tưởng tượng. Để triển khai nó, hãy chuyển chuỗi byte Hash(M) thành một số, x, và tạo chữ ký y = x<sup>d</sup> mod n, như trong Hình 10-4.
 
 ![Figure 10-4](images/ch10_rsa/fig10-4.png)
 
@@ -219,7 +219,7 @@ Dù sao thì RSA signature (PSS hay FDH) ngày càng ít được dùng. Các ch
 
 ## Các implementation RSA (RSA Implementations)
 
-Tôi hy vọng bạn sẽ không bao giờ phải tự hiện thực RSA từ đầu. Nếu bạn được yêu cầu làm vậy, hãy chạy nhanh hết mức có thể và đặt câu hỏi về sự tỉnh táo của người đã yêu cầu bạn. Các cryptographer và engineer đã mất hàng chục năm để phát triển các implementation RSA nhanh, đủ an toàn và lý tưởng nhất là không có bug nghiêm trọng, vì vậy không khôn ngoan khi phát minh lại RSA. Ngay cả với tất cả tài liệu có sẵn, cũng phải mất hàng tháng để hoàn thành nhiệm vụ đáng nản lòng này.
+Tôi hy vọng bạn sẽ không bao giờ phải tự triển khai RSA từ đầu. Nếu bạn được yêu cầu làm vậy, hãy chạy nhanh hết mức có thể và đặt câu hỏi về sự tỉnh táo của người đã yêu cầu bạn. Các cryptographer và engineer đã mất hàng chục năm để phát triển các implementation RSA nhanh, đủ an toàn và lý tưởng nhất là không có bug nghiêm trọng, vì vậy không khôn ngoan khi phát minh lại RSA. Ngay cả với tất cả tài liệu có sẵn, cũng phải mất hàng tháng để hoàn thành nhiệm vụ đáng nản lòng này.
 
 Thông thường, khi dùng RSA trong software, bạn sẽ dùng một thư viện hoặc API cung cấp các function cần thiết để thực hiện các thao tác RSA. Ví dụ, ngôn ngữ Go có function sau trong gói crypto của nó (từ https://go.dev/src/crypto/rsa/rsa.go):
 
@@ -242,13 +242,13 @@ Listing 10-3: Implementation của RSA encryption function cốt lõi từ thư 
 
 Thao tác chính ở đây là c.Exp(m, e, pub.N), nâng một message, m, lên lũy thừa e modulo pub.N, và gán kết quả cho biến c.
 
-Nếu bạn chọn tự hiện thực RSA thay vì dùng một function thư viện có sẵn, hãy chắc chắn dựa vào một thư viện big-number có sẵn, tức là một tập các function và kiểu dữ liệu cho phép bạn định nghĩa và tính các phép toán số học trên các số lớn dài hàng nghìn bit. Ví dụ, bạn có thể dùng thư viện số học GNU Multiple Precision (GMP) trong C hoặc trong gói big của Go. (Hãy tin tôi, bạn không muốn tự hiện thực số học big-number đâu.)
+Nếu bạn chọn tự triển khai RSA thay vì dùng một function thư viện có sẵn, hãy chắc chắn dựa vào một thư viện big-number có sẵn, tức là một tập các function và kiểu dữ liệu cho phép bạn định nghĩa và tính các phép toán số học trên các số lớn dài hàng nghìn bit. Ví dụ, bạn có thể dùng thư viện số học GNU Multiple Precision (GMP) trong C hoặc trong gói big của Go. (Hãy tin tôi, bạn không muốn tự triển khai số học big-number đâu.)
 
-Ngay cả khi bạn chỉ dùng một function thư viện khi hiện thực RSA, hãy chắc chắn rằng bạn hiểu phần bên trong hoạt động như thế nào để bạn có thể đánh giá rủi ro và xem nó có khớp với các yêu cầu security của ứng dụng hay không.
+Ngay cả khi bạn chỉ dùng một function thư viện khi triển khai RSA, hãy chắc chắn rằng bạn hiểu phần bên trong hoạt động như thế nào để bạn có thể đánh giá rủi ro và xem nó có khớp với các yêu cầu security của ứng dụng hay không.
 
 ### Một algorithm lũy thừa nhanh (A Fast Exponentiation Algorithm)
 
-Lũy thừa (exponentiation) là phép toán nâng x lên lũy thừa e, khi tính x<sup>e</sup> mod n. Khi làm việc với các số lớn, như với RSA, phép toán này có thể cực kỳ chậm nếu được hiện thực một cách ngây thơ. Làm thế nào để tính lũy thừa một cách hiệu quả?
+Lũy thừa (exponentiation) là phép toán nâng x lên lũy thừa e, khi tính x<sup>e</sup> mod n. Khi làm việc với các số lớn, như với RSA, phép toán này có thể cực kỳ chậm nếu được triển khai một cách ngây thơ. Làm thế nào để tính lũy thừa một cách hiệu quả?
 
 Cách ngây thơ để tính x<sup>e</sup> mod n cần e – 1 phép nhân, như algorithm pseudocode trong Listing 10-4 cho thấy.
 
@@ -302,7 +302,7 @@ Listing 10-5: Một algorithm lũy thừa nhanh bằng pseudocode, nâng x lên 
 
 Algorithm expMod() chạy trong thời gian O(m), trong khi algorithm ngây thơ chạy trong thời gian O(2<sup>m</sup>), trong đó m là độ dài bit của số mũ. Ở đây, O() là ký hiệu độ phức tạp tiệm cận đã giới thiệu trong Chương 9.
 
-Mọi hệ thống nghiêm túc đều hiện thực một biến thể nào đó của phương pháp square-and-multiply đơn giản nhất này. Một biến thể như vậy là phương pháp sliding window, xét các khối bit thay vì từng bit riêng lẻ để thực hiện một phép nhân cho trước. Ví dụ, hãy xem function expNN() của ngôn ngữ Go, mà source code có tại https://go.dev/src/math/big/nat.go.
+Mọi hệ thống nghiêm túc đều triển khai một biến thể nào đó của phương pháp square-and-multiply đơn giản nhất này. Một biến thể như vậy là phương pháp sliding window, xét các khối bit thay vì từng bit riêng lẻ để thực hiện một phép nhân cho trước. Ví dụ, hãy xem function expNN() của ngôn ngữ Go, mà source code có tại https://go.dev/src/math/big/nat.go.
 
 Các algorithm lũy thừa square-and-multiply này an toàn đến mức nào? Đáng tiếc là các thủ thuật để tăng tốc quá trình thường dẫn đến việc dễ bị tổn thương hơn trước một số attack.
 
@@ -340,7 +340,7 @@ Listing 10-6: Ví dụ benchmark các thao tác RSA dùng bộ công cụ OpenSS
 
 Để hình dung việc kiểm chứng chậm hơn bao nhiêu so với việc tạo chữ ký, hãy tính tỷ lệ giữa thời gian kiểm chứng và thời gian ký. Các benchmark trong Listing 10-6 cho thấy tôi có được các tỷ lệ tốc độ verification-over-signature xấp xỉ 21.6, 40.1 và 68.7 lần lượt cho các modulus 1,024- , 2,048- và 4,096-bit. Khoảng cách tăng theo kích thước modulus vì số phép nhân cho các thao tác với e vẫn không đổi theo kích thước modulus (ví dụ, 17 phép toán khi e = 65,537), trong khi các thao tác private-key luôn cần nhiều phép nhân hơn với modulus lớn hơn vì d tăng tương ứng.
 
-Nếu số mũ nhỏ tốt như vậy, sao lại dùng 65,537 mà không phải thứ gì đó như 3? Thực ra dùng 3 làm số mũ khi hiện thực RSA với một scheme an toàn như OAEP, PSS hoặc FDH là hoàn toàn ổn (và nhanh hơn). Tuy nhiên, các cryptographer tránh làm vậy, vì khi e = 3, các scheme kém an toàn hơn khiến một số loại attack toán học trở nên khả thi. Số 65,537 đủ lớn để tránh các low-exponent attack như vậy, và nó chỉ có hai bit khác không (nonzero), giúp giảm thời gian tính toán khi tính x<sup>65,537</sup>. Số 65,537 cũng đặc biệt đối với các nhà toán học: nó là số Fermat thứ tư, hay một số có dạng
+Nếu số mũ nhỏ tốt như vậy, sao lại dùng 65,537 mà không phải thứ gì đó như 3? Thực ra dùng 3 làm số mũ khi triển khai RSA với một scheme an toàn như OAEP, PSS hoặc FDH là hoàn toàn ổn (và nhanh hơn). Tuy nhiên, các cryptographer tránh làm vậy, vì khi e = 3, các scheme kém an toàn hơn khiến một số loại attack toán học trở nên khả thi. Số 65,537 đủ lớn để tránh các low-exponent attack như vậy, và nó chỉ có hai bit khác không (nonzero), giúp giảm thời gian tính toán khi tính x<sup>65,537</sup>. Số 65,537 cũng đặc biệt đối với các nhà toán học: nó là số Fermat thứ tư, hay một số có dạng
 
 ![p237_5](images/ch10_rsa/p237_5.png)
 

@@ -40,27 +40,27 @@ Hiệu năng cao có thể là throughput lớn hơn cho tác vụ độc lập,
 
 ![p0982_4](images/ch06_parallel_processors_from_client_to_cloud/p0982_4.jpg)
 
-#### task-level parallelism hay process-level parallelism
+### task-level parallelism hay process-level parallelism
 
 Tận dụng nhiều processor bằng cách chạy chương trình độc lập đồng thời.
 
-#### parallel processing program
+### parallel processing program
 
 Một chương trình chạy đồng thời trên nhiều processor.
 
 Từ lâu đã có bài toán khoa học cần máy tính nhanh hơn nhiều, và nhóm bài toán này là lý do xây dựng nhiều máy tính song song mới qua các thập niên. Ngày nay có thể xử lý đơn giản một số bài toán bằng cluster gồm microprocessor trong nhiều server độc lập (xem Mục 6.7). Ngoài ra cluster phục vụ ứng dụng ngoài khoa học đòi hỏi tương đương như công cụ tìm kiếm, Web server, email server và cơ sở dữ liệu.
 
-#### cluster
+### cluster
 
 Tập máy tính nối qua local area network hoạt động như một multiprocessor lớn duy nhất.
 
 Như Chương 1 mô tả, multiprocessor được đẩy vào tâm điểm vì vấn đề năng lượng khiến tăng hiệu năng tương lai chủ yếu đến từ hardware parallelism tường minh, thay vì clock rate cao hơn nhiều hay CPI cải thiện vượt bậc. Như đã nói trong Chương 1, chúng được gọi là multicore microprocessor thay vì multiprocessor microprocessor, có lẽ để tránh lặp trong tên gọi. Vì thế processor thường gọi là core trong chip multicore. Số core dự kiến tăng theo Moore’s Law. Những multicore này gần như luôn là Shared Memory Processors (SMPs), vì thường chia sẻ một physical address space. Ta sẽ xem thêm SMP ở Mục 6.5.
 
-#### multicore microprocessor
+### multicore microprocessor
 
 Microprocessor chứa nhiều processor (“core”) trong một integrated circuit. Gần như mọi microprocessor desktop và server hiện nay đều là multicore.
 
-#### shared memory multiprocessor (SMP)
+### shared memory multiprocessor (SMP)
 
 Parallel processor có một physical address space.
 
@@ -90,7 +90,7 @@ Trước khi đi sâu hơn trên con đường parallelism, đừng quên nhữn
 
 - Chương 5, Mục 5.10: Parallelism và memory hierarchy: Cache coherence
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 Đúng hay sai: Để hưởng lợi từ multiprocessor, ứng dụng phải concurrent.
 
@@ -138,7 +138,7 @@ Vì vậy, để đạt speed-up 90 từ 100 processor, tỷ lệ tuần tự ch
 
 Tuy nhiên có ứng dụng rất nhiều parallelism, như sẽ thấy tiếp theo.
 
-#### Thử thách Speed-up: Bài toán lớn hơn
+### Thử thách Speed-up: Bài toán lớn hơn
 
 **Ví dụ**
 
@@ -172,11 +172,11 @@ Ví dụ cho thấy đạt speed-up tốt trên multiprocessor khi giữ kích t
 
 Strong scaling nghĩa là đo speed-up trong khi giữ kích thước bài toán cố định. Weak scaling nghĩa là kích thước bài toán tăng tỷ lệ với số processor tăng. Giả sử kích thước bài toán M là working set trong main memory và có P processor. Memory mỗi processor cho strong scaling xấp xỉ M/P, còn weak scaling khoảng M.
 
-#### strong scaling
+### strong scaling
 
 Speed-up đạt trên multiprocessor mà không tăng kích thước bài toán.
 
-#### weak scaling
+### weak scaling
 
 Speed-up đạt trên multiprocessor khi tăng kích thước bài toán tỷ lệ với số processor tăng.
 
@@ -188,7 +188,7 @@ Tùy ứng dụng, có thể lập luận cho mỗi cách scaling. Ví dụ TPC-
 
 Ví dụ cuối cho thấy tầm quan trọng của load balancing.
 
-#### Thử thách Speed-up: Cân bằng tải
+### Thử thách Speed-up: Cân bằng tải
 
 **Ví dụ**
 
@@ -212,7 +212,7 @@ Giờ đã hiểu rõ hơn mục tiêu, thách thức xử lý song song, chúng
 
 Trong mục tiếp theo, chúng tôi giới thiệu những acronym có lẽ bạn đã thấy để nhận biết các loại máy tính song song.
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 Đúng hay sai: Strong scaling không bị Amdahl’s Law giới hạn.
 
@@ -224,7 +224,7 @@ Một cách phân loại hardware song song được đề xuất trong thập n
 
 hay Single Instruction stream, Single Data stream. Một uniprocessor.
 
-#### MIMD
+### MIMD
 
 hay Multiple Instruction streams, Multiple Data streams. Một multiprocessor.
 
@@ -234,13 +234,13 @@ hay Multiple Instruction streams, Multiple Data streams. Một multiprocessor.
 
 Tuy có thể viết chương trình riêng chạy trên các processor khác nhau của máy MIMD nhưng vẫn phối hợp cho mục tiêu chung lớn hơn, lập trình viên thường viết một chương trình chạy trên mọi processor MIMD, dựa vào câu lệnh điều kiện khi processor khác nhau cần thực thi phần code riêng. Kiểu này gọi là Single Program Multiple Data (SPMD), nhưng chỉ là cách thông thường lập trình máy MIMD.
 
-#### SPMD
+### SPMD
 
 Single Program, Multiple Data streams. Mô hình lập trình MIMD thông thường, một chương trình chạy trên mọi processor.
 
 Thứ gần nhất với processor multiple instruction stream, single data stream (MISD) có lẽ là “stream processor” thực hiện chuỗi tính toán trên một data stream theo pipeline: parse input từ mạng, giải mã dữ liệu, giải nén, tìm khớp, v.v. Dạng ngược MISD phổ biến hơn nhiều. Máy SIMD thao tác trên vector dữ liệu. Ví dụ, một SIMD instruction có thể cộng 64 số bằng cách gửi 64 data stream đến 64 ALU để tạo 64 tổng trong một clock cycle. Subword parallel instruction đã thấy ở Mục 3.6 và 3.7 là ví dụ SIMD khác; thực vậy chữ giữa acronym SSE của Intel đại diện SIMD.
 
-#### SIMD
+### SIMD
 
 hay Single Instruction stream, Multiple Data streams. Cùng instruction áp dụng cho nhiều data stream như trong vector processor.
 
@@ -252,7 +252,7 @@ SIMD hoạt động tốt nhất khi xử lý array trong vòng for. Vì thế �
 
 Các array processor được gọi theo cách này (so-called array processors), từng truyền cảm hứng cho nhóm SIMD, đã lùi vào lịch sử (xem ![p0995_23](images/ch06_parallel_processors_from_client_to_cloud/p0995_23.png) Mục 6.15 trực tuyến), nhưng hai cách diễn giải SIMD hiện đại vẫn được sử dụng ngày nay.
 
-#### data-level parallelism
+### data-level parallelism
 
 Parallelism đạt bằng thực hiện cùng thao tác trên dữ liệu độc lập.
 
@@ -394,23 +394,23 @@ Một khái niệm liên quan tới MIMD, đặc biệt theo góc nhìn lập tr
 
 Tăng mức sử dụng processor bằng cách chuyển sang thread khác khi một thread stall.
 
-#### thread
+### thread
 
 Thread gồm program counter, register state và stack. Là lightweight process; thread thường chia sẻ một address space, process thì không.
 
-#### process
+### process
 
 Process gồm một hay nhiều thread, address space và operating system state. Vì vậy process switch thường gọi operating system, thread switch thì không.
 
 Có hai cách chính cho hardware multithreading. Fine-grained multithreading chuyển thread sau mỗi instruction, dẫn đến thực thi xen kẽ nhiều thread. Thường xen kẽ theo round-robin, bỏ qua thread bị stall trong clock cycle đó. Để fine-grained multithreading thực tế, processor phải chuyển thread ở mọi clock cycle. Ưu điểm fine-grained multithreading là che tổn thất throughput do cả stall ngắn và dài, vì instruction thread khác có thể thực thi khi một thread stall. Nhược điểm chính fine-grained multithreading là làm chậm từng thread, vì thread sẵn sàng chạy không stall bị trì hoãn bởi instruction thread khác.
 
-#### fine-grained multithreading
+### fine-grained multithreading
 
 Phiên bản hardware multithreading chuyển thread sau mỗi instruction.
 
 Coarse-grained multithreading được phát minh thay fine-grained multithreading. Coarse-grained multithreading chỉ chuyển thread khi stall tốn kém như last-level cache miss. Thay đổi giảm yêu cầu chuyển thread cực nhanh, ít có khả năng làm chậm từng thread hơn nhiều, vì instruction thread khác chỉ issue khi thread gặp stall tốn kém. Tuy nhiên Coarse-grained multithreading có nhược điểm lớn: khả năng khắc phục mất throughput bị hạn chế, đặc biệt với stall ngắn. Hạn chế do chi phí start-up pipeline của coarse-grained multithreading. Vì processor coarse-grained multithreading issue instruction từ một thread, khi stall phải làm rỗng hoặc đóng băng pipeline. Thread mới bắt đầu sau stall phải lấp pipeline trước khi instruction hoàn tất. Do overhead start-up, coarse-grained multithreading hữu ích hơn nhiều để giảm penalty của stall high-cost, nơi nạp lại pipeline không đáng kể so với thời gian stall.
 
-#### coarse-grained multithreading
+### coarse-grained multithreading
 
 Phiên bản hardware multithreading chỉ chuyển thread sau sự kiện đáng kể, như last-level cache miss.
 
@@ -420,7 +420,7 @@ Simultaneous multithreading (SMT) là biến thể hardware multithreading dùng
 
 ![p1010_34](images/ch06_parallel_processors_from_client_to_cloud/p1010_34.jpg)
 
-#### simultaneous multithreading (SMT)
+### simultaneous multithreading (SMT)
 
 Phiên bản multithreading giảm chi phí bằng cách tận dụng tài nguyên cần cho microarchitecture multiple issue, lập lịch động.
 
@@ -454,7 +454,7 @@ Hình 6.6 biểu diễn lợi ích hiệu năng và năng lượng của multith
 
 Sau khi thấy nhiều thread sử dụng tài nguyên một processor hiệu quả hơn thế nào, tiếp theo xem cách dùng chúng khai thác nhiều processor.
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 1. Đúng hay sai: Cả multithreading lẫn multicore dựa vào parallelism để tăng hiệu quả chip.
 
@@ -480,21 +480,21 @@ Multiprocessor một address space có hai kiểu. Kiểu đầu, latency đến
 
 Multiprocessor mà latency đến mọi word trong main memory gần bằng nhau bất kể processor nào yêu cầu truy cập.
 
-#### nonuniform memory access (NUMA)
+### nonuniform memory access (NUMA)
 
 Loại multiprocessor một address space mà một số truy cập memory nhanh hơn nhiều tùy processor nào yêu cầu word nào.
 
 Vì processor hoạt động song song thường chia sẻ dữ liệu, chúng cũng cần phối hợp khi thao tác shared data; nếu không một processor có thể bắt đầu làm trên dữ liệu trước khi processor khác xong. Phối hợp gọi là synchronization, đã thấy Chương 2. Khi một address space hỗ trợ chia sẻ, phải có cơ chế synchronization riêng. Một cách dùng lock cho shared variable. Chỉ một processor được lấy lock tại một thời điểm, các processor khác quan tâm shared data phải chờ processor ban đầu unlock biến. Mục 2.11 Chương 2 mô tả instruction locking trong RISC-V instruction set.
 
-#### synchronization
+### synchronization
 
 Quá trình phối hợp hành vi hai hay nhiều process, có thể chạy trên processor khác nhau.
 
-#### lock
+### lock
 
 Thiết bị synchronization chỉ cho một processor truy cập dữ liệu mỗi thời điểm.
 
-#### Chương trình xử lý song song đơn giản cho shared address space
+### Chương trình xử lý song song đơn giản cho shared address space
 
 **Ví dụ**
 
@@ -514,7 +514,7 @@ for (i = 1000*Pn; i < 1000*(Pn+1); i += 1)
 
 Bước tiếp theo là cộng 64 tổng từng phần này. Bước này được gọi là reduction, trong đó chúng ta áp dụng cách chia để trị. Một nửa số processor cộng các cặp tổng từng phần, rồi một phần tư số processor cộng các cặp tổng mới, và cứ tiếp tục cho đến khi có một tổng cuối cùng duy nhất. Hình 6.8 minh họa tính phân cấp của reduction này.
 
-#### reduction
+### reduction
 
 Hàm xử lý cấu trúc dữ liệu và trả một giá trị.
 
@@ -537,11 +537,11 @@ do
 while (half > 1); /*exit with final sum in Sum[0] */
 ```
 
-#### Hardware/Software Interface
+### Hardware/Software Interface
 
 Vì mối quan tâm long-term đối với lập trình song song, đã có hàng trăm nỗ lực xây dựng các hệ thống lập trình song song. Một ví dụ có phạm vi hạn chế nhưng phổ biến là OpenMP. Nó chỉ là một Application Programmer Interface (API) đi cùng một tập compiler directive, environment variable và runtime library routine có thể mở rộng các ngôn ngữ lập trình tiêu chuẩn. Nó cung cấp mô hình lập trình có tính di động, khả năng mở rộng và sự đơn giản cho shared memory multiprocessor. Mục tiêu chính của nó là song song hóa các vòng lặp và thực hiện reduction.
 
-#### OpenMP
+### OpenMP
 
 API cho shared memory multiprocessing bằng C, C++ hoặc Fortran chạy trên nền tảng UNIX và Microsoft. Gồm compiler directive, thư viện và runtime directive.
 
@@ -584,15 +584,15 @@ Mặc dù OpenMP giúp dễ viết code song song đơn giản, nó không hỗ 
 
 Sau chuyến tham quan hardware, software MIMD kinh điển, tiếp theo là chuyến khám phá lạ hơn về kiểu MIMD architecture có nguồn gốc khác, vì vậy góc nhìn rất khác về thử thách lập trình song song.
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 Đúng hay sai: Shared memory multiprocessor không thể tận dụng task-level parallelism.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Một số tác giả đã dùng lại acronym SMP với nghĩa symmetric multiprocessor để chỉ rằng latency từ processor tới bộ nhớ gần như bằng nhau cho mọi processor. Sự thay đổi này nhằm phân biệt chúng với NUMA multiprocessor large-scale, vì cả hai loại đều dùng một address space. Vì cluster đã trở nên phổ biến hơn nhiều so với NUMA multiprocessor large-scale, trong sách này chúng tôi khôi phục ý nghĩa ban đầu của SMP và dùng nó để phân biệt với những hệ thống có nhiều address space, chẳng hạn cluster.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Một lựa chọn thay cho chia sẻ physical address space là có các physical address space riêng nhưng chia sẻ một virtual address space chung, giao việc xử lý truyền thông cho operating system. Cách tiếp cận này đã được thử nghiệm, nhưng overhead của nó quá cao để cung cấp một shared memory abstraction thực tế cho lập trình viên performance-oriented.
 
@@ -710,11 +710,11 @@ Cách tiếp cận thay cho chia sẻ address space là để mỗi processor c�
 
 Truyền thông giữa nhiều processor bằng gửi và nhận thông tin tường minh.
 
-#### send message routine
+### send message routine
 
 Routine processor trong máy private memory dùng chuyển message đến processor khác.
 
-#### receive message routine
+### receive message routine
 
 Routine processor trong máy private memory dùng nhận message từ processor khác.
 
@@ -724,13 +724,13 @@ Routine processor trong máy private memory dùng nhận message từ processor 
 
 Đã có nhiều nỗ lực xây dựng máy tính large-scale dựa trên mạng message-passing high-performance, và chúng thực sự cung cấp hiệu năng truyền thông tuyệt đối tốt hơn cluster xây bằng local area network. Thực tế, nhiều supercomputer ngày nay dùng mạng tùy chỉnh. Vấn đề là chúng đắt hơn nhiều so với local area network như Ethernet. Với chi phí cao hơn rất nhiều, ngày nay ít ứng dụng ngoài high-performance computing có thể biện minh cho nhu cầu hiệu năng truyền thông cao hơn này.
 
-#### Hardware/Software Interface
+### Hardware/Software Interface
 
 Máy tính dựa vào message passing để truyền thông thay vì cache coherent shared memory dễ xây dựng hơn rất nhiều đối với người thiết kế phần cứng (xem Mục 5.8). Lập trình viên cũng có lợi vì truyền thông là tường minh, nghĩa là ít gặp bất ngờ về hiệu năng hơn so với truyền thông ngầm trong máy tính cache-coherent shared memory. Bất lợi đối với lập trình viên là khó port chương trình tuần tự sang máy tính message-passing hơn, vì mọi truyền thông phải được xác định trước, nếu không chương trình sẽ không hoạt động. Cache-coherent shared memory cho phép phần cứng tự xác định dữ liệu nào cần truyền, giúp port dễ hơn. Có những ý kiến khác nhau về con đường ngắn nhất tới hiệu năng cao, xét ưu và nhược điểm của truyền thông ngầm, nhưng thị trường ngày nay không có sự nhầm lẫn. Microprocessor multicore dùng shared physical memory, còn các node của cluster giao tiếp với nhau bằng message passing.
 
 Một số ứng dụng concurrent chạy tốt trên phần cứng song song bất kể nó cung cấp shared address hay message passing. Đặc biệt, task-level parallelism và ứng dụng ít truyền thông—như tìm kiếm Web, mail server và file server—không cần shared addressing để chạy tốt. Vì vậy, cluster đã trở thành ví dụ phổ biến nhất ngày nay của máy tính song song message-passing. Do có các bộ nhớ riêng, mỗi node cluster chạy một bản operating system riêng biệt. Ngược lại, các core trong microprocessor được kết nối bằng mạng high-speed bên trong chip, còn hệ thống multichip shared-memory dùng memory interconnect để truyền thông. Memory interconnect có bandwidth cao hơn và latency thấp hơn, cho phép hiệu năng truyền thông tốt hơn nhiều đối với shared memory multiprocessor.
 
-#### clusters
+### clusters
 
 Tập máy tính nối qua I/O trên network switch tiêu chuẩn để tạo message-passing multiprocessor.
 
@@ -831,7 +831,7 @@ Nói không chính thức, tốc độ truyền đỉnh mạng; có thể chỉ 
 
 Để cân bằng trường hợp bandwidth tốt nhất này, chúng ta đưa vào một thước đo khác gần với trường hợp xấu nhất hơn: bisection bandwidth. Thước đo được tính bằng cách chia máy thành hai nửa, rồi cộng bandwidth của những link cắt qua đường phân chia tưởng tượng. Bisection bandwidth của ring bằng hai lần link bandwidth; đối với bus, nó bằng một lần link bandwidth. Nếu một link nhanh bằng bus, ring chỉ nhanh gấp đôi bus trong trường hợp xấu nhất, nhưng nhanh gấp P lần trong trường hợp tốt nhất.
 
-#### bisection bandwidth
+### bisection bandwidth
 
 Bandwidth giữa hai phần bằng nhau multiprocessor. Thước đo dành cho cách chia worst-case.
 
@@ -839,7 +839,7 @@ Vì một số network topology không đối xứng, câu hỏi xuất hiện l
 
 Ở cực đối diện ring là fully connected network, mỗi processor có link hai chiều đến mọi processor khác. Tổng network bandwidth là P×(P−1)/2, bisection bandwidth là (P/2)<sup>2</sup>.
 
-#### fully connected network
+### fully connected network
 
 Mạng nối node processor-memory bằng đường truyền chuyên dụng giữa mọi node.
 
@@ -853,11 +853,11 @@ Khó đếm hết topology đã bàn trong ấn phẩm, nhưng chỉ ít đượ
 
 Một lựa chọn thay cho đặt processor ở mọi node mạng là chỉ để switch ở một số node. Switch nhỏ hơn node processor-memory-switch nên có thể bố trí dày hơn, nhờ đó giảm khoảng cách và tăng hiệu năng. Mạng như vậy thường gọi là multistage network để phản ánh nhiều bước mà message có thể đi qua. Các loại multistage network cũng nhiều như single-stage network; Hình 6.15 minh họa hai tổ chức phổ biến. Fully connected hay crossbar network cho phép bất kỳ node nào giao tiếp với bất kỳ node khác trong một lượt đi qua mạng. Omega network dùng ít phần cứng hơn crossbar network (2n log<sub>2</sub> n so với n<sup>2</sup> switch), nhưng có thể có tranh chấp giữa message tùy communication pattern. Ví dụ, Omega network trong Hình 6.15 không thể gửi message từ P<sub>0</sub> tới P<sub>6</sub> cùng lúc gửi message từ P<sub>1</sub> tới P<sub>4</sub>.
 
-#### multistage network
+### multistage network
 
 Mạng cung cấp switch nhỏ ở mỗi node.
 
-#### crossbar network
+### crossbar network
 
 Mạng cho mọi node giao tiếp node khác bằng một lượt qua mạng.
 
@@ -913,7 +913,7 @@ Ví dụ, thao tác ghi có thể gửi dữ liệu tới network interface, nơ
 
 Mặc dù processor có thể tự truyền dữ liệu từ user space vào I/O space, overhead truyền dữ liệu từ hoặc tới mạng high-speed có thể không chấp nhận được, vì nó chiếm một phần lớn năng lực processor. Vì vậy, từ lâu người thiết kế máy tính đã phát minh cơ chế giảm tải cho processor, để device controller truyền dữ liệu trực tiếp từ hoặc tới bộ nhớ mà không cần processor tham gia. Cơ chế này gọi là direct memory access (DMA).
 
-#### direct memory access (DMA)
+### direct memory access (DMA)
 
 Cơ chế cho device controller truyền dữ liệu trực tiếp từ hoặc đến memory mà không cần processor tham gia.
 
@@ -921,7 +921,7 @@ DMA được triển khai bằng controller chuyên dụng truyền dữ liệu 
 
 Để thông báo cho operating system (và cuối cùng là ứng dụng sẽ nhận packet) rằng việc truyền đã hoàn tất, DMA gửi một I/O interrupt.
 
-#### interrupt-driven I/O
+### interrupt-driven I/O
 
 Cơ chế I/O dùng interrupt báo processor rằng thiết bị I/O cần chú ý.
 
@@ -1269,7 +1269,7 @@ Tiếp theo là cảnh báo về ngộ nhận, cạm bẫy multiprocessing. Ngh�
 
 Các kết quả này được đo khi tắt Turbo. Vì hệ dùng hai chip, không ngạc nhiên khi đạt đầy đủ Turbo speed-up (3.3/2.6 =1.27) với một thread (một core trên một chip) hoặc hai thread (mỗi chip một core). Khi thêm thread, tăng core active, lợi ích Turbo giảm vì ngân sách công suất cho mỗi core active ít hơn. Bốn thread có Turbo speed-up trung bình 1.23, tám là 1.13, 16 là 1.11.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Dù Sandy Bridge hỗ trợ hai hardware thread/core, 32 thread không tăng hiệu năng. Hai thread ghép trên một core dùng chung phần cứng AVX duy nhất, nên gán hai thread/core thực ra làm giảm hiệu năng vì overhead ghép kênh.
 

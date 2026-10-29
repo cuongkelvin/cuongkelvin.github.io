@@ -2,7 +2,7 @@
 
 Trong Chương 4, chúng ta đã xem kernel boot như thế nào cho đến lúc nó khởi chạy chương trình đầu tiên, `init`. Trong Chương 5 và 6, chúng ta đã xem cách tạo các root filesystem với độ phức tạp khác nhau, tất cả đều chứa một chương trình `init`. Giờ là lúc xem xét chính chương trình `init` chi tiết hơn và khám phá vì sao nó lại quan trọng đến vậy đối với phần còn lại của hệ thống.
 
-Có nhiều bản hiện thực của `init`. Trong chương này, tôi sẽ mô tả ba bản chính: BusyBox `init`, System V `init` và `systemd`. Tôi sẽ giải thích cách chúng hoạt động và loại hệ thống nào phù hợp nhất với từng loại. Một phần của việc này là cân bằng sự đánh đổi giữa kích thước, độ phức tạp và tính linh hoạt. Chúng ta sẽ học cách khởi chạy một daemon bằng cả BusyBox `init` lẫn System V `init`. Chúng ta cũng sẽ học cách thêm một service vào `systemd`.
+Có nhiều bản triển khai của `init`. Trong chương này, tôi sẽ mô tả ba bản chính: BusyBox `init`, System V `init` và `systemd`. Tôi sẽ giải thích cách chúng hoạt động và loại hệ thống nào phù hợp nhất với từng loại. Một phần của việc này là cân bằng sự đánh đổi giữa kích thước, độ phức tạp và tính linh hoạt. Chúng ta sẽ học cách khởi chạy một daemon bằng cả BusyBox `init` lẫn System V `init`. Chúng ta cũng sẽ học cách thêm một service vào `systemd`.
 
 Trong chương này, chúng ta sẽ đề cập các chủ đề sau:
 
@@ -204,9 +204,9 @@ MẸO
 
 Runlevel là một cách đơn giản và tiện lợi để chuyển đổi giữa các chế độ, ví dụ, từ chế độ sản xuất sang chế độ bảo trì.
 
-System V `init` là một tùy chọn trong Buildroot và The Yocto Project. Trong cả hai trường hợp, các script `init` đã được loại bỏ mọi đặc thù của shell `bash`, vì vậy chúng sẽ hoạt động với shell `ash` của BusyBox. Tuy nhiên, Buildroot hơi ăn gian bằng cách thay chương trình BusyBox `init` bằng System V `init` và thêm một `inittab` mô phỏng hành vi của BusyBox. Buildroot không hiện thực runlevel ngoại trừ `0` và `6`, là các runlevel dừng hoặc reboot hệ thống.
+System V `init` là một tùy chọn trong Buildroot và The Yocto Project. Trong cả hai trường hợp, các script `init` đã được loại bỏ mọi đặc thù của shell `bash`, vì vậy chúng sẽ hoạt động với shell `ash` của BusyBox. Tuy nhiên, Buildroot hơi ăn gian bằng cách thay chương trình BusyBox `init` bằng System V `init` và thêm một `inittab` mô phỏng hành vi của BusyBox. Buildroot không triển khai runlevel ngoại trừ `0` và `6`, là các runlevel dừng hoặc reboot hệ thống.
 
-Tiếp theo, hãy xem một số chi tiết. Các ví dụ sau được lấy từ bản phát hành The Yocto Project 5.0. Các bản phân phối Linux khác có thể hiện thực các script `init` hơi khác một chút.
+Tiếp theo, hãy xem một số chi tiết. Các ví dụ sau được lấy từ bản phát hành The Yocto Project 5.0. Các bản phân phối Linux khác có thể triển khai các script `init` hơi khác một chút.
 
 ### inittab
 
@@ -395,7 +395,7 @@ done
 Starting syslogd/klogd: done
 ```
 
-Tất cả các script đều hiện thực `start` và `stop`, và chúng cũng nên hiện thực `help`. Một số hiện thực cả `status`, cho bạn biết service có đang chạy hay không. Các bản phân phối chính thống vẫn dùng System V `init` có một lệnh tên `service` để khởi động và dừng service, che giấu chi tiết của việc gọi script trực tiếp.
+Tất cả các script đều triển khai `start` và `stop`, và chúng cũng nên triển khai `help`. Một số bản triển khai cả `status`, cho bạn biết service có đang chạy hay không. Các bản phân phối chính thống vẫn dùng System V `init` có một lệnh tên `service` để khởi động và dừng service, che giấu chi tiết của việc gọi script trực tiếp.
 
 System V `init` là một daemon `init` đơn giản đã phục vụ các quản trị viên Linux trong nhiều thập kỷ. Mặc dù runlevel mang lại mức độ tinh vi cao hơn BusyBox `init`, System V `init` vẫn thiếu khả năng giám sát service và khởi động lại chúng khi cần. Khi System V `init` bắt đầu lộ vẻ già cỗi, hầu hết các bản phân phối Linux phổ biến đã chuyển sang `systemd`.
 
@@ -520,7 +520,7 @@ AllowIsolate=yes
 
 ### Cách systemd boot hệ thống
 
-Hãy xem `systemd` hiện thực bootstrap như thế nào. Kernel khởi động `systemd` vì `/sbin/init` là symbolic link tới `/lib/systemd/systemd`. `systemd` chạy `default.target`, vốn luôn là một link tới target mong muốn: hoặc `multi-user.target` cho đăng nhập văn bản hoặc `graphical.target` cho môi trường đồ họa. Nếu target mặc định là `multi-user.target`, bạn sẽ thấy symbolic link này:
+Hãy xem `systemd` triển khai bootstrap như thế nào. Kernel khởi động `systemd` vì `/sbin/init` là symbolic link tới `/lib/systemd/systemd`. `systemd` chạy `default.target`, vốn luôn là một link tới target mong muốn: hoặc `multi-user.target` cho đăng nhập văn bản hoặc `graphical.target` cho môi trường đồ họa. Nếu target mặc định là `multi-user.target`, bạn sẽ thấy symbolic link này:
 
 ```
 /etc/systemd/system/default.target -> /lib/systemd/system/multi-user.

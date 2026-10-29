@@ -6,7 +6,7 @@ Trong một thời gian dài, embedded system chạy ẩn danh trong bóng tối
 
 Đột nhiên, nhân viên bảo trì giờ đăng nhập vào thiết bị từ xa và không thể xác minh rằng họ đang làm việc với đúng thiết bị bằng cách nhìn vào các dấu hiệu vật lý. Ngoài ra, các mô hình kinh doanh pay-per-use ngày càng trở nên phổ biến trong các kịch bản công nghiệp, và các thiết bị tự viết hóa đơn của chúng. Khả năng chứng minh nguồn gốc của dữ liệu sử dụng và ánh xạ nó tới một khách hàng cụ thể là thiết yếu trong trường hợp này. Hơn nữa, các thiết bị do các nhà sản xuất khác nhau làm ra đã bắt đầu nói chuyện với nhau và trao đổi dữ liệu. Tất cả những xu hướng này có chung một yêu cầu mạnh: mọi thiết bị cần một định danh duy nhất, và mọi thiết bị phải có khả năng chứng minh nó.
 
-Phần đầu của chương này khảo sát những thuộc tính nào góp phần vào tính duy nhất của thiết bị và có thể làm cơ sở cho định danh, cũng như các quá trình liên kết chặt chẽ là identification (nhận dạng) và authentication (xác thực). Tiếp theo, chúng ta sẽ xem việc hiện thực quản lý định danh thiết bị được nhìn nhận từ hai góc độ: việc lưu trữ on-device một định danh cryptography và việc quản lý life-cycle ở phía nhà sản xuất. Chương kết thúc với hai case study khám phá việc tạo và cung cấp (provisioning) định danh.
+Phần đầu của chương này khảo sát những thuộc tính nào góp phần vào tính duy nhất của thiết bị và có thể làm cơ sở cho định danh, cũng như các quá trình liên kết chặt chẽ là identification (nhận dạng) và authentication (xác thực). Tiếp theo, chúng ta sẽ xem việc triển khai quản lý định danh thiết bị được nhìn nhận từ hai góc độ: việc lưu trữ on-device một định danh cryptography và việc quản lý life-cycle ở phía nhà sản xuất. Chương kết thúc với hai case study khám phá việc tạo và cung cấp (provisioning) định danh.
 
 <a id="ch00lev1_50"></a>
 
@@ -122,7 +122,7 @@ Trong cách tiếp cận này, các nhà sản xuất đăng ký định danh th
 
 ### *Certificate và certificate authority*
 
-Tôi đã dùng thuật ngữ *certificate* để mô tả một tài liệu số do TTP cấp để xác nhận định danh của một thiết bị. Về mặt kỹ thuật, các hiện thực phổ biến nhất của khái niệm này là các certificate X.509 v3 dựa trên asymmetric cryptography như được đặc tả trong RFC 5280.
+Tôi đã dùng thuật ngữ *certificate* để mô tả một tài liệu số do TTP cấp để xác nhận định danh của một thiết bị. Về mặt kỹ thuật, các bản triển khai phổ biến nhất của khái niệm này là các certificate X.509 v3 dựa trên asymmetric cryptography như được đặc tả trong RFC 5280.
 
 Mục đích của những certificate này là gắn một public key cho trước với chủ thể tương ứng của nó, như một thiết bị, và với một tập attribute bao gồm thời hạn hiệu lực và số serial của certificate. Một *certificate authority (CA)* ký số những giá trị này bằng private key của chính nó. CA này cũng được đưa vào certificate, trong trường `Issuer`. Kết quả là phiên bản nhỏ nhất của một *certificate chain*, nghĩa là một device certificate và public key của nó có thể được xác minh bằng cryptography, và nếu thành công, certificate tiếp theo (cụ thể là certificate của CA) phải được xác minh. Việc xác thực chỉ được tin cậy nếu cả hai lần xác minh đều thành công.
 
@@ -132,7 +132,7 @@ Các *root certificate* không được ai chứng nhận; chúng là self-signe
 
 Trong một số trường hợp, một certificate không thể được tin cậy cho đến khi thực sự hết hiệu lực—ví dụ, do một private-key compromise (private key bị xâm phạm), thiết bị bị đánh cắp, hay vấn đề tương tự. Cho những tình huống như vậy, CA duy trì một *certificate revocation list (CRL)* liệt kê mọi certificate không còn được tin cậy dù thời hạn hiệu lực của chúng chưa kết thúc. *Online Certificate Status Protocol (OCSP)* là một protocol phổ biến để kiểm tra trạng thái thu hồi của một certificate trong quá trình xác thực, như được tiêu chuẩn hóa trong RFC 6960.
 
-Toàn bộ architecture xác minh, chứng nhận và thu hồi, cùng các quy trình và dịch vụ tương ứng, thường được gọi là *public-key infrastructure (PKI)*. Vì một hệ thống như vậy đòi hỏi công sức bảo trì và tài liệu đáng kể, các công ty nhỏ và medium-sized thường ngần ngại tự hiện thực nó và thay vào đó dựa vào các nhà cung cấp dịch vụ PKI, tức là các TTP.
+Toàn bộ architecture xác minh, chứng nhận và thu hồi, cùng các quy trình và dịch vụ tương ứng, thường được gọi là *public-key infrastructure (PKI)*. Vì một hệ thống như vậy đòi hỏi công sức bảo trì và tài liệu đáng kể, các công ty nhỏ và medium-sized thường ngần ngại tự triển khai nó và thay vào đó dựa vào các nhà cung cấp dịch vụ PKI, tức là các TTP.
 
 <a id="ch00lev1_53"></a>
 
@@ -166,7 +166,7 @@ Nhược điểm thứ hai của việc tạo on-device có thể là việc đ�
 
 Việc tạo định danh bên ngoài thiết bị mang lại sự linh hoạt hơn trong việc quản lý định danh thiết bị trước khi sản xuất và trong các trường hợp sửa chữa. Các bí mật xác thực được chuẩn bị trước trong một hệ thống quản lý định danh và được cung cấp cho khâu sản xuất ở bước thứ hai. Tuy nhiên, điều này có nghĩa là những định danh này tồn tại trước cả khi thiết bị thực được lắp ráp và, dĩ nhiên, chúng đã mang các protection goal confidentiality và integrity. Việc lộ thông tin hay thao túng dữ liệu trước khi sản xuất có thể có hậu quả nghiêm trọng đối với bảo mật sản phẩm của bạn.
 
-Một điểm cuối cùng có thể ảnh hưởng đến quyết định tạo on-/off-device của bạn là sự tham gia của một TTP. Nếu bạn tạo định danh trong quá trình sản xuất, chúng phải được đăng ký, xác minh và chứng nhận với một bên thứ ba trong một lịch trình chặt chẽ. Dĩ nhiên, điều đó là khả thi và đáng mong muốn, và nó đã được những người dẫn đầu trong lĩnh vực này hiện thực, nhưng nó đòi hỏi một lượng đáng kể công sức về hạ tầng và quản lý quy trình.
+Một điểm cuối cùng có thể ảnh hưởng đến quyết định tạo on-/off-device của bạn là sự tham gia của một TTP. Nếu bạn tạo định danh trong quá trình sản xuất, chúng phải được đăng ký, xác minh và chứng nhận với một bên thứ ba trong một lịch trình chặt chẽ. Dĩ nhiên, điều đó là khả thi và đáng mong muốn, và nó đã được những người dẫn đầu trong lĩnh vực này triển khai, nhưng nó đòi hỏi một lượng đáng kể công sức về hạ tầng và quản lý quy trình.
 
 <a id="ch00lev2_69"></a>
 
@@ -196,7 +196,7 @@ Hãy tưởng tượng các log xác thực của bạn cho thấy cùng một t
 
 ### *Thay thế hay hủy bỏ*
 
-Ngay cả khi một số thiết bị (đặc biệt trong các ứng dụng công nghiệp, quân sự hay vũ trụ) được dự định tồn tại mãi mãi về mặt vật lý, các bí mật xác thực của chúng thường thì không. Trên internet, thời hạn hiệu lực phổ biến cho certificate của web server là 90 ngày (như, ví dụ, được Let’s Encrypt hiện thực tại *[https://letsencrypt.org](https://letsencrypt.org)*), nghĩa là những định danh này phải được tạo lại ít nhất mỗi ba tháng.
+Ngay cả khi một số thiết bị (đặc biệt trong các ứng dụng công nghiệp, quân sự hay vũ trụ) được dự định tồn tại mãi mãi về mặt vật lý, các bí mật xác thực của chúng thường thì không. Trên internet, thời hạn hiệu lực phổ biến cho certificate của web server là 90 ngày (như, ví dụ, được Let’s Encrypt triển khai tại *[https://letsencrypt.org](https://letsencrypt.org)*), nghĩa là những định danh này phải được tạo lại ít nhất mỗi ba tháng.
 
 Rõ ràng, việc làm mới định danh trong các kịch bản IoT và IIoT vẫn còn rất xa những tần suất cao như vậy. Tuy nhiên, ít nhất nếu certificate X.509 được dùng cho mục đích xác thực, thời hạn hiệu lực là một tham số bắt buộc phải được chỉ định, hoặc bởi công ty của bạn hoặc bởi TTP bạn chọn. Một số nhà sản xuất cấp device certificate với thời hạn hiệu lực 20 năm hay hơn, nhưng ngay cả khi crypto được chọn là future-proof, rất khó ước lượng liệu một định danh như vậy còn đáng tin cậy sau 15 năm hay hơn.
 
@@ -265,7 +265,7 @@ Serial : 0038003D3438511436383238
 
 *Listing 6-3: Lấy số serial CPU có sẵn trong Linux*
 
-Tuy nhiên, chip STM32MP157F không phải là chip duy nhất trên PCB. *User Manual UM2637* của ST mô tả vô số interface giao tiếp được hiện thực. Bên cạnh mạng Ethernet cổ điển, thiết bị có một IC cung cấp khả năng Wi-Fi và Bluetooth. Tất cả các interface này đều có địa chỉ MAC duy nhất có thể được dùng để dẫn xuất system identity. [Listing 6-4](#ch06list04) cho thấy cách trích xuất những giá trị đó khi chạy trên Linux.
+Tuy nhiên, chip STM32MP157F không phải là chip duy nhất trên PCB. *User Manual UM2637* của ST mô tả vô số interface giao tiếp được triển khai. Bên cạnh mạng Ethernet cổ điển, thiết bị có một IC cung cấp khả năng Wi-Fi và Bluetooth. Tất cả các interface này đều có địa chỉ MAC duy nhất có thể được dùng để dẫn xuất system identity. [Listing 6-4](#ch06list04) cho thấy cách trích xuất những giá trị đó khi chạy trên Linux.
 
 ```
 # cat /sys/class/net/eth0/address
@@ -585,4 +585,4 @@ Tuy nhiên, chỉ tuyên bố một định danh là không đủ đối với h
 
 Bên cạnh các thách thức kỹ thuật về việc gắn một định danh số với một thiết bị, một lĩnh vực rộng hơn nhiều gồm các quy trình tổ chức phải được đặc tả để cung cấp việc quản lý life-cycle định danh an toàn và đáng tin cậy. Những quy trình này thường có sự tham gia của các nhà cung cấp EMS, TTP và các đặc thù quy trình riêng của bạn, dẫn đến một độ phức tạp không bao giờ nên bị đánh giá thấp.
 
-Càng đi sâu vào chủ đề này, bạn sẽ càng phát hiện ra nhiều vấn đề “thú vị” hơn. Trong nhiều năm, các nhà nghiên cứu đã làm việc trên các hiện thực PUF để khai thác những biến thiên trong quy trình sản xuất nhằm dẫn xuất các định danh chip ngầm định, và những sản phẩm đầu tiên trên thị trường đã chứa các mạch như vậy. Hơn nữa, việc tự động hóa quản lý định danh trong các kịch bản on- and offline (online và offline) cùng các protocol tương ứng như SCEP và EST chắc chắn sẽ nhận được nhiều sự chú ý hơn trong tương lai, tạo ra một bước tiến lớn cho việc quản lý định danh thiết bị an toàn.
+Càng đi sâu vào chủ đề này, bạn sẽ càng phát hiện ra nhiều vấn đề “thú vị” hơn. Trong nhiều năm, các nhà nghiên cứu đã làm việc trên các bản triển khai PUF để khai thác những biến thiên trong quy trình sản xuất nhằm dẫn xuất các định danh chip ngầm định, và những sản phẩm đầu tiên trên thị trường đã chứa các mạch như vậy. Hơn nữa, việc tự động hóa quản lý định danh trong các kịch bản on- and offline (online và offline) cùng các protocol tương ứng như SCEP và EST chắc chắn sẽ nhận được nhiều sự chú ý hơn trong tương lai, tạo ra một bước tiến lớn cho việc quản lý định danh thiết bị an toàn.

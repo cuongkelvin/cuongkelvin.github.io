@@ -4,7 +4,7 @@
 
 # Lời nói đầu
 
-Tôi viết cuốn sách này cho những người thiết kế, hiện thực và kiểm chứng hệ thống, những người có kinh nghiệm trong phát triển phần mềm nhúng nói chung nhưng đang đứng trước viễn cảnh phải bàn giao một ứng dụng safety-critical. Cụ thể, cuốn sách hướng tới những người đang tạo ra một sản phẩm phải thỏa mãn một hoặc nhiều tiêu chuẩn quốc tế liên quan đến các ứng dụng safety-critical.
+Tôi viết cuốn sách này cho những người thiết kế, triển khai và kiểm chứng hệ thống, những người có kinh nghiệm trong phát triển phần mềm nhúng nói chung nhưng đang đứng trước viễn cảnh phải bàn giao một ứng dụng safety-critical. Cụ thể, cuốn sách hướng tới những người đang tạo ra một sản phẩm phải thỏa mãn một hoặc nhiều tiêu chuẩn quốc tế liên quan đến các ứng dụng safety-critical.
 
 ## Phần mềm và an toàn
 

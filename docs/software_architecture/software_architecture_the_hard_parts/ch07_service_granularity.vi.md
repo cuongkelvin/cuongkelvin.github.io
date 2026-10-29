@@ -446,7 +446,7 @@ Ví dụ 3:
 
 Một khi trouble ticket đã được khách hàng tạo và được hệ thống chấp nhận,<a id="ch07-ssotg"></a><a id="ch07-ssotg2"></a> nó phải được giao cho một chuyên gia Sysops Squad dựa trên bộ kỹ năng, vị trí và lịch sẵn sàng của họ. Việc giao ticket bao gồm hai component chính—một component Ticket Assignment xác định chuyên viên tư vấn nào nên được giao công việc, và component Ticket Routing định vị chuyên gia Sysops Squad, chuyển ticket tới thiết bị di động của chuyên gia (qua một ứng dụng di động Sysops Squad tùy biến), và thông báo cho chuyên gia qua tin nhắn SMS rằng một ticket mới đã được giao.
 
-Development team của Sysops Squad đang gặp khó khăn trong việc quyết định liệu hai component này (giao và định tuyến) nên được hiện thực thành một service hợp nhất duy nhất hay hai service riêng biệt, như minh họa trong [Hình 7-18](#fig-modularity-vs-granularity-ticket-assign-options). Development team hỏi ý kiến Addison (một trong các kiến trúc sư của Sysops Squad) để giúp quyết định nên chọn phương án nào.
+Development team của Sysops Squad đang gặp khó khăn trong việc quyết định liệu hai component này (giao và định tuyến) nên được triển khai thành một service hợp nhất duy nhất hay hai service riêng biệt, như minh họa trong [Hình 7-18](#fig-modularity-vs-granularity-ticket-assign-options). Development team hỏi ý kiến Addison (một trong các kiến trúc sư của Sysops Squad) để giúp quyết định nên chọn phương án nào.
 
 <a id="fig-modularity-vs-granularity-ticket-assign-options"></a>
 

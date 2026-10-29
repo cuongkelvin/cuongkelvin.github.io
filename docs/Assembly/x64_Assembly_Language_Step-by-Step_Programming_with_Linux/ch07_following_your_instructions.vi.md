@@ -529,7 +529,7 @@ Chỉ trong một nhát, 42 trở thành 0FFFFFFD6h, biểu diễn hexadecimal t
 
 *<a id="c07-tbl-0002"></a>**Bảng 7.2**: Phạm vi của các giá trị có dấu*
 
-| KÍCH THƯỚC GIÁ TRỊ | GIÁ TRỊ ÂM LỚN NHẤT | GIÁ TRỊ DƯƠNG LỚN NHẤT |  |  |
+| KÍCH THƯỚC GIÁ TRỊ | GIÁ TRỊ ÂM LỚN NHẤT |  | GIÁ TRỊ DƯƠNG LỚN NHẤT |  |
 |---|---|---|---|---|
 |  | DECIMAL | HEX | DECIMAL | HEX |
 | 8 bit | -128 | 80h | 127 | 7Fh |

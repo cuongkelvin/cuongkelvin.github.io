@@ -58,7 +58,7 @@ Hãy hiểu càng nhiều khía cạnh quan trọng của business domain càng 
 
 Xác định và làm rõ những architecture characteristic nào cần thiết để hỗ trợ domain và các yếu tố bên ngoài khác bằng cách thực hiện phân tích architectural characteristic, một trong những hoạt động cốt lõi trong việc chọn một style.
 
-Có thể hiện thực bất kỳ architecture style chung nào trong hầu như bất kỳ problem domain nào—suy cho cùng, *chung* (generic) hàm ý rằng chúng là general-purpose. Ngoại lệ là các domain đòi hỏi những architectural characteristic vận hành đặc biệt, như một trang đấu giá có scalability rất cao. Tuy nhiên, trong hầu hết các trường hợp, sự khác biệt thực sự giữa các architectural style không liên quan đến domain, mà ở chỗ mỗi style hỗ trợ các architectural characteristic khác nhau tốt đến mức nào.
+Có thể triển khai bất kỳ architecture style chung nào trong hầu như bất kỳ problem domain nào—suy cho cùng, *chung* (generic) hàm ý rằng chúng là general-purpose. Ngoại lệ là các domain đòi hỏi những architectural characteristic vận hành đặc biệt, như một trang đấu giá có scalability rất cao. Tuy nhiên, trong hầu hết các trường hợp, sự khác biệt thực sự giữa các architectural style không liên quan đến domain, mà ở chỗ mỗi style hỗ trợ các architectural characteristic khác nhau tốt đến mức nào.
 
 Có lẽ bạn đã nhận thấy rằng các biểu đồ sao chúng tôi dùng trong Phần II của cuốn sách này để so sánh từng architecture style tập trung vào các *characteristic* kiến trúc, không phải domain. Điều này phản ánh tầm quan trọng của việc hiểu các architectural characteristic khi chọn một style.
 
@@ -118,7 +118,7 @@ Nếu architecture là monolith, kiến trúc sư thường giả định nó s�
 
 <a id="id1472"></a><a id="id1473"></a>Khi đã xác định dữ liệu nên nằm ở đâu, điều cần cân nhắc thiết kế tiếp theo là giao tiếp giữa các service—nó nên đồng bộ hay bất đồng bộ? Giao tiếp đồng bộ thường tiện lợi hơn, nhưng nó có thể có nghĩa là đánh đổi scalability, reliability, và các characteristic đáng mong muốn khác. Giao tiếp bất đồng bộ có thể mang lại những lợi ích độc đáo về performance và quy mô, nhưng cũng có nhiều đau đầu xoay quanh đồng bộ dữ liệu, deadlock, race condition, debug, v.v. (Chúng tôi đề cập nhiều vấn đề trong số này trong [Chương 15](ch15_event_driven_architecture_style.vi.md#ch-style-eda).)
 
-Vì giao tiếp đồng bộ đặt ra ít thách thức hơn về thiết kế, hiện thực và debug, chúng tôi khuyến nghị mặc định dùng đồng bộ khi có thể, và chỉ dùng giao tiếp bất đồng bộ khi cần thiết.
+Vì giao tiếp đồng bộ đặt ra ít thách thức hơn về thiết kế, triển khai và debug, chúng tôi khuyến nghị mặc định dùng đồng bộ khi có thể, và chỉ dùng giao tiếp bất đồng bộ khi cần thiết.
 
 > **Mẹo**
 >
@@ -130,7 +130,7 @@ Vì giao tiếp đồng bộ đặt ra ít thách thức hơn về thiết kế,
 
 ## Nghiên cứu tình huống monolith: Silicon Sandwiches (Monolith Case Study: Silicon Sandwiches)
 
-<a id="ix_ch19-choosing-style-asciidoc3"></a><a id="ix_ch19-choosing-style-asciidoc4"></a><a id="ix_ch19-choosing-style-asciidoc5"></a>Trong architecture kata Silicon Sandwiches ở [Chương 5](ch05_identifying_architectural_characteristics.vi.md#ch-identifying), sau khi phân tích architecture characteristic, chúng tôi đã xác định rằng một quantum duy nhất là đủ để hiện thực hệ thống. Vì chúng tôi đang xem xét một ứng dụng đơn giản không có ngân sách lớn, sự đơn giản của một monolith là hấp dẫn.
+<a id="ix_ch19-choosing-style-asciidoc3"></a><a id="ix_ch19-choosing-style-asciidoc4"></a><a id="ix_ch19-choosing-style-asciidoc5"></a>Trong architecture kata Silicon Sandwiches ở [Chương 5](ch05_identifying_architectural_characteristics.vi.md#ch-identifying), sau khi phân tích architecture characteristic, chúng tôi đã xác định rằng một quantum duy nhất là đủ để triển khai hệ thống. Vì chúng tôi đang xem xét một ứng dụng đơn giản không có ngân sách lớn, sự đơn giản của một monolith là hấp dẫn.
 
 Tuy nhiên, chúng tôi đã tạo hai thiết kế component khác nhau cho Silicon Sandwiches: một được phân vùng theo domain, và một được phân vùng theo kỹ thuật—bạn có thể muốn lật lại [Chương 5](ch05_identifying_architectural_characteristics.vi.md#ch-identifying) nếu muốn ôn lại. Trong chương này, chúng tôi quay lại những giải pháp đơn giản đó để tạo thiết kế cho mỗi lựa chọn và thảo luận các trade-offs của chúng. Chúng ta sẽ bắt đầu với một monolithic architecture.
 
@@ -140,13 +140,13 @@ Tuy nhiên, chúng tôi đã tạo hai thiết kế component khác nhau cho Sil
 
 <a id="ix_ch19-choosing-style-asciidoc6"></a><a id="ix_ch19-choosing-style-asciidoc7"></a><a id="ix_ch19-choosing-style-asciidoc8"></a>Một modular monolith xây dựng các component domain-centric với một database duy nhất, được deploy như một quantum duy nhất; thiết kế modular monolith cho Silicon Sandwiches xuất hiện trong [Hình 19-3](#fig-choosing-pattern-SS-modular).
 
-Đây là một monolith với một relational database duy nhất, được hiện thực với một UI web-based duy nhất (với các cân nhắc thiết kế cẩn thận cho thiết bị di động) để giữ chi phí tổng thể thấp. Mỗi domain chúng tôi đã xác định xuất hiện như một component. Nếu đủ thời gian và nguồn lực, hãy cân nhắc tách các bảng và các tài sản database khác theo cùng cách như các domain component, điều sẽ giúp dễ dàng hơn nhiều để di chuyển architecture này sang một architecture phân tán nếu các yêu cầu tương lai đòi hỏi.
+Đây là một monolith với một relational database duy nhất, được triển khai với một UI web-based duy nhất (với các cân nhắc thiết kế cẩn thận cho thiết bị di động) để giữ chi phí tổng thể thấp. Mỗi domain chúng tôi đã xác định xuất hiện như một component. Nếu đủ thời gian và nguồn lực, hãy cân nhắc tách các bảng và các tài sản database khác theo cùng cách như các domain component, điều sẽ giúp dễ dàng hơn nhiều để di chuyển architecture này sang một architecture phân tán nếu các yêu cầu tương lai đòi hỏi.
 
 <a id="fig-choosing-pattern-SS-modular"></a>
 
 ![](images/fsa2_1903.png)
 
-*Hình 19-3. Một hiện thực modular monolith của Silicon Sandwiches*
+*Hình 19-3. Một bản triển khai modular monolith của Silicon Sandwiches*
 
 Vì bản thân architecture style vốn không xử lý việc tùy biến, tính năng đó nên trở thành một phần của thiết kế domain. Trong trường hợp này, kiến trúc sư thiết kế một endpoint `Override`, nơi developer có thể tải lên các tùy biến riêng lẻ. Tương ứng, họ phải bảo đảm rằng mọi domain component đều tham chiếu tới component `Override` cho mỗi characteristic tùy biến được. (Kiểm tra điều này sẽ là một công việc hoàn hảo cho một architectural fitness function.)<a id="id1475"></a><a id="id1476"></a><a id="id1477"></a>
 
@@ -154,13 +154,13 @@ Vì bản thân architecture style vốn không xử lý việc tùy biến, tí
 
 ### Microkernel
 
-<a id="ix_ch19-choosing-style-asciidoc9"></a><a id="ix_ch19-choosing-style-asciidoc10"></a><a id="ix_ch19-choosing-style-asciidoc11"></a>Một trong các architecture characteristic chúng tôi đã xác định trong Silicon Sandwiches là customizability. [Hình 19-4](#fig-choosing-pattern-SS-micro) dùng sự đẳng cấu domain/architecture để cho thấy điều này có thể được hiện thực như thế nào bằng một microkernel architecture.
+<a id="ix_ch19-choosing-style-asciidoc9"></a><a id="ix_ch19-choosing-style-asciidoc10"></a><a id="ix_ch19-choosing-style-asciidoc11"></a>Một trong các architecture characteristic chúng tôi đã xác định trong Silicon Sandwiches là customizability. [Hình 19-4](#fig-choosing-pattern-SS-micro) dùng sự đẳng cấu domain/architecture để cho thấy điều này có thể được triển khai như thế nào bằng một microkernel architecture.
 
 <a id="fig-choosing-pattern-SS-micro"></a>
 
 ![](images/fsa2_1904.png)
 
-*Hình 19-4. Một hiện thực microkernel của Silicon Sandwiches*
+*Hình 19-4. Một bản triển khai microkernel của Silicon Sandwiches*
 
 Trong [Hình 19-4](#fig-choosing-pattern-SS-micro), core system gồm các domain component và một relational database duy nhất. Như trong thiết kế modular monolith, việc đồng bộ cẩn thận giữa các domain và thiết kế dữ liệu sẽ tạo điều kiện cho việc di chuyển core sang một architecture phân tán trong tương lai. Mỗi tùy biến xuất hiện trong một plug-in; những tùy biến chung xuất hiện trong một tập plug-ins duy nhất (với một database tương ứng) và một loạt tùy biến địa phương, mỗi cái có dữ liệu riêng. Vì không plug-ins nào cần được coupled với các plug-ins khác, chúng có thể đều duy trì dữ liệu của mình và vẫn decoupled.
 
@@ -182,7 +182,7 @@ Các yêu cầu hệ thống của GGG cũng nêu rõ một số kỳ vọng tha
 
 ![](images/fsa2_1905.png)
 
-*Hình 19-5. Một hiện thực microservices của Going, Going, Gone*
+*Hình 19-5. Một bản triển khai microservices của Going, Going, Gone*
 
 Trong [Hình 19-5](#fig-choosing-pattern-GGG-topo), mỗi component đã xác định trở thành một service trong architecture, khớp component với granularity service. GGG có ba giao diện người dùng riêng biệt:
 

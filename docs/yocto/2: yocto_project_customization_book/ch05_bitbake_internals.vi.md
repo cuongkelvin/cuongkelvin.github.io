@@ -444,7 +444,7 @@ Các chuỗi kết quả chính xác là những gì chúng ta mong đợi.
 
 ### 5.1.4 Unset biến và flag (Unsetting Variables and Flags)
 
-Variable flag là cách BitBake hiện thực các thuộc tính (property hay attribute) của biến. Đó là một cách gắn thêm thông tin vào một biến. Ví dụ, chúng ta đã thấy cách dùng các flag này trong file `sources/poky/meta/conf/documentation.conf` ở Mục 4.1.1, nơi có một số thiết lập như dưới đây:
+Variable flag là cách BitBake triển khai các thuộc tính (property hay attribute) của biến. Đó là một cách gắn thêm thông tin vào một biến. Ví dụ, chúng ta đã thấy cách dùng các flag này trong file `sources/poky/meta/conf/documentation.conf` ở Mục 4.1.1, nơi có một số thiết lập như dưới đây:
 
 ```
 do_build[doc] = "Default task for a recipe - depends on all other norma
@@ -990,7 +990,7 @@ addtask package_write_tar before do_build \
 
 Ở đây, task `package_write_tar` phải đợi cho đến khi cả hai task `do_packagedata` và `do_package` hoàn tất.
 
-Nói chung, thứ tự BitBake chạy các task được kiểm soát bởi task scheduler của nó, scheduler này có thể được cấu hình hoặc thậm chí định nghĩa lại bằng các hiện thực tùy biến cho những trường hợp sử dụng cụ thể.
+Nói chung, thứ tự BitBake chạy các task được kiểm soát bởi task scheduler của nó, scheduler này có thể được cấu hình hoặc thậm chí định nghĩa lại bằng các bản triển khai tùy biến cho những trường hợp sử dụng cụ thể.
 
 Dù các thiết lập này nằm ngoài phạm vi của sách, chúng ta có thể nói rằng để chọn tên scheduler dùng cho việc lập lịch các task của BitBake, chúng ta có thể dùng biến `BB_SCHEDULER` (xem `https://docs.yoctoproject.org/bitbake/2.8/bitbake-user-manual/bitbake-user-manual-ref-variables.html#term-BB_SCHEDULERS`).
 
@@ -1236,7 +1236,7 @@ Như chúng ta thấy ở trên, có nhiều thiết lập tự động được
 
 > Xem Mục 11.6 để có ví dụ về cách dùng các class target và native.
 
-- `LIBCOVERRIDE` chỉ định một số libC override đặc biệt. Theo mặc định, nó được đặt thành null, nhưng có thể được đặt thành `libc-` `musl` hoặc `libc-newlib` tùy theo các hiện thực libC được dùng.
+- `LIBCOVERRIDE` chỉ định một số libC override đặc biệt. Theo mặc định, nó được đặt thành null, nhưng có thể được đặt thành `libc-` `musl` hoặc `libc-newlib` tùy theo các bản triển khai libC được dùng.
 
 - Override `forcevariable` là override mạnh nhất có thể, và nó có thể được dùng để chỉ định một giá trị cưỡng bức.
 
@@ -1376,7 +1376,7 @@ Bằng cách này, `DEPENDS` sẽ được đặt thành `”foo bar”` khi com
 >
 > chúng ta chọn cùng lúc mọi machine override được định nghĩa bởi `MACHINEOVERRIDES_EXTENDER:mx8mpul:use-mainline-bsp`.
 >
-> Như chúng ta thấy, tính năng này khá hữu ích, nhưng chúng ta lưu ý rằng nó không portable! Vì vậy chúng ta không thể dùng nó trên các hiện thực khác.
+> Như chúng ta thấy, tính năng này khá hữu ích, nhưng chúng ta lưu ý rằng nó không portable! Vì vậy chúng ta không thể dùng nó trên các cách triển khai khác.
 
 Về `DISTROOVERRIDES`, có rất ít cách dùng cơ chế này; tuy nhiên, nếu xem định nghĩa của distro `poky-tiny`, chúng ta có thể đọc thấy đoạn sau:
 

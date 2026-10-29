@@ -317,9 +317,9 @@ Argument thứ nhất là một pointer tới đối tượng barrier. Argument 
 
 Với ví dụ trên, chúng ta đặt nó là 2. Do đó, chỉ khi có hai thread đang chờ trên đối tượng barrier, cả hai mới được bỏ chặn và có thể tiếp tục. Phần còn lại của code khá giống các ví dụ trước, và đã được giải thích trong phần trước.
 
-Một đối tượng barrier có thể được hiện thực bằng một mutex và một condition variable tương tự những gì chúng ta đã làm trong phần trước. Thực tế, một hệ điều hành POSIX-compliant không cung cấp thứ gì như barrier trong system call interface của nó, và hầu hết các hiện thực được tạo bằng một mutex và một condition variable.
+Một đối tượng barrier có thể được triển khai bằng một mutex và một condition variable tương tự những gì chúng ta đã làm trong phần trước. Thực tế, một hệ điều hành POSIX-compliant không cung cấp thứ gì như barrier trong system call interface của nó, và hầu hết các bản triển khai được tạo bằng một mutex và một condition variable.
 
-Về cơ bản đó là lý do tại sao một số hệ điều hành như macOS không cung cấp hiện thực cho POSIX barrier. Code trên không thể được biên dịch trên một máy macOS vì các hàm POSIX barrier không được định nghĩa. Code trên đã được kiểm thử trên cả Linux và FreeBSD và hoạt động trên cả hai. Do đó, hãy cẩn thận khi dùng barrier, vì việc dùng chúng làm cho code của bạn kém portable hơn.
+Về cơ bản đó là lý do tại sao một số hệ điều hành như macOS không cung cấp bản triển khai cho POSIX barrier. Code trên không thể được biên dịch trên một máy macOS vì các hàm POSIX barrier không được định nghĩa. Code trên đã được kiểm thử trên cả Linux và FreeBSD và hoạt động trên cả hai. Do đó, hãy cẩn thận khi dùng barrier, vì việc dùng chúng làm cho code của bạn kém portable hơn.
 
 > Việc macOS không cung cấp các hàm POSIX barrier đơn giản có nghĩa là nó chỉ POSIX-compliant một phần và các chương trình dùng barrier (vốn dĩ nhiên là chuẩn) không thể được biên dịch trên các máy macOS. Điều này đi ngược lại triết lý C, đó là *viết một lần, và biên dịch ở bất cứ đâu*.
 
@@ -453,7 +453,7 @@ Ví dụ kinh điển này là về việc tạo ra 50 phân tử nước. Với
 
 Trong code sau, trước tiên chúng ta tạo 50 thread oxy và 100 thread hydro. Để bảo vệ critical section của thread oxy, chúng ta dùng một mutex, nhưng đối với critical section của các thread hydro, chúng ta dùng một general semaphore cho phép hai thread đi vào critical section đồng thời.
 
-Cho mục đích báo hiệu, chúng ta dùng POSIX barrier, nhưng vì barrier không được hiện thực trong các hệ thống Apple, chúng ta cần hiện thực chúng bằng mutex và condition variable. Code box sau chứa code:
+Cho mục đích báo hiệu, chúng ta dùng POSIX barrier, nhưng vì barrier không được triển khai trong các hệ thống Apple, chúng ta cần triển khai chúng bằng mutex và condition variable. Code box sau chứa code:
 
 ```
 #include <stdio.h>
@@ -584,7 +584,7 @@ int main(int argc, char** argv) {
 
 *Code Box 16-6 [ExtremeC_examples_chapter16_2.c]: Dùng một general semaphore để mô phỏng quá trình tạo 50 phân tử nước từ 50 nguyên tử oxy và 100 nguyên tử hydro*
 
-Ở đầu code, có <a id="_idIndexMarker1135"></a>một số dòng <a id="_idIndexMarker1136"></a>được bao bởi `#ifdef __APPLE__` và `#endif`. Những dòng này chỉ được biên dịch trong các hệ thống Apple. Những dòng này chủ yếu là hiện thực và các biến cần thiết để mô phỏng hành vi của POSIX barrier. Trong các hệ thống POSIX-compliant khác ngoài Apple, chúng ta dùng một POSIX barrier thông thường. Chúng tôi sẽ không đi qua chi tiết hiện thực barrier trên các hệ thống Apple ở đây, nhưng đáng để đọc code và hiểu nó kỹ lưỡng.
+Ở đầu code, có <a id="_idIndexMarker1135"></a>một số dòng <a id="_idIndexMarker1136"></a>được bao bởi `#ifdef __APPLE__` và `#endif`. Những dòng này chỉ được biên dịch trong các hệ thống Apple. Những dòng này chủ yếu là bản triển khai và các biến cần thiết để mô phỏng hành vi của POSIX barrier. Trong các hệ thống POSIX-compliant khác ngoài Apple, chúng ta dùng một POSIX barrier thông thường. Chúng tôi sẽ không đi qua chi tiết triển khai barrier trên các hệ thống Apple ở đây, nhưng đáng để đọc code và hiểu nó kỹ lưỡng.
 
 Là một phần của một số biến global được định nghĩa trong code trên, chúng ta đã khai báo mutex `oxygen_mutex`, được dự định bảo vệ critical section của các thread oxy. Tại mỗi thời điểm, chỉ một thread oxy (hay nguyên tử oxy) có thể đi vào critical section.
 
@@ -594,7 +594,7 @@ Sau đó trong critical section của nó, một thread oxy chờ hai thread hyd
 
 Khi số thread đang chờ trên đối tượng barrier dùng chung đạt đến hai, điều đó có nghĩa là chúng ta đã có một oxy và hai hydro, và rồi voilà: một phân tử nước được tạo ra, và mọi<a id="_idIndexMarker1138"></a> thread đang chờ có thể tiếp tục. Các thread hydro thoát ngay lập tức, nhưng thread oxy chỉ thoát sau khi tăng bộ đếm phân tử nước.
 
-Chúng ta khép lại phần này với lưu ý cuối cùng này. Trong *ví dụ 16.2*, chúng ta đã dùng hàm `pthread_cond_broadcast` khi hiện thực các barrier cho các hệ thống Apple. Nó báo hiệu cho mọi thread đang chờ trên condition variable của barrier vốn được dự định tiếp tục sau khi có các thread khác tham gia.
+Chúng ta khép lại phần này với lưu ý cuối cùng này. Trong *ví dụ 16.2*, chúng ta đã dùng hàm `pthread_cond_broadcast` khi triển khai các barrier cho các hệ thống Apple. Nó báo hiệu cho mọi thread đang chờ trên condition variable của barrier vốn được dự định tiếp tục sau khi có các thread khác tham gia.
 
 Trong phần tiếp theo, chúng ta sẽ nói về memory model đằng sau POSIX thread và cách chúng tương tác với memory của process sở hữu. Chúng ta cũng sẽ xem các ví dụ về việc dùng các segment Stack và Heap và cách chúng có thể dẫn đến một số vấn đề memory-related nghiêm trọng.
 

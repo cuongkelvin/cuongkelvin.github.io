@@ -261,7 +261,7 @@ Zero padding thêm các số không vào plaintext để làm phình kích thư�
 
 ### TLS handshake protocol (The TLS Handshake Protocol)
 
-Handshake là cốt lõi của TLS agreement protocol—quá trình mà qua đó một client và một server thiết lập các secret key dùng chung để khởi tạo liên lạc an toàn. Trong một TLS handshake, client và server đóng các vai trò khác nhau. Client đề xuất một số cấu hình (phiên bản TLS và một bộ cipher, theo thứ tự ưu tiên), và server chọn cấu hình mà nó sẽ dùng. Server nên tuân theo các ưu tiên của client. Để bảo đảm khả năng tương tác giữa các implementation và bảo đảm rằng bất kỳ server nào hiện thực TLS 1.3 cũng sẽ đọc được dữ liệu TLS 1.3 do bất kỳ client nào hiện thực TLS 1.3 gửi (ngay cả khi nó dùng một thư viện hoặc ngôn ngữ lập trình khác), các đặc tả TLS 1.3 cũng mô tả định dạng mà dữ liệu nên được gửi.
+Handshake là cốt lõi của TLS agreement protocol—quá trình mà qua đó một client và một server thiết lập các secret key dùng chung để khởi tạo liên lạc an toàn. Trong một TLS handshake, client và server đóng các vai trò khác nhau. Client đề xuất một số cấu hình (phiên bản TLS và một bộ cipher, theo thứ tự ưu tiên), và server chọn cấu hình mà nó sẽ dùng. Server nên tuân theo các ưu tiên của client. Để bảo đảm khả năng tương tác giữa các implementation và bảo đảm rằng bất kỳ server nào triển khai TLS 1.3 cũng sẽ đọc được dữ liệu TLS 1.3 do bất kỳ client nào triển khai TLS 1.3 gửi (ngay cả khi nó dùng một thư viện hoặc ngôn ngữ lập trình khác), các đặc tả TLS 1.3 cũng mô tả định dạng mà dữ liệu nên được gửi.
 
 Hình 13-1 cho thấy quá trình handshake trao đổi dữ liệu như thế nào, theo mô tả của các đặc tả TLS 1.3.
 
@@ -347,7 +347,7 @@ Trong thực tế, nếu kẻ tấn công xâm phạm máy của client và có 
 
 ## Những gì có thể sai (How Things Can Go Wrong)
 
-TLS 1.3 đáp ứng yêu cầu như một protocol liên lạc an toàn general-purpose, nhưng nó không phải là bất khả xâm phạm. Giống như mọi hệ thống security, nó có thể thất bại trong những hoàn cảnh nhất định (ví dụ, khi các giả định mà nhà thiết kế đưa ra về các attack thực tế là sai). Đáng tiếc, ngay cả phiên bản mới nhất của TLS 1.3, được cấu hình với các cipher an toàn nhất, cũng có thể bị xâm phạm. Ví dụ, security của TLS 1.3 dựa vào giả định rằng cả ba bên (client, server và certificate authority) sẽ hành xử trung thực, nhưng nếu một bên bị xâm phạm hoặc bản thân implementation TLS được hiện thực kém thì sao?
+TLS 1.3 đáp ứng yêu cầu như một protocol liên lạc an toàn general-purpose, nhưng nó không phải là bất khả xâm phạm. Giống như mọi hệ thống security, nó có thể thất bại trong những hoàn cảnh nhất định (ví dụ, khi các giả định mà nhà thiết kế đưa ra về các attack thực tế là sai). Đáng tiếc, ngay cả phiên bản mới nhất của TLS 1.3, được cấu hình với các cipher an toàn nhất, cũng có thể bị xâm phạm. Ví dụ, security của TLS 1.3 dựa vào giả định rằng cả ba bên (client, server và certificate authority) sẽ hành xử trung thực, nhưng nếu một bên bị xâm phạm hoặc bản thân implementation TLS được triển khai kém thì sao?
 
 ### Certificate authority bị xâm phạm (Compromised Certificate Authority)
 

@@ -89,7 +89,7 @@ Giờ là lúc thiết lập target machine của chúng ta. Tất nhiên, chún
 
 Mỗi hệ thống embedded dựa trên GNU/Linux OS đều có một cổng serial chuyên dụng gọi là serial console, mà developer có thể dùng để debug và quản lý hệ thống ngay cả với một môi trường thu gọn (chỉ một terminal!).
 
-Lưu ý rằng gần như thường xuyên serial console không được hiện thực qua kết nối serial RS232 thông thường, mà qua USB. Trong trường hợp sau, hệ thống embedded vẫn dùng một cổng serial, nhưng dữ liệu của nó đi qua kết nối USB nhờ một bộ chuyển đổi Serial-to-USB, như bộ chuyển đổi đi kèm development kit của Engicam (xem Hình 1-3).
+Lưu ý rằng gần như thường xuyên serial console không được triển khai qua kết nối serial RS232 thông thường, mà qua USB. Trong trường hợp sau, hệ thống embedded vẫn dùng một cổng serial, nhưng dữ liệu của nó đi qua kết nối USB nhờ một bộ chuyển đổi Serial-to-USB, như bộ chuyển đổi đi kèm development kit của Engicam (xem Hình 1-3).
 
 ![Figure 1-3](images/ch01/fig01-03.png)
 

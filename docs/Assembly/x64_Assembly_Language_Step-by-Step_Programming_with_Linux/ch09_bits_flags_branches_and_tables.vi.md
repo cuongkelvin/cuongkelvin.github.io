@@ -713,7 +713,7 @@ Giống như nha khoa thập niên 1950, memory addressing real-mode 8088-based 
 
 <a id="Page_280"></a>Chà, qua 40 năm qua, các CPU Intel-family của chúng ta đã có được gần như mọi transistor chúng muốn, và phần lớn những hạn chế memory addressing 16-bit đáng giận đó đơn giản đã biến mất. Bạn có thể address memory bằng *bất kỳ* register general-purpose nào. Bạn thậm chí có thể address memory trực tiếp bằng stack pointer RSP, điều mà tổ tiên 16-bit của nó là SP không thể làm. (Bạn không nên *thay đổi* giá trị trong RSP mà không hết sức cẩn thận, nhưng RSP giờ có thể tham gia vào các addressing mode mà stack pointer từng bị loại trừ ở vùng đất real-mode 16-bit.)
 
-Protected mode 32-bit trên họ CPU 386 đã giới thiệu một lược đồ memory-addressing general-purpose trong đó mọi register GP đều có thể tham gia ngang nhau. Memory addressing ở long mode x64 hiện thực cùng lược đồ đó với rất ít thay đổi. Tôi đã phác thảo nó trong <a id="R_c09-fig-0009"></a>[Hình 9.9](#c09-fig-0009), có lẽ là hình quan trọng nhất trong toàn bộ cuốn sách này. *Memory addressing là kỹ năng then chốt trong công việc assembly language*. Nếu bạn không hiểu CPU address memory thế nào, không gì khác có ý nghĩa.
+Protected mode 32-bit trên họ CPU 386 đã giới thiệu một lược đồ memory-addressing general-purpose trong đó mọi register GP đều có thể tham gia ngang nhau. Memory addressing ở long mode x64 triển khai cùng lược đồ đó với rất ít thay đổi. Tôi đã phác thảo nó trong <a id="R_c09-fig-0009"></a>[Hình 9.9](#c09-fig-0009), có lẽ là hình quan trọng nhất trong toàn bộ cuốn sách này. *Memory addressing là kỹ năng then chốt trong công việc assembly language*. Nếu bạn không hiểu CPU address memory thế nào, không gì khác có ý nghĩa.
 
 ![](images/c09f009.png)
 

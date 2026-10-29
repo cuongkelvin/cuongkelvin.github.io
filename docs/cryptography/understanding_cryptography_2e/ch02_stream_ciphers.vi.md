@@ -40,7 +40,7 @@ Hình 2.3 Stream cipher đồng bộ và bất đồng bộ
 
 Block cipher mã hóa một block gồm b bit plaintext mỗi lần với cùng một key. Các cipher được xây dựng sao cho việc mã hóa bất kỳ bit plaintext nào trong một block cho trước đều phụ thuộc vào mọi bit plaintext khác trong cùng block. Trong thực tế, đại đa số block cipher hoặc có độ dài block 128 bit (16 byte) như Advanced Encryption Standard (AES), hoặc có độ dài block 64 bit (8 byte) như Data Encryption Standard (DES) hay triple DES (3DES). Hai cipher này lần lượt được giới thiệu trong Chương 4 và Chương 3.
 
-Trong thực tế, đặc biệt để mã hóa truyền thông máy tính trên internet, block cipher được dùng thường xuyên hơn stream cipher. Trong những ngày đầu của cryptography hiện đại, khoảng những năm 1980 và 1990, người ta cho rằng stream cipher có thể mã hóa hiệu quả hơn block cipher. Chúng đặc biệt phù hợp với các ứng dụng có tài nguyên tính toán thấp, chẳng hạn điện thoại di động hay các thiết bị nhúng nhỏ khác. Hồi đó, stream cipher thường được hiện thực bằng hardware. Một ví dụ nổi bật về thuật toán như vậy là cipher A5/1, được dùng để mã hóa thoại trong tiêu chuẩn điện thoại di động GSM (sắp lỗi thời). Kể từ đó, nhiều block cipher được thiết kế đặc biệt với hiệu quả hardware trong đầu đã được đề xuất, chẳng hạn thuật toán PRESENT, được mô tả trong Mục 3.7.3. Đồng thời, có những stream cipher hiện đại rất phù hợp cho các hiện thực software high-speed, bao gồm Salsa20 (xem Mục 2.4.1) và ChaCha (xem Mục 2.4.2).
+Trong thực tế, đặc biệt để mã hóa truyền thông máy tính trên internet, block cipher được dùng thường xuyên hơn stream cipher. Trong những ngày đầu của cryptography hiện đại, khoảng những năm 1980 và 1990, người ta cho rằng stream cipher có thể mã hóa hiệu quả hơn block cipher. Chúng đặc biệt phù hợp với các ứng dụng có tài nguyên tính toán thấp, chẳng hạn điện thoại di động hay các thiết bị nhúng nhỏ khác. Hồi đó, stream cipher thường được triển khai bằng hardware. Một ví dụ nổi bật về thuật toán như vậy là cipher A5/1, được dùng để mã hóa thoại trong tiêu chuẩn điện thoại di động GSM (sắp lỗi thời). Kể từ đó, nhiều block cipher được thiết kế đặc biệt với hiệu quả hardware trong đầu đã được đề xuất, chẳng hạn thuật toán PRESENT, được mô tả trong Mục 3.7.3. Đồng thời, có những stream cipher hiện đại rất phù hợp cho các bản triển khai software high-speed, bao gồm Salsa20 (xem Mục 2.4.1) và ChaCha (xem Mục 2.4.2).
 
 ### 2.1.2 Mã hóa và giải mã bằng Stream Cipher
 
@@ -264,11 +264,11 @@ Kiểu tấn công này là lý do khái niệm CSPRNG được phát minh.
 
 Điều chúng ta cần làm để ngăn tấn công ở trên là dùng một CSPRNG, thứ bảo đảm key stream không thể đoán trước. Nhớ lại rằng điều này có nghĩa là cho n bit output đầu tiên của key stream s<sub>1</sub>,s<sub>2</sub>,...,s<sub>n</sub>, việc tính các bit s<sub>n+1</sub>,s<sub>n+2</sub>,... là không khả thi về mặt tính toán. Đáng tiếc, gần như mọi bộ sinh số giả ngẫu nhiên được dùng cho các ứng dụng bên ngoài cryptography đều không an toàn về mặt mật mã. Do đó, trong thực tế, chúng ta cần dùng các bộ sinh số giả ngẫu nhiên được thiết kế đặc biệt cho stream cipher.
 
-Câu hỏi bây giờ là các stream cipher thực tế thực sự trông như thế nào. Có nhiều đề xuất stream cipher trong tài liệu. Chúng có thể được phân loại đại khái thành cipher tối ưu cho hiện thực software hoặc tối ưu cho hiện thực hardware. Trong trường hợp đầu, các cipher thường cần ít lệnh CPU để tính một bit key stream. Trong trường hợp sau, chúng có xu hướng dựa trên các phép toán có thể dễ dàng hiện thực bằng hardware. Một ví dụ phổ biến là shift register có feedback, được thảo luận ở mục tiếp theo. Một lớp stream cipher khác được xây dựng trên các pseudorandom function dựa trên phép cộng 32-bit, phép xoay và phép XOR, gọi là các phép toán add-rotate-XOR, và sẽ được thảo luận trong Mục 2.4. Một lớp stream cipher thứ ba dùng block cipher làm khối xây dựng. Các mode cipher feedback, output feedback và counter sẽ được giới thiệu trong Chương 5 là các ví dụ về stream cipher được suy ra từ block cipher.
+Câu hỏi bây giờ là các stream cipher thực tế thực sự trông như thế nào. Có nhiều đề xuất stream cipher trong tài liệu. Chúng có thể được phân loại đại khái thành cipher tối ưu cho triển khai software hoặc tối ưu cho triển khai hardware. Trong trường hợp đầu, các cipher thường cần ít lệnh CPU để tính một bit key stream. Trong trường hợp sau, chúng có xu hướng dựa trên các phép toán có thể dễ dàng triển khai bằng hardware. Một ví dụ phổ biến là shift register có feedback, được thảo luận ở mục tiếp theo. Một lớp stream cipher khác được xây dựng trên các pseudorandom function dựa trên phép cộng 32-bit, phép xoay và phép XOR, gọi là các phép toán add-rotate-XOR, và sẽ được thảo luận trong Mục 2.4. Một lớp stream cipher thứ ba dùng block cipher làm khối xây dựng. Các mode cipher feedback, output feedback và counter sẽ được giới thiệu trong Chương 5 là các ví dụ về stream cipher được suy ra từ block cipher.
 
 ## 2.3 Stream Cipher Shift Register-Based
 
-Như chúng ta đã học cho đến giờ, các stream cipher thực tế dùng một dòng bit key s<sub>1</sub>,s<sub>2</sub>,... được tạo bởi bộ sinh key stream, thứ nên có các tính chất nhất định. Một cách thanh lịch để hiện thực các dãy giả ngẫu nhiên dài là dùng linear feedback shift register (LFSR). Chúng dễ dàng được hiện thực bằng hardware và nhiều, nhưng chắc chắn không phải tất cả, stream cipher dùng LFSR. Một ví dụ nổi bật là cipher A5/1, được chuẩn hóa để mã hóa thoại trong tiêu chuẩn truyền thông di động GSM (hơi lỗi thời). Như chúng ta sẽ thấy, dù một LFSR đơn thuần tạo ra một dãy có tính chất thống kê tốt, nó yếu về mặt mật mã. Tuy nhiên, kết hợp nhiều LFSR có thể tạo ra stream cipher an toàn. Trivium, được giới thiệu trong Mục 2.4.3, là một ví dụ về cipher như vậy. Cần nhấn mạnh rằng có nhiều cách xây dựng stream cipher, như chúng ta sẽ thấy trong Mục 2.4.
+Như chúng ta đã học cho đến giờ, các stream cipher thực tế dùng một dòng bit key s<sub>1</sub>,s<sub>2</sub>,... được tạo bởi bộ sinh key stream, thứ nên có các tính chất nhất định. Một cách thanh lịch để triển khai các dãy giả ngẫu nhiên dài là dùng linear feedback shift register (LFSR). Chúng dễ dàng được triển khai bằng hardware và nhiều, nhưng chắc chắn không phải tất cả, stream cipher dùng LFSR. Một ví dụ nổi bật là cipher A5/1, được chuẩn hóa để mã hóa thoại trong tiêu chuẩn truyền thông di động GSM (hơi lỗi thời). Như chúng ta sẽ thấy, dù một LFSR đơn thuần tạo ra một dãy có tính chất thống kê tốt, nó yếu về mặt mật mã. Tuy nhiên, kết hợp nhiều LFSR có thể tạo ra stream cipher an toàn. Trivium, được giới thiệu trong Mục 2.4.3, là một ví dụ về cipher như vậy. Cần nhấn mạnh rằng có nhiều cách xây dựng stream cipher, như chúng ta sẽ thấy trong Mục 2.4.
 
 ### 2.3.1 Linear Feedback Shift Register (LFSR)
 
@@ -426,7 +426,7 @@ Tình huống này có hệ quả lớn: ngay khi Oscar biết 2m bit output c�
 
 ## 2.4 Các Stream Cipher thực tế
 
-Dù stream cipher đã phổ biến trong “những ngày đầu” của cryptography hiện đại, khoảng những năm 1980, block cipher trở nên thống trị hơn trong những năm 1990. Sự phát triển này một phần là do các tấn công thành công nhắm vào nhiều stream cipher thời kỳ đầu. Đây là động lực chính cho project eSTREAM, được tổ chức bởi một mạng lưới các nhà cryptographer châu Âu. Năm 2004, eSTREAM đưa ra lời kêu gọi đề xuất stream cipher mới và quá trình lựa chọn kết thúc năm 2008. Các cipher được chia thành hai “profile”. Profile 1 chứa các stream cipher cho phép hiện thực software high-throughput. Các thuật toán Profile 2 là các stream cipher hardware-friendly, có số cổng logic và mức tiêu thụ điện thấp. Trong mục này, chúng tôi sẽ giới thiệu đại diện cho mỗi profile: Salsa20 cùng với biến thể ChaCha của nó (Profile 1) và Trivium (Profile 2).
+Dù stream cipher đã phổ biến trong “những ngày đầu” của cryptography hiện đại, khoảng những năm 1980, block cipher trở nên thống trị hơn trong những năm 1990. Sự phát triển này một phần là do các tấn công thành công nhắm vào nhiều stream cipher thời kỳ đầu. Đây là động lực chính cho project eSTREAM, được tổ chức bởi một mạng lưới các nhà cryptographer châu Âu. Năm 2004, eSTREAM đưa ra lời kêu gọi đề xuất stream cipher mới và quá trình lựa chọn kết thúc năm 2008. Các cipher được chia thành hai “profile”. Profile 1 chứa các stream cipher cho phép triển khai software high-throughput. Các thuật toán Profile 2 là các stream cipher hardware-friendly, có số cổng logic và mức tiêu thụ điện thấp. Trong mục này, chúng tôi sẽ giới thiệu đại diện cho mỗi profile: Salsa20 cùng với biến thể ChaCha của nó (Profile 1) và Trivium (Profile 2).
 
 ### 2.4.1 Salsa20
 
@@ -446,7 +446,7 @@ y = Salsa20<sub>k</sub>(n) ⊕ x
 
 x = Salsa20<sub>k</sub>(n) ⊕ y
 
-Vì mỗi block chỉ phụ thuộc vào key, nonce và số thứ tự block, các block key stream có thể được tính độc lập với nhau và các block có thể được tính song song. Điều này có lợi cho các hiện thực high-speed của Salsa20.
+Vì mỗi block chỉ phụ thuộc vào key, nonce và số thứ tự block, các block key stream có thể được tính độc lập với nhau và các block có thể được tính song song. Điều này có lợi cho các bản triển khai high-speed của Salsa20.
 
 #### Hàm lõi của Salsa20
 
@@ -508,9 +508,9 @@ Hình 2.8 Hàm Quarter-round QR(a,b,c,d) của Salsa20
 
 Hình 2.9 Hàm Double-round của Salsa20
 
-#### Hiện thực
+#### Triển khai
 
-Vì Salsa20 là một cipher ARX, tức là cấu trúc bên trong của nó chỉ dùng phép cộng, phép xoay và phép XOR, nó cho phép các hiện thực software high-throughput rất gọn. Salsa20 với 20 vòng cần trung bình khoảng 4–14 chu kỳ mỗi byte với các stream dài, tùy loại CPU.
+Vì Salsa20 là một cipher ARX, tức là cấu trúc bên trong của nó chỉ dùng phép cộng, phép xoay và phép XOR, nó cho phép các bản triển khai software high-throughput rất gọn. Salsa20 với 20 vòng cần trung bình khoảng 4–14 chu kỳ mỗi byte với các stream dài, tùy loại CPU.
 
 ### 2.4.2 ChaCha
 
@@ -584,13 +584,13 @@ Vòng thứ hai của double-round cho ra output trung gian (z<sub>0</sub>,z<sub
 
 (z<sub>3</sub>,z<sub>4</sub>,z<sub>9</sub>,z<sub>14</sub>) = QR(v<sub>3</sub>,v<sub>4</sub>,v<sub>9</sub>,v<sub>14</sub>).
 
-#### Hiện thực
+#### Triển khai
 
-So với Salsa20, các vòng trong ChaCha có diffusion được cải thiện (xem Mục 3.1.1 để có thảo luận về diffusion trong symmetric cipher) trong khi vẫn duy trì hiệu năng tương tự. So với các hiện thực software của AES, ChaCha20 nhanh hơn khoảng ba lần trên các CPU không có bộ tăng tốc AES chuyên dụng. Giống một vòng Salsa20, một vòng ChaCha có 16 phép XOR, 16 phép cộng và 16 phép xoay word 32-bit. ChaCha20 với 20 vòng cần trung bình khoảng 4–15 chu kỳ mỗi byte với các stream dài, tùy loại processor.
+So với Salsa20, các vòng trong ChaCha có diffusion được cải thiện (xem Mục 3.1.1 để có thảo luận về diffusion trong symmetric cipher) trong khi vẫn duy trì hiệu năng tương tự. So với các bản triển khai software của AES, ChaCha20 nhanh hơn khoảng ba lần trên các CPU không có bộ tăng tốc AES chuyên dụng. Giống một vòng Salsa20, một vòng ChaCha có 16 phép XOR, 16 phép cộng và 16 phép xoay word 32-bit. ChaCha20 với 20 vòng cần trung bình khoảng 4–15 chu kỳ mỗi byte với các stream dài, tùy loại processor.
 
 ### 2.4.3 Trivium
 
-Giống Salsa20, Trivium cũng ra đời từ project eStream. Nó được thiết kế bởi Christophe De Cannière và Bart Preneel. Khác với Salsa20, nó là một cipher hardware-oriented. Điều này có nghĩa là các hiện thực hardware của cipher dùng ít tài nguyên (tức là cổng logic) và nên cho phép tốc độ mã hóa cao. Một khác biệt nữa so với Salsa20 là nó dùng key 80-bit.
+Giống Salsa20, Trivium cũng ra đời từ project eStream. Nó được thiết kế bởi Christophe De Cannière và Bart Preneel. Khác với Salsa20, nó là một cipher hardware-oriented. Điều này có nghĩa là các bản triển khai hardware của cipher dùng ít tài nguyên (tức là cổng logic) và nên cho phép tốc độ mã hóa cao. Một khác biệt nữa so với Salsa20 là nó dùng key 80-bit.
 
 Trivium dựa trên một tổ hợp của ba shift register. Dù đây là các linear feedback shift register, có các thành phần phi tuyến được dùng để kết hợp các thanh ghi, điều ngăn tấn công nhắm vào LFSR mà chúng ta đã nghiên cứu trong Mục 2.3.2.
 
@@ -648,7 +648,7 @@ Giai đoạn Warm-Up Ở giai đoạn đầu, cipher được cho chạy clock 4
 
 Giai đoạn mã hóa (giải mã) Các bit được tạo ra từ đây trở đi, tức là bắt đầu với bit output của chu kỳ 1153, tạo thành key stream. Như trong mọi stream cipher, key stream được XOR với plainext *(ghi chú: sách in plainext; đúng là plaintext)* (mã hóa) hoặc ciphertext (giải mã).
 
-Hiện thực Một đặc điểm hấp dẫn của Trivium là sự gọn nhẹ, đặc biệt nếu được hiện thực bằng hardware. Nó chủ yếu gồm một shift register 288-bit và vài cổng Boolean. Người ta ước tính rằng một hiện thực hardware của cipher chiếm diện tích khoảng từ 3500 tới 5500 gate equivalence, tùy mức độ song song hóa. (Một gate equivalence là diện tích chip mà một cổng NAND 2-input chiếm.) Chẳng hạn, một hiện thực với 4000 cổng tính key stream với tốc độ 16 bit/chu kỳ clock. Con số này nhỏ hơn đáng kể so với hầu hết block cipher như AES và thêm vào đó rất nhanh. Nếu giả định thiết kế hardware này chạy clock ở 500 MHz, tốc độ mã hóa sẽ là 16 bit × 500 MHz = 8 Gbit/s. Trong software, người ta ước tính rằng tính 8 bit output mất 12 chu kỳ trên một CPU Intel 1.5 GHz, cho tốc độ mã hóa lý thuyết 1 Gbit/s.
+Triển khai Một đặc điểm hấp dẫn của Trivium là sự gọn nhẹ, đặc biệt nếu được triển khai bằng hardware. Nó chủ yếu gồm một shift register 288-bit và vài cổng Boolean. Người ta ước tính rằng một bản triển khai hardware của cipher chiếm diện tích khoảng từ 3500 tới 5500 gate equivalence, tùy mức độ song song hóa. (Một gate equivalence là diện tích chip mà một cổng NAND 2-input chiếm.) Chẳng hạn, một bản triển khai với 4000 cổng tính key stream với tốc độ 16 bit/chu kỳ clock. Con số này nhỏ hơn đáng kể so với hầu hết block cipher như AES và thêm vào đó rất nhanh. Nếu giả định thiết kế hardware này chạy clock ở 500 MHz, tốc độ mã hóa sẽ là 16 bit × 500 MHz = 8 Gbit/s. Trong software, người ta ước tính rằng tính 8 bit output mất 12 chu kỳ trên một CPU Intel 1.5 GHz, cho tốc độ mã hóa lý thuyết 1 Gbit/s.
 
 #### Bảo mật của Trivium
 
@@ -684,7 +684,7 @@ Trong trường hợp các cipher hardware-oriented, có rất nhiều thuật t
 
 ■ Bản thân one-time pad là một symmetric cipher an toàn chứng minh được. Tuy nhiên, nó rất phi thực tế với hầu hết ứng dụng vì độ dài key phải bằng độ dài message.
 
-■ Stream cipher đôi khi cần ít tài nguyên hơn, chẳng hạn kích thước code hay diện tích chip, để hiện thực so với block cipher, và chúng có thể rất nhanh.
+■ Stream cipher đôi khi cần ít tài nguyên hơn, chẳng hạn kích thước code hay diện tích chip, để triển khai so với block cipher, và chúng có thể rất nhanh.
 
 ■ Các stream cipher an toàn và nhanh như ChaCha20 có thể được xây dựng từ các hàm gồm các phép toán add-rotate-XOR.
 

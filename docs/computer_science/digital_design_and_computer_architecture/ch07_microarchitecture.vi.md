@@ -214,9 +214,9 @@ Bảng 7.1 Mã hóa ImmSrc
 
 | ImmSrc | ImmExt | Loại | Mô tả |
 |---|---|---|---|
-| 00 | {{20{Instr\[31\]}}, Instr\[31:20\]} | I | Immediate có dấu 12-bit |
-| 01 | {{20{Instr\[31\]}}, Instr\[31:25\], Instr\[11:7\]} | S | Immediate có dấu 12-bit |
-| 10 | {{20{Instr\[31\]}}, Instr\[7\], Instr\[30:25\], Instr\[11:8\], 1’b0} | B | Immediate có dấu 13-bit |
+| 00 | {{20{Instr[31]}}, Instr[31:20]} | I | Immediate có dấu 12-bit |
+| 01 | {{20{Instr[31]}}, Instr[31:25], Instr[11:7]} | S | Immediate có dấu 12-bit |
+| 10 | {{20{Instr[31]}}, Instr[7], Instr[30:25], Instr[11:8], 1’b0} | B | Immediate có dấu 13-bit |
 
 ![fig7_11](images/ch07/fig7_11.png)
 
@@ -234,7 +234,7 @@ Hình 7.12 Processor single-cycle hoàn chỉnh
 
 > Chúng tôi đặt tên multiplexer (mux) theo tín hiệu chúng tạo ra. Chẳng hạn, mux PCNext tạo tín hiệu PCNext, mux Result tạo tín hiệu Result.
 
-Điều này hoàn tất thiết kế datapath processor single-cycle. Chúng ta đã minh họa cả thiết kế lẫn quy trình, trong đó xác định state element rồi thêm logic tổ hợp một cách hệ thống để nối chúng. Phần tiếp theo xem cách tính control signal điều khiển hoạt động datapath.
+Đến đây, việc thiết kế datapath của processor single-cycle đã hoàn tất. Chúng ta đã minh họa cả bản thiết kế lẫn quy trình thiết kế, trong đó các state element được xác định trước, rồi combinational logic được bổ sung một cách có hệ thống để kết nối các state element đó. Trong phần tiếp theo, chúng ta sẽ xem cách tính các control signal điều khiển hoạt động của datapath.
 
 ### 7.3.3 Control Single-Cycle
 
@@ -325,16 +325,16 @@ Bảng 7.5 Mã hóa ImmSrc.
 
 | ImmSrc | ImmExt | Loại | Mô tả |
 |---|---|---|---|
-| 00 | {{20{Instr\[31\]}}, Instr\[31:20\]} | I | Immediate có dấu 12-bit |
-| 01 | {{20{Instr\[31\]}}, Instr\[31:25\], Instr\[11:7\]} | S | Immediate có dấu 12-bit |
-| 10 | {{20{Instr\[31\]}}, Instr\[7\], Instr\[30:25\], Instr\[11:8\], 1’b0} | B | Immediate có dấu 13-bit |
-| 11 | {{12{Instr\[31\]}}, Instr\[19:12\], Instr\[20\], Instr\[30:21\], 1’b0} | J | Immediate có dấu 21-bit |
+| 00 | {{20{Instr[31]}}, Instr[31:20]} | I | Immediate có dấu 12-bit |
+| 01 | {{20{Instr[31]}}, Instr[31:25], Instr[11:7]} | S | Immediate có dấu 12-bit |
+| 10 | {{20{Instr[31]}}, Instr[7], Instr[30:25], Instr[11:8], 1’b0} | B | Immediate có dấu 13-bit |
+| 11 | {{12{Instr[31]}}, Instr[19:12], Instr[20], Instr[30:21], 1’b0} | J | Immediate có dấu 21-bit |
 
 Bảng 7.6 thể hiện Main Decoder cập nhật với hàng mới cho `jal`. RegWrite = 1 và ResultSrc = 10 để ghi PC+4 vào rd. ImmSrc = 11 để chọn jump offset 21-bit. ALUSrc và ALUOp không quan trọng vì ALU không được dùng. MemWrite = 0 vì instruction không phải store, và Branch = 0 vì không phải branch. Tín hiệu Jump mới là 1 để chọn jump target address làm PC tiếp theo.
 
 ### 7.3.5 Phân tích hiệu năng
 
-Nhớ từ Phương trình 7.1 rằng thời gian thực thi chương trình là tích số instruction, cycles per instruction và cycle time. Mỗi instruction trong processor single-cycle mất một clock cycle nên clock cycles per instruction (CPI) là 1. Cycle time do critical path quyết định. Trong processor của chúng ta, instruction `lw` là time-consuming nhất và liên quan critical path ở Hình 7.17. Như các đường xanh đậm chỉ ra, critical path bắt đầu khi PC nạp địa chỉ mới ở rising edge của clock. Instruction memory sau đó đọc instruction mới và register file đọc rs1 làm SrcA. Trong khi register file đọc, trường immediate được sign-extended theo ImmSrc và chọn tại multiplexer SrcB (đường tô xám). ALU cộng SrcA và SrcB để tìm địa chỉ bộ nhớ. Data memory đọc từ địa chỉ này, và multiplexer Result chọn ReadData làm Result. Cuối cùng, Result phải được thiết lập tại register file trước rising clock edge tiếp theo để ghi đúng. Vì vậy cycle time của processor single-cycle là:
+Hãy nhớ lại từ Phương trình 7.1 rằng thời gian thực thi chương trình là tích số instruction, cycles per instruction và cycle time. Mỗi instruction trong processor single-cycle mất một clock cycle nên clock cycles per instruction (CPI) là 1. Cycle time do critical path quyết định. Trong processor của chúng ta, instruction `lw` là time-consuming nhất và liên quan critical path ở Hình 7.17. Như các đường xanh đậm chỉ ra, critical path bắt đầu khi PC nạp địa chỉ mới ở rising edge của clock. Instruction memory sau đó đọc instruction mới và register file đọc rs1 làm SrcA. Trong khi register file đọc, trường immediate được sign-extended theo ImmSrc và chọn tại multiplexer SrcB (đường tô xám). ALU cộng SrcA và SrcB để tìm địa chỉ bộ nhớ. Data memory đọc từ địa chỉ này, và multiplexer Result chọn ReadData làm Result. Cuối cùng, Result phải được thiết lập tại register file trước rising clock edge tiếp theo để ghi đúng. Vì vậy cycle time của processor single-cycle là:
 
 ![fig7_16](images/ch07/fig7_16.png)
 
@@ -355,7 +355,7 @@ Bảng 7.6 Truth table Main Decoder được cải tiến hỗ trợ `jal`
 
 Hình 7.17 Critical path cho `lw`
 
-T<sub>c\_single</sub> = t<sub>pcq\_PC</sub> + t<sub>mem</sub> + max\[t<sub>RFread</sub>, t<sub>dec</sub> + t<sub>ext</sub> + t<sub>mux</sub>\]
+T<sub>c_single</sub> = t<sub>pcq_PC</sub> + t<sub>mem</sub> + max[t<sub>RFread</sub>, t<sub>dec</sub> + t<sub>ext</sub> + t<sub>mux</sub>]
 
 \+ t<sub>ALU</sub> + t<sub>mem</sub> + t<sub>mux</sub> + t<sub>RFsetup</sub> (7.2)
 
@@ -363,7 +363,7 @@ Trong hầu hết công nghệ triển khai, ALU, bộ nhớ và register file c
 
 > Nhớ rằng `lw` không dùng read port thứ hai (A2/RD2) của register file.
 
-T<sub>c\_single</sub> = t<sub>pcq\_PC</sub> + 2t<sub>mem</sub> + t<sub>RFread</sub> + t<sub>ALU</sub> + t<sub>mux</sub> + t<sub>RFsetup</sub> (7.3)
+T<sub>c_single</sub> = t<sub>pcq_PC</sub> + 2t<sub>mem</sub> + t<sub>RFread</sub> + t<sub>ALU</sub> + t<sub>mux</sub> + t<sub>RFsetup</sub> (7.3)
 
 Giá trị số của những thời gian này phụ thuộc công nghệ triển khai cụ thể.
 
@@ -388,7 +388,7 @@ Bảng 7.7 Delay của các phần tử mạch
 
 Ben Bitdiddle đang cân nhắc xây processor single-cycle bằng quy trình sản xuất CMOS 7-nm. Anh xác định các logic element có delay ở Bảng 7.7. Hãy giúp anh tính thời gian thực thi chương trình có 100 tỷ instruction.
 
-Lời giải Theo Phương trình 7.3, cycle time của processor single-cycle là T<sub>c\_single</sub> = 40 + 2(200) + 100 + 120 + 30 + 60 = 750 ps. Theo Phương trình 7.1, tổng thời gian thực thi là T<sub>single</sub> = (100 × 10<sup>9</sup> instruction) (1 cycle/instruction) (750 × 10<sup>−12</sup> s/cycle) = 75 giây.
+Lời giải Theo Phương trình 7.3, cycle time của processor single-cycle là T<sub>c_single</sub> = 40 + 2(200) + 100 + 120 + 30 + 60 = 750 ps. Theo Phương trình 7.1, tổng thời gian thực thi là T<sub>single</sub> = (100 × 10<sup>9</sup> instruction) (1 cycle/instruction) (750 × 10<sup>−12</sup> s/cycle) = 75 giây.
 
 ## 7.4 PROCESSOR MULTICYCLE
 
@@ -428,7 +428,7 @@ Hình 7.20 Đọc một source từ register file và mở rộng source thứ h
 
 Instruction `lw` còn cần offset 12-bit trong trường immediate Instr<sub>31:20</sub>, phải được sign-extended thành 32 bit như Hình 7.20. Như processor single-cycle, Extend unit nhận control signal ImmSrc 2-bit chỉ định immediate 12-, 13- hoặc 21-bit cần mở rộng cho các loại instruction khác nhau. Immediate đã mở rộng 32-bit gọi là ImmExt. Để nhất quán có thể lưu ImmExt trong nonarchitectural register khác. Tuy nhiên, ImmExt là hàm tổ hợp của Instr, không đổi trong lúc xử lý instruction hiện tại, nên không cần dành register giữ giá trị hằng này.
 
-Địa chỉ load là tổng base address và offset. Ở bước thứ ba, dùng ALU tính tổng như Hình 7.21. ALUControl nên là 000 để cộng. ALUResult được lưu trong nonarchitectural register tên ALUOut.
+Địa chỉ của instruction load là tổng của base address và offset. Trong bước thứ ba, chúng ta sử dụng ALU để tính tổng này, như trong Hình 7.21. ALUControl cần được đặt thành 000 để thực hiện phép cộng. ALUResult được lưu trong một nonarchitectural register có tên ALUOut.
 
 Bước thứ tư là load dữ liệu từ địa chỉ đã tính trong bộ nhớ. Thêm multiplexer trước bộ nhớ để chọn memory address Adr từ PC hoặc ALUOut theo select signal AdrSrc như Hình 7.22. Dữ liệu đọc được lưu trong nonarchitectural register khác tên Data. Lưu ý multiplexer địa chỉ (Adr) cho phép tái sử dụng memory unit trong instruction `lw`. Ở bước đầu, lấy địa chỉ từ PC để fetch instruction. Bước thứ tư lấy địa chỉ từ ALUOut để load dữ liệu. Vì vậy AdrSrc phải có giá trị khác nhau ở các bước của một instruction. Phần 7.4.2 phát triển FSM controller tạo các chuỗi control signal này.
 
@@ -582,7 +582,7 @@ Hình 7.39 Trạng thái execute R-type (ExecuteR) và ALU writeback (ALUWB)
 beq
 ```
 
-Instruction cuối, `beq`, so sánh hai register và tính branch target address. Đến nay ALU nhàn trong Decode nên có thể dùng nó khi đó tính branch target address OldPC + ImmExt. ALUSrcA và ALUSrcB đều là 01 để OldPC là SrcA, branch offset (ImmExt) là SrcB. ALUOp = 00 để ALU cộng. Target address lưu vào ALUOut cuối Decode. Hình 7.41 thể hiện Decode cải tiến và BEQ kế tiếp, sẽ thảo luận ngay sau. Trong Hình 7.42, luồng dữ liệu Decode bằng đường light-blue và xám. Tính branch target address tô xanh nhạt, đọc register và mở rộng immediate tô đường xám đậm.
+Instruction cuối cùng, `beq`, so sánh hai register và tính branch target address. Cho đến đây, ALU không hoạt động trong state Decode, nên chúng ta có thể sử dụng ALU trong state này để tính branch target address là OldPC + ImmExt. ALUSrcA và ALUSrcB đều bằng 01 để OldPC là SrcA và branch offset (ImmExt) là SrcB. ALUOp = 00 để ALU thực hiện phép cộng. Địa chỉ đích được lưu trong register ALUOut vào cuối state Decode. Hình 7.41 minh họa state Decode đã được bổ sung cùng state BEQ tiếp theo, sẽ được thảo luận ngay sau đây. Trong Hình 7.42, luồng data trong state Decode được thể hiện bằng các đường light-blue và màu xám. Phép tính branch target address được tô xanh nhạt, còn việc đọc register và mở rộng immediate được tô bằng các đường xám đậm.
 
 ![fig7_40](images/ch07/fig7_40.png)
 
@@ -598,15 +598,13 @@ Hình 7.41 Decode cải tiến có tính branch target address, và trạng thá
 
 ### 7.4.3 Thêm instruction
 
-Như processor single-cycle, tiếp theo xét ví dụ sửa datapath và controller multicycle để xử lý instruction mới: ALU I-type (`addi`, `andi`, `ori`, `slti`) và `jal`.
+Tương tự cách đã làm với processor single-cycle, tiếp theo chúng ta sẽ xét các ví dụ về cách sửa đổi datapath và controller của processor multicycle để xử lý những instruction mới: các ALU instruction I-type (`addi`, `andi`, `ori`, `slti`) và `jal`.
 
 ![fig7_42](images/ch07/fig7_42.png)
 
 Hình 7.42 Luồng dữ liệu trong Decode và BEQ
 
-#### Ví dụ 7.5 MỞ RỘNG PROCESSOR MULTICYCLE ĐỂ
-
-BAO GỒM INSTRUCTION ALU I-TYPE
+#### Ví dụ 7.5 MỞ RỘNG PROCESSOR MULTICYCLE ĐỂ BAO GỒM INSTRUCTION ALU I-TYPE
 
 Mở rộng processor multicycle để bao gồm instruction ALU I-type `addi`, `andi`, `ori` và `slti`.
 
@@ -622,7 +620,7 @@ Lời giải Giống instruction ALU I-type từ Ví dụ 7.5, không cần thê
 
 Hình 7.43 Main FSM cải tiến: ExecuteI và JAL
 
-> Bạn có thể thấy khi processor tới JAL, PC register đã được cập nhật thành PC+4. Vì thế có thể dùng ngay output PC register để ghi rd. Nhưng điều đó đòi mở rộng multiplexer Result nhận PC làm input. Giải pháp trên cần ít phần cứng hơn vì dùng datapath hiện có.
+> Bạn có thể thấy khi processor tới JAL, PC register đã được cập nhật thành PC+4. Vì thế có thể dùng ngay output PC register để ghi rd. Nhưng điều đó đòi hỏi mở rộng multiplexer Result nhận PC làm input. Giải pháp trên cần ít phần cứng hơn vì dùng datapath hiện có.
 
 ![fig7_44](images/ch07/fig7_44.png)
 
@@ -652,19 +650,13 @@ Lời giải CPI trung bình là tổng có trọng số trên từng instructio
 
 Nhớ rằng thiết kế processor multicycle để mỗi chu kỳ liên quan một thao tác ALU, truy cập bộ nhớ hoặc truy cập register file. Giả sử register file nhanh hơn bộ nhớ và ghi bộ nhớ nhanh hơn đọc. Xem datapath cho thấy hai critical path có thể giới hạn cycle time như Hình 7.46:
 
-1\. Đường tính PC+4: Từ PC register qua multiplexer SrcA
+1\. Đường tính PC+4: Từ PC register qua multiplexer SrcA , ALU và multiplexer Result trở lại PC register
 
-, ALU và multiplexer Result trở lại PC register
-
-(tô đường xanh đậm); hoặc 2. Đường đọc dữ liệu từ bộ nhớ: Từ ALUOut register
-
-qua mux Result và Adr để đọc bộ nhớ vào Data
-
-register (tô đường xám đậm)
+(tô đường xanh đậm); hoặc 2. Đường đọc dữ liệu từ bộ nhớ: Từ ALUOut register qua mux Result và Adr để đọc bộ nhớ vào Data register (tô đường xám đậm)
 
 Cả hai đường còn cần delay qua decoder sau khi trạng thái cập nhật (tức sau delay t<sub>pcq</sub>) để tạo control signal (multiplexer select và ALUControl). Vì vậy clock period theo Phương trình 7.4.
 
-T<sub>c\_multi</sub> = t<sub>pcq</sub> + t<sub>dec</sub> + 2t<sub>mux</sub> + max\[t<sub>ALU</sub> , t<sub>mem</sub>\] + t<sub>setup</sub> (7.4)
+T<sub>c_multi</sub> = t<sub>pcq</sub> + t<sub>dec</sub> + 2t<sub>mux</sub> + max[t<sub>ALU</sub> , t<sub>mem</sub>] + t<sub>setup</sub> (7.4)
 
 Giá trị số của các thời gian này phụ thuộc công nghệ triển khai cụ thể.
 
@@ -672,7 +664,7 @@ Giá trị số của các thời gian này phụ thuộc công nghệ triển k
 
 Ben Bitdiddle tự hỏi processor multicycle có nhanh hơn processor single-cycle không. Với cả hai thiết kế, anh định dùng quy trình sản xuất CMOS 7-nm với delay trong Bảng 7.7 trang 415. Giúp anh so sánh thời gian thực thi 100 tỷ instruction từ benchmark SPECINT2000 của mỗi processor (xem Ví dụ 7.4).
 
-Lời giải Theo Phương trình 7.4, cycle time của processor multicycle là T<sub>c\_multi</sub> = t<sub>pcq</sub> + t<sub>dec</sub> + 2t<sub>mux</sub> + t<sub>mem</sub> + t<sub>setup</sub> = 40 + 25 + 2(30) + 200 + 50 = 375 ps. Dùng CPI 4.14 từ Ví dụ 7.7, tổng thời gian thực thi là T<sub>multi</sub> = (100 × 10<sup>9</sup> instructions)(4.14 cycles/instruction)(375 × 10<sup>−12</sup> s/cycle) = 155 giây. Theo Ví dụ 7.4, processor single-cycle có tổng thời gian thực thi 75 giây, nên processor multicycle chậm hơn.
+Lời giải Theo Phương trình 7.4, cycle time của processor multicycle là T<sub>c_multi</sub> = t<sub>pcq</sub> + t<sub>dec</sub> + 2t<sub>mux</sub> + t<sub>mem</sub> + t<sub>setup</sub> = 40 + 25 + 2(30) + 200 + 50 = 375 ps. Dùng CPI 4.14 từ Ví dụ 7.7, tổng thời gian thực thi là T<sub>multi</sub> = (100 × 10<sup>9</sup> instructions)(4.14 cycles/instruction)(375 × 10<sup>−12</sup> s/cycle) = 155 giây. Theo Ví dụ 7.4, processor single-cycle có tổng thời gian thực thi 75 giây, nên processor multicycle chậm hơn.
 
 Một động lực ban đầu xây processor multicycle là tránh buộc mọi instruction mất thời gian bằng instruction chậm nhất. Đáng tiếc, ví dụ cho thấy processor multicycle chậm hơn processor single-cycle với các giả định CPI và delay phần tử mạch. Vấn đề căn bản là dù instruction chậm nhất `lw` được chia năm bước, cycle time multicycle không cải thiện được gần năm lần. Một phần vì các bước không dài bằng nhau, một phần vì sequencing overhead 90-ps của register clock-to-Q và setup time giờ phải trả mỗi bước, thay vì một lần cho toàn instruction. Nhìn chung, kỹ sư đã học rằng khó khai thác việc một số tính toán nhanh hơn số khác trừ khi khác biệt lớn.
 
@@ -710,7 +702,7 @@ Thách thức trọng tâm của hệ thống pipelined là xử lý hazard khi 
 
 Datapath pipelined được tạo bằng cách chia datapath single-cycle thành năm stage ngăn bởi pipeline register. Hình 7.49(a) thể hiện datapath single-cycle kéo giãn để chừa chỗ cho pipeline register. Hình 7.49(b) thể hiện datapath pipelined tạo bằng cách chèn bốn pipeline register để chia datapath thành năm stage. Các stage và ranh giới màu xanh. Tín hiệu có hậu tố (F, D, E, M hoặc W) chỉ stage chúng thuộc về.
 
-Register file đặc biệt vì được đọc ở Decode và ghi ở Writeback. Vì vậy dù vẽ trong Decode, write address và write data đến từ Writeback. Feedback này dẫn tới pipeline hazard, được thảo luận trong Phần 7.5.3. Register file processor pipelined ghi tại falling edge của CLK để ghi kết quả nửa đầu chu kỳ rồi đọc nửa sau cho instruction kế tiếp sử dụng.
+Register file có điểm đặc biệt là được đọc trong stage Decode và được ghi trong stage Writeback. Vì vậy, mặc dù register file được vẽ trong stage Decode, write address và write data của nó lại đến từ stage Writeback. Feedback này sẽ dẫn đến các pipeline hazard, được thảo luận trong Mục 7.5.3. Register file trong processor pipelined thực hiện ghi tại falling edge của CLK để có thể ghi kết quả trong nửa đầu của một chu kỳ và đọc kết quả đó trong nửa sau của chu kỳ để sử dụng cho một instruction tiếp theo.
 
 ![fig7_49](images/ch07/fig7_49.png)
 
@@ -736,13 +728,13 @@ Toàn processor pipelined có control ở Hình 7.51. RegWrite phải được p
 
 ### 7.5.3 Hazard
 
-Trong hệ thống pipelined, nhiều instruction được xử lý đồng thời. Khi một instruction phụ thuộc kết quả instruction khác chưa hoàn tất, hazard xảy ra. Register file ghi nửa đầu chu kỳ và đọc nửa sau, nên có thể ghi rồi đọc lại register cùng chu kỳ mà không gây hazard.
+Trong một hệ thống pipelined, nhiều instruction được xử lý đồng thời. Khi một instruction phụ thuộc vào kết quả của một instruction khác chưa hoàn tất, hazard sẽ xảy ra. Register file được ghi trong nửa đầu chu kỳ và được đọc trong nửa sau chu kỳ, vì vậy có thể ghi rồi đọc lại một register trong cùng một chu kỳ mà không gây ra hazard.
 
 ![fig7_51](images/ch07/fig7_51.png)
 
 Hình 7.51 Processor pipelined có control
 
-Hình 7.52 minh họa hazard khi một instruction ghi register (`s8`) và các instruction sau đọc register này. Mũi tên xanh nhấn mạnh khi `s8` ghi register file (chu kỳ 5) so với khi instruction sau cần nó. Đây gọi là read after write (RAW) hazard. Instruction `add` ghi kết quả vào `s8` nửa đầu chu kỳ 5. Tuy nhiên `sub` đọc `s8` ở chu kỳ 3 nên nhận giá trị sai. `or` đọc `s8` chu kỳ 4 cũng nhận sai. `and` đọc `s8` nửa sau chu kỳ 5, nhận giá trị đúng vừa ghi nửa đầu chu kỳ 5. Instruction sau cũng đọc đúng `s8`. Sơ đồ cho thấy hazard có thể xảy ra khi một instruction ghi register và một trong hai instruction kế tiếp đọc register đó. Nếu không xử lý đặc biệt, pipeline sẽ tính sai.
+Hình 7.52 minh họa các hazard xảy ra khi một instruction ghi một register (`s8`) và những instruction tiếp theo đọc register đó. Các mũi tên xanh nhấn mạnh thời điểm `s8` được ghi vào register file (trong chu kỳ 5), so với thời điểm các instruction tiếp theo cần nó. Đây được gọi là read after write (RAW) hazard. Instruction `add` ghi kết quả vào `s8` trong nửa đầu chu kỳ 5. Tuy nhiên, instruction `sub` đọc `s8` trong chu kỳ 3 và nhận giá trị sai. Instruction `or` đọc `s8` trong chu kỳ 4 và cũng nhận giá trị sai. Instruction `and` đọc `s8` trong nửa sau chu kỳ 5 và nhận giá trị đúng, đã được ghi trong nửa đầu chu kỳ 5. Các instruction tiếp theo cũng đọc giá trị đúng của `s8`. Sơ đồ cho thấy hazard có thể xảy ra trong pipeline này khi một instruction ghi một register và một trong hai instruction ngay sau đó đọc register đó. Nếu không có cách xử lý đặc biệt, pipeline sẽ tính ra kết quả sai.
 
 Giải pháp phần mềm là buộc lập trình viên hoặc compiler chèn instruction nop giữa `add` và `sub` để instruction phụ thuộc không đọc kết quả (`s8`) trước khi có trong register file, như Hình 7.53. Software interlock như vậy làm lập trình phức tạp và giảm hiệu năng nên không lý tưởng.
 
@@ -764,7 +756,7 @@ Hazard được phân thành data hazard hoặc control hazard. Data hazard xả
 
 Giải quyết data hazard bằng forwarding
 
-Một số data hazard được giải quyết bằng forwarding (còn gọi bypassing) kết quả từ Memory hoặc Writeback đến instruction phụ thuộc trong Execute. Cần thêm multiplexer trước ALU chọn operand từ register file hoặc Memory, Writeback. Hình 7.54 minh họa nguyên lý. Chương trình tính `s8` bằng `add` rồi dùng `s8` trong ba instruction kế tiếp. Ở chu kỳ 4, `s8` được forward từ Memory của `add` đến Execute của `sub` phụ thuộc. Ở chu kỳ 5, `s8` forward từ Writeback của `add` đến Execute của `or` phụ thuộc. Một lần nữa không cần forwarding cho `and` vì `s8` ghi register file nửa đầu chu kỳ 5 và đọc nửa sau.
+Một số data hazard có thể được giải quyết bằng cách forwarding (còn gọi là bypassing) kết quả từ stage Memory hoặc Writeback đến một instruction phụ thuộc trong stage Execute. Điều này đòi hỏi thêm các multiplexer phía trước ALU để chọn các toán hạng từ register file hoặc từ stage Memory hay Writeback. Hình 7.54 minh họa nguyên lý này. Chương trình tính `s8` bằng instruction `add` rồi sử dụng `s8` trong ba instruction tiếp theo. Trong chu kỳ 4, `s8` được forward từ stage Memory của instruction `add` đến stage Execute của instruction `sub` phụ thuộc. Trong chu kỳ 5, `s8` được forward từ stage Writeback của instruction `add` đến stage Execute của instruction `or` phụ thuộc. Một lần nữa, không cần forwarding cho instruction `and` vì `s8` được ghi vào register file trong nửa đầu chu kỳ 5 và được đọc trong nửa sau.
 
 Forwarding cần khi instruction trong Execute có source register trùng destination register của instruction trong Memory hoặc Writeback. Hình 7.55 sửa processor pipelined hỗ trợ forwarding. Nó thêm Hazard Unit và hai forwarding multiplexer. Hazard detection unit nhận hai source register của instruction trong Execute, Rs1E và Rs2E, cùng destination register của instruction trong Memory và Writeback, RdM, RdW. Nó cũng nhận RegWrite từ Memory, Writeback (RegWriteM, RegWriteW) để biết destination register có thực sự được ghi không (ví dụ instruction `sw`, `beq` không ghi kết quả register file nên không forward kết quả).
 
@@ -826,7 +818,7 @@ Giải quyết control hazard
 
 Instruction `beq` gây control hazard: processor pipelined không biết fetch instruction nào tiếp vì quyết định branch chưa có khi fetch instruction kế.
 
-Một cơ chế xử lý control hazard này là stall pipeline tới khi quyết định branch có sẵn (tức tính xong PCSrcE). Vì quyết định ở Execute, pipeline phải stall hai chu kỳ mỗi branch. Điều này giảm nghiêm trọng hiệu năng nếu branch thường xuyên, như thường xảy ra.
+Một cơ chế xử lý control hazard này là stall pipeline cho đến khi có quyết định về branch (tức là PCSrcE đã được tính). Vì quyết định được đưa ra trong Execute stage, pipeline sẽ phải stall hai chu kỳ tại mỗi branch. Điều này sẽ làm giảm nghiêm trọng hiệu năng hệ thống nếu branch xuất hiện thường xuyên, vốn là trường hợp thường gặp.
 
 ![fig7_59](images/ch07/fig7_59.png)
 
@@ -834,7 +826,7 @@ Hình 7.59 Pipeline diagram trừu tượng minh họa flush khi lấy branch
 
 Thay vì stall pipeline, có thể dự đoán branch có được lấy không và bắt đầu chạy instruction theo dự đoán. Khi có quyết định branch, processor loại instruction nếu dự đoán sai. Trong pipeline đã trình bày (Hình 7.58), processor dự đoán không lấy branch và đơn giản tiếp tục chương trình theo thứ tự tới khi PCSrcE được asserted để chọn PC tiếp theo từ PCTargetE. Nếu lẽ ra lấy branch, hai instruction sau branch phải flush (loại) bằng cách clear pipeline register tương ứng. Các chu kỳ instruction lãng phí này gọi là branch misprediction penalty.
 
-Hình 7.59 thể hiện cách này với branch từ 0x20 tới 0x58 được lấy. PC chưa được ghi tới chu kỳ 3, khi `sub`, `or` ở 0x24, 0x28 đã fetch. Phải flush chúng và fetch `add` từ 0x58 ở chu kỳ 4.
+Hình 7.59 minh họa một cách thực hiện như vậy, trong đó branch từ địa chỉ 0x20 đến địa chỉ 0x58 được thực hiện. PC chưa được ghi cho đến chu kỳ 3; đến thời điểm đó, các instruction `sub` và `or` tại địa chỉ 0x24 và 0x28 đã được fetch. Những instruction này phải được flush, và instruction `add` được fetch từ địa chỉ 0x58 trong chu kỳ 4.
 
 Cuối cùng xác định tín hiệu stall, flush để xử lý branch và ghi PC. Khi lấy branch, hai instruction sau phải flush khỏi pipeline register Decode, Execute. Vì vậy thêm synchronous clear input (CLR) cho pipeline register Decode và thêm output FlushD cho Hazard Unit. (Khi CLR = 1, nội dung register bị clear, tức bằng 0.) Khi lấy branch (PCSrcE là 1), FlushD và FlushE phải asserted để flush pipeline register Decode, Execute. Hình 7.60 thể hiện processor pipelined cải tiến xử lý control hazard. Flush nay được tính:
 
@@ -884,13 +876,13 @@ Processor pipelined lý tưởng có CPI 1 vì instruction mới được issue�
 
 #### Ví dụ 7.9 CPI PROCESSOR PIPELINED
 
-Benchmark SPECINT2000 trong Ví dụ 7.4 gồm khoảng 25% load, 10% store, 11% branch, 2% jump, 52% instruction ALU R- hoặc I-type. Giả sử 40% load có instruction dùng kết quả ngay sau, cần stall, và 50% branch được lấy (dự đoán sai), cần flush hai instruction. Bỏ hazard khác. Tính CPI trung bình processor pipelined.
+Benchmark SPECINT2000 được xét trong Ví dụ 7.4 gồm khoảng 25% load, 10% store, 11% branch, 2% jump và 52% ALU instruction R- hoặc I-type. Giả sử ngay sau 40% số load là một instruction sử dụng kết quả của load đó, khiến pipeline phải stall, và 50% số branch được thực hiện (bị dự đoán sai), khiến hai instruction phải bị flush. Bỏ qua các hazard khác. Tính CPI trung bình của processor pipelined.
 
 Lời giải CPI trung bình là tổng có trọng số CPI mỗi instruction nhân tỷ phần thời gian dùng instruction. Load mất một clock cycle khi không dependency và hai khi phải stall vì dependency, nên CPI là (0.6)(1) + (0.4) (2) = 1.4. Branch mất một clock cycle khi dự đoán đúng và ba khi sai, nên CPI (0.5)(1) + (0.5)(3) = 2. Jump mất ba clock cycle (CPI = 3). Mọi instruction khác CPI 1. Vì vậy với benchmark này, CPI trung bình = (0.25)(1.4) + (0.1)(1) + (0.11)(2) + (0.02) (3) + (0.52)(1) = 1.25.
 
 Có thể xác định cycle time bằng cách xét critical path mỗi pipeline stage trong năm stage Hình 7.61. Nhớ register file dùng hai lần trong một chu kỳ: ghi nửa đầu chu kỳ Writeback và đọc nửa sau chu kỳ Decode; nên các stage này chỉ dùng nửa cycle time cho critical path. Nói cách khác, hai lần critical path mỗi stage đó phải vừa một chu kỳ. Hình 7.62 thể hiện critical path Execute. Nó xảy ra khi branch trong Execute cần forwarding từ Writeback: đường đi từ pipeline register Writeback qua multiplexer Result, ForwardBE, SrcB, qua ALU và logic AND-OR tới multiplexer PC rồi PC register.
 
-> Phân tích critical path Execute giả định delay Hazard Unit tính ForwardAE, ForwardBE không lớn hơn delay multiplexer Result. Nếu delay Hazard Unit dài hơn, phải đưa vào critical path thay delay multiplexer Result.
+> Phân tích critical path cho Execute stage giả định rằng độ trễ của Hazard Unit khi tính ForwardAE và ForwardBE nhỏ hơn hoặc bằng độ trễ của multiplexer Result. Nếu độ trễ của Hazard Unit lớn hơn, phải đưa độ trễ đó vào critical path thay cho độ trễ của multiplexer Result.
 
 ![eq_p476](images/ch07/eq_p476.png) (7.5)
 
@@ -900,13 +892,13 @@ Hình 7.62 Critical path processor pipelined
 
 #### Ví dụ 7.10 SO SÁNH HIỆU NĂNG PROCESSOR PIPELINED
 
-Ben Bitdiddle cần so hiệu năng processor pipelined với processor single-cycle và multicycle ở Ví dụ 7.4, 7.8. Delay logic được cho ở Bảng 7.7 (trang 415). Giúp Ben so thời gian chạy 100 tỷ instruction benchmark SPECINT2000 trên từng processor.
+Ben Bitdiddle cần so sánh hiệu năng của processor pipelined với hiệu năng của các processor single-cycle và multicycle đã xét trong Ví dụ 7.4 và 7.8. Các độ trễ logic được cho trong Bảng 7.7 (trang 415). Hãy giúp Ben so sánh thời gian thực thi 100 tỷ instruction từ benchmark SPECINT2000 trên từng processor.
 
-Lời giải Theo Phương trình 7.5, cycle time processor pipelined là T<sub>c\_pipelined</sub> = max\[40 + 200 + 50, 2(100 + 50), 40 + 4(30) + 120 + 20 + 50, 40 + 200 + 50, 2(40 + 30 + 60)\] = 350 ps. Execute lâu nhất. Theo Phương trình 7.1, tổng thời gian thực thi T<sub>pipelined</sub> = (100 × 10<sup>9</sup> instructions) (1.25 cycles / instruction)(350 × 10<sup>−12</sup> s /cycle) = 44 giây. So với 75 giây của processor single-cycle và 155 giây của multicycle.
+Lời giải Theo Phương trình 7.5, cycle time processor pipelined là T<sub>c_pipelined</sub> = max[40 + 200 + 50, 2(100 + 50), 40 + 4(30) + 120 + 20 + 50, 40 + 200 + 50, 2(40 + 30 + 60)] = 350 ps. Execute lâu nhất. Theo Phương trình 7.1, tổng thời gian thực thi T<sub>pipelined</sub> = (100 × 10<sup>9</sup> instructions) (1.25 cycles / instruction)(350 × 10<sup>−12</sup> s /cycle) = 44 giây. So với 75 giây của processor single-cycle và 155 giây của multicycle.
 
 > Processor pipelined của chúng ta không cân bằng, giải quyết branch trong Execute lâu hơn nhiều mọi stage khác. Có thể cân bằng tốt hơn bằng cách đẩy multiplexer Result về Memory, giảm cycle time còn 320 ps.
 
-Processor pipelined nhanh hơn đáng kể những processor khác. Tuy nhiên lợi thế so processor single-cycle còn xa mức tăng năm lần có thể kỳ vọng từ pipeline five-stage. Pipeline hazard tạo CPI penalty nhỏ. Quan trọng hơn, sequencing overhead (clk-to-Q và setup time) của register áp dụng mỗi pipeline stage, không chỉ một lần toàn datapath. Sequencing overhead giới hạn lợi ích pipelining có thể đạt. Delay không cân bằng giữa các stage cũng giảm lợi ích. Processor pipelined có yêu cầu phần cứng tương tự single-cycle nhưng thêm nhiều pipeline register 32-bit, cùng multiplexer, pipeline register nhỏ hơn và control logic giải quyết hazard.
+Processor pipelined nhanh hơn đáng kể những processor khác. Tuy nhiên lợi thế của nó so với processor single-cycle còn xa mức tăng năm lần có thể kỳ vọng từ pipeline five-stage. Pipeline hazard tạo CPI penalty nhỏ. Quan trọng hơn, sequencing overhead (clk-to-Q và setup time) của register áp dụng mỗi pipeline stage, không chỉ một lần toàn datapath. Sequencing overhead giới hạn lợi ích pipelining có thể đạt. Delay không cân bằng giữa các stage cũng giảm lợi ích. Processor pipelined có yêu cầu phần cứng tương tự single-cycle nhưng thêm nhiều pipeline register 32-bit, cùng multiplexer, pipeline register nhỏ hơn và control logic giải quyết hazard.
 
 ## 7.6 BIỂU DIỄN HDL\*
 
@@ -914,7 +906,7 @@ Phần này trình bày code HDL của processor RISC-V single-cycle hỗ trợ 
 
 Trong phần này, instruction memory và data memory tách khỏi datapath, nối bằng address bus và data bus. Thực tế đa số processor lấy instruction và dữ liệu từ cache riêng. Tuy nhiên, để xử lý memory map nhỏ mà dữ liệu có thể xen instruction, processor đầy đủ hơn còn phải đọc được dữ liệu (ngoài instruction) từ instruction memory. Chương 8 xem lại hệ thống bộ nhớ, gồm tương tác cache với main memory.
 
-Hình 7.63 thể hiện block diagram processor RISC-V single-cycle giao tiếp bộ nhớ ngoài. Processor gồm datapath Hình 7.15 và controller Hình 7.16. Controller lại gồm Main Decoder và ALU Decoder.
+Hình 7.63 minh họa block diagram của processor RISC-V single-cycle giao tiếp với các memory bên ngoài. Processor gồm datapath trong Hình 7.15 và controller trong Hình 7.16. Đến lượt mình, controller gồm Main Decoder và ALU Decoder.
 
 ![fig7_63](images/ch07/fig7_63.png)
 
@@ -1604,7 +1596,7 @@ Hình 7.64 riscvtest.s
 
 Hình 7.65 riscvtest.txt
 
-Testbench nạp chương trình vào bộ nhớ. Chương trình Hình 7.64 thử mọi instruction bằng một phép tính chỉ nên cho kết quả đúng nếu mọi instruction hoạt động đúng. Cụ thể, chương trình ghi 25 vào địa chỉ 100 nếu chạy đúng, nhưng khó làm vậy nếu phần cứng có bug. Đây là ví dụ ad hoc testing.
+Testbench load một chương trình vào các memory. Chương trình trong Hình 7.64 kiểm tra tất cả các instruction bằng cách thực hiện một phép tính chỉ cho kết quả chính xác nếu tất cả các instruction đều hoạt động đúng. Cụ thể, chương trình sẽ ghi giá trị 25 vào địa chỉ 100 nếu nó chạy chính xác, nhưng khó có thể làm được điều đó nếu hardware có bug. Đây là một ví dụ về ad hoc testing.
 
 Machine code lưu trong file văn bản riscvtest.txt (Hình 7.65), được testbench nạp khi mô phỏng. File gồm machine code của instruction viết dạng hexadecimal, mỗi dòng một instruction.
 
@@ -1897,7 +1889,7 @@ Số pipeline stage tối đa bị giới hạn bởi pipeline hazard, sequencin
 
 Xét xây processor pipelined bằng cách chia processor single-cycle thành N stage. Processor single-cycle có propagation delay 750 ps qua logic tổ hợp. Sequencing overhead register là 90 ps. Giả sử có thể chia combinational delay tùy ý vào bất kỳ số stage nào và pipeline hazard logic không tăng delay. Pipeline five-stage Ví dụ 7.9 có CPI 1.25. Giả sử mỗi stage thêm tăng CPI 0.1 do branch misprediction và pipeline hazard khác. Nên dùng bao nhiêu stage để processor chạy chương trình nhanh nhất?
 
-Lời giải Cycle time pipeline N-stage là T<sub>c</sub> = \[(750/N) + 90\] ps. CPI là 1.25 + 0.1(N – 5), với N ≥ 5. Thời gian mỗi instruction (instruction time) là tích cycle time T<sub>c</sub> và CPI. Hình 7.66 vẽ cycle time, instruction time theo số stage. Instruction time đạt cực tiểu 281 ps tại N = 8 stage. Cực tiểu chỉ tốt hơn chút so với 295 ps mỗi instruction của pipeline five-stage, và đường cong gần phẳng giữa 7 đến 10 stage.
+Lời giải Cycle time pipeline N-stage là T<sub>c</sub> = [(750/N) + 90] ps. CPI là 1.25 + 0.1(N – 5), với N ≥ 5. Thời gian mỗi instruction (instruction time) là tích cycle time T<sub>c</sub> và CPI. Hình 7.66 vẽ cycle time, instruction time theo số stage. Instruction time đạt cực tiểu 281 ps tại N = 8 stage. Cực tiểu chỉ tốt hơn chút so với 295 ps mỗi instruction của pipeline five-stage, và đường cong gần phẳng giữa 7 đến 10 stage.
 
 ![fig7_66](images/ch07/fig7_66.png)
 
@@ -1942,7 +1934,7 @@ for:
 done:
 ```
 
-Dynamic branch predictor one-bit nhớ lần trước có lấy branch không và dự đoán lần sau giống vậy. Khi vòng lặp đang lặp, nó nhớ `beq` lần trước không được lấy và dự đoán lần sau cũng không. Dự đoán đúng đến branch cuối vòng lặp, khi branch được lấy. Đáng tiếc nếu chạy vòng lặp lại, predictor nhớ branch cuối được lấy. Vì vậy nó dự đoán sai rằng nên lấy branch khi mới chạy lại vòng lặp. Tóm lại, branch predictor 1-bit dự đoán sai branch đầu và cuối vòng lặp.
+Dynamic branch predictor one-bit ghi nhớ liệu branch có được thực hiện ở lần trước hay không và dự đoán rằng lần tiếp theo nó sẽ hoạt động tương tự. Khi vòng lặp đang lặp lại, predictor nhớ rằng `beq` không được thực hiện ở lần trước và dự đoán rằng nó cũng không nên được thực hiện ở lần tiếp theo. Dự đoán này đúng cho đến branch cuối cùng của vòng lặp, khi branch thực sự được thực hiện. Đáng tiếc, nếu vòng lặp được chạy lại, branch predictor nhớ rằng branch cuối cùng đã được thực hiện. Do đó, nó dự đoán sai rằng branch nên được thực hiện khi vòng lặp vừa bắt đầu chạy lại. Tóm lại, branch predictor 1-bit dự đoán sai branch đầu tiên và cuối cùng của một vòng lặp.
 
 Dynamic branch predictor two-bit giải quyết bằng bốn trạng thái: Strongly Taken, Weakly Taken, Weakly Not Taken, Strongly Not Taken, như Hình 7.67. Khi vòng lặp đang lặp, nó vào Strongly Not Taken và dự đoán lần sau không lấy branch. Điều này đúng tới branch cuối, được lấy và chuyển predictor sang Weakly Not Taken. Khi chạy lại vòng lặp, predictor dự đoán đúng không lấy branch và vào lại Strongly Not Taken. Tóm lại, predictor two-bit chỉ dự đoán sai branch cuối vòng lặp. Gọi là predictor two-bit vì cần hai bit mã hóa bốn trạng thái.
 
@@ -1950,7 +1942,7 @@ Dynamic branch predictor two-bit giải quyết bằng bốn trạng thái: Stro
 
 Hình 7.67 State transition diagram của branch predictor Two-bit
 
-Branch predictor hoạt động tại Fetch để xác định instruction thực thi chu kỳ kế. Khi dự đoán lấy branch, processor fetch instruction kế từ branch destination lưu trong branch target buffer.
+Branch predictor hoạt động trong stage Fetch của pipeline để xác định instruction nào sẽ được thực thi trong chu kỳ tiếp theo. Khi dự đoán rằng branch sẽ được thực hiện, processor fetch instruction tiếp theo từ địa chỉ đích của branch được lưu trong branch target buffer.
 
 > RISC-V SweRV EH1 của Western Digital là core superscalar two-way.
 
@@ -1966,7 +1958,7 @@ Superscalar processor chứa nhiều bản sao phần cứng datapath để ch�
 
 Hình 7.69 là pipeline diagram minh họa processor superscalar two-way chạy hai instruction mỗi chu kỳ. Với chương trình này, CPI là 0.5. Người thiết kế thường gọi nghịch đảo CPI là instructions per cycle, hay IPC. Processor có IPC 2 trên chương trình này.
 
-Thực thi nhiều instruction đồng thời khó vì dependency. Ví dụ Hình 7.70 thể hiện pipeline diagram chạy chương trình có data dependency. Dependency trong code màu xanh. `add` phụ thuộc `s8` do `lw` tạo nên không issue cùng lúc `lw`. `add` stall thêm một chu kỳ để `lw` forward `s8` tới `add` ở chu kỳ 5. Dependency khác (giữa `sub`, `and` qua `s8`, và `or`, `sw` qua `s11`) được xử lý bằng forwarding kết quả tạo ở chu kỳ này để dùng chu kỳ sau. Chương trình cần năm chu kỳ issue sáu instruction, IPC 6/5 = 1.2.
+Việc thực thi nhiều instruction đồng thời rất khó vì có các dependency. Ví dụ, Hình 7.70 minh họa pipeline diagram khi chạy một chương trình có data dependency. Các dependency trong code được biểu thị bằng màu xanh. Instruction `add` phụ thuộc vào `s8`, được tạo ra bởi instruction `lw`, nên nó không thể được issue cùng lúc với `lw`. Instruction `add` stall thêm một chu kỳ nữa để `lw` có thể forward `s8` đến `add` trong chu kỳ 5. Các dependency còn lại (giữa `sub` và `and` thông qua `s8`, và giữa `or` và `sw` thông qua `s11`) được xử lý bằng cách forwarding những kết quả được tạo ra trong một chu kỳ để sử dụng trong chu kỳ tiếp theo. Chương trình này cần năm chu kỳ để issue sáu instruction, cho IPC bằng 6/5 = 1.2.
 
 ![fig7_68](images/ch07/fig7_68.png)
 
@@ -2000,7 +1992,7 @@ Chu kỳ 1
 
 - Instruction `lw` được issue.
 
-- Instruction `add`, `sub`, `and` phụ thuộc `lw` qua `s8` nên chưa issue được. Tuy nhiên `or` độc lập nên cũng issue.
+- Các instruction `add`, `sub` và `and` phụ thuộc vào `lw` thông qua `s8`, nên chưa thể được issue. Tuy nhiên, instruction `or` độc lập, nên nó cũng được issue.
 
 Chu kỳ 2
 
@@ -2031,7 +2023,7 @@ add s7, s1, t2
 
 WAW hazard cũng không thiết yếu; chúng lại phát sinh vì lập trình viên dùng cùng destination register cho instruction không liên quan. Nếu `add` issue trước, chương trình có thể loại WAW hazard bằng cách bỏ kết quả `lw` thay vì ghi `s7`. Đây gọi là squash `lw`.[^4]
 
-Processor Out-of-order dùng bảng theo dõi instruction chờ issue. Bảng đôi khi gọi scoreboard, chứa thông tin dependency. Kích thước bảng xác định số instruction có thể cân nhắc issue. Mỗi chu kỳ processor xem bảng, issue nhiều instruction nhất có thể, giới hạn bởi dependency và số execution unit sẵn có (ví dụ ALU, memory port).
+Các processor Out-of-order sử dụng một bảng để theo dõi những instruction đang chờ issue. Bảng này, đôi khi được gọi là scoreboard, chứa thông tin về các dependency. Kích thước bảng quyết định số instruction có thể được xem xét để issue. Trong mỗi chu kỳ, processor kiểm tra bảng và issue nhiều instruction nhất có thể, trong giới hạn của các dependency và số execution unit sẵn có (chẳng hạn ALU và memory port).
 
 instruction-level parallelism (ILP) là số instruction có thể thực thi đồng thời cho chương trình và microarchitecture cụ thể. Nghiên cứu lý thuyết cho thấy ILP có thể lớn với microarchitecture out-of-order có branch predictor hoàn hảo và lượng execution unit khổng lồ. Tuy nhiên processor thực tiễn hiếm đạt ILP hơn hai hoặc ba, kể cả datapath superscalar six-way với thực thi out-of-order.
 
@@ -2039,13 +2031,13 @@ instruction-level parallelism (ILP) là số instruction có thể thực thi đ
 
 Processor Out-of-order dùng kỹ thuật register renaming loại WAR và WAW hazard. Register renaming thêm nonarchitectural renaming register vào processor. Ví dụ có thể thêm 20 renaming register tên `r0` đến `r19`. Lập trình viên không dùng trực tiếp vì chúng không thuộc architecture. Tuy nhiên processor tự do dùng chúng loại hazard.
 
-Ví dụ phần trước có WAR hazard giữa `sub s8, t2, t3` và `add s9, s8, t1` do tái dùng `s8`. Processor out-of-order có thể rename `s8` thành `r0` cho `sub`. Khi đó `sub` thực thi sớm hơn vì `r0` không phụ thuộc `add`. Processor giữ bảng register được rename để rename nhất quán ở instruction phụ thuộc sau. Ở đây `s8` cũng phải rename `r0` trong `and` vì nó tham chiếu kết quả `sub`. Hình 7.72 thể hiện cùng chương trình Hình 7.71 chạy trên processor out-of-order có register renaming. `s8` được rename `r0` trong `sub`, `and` để loại WAR hazard. Ràng buộc issue là:
+Ví dụ, trong mục trước, một WAR hazard xuất hiện giữa các instruction `sub s8, t2, t3` và `add s9, s8, t1` do việc sử dụng lại `s8`. Processor out-of-order có thể đổi tên `s8` thành `r0` cho instruction `sub`. Khi đó, `sub` có thể được thực thi sớm hơn vì `r0` không có dependency với instruction `add`. Processor duy trì một bảng ghi nhận những register đã được đổi tên để có thể đổi tên nhất quán các register trong những instruction phụ thuộc tiếp theo. Trong ví dụ này, `s8` cũng phải được đổi tên thành `r0` trong instruction `and` vì nó tham chiếu kết quả của `sub`. Hình 7.72 minh họa cùng chương trình trong Hình 7.71 chạy trên một processor out-of-order có register renaming. `s8` được đổi tên thành `r0` trong `sub` và `and` để loại bỏ WAR hazard. Các ràng buộc khi issue instruction là:
 
 Chu kỳ 1
 
 - Instruction `lw` issue.
 
-- Instruction `add` phụ thuộc `lw` qua `s8` nên chưa issue. Tuy nhiên `sub` độc lập vì destination đã rename `r0`, nên `sub` cũng issue.
+- Instruction `add` phụ thuộc vào `lw` thông qua `s8`, nên chưa thể được issue. Tuy nhiên, instruction `sub` hiện độc lập vì đích của nó đã được đổi tên thành `r0`, nên `sub` cũng được issue.
 
 Chu kỳ 2
 
@@ -2077,13 +2069,13 @@ Trong processor thông thường, thread chỉ tạo ảo giác chạy đồng t
 
 Processor hardware multithreaded chứa hơn một bản architectural state để nhiều thread cùng active. Ví dụ nếu mở rộng thành bốn program counter và 128 register, bốn thread có thể sẵn có cùng lúc. Nếu một thread stall chờ dữ liệu main memory, processor context switch sang thread khác không delay vì program counter và register đã có sẵn. Hơn nữa nếu một thread không đủ parallelism giữ mọi execution unit superscalar bận, thread khác có thể issue vào unit nhàn. Chuyển thread có thể fine-grained hoặc coarse-grained. Multithreading Fine-grained chuyển thread mỗi instruction và phải có hỗ trợ hardware multithreading. Multithreading Coarse-grained chỉ chuyển thread ở stall đắt như truy cập bộ nhớ dài do cache miss.
 
-Multithreading không cải thiện hiệu năng từng thread vì không tăng ILP. Tuy nhiên nó cải thiện throughput tổng processor vì nhiều thread dùng tài nguyên lẽ ra nhàn khi chạy một thread. Triển khai multithreading còn tương đối rẻ vì chỉ sao chép PC và register file, không phải execution unit và bộ nhớ.
+Multithreading không cải thiện hiệu năng của một thread riêng lẻ vì nó không tăng ILP. Tuy nhiên, nó cải thiện throughput tổng thể của processor vì nhiều thread có thể sử dụng các tài nguyên processor vốn sẽ không hoạt động khi chỉ thực thi một thread. Multithreading cũng có chi phí triển khai tương đối thấp vì chỉ nhân bản PC và register file, không nhân bản các execution unit và memory.
 
 ### 7.7.8 Multiprocessor
 
 Có đóng góp của Matthew Watkins
 
-Processor hiện đại có lượng transistor khổng lồ. Dùng để tăng độ sâu pipeline hay thêm execution unit superscalar cho ít lợi ích và lãng phí công suất. Khoảng 2005, computer architect chuyển hướng lớn sang xây nhiều bản processor trên cùng chip; các bản này gọi core.
+Các processor hiện đại có sẵn số lượng transistor khổng lồ. Việc sử dụng chúng để tăng độ sâu pipeline hoặc bổ sung execution unit cho superscalar processor mang lại ít lợi ích về hiệu năng và gây lãng phí công suất. Khoảng năm 2005, các kiến trúc sư máy tính đã thực hiện một bước chuyển lớn sang việc xây dựng nhiều bản sao của processor trên cùng một chip; các bản sao này được gọi là core.
 
 Hệ thống multiprocessor gồm nhiều processor và phương thức giao tiếp giữa chúng. Ba loại thông dụng là symmetric (hoặc homogeneous) multiprocessor, heterogeneous multiprocessor và cluster.
 
@@ -2093,7 +2085,7 @@ Symmetric multiprocessor gồm ít nhất hai processor giống nhau chia sẻ m
 
 Multiprocessor có thể chạy nhiều thread đồng thời hơn hoặc chạy một thread nhanh hơn. Chạy nhiều thread đồng thời dễ; chỉ chia thread cho processor. Đáng tiếc người dùng PC điển hình chỉ cần ít thread tại mỗi lúc. Chạy một thread nhanh hơn khó hơn nhiều. Lập trình viên phải chia thread hiện có thành nhiều thread thực thi trên mỗi processor. Việc này khó khi processor cần giao tiếp nhau. Thách thức lớn với người thiết kế và lập trình viên là dùng hiệu quả nhiều processor core.
 
-Symmetric multiprocessor có vài ưu điểm. Tương đối đơn giản để thiết kế vì thiết kế processor một lần rồi sao chép nhiều lần tăng hiệu năng. Lập trình và chạy code cũng tương đối đơn giản vì mọi chương trình chạy được trên mọi processor trong hệ thống với hiệu năng xấp xỉ nhau.
+Symmetric multiprocessor có một số ưu điểm. Chúng tương đối đơn giản để thiết kế vì processor có thể được thiết kế một lần rồi nhân bản nhiều lần để tăng hiệu năng. Việc lập trình và thực thi code trên symmetric multiprocessor cũng tương đối đơn giản vì mọi chương trình có thể chạy trên bất kỳ processor nào trong hệ thống và đạt hiệu năng gần như nhau.
 
 Heterogeneous multiprocessor
 
@@ -2109,7 +2101,7 @@ Cluster
 
 Khác multiprocessor khác, mỗi processor trong clustered multiprocessor có hệ thống bộ nhớ cục bộ riêng thay vì chia sẻ. Một dạng cluster là nhóm PC nối mạng chạy phần mềm cùng giải bài toán lớn. Máy giao tiếp bằng message passing thay shared memory. Computer cluster large-scale ngày càng quan trọng là data center, còn gọi warehouse-scale computer (WSC), trong đó rack máy tính và đĩa nối mạng, chia sẻ nguồn và làm mát. Hệ thống thường gồm 50,000 đến 100,000 máy tính, hay server, giá \$150 triệu.[^5] Công ty Internet lớn—Google, Amazon, Facebook—thúc đẩy data center phát triển nhanh để phục vụ hàng triệu người toàn cầu. Ưu điểm lớn là có thể thay từng máy khi cần do hỏng hoặc nâng cấp.
 
-Những năm gần đây, server truyền thống do các công ty sở hữu được thay bằng cloud computing, nơi công ty nhỏ thuê phần WSC từ công ty như Google, Amazon. Tương tự, thay vì ứng dụng chạy hoàn toàn trên thiết bị cầm tay như smartphone hay tablet, gọi chung personal mobile device (PMD), phần ứng dụng có thể chạy trên cloud để tăng tốc tính toán và lưu dữ liệu hiệu quả hơn. Đây gọi software as a service (SaaS). Ví dụ phổ biến là tìm kiếm web, nơi database lưu trên WSC. Công ty thuê cloud hoặc web service đòi cả riêng tư (bảo vệ khỏi phần mềm khác trên cloud) lẫn hiệu năng. Cả hai đạt bằng virtual machine, mô phỏng cả máy tính gồm OS, chạy trên máy vật lý bản thân có thể chạy OS khác. Nhiều virtual machine có thể đồng thời chạy trên một máy vật lý, tài nguyên như bộ nhớ, I/O được chia hoặc chia sẻ theo thời gian. Nhờ đó nhà cung cấp như Amazon Web Services (AWS) dùng hiệu quả tài nguyên vật lý, bảo vệ giữa virtual machine và chuyển virtual machine khỏi máy không hoạt động hoặc low-performing. Hypervisor, còn gọi virtual machine monitor (VMM), là phần mềm chạy virtual machine và ánh xạ tài nguyên ảo sang vật lý. Hypervisor làm chức năng thường của OS như quản lý I/O, CPU và bộ nhớ. Nó chạy giữa host (nền tảng phần cứng vật lý bên dưới) với OS đang mô phỏng. Instruction set architecture cho phép hypervisor chạy trực tiếp trên phần cứng (thay vì trong phần mềm) gọi là virtualizable. Điều này cho virtual machine hiệu quả hơn, higher-performance. Ví dụ architecture virtualizable gồm x86 (từ 2005), RISC-V, IBM 370. ARMv7 và MIPS không virtualizable nhưng ARM giới thiệu virtualization extension năm 2013 cùng ARMv8.
+Những năm gần đây, server truyền thống do các công ty sở hữu được thay bằng cloud computing, nơi công ty nhỏ thuê phần WSC từ công ty như Google, Amazon. Tương tự, thay vì ứng dụng chạy hoàn toàn trên thiết bị cầm tay như smartphone hay tablet, gọi chung personal mobile device (PMD), phần ứng dụng có thể chạy trên cloud để tăng tốc tính toán và lưu dữ liệu hiệu quả hơn. Đây gọi software as a service (SaaS). Ví dụ phổ biến là tìm kiếm web, nơi database lưu trên WSC. Công ty thuê cloud hoặc web service đòi hỏi cả riêng tư (bảo vệ khỏi phần mềm khác trên cloud) lẫn hiệu năng. Cả hai đạt bằng virtual machine, mô phỏng cả máy tính gồm OS, chạy trên máy vật lý bản thân có thể chạy OS khác. Nhiều virtual machine có thể đồng thời chạy trên một máy vật lý, tài nguyên như bộ nhớ, I/O được chia hoặc chia sẻ theo thời gian. Nhờ đó nhà cung cấp như Amazon Web Services (AWS) dùng hiệu quả tài nguyên vật lý, bảo vệ giữa virtual machine và chuyển virtual machine khỏi máy không hoạt động hoặc low-performing. Hypervisor, còn gọi virtual machine monitor (VMM), là phần mềm chạy virtual machine và ánh xạ tài nguyên ảo sang vật lý. Hypervisor làm chức năng thường của OS như quản lý I/O, CPU và bộ nhớ. Nó chạy giữa host (nền tảng phần cứng vật lý bên dưới) với OS đang mô phỏng. Instruction set architecture cho phép hypervisor chạy trực tiếp trên phần cứng (thay vì trong phần mềm) gọi là virtualizable. Điều này cho virtual machine hiệu quả hơn, higher-performance. Ví dụ architecture virtualizable gồm x86 (từ 2005), RISC-V, IBM 370. ARMv7 và MIPS không virtualizable nhưng ARM giới thiệu virtualization extension năm 2013 cùng ARMv8.
 
 Cloud computing còn thiết yếu trong ứng dụng Internet of Things (IoT), nơi thiết bị như loa, điện thoại, cảm biến nối qua mạng như Bluetooth hoặc Wi-Fi. Ví dụ IoT gồm nối tai nghe với smartphone bằng Bluetooth hay nối Alexa, Siri bằng Wi-Fi. Thiết bị low-cost (tai nghe, Google Home cho Google Assistant hoặc Echo Dot cho Alexa) nối mạng tới server higher-power có thể stream nhạc hoặc, với Siri, Alexa, nhận dạng giọng nói, truy vấn database và tính toán.
 
@@ -2121,7 +2113,7 @@ Phần này theo dõi phát triển microarchitecture RISC-V từ khi RISC-V ra 
 
 Đa số triển khai processor hiện có thuộc processor low-level hoặc embedded, nhưng chip high-performance đang tới. RISC-V International (riscv.org) cung cấp danh sách core và nền tảng SoC ever-growing. Core thương mại RISC-V có trong development board HiFive của SiFive, ổ cứng Western Digital và GPU NVIDIA cùng nơi khác.
 
-Đến 2021, hai processor RISC-V thương mại đáng chú ý là core Freedom E310 của SiFive và core SweRV open-source của Western Digital, có ba phiên bản. Freedom E310 là embedded processor low-cost trong board SiFive HiFive và Sparkfun RED-V. Nó chạy RV32IMAC (RV32I với extension nhân/chia \[M\], truy cập bộ nhớ atomic \[A\], instruction nén \[C\]), có 8 KB program memory, 8 KB mask ROM cho boot code, 16 KB data SRAM và instruction cache 16-KB two-way set-associative. Nó còn có interface JTAG, SPI, I2C, UART cùng QSPI flash memory interface. Processor chạy 320 MHz, là core single-issue, in-order có pipeline 5-stage cùng stage mô tả trong chương. Hình 7.73 thể hiện block diagram processor FE310-G002 trên board HiFive 1 Rev B.
+Đến 2021, hai processor RISC-V thương mại đáng chú ý là core Freedom E310 của SiFive và core SweRV open-source của Western Digital, có ba phiên bản. Freedom E310 là embedded processor low-cost trong board SiFive HiFive và Sparkfun RED-V. Nó chạy RV32IMAC (RV32I với extension nhân/chia [M], truy cập bộ nhớ atomic [A], instruction nén [C]), có 8 KB program memory, 8 KB mask ROM cho boot code, 16 KB data SRAM và instruction cache 16-KB two-way set-associative. Nó còn có interface JTAG, SPI, I2C, UART cùng QSPI flash memory interface. Processor chạy 320 MHz, là core single-issue, in-order có pipeline 5-stage cùng stage mô tả trong chương. Hình 7.73 thể hiện block diagram processor FE310-G002 trên board HiFive 1 Rev B.
 
 ![fig7_73](images/ch07/fig7_73.png)
 
@@ -2153,11 +2145,11 @@ Hình 7.75 thể hiện block diagram SweRV EH1 Core Complex. Nó gồm processo
 
 Chương đã mô tả ba cách xây processor, mỗi cách có trade-offs hiệu năng, diện tích, chi phí khác nhau. Chúng tôi thấy chủ đề gần như kỳ diệu: làm sao thiết bị có vẻ phức tạp như microprocessor thực sự đủ đơn giản vừa schematic half-page? Hơn nữa, hoạt động bên trong bí ẩn với người chưa biết thực ra khá đơn giản.
 
-Các microarchitecture tập hợp gần như mọi chủ đề đã học tới nay. Ghép bài toán microarchitecture minh họa nguyên lý các chương trước: thiết kế mạch tổ hợp, tuần tự (Chương 1 đến 3), áp dụng nhiều building block (Chương 5), triển khai architecture RISC-V (Chương 6). Microarchitecture có thể mô tả trong vài trang HDL bằng kỹ thuật Chương 4.
+Các microarchitecture đã kết hợp gần như mọi chủ đề được trình bày trong sách cho đến thời điểm này. Việc ghép các phần của bài toán microarchitecture minh họa những nguyên lý đã được giới thiệu trong các chương trước, bao gồm thiết kế combinational circuit và sequential circuit (được trình bày trong Chương 1 đến Chương 3), ứng dụng nhiều building block (được mô tả trong Chương 5) và triển khai architecture RISC-V (được giới thiệu trong Chương 6). Có thể mô tả các microarchitecture bằng một vài trang HDL, sử dụng những kỹ thuật trong Chương 4.
 
 Xây microarchitecture còn dựa nhiều vào kỹ thuật quản lý độ phức tạp. Microarchitectural abstraction nối logic abstraction và architecture abstraction, là trọng tâm sách về digital design và computer architecture. Chúng ta còn dùng block diagram, HDL abstraction mô tả súc tích cách sắp xếp thành phần. Microarchitecture khai thác regularity, modularity, tái dùng thư viện building block như ALU, bộ nhớ, multiplexer, register. Hierarchy được dùng nhiều cách. Microarchitecture chia datapath và control unit, bản thân chúng chia unit nhỏ hơn. Mỗi unit xây từ logic block, logic block từ gate, gate từ transistor—đều dùng kỹ thuật năm chương đầu.
 
-Chương đã so microarchitecture single-cycle, multicycle, pipelined cho processor RISC-V. Cả ba triển khai cùng tập con instruction set RISC-V và có cùng architectural state. Processor single-cycle đơn giản nhất, CPI 1.
+Chương này đã so sánh các microarchitecture single-cycle, multicycle và pipelined dành cho processor RISC-V. Cả ba microarchitecture đều triển khai cùng một tập con của instruction set RISC-V và có cùng architectural state. Processor single-cycle có thiết kế đơn giản nhất và có CPI bằng 1.
 
 Processor multicycle dùng số bước ngắn hơn thay đổi để chạy instruction. Nhờ đó tái dùng ALU thay vì cần nhiều adder, và có bộ nhớ hợp nhất. Tuy nhiên cần vài nonarchitectural register lưu kết quả giữa các bước. Về nguyên tắc multicycle có thể nhanh hơn vì không phải mọi instruction dài bằng nhau. Thực tế thường chậm hơn vì giới hạn bởi bước chậm nhất và sequencing overhead mỗi bước.
 
@@ -2165,7 +2157,7 @@ Processor pipelined chia processor single-cycle thành năm pipeline stage tươ
 
 Dù microarchitecture trong chương chỉ triển khai tập con architecture RISC-V, chúng ta đã thấy hỗ trợ thêm instruction là cải tiến đơn giản datapath, controller.
 
-Hạn chế lớn của chương là giả định hệ thống bộ nhớ lý tưởng nhanh và đủ lớn chứa toàn bộ chương trình, dữ liệu. Thực tế bộ nhớ lớn nhanh quá đắt. Chương sau chỉ cách có đa số lợi ích bộ nhớ lớn nhanh bằng bộ nhớ nhỏ nhanh giữ thông tin dùng nhiều nhất và một hoặc nhiều bộ nhớ lớn chậm hơn giữ phần còn lại.
+Một hạn chế lớn của chương này là chúng ta đã giả định một memory system lý tưởng, đủ nhanh và đủ lớn để lưu toàn bộ chương trình cùng data. Trong thực tế, những memory vừa lớn vừa nhanh có chi phí quá cao. Chương tiếp theo minh họa cách đạt được phần lớn lợi ích của một memory lớn và nhanh bằng cách sử dụng một memory nhỏ và nhanh để giữ những thông tin được sử dụng thường xuyên nhất, cùng một hoặc nhiều memory lớn hơn nhưng chậm hơn để giữ phần thông tin còn lại.
 
 ## Bài tập
 
@@ -2313,7 +2305,7 @@ Lặp Bài tập 7.3 cho `lwpreinc`.
 
 Bài tập 7.7 Bạn của bạn là người thiết kế mạch tài ba. Cô đề nghị thiết kế lại một unit processor RISC-V single-cycle để delay còn nửa. Dùng delay Bảng 7.7 trang 415, cô nên làm unit nào để tăng tốc processor tổng thể nhiều nhất, và cycle time máy cải tiến là bao nhiêu? Giải thích tại sao.
 
-Bài tập 7.8 Xét delay Bảng 7.7 trang 415. Ben Bitdiddle xây prefix adder giảm ALU delay 20 ps. Nếu delay thành phần khác không đổi, tìm cycle time mới processor RISC-V single-cycle và thời gian chạy benchmark 100 tỷ instruction.
+Bài tập 7.8 Xét các delay trong Bảng 7.7 ở trang 415. Ben Bitdiddle xây dựng một prefix adder làm giảm delay của ALU đi 20 ps. Nếu delay của các phần tử khác không đổi, hãy tìm cycle time mới của processor RISC-V single-cycle và xác định thời gian cần thiết để thực thi một benchmark có 100 tỷ instruction.
 
 Bài tập 7.9 Sửa code HDL processor RISC-V single-cycle Phần 7.6 để xử lý một instruction mới Bài tập 7.3. Cải tiến testbench và chương trình kiểm tra (riscvtest.s, riscvtest.txt) Phần 7.6.3 để thử instruction mới. Thêm comment chỉ thay đổi.
 
@@ -2576,7 +2568,7 @@ Bài tập 7.39 Bạn của bạn, người thiết kế mạch tài ba, đề n
 
 Bài tập 7.40 Xét delay Bảng 7.7 trang 415. Giả sử ALU nhanh hơn 20%. Cycle time processor RISC-V pipelined có đổi không? Nếu ALU chậm hơn 20% thì sao? Giải thích câu trả lời và trình bày cách làm.
 
-Bài tập 7.41 Giả sử processor RISC-V pipelined chia 10 stage, mỗi stage 400 ps kể cả sequencing overhead. Giả định instruction mix Ví dụ 7.7. Giả sử 50% load có instruction dùng kết quả ngay sau, cần sáu stall, và 30% branch dự đoán sai. Target address branch chỉ được tính cuối stage thứ hai. Tính CPI trung bình, thời gian thực thi 100 tỷ instruction SPECINT2000 trên processor pipelined 10-stage này.
+Bài tập 7.41 Giả sử processor RISC-V pipelined được chia thành 10 stage, mỗi stage có thời gian 400 ps, bao gồm sequencing overhead. Giả định instruction mix như trong Ví dụ 7.7. Đồng thời, giả sử 50% số instruction load được theo ngay sau bởi một instruction sử dụng kết quả của nó, đòi hỏi sáu stall, và 30% số branch bị dự đoán sai. Địa chỉ đích của một instruction branch chỉ được tính xong vào cuối stage thứ hai. Hãy tính CPI trung bình và thời gian thực thi 100 tỷ instruction từ benchmark SPECINT2000 trên processor pipelined 10-stage này.
 
 Bài tập 7.42 Viết code HDL processor RISC-V pipelined, gọi module `riscv`. Processor phải tương thích module top-level dưới đây, hỗ trợ instruction mô tả trong chương: `lw`, `sw`, `add`, `sub`, `and`, `or`, `slt`, `addi`, `andi`, `ori`, `slti`, `beq`, `jal`. Nhớ có thể dùng building block từ HDL processor single-cycle Phần 7.6. Sửa testbench Phần 7.6.3 để thử processor bằng chương trình kiểm tra (riscvtest.s, riscvtest.txt) phần đó.
 
@@ -2635,6 +2627,6 @@ Câu hỏi 7.4 Mô tả khái niệm superscalar processor và ưu nhược đi�
 
 [^3]: Nhớ forwarding logic cho SrcBE (ForwardBE) giống hệt trừ kiểm tra Rs2E thay Rs1E.
 
-[^4]: Bạn có thể hỏi tại sao vẫn cần issue `lw`. Vì processor out-of-order phải bảo đảm mọi exception giống hệt như khi chạy chương trình theo thứ tự gốc. `lw` có thể gây load address misaligned exception hoặc load access fault nên phải issue kiểm tra exception dù có thể bỏ kết quả.
+[^4]: Bạn có thể thắc mắc tại sao vẫn cần issue instruction `lw`. Lý do là các processor out-of-order phải bảo đảm xảy ra đầy đủ những exception giống như khi chương trình được thực thi theo thứ tự ban đầu. Instruction `lw` có thể gây ra load address misaligned exception hoặc load access fault, vì vậy nó phải được issue để kiểm tra exception, ngay cả khi có thể loại bỏ kết quả của nó.
 
 [^5]: D. Patterson and J. Hennessy, Computer Organization and Design, The Hardware-Software Interface: RISC-V Edition, Morgan Kaufmann, © 2018.

@@ -145,9 +145,11 @@ struct context {
   int edi;
   int ebp;
 };
+
 // the different states a process can be in
 enum proc_state { UNUSED, EMBRYO, SLEEPING,
                   RUNNABLE, RUNNING, ZOMBIE };
+
 // the information xv6 tracks about each process
 // including its register context and state
 struct proc {

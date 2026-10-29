@@ -20,7 +20,7 @@ Hình 36.1: System Architecture điển hình
 
 Giờ hãy xem một device mẫu (không phải device thực), dùng nó để hiểu một số cơ chế cần thiết nhằm tương tác với device hiệu quả. Từ Hình 36.2, ta thấy device có hai thành phần quan trọng. Thứ nhất là hardware interface nó cung cấp cho phần còn lại của hệ thống. Giống phần mềm, hardware cũng phải cung cấp một loại interface cho phép system software điều khiển hoạt động của nó. Do đó, mọi device có interface và protocol xác định cho tương tác thông thường.
 
-Phần thứ hai của mọi device là cấu trúc bên trong. Phần này phụ thuộc cách triển khai và chịu trách nhiệm hiện thực abstraction mà device cung cấp cho hệ thống. Device rất đơn giản có một hoặc vài hardware chip để thực hiện chức năng; device phức tạp hơn gồm CPU đơn giản, một ít general purpose memory và các device-specific chip khác để làm việc. Chẳng hạn, RAID controller hiện đại có thể gồm hàng trăm nghìn dòng firmware (tức phần mềm trong hardware device) để thực hiện chức năng.
+Phần thứ hai của mọi device là cấu trúc bên trong. Phần này phụ thuộc cách triển khai và chịu trách nhiệm triển khai abstraction mà device cung cấp cho hệ thống. Device rất đơn giản có một hoặc vài hardware chip để thực hiện chức năng; device phức tạp hơn gồm CPU đơn giản, một ít general purpose memory và các device-specific chip khác để làm việc. Chẳng hạn, RAID controller hiện đại có thể gồm hàng trăm nghìn dòng firmware (tức phần mềm trong hardware device) để thực hiện chức năng.
 
 ![p0412_2](images/ch36_io_devices/p0412_2.png)
 
@@ -141,6 +141,7 @@ IDE disk cung cấp interface đơn giản cho hệ thống, gồm bốn loại 
 ```
 Control Register:
   Address 0x3F6 = 0x80 (0000 1RE0): R=reset, E=0 means "enable interrupt"
+
 Command Block Registers:
   Address 0x1F0 = Data Port
   Address 0x1F1 = Error
@@ -150,12 +151,15 @@ Command Block Registers:
   Address 0x1F5 = LBA hi  byte
   Address 0x1F6 = 1B1D TOP4LBA: B=LBA, D=drive
   Address 0x1F7 = Command/status
+
 Status Register (Address 0x1F7):
     7      6    5      4    3    2    1     0
    BUSY  READY FAULT SEEK  DRQ  CORR IDDEX ERROR
+
 Error Register (Address 0x1F1): (check when Status ERROR==1)
     7      6    5      4    3    2    1    0
    BBK    UNC   MC   IDNF  MCR  ABRT T0NF AMNF
+
    BBK  = Bad Block
    UNC  = Uncorrectable data error
    MC   = Media Changed
@@ -189,6 +193,7 @@ static int ide_wait_ready() {
   while (((int r = inb(0x1f7)) & IDE_BSY) || !(r & IDE_DRDY))
     ;                              // loop until drive isn’t busy
 }
+
 static void ide_start_request(struct buf *b) {
   ide_wait_ready();
   outb(0x3f6, 0);                  // generate interrupt
@@ -204,6 +209,7 @@ static void ide_start_request(struct buf *b) {
     outb(0x1f7, IDE_CMD_READ);     // this is a READ (no data)
   }
 }
+
 void ide_rw(struct buf *b) {
   acquire(&ide_lock);
   for (struct buf **pp = &ide_queue; *pp; pp=&(*pp)->qnext)
@@ -215,6 +221,7 @@ void ide_rw(struct buf *b) {
     sleep(b, &ide_lock);           // wait for completion
   release(&ide_lock);
 }
+
 void ide_intr() {
   struct buf *b;
   acquire(&ide_lock);

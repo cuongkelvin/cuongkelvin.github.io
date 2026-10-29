@@ -2,7 +2,7 @@
 
 Toolchain là thành phần đầu tiên của embedded Linux và là điểm khởi đầu của project. Bạn sẽ dùng nó để compile toàn bộ code sẽ chạy trên thiết bị của mình. Những lựa chọn bạn đưa ra ở giai đoạn sớm này sẽ có tác động sâu sắc đến kết quả cuối cùng.
 
-Toolchain của bạn phải có khả năng sử dụng hiệu quả phần cứng bằng cách dùng tập lệnh tối ưu cho bộ xử lý. Nó phải hỗ trợ các ngôn ngữ bạn cần và có một bản hiện thực vững chắc của Portable Operating System Interface (POSIX) cùng các giao diện hệ thống khác.
+Toolchain của bạn phải có khả năng sử dụng hiệu quả phần cứng bằng cách dùng tập lệnh tối ưu cho bộ xử lý. Nó phải hỗ trợ các ngôn ngữ bạn cần và có một bản triển khai vững chắc của Portable Operating System Interface (POSIX) cùng các giao diện hệ thống khác.
 
 Toolchain của bạn nên được giữ cố định trong suốt project. Nói cách khác, một khi đã chọn toolchain, điều quan trọng là phải gắn bó với nó. Thay đổi compiler và thư viện phát triển một cách không nhất quán trong một project sẽ dẫn đến các bug tinh vi. Dù vậy, vẫn tốt nhất là cập nhật toolchain khi phát hiện lỗ hổng bảo mật hoặc bug.
 
@@ -98,7 +98,7 @@ Toolchain phải được build theo khả năng của CPU target, bao gồm:
 
 - Hoạt động Big- hoặc little-endian: Một số CPU có thể hoạt động ở cả hai chế độ, nhưng mã máy khác nhau cho mỗi chế độ.
 
-- Hỗ trợ dấu chấm động: Không phải mọi phiên bản bộ xử lý nhúng đều hiện thực một đơn vị dấu chấm động bằng phần cứng. Trong những trường hợp này, toolchain phải được cấu hình để gọi một thư viện dấu chấm động bằng phần mềm thay thế.
+- Hỗ trợ dấu chấm động: Không phải mọi phiên bản bộ xử lý nhúng đều triển khai một đơn vị dấu chấm động bằng phần cứng. Trong những trường hợp này, toolchain phải được cấu hình để gọi một thư viện dấu chấm động bằng phần mềm thay thế.
 
 - Application Binary Interface (ABI): Quy ước gọi hàm được dùng để truyền tham số giữa các lời gọi hàm.
 
@@ -142,7 +142,7 @@ Tuple này cho biết CPU là MIPS little-endian, vendor là `unknown`, kernel l
 
 ### Chọn thư viện C
 
-Giao diện lập trình tới OS Unix được định nghĩa bằng ngôn ngữ C theo các chuẩn POSIX. Thư viện C là bản hiện thực của giao diện đó. Nó là cổng vào kernel cho các chương trình Linux. Ngay cả khi bạn viết chương trình bằng ngôn ngữ khác như Go hay Python, các thư viện hỗ trợ runtime tương ứng rốt cuộc cũng sẽ phải gọi thư viện C, như được thể hiện ở đây:
+Giao diện lập trình tới OS Unix được định nghĩa bằng ngôn ngữ C theo các chuẩn POSIX. Thư viện C là bản triển khai của giao diện đó. Nó là cổng vào kernel cho các chương trình Linux. Ngay cả khi bạn viết chương trình bằng ngôn ngữ khác như Go hay Python, các thư viện hỗ trợ runtime tương ứng rốt cuộc cũng sẽ phải gọi thư viện C, như được thể hiện ở đây:
 
 ![Figure 2.1](images/ch02/fig02-01.png)
 
@@ -152,7 +152,7 @@ Bất cứ khi nào thư viện C cần các dịch vụ của kernel, nó sẽ 
 
 Có nhiều thư viện C để lựa chọn. Các lựa chọn chính như sau:
 
-- glibc: Đây là thư viện GNU C chuẩn, có tại `https://gnu.org/software/libc/`. Nó lớn và, cho đến gần đây, không cấu hình được nhiều, nhưng nó là bản hiện thực đầy đủ nhất của POSIX API. License là LGPL 2.1.
+- glibc: Đây là thư viện GNU C chuẩn, có tại `https://gnu.org/software/libc/`. Nó lớn và, cho đến gần đây, không cấu hình được nhiều, nhưng nó là bản triển khai đầy đủ nhất của POSIX API. License là LGPL 2.1.
 
 - musl libc: Thư viện này tương đối mới nhưng đã được chú ý nhiều như một lựa chọn thay thế nhỏ gọn và standards-compliant cho glibc. Nó là một lựa chọn tốt cho các hệ thống có lượng RAM và bộ lưu trữ hạn chế. Nó có license MIT và có tại `https://musl.libc.org`.
 
@@ -408,7 +408,7 @@ Giờ chúng ta sẽ chuyển từ các công cụ command-line quay lại chủ
 
 ### Xem xét các thành phần của thư viện C
 
-Thư viện C không phải là một file thư viện duy nhất. Nó gồm bốn phần chính cùng nhau hiện thực POSIX API:
+Thư viện C không phải là một file thư viện duy nhất. Nó gồm bốn phần chính cùng nhau triển khai POSIX API:
 
 - `libc`: Thư viện C chính chứa các hàm POSIX well-known như `printf`, `open`, `close`, `read`, `write`, v.v.
 
@@ -761,7 +761,7 @@ Hãy đi sâu hơn vào Autotools và dùng nó để cross-compile một thư v
 
 #### Một ví dụ: SQLite
 
-Thư viện SQLite hiện thực một cơ sở dữ liệu quan hệ đơn giản và khá phổ biến trên các thiết bị nhúng.
+Thư viện SQLite triển khai một cơ sở dữ liệu quan hệ đơn giản và khá phổ biến trên các thiết bị nhúng.
 
 Trước tiên, hãy lấy một bản sao của SQLite:
 

@@ -41,8 +41,8 @@ Bảng B.1 RV32I: Các instruction số nguyên RISC-V
 | 0000011 (3) | 101 | – | I | `lhu rd, imm(rs1)` | Nạp half không dấu | `rd = ZeroExt([Address]`<sub>`15:0`</sub>`)` |
 | 0010011 (19) | 000 | – | I | `addi rd, rs1, imm` | Cộng immediate | `rd = rs1 + SignExt(imm)` |
 | 0010011 (19) | 001 | 0000000<sup>\*</sup> | I | `slli rd, rs1, uimm` | Dịch trái logic theo immediate | `rd = rs1 << uimm` |
-| 0010011 (19) | 010 | – | I | `slti rd, rs1, imm` | Đặt nếu nhỏ hơn immediate | `rd = (rs1` \< `SignExt(imm))` |
-| 0010011 (19) | 011 | – | I | `sltiu rd, rs1, imm` | Đặt nếu nhỏ hơn imm. không dấu | `rd = (rs1` \< `SignExt(imm))` |
+| 0010011 (19) | 010 | – | I | `slti rd, rs1, imm` | Đặt nếu nhỏ hơn immediate | `rd = (rs1` < `SignExt(imm))` |
+| 0010011 (19) | 011 | – | I | `sltiu rd, rs1, imm` | Đặt nếu nhỏ hơn imm. không dấu | `rd = (rs1` < `SignExt(imm))` |
 | 0010011 (19) | 100 | – | I | `xori rd, rs1, imm` | XOR với immediate | `rd = rs1 ^ SignExt(imm)` |
 | 0010011 (19) | 101 | 0000000<sup>\*</sup> | I | `srli rd, rs1, uimm` | Dịch phải logic theo immediate | `rd = rs1 >> uimm` |
 | 0010011 (19) | 101 | 0100000<sup>\*</sup> | I | `srai rd, rs1, uimm` | Dịch phải số học theo imm. | `rd = rs1 >>> uimm` |
@@ -55,8 +55,8 @@ Bảng B.1 RV32I: Các instruction số nguyên RISC-V
 | 0110011 (51) | 000 | 0000000 | R | `add rd, rs1, rs2` | Cộng | `rd = rs1 + rs2` |
 | 0110011 (51) | 000 | 0100000 | R | `sub rd, rs1, rs2` | Trừ | `rd = rs1 — rs2` |
 | 0110011 (51) | 001 | 0000000 | R | `sll rd, rs1, rs2` | Dịch trái logic | `rd = rs1 << rs2`<sub>`4:0`</sub> |
-| 0110011 (51) | 010 | 0000000 | R | `slt rd, rs1, rs2` | Đặt nếu nhỏ hơn | `rd = (rs1` \< `rs2)` |
-| 0110011 (51) | 011 | 0000000 | R | `sltu rd, rs1, rs2` | Đặt nếu nhỏ hơn không dấu | `rd = (rs1` \< `rs2)` |
+| 0110011 (51) | 010 | 0000000 | R | `slt rd, rs1, rs2` | Đặt nếu nhỏ hơn | `rd = (rs1` < `rs2)` |
+| 0110011 (51) | 011 | 0000000 | R | `sltu rd, rs1, rs2` | Đặt nếu nhỏ hơn không dấu | `rd = (rs1` < `rs2)` |
 | 0110011 (51) | 100 | 0000000 | R | `xor rd, rs1, rs2` | XOR | `rd = rs1 ^ rs2` |
 | 0110011 (51) | 101 | 0000000 | R | `srl rd, rs1, rs2` | Dịch phải logic | `rd = rs1 >> rs2`<sub>`4:0`</sub> |
 | 0110011 (51) | 101 | 0100000 | R | `sra rd, rs1, rs2` | Dịch phải số học | `rd = rs1 >>> rs2`<sub>`4:0`</sub> |
@@ -65,9 +65,9 @@ Bảng B.1 RV32I: Các instruction số nguyên RISC-V
 | 0110111 (55) | – | – | U | `lui rd, upimm` | Nạp upper immediate | `rd = {upimm, 12’b0}` |
 | 1100011 (99) | 000 | – | B | `beq rs1, rs2, label` | Branch nếu = | `if (rs1 == rs2) PC = BTA` |
 | 1100011 (99) | 001 | – | B | `bne rs1, rs2, label` | Branch nếu ≠ | `if (rs1 ≠ rs2) PC = BTA` |
-| 1100011 (99) | 100 | – | B | `blt rs1, rs2, label` | Branch nếu \< | `if (rs1` \< `rs2) PC = BTA` |
+| 1100011 (99) | 100 | – | B | `blt rs1, rs2, label` | Branch nếu < | `if (rs1` < `rs2) PC = BTA` |
 | 1100011 (99) | 101 | – | B | `bge rs1, rs2, label` | Branch nếu ≥ | `if (rs1` ≥ `rs2) PC = BTA` |
-| 1100011 (99) | 110 | – | B | `bltu rs1, rs2, label` | Branch nếu \< không dấu | `if (rs1` \< `rs2) PC = BTA` |
+| 1100011 (99) | 110 | – | B | `bltu rs1, rs2, label` | Branch nếu < không dấu | `if (rs1` < `rs2) PC = BTA` |
 | 1100011 (99) | 111 | – | B | `bgeu rs1, rs2, label` | Branch nếu ≥ không dấu | `if (rs1` ≥ `rs2) PC = BTA` |
 | 1100111 (103) | 000 | – | I | `jalr rd, rs1, imm` | Jump và link qua register | `PC = rs1 + SignExt(imm), rd = PC + 4` |
 | 1101111 (111) | – | – | J | `jal rd, label` | Jump và link | `PC = JTA, rd = PC + 4` |
@@ -112,7 +112,7 @@ Bảng B.3 RVF/D: Các instruction floating-point single- và double-precision c
 | 1010011 (83) | 000 | 00101, fmt | – | R | `fmin fd,fs1,fs2` | Nhỏ nhất | `fd = min(fs1, fs2)` |
 | 1010011 (83) | 001 | 00101, fmt | – | R | `fmax fd,fs1,fs2` | Lớn nhất | `fd = max(fs1, fs2)` |
 | 1010011 (83) | 010 | 10100, fmt | – | R | `feq rd,fs1,fs2` | So sánh = | `rd = (fs1 == fs2)` |
-| 1010011 (83) | 001 | 10100, fmt | – | R | `flt rd,fs1,fs2` | So sánh \< | `rd = (fs1` \< `fs2)` |
+| 1010011 (83) | 001 | 10100, fmt | – | R | `flt rd,fs1,fs2` | So sánh < | `rd = (fs1` < `fs2)` |
 | 1010011 (83) | 000 | 10100, fmt | – | R | `fle rd,fs1,fs2` | So sánh ≤ | `rd = (fs1` ≤ `fs2)` |
 | 1010011 (83) | 001 | 11100, fmt | 00000 | R | `fclass rd,fs1` | Phân loại | `rd = classification of fs1` |
 |  |  |  |  |  | Chỉ RVF |  |  |
@@ -224,18 +224,18 @@ Bảng B.7 Các pseudoinstruction RISC-V
 | `neg rd, rs1` | `sub rd, x0, rs1` | Bù hai | `rd = —rs1` |
 | `seqz rd, rs1` | `sltiu rd, rs1, 1` | Đặt nếu = 0 | `rd = (rs1 == 0)` |
 | `snez rd, rs1` | `sltu rd, x0, rs1` | Đặt nếu ≠ 0 | `rd = (rs1 ≠ 0)` |
-| `sltz rd, rs1` | `slt rd, rs1, x0` | Đặt nếu \< 0 | `rd = (rs1` \< `0)` |
-| `sgtz rd, rs1` | `slt rd, x0, rs1` | Đặt nếu \> 0 | `rd = (rs1` \> `0)` |
+| `sltz rd, rs1` | `slt rd, rs1, x0` | Đặt nếu < 0 | `rd = (rs1` < `0)` |
+| `sgtz rd, rs1` | `slt rd, x0, rs1` | Đặt nếu > 0 | `rd = (rs1` > `0)` |
 | `beqz rs1, label` | `beq rs1, x0, label` | Branch nếu = 0 | `if (rs1 == 0) PC = label` |
 | `bnez rs1, label` | `bne rs1, x0, label` | Branch nếu ≠ 0 | `if (rs1 ≠ 0) PC = label` |
 | `blez rs1, label` | `bge x0, rs1, label` | Branch nếu ≤ 0 | `if (rs1` ≤ `0) PC = label` |
 | `bgez rs1, label` | `bge rs1, x0, label` | Branch nếu ≥ 0 | `if (rs1` ≥ `0) PC = label` |
-| `bltz rs1, label` | `blt rs1, x0, label` | Branch nếu \< 0 | `if (rs1` \< `0) PC = label` |
-| `bgtz rs1, label` | `blt x0, rs1, label` | Branch nếu \> 0 | `if (rs1` \> `0) PC = label` |
+| `bltz rs1, label` | `blt rs1, x0, label` | Branch nếu < 0 | `if (rs1` < `0) PC = label` |
+| `bgtz rs1, label` | `blt x0, rs1, label` | Branch nếu > 0 | `if (rs1` > `0) PC = label` |
 | `ble rs1, rs2, label` | `bge rs2, rs1, label` | Branch nếu ≤ | `if (rs1` ≤ `rs2) PC = label` |
-| `bgt rs1, rs2, label` | `blt rs2, rs1, label` | Branch nếu \> | `if (rs1` \> `rs2) PC = label` |
+| `bgt rs1, rs2, label` | `blt rs2, rs1, label` | Branch nếu > | `if (rs1` > `rs2) PC = label` |
 | `bleu rs1, rs2, label` | `bgeu rs2, rs1, label` | Branch nếu ≤ (không dấu) | `if (rs1` ≤ `rs2) PC = label` |
-| `bgtu rs1, rs2, label` | `bltu rs2, rs1, offset` *(ghi chú: sách in offset; các dòng khác dùng `label`: `bltu rs2, rs1, label`)* | Branch nếu \> (không dấu) | `if (rs1` \> `rs2) PC = label` |
+| `bgtu rs1, rs2, label` | `bltu rs2, rs1, offset` *(ghi chú: sách in offset; các dòng khác dùng `label`: `bltu rs2, rs1, label`)* | Branch nếu > (không dấu) | `if (rs1` > `rs2) PC = label` |
 | `j label` | `jal x0, label` | Jump | `PC = label` |
 | `jal label` | `jal ra, label` | Jump và link | `PC = label, ra = PC + 4` |
 | `jr rs1` | `jalr x0, rs1, 0` | Jump qua register | `PC = rs1` |

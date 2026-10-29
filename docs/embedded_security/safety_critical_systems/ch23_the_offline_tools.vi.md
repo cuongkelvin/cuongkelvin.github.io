@@ -10,7 +10,7 @@ DOI: [10.1201/9781003598145-23](https://doi.org/10.1201/9781003598145-23)
 >
 > Sir Winston Churchill
 
-Dù thiết kế tốt đến đâu và phần hiện thực chính xác đến đâu, tính toàn vẹn của một hệ thống vẫn dựa vào hoạt động đúng của các công cụ được dùng để tạo ra nó. Source code hoàn hảo có thể bị phá hỏng bởi một compiler biến nó thành object code sai. Chương này đề cập đến các công cụ offline: những công cụ được dùng trong quá trình phát triển, nhưng không trở thành một phần của hệ thống được xuất xưởng.
+Dù thiết kế tốt đến đâu và phần triển khai chính xác đến đâu, tính toàn vẹn của một hệ thống vẫn dựa vào hoạt động đúng của các công cụ được dùng để tạo ra nó. Source code hoàn hảo có thể bị phá hỏng bởi một compiler biến nó thành object code sai. Chương này đề cập đến các công cụ offline: những công cụ được dùng trong quá trình phát triển, nhưng không trở thành một phần của hệ thống được xuất xưởng.
 
 Các tiêu chuẩn mà chúng ta đang xem xét có nhiều điều để nói về cách các công cụ chúng ta chọn để tạo ra sản phẩm cuối cùng phải được phân tích, giám sát và biện minh. Các công cụ này trải dài từ trình soạn thảo mà lập trình viên dùng, qua các công cụ dùng để quản lý source code (ví dụ, Apache Subversion hoặc Git), build hệ thống (ví dụ, GNU Make và compiler), báo cáo vấn đề (ví dụ, Bugzilla), đến công cụ cuối cùng ghi sản phẩm phần mềm vào repository mà từ đó khách hàng sẽ tải nó về. Một sự trục trặc không được nhận ra của bất kỳ công cụ nào trong số này đều có thể dẫn đến việc một sản phẩm kém chất lượng được xuất xưởng.
 
@@ -226,7 +226,7 @@ Ví dụ, với đoạn code trong <a id="b23fig23_6"></a>[Hình 23.6](#fig23_6)
 
 <a id="p316"></a>Invariant thứ hai không liên quan đến một biến quan sát được, nhưng invariant thứ nhất thì có và vì vậy phải đúng trong cả hai bản object code. Điều này có thể được kiểm tra tự động, làm tăng sự tin tưởng vào lần biên dịch.
 
-Kỹ thuật này có ưu điểm là có thể được hiện thực dần dần. Có lẽ trong giai đoạn đầu chỉ so sánh các flow graph cơ bản; sau đó có thể thêm các invariant data-flow, rồi các invariant control-flow đầy đủ. Cũng có thể hữu ích nếu tạo test case từ output của compiler thứ hai (ví dụ, dùng KLEE) và dùng <a id="p317"></a>chúng với output của compiler đang được kiểm thử. Thực chất, các test đang được sinh ra từ thứ lẽ ra phải là code tương đương, nhưng bất kỳ khác biệt nào do compiler đưa vào đều có thể dẫn đến những test case không thể được thỏa mãn bởi output của compiler đang được kiểm thử.
+Kỹ thuật này có ưu điểm là có thể được triển khai dần dần. Có lẽ trong giai đoạn đầu chỉ so sánh các flow graph cơ bản; sau đó có thể thêm các invariant data-flow, rồi các invariant control-flow đầy đủ. Cũng có thể hữu ích nếu tạo test case từ output của compiler thứ hai (ví dụ, dùng KLEE) và dùng <a id="p317"></a>chúng với output của compiler đang được kiểm thử. Thực chất, các test đang được sinh ra từ thứ lẽ ra phải là code tương đương, nhưng bất kỳ khác biệt nào do compiler đưa vào đều có thể dẫn đến những test case không thể được thỏa mãn bởi output của compiler đang được kiểm thử.
 
 Kỹ thuật này không cung cấp một *chứng minh*, mà chỉ một mức độ tin tưởng. Tôi sẽ lập luận rằng bất kỳ lượng kiểm thử compiler thực tế nào cũng chỉ cung cấp không hơn một mức độ tin tưởng.
 

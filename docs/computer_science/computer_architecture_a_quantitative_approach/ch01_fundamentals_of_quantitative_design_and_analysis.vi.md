@@ -661,7 +661,9 @@ Một vấn đề khác là điều kiện chạy benchmark. Một cách cải t
 
 2. Được phép sửa source code, nhưng về cơ bản không thể thực hiện. Chẳng hạn, database benchmark dựa vào chương trình database tiêu chuẩn có hàng chục triệu dòng code. Rất khó có khả năng công ty database sửa đổi để tăng performance cho một máy tính cụ thể.
 
-3. Được phép sửa source, miễn là phiên bản đã sửa tạo cùng output. Vấn đề then chốt mà người thiết kế benchmark đối mặt khi quyết định cho phép sửa source là liệu những thay đổi ấy có phản ánh thực tiễn và cung cấp hiểu biết hữu ích cho user hay không, hay chúng chỉ làm giảm độ chính xác của benchmark khi dự đoán performance thực.
+3. Được phép sửa source, miễn là phiên bản đã sửa tạo cùng output.
+
+Vấn đề then chốt mà người thiết kế benchmark đối mặt khi quyết định cho phép sửa source là liệu những thay đổi ấy có phản ánh thực tiễn và cung cấp hiểu biết hữu ích cho user hay không, hay chúng chỉ làm giảm độ chính xác của benchmark khi dự đoán performance thực.
 
 Để tránh nguy cơ đặt quá nhiều trứng vào một giỏ, các tập hợp ứng dụng benchmark, gọi là benchmark suite, là thước đo phổ biến của processor performance với nhiều ứng dụng. Tất nhiên, suite chỉ tốt bằng những benchmark riêng cấu thành nó. Tuy vậy, ưu điểm then chốt là điểm yếu của bất kỳ benchmark nào được giảm bớt nhờ sự hiện diện của benchmark khác. Mục tiêu benchmark suite là mô tả performance tương đối của hai máy tính, đặc biệt với chương trình không có trong suite nhưng khách hàng có khả năng chạy.
 

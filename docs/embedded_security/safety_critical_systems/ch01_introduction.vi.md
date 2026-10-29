@@ -22,7 +22,7 @@ Những nhận xét của Bossavit sẽ được viện dẫn nhiều lần tron
 
 ## 1.1 Văn hóa an toàn
 
-Phần lớn cuốn sách này đề cập đến các khía cạnh kỹ thuật của việc xây dựng một sản phẩm có thể được chứng nhận theo một tiêu chuẩn quốc tế. Có một khía cạnh bổ sung, quan trọng của việc xây dựng một sản phẩm có thể gây hại — những trách nhiệm mà các <a id="p4"></a>nhà thiết kế, người hiện thực, kỹ sư kiểm chứng và người đánh giá (assessor) phải gánh vác. Rất dễ đọc các tiêu chuẩn an toàn một cách máy móc, và coi các yêu cầu của chúng như những chiếc vòng mà dự án phải nhảy qua, nhưng những tiêu chuẩn đó được viết ra để những người làm việc trong một văn hóa an toàn đã được thiết lập đọc. Chủ đề văn hóa an toàn được xem xét trong [Mục 2.1.2](ch02_terminology_of_safety.vi.md#sec2_1_2) ở trang 11.
+Phần lớn cuốn sách này đề cập đến các khía cạnh kỹ thuật của việc xây dựng một sản phẩm có thể được chứng nhận theo một tiêu chuẩn quốc tế. Có một khía cạnh bổ sung, quan trọng của việc xây dựng một sản phẩm có thể gây hại — những trách nhiệm mà các <a id="p4"></a>nhà thiết kế, người triển khai, kỹ sư kiểm chứng và người đánh giá (assessor) phải gánh vác. Rất dễ đọc các tiêu chuẩn an toàn một cách máy móc, và coi các yêu cầu của chúng như những chiếc vòng mà dự án phải nhảy qua, nhưng những tiêu chuẩn đó được viết ra để những người làm việc trong một văn hóa an toàn đã được thiết lập đọc. Chủ đề văn hóa an toàn được xem xét trong [Mục 2.1.2](ch02_terminology_of_safety.vi.md#sec2_1_2) ở trang 11.
 
 <a id="fn1_1"></a>
 
@@ -66,13 +66,13 @@ Các tiêu chuẩn quốc tế khuyến nghị nhiều kỹ thuật khác nhau �
 
 Phần 4*Các kỹ thuật kiểm chứng thiết kế.*
 
-Một thiết kế phải được kiểm tra để bảo đảm rằng, nếu được hiện thực đúng, thiết bị sẽ hoạt động như yêu cầu. [Chương 14](ch14_markov_models.vi.md) đến [18](ch18_formal_verification.vi.md) mô tả một số phương pháp để thực hiện việc kiểm chứng này.
+Một thiết kế phải được kiểm tra để bảo đảm rằng, nếu được triển khai đúng, thiết bị sẽ hoạt động như yêu cầu. [Chương 14](ch14_markov_models.vi.md) đến [18](ch18_formal_verification.vi.md) mô tả một số phương pháp để thực hiện việc kiểm chứng này.
 
-Phần 5*Các kỹ thuật hiện thực.*
+Phần 5*Các kỹ thuật triển khai.*
 
-[Chương 19](ch19_coding_guidelines.vi.md) đến [21](ch21_static_analysis.vi.md) trình bày ưu điểm và nhược điểm của nhiều ngôn ngữ máy tính khác nhau và tính hữu ích (hoặc không hữu ích) của một số metric được thu thập trong quá trình hiện thực.
+[Chương 19](ch19_coding_guidelines.vi.md) đến [21](ch21_static_analysis.vi.md) trình bày ưu điểm và nhược điểm của nhiều ngôn ngữ máy tính khác nhau và tính hữu ích (hoặc không hữu ích) của một số metric được thu thập trong quá trình triển khai.
 
-Phần 6*Các kỹ thuật kiểm chứng hiện thực.*
+Phần 6*Các kỹ thuật kiểm chứng triển khai.*
 
 [Chương 22](ch22_integration_and_system_testing.vi.md) trình bày một số khía cạnh của kiểm thử tích hợp và kiểm thử hệ thống. Một nhiệm vụ thiết yếu, nhưng đôi khi bị bỏ qua, là chuẩn bị bằng chứng về việc các công cụ offline được sử dụng hoạt động đúng. Việc lập trình viên có viết ra code tốt hay không cũng chẳng còn ý nghĩa nếu compiler biên dịch nó sai. [Chương 23](ch23_the_offline_tools.vi.md) đưa ra một số hiểu biết về cách có thể thu thập bằng chứng như vậy.
 
@@ -84,7 +84,7 @@ Tôi giới thiệu goal structuring notation (GSN) và Bayesian belief network 
 
 Cuối cùng, có một chút toán học đây đó trong cuốn sách này. [Phụ lục D](ch28_appendix_d_notations.vi.md) mô tả các ký hiệu tôi đã dùng.
 
-Thứ tự các chương này dường như đang ngụ ý một phương pháp phát triển waterfall: đầu tiên chúng ta thiết kế, rồi hiện thực và cuối cùng kiểm chứng. Đó là một hàm ý gây hiểu lầm (xem [Chương 5](ch05_development_methodologies.vi.md) để biết suy nghĩ của tôi về các phương pháp phát triển), nhưng các chương trong một cuốn sách in thì phải xuất hiện theo một thứ tự định trước nào đó.
+Thứ tự các chương này dường như đang ngụ ý một phương pháp phát triển waterfall: đầu tiên chúng ta thiết kế, rồi triển khai và cuối cùng kiểm chứng. Đó là một hàm ý gây hiểu lầm (xem [Chương 5](ch05_development_methodologies.vi.md) để biết suy nghĩ của tôi về các phương pháp phát triển), nhưng các chương trong một cuốn sách in thì phải xuất hiện theo một thứ tự định trước nào đó.
 
 ## 1.3 Lựa chọn các kỹ thuật để mô tả
 
@@ -126,7 +126,7 @@ Có rất ít công cụ ngoài discrete-event simulation (xem [Mục 17.2](ch17
 
 ### 1.4.5 Dữ liệu
 
-Thế giới các hệ thống safety-critical chỉ mới gần đây bắt đầu coi trọng dữ liệu: dữ liệu cấu hình, dữ liệu huấn luyện, dữ liệu hiện thực (như các trọng số trong một mạng nơ-ron), dữ liệu kiểm chứng, v.v. Cho đến vài năm trước, việc phân tích có xu hướng tập trung vào hai khía cạnh của một hệ thống — phần cứng và phần mềm — và điều này được phản ánh trong cấu trúc của ISO 26262 và IEC 61508, vốn có các phần dành riêng cho những chủ đề đó.
+Thế giới các hệ thống safety-critical chỉ mới gần đây bắt đầu coi trọng dữ liệu: dữ liệu cấu hình, dữ liệu huấn luyện, dữ liệu triển khai (như các trọng số trong một mạng nơ-ron), dữ liệu kiểm chứng, v.v. Cho đến vài năm trước, việc phân tích có xu hướng tập trung vào hai khía cạnh của một hệ thống — phần cứng và phần mềm — và điều này được phản ánh trong cấu trúc của ISO 26262 và IEC 61508, vốn có các phần dành riêng cho những chủ đề đó.
 
 <a id="fn1_2"></a>
 

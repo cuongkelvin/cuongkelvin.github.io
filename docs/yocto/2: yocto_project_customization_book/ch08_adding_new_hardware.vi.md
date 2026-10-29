@@ -1295,9 +1295,9 @@ ERROR: Unable to find any recipe file matching "virtual/trusted-firmware
 -a"
 ```
 
-> Trên các bản phát hành Yocto gần đây (như Scarthgap), chúng ta có thể có hai phiên bản Trusted Firmware, tức là TF-A thông thường và phiên bản có tên Trusted Firmware for Cortex-M (TF-M), là một hiện thực tham chiếu open source của hệ điều hành runtime trusted execution environment dành cho Cortex-M, được host tại `www.trustedfirmware.org`.
+> Trên các bản phát hành Yocto gần đây (như Scarthgap), chúng ta có thể có hai phiên bản Trusted Firmware, tức là TF-A thông thường và phiên bản có tên Trusted Firmware for Cortex-M (TF-M), là một bản triển khai tham chiếu open source của hệ điều hành runtime trusted execution environment dành cho Cortex-M, được host tại `www.trustedfirmware.org`.
 >
-> Ví dụ, chúng ta có thể có hai hiện thực này trong Yocto Scarthgap của ST, như dưới đây:
+> Ví dụ, chúng ta có thể có hai bản triển khai này trong Yocto Scarthgap của ST, như dưới đây:
 >
 > ```
 > $ bitbake st-image-weston -e | grep 'virtual/trusted-firmware.*='

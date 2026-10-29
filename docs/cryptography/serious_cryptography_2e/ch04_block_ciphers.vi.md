@@ -26,7 +26,7 @@ Tổng quát hơn, kẻ tấn công phải không thể phát hiện ra bất k�
 
 Hai giá trị đặc trưng cho một block cipher: block size và key size. Security phụ thuộc vào cả hai giá trị này. Phần lớn block cipher có block 64-bit hoặc 128-bit—block của DES có 64 (2<sup>6</sup>) bit, và block của AES có 128 (2<sup>7</sup>) bit. Trong tính toán, các độ dài thường được đo bằng lũy thừa của hai giúp đơn giản hóa việc xử lý, lưu trữ và định địa chỉ dữ liệu. Nhưng vì sao lại là 2<sup>6</sup> và 2<sup>7</sup> mà không phải 2<sup>4</sup> hay 2<sup>16</sup> bit?
 
-Điều quan trọng là các block của một block cipher không được quá lớn, để giảm thiểu cả độ dài ciphertext lẫn memory footprint. Block cipher trước tiên biến dữ liệu đầu vào thành một chuỗi block, nghĩa là để mã hóa một message 16-bit khi block dài 128 bit, bạn cần chuyển message thành một block 128-bit để block cipher xử lý nó và trả về một ciphertext 128-bit. Block càng rộng thì chi phí phụ trội (overhead) này càng lớn. Để xử lý một block 128-bit, bạn cần ít nhất 128 bit memory. Các block 64, 128 hay thậm chí 512 bit đủ ngắn để vừa với các register của phần lớn CPU hoặc để hiện thực bằng các mạch hardware chuyên dụng, cho phép có các implementation hiệu quả trong phần lớn trường hợp. Nhưng các block lớn hơn (ví dụ, dài vài kilobyte) có thể có tác động đáng kể đến chi phí và hiệu năng của implementation.
+Điều quan trọng là các block của một block cipher không được quá lớn, để giảm thiểu cả độ dài ciphertext lẫn memory footprint. Block cipher trước tiên biến dữ liệu đầu vào thành một chuỗi block, nghĩa là để mã hóa một message 16-bit khi block dài 128 bit, bạn cần chuyển message thành một block 128-bit để block cipher xử lý nó và trả về một ciphertext 128-bit. Block càng rộng thì chi phí phụ trội (overhead) này càng lớn. Để xử lý một block 128-bit, bạn cần ít nhất 128 bit memory. Các block 64, 128 hay thậm chí 512 bit đủ ngắn để vừa với các register của phần lớn CPU hoặc để triển khai bằng các mạch hardware chuyên dụng, cho phép có các implementation hiệu quả trong phần lớn trường hợp. Nhưng các block lớn hơn (ví dụ, dài vài kilobyte) có thể có tác động đáng kể đến chi phí và hiệu năng của implementation.
 
 Khi độ dài ciphertext hoặc memory footprint là yếu tố then chốt, bạn có thể phải dùng block 64-bit vì chúng tạo ra ciphertext ngắn hơn và tiêu tốn ít memory hơn. Nếu không, block 128-bit hoặc lớn hơn sẽ tốt hơn, chủ yếu vì các CPU hiện đại thường có thể xử lý block 128-bit hiệu quả hơn block 64-bit và chúng an toàn hơn (xem attack “Sweet32”, tại https://sweet32.info). Đặc biệt, CPU có thể tận dụng các instruction để xử lý hiệu quả một hoặc nhiều block 128-bit song song—ví dụ, họ instruction Advanced Vector Extensions (AVX) trong các CPU Intel.
 
@@ -48,7 +48,7 @@ Có hàng trăm block cipher nhưng chỉ có một số ít kỹ thuật để 
 
 ### Các round của một block cipher (A Block Cipher’s Rounds)
 
-Tính toán một block cipher rốt cuộc là tính một chuỗi các round. Trong một block cipher, một round là một phép biến đổi cơ bản, đơn giản để đặc tả và hiện thực, và được lặp lại nhiều lần để tạo thành algorithm của block cipher. Cấu trúc này, gồm một thành phần nhỏ được lặp lại nhiều lần, dễ hiện thực và phân tích hơn một cấu trúc gồm một algorithm khổng lồ duy nhất.
+Tính toán một block cipher rốt cuộc là tính một chuỗi các round. Trong một block cipher, một round là một phép biến đổi cơ bản, đơn giản để đặc tả và triển khai, và được lặp lại nhiều lần để tạo thành algorithm của block cipher. Cấu trúc này, gồm một thành phần nhỏ được lặp lại nhiều lần, dễ triển khai và phân tích hơn một cấu trúc gồm một algorithm khổng lồ duy nhất.
 
 Ví dụ, một block cipher có ba round mã hóa một plaintext bằng cách tính C = R<sub>3</sub>(R<sub>2</sub>(R<sub>1</sub>(P))), trong đó các round là R<sub>1</sub>, R<sub>2</sub> và R<sub>3</sub>, và P là một plaintext. Mỗi round cũng phải có một inverse để bên nhận có thể tính ngược trở lại plaintext. Cụ thể, P = iR<sub>1</sub>(iR<sub>2</sub>(iR<sub>3</sub>(C))), trong đó iR<sub>1</sub> là inverse của R<sub>1</sub>, v.v.
 
@@ -78,7 +78,7 @@ Substitution thường xuất hiện dưới dạng S-boxes, hay substitution bo
 
 > **LƯU Ý** S-boxes phải được chọn cẩn thận để mạnh về mặt cryptography: chúng phải càng phi tuyến càng tốt (đầu vào và đầu ra phải liên hệ với nhau bằng các phương trình phức tạp) và không có độ lệch thống kê (chẳng hạn, nghĩa là lật một bit đầu vào phải có khả năng ảnh hưởng đến bất kỳ bit đầu ra nào).
 
-Permutation trong một substitution–permutation network có thể đơn giản như việc thay đổi thứ tự các bit, điều này dễ hiện thực nhưng không trộn các bit với nhau được nhiều. Thay vì sắp xếp lại các bit, một số cipher dùng đại số tuyến tính cơ bản và phép nhân ma trận để trộn các bit: chúng thực hiện một loạt phép nhân với các giá trị cố định (các hệ số của ma trận) rồi cộng các kết quả lại. Những phép toán như vậy có thể nhanh chóng tạo ra sự phụ thuộc giữa mọi bit bên trong một cipher và do đó bảo đảm diffusion mạnh. Ví dụ, block cipher FOX biến một vector 4-byte (a, b, c, d) thành (a′, b′, c′, d′), mà chúng ta định nghĩa như sau:
+Permutation trong một substitution–permutation network có thể đơn giản như việc thay đổi thứ tự các bit, điều này dễ triển khai nhưng không trộn các bit với nhau được nhiều. Thay vì sắp xếp lại các bit, một số cipher dùng đại số tuyến tính cơ bản và phép nhân ma trận để trộn các bit: chúng thực hiện một loạt phép nhân với các giá trị cố định (các hệ số của ma trận) rồi cộng các kết quả lại. Những phép toán như vậy có thể nhanh chóng tạo ra sự phụ thuộc giữa mọi bit bên trong một cipher và do đó bảo đảm diffusion mạnh. Ví dụ, block cipher FOX biến một vector 4-byte (a, b, c, d) thành (a′, b′, c′, d′), mà chúng ta định nghĩa như sau:
 
 ![p094_1](images/ch04_block_ciphers/p094_1.png)
 
@@ -213,13 +213,13 @@ dec(12b620bb5eddcde9a07523e59292a6d7) = 00000000000000000000000000000000
 
 Bạn sẽ nhận được kết quả khác vì key được tạo ngẫu nhiên ở mỗi lần thực thi mới.
 
-## Cách hiện thực AES (How to Implement AES)
+## Cách triển khai AES (How to Implement AES)
 
 Software AES thực tế hoạt động khác với algorithm trong Hình 4-4. Bạn sẽ không thấy code AES production-level gọi một function SubBytes(), rồi một function ShiftRows(), rồi một function MixColumns(), vì làm vậy sẽ kém hiệu quả. Thay vào đó, software AES nhanh dùng các implementation table-based và native instruction.
 
 ### Các implementation Table-Based
 
-Table-based implementation của AES thay chuỗi SubBytes-ShiftRows-MixColumns bằng một tổ hợp các phép XOR và các lần tra cứu trong những bảng được hardcode vào chương trình và được nạp vào memory lúc thực thi. Điều này khả thi vì MixColumns tương đương với việc XOR bốn giá trị 32-bit, trong đó mỗi giá trị phụ thuộc vào một byte duy nhất từ state và vào SubBytes. Vì vậy, bạn có thể xây dựng bốn bảng, mỗi bảng 256 mục, một mục cho mỗi giá trị byte, và hiện thực chuỗi SubBytes-MixColumns bằng cách tra bốn giá trị 32-bit và XOR chúng với nhau.
+Table-based implementation của AES thay chuỗi SubBytes-ShiftRows-MixColumns bằng một tổ hợp các phép XOR và các lần tra cứu trong những bảng được hardcode vào chương trình và được nạp vào memory lúc thực thi. Điều này khả thi vì MixColumns tương đương với việc XOR bốn giá trị 32-bit, trong đó mỗi giá trị phụ thuộc vào một byte duy nhất từ state và vào SubBytes. Vì vậy, bạn có thể xây dựng bốn bảng, mỗi bảng 256 mục, một mục cho mỗi giá trị byte, và triển khai chuỗi SubBytes-MixColumns bằng cách tra bốn giá trị 32-bit và XOR chúng với nhau.
 
 Ví dụ, implementation C table-based trong bộ công cụ OpenSSL trông như Listing 4-2.
 
@@ -247,7 +247,7 @@ Cache-timing attack rất khó tránh. Một giải pháp hiển nhiên là bỏ
 
 ### Native instruction (Native Instructions)
 
-AES native instructions (AES-NI) giải quyết vấn đề cache-timing attack đối với các implementation software của AES. Để hiểu AES-NI hoạt động ra sao, hãy nghĩ về cách software chạy trên hardware: để chạy một chương trình, bộ vi xử lý dịch mã nhị phân thành một chuỗi instruction mà các thành phần mạch tích hợp thực thi. Ví dụ, một assembly instruction MUL giữa hai giá trị 32-bit sẽ kích hoạt các transistor hiện thực một bộ nhân 32-bit trong bộ vi xử lý. Để hiện thực một crypto algorithm, chúng ta thường biểu diễn một tổ hợp các phép toán cơ bản—phép cộng, phép nhân, XOR, v.v.—và bộ vi xử lý kích hoạt các bộ cộng, bộ nhân và mạch XOR của nó theo thứ tự quy định.
+AES native instructions (AES-NI) giải quyết vấn đề cache-timing attack đối với các implementation software của AES. Để hiểu AES-NI hoạt động ra sao, hãy nghĩ về cách software chạy trên hardware: để chạy một chương trình, bộ vi xử lý dịch mã nhị phân thành một chuỗi instruction mà các thành phần mạch tích hợp thực thi. Ví dụ, một assembly instruction MUL giữa hai giá trị 32-bit sẽ kích hoạt các transistor triển khai một bộ nhân 32-bit trong bộ vi xử lý. Để triển khai một crypto algorithm, chúng ta thường biểu diễn một tổ hợp các phép toán cơ bản—phép cộng, phép nhân, XOR, v.v.—và bộ vi xử lý kích hoạt các bộ cộng, bộ nhân và mạch XOR của nó theo thứ tự quy định.
 
 AES native instruction đưa điều này lên một tầm cao mới bằng cách cung cấp cho developer các assembly instruction chuyên dụng để tính AES. Thay vì viết code một round AES dưới dạng một chuỗi assembly instruction, khi dùng AES-NI, bạn chỉ cần gọi instruction AESENC, và chip sẽ tính round đó cho bạn. Native instruction cho phép bạn yêu cầu bộ xử lý chạy một round AES thay vì buộc bạn phải lập trình các round như một tổ hợp các phép toán cơ bản.
 
@@ -271,7 +271,7 @@ Listing 4-3: Một implementation của AES-128 dùng AES native instructions
 
 Code này mã hóa plaintext 128-bit nằm ban đầu trong register xmm0, giả định rằng các register từ xmm5 đến xmm15 chứa các round key đã được tính trước, với mỗi instruction ghi kết quả của nó vào xmm0. Instruction PXOR ban đầu XOR round key đầu tiên trước khi tính round đầu tiên, và instruction AESENCLAST cuối cùng thực hiện round cuối hơi khác so với các round khác (MixColumns bị bỏ qua).
 
-> **LƯU Ý** AES nhanh hơn khoảng 10 lần trên các nền tảng có hiện thực native instruction, mà tại thời điểm tôi viết những dòng này, bao gồm hầu như mọi bộ vi xử lý laptop, máy để bàn và server, cũng như phần lớn điện thoại di động và máy tính bảng. Dù Intel ban đầu đề xuất các instruction AES vào năm 2008, chúng cũng có trong các bộ xử lý AMD, và phần lớn các kiến trúc ngoài x86 cũng có các instruction tương đương hiện thực AES trong hardware. Ví dụ, instruction set Armv8 chứa các instruction AESSE (tính SubBytes và ShiftRows) và AESMS (tính MixColumns).
+> **LƯU Ý** AES nhanh hơn khoảng 10 lần trên các nền tảng có triển khai native instruction, mà tại thời điểm tôi viết những dòng này, bao gồm hầu như mọi bộ vi xử lý laptop, máy để bàn và server, cũng như phần lớn điện thoại di động và máy tính bảng. Dù Intel ban đầu đề xuất các instruction AES vào năm 2008, chúng cũng có trong các bộ xử lý AMD, và phần lớn các kiến trúc ngoài x86 cũng có các instruction tương đương triển khai AES trong hardware. Ví dụ, instruction set Armv8 chứa các instruction AESSE (tính SubBytes và ShiftRows) và AESMS (tính MixColumns).
 
 > Trên microarchitecture Ice Lake của Intel, instruction AESENC có latency ba chu kỳ với reciprocal throughput là nửa chu kỳ, nghĩa là một lời gọi AESENC mất ba chu kỳ để hoàn thành, và chúng ta có thể thực hiện hai lời gọi mới tới instruction này trong mỗi chu kỳ. Thực tế, cấu trúc bên trong của các micro-operations thực hiện phép toán AESENC cho phép một lần tính instruction mới bắt đầu trước khi lần trước kết thúc. Hơn nữa, kiến trúc Ice Lake dùng một phiên bản vector hóa của các instruction AES, cho phép khởi tạo nhiều instruction cùng lúc. Để biết thêm chi tiết, hãy xem bài viết “Making AES Great Again” của Nir Drucker, Shay Gueron và Vlad Krasnov, có tại https://eprint.iacr.org/2018/392.
 
@@ -285,7 +285,7 @@ Nhưng không có chứng minh nào rằng AES miễn nhiễm trước mọi att
 
 Sau hơn 15 năm và hàng trăm công bố nghiên cứu, chúng ta mới chỉ chạm vào bề mặt của security lý thuyết của AES. Năm 2011, các cryptanalyst đã tìm ra một cách khôi phục key AES-128 bằng cách thực hiện khoảng 2<sup>126</sup> phép toán thay vì 2<sup>128</sup>, tăng tốc 4 lần. Nhưng “attack” này cần một số lượng lớn cặp plaintext–ciphertext—lượng dữ liệu cỡ 2<sup>88</sup> bit. Đó là một phát hiện hay nhưng không phải điều bạn cần lo lắng.
 
-Bạn nên quan tâm đến cả triệu thứ khi hiện thực và triển khai crypto, nhưng security của AES không phải là một trong số đó. Mối đe dọa lớn nhất đối với block cipher không nằm ở core algorithm của chúng mà ở mode of operation. Nếu bạn chọn sai mode hoặc dùng sai mode đúng, ngay cả một cipher mạnh như AES cũng không cứu được bạn.
+Bạn nên quan tâm đến cả triệu thứ khi triển khai và triển khai crypto, nhưng security của AES không phải là một trong số đó. Mối đe dọa lớn nhất đối với block cipher không nằm ở core algorithm của chúng mà ở mode of operation. Nếu bạn chọn sai mode hoặc dùng sai mode đúng, ngay cả một cipher mạnh như AES cũng không cứu được bạn.
 
 ## Mode of operation (Modes of Operation)
 
@@ -469,7 +469,7 @@ Trong Hình 4-9, chúng ta có ba block, trong đó block cuối, P<sub>3</sub>,
 
 Hình 4-9: Ciphertext stealing cho encryption CBC-mode
 
-Ciphertext stealing không có vấn đề lớn nào, nhưng nó kém thanh lịch và khó làm đúng, đặc biệt khi tiêu chuẩn của NIST quy định ba cách khác nhau để hiện thực nó (xem Special Publication 800-38A).
+Ciphertext stealing không có vấn đề lớn nào, nhưng nó kém thanh lịch và khó làm đúng, đặc biệt khi tiêu chuẩn của NIST quy định ba cách khác nhau để triển khai nó (xem Special Publication 800-38A).
 
 ### Counter Mode
 
@@ -540,7 +540,7 @@ Counter được bảo đảm là duy nhất nếu nó được tăng lên cho m
 
 Một lợi ích đặc biệt của CTR là nó có thể nhanh hơn bất kỳ mode nào khác. Không chỉ có thể song song hóa, bạn còn có thể bắt đầu mã hóa ngay cả trước khi biết message, bằng cách chọn một nonce và tính trước dòng mà sau này bạn sẽ XOR với plaintext.
 
-> **LƯU Ý** Tùy thuộc vào phiên bản CTR mà chúng ta hiện thực, chúng ta có thể nối nonce mà API dùng làm đối số với một counter (như trong Hình 4-10) hoặc trực tiếp xem counter có độ rộng bằng một block.
+> **LƯU Ý** Tùy thuộc vào phiên bản CTR mà chúng ta triển khai, chúng ta có thể nối nonce mà API dùng làm đối số với một counter (như trong Hình 4-10) hoặc trực tiếp xem counter có độ rộng bằng một block.
 
 ## Những gì có thể sai (How Things Can Go Wrong)
 
@@ -596,7 +596,7 @@ Dựa trên quan sát này, padding oracle attack nhắm vào CBC encryption có
 
 Attack cần trung bình 128 query tới oracle cho mỗi byte trong 16 byte, tức tổng cộng khoảng 2,000 query. (Lưu ý rằng mỗi query phải dùng cùng một initial value.)
 
-> **LƯU Ý** Trong thực tế, hiện thực một padding oracle attack phức tạp hơn một chút so với những gì tôi đã mô tả, vì bạn phải xử lý các lần đoán sai ở bước 1. Một ciphertext có thể có padding hợp lệ không phải vì P<sub>2</sub> kết thúc bằng một byte 01 duy nhất mà vì nó kết thúc bằng hai byte 02 hoặc ba byte 03. Bạn có thể xử lý điều này bằng cách kiểm tra tính hợp lệ của các ciphertext có nhiều byte hơn bị sửa đổi.
+> **LƯU Ý** Trong thực tế, triển khai một padding oracle attack phức tạp hơn một chút so với những gì tôi đã mô tả, vì bạn phải xử lý các lần đoán sai ở bước 1. Một ciphertext có thể có padding hợp lệ không phải vì P<sub>2</sub> kết thúc bằng một byte 01 duy nhất mà vì nó kết thúc bằng hai byte 02 hoặc ba byte 03. Bạn có thể xử lý điều này bằng cách kiểm tra tính hợp lệ của các ciphertext có nhiều byte hơn bị sửa đổi.
 
 ## Đọc thêm (Further Reading)
 

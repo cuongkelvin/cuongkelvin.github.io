@@ -4,7 +4,7 @@
 
 Bạn có thể đã tự hỏi tại sao lại có một chương về Unix ở giữa một cuốn sách về C ở mức expert-level. Nếu bạn chưa hỏi, tôi mời bạn tự hỏi, làm sao hai chủ đề này, C và Unix, lại có thể liên quan với nhau theo cách mà cần đến hai chương riêng (chương này và chương tiếp theo) ở giữa một cuốn sách lẽ ra phải nói về C?
 
-Câu trả lời rất đơn giản: nếu bạn nghĩ chúng không liên quan, thì bạn đang mắc một sai lầm lớn. Mối quan hệ giữa hai thứ rất đơn giản; Unix là hệ điều hành đầu tiên được hiện thực bằng một ngôn ngữ lập trình khá high-level, C, vốn được thiết kế cho mục đích này, và C có được danh tiếng và sức mạnh của mình từ Unix. Dĩ nhiên, phát biểu của chúng tôi về việc C là một ngôn ngữ lập trình high-level không còn đúng nữa, và C không còn được coi là quá high-level.
+Câu trả lời rất đơn giản: nếu bạn nghĩ chúng không liên quan, thì bạn đang mắc một sai lầm lớn. Mối quan hệ giữa hai thứ rất đơn giản; Unix là hệ điều hành đầu tiên được triển khai bằng một ngôn ngữ lập trình khá high-level, C, vốn được thiết kế cho mục đích này, và C có được danh tiếng và sức mạnh của mình từ Unix. Dĩ nhiên, phát biểu của chúng tôi về việc C là một ngôn ngữ lập trình high-level không còn đúng nữa, và C không còn được coi là quá high-level.
 
 Quay lại những năm 1970 và 1980, nếu các kỹ sư Unix tại Bell Labs đã quyết định dùng một ngôn ngữ lập trình khác, thay vì C, để phát triển một phiên bản Unix mới, thì ngày nay chúng ta sẽ đang nói về ngôn ngữ đó, và cuốn sách này sẽ không còn là *Extreme C* nữa. Hãy dừng lại một phút để đọc trích dẫn này của Dennis M. Ritchie, một trong những người tiên phong của C, về tác động của Unix đối với thành công của C:
 
@@ -184,7 +184,7 @@ Vòng tiếp theo được gọi là **Shell**. Nó đơn giản là <a id="_idI
 
 Vòng shell gồm nhiều chương trình nhỏ, cùng nhau tạo thành một bộ công cụ cho phép một người dùng hay một ứng dụng dùng các dịch vụ của kernel. Nó cũng chứa một tập library, tất cả đều được viết bằng C, sẽ cho phép một lập trình viên viết một ứng dụng mới cho Unix.
 
-Dựa trên các library có trong **Simple Unix Specification** (**SUS**), vòng shell phải phơi ra một interface chuẩn và được định nghĩa <a id="_idIndexMarker702"></a>chính xác cho lập trình viên. Những sự chuẩn hóa như vậy sẽ làm cho các chương trình Unix portable, hoặc ít nhất là biên dịch được, trên nhiều hiện thực Unix khác nhau. Chúng tôi sẽ tiết lộ một số bí mật gây sốc về vòng này trong các phần sau!
+Dựa trên các library có trong **Simple Unix Specification** (**SUS**), vòng shell phải phơi ra một interface chuẩn và được định nghĩa <a id="_idIndexMarker702"></a>chính xác cho lập trình viên. Những sự chuẩn hóa như vậy sẽ làm cho các chương trình Unix portable, hoặc ít nhất là biên dịch được, trên nhiều cách triển khai Unix khác nhau. Chúng tôi sẽ tiết lộ một số bí mật gây sốc về vòng này trong các phần sau!
 
 Cuối cùng, vòng ngoài cùng, **User Applications**, gồm mọi ứng dụng thực tế được viết để dùng trên các hệ thống Unix, như các dịch vụ cơ sở dữ liệu, dịch vụ web, dịch vụ mail, trình duyệt web, chương trình bảng tính và chương trình soạn thảo văn bản.
 
@@ -192,7 +192,7 @@ Những ứng dụng này nên dùng các API và công cụ được vòng shel
 
 Việc bị giới hạn chỉ dùng vòng shell cũng giúp những ứng dụng này biên dịch được trên nhiều hệ điều hành Unix-like <a id="_idIndexMarker704"></a>khác nhau vốn không phải là các hệ điều hành Unix-compliant thực sự. Ví dụ tốt nhất là các bản phân phối Linux khác nhau, vốn chỉ là Unix-like. Chúng ta muốn có các phần mềm lớn sẵn có trên cả hệ điều hành Unix-compliant lẫn Unix-like với một code base duy nhất. Khi tiến lên, bạn sẽ tìm hiểu thêm về những khác biệt giữa các hệ thống Unix-like và Unix-compliant.
 
-Một chủ đề chung trong củ hành Unix là thực tế rằng các vòng bên trong nên cung cấp một interface nào đó cho các vòng bên ngoài để cho phép chúng dùng các dịch vụ của mình. Thực tế, những interface giữa các vòng này quan trọng hơn chính các vòng. Ví dụ, chúng ta quan tâm đến việc biết cách dùng các dịch vụ kernel hiện có hơn là chỉ đào sâu vào kernel, vốn khác nhau từ hiện thực Unix này sang hiện thực khác.
+Một chủ đề chung trong củ hành Unix là thực tế rằng các vòng bên trong nên cung cấp một interface nào đó cho các vòng bên ngoài để cho phép chúng dùng các dịch vụ của mình. Thực tế, những interface giữa các vòng này quan trọng hơn chính các vòng. Ví dụ, chúng ta quan tâm đến việc biết cách dùng các dịch vụ kernel hiện có hơn là chỉ đào sâu vào kernel, vốn khác nhau từ bản triển khai Unix này sang bản triển khai khác.
 
 Điều tương tự có thể được nói về vòng shell và interface mà nó phơi ra cho các user application. Thực tế, những interface này là chủ đề trọng tâm chính của chúng ta trong suốt hai chương này khi xem xét Unix. Trong các phần sau, chúng ta sẽ nói về từng vòng riêng lẻ và thảo luận khá chi tiết về interface được phơi ra của nó.
 
@@ -208,19 +208,19 @@ Có rất nhiều loại <a id="_idIndexMarker709"></a>chương trình đã đư
 
 Câu trả lời rất đơn giản: mọi hệ thống Unix đều phơi ra cùng một **Application Programming Interface** (**API**) từ <a id="_idIndexMarker710"></a>vòng shell của chúng. Một đoạn source code C chỉ dùng interface chuẩn được phơi ra có thể được build và chạy trên mọi hệ thống Unix.
 
-Nhưng chính xác thì chúng ta muốn nói gì khi nói phơi ra một API? Một API, như chúng tôi đã giải thích trước đây, là một nhóm header file chứa một tập khai báo. Trong Unix, những header này, và các hàm được khai báo trong chúng, là như nhau trên mọi hệ thống Unix, nhưng hiện thực của những hàm đó, nói cách khác là các static library và dynamic library được viết cho mỗi hệ thống UNIX-compliant, có thể là độc nhất và khác với các hệ thống khác.
+Nhưng chính xác thì chúng ta muốn nói gì khi nói phơi ra một API? Một API, như chúng tôi đã giải thích trước đây, là một nhóm header file chứa một tập khai báo. Trong Unix, những header này, và các hàm được khai báo trong chúng, là như nhau trên mọi hệ thống Unix, nhưng bản triển khai của những hàm đó, nói cách khác là các static library và dynamic library được viết cho mỗi hệ thống UNIX-compliant, có thể là độc nhất và khác với các hệ thống khác.
 
 Lưu ý rằng chúng ta đang nhìn Unix như một chuẩn chứ không phải một hệ điều hành. Có những hệ thống được xây dựng hoàn toàn tương thích với chuẩn Unix, và chúng ta gọi chúng là *hệ thống Unix-compliant*, như BSD Unix, trong khi có những hệ thống tuân thủ một phần chuẩn Unix, và được gọi là *hệ thống Unix-like*, như Linux.
 
 Cùng một API đang được phơi ra từ vòng shell trong ít nhiều mọi hệ thống Unix. Ví dụ, hàm `printf` phải luôn được khai báo trong header file `stdio.h`, như được chuẩn Unix quy định. Bất cứ khi nào bạn muốn in một thứ gì đó ra standard output trong một hệ thống Unix-compliant, bạn nên dùng `printf` hay `fprintf` từ header file `stdio.h`.
 
-Thực tế, `stdio.h` không phải là một phần của C dù mọi sách C đều giải thích header này và các hàm được khai báo trong nó. Nó là một phần của thư viện chuẩn C được quy định trong chuẩn SUS. Một chương trình C được viết cho Unix không biết về hiện thực thực sự của một hàm cụ thể, như `printf` hay `fopen`. Nói cách khác, vòng shell được các chương trình ở vòng ngoài coi như một hộp đen.
+Thực tế, `stdio.h` không phải là một phần của C dù mọi sách C đều giải thích header này và các hàm được khai báo trong nó. Nó là một phần của thư viện chuẩn C được quy định trong chuẩn SUS. Một chương trình C được viết cho Unix không biết về bản triển khai thực sự của một hàm cụ thể, như `printf` hay `fopen`. Nói cách khác, vòng shell được các chương trình ở vòng ngoài coi như một hộp đen.
 
 Các API khác nhau được vòng shell phơi ra được tập hợp dưới chuẩn SUS. Chuẩn này được duy trì bởi tập đoàn **The Open Group** và đã có nhiều lần lặp kể từ khi Unix được tạo ra. Phiên bản gần đây nhất là SUS phiên bản 4, có từ năm 2008. Tuy nhiên, bản thân phiên bản gần đây nhất có một số bản sửa đổi vào năm 2013, 2016, và cuối cùng vào năm 2018.
 
 Link sau sẽ đưa <a id="_idIndexMarker711"></a>bạn tới tài liệu giải thí[ng the exposed interfaces in SUS version ](http://www.unix.org/version4/GS5_APIs.pdf)4 (các interface được phơi ra trong SUS phiên bản bốn): [http://www.unix.org/version4/GS5_APIs.pdf](http://www.unix.org/version4/GS5_APIs.pdf). Như bạn có thể thấy trong link, có nhiều loại API khác nhau được vòng shell phơi ra. Một số là bắt buộc, và một số khác là tùy chọn. Sau đây là danh sách các API có trong SUS v4:
 
-- **System interface**: Đây là một danh sách <a id="_idIndexMarker712"></a>mọi hàm nên dùng được bởi bất kỳ chương trình C nào. SUS v4 có 1,191 hàm cần được một hệ thống Unix hiện thực. Bảng cũng mô tả việc một hàm cụ thể là bắt buộc hay tùy chọn đối với một phiên bản C cụ thể. Hãy lưu ý rằng phiên bản chúng ta quan tâm là C99.
+- **System interface**: Đây là một danh sách <a id="_idIndexMarker712"></a>mọi hàm nên dùng được bởi bất kỳ chương trình C nào. SUS v4 có 1,191 hàm cần được một hệ thống Unix triển khai. Bảng cũng mô tả việc một hàm cụ thể là bắt buộc hay tùy chọn đối với một phiên bản C cụ thể. Hãy lưu ý rằng phiên bản chúng ta quan tâm là C99.
 
 - **Header interface**: Đây là một danh sách các header file có thể có sẵn trong một hệ thống Unix SUS v4-compatible. Trong <a id="_idIndexMarker713"></a>phiên bản SUS này, có 82 header file có thể truy cập được bởi mọi chương trình C. Nếu bạn đi qua danh sách, bạn sẽ thấy nhiều header file nổi tiếng, như `stdio.h`, `stdlib.h`, `math.h` và `string.h`. Dựa trên phiên bản Unix và phiên bản C được dùng, một số là bắt buộc, trong khi những cái khác là tùy chọn. Các header tùy chọn có thể không có trong một hệ thống Unix, nhưng các header file bắt buộc chắc chắn tồn tại ở đâu đó trong filesystem.
 
@@ -236,7 +236,7 @@ Link sau sẽ đưa <a id="_idIndexMarker711"></a>bạn tới tài liệu giải
 
 - **XCURSES interface**: XCURSES là <a id="_idIndexMarker718"></a>một tập interface cho phép một chương trình C tương tác với người dùng trong một GUI text-based tối giản.
 
-  Trong ảnh chụp màn hình<a id="_idIndexMarker719"></a> sau, bạn có thể thấy một ví dụ về GUI đã được viết bằng `ncurses`, vốn là một hiện thực của XCURSES.
+  Trong ảnh chụp màn hình<a id="_idIndexMarker719"></a> sau, bạn có thể thấy một ví dụ về GUI đã được viết bằng `ncurses`, vốn là một bản triển khai của XCURSES.
 
   Trong SUS v4, có 379 hàm nằm trong 3 header, cùng với 4 chương trình tiện ích, tạo nên XCURSES interface.
 
@@ -248,7 +248,7 @@ Link sau sẽ đưa <a id="_idIndexMarker711"></a>bạn tới tài liệu giải
 
 Như bạn có thể thấy, SUS không nói về hệ thống phân cấp filesystem và nơi các header file nên được tìm thấy. Nó chỉ nêu những header nào nên có sẵn và có mặt trong hệ thống. Một quy ước được dùng rộng rãi cho đường dẫn của các header file chuẩn nói rằng những header này nên được tìm thấy ở `/usr/include` hoặc `/usr/local/include`, nhưng quyết định cuối cùng vẫn tùy thuộc vào hệ điều hành và người dùng. Đây là các đường dẫn mặc định cho header file. Tuy nhiên, các hệ thống có thể được cấu hình để dùng các đường dẫn khác thay cho các đường dẫn mặc định.
 
-Nếu chúng ta đặt system interface và header interface cùng với hiện thực của các hàm được phơi ra, vốn khác nhau trong<a id="_idIndexMarker722"></a> mỗi biến thể (hay hiện thực) Unix, thì chúng ta có **C Standard Library** hay **libc**. Nói cách khác, libc là một tập hàm được đặt trong các header file cụ thể, tất cả đều theo SUS, cùng với các static library và shared library chứa hiện thực của các hàm được phơi ra.
+Nếu chúng ta đặt system interface và header interface cùng với bản triển khai của các hàm được phơi ra, vốn khác nhau trong<a id="_idIndexMarker722"></a> mỗi biến thể (hay bản triển khai) Unix, thì chúng ta có **C Standard Library** hay **libc**. Nói cách khác, libc là một tập hàm được đặt trong các header file cụ thể, tất cả đều theo SUS, cùng với các static library và shared library chứa bản triển khai của các hàm được phơi ra.
 
 Định nghĩa của libc gắn chặt với sự chuẩn hóa của các hệ thống Unix. Mọi chương trình C đang được phát triển trong một hệ thống Unix đều dùng libc để giao tiếp xuống sâu hơn tới các mức kernel và phần cứng.
 
@@ -270,7 +270,7 @@ Tuy nhiên, điều đó không đúng với một số hệ điều hành như 
 
 Lạc đề một chút, đã từng có cả một câu chuyện khi Microsoft Windows trở thành POSIX-compliant vào những năm 1990. Tuy nhiên, theo thời gian, sự hỗ trợ đó đã bị deprecated.
 
-Cả hai chuẩn SUS và POSIX đều quy định các interface. Cả hai đều nêu những gì nên có sẵn, nhưng chúng không nói về việc nó nên trở nên sẵn có như thế nào. Mỗi hệ thống Unix có hiện thực POSIX hay hiện thực SUS riêng của nó. Những hiện thực này sau đó được đặt trong các library libc vốn là một phần của vòng shell. Nói cách khác, trong một hệ thống Unix, vòng shell chứa một hiện thực libc được phơi ra theo một cách chuẩn. Sau đó, vòng shell sẽ chuyển yêu cầu xuống sâu hơn tới vòng kernel để được xử lý.
+Cả hai chuẩn SUS và POSIX đều quy định các interface. Cả hai đều nêu những gì nên có sẵn, nhưng chúng không nói về việc nó nên trở nên sẵn có như thế nào. Mỗi hệ thống Unix có bản triển khai POSIX hay bản triển khai SUS riêng của nó. Những bản triển khai này sau đó được đặt trong các library libc vốn là một phần của vòng shell. Nói cách khác, trong một hệ thống Unix, vòng shell chứa một bản triển khai libc được phơi ra theo một cách chuẩn. Sau đó, vòng shell sẽ chuyển yêu cầu xuống sâu hơn tới vòng kernel để được xử lý.
 
 <a id="_idParaDest-149"></a>
 
@@ -280,15 +280,17 @@ Trong phần trước, chúng tôi<a id="_idIndexMarker727"></a> đã giải th�
 
 Lưu ý rằng bản thân các chương trình tiện ích hiện có cũng dùng các library libc. Do đó, chúng ta có thể tổng quát hóa và nói rằng mọi routine của shell đều có thể được tìm thấy trong các library libc. Điều này càng làm tăng tầm quan trọng của các thư viện chuẩn C. Nếu bạn muốn tạo một hệ thống Unix mới từ đầu, bạn phải viết libc của riêng mình sau khi đã có kernel chạy và sẵn sàng.
 
-Nếu bạn đã theo dòng chảy của cuốn sách này và đã đọc các chương trước, bạn sẽ thấy rằng các mảnh ghép đang khớp lại với nhau. Chúng ta cần có một compilation pipeline và một cơ chế linking để có thể thiết kế một hệ điều hành phơi ra một interface và đã được hiện thực bằng một tập file library. Ở điểm này, bạn có thể thấy rằng mọi tính năng của C đều đang hoạt động nhằm phục vụ cho việc có Unix. Bạn càng hiểu về mối quan hệ giữa C và Unix, bạn càng thấy chúng gắn bó với nhau.
+Nếu bạn đã theo dòng chảy của cuốn sách này và đã đọc các chương trước, bạn sẽ thấy rằng các mảnh ghép đang khớp lại với nhau. Chúng ta cần có một compilation pipeline và một cơ chế linking để có thể thiết kế một hệ điều hành phơi ra một interface và đã được triển khai bằng một tập file library. Ở điểm này, bạn có thể thấy rằng mọi tính năng của C đều đang hoạt động nhằm phục vụ cho việc có Unix. Bạn càng hiểu về mối quan hệ giữa C và Unix, bạn càng thấy chúng gắn bó với nhau.
 
 Giờ khi mối quan hệ giữa các user application và vòng shell đã rõ ràng, chúng ta cần xem vòng shell (hay libc) giao tiếp với vòng kernel như thế nào. Trước khi đi xa hơn, lưu ý rằng, trong phần này, chúng tôi sẽ không giải thích kernel là gì. Thay vào đó, chúng ta sẽ nhìn nó như một hộp đen phơi ra những chức năng nhất định.
 
 Cơ chế chính mà libc (hay các hàm trong vòng shell) dùng để sử dụng một chức năng của kernel là thông qua<a id="_idIndexMarker729"></a> việc dùng *system call*. Để giải thích cơ chế này, chúng ta cần có một ví dụ để đi theo xuống các vòng của onion model nhằm tìm ra nơi system call được dùng để làm những việc nhất định.
 
-Chúng ta cũng cần chọn một hiện thực libc thật, để chúng ta có thể lần theo các source và tìm ra các system call. Chúng ta chọn FreeBSD cho các cuộc điều tra tiếp theo. FreeBSD là một hệ điều hành Unix-like tách nhánh từ BSD[ Unix. ](https://github.com/freebsd/freebsd0)
+Chúng ta cũng cần chọn một bản triển khai libc thật, để chúng ta có thể lần theo các source và tìm ra các system call. Chúng ta chọn FreeBSD cho các cuộc điều tra tiếp theo. FreeBSD là một hệ điều hành Unix-like tách nhánh từ BSD[ Unix. ](https://github.com/freebsd/freebsd0)
 
-[ **Lưu ý**: Có thể tìm thấy Git repository của FreeBSD ở đây: https://github.com/freebsd/freebsd. Repository này chứa các source cho các vòng kernel và shell của FreeBSD. Các source cho libc của FreeBSD có thể được tìm thấy trong thư mục `lib/libc`. ](https://github.com/freebsd/freebsd0)
+> **Lưu ý**:
+>
+> Có thể tìm thấy Git repository của FreeBSD ở đây: https://github.com/freebsd/freebsd. Repository này chứa các source cho các vòng kernel và shell của FreeBSD. Các source cho libc của FreeBSD có thể được tìm thấy trong thư mục `lib/libc`.
 
 Hãy bắt đầu với <a id="_idIndexMarker730"></a>ví dụ sau. *Ví dụ 10.1* là một chương trình đơn giản<a id="_idIndexMarker731"></a> chỉ chờ một giây. Tương tự, chương trình được coi là ở vòng application, nghĩa là nó là một user application, dù nó cực kỳ đơn giản.
 
@@ -308,7 +310,7 @@ Như bạn có thể thấy, code include header file `unistd.h` và gọi hàm 
 
 Chúng ta đã luôn dùng các hàm như `sleep`, `printf` và `malloc` mà không biết chúng hoạt động bên trong như thế nào, nhưng giờ chúng ta muốn làm một bước nhảy vọt và khám phá cơ chế mà libc dùng để giao tiếp với kernel.
 
-Chúng ta biết rằng system call, hay viết tắt là *syscall*, được kích hoạt bởi code được viết trong một hiện thực libc. Thực tế, đây là cách các routine của kernel được kích hoạt. Trong SUS, và sau đó trong các hệ thống POSIX-compatible, có một chương trình được dùng để theo dõi các system call khi một chương trình đang chạy.
+Chúng ta biết rằng system call, hay viết tắt là *syscall*, được kích hoạt bởi code được viết trong một bản triển khai libc. Thực tế, đây là cách các routine của kernel được kích hoạt. Trong SUS, và sau đó trong các hệ thống POSIX-compatible, có một chương trình được dùng để theo dõi các system call khi một chương trình đang chạy.
 
 Chúng ta gần như chắc chắn rằng một chương trình không gọi system call nào thì theo đúng nghĩa đen không thể làm được gì. Vì vậy, kết quả là, chúng ta biết rằng mọi chương trình chúng ta viết đều phải dùng system call thông qua việc gọi các hàm libc.
 
@@ -358,7 +360,7 @@ process exit, rval = 0                                                   $
 
 *Shell Box 10-2: Output của truss thể hiện các system call được gọi bởi ví dụ 10.1*
 
-Như bạn có thể thấy trong output trên, có nhiều system call được khởi tạo bởi ví dụ đơn giản của chúng ta, với<a id="_idIndexMarker736"></a> một số trong đó là về việc nạp các shared object library, đặc biệt <a id="_idIndexMarker737"></a>khi khởi tạo process. System call đầu tiên được hiển thị in đậm mở file shared object library `libc.so.7`. Shared object library này chứa hiện thực thực sự của libc của FreeBSD.
+Như bạn có thể thấy trong output trên, có nhiều system call được khởi tạo bởi ví dụ đơn giản của chúng ta, với<a id="_idIndexMarker736"></a> một số trong đó là về việc nạp các shared object library, đặc biệt <a id="_idIndexMarker737"></a>khi khởi tạo process. System call đầu tiên được hiển thị in đậm mở file shared object library `libc.so.7`. Shared object library này chứa bản triển khai thực sự của libc của FreeBSD.
 
 Trong cùng shell box, bạn có thể thấy rằng chương trình đang gọi system call `nanosleep`. Giá trị được truyền cho system call này là 1000000000 nano giây, tương đương với 1 giây.
 
@@ -430,7 +432,7 @@ $
 
 Như bạn có thể thấy trong file `lib/libc/sys/interposing_table.c`, hàm `nanosleep` được ánh xạ tới hàm `__sys_nanosleep`. Do đó, mọi lời gọi hàm nhắm tới `nanosleep` sẽ khiến `__sys_nanosleep` được gọi.
 
-Các hàm <a id="_idIndexMarker742"></a>bắt đầu bằng `__sys` là các hàm system call thực sự theo quy ước <a id="_idIndexMarker743"></a>của FreeBSD. Lưu ý rằng đây là một phần của hiện thực libc, và quy ước đặt tên được dùng cũng như các cấu hình implementation-related khác đều rất đặc thù cho FreeBSD.
+Các hàm <a id="_idIndexMarker742"></a>bắt đầu bằng `__sys` là các hàm system call thực sự theo quy ước <a id="_idIndexMarker743"></a>của FreeBSD. Lưu ý rằng đây là một phần của bản triển khai libc, và quy ước đặt tên được dùng cũng như các cấu hình implementation-related khác đều rất đặc thù cho FreeBSD.
 
 Đã nói tất cả những điều đó, còn có một điểm thú vị khác trong shell box trên. File `lib/libc/include/libc_private.h` chứa các khai báo hàm private và nội bộ cần thiết cho các hàm wrapper quanh các system call.
 

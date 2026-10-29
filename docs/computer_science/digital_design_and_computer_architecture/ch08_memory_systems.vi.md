@@ -83,7 +83,7 @@ AMAT = t<sub>cache</sub> + MR<sub>cache</sub>(t<sub>MM</sub> + MR<sub>MM</sub>t<
 
 trong đó t<sub>cache</sub>, t<sub>MM</sub> và t<sub>VM</sub> lần lượt là thời gian truy cập cache, main memory và virtual memory, còn MR<sub>cache</sub> và MR<sub>MM</sub> lần lượt là miss rate của cache và main memory.
 
-#### Ví dụ 8.2 TÍNH THỜI GIAN TRUY CẬP BỘ NHỚ TRUNG BÌNH
+### Ví dụ 8.2 TÍNH THỜI GIAN TRUY CẬP BỘ NHỚ TRUNG BÌNH
 
 Giả sử một hệ thống máy tính có tổ chức bộ nhớ chỉ gồm hai tầng hierarchy: cache và main memory. Thời gian truy cập bộ nhớ trung bình bằng bao nhiêu với thời gian truy cập và miss rate trong Bảng 8.1?
 
@@ -102,7 +102,7 @@ Bảng 8.1 Thời gian truy cập và miss rate
 >
 > Ông nổi tiếng nhất với Amdahl’s Law, một nhận xét được đưa ra năm 1965. Khi học cao học, ông bắt đầu thiết kế máy tính trong thời gian rảnh. Công việc làm thêm này đem lại cho ông bằng tiến sĩ vật lý lý thuyết năm 1952. Ông gia nhập IBM ngay sau khi tốt nghiệp và về sau thành lập ba công ty, trong đó có Amdahl Corporation năm 1970.
 
-#### Ví dụ 8.3 CẢI THIỆN THỜI GIAN TRUY CẬP
+### Ví dụ 8.3 CẢI THIỆN THỜI GIAN TRUY CẬP
 
 Thời gian truy cập bộ nhớ trung bình 11-cycle nghĩa là processor dành mười cycle chờ dữ liệu cho mỗi một cycle thực sự sử dụng dữ liệu đó. Cần cache miss rate bao nhiêu để giảm thời gian truy cập bộ nhớ trung bình xuống 1.5 cycle, với thời gian truy cập trong Bảng 8.1?
 
@@ -292,7 +292,7 @@ Bảng 8.2 Các cách tổ chức cache
 | Cách tổ chức | Số way (N) | Số set (S) |
 |---|---|---|
 | Direct Mapped | 1 | B |
-| Set Associative | 1 \< N \< B | B/N |
+| Set Associative | 1 < N < B | B/N |
 | Fully Associative | B | 1 |
 
 - dung lượng C
@@ -346,7 +346,7 @@ Cache lớn có lợi vì có khả năng chứa dữ liệu cần thiết cao h
 
 Sử dụng hệ thống ở Hình 8.16 có thời gian truy cập lần lượt là 1, 10 và 100 cycle cho cache L1, cache L2 và main memory. Giả sử cache L1 và L2 có miss rate lần lượt là 5% và 20%. Cụ thể, trong 5% số lần truy cập miss ở cache L1, 20% trong số đó cũng miss ở cache L2. Average memory access time (AMAT) bằng bao nhiêu?
 
-Lời giải Mỗi lần truy cập bộ nhớ đều kiểm tra cache L1. Khi cache L1 miss (5% số lần), processor kiểm tra cache L2. Khi cache L2 miss (20% số lần), processor lấy dữ liệu từ main memory. Dùng Phương trình 8.2, ta tính thời gian truy cập bộ nhớ trung bình như sau: 1 cycle + 0.05\[10 cycle + 0.2(100 cycle)\] = 2.5 cycle.
+Lời giải Mỗi lần truy cập bộ nhớ đều kiểm tra cache L1. Khi cache L1 miss (5% số lần), processor kiểm tra cache L2. Khi cache L2 miss (20% số lần), processor lấy dữ liệu từ main memory. Dùng Phương trình 8.2, ta tính thời gian truy cập bộ nhớ trung bình như sau: 1 cycle + 0.05[10 cycle + 0.2(100 cycle)] = 2.5 cycle.
 
 Miss rate của L2 cao vì nó chỉ nhận những lần truy cập bộ nhớ “khó”, tức những lần miss ở cache L1. Nếu mọi lần truy cập đều đi trực tiếp đến cache L2, miss rate của L2 sẽ khoảng 1%. Giảm miss rate
 
@@ -468,9 +468,7 @@ Vì page table rất lớn, nó được lưu trong physical memory. Hiện tạ
 
 Hình 8.23 Page table cho Hình 8.21
 
-#### Ví dụ 8.14 SỬ DỤNG PAGE TABLE ĐỂ THỰC HIỆN
-
-ADDRESS TRANSLATION
+#### Ví dụ 8.14 SỬ DỤNG PAGE TABLE ĐỂ THỰC HIỆN ADDRESS TRANSLATION
 
 Tìm physical address của virtual address 0x247C bằng page table trong Hình 8.23.
 
@@ -536,9 +534,7 @@ Trong Hình 8.26, virtual page number 19-bit được chia thành 9 và 10 bit �
 
 Hình 8.27 Address translation bằng page table two-level
 
-#### Ví dụ 8.16 SỬ DỤNG MULTILEVEL PAGE TABLE ĐỂ THỰC HIỆN
-
-ADDRESS TRANSLATION
+#### Ví dụ 8.16 SỬ DỤNG MULTILEVEL PAGE TABLE ĐỂ THỰC HIỆN ADDRESS TRANSLATION
 
 Hình 8.27 cho thấy nội dung có thể có của page table two-level ở Hình 8.26. Chỉ nội dung của một page table second-level được thể hiện. Dùng page table two-level này, hãy mô tả điều gì xảy ra khi truy cập virtual address 0x003FEFB0.
 
@@ -660,15 +656,9 @@ Bài tập 8.13 Xét cache có các tham số sau: N (associativity) = 2, b (blo
 
 Hình 8.28 Building block
 
-dữ liệu, so sánh địa chỉ, lựa chọn data output và mọi thành phần khác
+dữ liệu, so sánh địa chỉ, lựa chọn data output và mọi thành phần khác mà bạn thấy liên quan. Lưu ý rằng các block multiplexer và comparator có thể có kích thước bất kỳ (độ rộng lần lượt n hoặc p bit), nhưng các block SRAM phải có
 
-mà bạn thấy liên quan. Lưu ý rằng các block multiplexer và comparator có thể
-
-có kích thước bất kỳ (độ rộng lần lượt n hoặc p bit), nhưng các block SRAM phải có
-
-kích thước 16Ki × 4 bit. Nhớ kèm theo block diagram được ghi nhãn rõ ràng. Bạn chỉ cần
-
-thiết kế cache cho thao tác đọc.
+kích thước 16Ki × 4 bit. Nhớ kèm theo block diagram được ghi nhãn rõ ràng. Bạn chỉ cần thiết kế cache cho thao tác đọc.
 
 Bài tập 8.14 Bạn vừa gia nhập một Internet start-up đầy triển vọng để chế tạo đồng hồ đeo tay có pager built-in và Web browser. Nó dùng embedded processor có sơ đồ multilevel cache ở Hình 8.29. Processor có cache on-chip nhỏ cùng với cache second-level off-chip lớn. (Đúng vậy, chiếc đồng hồ nặng 3 pound, nhưng bạn phải xem nó lướt Web mới hiểu!)
 
@@ -738,7 +728,7 @@ Bài tập 8.20 Xét virtual memory system có thể đánh địa chỉ tổng 
 
 (e) Giả sử bạn đề xuất sơ đồ direct mapped ánh xạ virtual page sang physical page. Mapping dùng các bit ít quan trọng nhất của virtual page number để xác định physical page number. Có bao nhiêu virtual page ánh xạ đến mỗi physical page? Tại sao “direct mapping” này là phương án tồi?
 
-(f) Rõ ràng cần sơ đồ linh hoạt và động hơn sơ đồ trong phần (e) để dịch virtual address thành physical address. Giả sử bạn dùng page table lưu các mapping (phép dịch từ virtual page number sang physical page number). Page table sẽ chứa bao nhiêu page table entry?
+(f) Rõ ràng, cần một phương pháp linh hoạt hơn và có tính động hơn phương pháp được mô tả trong phần (e) để chuyển đổi virtual address thành physical address. Giả sử bạn sử dụng page table để lưu các mapping (phép chuyển đổi từ virtual page number sang physical page number). Page table sẽ chứa bao nhiêu page table entry?
 
 (g) Giả sử ngoài physical page number, mỗi page table entry còn chứa một số thông tin trạng thái dưới dạng valid bit (V) và dirty bit (D). Mỗi page table entry dài bao nhiêu byte? (Làm tròn lên số byte nguyên.)
 

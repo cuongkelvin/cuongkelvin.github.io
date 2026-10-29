@@ -89,25 +89,21 @@ struct iio_dev {
 
 - `modes` biểu diễn mode mà device hỗ trợ. Mode có thể có như sau:
 
-- `INDIO_DIRECT_MODE`: Cho biết device cung cấp sysfs-type interface.
+  - `INDIO_DIRECT_MODE`: Cho biết device cung cấp sysfs-type interface.
 
-- `INDIO_BUFFER_TRIGGERED`: Cho biết device hỗ trợ hardware trigger gắn với buffer. Mode flag này tự động được đặt khi thiết lập triggered buffer bằng function `iio_triggered_buffer_setup()`.
+  - `INDIO_BUFFER_TRIGGERED`: Cho biết device hỗ trợ hardware trigger gắn với buffer. Mode flag này tự động được đặt khi thiết lập triggered buffer bằng function `iio_triggered_buffer_setup()`.
 
-- `INDIO_BUFFER_SOFTWARE`: Trong continuous conversion, buffering được chính kernel triển khai bằng software. Kernel đẩy data vào internal FIFO với interrupt có thể xảy ra tại watermark chỉ định.
+  - `INDIO_BUFFER_SOFTWARE`: Trong continuous conversion, buffering được chính kernel triển khai bằng software. Kernel đẩy data vào internal FIFO với interrupt có thể xảy ra tại watermark chỉ định.
 
-- `INDIO_BUFFER_HARDWARE`: Nghĩa là device có hardware buffer. Trong continuous conversion, device có thể xử lý buffering. Nghĩa là có thể lấy data stream trực tiếp từ hardware backend.
+  - `INDIO_BUFFER_HARDWARE`: Nghĩa là device có hardware buffer. Trong continuous conversion, device có thể xử lý buffering. Nghĩa là có thể lấy data stream trực tiếp từ hardware backend.
 
-- `INDIO_ALL_BUFFER_MODES`: Hợp của ba mode trên.
+  - `INDIO_ALL_BUFFER_MODES`: Hợp của ba mode trên.
 
-- `INDIO_EVENT_TRIGGERED`: Conversion có thể được trigger bởi event nào đó, như ADC đạt threshold voltage, nhưng không phải interrupt hoặc timer trigger. Flag dành cho chip comparator-equipped mà không có cách khác để trigger conversion.
+  - `INDIO_EVENT_TRIGGERED`: Conversion có thể được trigger bởi event nào đó, như ADC đạt threshold voltage, nhưng không phải interrupt hoặc timer trigger. Flag dành cho chip comparator-equipped mà không có cách khác để trigger conversion.
 
-- `INDIO_HARDWARE_TRIGGERED`: Có thể được trigger bằng hardware event như IRQ hoặc clock event.
+  - `INDIO_HARDWARE_TRIGGERED`: Có thể được trigger bằng hardware event như IRQ hoặc clock event.
 
-- `INDIO_ALL_TRIGGERED_MODES` là hợp của `INDIO_BUFFER_TRIGGERED`, `INDIO_EVENT_TRIGGERED` và
-
-```
-INDIO_HARDWARE_TRIGGERED.
-```
+  - `INDIO_ALL_TRIGGERED_MODES` là hợp của `INDIO_BUFFER_TRIGGERED`, `INDIO_EVENT_TRIGGERED` và `INDIO_HARDWARE_TRIGGERED`.
 
 - `currentmode`: Biểu diễn mode device đang dùng.
 
@@ -328,17 +324,17 @@ Sau đây là ý nghĩa thành phần trong data structure:
 
 - Field `scan_index` và `scan_type` dùng nhận diện phần tử từ buffer khi dùng buffer trigger. `scan_index` đặt vị trí channel được capture trong buffer. Channel được xếp trong buffer theo `scan_index`, từ index thấp nhất (đặt trước) tới cao nhất. Đặt `.scan_index` là `-1` ngăn channel tham gia buffered capture (không có entry trong directory `scan_elements`). Thành phần trong substructure có ý nghĩa sau:
 
-- `sign`: `s` hoặc `u` chỉ signed (bù 2) hoặc unsigned.
+  - `sign`: `s` hoặc `u` chỉ signed (bù 2) hoặc unsigned.
 
-- `realbits`: Số data bit hợp lệ.
+  - `realbits`: Số data bit hợp lệ.
 
-- `storagebits`: Số chữ số channel chiếm trong buffer. Nghĩa là value có thể thực sự mã hóa bằng 12 bit nhưng chiếm 16 bit (storage bit) trong buffer. Vì vậy phải dịch data sang phải bốn lần để lấy actual value. Parameter phụ thuộc device và nên tham khảo datasheet.
+  - `storagebits`: Số chữ số channel chiếm trong buffer. Nghĩa là value có thể thực sự mã hóa bằng 12 bit nhưng chiếm 16 bit (storage bit) trong buffer. Vì vậy phải dịch data sang phải bốn lần để lấy actual value. Parameter phụ thuộc device và nên tham khảo datasheet.
 
-- `shift`: Biểu diễn số lần data value cần right-shifted trước khi mask bỏ unused bit. Parameter không phải luôn cần. Nếu số valid bit bằng số storage bit, shift là `0`. Có thể tìm parameter trong device datasheet.
+  - `shift`: Biểu diễn số lần data value cần right-shifted trước khi mask bỏ unused bit. Parameter không phải luôn cần. Nếu số valid bit bằng số storage bit, shift là `0`. Có thể tìm parameter trong device datasheet.
 
-- `repeat`: Số lần real/storage bit lặp lại.
+  - `repeat`: Số lần real/storage bit lặp lại.
 
-- `endianness`: Biểu diễn data endianness. Có type `enum iio_endian`, nên đặt một trong `IIO_CPU`, `IIO_LE` hoặc `IIO_BE`, lần lượt nghĩa là native CPU endianness, little endian hoặc big endian.
+  - `endianness`: Biểu diễn data endianness. Có type `enum iio_endian`, nên đặt một trong `IIO_CPU`, `IIO_LE` hoặc `IIO_BE`, lần lượt nghĩa là native CPU endianness, little endian hoặc big endian.
 
 - Field `modified` chỉ có áp dụng modifier vào channel attribute name hay không. Khi đó modifier được đặt trong `.channel2`. (Ví dụ, `IIO_MOD_X`, `IIO_MOD_Y` và `IIO_MOD_Z` là modifier cho axial-sensors theo axis `X`, `Y` và `Z`.) Danh sách modifier sẵn có được định nghĩa trong kernel IIO header là `enum iio_modifier`. Modifier chỉ thay đổi channel attribute name trong sysfs, không thay value.
 
@@ -388,10 +384,9 @@ Sau khi mô tả channel data structure, hãy giải mã bí ẩn đặt tên ch
 
 Attribute name được IIO core tự tạo theo mẫu định sẵn `{direction}_{type}{index}_{modifier}_{info_mask}`. Sau đây mô tả từng field trong mẫu:
 
-- `{direction}` tương ứng attribute direction, theo structure `struct iio_direction` trong
+- `{direction}` tương ứng attribute direction, theo structure `struct iio_direction` trong `drivers/iio/industrialio-core.c`:
 
 ```
-drivers/iio/industrialio-core.c:
 static const char * const iio_direction[] = {
     [0] = "in",
     [1] = "out",
@@ -456,11 +451,7 @@ Giờ quy ước đặt tên channel không còn bí mật. Bây giờ đã quen
 
 LƯU Ý
 
-Trong mẫu này, nếu thành phần không hiện diện, dấu gạch dưới ngay trước nó được bỏ. Ví dụ nếu không chỉ định modifier, mẫu thành `{direction}_{type}{index}_{info_mask}` thay vì
-
-```
-{direction}_{type}{index}__{info_mask}.
-```
+Trong mẫu này, nếu thành phần không hiện diện, dấu gạch dưới ngay trước nó được bỏ. Ví dụ nếu không chỉ định modifier, mẫu thành `{direction}_{type}{index}_{info_mask}` thay vì `{direction}_{type}{index}__{info_mask}`.
 
 ## Phân biệt channel
 
@@ -722,11 +713,7 @@ Có thể phát triển trigger driver riêng, nhưng ngoài phạm vi sách. Ch
 
 - `iio-trig-interrupt`: Cho phép dùng IRQ làm IIO trigger. Trong kernel cũ (trước v3.11), từng là `iio-trig-gpio`. Để hỗ trợ trigger mode này, nên enable `CONFIG_IIO_INTERRUPT_TRIGGER` trong kernel config. Nếu build làm module, module tên `iio-trig-interrupt`.
 
-- `iio-trig-hrtimer`: Cung cấp frequency-based IIO trigger dùng high-resolution timer làm interrupt source (từ kernel v4.5). Trong kernel cũ, từng là `iio-trig-rtc`. Để hỗ trợ trigger mode trong kernel, phải enable config option `IIO_HRTIMER_TRIGGER`. Nếu build làm module, module tên `iio-trig-`
-
-```
-hrtimer.
-```
+- `iio-trig-hrtimer`: Cung cấp frequency-based IIO trigger dùng high-resolution timer làm interrupt source (từ kernel v4.5). Trong kernel cũ, từng là `iio-trig-rtc`. Để hỗ trợ trigger mode trong kernel, phải enable config option `IIO_HRTIMER_TRIGGER`. Nếu build làm module, module tên `iio-trig-hrtimer`.
 
 - `iio-trig-sysfs`: Cho phép dùng entry `SYSFS` để trigger data capture. `CONFIG_IIO_SYSFS_TRIGGER` là kernel option thêm hỗ trợ trigger mode này.
 
@@ -843,7 +830,7 @@ Giờ hãy mô tả một số điều quan trọng dùng trong code trên:
 
 - `sensor_trigger_handler` là bottom half, chạy trong kernel thread, cho phép mọi xử lý, kể cả lấy mutex hoặc sleep. Xử lý nặng nên diễn ra ở đây. Phần lớn công việc gồm đọc data từ device, lưu vào internal buffer cùng timestamp đã ghi trong top half và đẩy chúng tới IIO device buffer.
 
-LƯU Ý Triggered buffer có trigger đi kèm. Nó báo driver khi nào đọc sample từ device và đưa vào buffer. Triggered buffer không bắt buộc khi viết IIO device driver. Cũng có thể dùng single-shot capture qua sysfs bằng cách đọc raw attribute của channel, chỉ thực hiện một conversion (cho channel attribute đang đọc). Buffer mode cho phép continuous conversion, qua đó capture nhiều channel trong một lần.
+  LƯU Ý Triggered buffer có trigger đi kèm. Nó báo driver khi nào đọc sample từ device và đưa vào buffer. Triggered buffer không bắt buộc khi viết IIO device driver. Cũng có thể dùng single-shot capture qua sysfs bằng cách đọc raw attribute của channel, chỉ thực hiện một conversion (cho channel attribute đang đọc). Buffer mode cho phép continuous conversion, qua đó capture nhiều channel trong một lần.
 
 Bây giờ đã quen mọi khía cạnh triggered buffer in-kernel, hãy giới thiệu thiết lập trong user space qua sysfs interface.
 
@@ -981,17 +968,17 @@ Channel có data cần đọc và đẩy vào buffer gọi là scan element. C�
 
 - `type`: Mô tả cách lưu scan element data trong buffer, qua đó là dạng đọc từ user space. Ví dụ, `in_voltage0_type` là một channel type. Định dạng tuân theo mẫu `[be|le]:` `[s|u]bits/storagebitsXrepeat[>>shift]`. Sau đây là ý nghĩa từng field trong định dạng:
 
-- `be` hoặc `le` chỉ endianness (big hoặc little).
+  - `be` hoặc `le` chỉ endianness (big hoặc little).
 
-- `s` hoặc `u` chỉ sign, signed (bù hai) hoặc unsigned.
+  - `s` hoặc `u` chỉ sign, signed (bù hai) hoặc unsigned.
 
-- `bits` là số data bit hợp lệ.
+  - `bits` là số data bit hợp lệ.
 
-- `storagebits` là số bit channel chiếm trong buffer. Value có thể thực sự mã hóa bằng 12 bit (`bits`) nhưng chiếm 16 bit (`storagebits`) trong buffer. Vì vậy phải shift data sang phải bốn lần để có actual value. Parameter phụ thuộc device, nên tham khảo datasheet.
+  - `storagebits` là số bit channel chiếm trong buffer. Value có thể thực sự mã hóa bằng 12 bit (`bits`) nhưng chiếm 16 bit (`storagebits`) trong buffer. Vì vậy phải shift data sang phải bốn lần để có actual value. Parameter phụ thuộc device, nên tham khảo datasheet.
 
-- `shift` biểu diễn số lần phải shift data value trước khi mask bỏ unused bit. Parameter không phải luôn cần. Nếu số valid bit bằng số storage bit, shift là `0`. Cũng có thể tìm parameter trong device datasheet.
+  - `shift` biểu diễn số lần phải shift data value trước khi mask bỏ unused bit. Parameter không phải luôn cần. Nếu số valid bit bằng số storage bit, shift là `0`. Cũng có thể tìm parameter trong device datasheet.
 
-- Thành phần `repeat` chỉ số lần `bits`/`storagebits` lặp lại. Repeat value được bỏ khi repeat element là `0` hoặc `1`.
+  - Thành phần `repeat` chỉ số lần `bits`/`storagebits` lặp lại. Repeat value được bỏ khi repeat element là `0` hoặc `1`.
 
 Cách tốt nhất giải thích phần này là đưa đoạn trích kernel docs tại https://www.kernel.org/doc/html/latest/driver-api/iio/buffers.html. Xét driver cho accelerometer 3-axis độ phân giải 12-bit, data lưu trong hai register 8-bit (tức 16 bit), như sau:
 
@@ -1230,11 +1217,7 @@ static int bma220_write_raw(struct iio_dev *indio_dev,
 }
 ```
 
-Function này được gọi mỗi khi ghi value tới device và chỉ hỗ trợ đổi scaling value. Ví dụ dùng trong user space có thể là `echo $desired_scale >`
-
-```
-/sys/bus/iio/devices/iio:devices0/in_accel_scale.
-```
+Function này được gọi mỗi khi ghi value tới device và chỉ hỗ trợ đổi scaling value. Ví dụ dùng trong user space có thể là `echo $desired_scale >` `/sys/bus/iio/devices/iio:devices0/in_accel_scale`.
 
 Giờ đến lúc điền structure `struct iio_info` để truyền cho `iio_device`:
 
@@ -1353,9 +1336,7 @@ echo 0 > /sys/devices/iio_sysfs_trigger/add_trigger
 
 Trong lệnh trên, `0` tương ứng index cần gán cho trigger. Sau lệnh này, trigger directory sẵn có dưới `/sys/bus/iio/devices/` với tên `trigger0`. Full path của trigger là `/sys/bus/iio/devices/trigger0`.
 
-2\. Gán trigger cho device: Trigger được nhận diện duy nhất bằng tên, có thể dùng để gắn device với
-
-trigger. Vì dùng `0` làm index, trigger tên `sysfstrig0`:
+2\. Gán trigger cho device: Trigger được nhận diện duy nhất bằng tên, có thể dùng để gắn device với trigger. Vì dùng `0` làm index, trigger tên `sysfstrig0`:
 
 ```
 echo sysfstrig0 >
@@ -1375,9 +1356,7 @@ Tuy nhiên, nếu value ghi không tương ứng trigger name hiện có, không
 cat /sys/bus/iio/devices/iio:device0/trigger/current_trigger
 ```
 
-3\. Enable một số scan element: Bước này chọn channel có data value cần đẩy vào buffer.
-
-Nên chú ý `available_scan_masks` trong driver:
+3\. Enable một số scan element: Bước này chọn channel có data value cần đẩy vào buffer. Nên chú ý `available_scan_masks` trong driver:
 
 ```
 echo 1 > /sys/bus/iio/devices/iio:device0/scan_elements/in_voltage4_en
@@ -1400,9 +1379,7 @@ echo 1 > /sys/bus/iio/devices/iio:device0/buffer/enable
 
 Để dừng capture, phải ghi `0` vào cùng file.
 
-6\. Kích hoạt trigger: Bắt đầu acquisition. Phải thực hiện số lần bằng data sample count cần trong buffer, ví dụ trong
-
-loop:
+6\. Kích hoạt trigger: Bắt đầu acquisition. Phải thực hiện số lần bằng data sample count cần trong buffer, ví dụ trong loop:
 
 ```
 echo 1 > /sys/bus/iio/devices/trigger0/trigger_now
@@ -1465,17 +1442,13 @@ echo trigger0 > /sys/bus/iio/devices/iio:device0/trigger/current_trigger
 # echo 1 > /sys/bus/iio/devices/iio:device0/scan_elements/in_voltage7_en
 ```
 
-5\. Bắt đầu hrtimer capture, thực hiện periodic data capture ở frequency đã định nghĩa và trên channel đã
-
-enable trước đó:
+5\. Bắt đầu hrtimer capture, thực hiện periodic data capture ở frequency đã định nghĩa và trên channel đã enable trước đó:
 
 ```
 echo 1 > /sys/bus/iio/devices/iio:device0/buffer/enable
 ```
 
-6\. Cuối cùng, có thể dump data bằng `cat /dev/iio\:device0 | xxd –`. Vì trigger là hrtimer, data được
-
-capture và đẩy vào mỗi khoảng hrtimer period.
+6\. Cuối cùng, có thể dump data bằng `cat /dev/iio\:device0 | xxd –`. Vì trigger là hrtimer, data được capture và đẩy vào mỗi khoảng hrtimer period.
 
 7\. Để disable periodic capture này, dùng lệnh sau:
 
@@ -1663,19 +1636,17 @@ Context được biểu diễn bằng instance `struct iio_context`. Context obj
 
 Sau khi quen các khái niệm, có thể chia phát triển IIO application thành bước sau:
 
-1\. Tạo context sau khi (tùy chọn) scan backend sẵn có để tạo context. 2. Lặp qua mọi device hoặc tìm và chọn device quan tâm. Cuối cùng lấy/đặt device parameter qua
+1\. Tạo context sau khi (tùy chọn) scan backend sẵn có để tạo context.
 
-attribute.
+2\. Lặp qua mọi device hoặc tìm và chọn device quan tâm. Cuối cùng lấy/đặt device parameter qua attribute.
 
-3\. Duyệt device channel và enable channel quan tâm (hoặc disable channel không quan tâm). Cuối cùng
+3\. Duyệt device channel và enable channel quan tâm (hoặc disable channel không quan tâm). Cuối cùng lấy/đặt channel parameter qua attribute.
 
-lấy/đặt channel parameter qua attribute.
+4\. Nếu device cần trigger, gắn trigger với device đã cho. Trigger phải được tạo trước khi tạo context.
 
-4\. Nếu device cần trigger, gắn trigger với device đã cho. Trigger phải được tạo trước khi tạo
+5\. Tạo buffer và gắn với device, rồi bắt đầu streaming.
 
-context.
-
-5\. Tạo buffer và gắn với device, rồi bắt đầu streaming. 6. Bắt đầu capture và đọc data.
+6\. Bắt đầu capture và đọc data.
 
 ## Scan và tạo IIO context
 
@@ -1716,10 +1687,9 @@ struct iio_context * usb_ctx;
 usb_ctx = iio_create_context_from_uri("usb:3.80.5");
 ```
 
-- Serial context, giống USB context, dùng URI-based API. Tuy nhiên URI phải khớp mẫu `serial:`
+- Serial context, giống USB context, dùng URI-based API. Tuy nhiên URI phải khớp mẫu `serial:` `[port][,baud][,config]`:
 
 ```
-[port][,baud][,config]:
 struct iio_context * serial_ctx;
 serial_ctx = iio_create_context_from_uri(
                    "serial:/dev/ttyUSB0,115200,8n1");
@@ -1877,11 +1847,7 @@ struct iio_channel* iio_device_find_channel(
 
 Có thể lấy số channel sẵn có từ object `iio_device` nhờ `iio_device_get_channels_count()`. Sau đó truy cập từng object `iio_channel` bằng `iio_device_get_channel()`, chỉ định index channel. Ví dụ, trên accelerometer three-axis (x, y, z), `iio_device_get_channel(iio_device, 0)` tương ứng lấy channel 0, tức `accel_x`. Trên ADC converter eight-channel, `iio_device_get_channel(iio_device, 0)` tương ứng lấy channel 0, tức `voltage0`.
 
-Một cách khác là tìm channel theo tên bằng `iio_device_find_channel()`, nhận các argument là tên channel và một Boolean cho biết channel có phải output hay không. Nếu còn nhớ, trong phần Quy ước đặt tên channel attribute, chúng ta đã thấy các attribute name tuân theo mẫu `{direction}_{type}{index}_{modifier}_{info_mask}`. Phần của mẫu cần dùng với `iio_device_find_channel()` là `{type}` `{index}_{modifier}`. Sau đó, tùy giá trị Boolean parameter, tên cuối cùng được tạo bằng cách thêm prefix `in_` hoặc `out_`. Ví dụ, để lấy channel `X` của accelerometer, chúng ta dùng `iio_device_find_channel(iio_device, "accel_x", 0)`. Với channel đầu tiên của analog-to-digital converter, chúng ta dùng `iio_device_find_channel(iio_device,`
-
-```
-"voltage0", 0).
-```
+Một cách khác là tìm channel theo tên bằng `iio_device_find_channel()`, nhận các argument là tên channel và một Boolean cho biết channel có phải output hay không. Nếu còn nhớ, trong phần Quy ước đặt tên channel attribute, chúng ta đã thấy các attribute name tuân theo mẫu `{direction}_{type}{index}_{modifier}_{info_mask}`. Phần của mẫu cần dùng với `iio_device_find_channel()` là `{type}` `{index}_{modifier}`. Sau đó, tùy giá trị Boolean parameter, tên cuối cùng được tạo bằng cách thêm prefix `in_` hoặc `out_`. Ví dụ, để lấy channel `X` của accelerometer, chúng ta dùng `iio_device_find_channel(iio_device, "accel_x", 0)`. Với channel đầu tiên của analog-to-digital converter, chúng ta dùng `iio_device_find_channel(iio_device, "voltage0", 0)`.
 
 Sau đây là ví dụ duyệt mọi device và mọi channel của từng device:
 
@@ -1943,11 +1909,7 @@ int iio_device_set_trigger(const struct iio_device *dev,
                           const struct iio_device *trig)
 ```
 
-Function gắn trigger `trig` với device `dev`, return `0` khi thành công hoặc code `errno` âm khi thất bại. Nếu parameter `trig` là `NULL`, mọi trigger gắn với device đó bị tách ra. Nói cách khác, để tách trigger khỏi device, nên gọi
-
-```
-iio_device_set_trigger(dev, NULL).
-```
+Function gắn trigger `trig` với device `dev`, return `0` khi thành công hoặc code `errno` âm khi thất bại. Nếu parameter `trig` là `NULL`, mọi trigger gắn với device đó bị tách ra. Nói cách khác, để tách trigger khỏi device, nên gọi `iio_device_set_trigger(dev, NULL)`.
 
 Hãy xem trigger lookup và association hoạt động qua ví dụ nhỏ:
 

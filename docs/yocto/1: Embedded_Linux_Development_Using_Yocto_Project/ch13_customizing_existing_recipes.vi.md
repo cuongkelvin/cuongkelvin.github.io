@@ -23,7 +23,7 @@ File `.bbappend` có thể được xem như một đoạn văn bản được n
 
 ### Mở rộng một task
 
-Khi nội dung của task không thỏa mãn yêu cầu của chúng ta, chúng ta thay thế nó (cung cấp bản hiện thực của mình) hoặc append vào nó. Như chúng ta đã học kỹ hơn về cú pháp metadata của BitBake trong *Chương 8*, *Đi sâu vào metadata của BitBake*, các toán tử `:append` và `:prepend` có thể mở rộng một task với nội dung bổ sung. Ví dụ, để mở rộng một task `do_install`, chúng ta có thể dùng đoạn code sau:
+Khi nội dung của task không thỏa mãn yêu cầu của chúng ta, chúng ta thay thế nó (cung cấp bản triển khai của mình) hoặc append vào nó. Như chúng ta đã học kỹ hơn về cú pháp metadata của BitBake trong *Chương 8*, *Đi sâu vào metadata của BitBake*, các toán tử `:append` và `:prepend` có thể mở rộng một task với nội dung bổ sung. Ví dụ, để mở rộng một task `do_install`, chúng ta có thể dùng đoạn code sau:
 
 ![](images/Figure_13.01_B19361.jpg)
 

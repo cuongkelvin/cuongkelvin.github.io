@@ -18,7 +18,7 @@ Chương này được chia thành các phần sau:
 4. **Executable object file**: như một phần của mục này, chúng ta nói về executable object file. Chúng ta cũng giải thích cách chúng được tạo ra từ một số relocatable object file. Chúng ta thảo luận về sự khác biệt giữa relocatable object file và executable object file ELF xét về cấu trúc bên trong của chúng.
 5. **Static library**: trong phần này, chúng ta nói về static library và cách chúng ta có thể tạo ra chúng. Chúng ta cũng minh họa cách viết một chương trình và dùng các static library đã được build sẵn.
 
-1. **Dynamic library**: ở đây chúng ta nói về shared object file. Chúng ta minh họa cách tạo chúng từ một số relocatable object file và cách dùng chúng trong một chương trình. Chúng ta cũng nói ngắn gọn về cấu trúc bên trong của một shared object file ELF.
+6. **Dynamic library**: ở đây chúng ta nói về shared object file. Chúng ta minh họa cách tạo chúng từ một số relocatable object file và cách dùng chúng trong một chương trình. Chúng ta cũng nói ngắn gọn về cấu trúc bên trong của một shared object file ELF.
 
 Các thảo luận của chúng ta trong chương này chủ yếu xoay quanh các hệ thống Unix-like, nhưng chúng ta sẽ thảo luận một số khác biệt ở các hệ điều hành khác như Microsoft Windows.
 
@@ -280,7 +280,7 @@ ELF Header:
   Version:                           1 (current)
   OS/ABI:                            UNIX - System V
   ABI Version:                       0
- Type:                              DYN (Shared object file)
+  Type:                              DYN (Shared object file)
   Machine:                           Advanced Micro Devices X86-64
   Version:                           0x1
   Entry point address:               0x4f0
@@ -332,10 +332,10 @@ Program Headers:
 Section to Segment mapping:
   Segment Sections...
    00
- 01     .interp
- 02     .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .init .plt .plt.got .text .fini .rodata .eh_frame_hdr .eh_frame
- 03     .init_array .fini_array .dynamic .got .data .bss
- 04     .dynamic
+   01     .interp
+   02     .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .init .plt .plt.got .text .fini .rodata .eh_frame_hdr .eh_frame
+   03     .init_array .fini_array .dynamic .got .data .bss
+   04     .dynamic
    05     .note.ABI-tag .note.gnu.build-id
    06     .eh_frame_hdr
    07
@@ -676,7 +676,7 @@ $
 
 - `-L/opt/geometry` bảo `gcc` coi thư mục `/opt/geometry` là một trong các vị trí khác nhau nơi có thể tìm thấy static library và shared library. Có các đường dẫn well-known như `/usr/lib` hay `/usr/local/lib` mà linker tìm kiếm library file trong đó theo mặc định. Nếu bạn không chỉ định tùy chọn `-L`, linker chỉ tìm kiếm trong các đường dẫn mặc định của nó.
 - `-lgeometry` bảo `gcc` tìm file `libgeometry.a` hoặc `libgeometry.so`. Một file kết thúc bằng `.so` là một shared object file, mà chúng ta giải thích trong phần tiếp theo. Hãy chú ý quy ước được dùng. Chẳng hạn, nếu bạn truyền tùy chọn `-lxyz`, linker sẽ tìm file `libxyz.a` hoặc `libxyz.so` trong các thư mục mặc định và được chỉ định. Nếu không tìm thấy file, linker dừng lại và sinh ra một lỗi.
-- `-lm` bảo `gcc` tìm một library khác tên là `libm.a` hoặc `libm.so`. Library này giữ definition của các hàm toán học trong *glibc*. Chúng ta cần nó cho các hàm `cos`, `sin` và `acos`. Lưu ý rằng chúng ta đang build *ví dụ 3.3* trên một máy Linux, máy này dùng *glibc* làm hiện thực library C mặc định của nó. Trong macOS và có thể một số hệ thống Unix-like khác, bạn không cần chỉ định tùy chọn này.
+- `-lm` bảo `gcc` tìm một library khác tên là `libm.a` hoặc `libm.so`. Library này giữ definition của các hàm toán học trong *glibc*. Chúng ta cần nó cho các hàm `cos`, `sin` và `acos`. Lưu ý rằng chúng ta đang build *ví dụ 3.3* trên một máy Linux, máy này dùng *glibc* làm bản triển khai library C mặc định của nó. Trong macOS và có thể một số hệ thống Unix-like khác, bạn không cần chỉ định tùy chọn này.
 - `-o ex3_3.out` bảo `gcc` rằng executable file đầu ra nên được đặt tên là `ex3_3.out`.
 
 Sau khi chạy lệnh trên, nếu mọi thứ suôn sẻ, bạn sẽ có một file binary executable chứa mọi relocatable object file có trong static library `libgeometry.a` cộng với `main.o`.
@@ -877,7 +877,7 @@ $
 
 Như bạn có thể thấy, chúng ta đã không link chương trình với file `libgeometry.so`. Chúng ta không làm điều này vì thay vào đó chúng ta muốn nạp nó một cách thủ công khi cần. Phương pháp này thường được gọi là *lazy loading* (nạp lười biếng) shared object file. Tuy nhiên, bất chấp cái tên, trong một số kịch bản nhất định, việc nạp lười biếng các shared object file có thể thực sự hữu ích.
 
-Một trường hợp như vậy là khi bạn có các shared object file khác nhau cho các hiện thực hay phiên bản khác nhau của cùng một library. Lazy loading cho bạn thêm tự do để nạp các shared object mong muốn theo logic của riêng bạn và khi cần, thay vì để chúng được nạp tự động vào lúc nạp, nơi bạn có ít quyền kiểm soát hơn với chúng.
+Một trường hợp như vậy là khi bạn có các shared object file khác nhau cho các cách triển khai hay phiên bản khác nhau của cùng một library. Lazy loading cho bạn thêm tự do để nạp các shared object mong muốn theo logic của riêng bạn và khi cần, thay vì để chúng được nạp tự động vào lúc nạp, nơi bạn có ít quyền kiểm soát hơn với chúng.
 
 <a id="_idParaDest-69"></a>
 

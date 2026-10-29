@@ -38,13 +38,13 @@ Song song đó, các liên minh trong nhiều ngành công nghiệp cố gắng 
 
 Nếu bạn là một kiến trúc sư embedded system tham gia vào các cuộc thảo luận với khách hàng như đã mô tả ở trên, cuốn sách này cung cấp cho bạn kiến thức cần thiết để tranh luận ngang hàng với các đối tác của mình.
 
-Nếu bạn là một kỹ sư embedded system hay một developer IoT chịu trách nhiệm hiện thực các tính năng bảo mật và bạn muốn biết lý do đằng sau những tính năng này cũng như các trở ngại điển hình, cuốn sách này sẽ chuẩn bị cho bạn hành trình phía trước.
+Nếu bạn là một kỹ sư embedded system hay một developer IoT chịu trách nhiệm triển khai các tính năng bảo mật và bạn muốn biết lý do đằng sau những tính năng này cũng như các trở ngại điển hình, cuốn sách này sẽ chuẩn bị cho bạn hành trình phía trước.
 
-Nếu bạn là một phần của quy trình requirements engineering cho một sản phẩm hay làm kiểm thử embedded system trong công việc day-to-day, cuốn sách này sẽ giúp bạn hiểu giá trị của một số tính năng bảo mật nhất định và tại sao các đồng nghiệp của bạn từ nhóm phát triển có thể ngần ngại hiện thực chúng.
+Nếu bạn là một phần của quy trình requirements engineering cho một sản phẩm hay làm kiểm thử embedded system trong công việc day-to-day, cuốn sách này sẽ giúp bạn hiểu giá trị của một số tính năng bảo mật nhất định và tại sao các đồng nghiệp của bạn từ nhóm phát triển có thể ngần ngại triển khai chúng.
 
 Nếu bạn là một sinh viên và thắc mắc tại sao nhiều biện pháp bảo vệ không thể được coi là đương nhiên trong các sản phẩm IoT, cuốn sách này sẽ xác nhận rằng bạn có tư duy đúng, và bạn sẽ học được rằng bảo mật embedded system là một nhiệm vụ quan trọng nhưng đôi khi tẻ nhạt.
 
-Và nếu, vài phút trước, có ai đó hét vào mặt bạn, “Chúng ta cần hiện thực cái bảo mật thiết bị c\*\*\*\*\*\* này! NGAY!!!” thì hãy hít một hơi thật sâu, hủy mọi cuộc hẹn và đọc kỹ cuốn sách này. Sau đó, bạn sẽ sẵn sàng cho một cuộc thảo luận thân thiện, khách quan về “bảo mật.”
+Và nếu, vài phút trước, có ai đó hét vào mặt bạn, “Chúng ta cần triển khai cái bảo mật thiết bị c\*\*\*\*\*\* này! NGAY!!!” thì hãy hít một hơi thật sâu, hủy mọi cuộc hẹn và đọc kỹ cuốn sách này. Sau đó, bạn sẽ sẵn sàng cho một cuộc thảo luận thân thiện, khách quan về “bảo mật.”
 
 <a id="ch00lev1_4"></a>
 
@@ -62,13 +62,13 @@ Trong **[Phần I: Nền tảng (Fundamentals)](part1_fundamentals.vi.md#part01)
 
 **[Chương 3: Random Number Generator](ch03_random_number_generators.vi.md#ch03)** Đi sâu vào lĩnh vực kỳ diệu của tính ngẫu nhiên, nhấn mạnh tầm quan trọng của nó đối với bảo mật, và đưa ra các gợi ý thực tế về cách sinh và đánh giá dữ liệu ngẫu nhiên.
 
-**[Chương 4: Hiện thực cryptography (Cryptographic Implementations)](ch04_cryptographic_implementations.vi.md#ch04)** Thảo luận các lựa chọn hiện thực cho các thuật toán cryptography và tác động tương ứng lên các thuộc tính như performance.
+**[Chương 4: Bản triển khai cryptography (Cryptographic Implementations)](ch04_cryptographic_implementations.vi.md#ch04)** Thảo luận các lựa chọn triển khai cho các thuật toán cryptography và tác động tương ứng lên các thuộc tính như performance.
 
 **[Chương 5: Lưu trữ dữ liệu bí mật và secure memory (Confidential Data Storage and Secure Memory)](ch05_confidential_data_storage_and_secure_memory.vi.md#ch05)** Tập trung vào việc lưu trữ những lượng dữ liệu nhỏ và lớn theo cách an toàn, bí mật.
 
 **[Chương 6: Định danh thiết bị an toàn (Secure Device Identity)](ch06_secure_device_identity.vi.md#ch06)** Liên quan đến việc tạo và quản lý các định danh duy nhất cho embedded system.
 
-**[Chương 7: Giao tiếp an toàn (Secure Communication)](ch07_secure_communication.vi.md#ch07)** Trình bày các biện pháp bảo vệ state-of-the-art cho các kênh giao tiếp, và trả lời các câu hỏi thường gặp về việc hiện thực chúng trên embedded system.
+**[Chương 7: Giao tiếp an toàn (Secure Communication)](ch07_secure_communication.vi.md#ch07)** Trình bày các biện pháp bảo vệ state-of-the-art cho các kênh giao tiếp, và trả lời các câu hỏi thường gặp về việc triển khai chúng trên embedded system.
 
 **[Phần III: Các khái niệm bảo mật thiết bị nâng cao (Advanced Device Security Concepts)](part3_advanced_device_security_concepts.vi.md#part03)** tập trung vào các khái niệm bảo vệ toàn diện liên quan đến các thiết bị IoT an toàn.
 
@@ -88,9 +88,9 @@ Khi đọc cuốn sách này, hãy nhớ rằng mục tiêu của bạn không c
 
 ## Một lưu ý về các case study trong cuốn sách này
 
-Một số chương trong cuốn sách này chứa các case study thực tế. Mục đích của chúng *không phải* là làm các ví dụ copy-and-paste để dễ dàng tái hiện trên thiết bị của riêng bạn hay thậm chí để dùng cho phát triển sản phẩm thật. Điều đó sẽ đòi hỏi một mức chi tiết vượt ngoài phạm vi của cuốn sách này, và những hiểu biết bảo mật liên quan sẽ biến mất trong một biển các vấn đề hiện thực.
+Một số chương trong cuốn sách này chứa các case study thực tế. Mục đích của chúng *không phải* là làm các ví dụ copy-and-paste để dễ dàng tái hiện trên thiết bị của riêng bạn hay thậm chí để dùng cho phát triển sản phẩm thật. Điều đó sẽ đòi hỏi một mức chi tiết vượt ngoài phạm vi của cuốn sách này, và những hiểu biết bảo mật liên quan sẽ biến mất trong một biển các vấn đề triển khai.
 
-Một số case study minh họa khoảng cách giữa lý thuyết và thế giới thực đầy lộn xộn. Một số khác cho thấy ưu điểm hay nhược điểm của các lựa chọn hiện thực khác nhau, và một số case study chỉ cung cấp một bối cảnh ứng dụng cụ thể giúp bạn hiểu các ý tưởng và khái niệm đã nêu trước đó.
+Một số case study minh họa khoảng cách giữa lý thuyết và thế giới thực đầy lộn xộn. Một số khác cho thấy ưu điểm hay nhược điểm của các lựa chọn triển khai khác nhau, và một số case study chỉ cung cấp một bối cảnh ứng dụng cụ thể giúp bạn hiểu các ý tưởng và khái niệm đã nêu trước đó.
 
 <a id="page_xxvi"></a>Như đã đề cập trước đó, embedded system là một lớp thiết bị đa dạng, và processor, memory và interface của chúng cũng vậy. Để có một thiết bị minh họa hợp lý—không quá cao cấp, không quá nhỏ bé và hạn chế—tôi đã chọn một nền tảng phần cứng có performance trung bình, đồng thời có các biện pháp bảo mật hardware-based có thể được phân tích trong các case study thực tế: board đánh giá STM32MP157F-DK2 của STMicroelectronics (ST). (Xin nói rõ, tôi không có liên hệ gì với ST.)
 

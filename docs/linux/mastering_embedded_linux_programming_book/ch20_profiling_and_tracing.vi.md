@@ -343,7 +343,7 @@ Ftrace gồm một số tracer có thể ghi log nhiều loại hoạt động k
 
 Tracer `function` instrument mỗi hàm kernel để các lời gọi có thể được ghi lại và gắn timestamp. Nó compile kernel với switch `-pg` để chèn instrumentation. Tracer `function_graph` đi xa hơn và ghi lại cả lúc vào lẫn lúc ra của các hàm để có thể tạo một call graph. Tính năng event tracepoint ghi lại các tham số gắn với lời gọi.
 
-Ftrace có một giao diện người dùng rất embedded-friendly được hiện thực hoàn toàn thông qua các file ảo trong filesystem `debugfs`, nghĩa là bạn không cần cài đặt bất kỳ công cụ nào trên target để nó hoạt động. Tuy vậy, có các giao diện người dùng khác nếu bạn thích: `trace-cmd` là một công cụ command-line ghi lại và xem trace và có sẵn trong Buildroot (`BR2_PACKAGE_TRACE_CMD`) và The Yocto Project (`trace-cmd`). Có một trình xem trace đồ họa tên KernelShark có sẵn dưới dạng package cho The Yocto Project.
+Ftrace có một giao diện người dùng rất embedded-friendly được triển khai hoàn toàn thông qua các file ảo trong filesystem `debugfs`, nghĩa là bạn không cần cài đặt bất kỳ công cụ nào trên target để nó hoạt động. Tuy vậy, có các giao diện người dùng khác nếu bạn thích: `trace-cmd` là một công cụ command-line ghi lại và xem trace và có sẵn trong Buildroot (`BR2_PACKAGE_TRACE_CMD`) và The Yocto Project (`trace-cmd`). Có một trình xem trace đồ họa tên KernelShark có sẵn dưới dạng package cho The Yocto Project.
 
 Giống như `perf`, bật Ftrace đòi hỏi đặt một số tùy chọn cấu hình kernel nhất định.
 
@@ -562,9 +562,9 @@ LTTng gồm ba thành phần:
 
 - Một core session manager
 
-- Một kernel tracer được hiện thực như một nhóm kernel module
+- Một kernel tracer được triển khai như một nhóm kernel module
 
-- Một user-space tracer được hiện thực như một thư viện
+- Một user-space tracer được triển khai như một thư viện
 
 Ngoài những thứ đó, bạn sẽ cần một trình xem trace như Babeltrace (`https://babeltrace.org/`) hoặc plugin Eclipse Trace Compass để hiển thị và lọc dữ liệu trace thô trên host hoặc target.
 

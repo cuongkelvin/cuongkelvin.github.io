@@ -13,7 +13,7 @@ Trong chương này, chúng ta đi qua các bước cần thiết để có đư
 3. **Compiler**: trong phần này, chúng ta sẽ xem xét sâu hơn về compiler. Chúng ta sẽ giải thích cách compiler, thành phần điều khiển bước biên dịch, tạo ra các *intermediate representation* từ source code rồi dịch chúng sang assembly language.
 4. **Assembler**: sau compiler, chúng ta cũng nói về *assembler*, thành phần đóng vai trò quan trọng trong việc dịch các instruction assembly nhận được từ compiler thành các instruction machine-level. Thành phần assembler điều khiển bước assemble.
 
-1. **Linker**: trong phần cuối cùng, chúng ta sẽ thảo luận sâu hơn về thành phần *linker*, thành phần điều khiển bước link. Linker là một thành phần build cuối cùng tạo ra các sản phẩm thực sự của một dự án C. Có những lỗi build riêng của thành phần này, và kiến thức đầy đủ về linker sẽ giúp chúng ta ngăn ngừa và giải quyết chúng. Chúng ta cũng thảo luận về các sản phẩm cuối cùng khác nhau của một dự án C, và chúng ta sẽ đưa ra một vài gợi ý về việc disassemble một object file và đọc nội dung của nó. Hơn thế nữa, chúng ta thảo luận ngắn gọn về *C++ name mangling* là gì và nó ngăn chặn một số khiếm khuyết nhất định trong bước link khi build code C++ như thế nào.
+5. **Linker**: trong phần cuối cùng, chúng ta sẽ thảo luận sâu hơn về thành phần *linker*, thành phần điều khiển bước link. Linker là một thành phần build cuối cùng tạo ra các sản phẩm thực sự của một dự án C. Có những lỗi build riêng của thành phần này, và kiến thức đầy đủ về linker sẽ giúp chúng ta ngăn ngừa và giải quyết chúng. Chúng ta cũng thảo luận về các sản phẩm cuối cùng khác nhau của một dự án C, và chúng ta sẽ đưa ra một vài gợi ý về việc disassemble một object file và đọc nội dung của nó. Hơn thế nữa, chúng ta thảo luận ngắn gọn về *C++ name mangling* là gì và nó ngăn chặn một số khiếm khuyết nhất định trong bước link khi build code C++ như thế nào.
 
 Các thảo luận của chúng ta trong chương này chủ yếu xoay quanh các hệ thống Unix-like, nhưng chúng ta cũng thảo luận một số khác biệt ở các hệ điều hành khác, chẳng hạn Microsoft Windows.
 
@@ -109,7 +109,7 @@ Declaration giới thiệu một function signature có tên là `average`, nh�
 
 Như bạn có thể thấy<a id="_idIndexMarker134"></a> trong *Code Box 2-1*, một declaration hàm kết thúc bằng dấu chấm phẩy ";" và nó không có *body* (thân) được bao bởi dấu ngoặc nhọn. Chúng ta cũng nên lưu ý rằng các tham số trong declaration hàm không có tên đi kèm, và điều này hợp lệ trong C, nhưng chỉ trong declaration chứ không phải trong definition. Dù vậy, bạn được khuyến nghị đặt tên cho tham số ngay cả trong declaration.
 
-Declaration hàm nói về cách dùng hàm, còn definition định nghĩa hàm đó được hiện thực như thế nào. Người dùng không cần biết tên tham số để dùng hàm, và vì vậy có thể ẩn chúng trong declaration hàm.
+Declaration hàm nói về cách dùng hàm, còn definition định nghĩa hàm đó được triển khai như thế nào. Người dùng không cần biết tên tham số để dùng hàm, và vì vậy có thể ẩn chúng trong declaration hàm.
 
 Trong code sau, bạn có thể thấy <a id="_idIndexMarker135"></a>definition của hàm `average` mà chúng ta đã khai báo ở trên. Một definition hàm chứa code C thực sự biểu diễn logic của hàm. Nó luôn có một thân code được bao bởi một cặp dấu ngoặc nhọn:
 
@@ -549,7 +549,7 @@ Một chương trình có thể được build cho một architecture mới nế
 
 1. Assembly language đã được biết.
 
-1. Công cụ (hay chương trình) assembler cần thiết do công ty nhà cung cấp phát triển phải có sẵn trong tay. Điều này cho phép chúng ta dịch assembly code thành các instruction machine-level tương đương.
+2. Công cụ (hay chương trình) assembler cần thiết do công ty nhà cung cấp phát triển phải có sẵn trong tay. Điều này cho phép chúng ta dịch assembly code thành các instruction machine-level tương đương.
 
 Một khi các điều kiện tiên quyết này đã sẵn sàng, sẽ có thể sinh ra các instruction machine-level từ source code C. Chỉ khi đó, chúng ta mới có thể lưu các instruction machine-level được sinh ra bên trong các object file bằng một *object file format*. Ví dụ, nó có thể ở dạng *ELF* hoặc *Mach-O*.
 
@@ -694,7 +694,7 @@ Parser của preprocessor khác với parser được một compiler C dùng vì
 
 [*The GNU C Preprocessor Int*](http://www.chiark.greenend.org.uk/doc/cpp-4.3-doc/cppinternals.html)*ernals* – [http://www.chiark.greenend.org.uk/doc/cpp-4.3-doc/cppinternals.html](http://www.chiark.greenend.org.uk/doc/cpp-4.3-doc/cppinternals.html) – là một nguồn tuyệt vời để tìm hiểu thêm <a id="_idIndexMarker186"></a>về preprocessor của `gcc`. Tài liệu này là một nguồn chính thức mô tả GNU C preprocessor hoạt động thế nào. GNU C preprocessor được compiler `gcc` dùng để tiền xử lý các source file.
 
-Trong đường dẫn trên, bạn có thể tìm thấy cách preprocessor phân tích cú pháp các directive và cách nó tạo ra *parse tree*. Tài liệu cũng cung cấp phần giải thích về các thuật toán mở rộng macro khác nhau. Mặc dù điều đó nằm ngoài phạm vi của chương này, nếu bạn muốn hiện thực preprocessor của riêng mình cho một ngôn ngữ lập trình in-house cụ thể, hoặc chỉ để xử lý một số text file, thì đường dẫn trên cung cấp một số bối cảnh tuyệt vời.
+Trong đường dẫn trên, bạn có thể tìm thấy cách preprocessor phân tích cú pháp các directive và cách nó tạo ra *parse tree*. Tài liệu cũng cung cấp phần giải thích về các thuật toán mở rộng macro khác nhau. Mặc dù điều đó nằm ngoài phạm vi của chương này, nếu bạn muốn triển khai preprocessor của riêng mình cho một ngôn ngữ lập trình in-house cụ thể, hoặc chỉ để xử lý một số text file, thì đường dẫn trên cung cấp một số bối cảnh tuyệt vời.
 
 Trong hầu hết các hệ điều hành Unix-like, có một công cụ gọi là **cpp**, viết tắt của **C Pre-Processor** – chứ không phải C Plus Plus! `cpp` là<a id="_idIndexMarker188"></a> một phần của gói phát triển C được phát hành kèm mỗi biến thể Unix. Nó có thể được dùng để tiền xử lý một file C. Ở hậu trường, công cụ này được một compiler C, như `gcc`, dùng để tiền xử lý một file C. Nếu bạn có một source file, bạn có thể dùng nó, theo cách tương tự như những gì chúng ta làm tiếp theo, để tiền xử lý một source file:
 
@@ -793,7 +793,7 @@ Bước tiếp theo là dùng `clang` để dump AST bên trong code trên. Tron
 
 Đến giờ, chúng ta đã dùng `clang` ở nhiều chỗ như một compiler C, nhưng hãy giới thiệu nó cho đúng. `clang` là một compiler frontend C do LLVM Developer Group phát triển cho compiler backend `llvm`. *LLVM Compiler Infrastructure Project* dùng một *intermediate representation* – hay *LLVM IR* – làm cấu trúc dữ liệu trừu tượng được dùng giữa frontend và backend của nó. LLVM nổi tiếng với khả năng dump cấu trúc dữ liệu IR của nó cho mục đích nghiên cứu. Output tree-like ở trên là IR được sinh ra từ source code của *ví dụ 2.2*.
 
-Những gì chúng ta đã làm<a id="_idIndexMarker202"></a> ở đây là giới thiệu cho bạn những điều cơ bản về AST. Chúng ta <a id="_idIndexMarker203"></a>sẽ không đi qua chi tiết của output AST ở trên vì mỗi compiler có hiện thực AST riêng của nó. Chúng ta sẽ cần vài chương để trình bày mọi chi tiết về điều này, và điều đó nằm ngoài phạm vi của cuốn sách này.
+Những gì chúng ta đã làm<a id="_idIndexMarker202"></a> ở đây là giới thiệu cho bạn những điều cơ bản về AST. Chúng ta <a id="_idIndexMarker203"></a>sẽ không đi qua chi tiết của output AST ở trên vì mỗi compiler có bản triển khai AST riêng của nó. Chúng ta sẽ cần vài chương để trình bày mọi chi tiết về điều này, và điều đó nằm ngoài phạm vi của cuốn sách này.
 
 Tuy nhiên, nếu bạn chú ý đến hình trên, bạn có thể tìm thấy một dòng bắt đầu bằng -`FunctionDecl`. Dòng này biểu diễn hàm `main`. Trước đó, bạn có thể tìm thấy meta information liên quan đến translation unit được truyền cho compiler.
 
@@ -993,7 +993,7 @@ int multiply(int, int);
 
 Nhìn vào code đó, bạn có thể<a id="_idIndexMarker224"></a> thấy rằng chúng ta đã dùng các câu lệnh header guard để ngăn *double inclusion* (include hai lần). Hơn thế nữa, hai hàm với *signature* tương tự được khai báo. Mỗi hàm nhận hai số nguyên làm input và sẽ trả về một số nguyên khác làm kết quả.
 
-Như chúng ta đã nói ở trên, mỗi hàm này được hiện thực trong các source file riêng biệt. Source file thứ nhất trông như sau:
+Như chúng ta đã nói ở trên, mỗi hàm này được triển khai trong các source file riêng biệt. Source file thứ nhất trông như sau:
 
 ```
 int add(int a, int b) {

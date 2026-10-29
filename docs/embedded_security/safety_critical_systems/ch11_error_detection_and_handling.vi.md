@@ -412,7 +412,7 @@ Luồng thực thi được minh họa trong <a id="b11fig11_9"></a>[Hình 11.9]
 
 *Hình 11.9: Recovery block với backward error recovery.[⏎](#b11fig11_9)*
 
-Có nhiều biến thể của kỹ thuật cơ bản này, có thể được coi là một loại N-version programming, như được mô tả trong [Mục 13.4.2](ch13_replication_and_diversification.vi.md#sec13_4_2). Một biến thể bắt nguồn từ nhận xét rằng các hiện thực khác nhau của hàm không cần tính ra kết quả giống hệt nhau, chúng chỉ cần trả về kết quả *chấp nhận được*. Vì vậy `function1` có thể cố gắng xử lý đầy đủ các tham số input, trong khi `function2` có thể thực hiện một phép tính đơn giản hơn cho ra một câu trả lời gần đúng hơn.
+Có nhiều biến thể của kỹ thuật cơ bản này, có thể được coi là một loại N-version programming, như được mô tả trong [Mục 13.4.2](ch13_replication_and_diversification.vi.md#sec13_4_2). Một biến thể bắt nguồn từ nhận xét rằng các cách triển khai khác nhau của hàm không cần tính ra kết quả giống hệt nhau, chúng chỉ cần trả về kết quả *chấp nhận được*. Vì vậy `function1` có thể cố gắng xử lý đầy đủ các tham số input, trong khi `function2` có thể thực hiện một phép tính đơn giản hơn cho ra một câu trả lời gần đúng hơn.
 
 Một nhận xét thứ hai nảy sinh từ thực tế là hầu hết các fault còn sót lại trong code đã xuất xưởng có khả năng là Heisenbug. Nếu đúng như vậy thì pattern có thể được đơn giản hóa:
 
@@ -433,7 +433,7 @@ Làm ví dụ về việc dùng recovery block với cùng một routine đượ
 
 Một nhược điểm của recovery block là mọi side effect (thay đổi hệ thống) do một routine tạo ra, mà output của nó rốt cuộc bị acceptance routine từ chối, phải được hoàn tác trước khi phép tính được lặp lại. Những side effect này bao gồm cái mà tài liệu tham khảo [[10](#refbib11_10)] gọi là “information smuggling”, khi routine thay đổi các cấu trúc dữ liệu bên ngoài nhóm chương trình tham gia xử lý hoặc thậm chí tạo ra các tiến trình mới một cách động.
 
-Recovery block cũng có thể cung cấp một mức độ bảo vệ nào đó chống lại các cuộc tấn công bảo mật, vì kẻ tấn công phải làm hỏng cả phần hiện thực *lẫn* <a id="p136"></a>acceptance test trước khi một giá trị xấu có thể được tạo ra một cách âm thầm. Trong Turing Lecture thứ hai (2000), Brian Randell đã báo cáo về một thí nghiệm mà nhóm của ông thực hiện với một hệ thống được hiện thực bằng recovery block. Người dùng được khuyến khích thực hiện những thay đổi tùy ý đối với code của nhiều hiện thực khác nhau. Sau một thời gian ngắn, hệ thống đã được mài giũa đến mức không có lượng sửa đổi nào gây ra error trong hoạt động của nó.
+Recovery block cũng có thể cung cấp một mức độ bảo vệ nào đó chống lại các cuộc tấn công bảo mật, vì kẻ tấn công phải làm hỏng cả phần triển khai *lẫn* <a id="p136"></a>acceptance test trước khi một giá trị xấu có thể được tạo ra một cách âm thầm. Trong Turing Lecture thứ hai (2000), Brian Randell đã báo cáo về một thí nghiệm mà nhóm của ông thực hiện với một hệ thống được triển khai bằng recovery block. Người dùng được khuyến khích thực hiện những thay đổi tùy ý đối với code của nhiều cách triển khai khác nhau. Sau một thời gian ngắn, hệ thống đã được mài giũa đến mức không có lượng sửa đổi nào gây ra error trong hoạt động của nó.
 
 Đáng tiếc là không có ngôn ngữ lập trình hiện đại nào hỗ trợ trực tiếp recovery block (mặc dù D đến khá gần), nhưng các cấu trúc cần thiết có thể được cung cấp trong hầu như bất kỳ ngôn ngữ nào thông qua macro hoặc meta-programming.
 

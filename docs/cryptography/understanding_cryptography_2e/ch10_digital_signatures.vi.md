@@ -734,7 +734,7 @@ Các thuật toán cho Digital Signature Scheme digital signature thực tế đ
 
 Digital signature Elgamal được công bố năm 1985 trong [110]. Nhiều biến thể của scheme này là khả dĩ và đã được đề xuất qua nhiều năm. Để có một bản tóm tắt gọn, xem [189, Note 11.70].
 
-DSS, hay Digital Signature Standard, là một tập các thuật toán chữ ký được chính phủ Mỹ phê chuẩn. Nó được công bố năm 1994. Thuật toán DSA được đề xuất năm 1991 và lúc đầu là scheme duy nhất của DSS. Có hai động cơ khả dĩ để chính phủ tạo tiêu chuẩn này như một lựa chọn thay thế RSA, vốn là tiêu chuẩn de facto cho chữ ký vào thời điểm đó. Thứ nhất, RSA khi đó đã được cấp bằng sáng chế và có một lựa chọn thay thế miễn phí là hấp dẫn cho công nghiệp Mỹ. Thứ hai, các hiện thực digital signature RSA cũng có thể được dùng để mã hóa. Điều này không đáng mong muốn (từ góc nhìn của chính phủ Mỹ) vì khi đó vẫn còn các hạn chế xuất khẩu khá nghiêm ngặt cho cryptography ở Mỹ. Ngược lại, một hiện thực DSA chỉ có thể được dùng để ký chứ không để mã hóa, và việc xuất khẩu các hệ thống chỉ có chức năng chữ ký dễ hơn. Tiêu chuẩn gốc năm 1994 được gọi là FIPS 186, đã được sửa đổi vài lần. Phiên bản mới nhất của tiêu chuẩn có chứa DSA là FIPS 186-4. Tuy nhiên, phiên bản hiện tại, FIPS 186-5 [198], không cho phép DSA và chỉ liệt kê ECDSA và RSA làm thuật toán chữ ký.
+DSS, hay Digital Signature Standard, là một tập các thuật toán chữ ký được chính phủ Mỹ phê chuẩn. Nó được công bố năm 1994. Thuật toán DSA được đề xuất năm 1991 và lúc đầu là scheme duy nhất của DSS. Có hai động cơ khả dĩ để chính phủ tạo tiêu chuẩn này như một lựa chọn thay thế RSA, vốn là tiêu chuẩn de facto cho chữ ký vào thời điểm đó. Thứ nhất, RSA khi đó đã được cấp bằng sáng chế và có một lựa chọn thay thế miễn phí là hấp dẫn cho công nghiệp Mỹ. Thứ hai, các bản triển khai digital signature RSA cũng có thể được dùng để mã hóa. Điều này không đáng mong muốn (từ góc nhìn của chính phủ Mỹ) vì khi đó vẫn còn các hạn chế xuất khẩu khá nghiêm ngặt cho cryptography ở Mỹ. Ngược lại, một bản triển khai DSA chỉ có thể được dùng để ký chứ không để mã hóa, và việc xuất khẩu các hệ thống chỉ có chức năng chữ ký dễ hơn. Tiêu chuẩn gốc năm 1994 được gọi là FIPS 186, đã được sửa đổi vài lần. Phiên bản mới nhất của tiêu chuẩn có chứa DSA là FIPS 186-4. Tuy nhiên, phiên bản hiện tại, FIPS 186-5 [198], không cho phép DSA và chỉ liệt kê ECDSA và RSA làm thuật toán chữ ký.
 
 Ngoài các thuật toán được thảo luận trong chương này, tồn tại vài scheme digital signature khác. Chúng bao gồm, ví dụ, chữ ký Rabin [213], chữ ký Fiat–Shamir [114], chữ ký Pointcheval–Stern [208] và chữ ký Schnorr [228].
 
@@ -808,7 +808,7 @@ Oscar có thể thực hiện một man-in-the-middle attack, tức là hắn c�
 
 2. Việc nào mất nhiều thời gian hơn, ký hay kiểm chứng?
 
-3. Bây giờ chúng ta suy ra các ước tính cho tốc độ của hiện thực software thực tế. Dùng mô hình thời gian sau cho phép nhân: Máy tính hoạt động với các cấu trúc dữ liệu 32-bit. Do đó, mỗi biến full-length, đặc biệt là n và x, được biểu diễn bằng một mảng với m = ⌈l/32⌉ phần tử (với x là cơ số của phép lũy thừa). Chúng ta giả sử rằng một phép nhân hoặc bình phương hai biến này modulo n mất m<sup>2</sup> đơn vị thời gian (một đơn vị thời gian là chu kỳ clock nhân một hằng số lớn hơn 1 phụ thuộc vào hiện thực). Lưu ý rằng bạn không bao giờ nhân với các số mũ d và e. Điều đó có nghĩa là độ dài bit của số mũ không ảnh hưởng tới thời gian thực hiện một phép bình phương hoặc phép nhân modulo riêng lẻ.
+3. Bây giờ chúng ta suy ra các ước tính cho tốc độ của bản triển khai software thực tế. Dùng mô hình thời gian sau cho phép nhân: Máy tính hoạt động với các cấu trúc dữ liệu 32-bit. Do đó, mỗi biến full-length, đặc biệt là n và x, được biểu diễn bằng một mảng với m = ⌈l/32⌉ phần tử (với x là cơ số của phép lũy thừa). Chúng ta giả sử rằng một phép nhân hoặc bình phương hai biến này modulo n mất m<sup>2</sup> đơn vị thời gian (một đơn vị thời gian là chu kỳ clock nhân một hằng số lớn hơn 1 phụ thuộc vào bản triển khai). Lưu ý rằng bạn không bao giờ nhân với các số mũ d và e. Điều đó có nghĩa là độ dài bit của số mũ không ảnh hưởng tới thời gian thực hiện một phép bình phương hoặc phép nhân modulo riêng lẻ.
 
 Mất bao lâu để tính một chữ ký/kiểm chứng một chữ ký nếu đơn vị thời gian trên một máy tính nhất định là 100 ns, và n có 1024 bit? Mất bao lâu nếu n có 2048 bit?
 
@@ -840,7 +840,7 @@ c. x = 85 và k<sub>E</sub> = 77
 
 10.12. Cho một scheme chữ ký Elgamal với các tham số công khai (p = 97,α = 23,β = 15). Chỉ ra cách Oscar có thể thực hiện một existential forgery attack bằng cách đưa ra một ví dụ về một chữ ký hợp lệ.
 
-10.13. Cho một scheme chữ ký Elgamal với các tham số công khai p,α ∈ ℤ<sub>p</sub><sup>∗</sup> và một private key chưa biết d. Do một hiện thực software sai, có sự phụ thuộc sau giữa hai ephemeral key liên tiếp:
+10.13. Cho một scheme chữ ký Elgamal với các tham số công khai p,α ∈ ℤ<sub>p</sub><sup>∗</sup> và một private key chưa biết d. Do một bản triển khai software sai, có sự phụ thuộc sau giữa hai ephemeral key liên tiếp:
 
 k<sub>E<sub>i+1</sub></sub> = k<sub>E<sub>i</sub></sub> + 1
 
@@ -864,7 +864,7 @@ Giả sử hai chữ ký liên tiếp cho các plaintext x<sub>1</sub> và x<sub
 
 3. h(x) = 9,k<sub>E</sub> = 8
 
-10.17. Bob nhận thấy rằng ai đó có thể ký thông điệp dưới tên anh ấy. Khi kiểm tra software chữ ký của mình, anh ấy nhận thấy rằng bộ sinh số ngẫu nhiên luôn chọn cùng ephemeral key cho scheme chữ ký Elgamal. Vì hiện thực của anh ấy thiếu một TRNG tốt, Bob hiện thực biện pháp đối phó sau. Anh ấy sửa đổi bộ sinh số ngẫu nhiên sao cho key mới được tính bằng cách nhân giá trị của key trước với 3, tức là
+10.17. Bob nhận thấy rằng ai đó có thể ký thông điệp dưới tên anh ấy. Khi kiểm tra software chữ ký của mình, anh ấy nhận thấy rằng bộ sinh số ngẫu nhiên luôn chọn cùng ephemeral key cho scheme chữ ký Elgamal. Vì bản triển khai của anh ấy thiếu một TRNG tốt, Bob triển khai biện pháp đối phó sau. Anh ấy sửa đổi bộ sinh số ngẫu nhiên sao cho key mới được tính bằng cách nhân giá trị của key trước với 3, tức là
 
 k<sub>E(i+1)</sub> = 3 · k<sub>E(i)</sub>
 

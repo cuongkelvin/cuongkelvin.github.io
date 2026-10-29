@@ -34,7 +34,7 @@ Hình C.2.1 trình bày truth table cho hàm ALU control đã xây dựng trong 
 
 **HÌNH C.2.1 Truth table cho bốn bit ALU control (gọi là Operation) dưới dạng hàm của ALUOp và trường function code. Bảng này giống bảng trong Hình 4.13.**
 
-Hình C.2.2 trình bày truth table cho từng bit trong bốn bit ALU control. Chúng ta tận dụng cấu trúc chung của mỗi truth table để đưa thêm các don’t care vào. Ví dụ, năm dòng trong truth table ở Hình C.2.1 thiết lập Operation1 được rút gọn còn hai entry trong Hình C.2.2. Một chương trình tối thiểu hóa logic sẽ dùng các hạng don’t-care để giảm số gate và số input của mỗi gate khi hiện thực các truth table này bằng logic gate.
+Hình C.2.2 trình bày truth table cho từng bit trong bốn bit ALU control. Chúng ta tận dụng cấu trúc chung của mỗi truth table để đưa thêm các don’t care vào. Ví dụ, năm dòng trong truth table ở Hình C.2.1 thiết lập Operation1 được rút gọn còn hai entry trong Hình C.2.2. Một chương trình tối thiểu hóa logic sẽ dùng các hạng don’t-care để giảm số gate và số input của mỗi gate khi triển khai các truth table này bằng logic gate.
 
 ![p1396_2](images/appC_mapping_control_to_hardware/p1396_2.jpg)
 
@@ -112,7 +112,7 @@ Như đã thấy, hàm control có thể được biểu diễn bằng một ph�
 
 Đơn giản nhất là chia hàm control được định nghĩa trong Hình C.3.3 thành hai phần: các output next-state có thể phụ thuộc vào mọi input, và các output tín hiệu control chỉ phụ thuộc vào các bit current-state. Hình C.3.4 trình bày truth table cho mọi tín hiệu datapath control. Vì các tín hiệu này thực sự chỉ phụ thuộc vào các bit state (không phụ thuộc opcode), mỗi entry trong một bảng ở Hình C.3.4 thực ra biểu diễn 64 (=2<sup>6</sup>) entry, với 6 bit mang tên Op nhận mọi giá trị có thể; tức là các bit Op là bit don’t-care khi xác định các output control của data path. Hình C.3.5 trình bày truth table cho các bit next-state NS[3–0], phụ thuộc vào các bit input state và các bit instruction cung cấp opcode.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Có nhiều cơ hội đơn giản hóa hàm control bằng cách quan sát điểm tương đồng giữa hai hay nhiều tín hiệu control và dùng ngữ nghĩa của cách triển khai. Ví dụ, các tín hiệu PCWriteCond, PCSource0 và ALUOp0 đều được assert trong đúng một state, state 8. Ba tín hiệu control này có thể được thay bằng một tín hiệu duy nhất.
 
@@ -278,7 +278,7 @@ Cách tiếp cận hẹp nhưng thường dài hơn hay gọi là vertical micro
 
 ## C.6 Nhận xét kết thúc
 
-Chúng ta bắt đầu phụ lục bằng cách xem cách chuyển sơ đồ finite-state thành cách triển khai dùng finite-state machine. Sau đó khảo sát các sequencer tường minh dùng kỹ thuật khác để hiện thực hàm next-state. Mặc dù microprogram lớn thường hướng tới cách triển khai dùng phương pháp next-state tường minh này, chúng ta cũng có thể triển khai microprogram bằng finite-state machine. Như đã thấy, có thể triển khai các hàm logic bằng cả ROM lẫn PLA. Ưu điểm của next state tường minh so với được encode, và của triển khai ROM so với PLA, được tóm tắt dưới đây.
+Chúng ta bắt đầu phụ lục bằng cách xem cách chuyển sơ đồ finite-state thành cách triển khai dùng finite-state machine. Sau đó khảo sát các sequencer tường minh dùng kỹ thuật khác để triển khai hàm next-state. Mặc dù microprogram lớn thường hướng tới cách triển khai dùng phương pháp next-state tường minh này, chúng ta cũng có thể triển khai microprogram bằng finite-state machine. Như đã thấy, có thể triển khai các hàm logic bằng cả ROM lẫn PLA. Ưu điểm của next state tường minh so với được encode, và của cách triển khai ROM so với PLA, được tóm tắt dưới đây.
 
 ### Bức tranh tổng thể
 

@@ -147,25 +147,25 @@ Trong hình, mỗi PDE mô tả điều gì đó về page chứa page table cho
 
 Trong physical page 100 (PFN của page thứ 0 chứa page table), ta có page đầu gồm 16 page table entry cho 16 VPN đầu của address space. Xem Hình 20.5 (giữa) để biết nội dung phần này.
 
-| Page Directory | Page chứa PT (@PFN:100) | Page chứa PT (@PFN:101) |
-|---|---|---|
-| PFN valid? | PFN valid prot | PFN valid prot |
-| 100 1 | 10 1 r-x | — 0 — |
-| — 0 | 23 1 r-x | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | 80 1 rw- | — 0 — |
-| — 0 | 59 1 rw- | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | — 0 — | — 0 — |
-| — 0 | — 0 — | 55 1 rw- |
-| 101 1 | — 0 — | 45 1 rw- |
+| Page Directory |  | Page chứa PT (@PFN:100) |  |  | Page chứa PT (@PFN:101) |  |  |
+|---|---|---|---|---|---|---|---|
+| PFN | valid? | PFN | valid | prot | PFN | valid | prot |
+| 100 | 1 | 10 | 1 | r-x | — | 0 | — |
+| — | 0 | 23 | 1 | r-x | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | 80 | 1 | rw- | — | 0 | — |
+| — | 0 | 59 | 1 | rw- | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | — | 0 | — | — | 0 | — |
+| — | 0 | — | 0 | — | 55 | 1 | rw- |
+| 101 | 1 | — | 0 | — | 45 | 1 | rw- |
 
 Hình 20.5: Page Directory và các phần Page Table
 

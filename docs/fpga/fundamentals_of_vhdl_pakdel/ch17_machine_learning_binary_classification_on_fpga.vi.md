@@ -2,7 +2,7 @@
 
 ## 17.1 Giới thiệu
 
-Trong mục này, chúng ta sẽ hiện thực một model phân loại nhị phân (binary classification) machine learning trên FPGA bằng Simulink và Vivado. Đầu tiên, chúng ta tải một dataset từ Kaggle phù hợp cho việc hiện thực binary classification. Dùng MATLAB, chúng ta huấn luyện model binary classification bằng cách cực tiểu hóa cost function negative log-likelihood. Chúng ta dùng customer satisfaction dataset để dự đoán mức độ hài lòng của khách hàng dựa trên nhiều tham số input khác nhau. Sau đó, chúng ta hiện thực model machine learning binary classification đã huấn luyện bằng HDL Coder và tạo code VHDL có thể synthesize. Cuối cùng, dùng Vivado, chúng ta chạy synthesis analysis và simulation để kiểm chứng project VHDL đã thiết kế.
+Trong mục này, chúng ta sẽ triển khai một model phân loại nhị phân (binary classification) machine learning trên FPGA bằng Simulink và Vivado. Đầu tiên, chúng ta tải một dataset từ Kaggle phù hợp cho việc triển khai binary classification. Dùng MATLAB, chúng ta huấn luyện model binary classification bằng cách cực tiểu hóa cost function negative log-likelihood. Chúng ta dùng customer satisfaction dataset để dự đoán mức độ hài lòng của khách hàng dựa trên nhiều tham số input khác nhau. Sau đó, chúng ta triển khai model machine learning binary classification đã huấn luyện bằng HDL Coder và tạo code VHDL có thể synthesize. Cuối cùng, dùng Vivado, chúng ta chạy synthesis analysis và simulation để kiểm chứng project VHDL đã thiết kế.
 
 ## 17.2 Dataset Kaggle
 
@@ -14,7 +14,7 @@ Tổng quan về một phần customer satisfaction dataset trong phần mềm E
 
 ## 17.3 Binary classification (logistic regression)
 
-Trong mục này, chúng ta mô tả binary classification hay logistic regression, và mục tiêu của chúng ta là học hàm g ( x ) được tham số hóa bởi θ , hàm này dự đoán lớp nhị phân.
+Trong mục này, chúng ta mô tả binary classification hay logistic regression, và mục tiêu của chúng ta là học hàm g(x) được tham số hóa bởi θ, hàm này dự đoán lớp nhị phân.
 
 ![p0342_eq17_1](images/ch17_machine_learning_binary_classification_on_fpga/p0342_eq17_1.png) (17.1)
 
@@ -22,7 +22,7 @@ z nhận giá trị trên toàn bộ trục số thực, nhưng chúng ta cần 
 
 ![p0342_eq17_2](images/ch17_machine_learning_binary_classification_on_fpga/p0342_eq17_2.png) (17.2)
 
-Code sau được dùng để vẽ h ( z ) theo z trong khoảng [−10, 10], và waveform thu được được mô tả trong Hình 17.2.
+Code sau được dùng để vẽ h(z) theo z trong khoảng [−10, 10], và waveform thu được được mô tả trong Hình 17.2.
 
 ![p0343_3](images/ch17_machine_learning_binary_classification_on_fpga/p0343_3.png)
 
@@ -30,7 +30,7 @@ Hình 17.1 Tổng quan về một phần customer satisfaction dataset.
 
 ![p0343_4](images/ch17_machine_learning_binary_classification_on_fpga/p0343_4.png)
 
-Hình 17.2 Đồ thị h ( z ) theo z .
+Hình 17.2 Đồ thị h(z) theo z.
 
 ```
 z = -10:0.1:10;
@@ -47,7 +47,7 @@ Class prediction hay binary classification được định nghĩa bởi phươn
 
 ![p0343_eq17_3](images/ch17_machine_learning_binary_classification_on_fpga/p0343_eq17_3.png) (17.3)
 
-Ngưỡng quyết định là r = 0.5 .
+Ngưỡng quyết định là r = 0.5.
 
 Vector tham số 𝜽 được tìm bằng phương trình sau.
 
@@ -57,7 +57,7 @@ Cost function (negative log-likelihood cost) trong logistic regression được 
 
 ![p0343_eq17_5](images/ch17_machine_learning_binary_classification_on_fpga/p0343_eq17_5.png) (17.5)
 
-Gradient của cost function là một vector có cùng độ dài với 𝜽 , được cho bởi phương trình sau:
+Gradient của cost function là một vector có cùng độ dài với 𝜽, được cho bởi phương trình sau:
 
 ![p0344_eq17_6](images/ch17_machine_learning_binary_classification_on_fpga/p0344_eq17_6.png) (17.6)
 
@@ -69,23 +69,23 @@ Tóm lại, phương pháp logistic regression được mô tả như sau.
 
 Việc học (learning) binary regression được thực hiện như sau.
 
-Input: Dữ liệu huấn luyện τ = {x<sub>i</sub>,y<sub>i</sub>}<sup>N</sup><sub>i=1</sub> (với các lớp output y = { 0,1})
+Input: Dữ liệu huấn luyện τ = {x<sub>i</sub>,y<sub>i</sub>}<sup>N</sup><sub>i=1</sub> (với các lớp output y = {0,1})
 
 Output: Vector tham số đã học 𝜽 (tính bằng phương pháp số theo Phương trình (17.4))
 
 Việc dự đoán bằng binary logistic regression được thực hiện như sau.
 
-Input: Vector tham số đã học 𝜽 , và input test x*
+Input: Vector tham số đã học 𝜽, và input test x*
 
 Output: Dự đoán ŷ(x*) bằng phương trình sau.
 
-Tính g(x,*) , bằng phương trình sau.
+Tính g(x,*), bằng phương trình sau.
 
 ![p0344_eq17_8](images/ch17_machine_learning_binary_classification_on_fpga/p0344_eq17_8.png) (17.8)
 
 ## 17.4 Model logistic regression machine learning cho dataset
 
-Chúng ta dùng m-file MATLAB sau (ClassModel.m) để hiện thực model binary classification machine learning cho customer satisfaction dataset.
+Chúng ta dùng m-file MATLAB sau (ClassModel.m) để triển khai model binary classification machine learning cho customer satisfaction dataset.
 
 ```
 clear all; close all; clc
@@ -214,6 +214,7 @@ histogram(categorical(NumD_cell(:,7)),'BarWidth',0.3);
 ylabel('Frequency');
 title('Online support');
 grid on;
+
 subplot(212)
 histogram(categorical(NumD_cell(:,8)),'BarWidth',0.3);
 ylabel('Frequency');
@@ -320,6 +321,7 @@ initial,options);
 
 %Final value of cost function
 [Jf, Gradf] = Cost_Function(Theta_initial, XTrain, YTrain);
+
 %Sigmoid function evaluation
 z = XTest * Theta;
 hz = 1 ./ (1 + exp(-z));  %Sigmoid function implementation
@@ -406,7 +408,7 @@ Ngoài ra, cùng function “Convert_to_Fixed_Point” từ chương trước c�
 Accuracy of Log Reg Method = 94.2505
 ```
 
-Ngoài ra, các giá trị tối ưu của 𝜽​ như sau:​
+Ngoài ra, các giá trị tối ưu của 𝜽 như sau:
 
 ```
 >> Theta'
@@ -556,6 +558,7 @@ Khi chạy m-file này, chúng ta có kết quả sau trong MATLAB command windo
 
 ```
 AccuracySim =
+
    77.3000
 ```
 

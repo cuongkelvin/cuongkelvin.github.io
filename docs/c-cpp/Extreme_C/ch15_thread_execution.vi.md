@@ -2,7 +2,7 @@
 
 # Chương 15: Thực thi Thread (Thread Execution)
 
-Như chúng tôi đã giải thích trong chương trước, concurrency có thể được hiện thực bằng chỉ một trong hai cách tiếp cận *multithreading* hay *multi-processing* bên trong một hệ thống POSIX-compliant. Vì hai cách tiếp cận này là những chủ đề quá lớn để thảo luận, chúng đã được chia thành bốn chương riêng biệt để cho mỗi chủ đề phạm vi trình bày mà nó cần:
+Như chúng tôi đã giải thích trong chương trước, concurrency có thể được triển khai bằng chỉ một trong hai cách tiếp cận *multithreading* hay *multi-processing* bên trong một hệ thống POSIX-compliant. Vì hai cách tiếp cận này là những chủ đề quá lớn để thảo luận, chúng đã được chia thành bốn chương riêng biệt để cho mỗi chủ đề phạm vi trình bày mà nó cần:
 
 - **Cách tiếp cận multithreading** sẽ được thảo luận trong cả chương này và *Chương 16*, *Thread Synchronization*
 - **Cách tiếp cận multi-processing** sẽ được trình bày trong *Chương 17*, *Process Execution*, và *Chương 18*, *Process Synchronization*.
@@ -86,7 +86,7 @@ Khi các thread của nó được đồng bộ hóa và không còn data race h
 
 > **Lưu ý**:
 >
-> Trong link sau, bạn có thể tìm thấy thêm thông tin về POSIX thread và các thuộc tính mà chúng chia sẻ. Link sau là <a id="_idIndexMarker1070"></a>về hiện thực NTPL của POSIX threading interface. Nó dành cho môi trường Linux nhưng phần lớn có thể áp dụng cho các hệ điều hành Unix-like khác.
+> Trong link sau, bạn có thể tìm thấy thêm thông tin về POSIX thread và các thuộc tính mà chúng chia sẻ. Link sau là <a id="_idIndexMarker1070"></a>về bản triển khai NTPL của POSIX threading interface. Nó dành cho môi trường Linux nhưng phần lớn có thể áp dụng cho các hệ điều hành Unix-like khác.
 >
 > http://man7.org/linux/man-pages/man7/pthreads.7.html.
 
@@ -102,11 +102,11 @@ Phần này dành cho POSIX threading API, được biết đến nhiều hơn l
 
 Trong các hệ điều hành non-POSIX-compliant như Microsoft Windows, phải có một API khác được thiết kế cho mục đích này và nó có thể được tìm thấy trong tài liệu của hệ điều hành đó. Ví dụ, trong trường hợp Microsoft Windows, threading API được cung cấp như một phần của Windows API<a id="_idIndexMarker1074"></a>, được biết đến là Win32 API. Đây là link tới tài liệu của Microsoft<a id="_idIndexMarker1075"></a> về [Windows' threading API: https://docs.microsoft.com/en-us/windows/desktop/procthread/proce](https://docs.microsoft.com/en-us/windows/desktop/procthread/process-and-thread-functions)ss-and-thread-functions.
 
-Tuy nhiên, trong C11, chúng ta kỳ vọng có một API thống nhất để làm việc với thread. Nói cách khác, bất kể bạn đang viết một chương trình cho một hệ thống POSIX hay một hệ thống non-POSIX, bạn sẽ có thể dùng cùng API do C11 cung cấp. Dù điều này rất đáng mong muốn, vào thời điểm này chưa có nhiều hỗ trợ cho những API phổ quát như vậy giữa các hiện thực chuẩn C khác nhau, như glibc.
+Tuy nhiên, trong C11, chúng ta kỳ vọng có một API thống nhất để làm việc với thread. Nói cách khác, bất kể bạn đang viết một chương trình cho một hệ thống POSIX hay một hệ thống non-POSIX, bạn sẽ có thể dùng cùng API do C11 cung cấp. Dù điều này rất đáng mong muốn, vào thời điểm này chưa có nhiều hỗ trợ cho những API phổ quát như vậy giữa các cách triển khai chuẩn C khác nhau, như glibc.
 
-Tiếp tục chủ đề, library pthread đơn giản là một tập *header* và *hàm* có thể được dùng để viết các chương trình multithreaded trong các hệ điều hành POSIX-compliant. Mỗi hệ điều hành có hiện thực riêng cho library pthread. Những hiện thực này có thể hoàn toàn khác với những gì một hệ điều hành POSIX-compliant khác có, nhưng rốt cuộc, tất cả chúng đều phơi ra cùng một interface (API).
+Tiếp tục chủ đề, library pthread đơn giản là một tập *header* và *hàm* có thể được dùng để viết các chương trình multithreaded trong các hệ điều hành POSIX-compliant. Mỗi hệ điều hành có bản triển khai riêng cho library pthread. Những bản triển khai này có thể hoàn toàn khác với những gì một hệ điều hành POSIX-compliant khác có, nhưng rốt cuộc, tất cả chúng đều phơi ra cùng một interface (API).
 
-Một ví dụ nổi tiếng<a id="_idIndexMarker1076"></a> là **Native POSIX Threading Library**, hay viết tắt là **NPTL**, vốn là hiện thực chính của library pthread cho hệ điều hành Linux.
+Một ví dụ nổi tiếng<a id="_idIndexMarker1076"></a> là **Native POSIX Threading Library**, hay viết tắt là **NPTL**, vốn là bản triển khai chính của library pthread cho hệ điều hành Linux.
 
 Như được pthread API mô tả, mọi chức năng threading đều có sẵn bằng cách include header `pthread.h`. Cũng có một số phần mở rộng của library pthread chỉ có sẵn nếu bạn include `semaphore.h`. Ví dụ, một trong các phần mở rộng liên quan đến các thao tác semaphore-specific, ví dụ, tạo một semaphore, khởi tạo nó, hủy nó, v.v.
 
@@ -217,7 +217,7 @@ $
 
 *Shell Box 15-1: Build và chạy ví dụ 15.1*
 
-Như bạn thấy trong shell box trên, chúng ta cần thêm tùy chọn `-lpthread` vào lệnh biên dịch. Điều này được làm vì chúng ta cần link chương trình của mình với hiện thực hiện có của library pthread. Trên một số nền tảng, như macOS, chương trình của bạn có thể được link mà không cần tùy chọn `-lpthread`; tuy nhiên, rất khuyến khích dùng tùy chọn này khi bạn đang link các chương trình dùng library pthread. Tầm quan trọng của lời khuyên này là làm cho các *build script* của bạn hoạt động trên mọi nền tảng và ngăn mọi vấn đề cross-compatibility khi build các dự án C của bạn.
+Như bạn thấy trong shell box trên, chúng ta cần thêm tùy chọn `-lpthread` vào lệnh biên dịch. Điều này được làm vì chúng ta cần link chương trình của mình với bản triển khai hiện có của library pthread. Trên một số nền tảng, như macOS, chương trình của bạn có thể được link mà không cần tùy chọn `-lpthread`; tuy nhiên, rất khuyến khích dùng tùy chọn này khi bạn đang link các chương trình dùng library pthread. Tầm quan trọng của lời khuyên này là làm cho các *build script* của bạn hoạt động trên mọi nền tảng và ngăn mọi vấn đề cross-compatibility khi build các dự án C của bạn.
 
 Một thread mà<a id="_idIndexMarker1085"></a> có thể được join được gọi là *joinable*. Các thread mặc định là joinable. Ngược lại với các thread joinable<a id="_idIndexMarker1086"></a>, chúng ta có các thread *detached*. Detached thread không thể được join.
 

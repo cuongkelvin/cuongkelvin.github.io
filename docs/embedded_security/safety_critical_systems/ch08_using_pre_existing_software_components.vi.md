@@ -127,7 +127,7 @@ Ngoài việc tạo ra một safety manual một cách hồi tố, còn có nh�
 
 <a id="fn8_2"></a>
 
-[<sup>2</sup>](#fn8_28b)Tức là tạo ra tài liệu thiết kế từ phần hiện thực thay vì tạo ra phần hiện thực từ thiết kế.
+[<sup>2</sup>](#fn8_28b)Tức là tạo ra tài liệu thiết kế từ phần triển khai thay vì tạo ra phần triển khai từ thiết kế.
 
 <a id="fig8_1"></a>
 

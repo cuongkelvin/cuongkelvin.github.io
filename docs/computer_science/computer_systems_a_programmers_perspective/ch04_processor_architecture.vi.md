@@ -10,6 +10,12 @@ Có lẽ bạn sẽ không bao giờ tự thiết kế processor. Đây là côn
 
 - Chủ đề thú vị và quan trọng về mặt trí tuệ. Học cách mọi thứ hoạt động tự nó đã có giá trị. Đặc biệt thú vị là tìm hiểu hoạt động bên trong của một hệ thống gắn với đời sống hằng ngày của nhà khoa học máy tính và kỹ sư nhưng vẫn bí ẩn với nhiều người. Thiết kế processor thể hiện nhiều nguyên tắc thực hành kỹ thuật tốt: cần tạo cấu trúc đơn giản, đều đặn để thực hiện nhiệm vụ phức tạp.
 
+- Hiểu hoạt động processor giúp hiểu toàn bộ hệ thống máy tính. Trong Chương 6, chúng ta xem hệ thống bộ nhớ và kỹ thuật tạo hình ảnh của bộ nhớ rất lớn với thời gian truy cập rất nhanh. Hiểu phía processor của interface processor–memory sẽ làm phần trình bày hoàn chỉnh hơn.
+
+- Dù ít người thiết kế processor, nhiều người thiết kế hệ thống hardware chứa processor. Điều này trở nên phổ biến khi processor được nhúng vào hệ thống real-world như ô tô và thiết bị gia dụng. Người thiết kế Embedded-system phải hiểu cách processor hoạt động, vì các hệ thống này thường được thiết kế và lập trình ở cấp abstraction thấp hơn hệ thống desktop và server-based.
+
+- Bạn cũng có thể làm việc trong dự án thiết kế processor. Dù ít công ty sản xuất microprocessor, các nhóm thiết kế processor đã lớn và đang tiếp tục phát triển. Có thể có hơn 1,000 người tham gia những khía cạnh khác nhau của một thiết kế processor lớn.
+
 ## Ghi chú Sự tiến bộ của công nghệ máy tính
 
 Để hình dung công nghệ máy tính đã tiến bộ đến mức nào trong bốn thập niên qua, xét hai processor sau.
@@ -19,12 +25,6 @@ Supercomputer Cray 1 đầu tiên được giao cho Los Alamos National Laborato
 Chip microprocessor Apple ARM A7, giới thiệu năm 2013 để vận hành iPhone 5S, chứa hai CPU, mỗi CPU thực hiện được vài tỷ arithmetic operation mỗi giây, cùng 1 gigabyte random access memory. Toàn bộ điện thoại chỉ nặng 112 gram, tiêu thụ khoảng 1 watt và có giá dưới $800. Hơn 9 triệu máy được bán trong cuối tuần đầu tiên ra mắt. Ngoài là máy tính mạnh, nó còn chụp ảnh, gọi điện và chỉ đường lái xe, những tính năng chưa từng được xem xét cho Cray 1.
 
 Hai hệ thống cách nhau chỉ 37 năm thể hiện tiến bộ to lớn của công nghệ bán dẫn. Trong khi CPU Cray 1 được xây từ khoảng 100,000 chip bán dẫn, mỗi chip chứa dưới 20 transistor, Apple A7 có hơn 1 tỷ transistor trên một chip. Bộ nhớ 8-megabyte của Cray 1 cần 8,192 chip, còn bộ nhớ gigabyte của iPhone nằm trong một chip duy nhất.
-
-- Hiểu hoạt động processor giúp hiểu toàn bộ hệ thống máy tính. Trong Chương 6, chúng ta xem hệ thống bộ nhớ và kỹ thuật tạo hình ảnh của bộ nhớ rất lớn với thời gian truy cập rất nhanh. Hiểu phía processor của interface processor–memory sẽ làm phần trình bày hoàn chỉnh hơn.
-
-- Dù ít người thiết kế processor, nhiều người thiết kế hệ thống hardware chứa processor. Điều này trở nên phổ biến khi processor được nhúng vào hệ thống real-world như ô tô và thiết bị gia dụng. Người thiết kế Embedded-system phải hiểu cách processor hoạt động, vì các hệ thống này thường được thiết kế và lập trình ở cấp abstraction thấp hơn hệ thống desktop và server-based.
-
-- Bạn cũng có thể làm việc trong dự án thiết kế processor. Dù ít công ty sản xuất microprocessor, các nhóm thiết kế processor đã lớn và đang tiếp tục phát triển. Có thể có hơn 1,000 người tham gia những khía cạnh khác nhau của một thiết kế processor lớn.
 
 Chương này bắt đầu bằng việc định nghĩa instruction set đơn giản làm ví dụ xuyên suốt cho các triển khai processor. Chúng ta gọi là instruction set “Y86-64” vì nó lấy cảm hứng từ x86-64. So với x86-64, Y86-64 có ít data type, instruction và addressing mode hơn. Nó cũng có encoding byte-level đơn giản, khiến machine code kém gọn hơn code x86-64 tương đương nhưng việc thiết kế logic decode của CPU dễ hơn nhiều. Dù rất đơn giản, instruction set Y86-64 đủ hoàn chỉnh để viết chương trình thao tác dữ liệu số nguyên. Thiết kế processor triển khai Y86-64 đòi hỏi xử lý nhiều thách thức mà người thiết kế processor gặp phải.
 
@@ -60,13 +60,13 @@ Hình 4.2 mô tả ngắn gọn từng instruction trong ISA Y86-64. Chúng ta d
 
 Sau đây là một số chi tiết về instruction Y86-64.
 
-- Instruction movq của x86-64 được tách thành bốn instruction: irmovq, rrmovq, mrmovq và rmmovq, chỉ rõ dạng nguồn và đích. Nguồn là immediate (i), register (r) hoặc memory (m), được chỉ bởi ký tự đầu tên instruction. Đích là register (r) hoặc memory (m), được chỉ bởi ký tự thứ hai tên instruction. Xác định rõ bốn dạng truyền dữ liệu sẽ hữu ích khi quyết định cách triển khai. Memory reference của hai instruction di chuyển bộ nhớ có format base và displacement đơn giản. Chúng ta không hỗ trợ index register thứ hai hoặc scale giá trị register khi tính địa chỉ. Giống x86-64, không cho phép truyền trực tiếp từ vị trí bộ nhớ này sang vị trí khác. Ngoài ra, không cho phép truyền dữ liệu immediate tới bộ nhớ.
+- Instruction movq của x86-64 được tách thành bốn instruction: irmovq, rrmovq, mrmovq và rmmovq, chỉ rõ dạng nguồn và đích. Nguồn là immediate (i), register (r) hoặc memory (m), được chỉ bởi ký tự đầu tên instruction. Đích là register (r) hoặc memory (m), được chỉ bởi ký tự thứ hai tên instruction. Xác định rõ bốn dạng truyền dữ liệu sẽ hữu ích khi quyết định cách triển khai.
+
+  Memory reference của hai instruction di chuyển bộ nhớ có format base và displacement đơn giản. Chúng ta không hỗ trợ index register thứ hai hoặc scale giá trị register khi tính địa chỉ.
+
+  Giống x86-64, không cho phép truyền trực tiếp từ vị trí bộ nhớ này sang vị trí khác. Ngoài ra, không cho phép truyền dữ liệu immediate tới bộ nhớ.
 
 - Có bốn instruction phép toán số nguyên, được ghi là OPq trong Hình 4.2: addq, subq, andq và xorq. Chúng chỉ thao tác dữ liệu register, trong khi x86-64 cho phép cả dữ liệu bộ nhớ. Các instruction đặt ba condition code ZF, SF và OF (zero, sign và overflow).
-
-![p0394_2](images/ch04_processor_architecture/p0394_2.png)
-
-**Hình 4.2 Instruction set Y86-64. Instruction encoding dài từ 1 đến 10 byte. Instruction gồm instruction specifier 1-byte, có thể có register specifier 1-byte và có thể có constant word 8-byte. Field fn chỉ một integer operation ( OPq ), điều kiện di chuyển dữ liệu ( cmovXX ) hoặc điều kiện branch ( jXX ) cụ thể. Mọi giá trị số được trình bày theo hexadecimal.**
 
 - Bảy jump instruction (ghi là jXX trong Hình 4.2) là jmp, jle, jl, je, jne, jge và jg. Branch được thực hiện tùy loại branch và thiết lập condition code. Điều kiện branch giống x86-64 (Hình 3.15).
 
@@ -77,6 +77,10 @@ Sau đây là một số chi tiết về instruction Y86-64.
 - Instruction pushq và popq triển khai push và pop giống trong x86-64.
 
 - Instruction halt dừng thực thi instruction. x86-64 có instruction tương tự tên hlt. Chương trình ứng dụng x86-64 không được phép dùng vì nó khiến cả hệ thống tạm dừng hoạt động. Với Y86-64, thực thi halt khiến processor dừng, status code đặt thành HLT. (Xem Mục 4.1.4.)
+
+![p0394_2](images/ch04_processor_architecture/p0394_2.png)
+
+**Hình 4.2 Instruction set Y86-64. Instruction encoding dài từ 1 đến 10 byte. Instruction gồm instruction specifier 1-byte, có thể có register specifier 1-byte và có thể có constant word 8-byte. Field fn chỉ một integer operation ( OPq ), điều kiện di chuyển dữ liệu ( cmovXX ) hoặc điều kiện branch ( jXX ) cụ thể. Mọi giá trị số được trình bày theo hexadecimal.**
 
 ### 4.1.3 Instruction encoding
 
@@ -105,7 +109,9 @@ Một số instruction chỉ dài 1 byte, nhưng những instruction cần opera
 
 Một số instruction cần thêm constant word 8-byte. Word này có thể là dữ liệu immediate cho irmovq, displacement trong chỉ định địa chỉ của rmmovq và mrmovq, hoặc đích của branch và call. Lưu ý đích branch và call là absolute address, thay vì PC-relative addressing như x86-64. Processor dùng PC-relative addressing để encoding branch instruction gọn hơn và cho phép dịch chuyển code từ vùng bộ nhớ này sang vùng khác mà không cần cập nhật mọi branch target address. Vì ở đây quan tâm tính đơn giản hơn, chúng ta dùng absolute addressing. Giống x86-64, mọi số nguyên có encoding little-endian. Khi instruction được viết dạng disassembled, các byte xuất hiện theo thứ tự đảo ngược.
 
-Ví dụ, hãy tạo byte encoding hexadecimal của instruction rmmovq %rsp,0x123456789abcd(%rdx). Từ Hình 4.2, rmmovq có byte đầu 40. Source register %rsp cần mã hóa trong field rA, còn base register %rdx trong field rB. Dùng số register ở Hình 4.4, ta được byte register specifier 42. Cuối cùng, displacement được mã hóa trong constant word 8-byte. Trước hết thêm số 0 ở đầu 0x123456789abcd để đủ 8 byte, cho chuỗi byte 00 01 23 45 67 89 ab cd. Viết theo thứ tự byte-reversed thành cd ab 89 67 45 23 01 00. Kết hợp lại, ta có instruction encoding 4042cdab896745230100. Một tính chất quan trọng của mọi instruction set là byte encoding phải có cách diễn giải duy nhất. Chuỗi byte tùy ý hoặc mã hóa một chuỗi instruction duy nhất, hoặc không hợp lệ. Y86-64 có tính chất này vì mọi instruction có tổ hợp code và function duy nhất trong byte đầu, và từ byte đó có thể xác định độ dài, ý nghĩa của các byte bổ sung. Tính chất bảo đảm processor thực thi chương trình object-code mà không nhập nhằng về ý nghĩa code. Ngay cả khi code nằm giữa các byte khác trong chương trình, vẫn dễ xác định chuỗi instruction miễn bắt đầu đúng byte đầu chuỗi. Ngược lại, nếu không biết vị trí bắt đầu chuỗi code, không thể xác định tin cậy cách chia chuỗi thành từng instruction. Điều này gây khó cho disassembler và tool khác cố trích xuất chương trình machine-level trực tiếp từ chuỗi byte object-code.
+Ví dụ, hãy tạo byte encoding hexadecimal của instruction rmmovq %rsp,0x123456789abcd(%rdx). Từ Hình 4.2, rmmovq có byte đầu 40. Source register %rsp cần mã hóa trong field rA, còn base register %rdx trong field rB. Dùng số register ở Hình 4.4, ta được byte register specifier 42. Cuối cùng, displacement được mã hóa trong constant word 8-byte. Trước hết thêm số 0 ở đầu 0x123456789abcd để đủ 8 byte, cho chuỗi byte 00 01 23 45 67 89 ab cd. Viết theo thứ tự byte-reversed thành cd ab 89 67 45 23 01 00. Kết hợp lại, ta có instruction encoding 4042cdab896745230100.
+
+Một tính chất quan trọng của mọi instruction set là byte encoding phải có cách diễn giải duy nhất. Chuỗi byte tùy ý hoặc mã hóa một chuỗi instruction duy nhất, hoặc không hợp lệ. Y86-64 có tính chất này vì mọi instruction có tổ hợp code và function duy nhất trong byte đầu, và từ byte đó có thể xác định độ dài, ý nghĩa của các byte bổ sung. Tính chất bảo đảm processor thực thi chương trình object-code mà không nhập nhằng về ý nghĩa code. Ngay cả khi code nằm giữa các byte khác trong chương trình, vẫn dễ xác định chuỗi instruction miễn bắt đầu đúng byte đầu chuỗi. Ngược lại, nếu không biết vị trí bắt đầu chuỗi code, không thể xác định tin cậy cách chia chuỗi thành từng instruction. Điều này gây khó cho disassembler và tool khác cố trích xuất chương trình machine-level trực tiếp từ chuỗi byte object-code.
 
 #### Ghi chú So sánh instruction encoding x86-64 và Y86-64
 
@@ -171,7 +177,15 @@ Instruction set Y86-64 mang đặc điểm của cả CISC lẫn RISC. Về phí
 
 Suốt thập niên 1980, cộng đồng computer architecture tranh luận gay gắt về ưu điểm instruction set RISC so với CISC. Người ủng hộ RISC khẳng định có thể đạt năng lực tính toán cao hơn với cùng lượng hardware nhờ kết hợp thiết kế instruction set tinh gọn, công nghệ compiler tiên tiến và triển khai pipelined processor. Người ủng hộ CISC phản bác rằng một tác vụ cần ít instruction CISC hơn, nên máy của họ có thể đạt hiệu năng tổng thể cao hơn.
 
-Các công ty lớn giới thiệu dòng processor RISC, gồm Sun Microsystems (SPARC), IBM và Motorola (PowerPC), Digital Equipment Corporation (Alpha). Công ty Anh Acorn Computers Ltd. phát triển kiến trúc ARM riêng (ban đầu viết tắt “Acorn RISC machine”), được dùng rộng rãi trong ứng dụng nhúng như điện thoại. Đầu thập niên 1990, tranh luận lắng xuống khi rõ rằng RISC hay CISC ở dạng thuần túy nhất đều không tốt hơn thiết kế kết hợp ý tưởng hay nhất của cả hai. Máy RISC phát triển, thêm instruction, nhiều instruction cần nhiều cycle để thực thi. Máy RISC hiện có hàng trăm instruction, khó còn hợp tên “reduced instruction set machine”. Ý tưởng để lộ dấu vết triển khai cho chương trình machine-level tỏ ra thiển cận. Khi mẫu processor mới dùng cấu trúc hardware tiên tiến hơn xuất hiện, nhiều dấu vết không còn liên quan nhưng vẫn là một phần instruction set. Dù vậy, cốt lõi thiết kế RISC là instruction set phù hợp thực thi trên pipelined machine. Máy CISC gần đây cũng tận dụng cấu trúc pipeline high-performance. Như Mục 5.7 sẽ thảo luận, chúng fetch instruction CISC và dịch động thành chuỗi thao tác RISC-like đơn giản hơn. Ví dụ, instruction cộng register vào bộ nhớ được chuyển thành ba thao tác: đọc giá trị bộ nhớ gốc, thực hiện phép cộng và ghi tổng về bộ nhớ. Vì chuyển đổi động thường thực hiện được từ lâu trước khi instruction thực sự thực thi, processor có thể duy trì tốc độ thực thi rất cao. Ngoài vấn đề kỹ thuật, vấn đề tiếp thị cũng đóng vai trò lớn quyết định thành công của instruction set. Nhờ giữ tương thích với processor hiện có, Intel với x86 giúp chuyển dễ dàng từ thế hệ processor này sang thế hệ tiếp theo. Khi công nghệ integrated-circuit tiến bộ, Intel và các nhà sản xuất x86 khác khắc phục điểm kém hiệu quả do thiết kế instruction set 8086 gốc, dùng kỹ thuật RISC để tạo hiệu năng ngang những máy RISC tốt nhất. Như Mục 3.1 cho thấy, phát triển IA32 thành x86-64 tạo cơ hội đưa một số tính năng RISC vào họ x86. Trong điện toán desktop, laptop và server-based, x86 gần như thống trị hoàn toàn. Processor RISC rất thành công ở thị trường embedded processor, điều khiển các hệ thống như điện thoại di động, phanh ô tô và thiết bị Internet. Trong ứng dụng này, tiết kiệm chi phí và công suất quan trọng hơn giữ tương thích ngược. Xét số lượng processor bán ra, đây là thị trường rất lớn và đang phát triển.
+Các công ty lớn giới thiệu dòng processor RISC, gồm Sun Microsystems (SPARC), IBM và Motorola (PowerPC), Digital Equipment Corporation (Alpha). Công ty Anh Acorn Computers Ltd. phát triển kiến trúc ARM riêng (ban đầu viết tắt “Acorn RISC machine”), được dùng rộng rãi trong ứng dụng nhúng như điện thoại.
+
+Đầu thập niên 1990, tranh luận lắng xuống khi rõ rằng RISC hay CISC ở dạng thuần túy nhất đều không tốt hơn thiết kế kết hợp ý tưởng hay nhất của cả hai. Máy RISC phát triển, thêm instruction, nhiều instruction cần nhiều cycle để thực thi. Máy RISC hiện có hàng trăm instruction, khó còn hợp tên “reduced instruction set machine”. Ý tưởng để lộ dấu vết triển khai cho chương trình machine-level tỏ ra thiển cận. Khi mẫu processor mới dùng cấu trúc hardware tiên tiến hơn xuất hiện, nhiều dấu vết không còn liên quan nhưng vẫn là một phần instruction set. Dù vậy, cốt lõi thiết kế RISC là instruction set phù hợp thực thi trên pipelined machine.
+
+Máy CISC gần đây cũng tận dụng cấu trúc pipeline high-performance. Như Mục 5.7 sẽ thảo luận, chúng fetch instruction CISC và dịch động thành chuỗi thao tác RISC-like đơn giản hơn. Ví dụ, instruction cộng register vào bộ nhớ được chuyển thành ba thao tác: đọc giá trị bộ nhớ gốc, thực hiện phép cộng và ghi tổng về bộ nhớ. Vì chuyển đổi động thường thực hiện được từ lâu trước khi instruction thực sự thực thi, processor có thể duy trì tốc độ thực thi rất cao.
+
+Ngoài vấn đề kỹ thuật, vấn đề tiếp thị cũng đóng vai trò lớn quyết định thành công của instruction set. Nhờ giữ tương thích với processor hiện có, Intel với x86 giúp chuyển dễ dàng từ thế hệ processor này sang thế hệ tiếp theo. Khi công nghệ integrated-circuit tiến bộ, Intel và các nhà sản xuất x86 khác khắc phục điểm kém hiệu quả do thiết kế instruction set 8086 gốc, dùng kỹ thuật RISC để tạo hiệu năng ngang những máy RISC tốt nhất. Như Mục 3.1 cho thấy, phát triển IA32 thành x86-64 tạo cơ hội đưa một số tính năng RISC vào họ x86. Trong điện toán desktop, laptop và server-based, x86 gần như thống trị hoàn toàn.
+
+Processor RISC rất thành công ở thị trường embedded processor, điều khiển các hệ thống như điện thoại di động, phanh ô tô và thiết bị Internet. Trong ứng dụng này, tiết kiệm chi phí và công suất quan trọng hơn giữ tương thích ngược. Xét số lượng processor bán ra, đây là thị trường rất lớn và đang phát triển.
 
 ### 4.1.4 Exception Y86-64
 
@@ -208,6 +222,10 @@ Hình 4.6 trình bày assembly code x86-64 và Y86-64 cho function C sau:
 Code x86-64 do compiler gcc tạo. Code Y86-64 tương tự, nhưng khác ở các điểm sau:
 
 - Code Y86-64 load hằng số vào register (dòng 2–3), vì không thể dùng dữ liệu immediate trong arithmetic instruction.
+
+- Code Y86-64 cần hai instruction (dòng 8–9) để đọc giá trị từ bộ nhớ và cộng vào register, còn x86-64 làm được bằng một instruction addq (dòng 5).
+
+- Triển khai Y86-64 hand-coded tận dụng tính chất instruction subq (dòng 11) cũng đặt condition code, nên không cần instruction testq của code gcc-generated (dòng 9). Tuy nhiên, để làm vậy, code Y86-64 phải đặt condition code trước khi vào vòng lặp bằng instruction andq (dòng 5).
 
 Code x86-64
 
@@ -249,10 +267,6 @@ Code Y86-64
 ```
 
 **Hình 4.6 So sánh chương trình assembly Y86-64 và x86-64. Function sum tính tổng array số nguyên. Code Y86-64 theo cùng pattern tổng quát như code x86-64.**
-
-- Code Y86-64 cần hai instruction (dòng 8–9) để đọc giá trị từ bộ nhớ và cộng vào register, còn x86-64 làm được bằng một instruction addq (dòng 5).
-
-- Triển khai Y86-64 hand-coded tận dụng tính chất instruction subq (dòng 11) cũng đặt condition code, nên không cần instruction testq của code gcc-generated (dòng 9). Tuy nhiên, để làm vậy, code Y86-64 phải đặt condition code trước khi vào vòng lặp bằng instruction andq (dòng 5).
 
 Hình 4.7 trình bày ví dụ program file hoàn chỉnh viết bằng assembly code Y86-64. Chương trình chứa cả dữ liệu và instruction. Directive chỉ nơi đặt code hoặc dữ liệu và cách align. Chương trình chỉ định các vấn đề như vị trí stack, khởi tạo dữ liệu, khởi tạo chương trình và kết thúc chương trình.
 
@@ -522,13 +536,13 @@ Viết biểu thức HCL cho tín hiệu xor, bằng exclusive-or của các inp
 
 Hình 4.11 trình bày một ví dụ khác về combinational circuit đơn giản nhưng hữu ích, gọi là multiplexor (thường gọi là “MUX”). Multiplexor chọn một giá trị trong tập các tín hiệu dữ liệu khác nhau, tùy giá trị của tín hiệu input điều khiển. Trong multiplexor single-bit này, hai tín hiệu dữ liệu là các bit input a và b, còn tín hiệu điều khiển là bit input s. Output bằng a khi s là 1 và bằng b khi s là 0. Trong mạch này, chúng ta thấy hai gate and quyết định có truyền input dữ liệu tương ứng đến gate or hay không. Gate and phía trên truyền tín hiệu b khi s là 0 (vì input còn lại của gate là !s), còn gate and phía dưới truyền tín hiệu a khi s là 1. Một lần nữa, chúng ta có thể viết biểu thức HCL cho tín hiệu output, dùng cùng các phép toán hiện diện trong combinational circuit:
 
-![p0412_7](images/ch04_processor_architecture/p0412_7.png)
-
-**Hình 4.11 Mạch multiplexor Single-bit. Output bằng input a nếu tín hiệu điều khiển s là 1 và bằng input b khi s là 0.**
-
 ```
 bool out = (s && a) || (!s && b);
 ```
+
+![p0412_7](images/ch04_processor_architecture/p0412_7.png)
+
+**Hình 4.11 Mạch multiplexor Single-bit. Output bằng input a nếu tín hiệu điều khiển s là 1 và bằng input b khi s là 0.**
 
 Các biểu thức HCL của chúng ta cho thấy sự tương ứng rõ ràng giữa mạch combinational logic và biểu thức logic trong C. Cả hai dùng phép toán Boolean để tính hàm trên các input. Cần lưu ý một số khác biệt giữa hai cách biểu diễn tính toán này:
 
@@ -605,18 +619,15 @@ Các biểu thức lựa chọn có thể là biểu thức Boolean tùy ý, và
 ```
 word Out4 = [
         !s1 && !s0 : A; # 00
-```
-
-![p0416_10](images/ch04_processor_architecture/p0416_10.png)
-
-**Hình 4.14 Multiplexor Four-way. Những tổ hợp khác nhau của tín hiệu điều khiển s1 và s0 quyết định input dữ liệu nào được truyền đến output.**
-
-```
         !s1        : B; # 01
         !s0        : C; # 10
         1          : D; # 11
 ];
 ```
+
+![p0416_10](images/ch04_processor_architecture/p0416_10.png)
+
+**Hình 4.14 Multiplexor Four-way. Những tổ hợp khác nhau của tín hiệu điều khiển s1 và s0 quyết định input dữ liệu nào được truyền đến output.**
 
 Các chú thích bên phải (mọi văn bản bắt đầu bằng # và kéo dài đến hết dòng đều là chú thích) cho biết tổ hợp s1 và s0 nào khiến case được chọn. Hãy quan sát rằng đôi khi có thể đơn giản hóa biểu thức lựa chọn, vì chỉ case khớp đầu tiên được chọn. Ví dụ, có thể viết biểu thức thứ hai là !s1 thay vì dạng đầy đủ hơn !s1&& s0, vì khả năng duy nhất khác có s1 bằng 0 đã được cho trong biểu thức lựa chọn thứ nhất. Tương tự, có thể viết biểu thức thứ ba là !s0, còn biểu thức thứ tư chỉ cần viết là 1.
 
@@ -650,9 +661,11 @@ Có thể thiết kế mạch combinational logic để thực hiện nhiều lo
 
 ### 4.2.4 Kiểm tra thuộc tập hợp
 
-Trong thiết kế processor, chúng ta gặp nhiều ví dụ muốn so sánh một tín hiệu với nhiều tín hiệu có thể khớp, chẳng hạn kiểm tra xem code của instruction đang được xử lý có khớp một nhóm instruction code nào không. Làm ví dụ đơn giản, giả sử chúng ta muốn sinh tín hiệu s1 và s0 cho multiplexor 4-way trong Hình 4.14 bằng cách chọn các bit high- và low-order từ tín hiệu 2-bit code, như sau: Trong mạch này, tín hiệu 2-bit code điều khiển việc chọn giữa bốn data word A, B, C và D. Chúng ta có thể biểu diễn việc sinh tín hiệu s1 và s0 bằng các phép kiểm tra bằng nhau dựa trên những giá trị có thể có của code:
+Trong thiết kế processor, chúng ta gặp nhiều ví dụ muốn so sánh một tín hiệu với nhiều tín hiệu có thể khớp, chẳng hạn kiểm tra xem code của instruction đang được xử lý có khớp một nhóm instruction code nào không. Làm ví dụ đơn giản, giả sử chúng ta muốn sinh tín hiệu s1 và s0 cho multiplexor 4-way trong Hình 4.14 bằng cách chọn các bit high- và low-order từ tín hiệu 2-bit code, như sau:
 
 ![p0417_13](images/ch04_processor_architecture/p0417_13.png)
+
+Trong mạch này, tín hiệu 2-bit code điều khiển việc chọn giữa bốn data word A, B, C và D. Chúng ta có thể biểu diễn việc sinh tín hiệu s1 và s0 bằng các phép kiểm tra bằng nhau dựa trên những giá trị có thể có của code:
 
 ```
 bool s1 = code == 2 || code == 3;
@@ -769,9 +782,8 @@ Thực thi instruction rrmovq diễn ra khá giống phép toán số học. Tuy
 |  | valP ← PC + 2 | valP ← PC + 2 | valP ← PC + 10 |
 | Decode | valA ← R[rA]<br>valB ← R[rB] | valA ← R[rA] |  |
 | Execute | valE ← valB OP valA<br>Đặt CC | valE ← 0 + valA | valE ← 0 + valC |
-
+| Memory |  |  |  |
 | Write back | R[rB] ← valE | R[rB] ← valE | R[rB] ← valE |
-|---|---|---|---|
 | PC update | PC ← valP | PC ← valP | PC ← valP |
 
 **Hình 4.18 Các phép tính trong triển khai tuần tự của instruction Y86-64 OPq, rrmovq và irmovq. Những instruction này tính giá trị và lưu kết quả vào register. Ký pháp icode : ifun chỉ hai thành phần của instruction byte, còn rA : rB chỉ hai thành phần của register specifier byte. Ký pháp M<sub>1</sub>[x] chỉ truy cập (đọc hoặc ghi) 1 byte tại vị trí bộ nhớ x, còn M<sub>8</sub>[x] chỉ truy cập 8 byte.**
@@ -789,6 +801,11 @@ Thực thi instruction rrmovq diễn ra khá giống phép toán số học. Tuy
 |  | valP ← PC + 10 |  |
 | Decode |  |  |
 | Execute | valE ← 0 + valC |  |
+| Memory |  |  |
+| Write back | R[rB] ← valE |  |
+| PC update | PC ← valP |  |
+
+Việc thực thi instruction này thay đổi các register và PC như thế nào?
 
 #### Thông tin thêm: Lần theo thực thi instruction subq
 
@@ -808,15 +825,6 @@ Ví dụ, hãy theo dõi việc xử lý instruction subq ở dòng 3 của obje
 | PC update | PC ← valP | PC ← valP = 0x016 |
 
 Như quá trình lần theo này cho thấy, chúng ta đạt tác dụng mong muốn là đặt register %rbx bằng 12, đặt cả ba condition code bằng không, và tăng PC thêm 2.
-
-|  | Generic | Specific |
-|---|---|---|
-| Stage | irmovq V , rB | irmovq $128, %rsp |
-| Memory |  |  |
-| Write back | R[rB] ← valE |  |
-| PC update | PC ← valP |  |
-
-Việc thực thi instruction này thay đổi các register và PC như thế nào?
 
 Hình 4.19 trình bày việc xử lý cần cho instruction ghi và đọc bộ nhớ rmmovq và mrmovq. Chúng ta thấy flow cơ bản giống trước, nhưng dùng ALU cộng valC với valB, tạo effective address (tổng displacement và giá trị base register) cho phép toán bộ nhớ. Trong memory stage, chúng ta ghi giá trị register valA vào bộ nhớ hoặc đọc valM từ bộ nhớ.
 
@@ -872,6 +880,15 @@ Như quá trình lần theo này cho thấy, instruction ghi 128 vào địa ch�
 | Fetch | icode : ifun ← M<sub>1</sub>[PC] |  |
 |  | rA : rB ← M<sub>1</sub>[PC + 1] |  |
 |  | valP ← PC + 2 |  |
+| Decode | valA ← R[ %rsp] |  |
+|  | valB ← R[%rsp ] |  |
+| Execute | valE ← valB + 8 |  |
+| Memory | valM ← M<sub>8</sub>[valA] |  |
+| Write back | R[ %rsp ] ← valE |  |
+|  | R[rA] ← valM |  |
+| PC update | PC ← valP |  |
+
+Việc thực thi instruction này tác động thế nào đến các register và PC?
 
 | Stage | pushq rA | popq rA |
 |---|---|---|
@@ -886,19 +903,6 @@ Như quá trình lần theo này cho thấy, instruction ghi 128 vào địa ch�
 | PC update | PC ← valP | PC ← valP |
 
 **Hình 4.20 Các phép tính trong triển khai tuần tự của instruction Y86-64 pushq và popq. Những instruction này push và pop stack.**
-
-|  | Generic | Specific |
-|---|---|---|
-| Stage | popq rA | popq %rax |
-| Decode | valA ← R[ %rsp] |  |
-|  | valB ← R[%rsp ] |  |
-| Execute | valE ← valB + 8 |  |
-| Memory | valM ← M<sub>8</sub>[valA] |  |
-| Write back | R[ %rsp ] ← valE |  |
-|  | R[rA] ← valM |  |
-| PC update | PC ← valP |  |
-
-Việc thực thi instruction này tác động thế nào đến các register và PC?
 
 #### Bài tập thực hành 4.15 (lời giải trang 522)
 
@@ -992,6 +996,14 @@ Instruction call và ret phần nào tương tự pushq và popq, ngoại trừ 
 | Fetch | icode : ifun ← M<sub>1</sub>[PC] |  |
 |  | valC ← M<sub>8</sub>[PC + 1] |  |
 |  | valP ← PC + 9 |  |
+| Decode |  |  |
+|  | valB ← R[%rsp ] |  |
+| Execute | valE ← valB + (−8) |  |
+| Memory | M<sub>8</sub>[valE] ← valP |  |
+| Write back | R[%rsp ] ← valE |  |
+| PC update | PC ← valC |  |
+
+Việc thực thi instruction này tác động thế nào đến các register, PC và bộ nhớ?
 
 #### Thông tin thêm: Lần theo thực thi instruction ret
 
@@ -1010,18 +1022,6 @@ Hãy lần theo việc xử lý instruction ret ở dòng 13 của object code t
 | PC update | PC ← valM | PC ← 0x040 |
 
 Như quá trình lần theo này cho thấy, instruction đặt PC bằng 0x040, địa chỉ instruction halt. Nó cũng đặt %rsp bằng 128.
-
-|  | Generic | Specific |
-|---|---|---|
-| Stage | call Dest | call 0x041 |
-| Decode |  |  |
-|  | valB ← R[%rsp ] |  |
-| Execute | valE ← valB + (−8) |  |
-| Memory | M<sub>8</sub>[valE] ← valP |  |
-| Write back | R[%rsp ] ← valE |  |
-| PC update | PC ← valC |  |
-
-Việc thực thi instruction này tác động thế nào đến các register, PC và bộ nhớ?
 
 Chúng ta đã tạo khuôn khổ thống nhất xử lý mọi loại instruction Y86-64 khác nhau. Mặc dù hành vi instruction rất đa dạng, chúng ta có thể tổ chức xử lý thành sáu stage. Nhiệm vụ tiếp theo là tạo thiết kế hardware triển khai các stage và nối chúng với nhau.
 
@@ -1043,11 +1043,11 @@ Memory. Data memory đọc hoặc ghi một word bộ nhớ khi thực thi memor
 
 Write back. Register file có hai write port. Port E dùng để ghi giá trị do ALU tính, còn port M dùng để ghi giá trị đọc từ data memory.
 
+PC update. Giá trị mới của program counter được chọn là valP, địa chỉ instruction tiếp theo, valC, địa chỉ đích do call hoặc jump instruction chỉ định, hoặc valM, địa chỉ trả về đọc từ bộ nhớ.
+
 ![p0434_17](images/ch04_processor_architecture/p0434_17.png)
 
 **Hình 4.22 Góc nhìn trừu tượng của SEQ, một cách triển khai tuần tự. Thông tin được xử lý trong khi thực thi instruction đi theo flow chiều kim đồng hồ, bắt đầu bằng instruction fetch dùng program counter (PC), thể hiện ở góc left-hand phía dưới của hình.**
-
-PC update. Giá trị mới của program counter được chọn là valP, địa chỉ instruction tiếp theo, valC, địa chỉ đích do call hoặc jump instruction chỉ định, hoặc valM, địa chỉ trả về đọc từ bộ nhớ.
 
 Hình 4.23 trình bày chi tiết hơn hardware cần để triển khai SEQ (mặc dù chưa thấy đầy đủ chi tiết cho đến khi xét từng stage). Chúng ta thấy cùng tập hardware unit như trước, nhưng giờ dây được vẽ tường minh. Trong hình này và những sơ đồ hardware khác, chúng ta dùng các quy ước vẽ sau:
 
@@ -1203,10 +1203,6 @@ Register file có bốn port. Nó hỗ trợ tối đa hai phép đọc đồng 
 
 Bốn block ở dưới Hình 4.28 sinh bốn register ID khác nhau cho register file, dựa trên instruction code icode, các bộ chỉ định register rA và rB, và có thể cả tín hiệu điều kiện Cnd được tính trong execute stage. Register ID srcA cho biết cần đọc register nào để sinh valA. Giá trị mong muốn phụ thuộc loại instruction, như hàng đầu của decode stage trong Hình 4.18 đến 4.21 thể hiện. Kết hợp mọi mục thành một phép tính cho mô tả HCL của srcA sau (nhớ rằng RESP là register ID của %rsp):
 
-![p0444_21](images/ch04_processor_architecture/p0444_21.png)
-
-**Hình 4.28 Decode stage và write-back stage của SEQ. Các field instruction được decode để sinh register identifier cho bốn địa chỉ (hai đọc, hai ghi) do register file dùng. Các giá trị đọc từ register file trở thành tín hiệu valA và valB. Hai giá trị write-back valE và valM làm dữ liệu cho phép ghi.**
-
 ```
 word srcA = [
         icode in { IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ  } : rA;
@@ -1214,6 +1210,10 @@ word srcA = [
         1 : RNONE; # Don’t need register
 ];
 ```
+
+![p0444_21](images/ch04_processor_architecture/p0444_21.png)
+
+**Hình 4.28 Decode stage và write-back stage của SEQ. Các field instruction được decode để sinh register identifier cho bốn địa chỉ (hai đọc, hai ghi) do register file dùng. Các giá trị đọc từ register file trở thành tín hiệu valA và valB. Hai giá trị write-back valE và valM làm dữ liệu cho phép ghi.**
 
 #### Bài tập thực hành 4.20 (lời giải trang 524)
 
@@ -1251,18 +1251,15 @@ Trong Hình 4.18 đến 4.21, phép tính ALU cho mỗi instruction là bước 
 word aluA = [
         icode in { IRRMOVQ, IOPQ } : valA;
         icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ } : valC;
-```
-
-![p0445_22](images/ch04_processor_architecture/p0445_22.png)
-
-**Hình 4.29 Execute stage của SEQ. ALU thực hiện phép toán cho instruction phép toán số nguyên hoặc hoạt động như adder. Các condition code register được đặt theo giá trị ALU. Giá trị condition code được kiểm tra để xác định có lấy branch không.**
-
-```
         icode in { ICALL, IPUSHQ } : -8;
         icode in { IRET, IPOPQ } : 8;
         # Other instructions don’t need ALU
 ];
 ```
+
+![p0445_22](images/ch04_processor_architecture/p0445_22.png)
+
+**Hình 4.29 Execute stage của SEQ. ALU thực hiện phép toán cho instruction phép toán số nguyên hoặc hoạt động như adder. Các condition code register được đặt theo giá trị ALU. Giá trị condition code được kiểm tra để xác định có lấy branch không.**
 
 #### Bài tập thực hành 4.23 (lời giải trang 524)
 
@@ -1368,9 +1365,9 @@ Chuyển trọng tâm sang pipeline tính toán, “khách hàng” là các ins
 
 ![p0450_25](images/ch04_processor_architecture/p0450_25.png)
 
-**Hình 4.32 Phần cứng tính toán không pipeline. Trong mỗi chu kỳ 320 ps, hệ thống dành 300 ps để tính một function combinational logic và 20 ps để lưu kết quả vào output register.**
-
 ![p0450_26](images/ch04_processor_architecture/p0450_26.png)
+
+**Hình 4.32 Phần cứng tính toán không pipeline. Trong mỗi chu kỳ 320 ps, hệ thống dành 300 ps để tính một function combinational logic và 20 ps để lưu kết quả vào output register.**
 
 Trong thiết kế logic hiện đại, chúng ta đo độ trễ circuit bằng đơn vị picosecond (viết tắt “ps”), tức 10<sup>−12</sup> giây. Trong ví dụ này, giả sử combinational logic cần 300 ps, còn việc nạp register cần 20 ps. Hình 4.32 trình bày một dạng timing diagram gọi là pipeline diagram. Trong sơ đồ này, thời gian trôi từ trái sang phải. Một chuỗi instruction (ở đây đặt tên I1, I2 và I3) được viết từ trên xuống dưới. Các hình chữ nhật đặc biểu thị thời gian những instruction này được thực thi. Trong cách triển khai này, phải hoàn tất một instruction trước khi bắt đầu instruction tiếp theo. Vì vậy, các ô không chồng lấn nhau theo chiều dọc. Công thức sau cho tốc độ tối đa mà chúng ta có thể vận hành hệ thống:
 
@@ -1398,7 +1395,11 @@ Hình 4.35 theo dõi hoạt động circuit giữa các thời điểm 240 và 3
 
 **Hình 4.35 Một chu kỳ clock của hoạt động pipeline. Ngay trước khi clock lên tại thời điểm 240 (điểm 1), các instruction I1 (màu xám đậm) và I2 (màu xanh) đã hoàn tất các stage B và A. Sau khi clock lên, các instruction này bắt đầu lan truyền qua các stage C và B, trong khi instruction I3 (màu xám nhạt) bắt đầu lan truyền qua stage A (điểm 2 và 3). Ngay trước khi clock lên lần nữa, các kết quả instruction đã lan truyền đến input của các pipeline register (điểm 4).**
 
-A. Ngay trước cạnh lên clock tại thời điểm 240 (điểm 1), các giá trị tính được ở stage A cho instruction I2 đã đến input của pipeline register đầu tiên, nhưng trạng thái và output của nó vẫn là các giá trị tính được trong stage A cho instruction I1. Các giá trị tính được ở stage B cho instruction I1 đã đến input của pipeline register thứ hai. Khi clock lên, các input này được nạp vào pipeline register, trở thành output của register (điểm 2). Ngoài ra, input của stage A được đặt để khởi đầu phép tính cho instruction I3. Sau đó, các tín hiệu lan truyền qua combinational logic của các stage khác nhau (điểm 3). Như các mặt sóng cong trong sơ đồ ở điểm 3 gợi ý, tín hiệu có thể lan truyền qua các phần khác nhau với tốc độ khác nhau. Trước thời điểm 360, các giá trị kết quả đến input của pipeline register (điểm 4). Khi clock lên tại thời điểm 360, mỗi instruction đã tiến qua một stage pipeline. Qua góc nhìn chi tiết về hoạt động pipeline này, có thể thấy giảm tốc clock sẽ không thay đổi hành vi pipeline. Tín hiệu lan truyền đến input của pipeline register, nhưng trạng thái register không thay đổi cho đến khi clock lên. Ngược lại, có thể xảy ra hậu quả nghiêm trọng nếu clock chạy quá nhanh. Các giá trị không có đủ thời gian lan truyền qua combinational logic, nên input của register chưa hợp lệ khi clock lên. Như trong thảo luận về timing của processor SEQ (Mục 4.3.3), có thể thấy cơ chế đơn giản đặt register điều khiển bằng clock giữa các block combinational logic là đủ để điều khiển luồng instruction trong pipeline. Khi clock liên tục lên xuống, các instruction khác nhau đi qua các stage pipeline mà không ảnh hưởng lẫn nhau.
+A. Ngay trước cạnh lên clock tại thời điểm 240 (điểm 1), các giá trị tính được ở stage A cho instruction I2 đã đến input của pipeline register đầu tiên, nhưng trạng thái và output của nó vẫn là các giá trị tính được trong stage A cho instruction I1. Các giá trị tính được ở stage B cho instruction I1 đã đến input của pipeline register thứ hai. Khi clock lên, các input này được nạp vào pipeline register, trở thành output của register (điểm 2). Ngoài ra, input của stage A được đặt để khởi đầu phép tính cho instruction I3. Sau đó, các tín hiệu lan truyền qua combinational logic của các stage khác nhau (điểm 3). Như các mặt sóng cong trong sơ đồ ở điểm 3 gợi ý, tín hiệu có thể lan truyền qua các phần khác nhau với tốc độ khác nhau. Trước thời điểm 360, các giá trị kết quả đến input của pipeline register (điểm 4). Khi clock lên tại thời điểm 360, mỗi instruction đã tiến qua một stage pipeline.
+
+Qua góc nhìn chi tiết về hoạt động pipeline này, có thể thấy giảm tốc clock sẽ không thay đổi hành vi pipeline. Tín hiệu lan truyền đến input của pipeline register, nhưng trạng thái register không thay đổi cho đến khi clock lên. Ngược lại, có thể xảy ra hậu quả nghiêm trọng nếu clock chạy quá nhanh. Các giá trị không có đủ thời gian lan truyền qua combinational logic, nên input của register chưa hợp lệ khi clock lên.
+
+Như trong thảo luận về timing của processor SEQ (Mục 4.3.3), có thể thấy cơ chế đơn giản đặt register điều khiển bằng clock giữa các block combinational logic là đủ để điều khiển luồng instruction trong pipeline. Khi clock liên tục lên xuống, các instruction khác nhau đi qua các stage pipeline mà không ảnh hưởng lẫn nhau.
 
 ### 4.4.3 Các giới hạn của pipelining
 
@@ -1514,6 +1515,12 @@ F giữ giá trị dự đoán của program counter, sẽ được thảo luậ
 
 D nằm giữa fetch stage và decode stage. Nó giữ thông tin về instruction vừa được fetch để decode stage xử lý.
 
+E nằm giữa decode stage và execute stage. Nó giữ thông tin về instruction vừa được decode và các giá trị đọc từ register file để execute stage xử lý.
+
+M nằm giữa execute stage và memory stage. Nó giữ kết quả của instruction vừa được thực thi để memory stage xử lý. Nó cũng giữ thông tin về điều kiện nhánh và đích nhánh để xử lý conditional jump.
+
+W nằm giữa memory stage và các đường feedback cung cấp kết quả tính được cho register file để ghi, đồng thời cung cấp return address cho logic chọn PC khi hoàn tất instruction ret.
+
 ![p0460_38](images/ch04_processor_architecture/p0460_38.png)
 
 **Hình 4.40 Cấu trúc phần cứng SEQ+. Chuyển phép tính PC từ cuối chu kỳ clock lên đầu khiến thiết kế phù hợp hơn với pipelining.**
@@ -1521,12 +1528,6 @@ D nằm giữa fetch stage và decode stage. Nó giữ thông tin về instructi
 ![p0461_39](images/ch04_processor_architecture/p0461_39.png)
 
 **Hình 4.41 Cấu trúc phần cứng PIPE−, một cách triển khai pipeline ban đầu. Bằng cách chèn pipeline register vào SEQ+ (Hình 4.40), chúng ta tạo pipeline five-stage. Phiên bản này có một số thiếu sót sẽ được xử lý ngay sau đây.**
-
-E nằm giữa decode stage và execute stage. Nó giữ thông tin về instruction vừa được decode và các giá trị đọc từ register file để execute stage xử lý.
-
-M nằm giữa execute stage và memory stage. Nó giữ kết quả của instruction vừa được thực thi để memory stage xử lý. Nó cũng giữ thông tin về điều kiện nhánh và đích nhánh để xử lý conditional jump.
-
-W nằm giữa memory stage và các đường feedback cung cấp kết quả tính được cho register file để ghi, đồng thời cung cấp return address cho logic chọn PC khi hoàn tất instruction ret.
 
 Hình 4.42 trình bày cách chuỗi code sau đi qua pipeline five-stage của chúng ta, trong đó các comment nhận diện instruction từ I1 đến I5 để tiện tham chiếu:
 
@@ -1690,15 +1691,15 @@ Như Hình 4.54 thể hiện, có thể tránh load/use data hazard bằng kết
 
 Việc dùng stall để xử lý load/use hazard như vậy được gọi là load interlock. Load interlock kết hợp forwarding đủ để xử lý mọi dạng data hazard có thể có. Vì chỉ load interlock làm giảm throughput pipeline, chúng ta gần đạt mục tiêu throughput phát hành một instruction mới mỗi chu kỳ clock.
 
+![p0479_52](images/ch04_processor_architecture/p0479_52.png)
+
+**Hình 4.54 Xử lý load/use hazard bằng stalling. Khi stall addq một chu kỳ trong decode stage, giá trị valB có thể được forward từ mrmovq trong memory stage sang addq trong decode stage.**
+
 ### Tránh control hazard
 
 Control hazard xuất hiện khi processor không thể xác định đáng tin cậy địa chỉ instruction tiếp theo dựa trên instruction hiện tại trong fetch stage. Như thảo luận trong Mục 4.5.4, control hazard chỉ có thể xuất hiện trong processor pipeline này với các instruction ret và jump. Hơn nữa, trường hợp sau chỉ gây khó khăn khi hướng conditional jump bị dự đoán sai. Trong mục này, chúng ta trình bày góc nhìn high-level về cách xử lý các hazard này. Cách triển khai chi tiết nằm trong Mục 4.5.8, trong thảo luận tổng quát hơn về điều khiển pipeline.
 
 Với instruction ret, xét chương trình ví dụ sau. Chương trình được viết bằng assembly code nhưng có địa chỉ instruction khác nhau ở bên trái để tiện tham chiếu:
-
-![p0479_52](images/ch04_processor_architecture/p0479_52.png)
-
-**Hình 4.54 Xử lý load/use hazard bằng stalling. Khi stall addq một chu kỳ trong decode stage, giá trị valB có thể được forward từ mrmovq trong memory stage sang addq trong decode stage.**
 
 ```
 0x000:    irmovq stack,%rsp  #   Initialize stack pointer
@@ -2130,6 +2131,36 @@ Có thể thấy các điều kiện cần hành động đặc biệt từ pipe
 
 Nếu bỏ qua tác động hiệu năng của exception (theo định nghĩa, hiếm khi xảy ra), một cách hiểu CPI là tưởng tượng chạy processor với chương trình benchmark và quan sát execute stage. Mỗi chu kỳ, execute stage hoặc (1) xử lý instruction và instruction đó tiếp tục qua các stage còn lại đến hoàn tất, hoặc (2) xử lý bubble được chèn do một trong ba trường hợp đặc biệt. Nếu stage xử lý tổng cộng C<sub>i</sub> instruction và C<sub>b</sub> bubble, processor cần khoảng C<sub>i</sub> + C<sub>b</sub> chu kỳ clock để thực thi C<sub>i</sub> instruction. Chúng ta nói “khoảng” vì bỏ qua các chu kỳ cần để bắt đầu đưa instruction qua pipeline. Khi đó có thể tính CPI cho benchmark như sau:
 
+![p0503_66](images/ch04_processor_architecture/p0503_66.png)
+
+Nghĩa là CPI bằng 1.0 cộng số hạng penalty C<sub>b</sub>/C<sub>i</sub>, chỉ số bubble trung bình được chèn trên mỗi instruction thực thi. Vì chỉ ba loại instruction khác nhau có thể gây chèn bubble, có thể chia số hạng penalty thành ba thành phần:
+
+CPI = 1.0 + lp + mp + rp
+
+trong đó lp (viết tắt “load penalty”) là tần suất trung bình bubble được chèn khi stall do load/use hazard, mp (viết tắt “mispredicted branch penalty”) là tần suất trung bình bubble được chèn khi hủy instruction do nhánh dự đoán sai và rp (viết tắt “return penalty”) là tần suất trung bình bubble được chèn khi stall do ret. Mỗi penalty chỉ tổng số bubble chèn vì lý do nêu trên (một phần C<sub>b</sub>) chia cho tổng instruction đã thực thi (C<sub>i</sub> .)
+
+Để ước tính mỗi penalty, cần biết tần suất các instruction liên quan (load, conditional branch và return) xuất hiện, và với mỗi loại, tần suất xuất hiện điều kiện cụ thể. Hãy chọn các tần suất sau để tính CPI (tương đương số đo được báo cáo trong [44] và [46]):
+
+- Instruction load (mrmovq và popq) chiếm 25% tổng instruction thực thi. Trong đó, 20% gây load/use hazard.
+
+- Conditional branch chiếm 20% tổng instruction thực thi. Trong đó, 60% được lấy và 40% không được lấy.
+
+- Instruction return chiếm 2% tổng instruction thực thi.
+
+Vì vậy, có thể ước tính mỗi penalty bằng tích tần suất loại instruction, tần suất điều kiện xuất hiện và số bubble được chèn khi điều kiện xảy ra:
+
+|  |  | Instruction | Điều kiện |  |  |
+|---|---|---|---|---|---|
+| Nguyên nhân | Tên | tần suất | tần suất | Bubble | Tích |
+| Load/use | lp | 0.25 | 0.20 | 1 | 0.05 |
+| Dự đoán sai | mp | 0.20 | 0.40 | 2 | 0.16 |
+| Return | rp | 0.02 | 1.00 | 3 | 0.06 |
+| Tổng penalty |  |  |  |  | 0.27 |
+
+Tổng ba penalty là 0.27, cho CPI bằng 1.27.
+
+Mục tiêu là thiết kế pipeline phát hành một instruction mỗi chu kỳ, cho CPI 1.0. Chúng ta chưa hoàn toàn đạt mục tiêu, nhưng hiệu năng tổng thể vẫn khá tốt. Cũng có thể thấy mọi nỗ lực giảm CPI thêm nên tập trung vào nhánh dự đoán sai. Chúng chiếm 0.16 trong tổng penalty 0.27 vì conditional branch phổ biến, chiến lược dự đoán thường thất bại và mỗi dự đoán sai hủy hai instruction.
+
 #### Thông tin thêm Kiểm thử thiết kế
 
 Như đã thấy, có nhiều cách đưa bug vào thiết kế, ngay cả microprocessor đơn giản. Với pipelining, có nhiều tương tác tinh tế giữa instruction ở các stage khác nhau. Nhiều thách thức thiết kế liên quan instruction khác thường (như pop vào stack pointer) hoặc tổ hợp instruction khác thường (như jump not-taken theo sau bởi ret). Xử lý exception còn thêm một chiều hoàn toàn mới vào các hành vi pipeline có thể có. Vậy làm sao chắc thiết kế đúng? Với nhà sản xuất phần cứng, đây là mối quan tâm hàng đầu, vì họ không thể đơn giản báo lỗi rồi để người dùng tải bản vá code qua Internet. Ngay cả lỗi thiết kế logic đơn giản cũng có thể gây hậu quả nghiêm trọng, nhất là khi microprocessor ngày càng được dùng để vận hành hệ thống thiết yếu với cuộc sống và sức khỏe, như phanh chống bó cứng ô tô, máy tạo nhịp tim và hệ thống điều khiển máy bay.
@@ -2162,41 +2193,11 @@ Trong thực nghiệm, chúng ta kiểm chứng không chỉ phiên bản PIPE t
 
 Formal verification vẫn ở giai đoạn phát triển ban đầu. Công cụ thường khó dùng và không đủ khả năng kiểm chứng thiết kế large-scale. Chúng ta kiểm chứng được processor một phần nhờ chúng tương đối đơn giản. Ngay cả vậy, vẫn cần nhiều tuần nỗ lực và nhiều lần chạy công cụ, mỗi lần cần tới 8 giờ tính toán. Đây là lĩnh vực nghiên cứu sôi động, với một số công cụ bắt đầu được thương mại hóa và một số đang dùng tại Intel, AMD và IBM.
 
-![p0503_66](images/ch04_processor_architecture/p0503_66.png)
-
-Nghĩa là CPI bằng 1.0 cộng số hạng penalty C<sub>b</sub>/C<sub>i</sub>, chỉ số bubble trung bình được chèn trên mỗi instruction thực thi. Vì chỉ ba loại instruction khác nhau có thể gây chèn bubble, có thể chia số hạng penalty thành ba thành phần:
-
 #### Ghi chú Web ARCH:VLOG Triển khai Verilog của processor Y86-64 pipeline
 
 Như đã đề cập, thiết kế logic hiện đại bao gồm viết biểu diễn văn bản của thiết kế phần cứng bằng hardware description language. Sau đó có thể kiểm thử thiết kế bằng mô phỏng và nhiều công cụ formal verification. Khi tin tưởng thiết kế, có thể dùng logic synthesis để chuyển thiết kế thành logic circuit thực tế.
 
 Chúng ta đã phát triển mô hình các thiết kế processor Y86-64 bằng hardware description language Verilog. Các thiết kế kết hợp module triển khai những block cơ bản của processor với control logic được sinh trực tiếp từ mô tả HCL. Chúng ta đã tổng hợp được một số thiết kế, tải mô tả logic circuit lên phần cứng field-programmable gate array (FPGA) và chạy processor với chương trình thực tế.
-
-CPI = 1.0 + lp + mp + rp
-
-trong đó lp (viết tắt “load penalty”) là tần suất trung bình bubble được chèn khi stall do load/use hazard, mp (viết tắt “mispredicted branch penalty”) là tần suất trung bình bubble được chèn khi hủy instruction do nhánh dự đoán sai và rp (viết tắt “return penalty”) là tần suất trung bình bubble được chèn khi stall do ret. Mỗi penalty chỉ tổng số bubble chèn vì lý do nêu trên (một phần C<sub>b</sub>) chia cho tổng instruction đã thực thi (C<sub>i</sub> .)
-
-Để ước tính mỗi penalty, cần biết tần suất các instruction liên quan (load, conditional branch và return) xuất hiện, và với mỗi loại, tần suất xuất hiện điều kiện cụ thể. Hãy chọn các tần suất sau để tính CPI (tương đương số đo được báo cáo trong [44] và [46]):
-
-- Instruction load (mrmovq và popq) chiếm 25% tổng instruction thực thi. Trong đó, 20% gây load/use hazard.
-
-- Conditional branch chiếm 20% tổng instruction thực thi. Trong đó, 60% được lấy và 40% không được lấy.
-
-- Instruction return chiếm 2% tổng instruction thực thi.
-
-Vì vậy, có thể ước tính mỗi penalty bằng tích tần suất loại instruction, tần suất điều kiện xuất hiện và số bubble được chèn khi điều kiện xảy ra:
-
-|  |  | Instruction | Điều kiện |  |  |
-|---|---|---|---|---|---|
-| Nguyên nhân | Tên | tần suất | tần suất | Bubble | Tích |
-| Load/use | lp | 0.25 | 0.20 | 1 | 0.05 |
-| Dự đoán sai | mp | 0.20 | 0.40 | 2 | 0.16 |
-| Return | rp | 0.02 | 1.00 | 3 | 0.06 |
-| Tổng penalty |  |  |  |  | 0.27 |
-
-Tổng ba penalty là 0.27, cho CPI bằng 1.27.
-
-Mục tiêu là thiết kế pipeline phát hành một instruction mỗi chu kỳ, cho CPI 1.0. Chúng ta chưa hoàn toàn đạt mục tiêu, nhưng hiệu năng tổng thể vẫn khá tốt. Cũng có thể thấy mọi nỗ lực giảm CPI thêm nên tập trung vào nhánh dự đoán sai. Chúng chiếm 0.16 trong tổng penalty 0.27 vì conditional branch phổ biến, chiến lược dự đoán thường thất bại và mỗi dự đoán sai hủy hai instruction.
 
 #### Bài tập thực hành 4.43 (lời giải trang 530)
 
@@ -2244,7 +2245,9 @@ Chúng ta đã thấy instruction set architecture, hay ISA, cung cấp một l�
 
 ### Thông tin thêm Thiết kế microprocessor State-of-the-art
 
-Một pipeline five-stage, như chúng ta đã trình bày với processor PIPE, đại diện cho trình độ tiên tiến nhất trong thiết kế processor vào mid-1980s. Processor RISC nguyên mẫu do nhóm nghiên cứu của Patterson tại Berkeley phát triển đã tạo nền tảng cho processor SPARC đầu tiên, được Sun Microsystems phát triển năm 1987. Processor do nhóm nghiên cứu của Hennessy tại Stanford phát triển đã được MIPS Technologies (một công ty do Hennessy thành lập) thương mại hóa năm 1986. Cả hai đều sử dụng pipeline five-stage. Processor Intel i486 cũng dùng pipeline five-stage, mặc dù phân chia trách nhiệm giữa các stage khác đi, với hai decode stage và một execute/memory stage kết hợp [27]. Các thiết kế pipeline này bị giới hạn ở throughput nhiều nhất một instruction mỗi clock cycle. Đại lượng CPI (viết tắt của “cycles per instruction”) được mô tả trong Mục 4.5.9 không bao giờ có thể nhỏ hơn 1.0. Mỗi stage khác nhau chỉ có thể xử lý một instruction tại một thời điểm. Các processor gần đây hơn hỗ trợ hoạt động superscalar, nghĩa là chúng có thể đạt CPI nhỏ hơn 1.0 bằng cách fetch, decode và execute nhiều instruction song song. Khi các processor superscalar trở nên phổ biến, đại lượng hiệu năng được chấp nhận đã chuyển từ CPI sang nghịch đảo của nó—số instruction được thực thi trung bình mỗi chu kỳ, hay IPC. Đại lượng này có thể vượt quá 1.0 với processor superscalar. Các thiết kế tiên tiến nhất dùng một kỹ thuật gọi là out-of-order execution để thực thi nhiều instruction song song, có thể theo thứ tự hoàn toàn khác với thứ tự xuất hiện trong chương trình, trong khi vẫn giữ nguyên hành vi tổng thể do mô hình ISA tuần tự quy định. Dạng thực thi này được mô tả trong Chương 5 như một phần của nội dung thảo luận về tối ưu hóa chương trình.
+Một pipeline five-stage, như chúng ta đã trình bày với processor PIPE, đại diện cho trình độ tiên tiến nhất trong thiết kế processor vào mid-1980s. Processor RISC nguyên mẫu do nhóm nghiên cứu của Patterson tại Berkeley phát triển đã tạo nền tảng cho processor SPARC đầu tiên, được Sun Microsystems phát triển năm 1987. Processor do nhóm nghiên cứu của Hennessy tại Stanford phát triển đã được MIPS Technologies (một công ty do Hennessy thành lập) thương mại hóa năm 1986. Cả hai đều sử dụng pipeline five-stage. Processor Intel i486 cũng dùng pipeline five-stage, mặc dù phân chia trách nhiệm giữa các stage khác đi, với hai decode stage và một execute/memory stage kết hợp [27].
+
+Các thiết kế pipeline này bị giới hạn ở throughput nhiều nhất một instruction mỗi clock cycle. Đại lượng CPI (viết tắt của “cycles per instruction”) được mô tả trong Mục 4.5.9 không bao giờ có thể nhỏ hơn 1.0. Mỗi stage khác nhau chỉ có thể xử lý một instruction tại một thời điểm. Các processor gần đây hơn hỗ trợ hoạt động superscalar, nghĩa là chúng có thể đạt CPI nhỏ hơn 1.0 bằng cách fetch, decode và execute nhiều instruction song song. Khi các processor superscalar trở nên phổ biến, đại lượng hiệu năng được chấp nhận đã chuyển từ CPI sang nghịch đảo của nó—số instruction được thực thi trung bình mỗi chu kỳ, hay IPC. Đại lượng này có thể vượt quá 1.0 với processor superscalar. Các thiết kế tiên tiến nhất dùng một kỹ thuật gọi là out-of-order execution để thực thi nhiều instruction song song, có thể theo thứ tự hoàn toàn khác với thứ tự xuất hiện trong chương trình, trong khi vẫn giữ nguyên hành vi tổng thể do mô hình ISA tuần tự quy định. Dạng thực thi này được mô tả trong Chương 5 như một phần của nội dung thảo luận về tối ưu hóa chương trình.
 
 Tuy nhiên, các processor pipeline không chỉ là sản phẩm của quá khứ. Phần lớn processor được bán được sử dụng trong các hệ thống embedded, điều khiển các chức năng ô tô, sản phẩm tiêu dùng và những thiết bị khác mà processor không trực tiếp hiển thị với người dùng hệ thống. Trong những ứng dụng này, tính đơn giản của một processor pipeline, như processor chúng ta đã tìm hiểu trong chương này, giúp giảm chi phí và yêu cầu năng lượng so với các mẫu higher-performance.
 
@@ -2254,7 +2257,7 @@ Chúng ta đã định nghĩa tập instruction Y86-64 bằng cách bắt đầu
 
 Pipelining cải thiện hiệu năng throughput của một hệ thống bằng cách cho phép các stage khác nhau hoạt động đồng thời. Tại một thời điểm bất kỳ, nhiều thao tác đang được các stage khác nhau xử lý. Khi đưa vào tính đồng thời này, chúng ta phải cẩn thận để cung cấp cùng hành vi program-level như khi thực thi chương trình tuần tự. Chúng ta đã đưa vào pipelining bằng cách sắp xếp lại các phần của SEQ để có SEQ+, rồi thêm các pipeline register để tạo pipeline PIPE−. Chúng ta cải thiện hiệu năng pipeline bằng cách thêm forwarding logic để tăng tốc việc gửi kết quả từ instruction này sang instruction khác. Một số trường hợp đặc biệt yêu cầu thêm pipeline control logic để stall hoặc hủy một số pipeline stage.
 
-#### Thông tin thêm trên Web ARCH:HCL Các mô tả HCL của processor Y86-64
+### Thông tin thêm trên Web ARCH:HCL Các mô tả HCL của processor Y86-64
 
 Trong chương này, chúng ta đã xem xét các phần code HCL cho một số thiết kế logic đơn giản và cho control logic của các processor Y86-64 SEQ và PIPE. Để tham khảo, chúng tôi cung cấp tài liệu về ngôn ngữ HCL và các mô tả HCL đầy đủ cho control logic của hai processor. Mỗi mô tả này chỉ cần từ năm đến bảy trang code HCL, và việc nghiên cứu toàn bộ chúng rất đáng làm.
 
@@ -2597,16 +2600,16 @@ rproduct:
         andq   %rsi,%rsi        # Set condition codes
         je     return           # If count <= 0, return 1
         pushq  %rbx             # Save callee-saved register
-mrmovq (%rdi),%rbx  # Get *start
-irmovq $-1,%r10
-addq %r10,%rsi      # count--
-irmovq $8,%r10
-addq %r10,%rdi      # start++
-call rproduct
-imulq %rbx,%rax     # Multiply *start to product
-popq %rbx           # Restore callee-saved register
+        mrmovq (%rdi),%rbx      # Get *start
+        irmovq $-1,%r10
+        addq   %r10,%rsi        # count--
+        irmovq $8,%r10
+        addq   %r10,%rdi        # start++
+        call   rproduct
+        imulq  %rbx,%rax        # Multiply *start to product
+        popq   %rbx             # Restore callee-saved register
 return:
-ret
+        ret
 ```
 
 Lời giải Bài toán 4.5 (trang 406) Bài toán này cho bạn cơ hội thử viết assembly code.
@@ -2643,11 +2646,11 @@ Lời giải Bài toán 4.6 (trang 406) Bài toán này cho bạn cơ hội th�
 11           xorq %r11,%r11          # Constant 0
 12           subq %r10,%r11          # -x
 13           cmovg %r11,%r10         # If -x > 0 then x = -x
-            14           addq %r10,%rax          # Add to sum
-            15           addq %r8,%rdi           # start++
-            16           subq %r9,%rsi           # count--
-            17   test:
-            18           jne    loop             # Stop when 0
+14           addq %r10,%rax          # Add to sum
+15           addq %r8,%rdi           # start++
+16           subq %r9,%rsi           # count--
+17   test:
+18           jne    loop             # Stop when 0
 ```
 
 Lời giải Bài toán 4.7 (trang 406) Mặc dù khó hình dung một cách sử dụng thực tế nào cho instruction cụ thể này, khi thiết kế hệ thống, điều quan trọng là tránh mọi điểm mơ hồ trong đặc tả. Chúng ta muốn xác định một quy ước hợp lý cho hành vi của instruction và đảm bảo mỗi cách triển khai đều tuân theo quy ước này.
@@ -2666,6 +2669,10 @@ Nói chung, các tín hiệu eq và xor sẽ là phần bù của nhau. Nghĩa l
 
 Lời giải Bài toán 4.10 (trang 413) Đầu ra của các mạch exclusive-or sẽ là phần bù của các giá trị bằng nhau của bit. Dùng các định luật DeMorgan (phần Thông tin thêm trên Web data:bool ở trang 88), chúng ta có thể triển khai and bằng or và not, cho ra mạch trong Hình 4.71.
 
+![p0522_69](images/ch04_processor_architecture/p0522_69.png)
+
+**Hình 4.71 Lời giải cho Bài toán 4.10.**
+
 Lời giải Bài toán 4.11 (trang 415) Chúng ta có thể thấy phần thứ hai của biểu thức case có thể được viết thành
 
 ```
@@ -2675,10 +2682,6 @@ B <= C           : B;
 Vì dòng đầu tiên sẽ phát hiện trường hợp A là phần tử nhỏ nhất, dòng thứ hai chỉ cần xác định B hay C là nhỏ nhất.
 
 Lời giải Bài toán 4.12 (trang 416) Thiết kế này là một biến thể của thiết kế tìm giá trị nhỏ nhất trong ba đầu vào:
-
-![p0522_69](images/ch04_processor_architecture/p0522_69.png)
-
-**Hình 4.71 Lời giải cho Bài toán 4.10.**
 
 ```
 word Med3 = [
@@ -2737,9 +2740,6 @@ Lời giải Bài toán 4.17 (trang 429) Triển khai conditional move chỉ c�
 |  | rA : rB ← M<sub>1</sub>[PC + 1] |
 |  | valP ← PC + 2 |
 | Decode | valA ← R[rA] |
-
-| Stage | cmovXX rA , rB |
-|---|---|
 | Execute | valE ← 0 + valA |
 |  | Cnd ← Cond(CC, ifun) |
 | Memory |  |

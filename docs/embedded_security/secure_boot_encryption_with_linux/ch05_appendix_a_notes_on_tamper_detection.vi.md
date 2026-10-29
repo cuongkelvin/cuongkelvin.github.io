@@ -22,7 +22,7 @@ Mặt khác, việc phát hiện can thiệp bên trong là một tập các cơ
 
 Một khi đã phát hiện một truy cập can thiệp, tính năng quan trọng nhất của một hệ thống chống can thiệp tốt là phản ứng của nó, vốn phải tức thì và phá hủy dữ liệu nhạy cảm. Trước hết, một cờ báo động trong một register chuyên dụng (*sentinel*) được đặt; sau đó, phản ứng phổ biến và then chốt nhất là *zeroization* (hay xóa) memory volatile chứa dữ liệu nhạy cảm (thường là các master cryptographic key, để khiến mọi dữ liệu đã mã hóa trở nên không dùng được). Hơn nữa, CPU cũng có thể ép một lần reset hệ thống hoặc tự đưa mình vào trạng thái khóa cho đến khi sự can thiệp được giải quyết (xem bên dưới về việc khôi phục sau can thiệp
 
-Để hiện thực một hệ thống phát hiện can thiệp tốt, các CPU hiện đại thường được chia thành hai vùng chính:
+Để triển khai một hệ thống phát hiện can thiệp tốt, các CPU hiện đại thường được chia thành hai vùng chính:
 
 1) Một vùng bình thường được cấp nguồn bình thường
 2) Một vùng đặc biệt được battery-backed
@@ -71,7 +71,7 @@ Việc phát hiện can thiệp có thể được dùng để xác minh tính t
         ...
 ```
 
-Phần đầu tiên của đoạn code trên (tức là *tampering recovery section*) được dùng để khởi tạo hoặc khôi phục hệ thống. Phần thứ hai (*tampering enable section*) được dùng để thực sự bật tính năng phát hiện can thiệp trong CPU (bằng hàm `enable_tamper_detection()`) rồi kiểm tra trạng thái tampering battery bằng cách kiểm tra register sentinel; trong kịch bản này, hàm `is_tampering_battery_ok()` có thể được hiện thực như dưới đây:
+Phần đầu tiên của đoạn code trên (tức là *tampering recovery section*) được dùng để khởi tạo hoặc khôi phục hệ thống. Phần thứ hai (*tampering enable section*) được dùng để thực sự bật tính năng phát hiện can thiệp trong CPU (bằng hàm `enable_tamper_detection()`) rồi kiểm tra trạng thái tampering battery bằng cách kiểm tra register sentinel; trong kịch bản này, hàm `is_tampering_battery_ok()` có thể được triển khai như dưới đây:
 
 ```
 static bool is_tampering_battery_ok(void)
@@ -103,9 +103,9 @@ Trong cả hai trường hợp, thao tác này phải được thực hiện b�
 
 Trong quá trình sản xuất tại nhà máy, chúng ta có thể ép nạp một phiên bản đặc biệt của bootloader có bật define `CONFIG_TAMPERING_INIT_FORCED`. Trong trường hợp này, bootloader khởi động và tự động gọi `setup_tampering_battery_status()` trước khi treo.
 
-Mặt khác, nếu chúng ta muốn hiện thực một thủ tục khôi phục sau can thiệp, chúng ta có thể định nghĩa hàm `is_tampering_init_forced()` sao cho nó trả về *true* nếu việc khôi phục phải bắt đầu. Sau đó, một khi register sentinel đã được lập trình đúng cách, chúng ta có thể kết thúc thủ tục khôi phục bằng hàm `unforce_tampering_init()`.
+Mặt khác, nếu chúng ta muốn triển khai một thủ tục khôi phục sau can thiệp, chúng ta có thể định nghĩa hàm `is_tampering_init_forced()` sao cho nó trả về *true* nếu việc khôi phục phải bắt đầu. Sau đó, một khi register sentinel đã được lập trình đúng cách, chúng ta có thể kết thúc thủ tục khôi phục bằng hàm `unforce_tampering_init()`.
 
-Có nhiều cách để hiện thực hai hàm này; tuy nhiên, cách đơn giản nhất (và kém an toàn nhất) là dùng một đường GPIO (có thể được nối với một công tắc trên PCB). Trong kịch bản này, hai hàm trông như sau:
+Có nhiều cách để triển khai hai hàm này; tuy nhiên, cách đơn giản nhất (và kém an toàn nhất) là dùng một đường GPIO (có thể được nối với một công tắc trên PCB). Trong kịch bản này, hai hàm trông như sau:
 
 ```
 static bool is_tampering_init_forced(void)

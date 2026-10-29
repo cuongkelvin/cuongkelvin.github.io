@@ -89,11 +89,14 @@ Vì vậy, tắt interrupt chỉ được dùng trong ngữ cảnh hạn chế n
 
 > BÊN LỀ: THUẬT TOÁN DEKKER VÀ PETERSON
 >
-> Vào thập niên 1960, Dijkstra nêu vấn đề concurrency với bạn bè, và một người, nhà toán học Theodorus Jozef Dekker, đưa ra lời giải [D68]. Khác những giải pháp ở đây dùng hardware instruction đặc biệt và cả OS hỗ trợ, thuật toán Dekker chỉ dùng load và store (giả định chúng atomic đối với nhau, đúng trên hardware thời đầu). Peterson sau đó cải tiến cách này [P81]. Một lần nữa chỉ dùng load và store, với ý tưởng bảo đảm hai thread không bao giờ cùng vào critical section. Đây là thuật toán Peterson (cho hai thread); hãy thử hiểu code. Các biến flag và turn dùng làm gì?
+> Vào thập niên 1960, Dijkstra nêu vấn đề concurrency với bạn bè, và một người, nhà toán học Theodorus Jozef Dekker, đưa ra lời giải [D68]. Khác những giải pháp ở đây dùng hardware instruction đặc biệt và cả OS hỗ trợ, thuật toán Dekker chỉ dùng load và store (giả định chúng atomic đối với nhau, đúng trên hardware thời đầu).
+>
+> Peterson sau đó cải tiến cách này [P81]. Một lần nữa chỉ dùng load và store, với ý tưởng bảo đảm hai thread không bao giờ cùng vào critical section. Đây là thuật toán Peterson (cho hai thread); hãy thử hiểu code. Các biến flag và turn dùng làm gì?
 >
 > ```
 > int flag[2];
 > int turn;
+>
 > void init() {
 >     flag[0] = flag[1] = 0;    // 1->thread wants to grab lock
 >     turn = 0;                 // whose turn? (thread 0 or 1?)

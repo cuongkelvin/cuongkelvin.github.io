@@ -58,7 +58,7 @@ có thể đạt 100% branch coverage bằng cách chạy các test mà điều 
 
 <a id="fn20_1"></a>
 
-[<sup>1</sup>](#fn20_120b)Kiểm thử “White-box” được thực hiện khi biết module được hiện thực thế nào; kiểm thử “black-box” được thực hiện khi chỉ biết giao diện bên ngoài của hàm.
+[<sup>1</sup>](#fn20_120b)Kiểm thử “White-box” được thực hiện khi biết module được triển khai thế nào; kiểm thử “black-box” được thực hiện khi chỉ biết giao diện bên ngoài của hàm.
 
 <a id="p265"></a>Với một điều kiện phức tạp hơn, những gì cần để đạt 100% branch coverage được định nghĩa kém rõ ràng hơn. Hãy xét câu lệnh điều kiện sau:
 

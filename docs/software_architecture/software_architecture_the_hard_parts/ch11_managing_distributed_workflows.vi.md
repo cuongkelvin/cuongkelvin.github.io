@@ -171,7 +171,7 @@ Tuy nhiên, hãy xét độ phức tạp gia tăng do kịch bản lỗi còn l�
 
 *Hình 11-9. Quản lý điều kiện lỗi workflow của product backlog*
 
-Nhiều bước của workflow này đã hoàn tất trước sự kiện (hết hàng) gây ra lỗi. Vì mỗi service này hiện thực tính transaction riêng của nó (đây là một ví dụ về [“Anthology Saga<sup>(aec)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-anthology-saga)), khi xảy ra lỗi, mỗi service phải gửi các message bù trừ tới các service khác. Một khi Fulfillment Service nhận ra điều kiện lỗi, nó nên tạo ra các sự kiện phù hợp với bounded context của mình, có lẽ là một message broadcast mà các service Email, Payment và Order Placement đăng ký nhận.
+Nhiều bước của workflow này đã hoàn tất trước sự kiện (hết hàng) gây ra lỗi. Vì mỗi service này triển khai tính transaction riêng của nó (đây là một ví dụ về [“Anthology Saga<sup>(aec)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-anthology-saga)), khi xảy ra lỗi, mỗi service phải gửi các message bù trừ tới các service khác. Một khi Fulfillment Service nhận ra điều kiện lỗi, nó nên tạo ra các sự kiện phù hợp với bounded context của mình, có lẽ là một message broadcast mà các service Email, Payment và Order Placement đăng ký nhận.
 
 Ví dụ thể hiện trong [Hình 11-9](#fig-managing-workflows-chor-error-backorder) minh họa sự phụ thuộc giữa các workflow phức tạp và mediator. Dù workflow ban đầu trong choreography minh họa ở [Hình 11-7](#fig-managing-workflows-simple-choreo) có vẻ đơn giản hơn [Hình 11-4](#fig-managing-workflows-orch-happy), trường hợp lỗi (và các trường hợp khác) liên tục làm tăng thêm độ phức tạp cho giải pháp choreographed. Trong [Hình 11-10](#fig-managing-workflows-chor-error-add-comm), mỗi kịch bản lỗi buộc các domain service phải tương tác với nhau, thêm các liên kết giao tiếp vốn không cần thiết cho happy path.
 
@@ -181,9 +181,9 @@ Ví dụ thể hiện trong [Hình 11-9](#fig-managing-workflows-chor-error-back
 
 *Hình 11-10. Các điều kiện lỗi trong choreography thường thêm liên kết giao tiếp*
 
-Mọi workflow mà kiến trúc sư cần mô hình hóa trong phần mềm đều có một lượng<a id="idm45798377393864"></a><a id="idm45798377392888"></a><a id="idm45798377392216"></a> *semantic coupling* (coupling ngữ nghĩa) nhất định—coupling vốn có tồn tại trong problem domain. Ví dụ, quy trình giao một ticket cho một thành viên Sysops Squad có một workflow nhất định: một client phải yêu cầu dịch vụ, kỹ năng phải được khớp với các chuyên gia cụ thể, rồi cross-referenced (đối chiếu chéo) với lịch làm việc và địa điểm. <a id="idm45798377390424"></a><a id="idm45798377389176"></a><a id="idm45798377388504"></a><a id="idm45798377387288"></a>Cách kiến trúc sư mô hình hóa tương tác đó là *implementation coupling* (coupling hiện thực).
+Mọi workflow mà kiến trúc sư cần mô hình hóa trong phần mềm đều có một lượng<a id="idm45798377393864"></a><a id="idm45798377392888"></a><a id="idm45798377392216"></a> *semantic coupling* (coupling ngữ nghĩa) nhất định—coupling vốn có tồn tại trong problem domain. Ví dụ, quy trình giao một ticket cho một thành viên Sysops Squad có một workflow nhất định: một client phải yêu cầu dịch vụ, kỹ năng phải được khớp với các chuyên gia cụ thể, rồi cross-referenced (đối chiếu chéo) với lịch làm việc và địa điểm. <a id="idm45798377390424"></a><a id="idm45798377389176"></a><a id="idm45798377388504"></a><a id="idm45798377387288"></a>Cách kiến trúc sư mô hình hóa tương tác đó là *implementation coupling* (coupling triển khai).
 
-Semantic coupling của một workflow được quy định bởi các yêu cầu domain của giải pháp và phải được mô hình hóa bằng cách nào đó. Dù kiến trúc sư khéo léo đến đâu, họ cũng không thể giảm lượng semantic coupling, nhưng các lựa chọn hiện thực của họ có thể làm tăng nó. Điều này không có nghĩa là kiến trúc sư không thể phản đối những ngữ nghĩa phi thực tế hoặc bất khả thi do người dùng nghiệp vụ định nghĩa—một số yêu cầu domain tạo ra những vấn đề cực kỳ khó trong architecture.
+Semantic coupling của một workflow được quy định bởi các yêu cầu domain của giải pháp và phải được mô hình hóa bằng cách nào đó. Dù kiến trúc sư khéo léo đến đâu, họ cũng không thể giảm lượng semantic coupling, nhưng các lựa chọn triển khai của họ có thể làm tăng nó. Điều này không có nghĩa là kiến trúc sư không thể phản đối những ngữ nghĩa phi thực tế hoặc bất khả thi do người dùng nghiệp vụ định nghĩa—một số yêu cầu domain tạo ra những vấn đề cực kỳ khó trong architecture.
 
 Đây là một ví dụ phổ biến. Hãy xét layered monolithic architecture tiêu chuẩn so với style hiện đại hơn là modular monolith, thể hiện trong [Hình 11-11](#fig-managing-workflows-tech-domain-part-one).
 
@@ -201,17 +201,17 @@ Cả hai topology đều là những cách hợp lý để tổ chức một cod
 
 ![](images/sahp_1112.png)
 
-*Hình 11-12. Catalog Checkout bị trải nhòe qua các layer hiện thực trong một architecture phân vùng theo kỹ thuật*
+*Hình 11-12. Catalog Checkout bị trải nhòe qua các layer triển khai trong một architecture phân vùng theo kỹ thuật*
 
-`Catalog Checkout` bị “trải nhòe” qua các layer của technical architecture, trong khi nó chỉ xuất hiện trong domain component và database tương ứng trong ví dụ phân vùng theo domain. Tất nhiên, việc sắp domain khớp với domain partitioned architecture không phải là một phát hiện mới—một trong những hiểu biết sâu sắc của domain-driven design là vị trí hàng đầu của các domain workflow. Dù thế nào đi nữa, nếu kiến trúc sư muốn mô hình hóa một workflow, họ phải làm cho các bộ phận chuyển động đó hoạt động cùng nhau. Nếu kiến trúc sư đã tổ chức architecture của mình giống với các domain, việc hiện thực workflow sẽ có độ phức tạp tương tự. <a id="idm45798377373208"></a><a id="idm45798377371992"></a>Tuy nhiên, nếu kiến trúc sư đã áp đặt thêm các layer (như trong phân vùng theo kỹ thuật, thể hiện trong [Hình 11-12](#fig-managing-workflows-tech-domain-part-two)), nó làm tăng độ phức tạp hiện thực tổng thể vì giờ kiến trúc sư phải thiết kế cho độ phức tạp *ngữ nghĩa* cùng với độ phức tạp *hiện thực* bổ sung.
+`Catalog Checkout` bị “trải nhòe” qua các layer của technical architecture, trong khi nó chỉ xuất hiện trong domain component và database tương ứng trong ví dụ phân vùng theo domain. Tất nhiên, việc sắp domain khớp với domain partitioned architecture không phải là một phát hiện mới—một trong những hiểu biết sâu sắc của domain-driven design là vị trí hàng đầu của các domain workflow. Dù thế nào đi nữa, nếu kiến trúc sư muốn mô hình hóa một workflow, họ phải làm cho các bộ phận chuyển động đó hoạt động cùng nhau. Nếu kiến trúc sư đã tổ chức architecture của mình giống với các domain, việc triển khai workflow sẽ có độ phức tạp tương tự. <a id="idm45798377373208"></a><a id="idm45798377371992"></a>Tuy nhiên, nếu kiến trúc sư đã áp đặt thêm các layer (như trong phân vùng theo kỹ thuật, thể hiện trong [Hình 11-12](#fig-managing-workflows-tech-domain-part-two)), nó làm tăng độ phức tạp triển khai tổng thể vì giờ kiến trúc sư phải thiết kế cho độ phức tạp *ngữ nghĩa* cùng với độ phức tạp *triển khai* bổ sung.
 
 Đôi khi độ phức tạp thêm vào là có cơ sở. Ví dụ, nhiều layered architecture xuất phát từ mong muốn của kiến trúc sư muốn tiết kiệm chi phí bằng cách hợp nhất các architecture pattern, như database connection pooling. Trong trường hợp đó, kiến trúc sư đã cân nhắc các trade-offs giữa khoản tiết kiệm chi phí gắn với việc phân vùng kỹ thuật cho kết nối database so với độ phức tạp và chi phí phải gánh thêm, và khoản tiết kiệm đã thắng trong nhiều trường hợp.
 
-Bài học lớn nhất của thập kỷ qua trong thiết kế architecture là mô hình hóa *ngữ nghĩa* của workflow càng sát với việc hiện thực càng tốt.
+Bài học lớn nhất của thập kỷ qua trong thiết kế architecture là mô hình hóa *ngữ nghĩa* của workflow càng sát với việc triển khai càng tốt.
 
 > **Mẹo**
 >
-> Kiến trúc sư không bao giờ có thể giảm semantic coupling thông qua việc hiện thực, nhưng họ có thể làm nó tệ hơn.
+> Kiến trúc sư không bao giờ có thể giảm semantic coupling thông qua việc triển khai, nhưng họ có thể làm nó tệ hơn.
 
 Do đó, chúng ta có thể thiết lập một quan hệ giữa semantic coupling và nhu cầu phối hợp—workflow càng đòi hỏi nhiều bước, càng xuất hiện nhiều đường đi lỗi và các đường đi tùy chọn khác.<a id="idm45798377364952"></a><a id="idm45798377364248"></a><a id="idm45798377363576"></a>
 
@@ -340,7 +340,7 @@ Tuy nhiên, khi độ phức tạp của workflow tăng lên, nhu cầu về m�
 
 Ngoài ra, workflow chứa càng nhiều độ phức tạp ngữ nghĩa, orchestrator càng hữu dụng. Hãy nhớ, implementation coupling không thể làm semantic coupling tốt hơn, chỉ có thể làm tệ hơn.
 
-Rốt cuộc, điểm lý tưởng cho choreography nằm ở các workflow cần khả năng phản hồi và scalability, và hoặc không có kịch bản lỗi phức tạp hoặc các kịch bản lỗi hiếm khi xảy ra. Kiểu giao tiếp này cho phép throughput cao; nó được các dynamic coupling pattern [“Phone Tag Saga<sup>(sac)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-phone-tag-saga), [“Time Travel Saga<sup>(sec)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-time-travel-saga), và [“Anthology Saga<sup>(aec)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-anthology-saga) dùng. Tuy nhiên, nó cũng có thể dẫn đến những cách hiện thực cực kỳ khó khăn khi các lực khác bị trộn vào, dẫn đến [“Horror Story<sup>(aac)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-horror-story).
+Rốt cuộc, điểm lý tưởng cho choreography nằm ở các workflow cần khả năng phản hồi và scalability, và hoặc không có kịch bản lỗi phức tạp hoặc các kịch bản lỗi hiếm khi xảy ra. Kiểu giao tiếp này cho phép throughput cao; nó được các dynamic coupling pattern [“Phone Tag Saga<sup>(sac)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-phone-tag-saga), [“Time Travel Saga<sup>(sec)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-time-travel-saga), và [“Anthology Saga<sup>(aec)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-anthology-saga) dùng. Tuy nhiên, nó cũng có thể dẫn đến những cách triển khai cực kỳ khó khăn khi các lực khác bị trộn vào, dẫn đến [“Horror Story<sup>(aac)</sup> Pattern”](ch12_transactional_sagas.vi.md#sec-horror-story).
 
 <a id="fig-managing-workflows-complexity-orch"></a>
 

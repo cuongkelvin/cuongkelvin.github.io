@@ -56,7 +56,7 @@ Vì architecture gồm các structure, và các structure gồm các element<sup
 
 ### Architecture so với thiết kế (Architecture versus Design)
 
-Architecture là thiết kế, nhưng không phải mọi thiết kế đều là architecture. Tức là, nhiều quyết định thiết kế không bị architecture ràng buộc—xét cho cùng, nó là một sự trừu tượng hóa—và phụ thuộc vào sự cân nhắc và óc phán đoán tốt của những người thiết kế ở khâu sau và thậm chí của những người hiện thực.
+Architecture là thiết kế, nhưng không phải mọi thiết kế đều là architecture. Tức là, nhiều quyết định thiết kế không bị architecture ràng buộc—xét cho cùng, nó là một sự trừu tượng hóa—và phụ thuộc vào sự cân nhắc và óc phán đoán tốt của những người thiết kế ở khâu sau và thậm chí của những người triển khai.
 
 ### Mọi hệ thống phần mềm đều có một software architecture (Every Software System Has a Software Architecture)
 
@@ -142,7 +142,7 @@ Các structure thuộc architecture có thể được chia thành ba loại ch�
 
 **Hình 1.2** *Một component-and-connector structure*
 
-2. *Module structure* chia hệ thống thành các đơn vị hiện thực, mà trong cuốn sách này chúng tôi gọi là *module*. Module structure cho thấy cách một hệ thống được cấu trúc thành một tập các đơn vị code hoặc dữ liệu cần được xây dựng hoặc mua sắm. Các module được giao những trách nhiệm tính toán cụ thể, và là cơ sở để phân công công việc cho các team lập trình. Trong bất kỳ module structure nào, các element đều là module thuộc loại nào đó (có thể là class, package, layer, hoặc đơn thuần là các phần chia của chức năng, tất cả đều là đơn vị hiện thực). Module thể hiện một cách xem xét hệ thống ở dạng tĩnh. Các module được giao các vùng trách nhiệm chức năng; các structure này ít chú trọng đến cách phần mềm kết quả thể hiện ra tại runtime. Implementation của module bao gồm package, class và layer. Các relation giữa các module trong một module structure bao gồm uses, generalization (hay “is-a”) và “is part of”. [Hình 1.2](#ch01fig02) và [1.3](#ch01fig03) lần lượt cho thấy ví dụ về các module element và relation, dùng ký hiệu Unified Modeling Language (UML).
+2. *Module structure* chia hệ thống thành các đơn vị triển khai, mà trong cuốn sách này chúng tôi gọi là *module*. Module structure cho thấy cách một hệ thống được cấu trúc thành một tập các đơn vị code hoặc dữ liệu cần được xây dựng hoặc mua sắm. Các module được giao những trách nhiệm tính toán cụ thể, và là cơ sở để phân công công việc cho các team lập trình. Trong bất kỳ module structure nào, các element đều là module thuộc loại nào đó (có thể là class, package, layer, hoặc đơn thuần là các phần chia của chức năng, tất cả đều là đơn vị triển khai). Module thể hiện một cách xem xét hệ thống ở dạng tĩnh. Các module được giao các vùng trách nhiệm chức năng; các structure này ít chú trọng đến cách phần mềm kết quả thể hiện ra tại runtime. Implementation của module bao gồm package, class và layer. Các relation giữa các module trong một module structure bao gồm uses, generalization (hay “is-a”) và “is part of”. [Hình 1.2](#ch01fig02) và [1.3](#ch01fig03) lần lượt cho thấy ví dụ về các module element và relation, dùng ký hiệu Unified Modeling Language (UML).
 
 <a id="ch01fig03"></a>
 
@@ -172,7 +172,7 @@ Các structure thuộc architecture có thể được chia thành ba loại ch�
 
 Các module structure hữu ích bao gồm:
 
-- *Decomposition structure.* Các đơn vị là các module liên hệ với nhau bởi relation “is-a-submodule-of”, cho thấy cách các module được phân rã đệ quy thành các module nhỏ hơn cho đến khi các module đủ nhỏ để dễ hiểu. Các module trong structure này là điểm khởi đầu chung cho thiết kế, khi kiến trúc sư liệt kê những gì các đơn vị phần mềm sẽ phải làm và giao mỗi mục cho một module để thiết kế tiếp theo (chi tiết hơn) và cuối cùng là hiện thực. Các module thường có các sản phẩm (như interface specification, code và test plan) gắn với chúng. Decomposition structure quyết định, ở mức độ lớn, modifiability của hệ thống. Tức là, các thay đổi có nằm trong phạm vi của một vài module (tốt nhất là nhỏ) hay không? Structure này thường được dùng làm cơ sở cho việc tổ chức dự án phát triển, bao gồm cấu trúc của tài liệu, và các kế hoạch tích hợp và kiểm thử của dự án. [Hình 1.5](#ch01fig05) cho thấy một ví dụ về decomposition structure.
+- *Decomposition structure.* Các đơn vị là các module liên hệ với nhau bởi relation “is-a-submodule-of”, cho thấy cách các module được phân rã đệ quy thành các module nhỏ hơn cho đến khi các module đủ nhỏ để dễ hiểu. Các module trong structure này là điểm khởi đầu chung cho thiết kế, khi kiến trúc sư liệt kê những gì các đơn vị phần mềm sẽ phải làm và giao mỗi mục cho một module để thiết kế tiếp theo (chi tiết hơn) và cuối cùng là triển khai. Các module thường có các sản phẩm (như interface specification, code và test plan) gắn với chúng. Decomposition structure quyết định, ở mức độ lớn, modifiability của hệ thống. Tức là, các thay đổi có nằm trong phạm vi của một vài module (tốt nhất là nhỏ) hay không? Structure này thường được dùng làm cơ sở cho việc tổ chức dự án phát triển, bao gồm cấu trúc của tài liệu, và các kế hoạch tích hợp và kiểm thử của dự án. [Hình 1.5](#ch01fig05) cho thấy một ví dụ về decomposition structure.
 
 <a id="ch01fig05"></a>
 
@@ -234,7 +234,7 @@ Allocation structure định nghĩa cách các element từ C&C structure hoặc
 **Hình 1.10** *Deployment structure*
 
 - *Implementation structure*. Structure này cho thấy cách các software element (thường là module) được ánh xạ tới các cấu trúc file trong môi trường phát triển, tích hợp, kiểm thử hoặc configuration control của hệ thống. Điều này rất quan trọng cho việc quản lý các hoạt động phát triển và các quy trình build.
-- *Work assignment structure.* Structure này giao trách nhiệm hiện thực và tích hợp các module cho các team sẽ thực hiện những nhiệm vụ này. Việc để work assignment structure là một phần của architecture làm rõ rằng quyết định về ai làm công việc gì có hệ quả về architecture cũng như về quản lý. Kiến trúc sư sẽ biết chuyên môn cần có ở mỗi team. Ví dụ, quyết định của Amazon giao một team riêng cho mỗi microservice của mình là một tuyên bố về work assignment structure của họ. Trong các dự án phát triển lớn, sẽ hữu ích khi xác định các đơn vị chức năng chung và giao chúng cho một team duy nhất, thay vì để mọi người cần đến chúng đều tự hiện thực. Structure này cũng sẽ xác định các kênh liên lạc chính giữa các team: hội nghị web định kỳ, wiki, email list, v.v.
+- *Work assignment structure.* Structure này giao trách nhiệm triển khai và tích hợp các module cho các team sẽ thực hiện những nhiệm vụ này. Việc để work assignment structure là một phần của architecture làm rõ rằng quyết định về ai làm công việc gì có hệ quả về architecture cũng như về quản lý. Kiến trúc sư sẽ biết chuyên môn cần có ở mỗi team. Ví dụ, quyết định của Amazon giao một team riêng cho mỗi microservice của mình là một tuyên bố về work assignment structure của họ. Trong các dự án phát triển lớn, sẽ hữu ích khi xác định các đơn vị chức năng chung và giao chúng cho một team duy nhất, thay vì để mọi người cần đến chúng đều tự triển khai. Structure này cũng sẽ xác định các kênh liên lạc chính giữa các team: hội nghị web định kỳ, wiki, email list, v.v.
 
 [Bảng 1.1](#ch01tab01) tóm tắt các structure này. Nó liệt kê ý nghĩa của các element và relation trong mỗi structure và cho biết mỗi structure có thể được dùng vào việc gì.
 
@@ -248,7 +248,7 @@ Allocation structure định nghĩa cách các element từ C&C structure hoặc
 
 Mỗi structure này cung cấp một góc nhìn và một tay cầm thiết kế khác nhau đối với một hệ thống, và mỗi structure đều có giá trị và hữu ích theo cách riêng. Dù các structure cho những góc nhìn khác nhau về hệ thống, chúng không độc lập với nhau. Các element của một structure sẽ liên hệ với các element của các structure khác, và chúng ta cần suy luận về các mối liên hệ này. Ví dụ, một module trong một decomposition structure có thể được thể hiện thành một, một phần của một, hoặc nhiều component trong một trong các C&C structure, phản ánh alter-ego runtime của nó. Nói chung, các ánh xạ giữa các structure là nhiều với nhiều.
 
-[Hình 1.11](#ch01fig11) cho thấy một ví dụ đơn giản về cách hai structure có thể liên hệ với nhau. Hình bên trái cho thấy một module decomposition view của một hệ thống client-server nhỏ. Trong hệ thống này, cần hiện thực hai module: phần mềm client và phần mềm server. Hình bên phải cho thấy một C&C view của cùng hệ thống đó. Tại runtime, mười client đang chạy và truy cập server. Do đó, hệ thống nhỏ này có hai module và 11 component (và mười connector).
+[Hình 1.11](#ch01fig11) cho thấy một ví dụ đơn giản về cách hai structure có thể liên hệ với nhau. Hình bên trái cho thấy một module decomposition view của một hệ thống client-server nhỏ. Trong hệ thống này, cần triển khai hai module: phần mềm client và phần mềm server. Hình bên phải cho thấy một C&C view của cùng hệ thống đó. Tại runtime, mười client đang chạy và truy cập server. Do đó, hệ thống nhỏ này có hai module và 11 component (và mười connector).
 
 <a id="ch01fig11"></a>
 
@@ -262,7 +262,7 @@ Các dự án riêng lẻ đôi khi coi một structure là chủ đạo và, kh
 
 ### Ít hơn thì tốt hơn (Fewer Is Better)
 
-Không phải hệ thống nào cũng đáng để xem xét nhiều structure. Hệ thống càng lớn, sự khác biệt giữa các structure này càng có xu hướng rõ rệt; nhưng với các hệ thống nhỏ, chúng ta thường có thể xoay xở với ít structure hơn. Ví dụ, thay vì làm việc với từng C&C structure trong số nhiều C&C structure, thường chỉ một là đủ. Nếu chỉ có một process, thì process structure thu gọn thành một node duy nhất và không cần được biểu diễn tường minh trong thiết kế. Nếu không có phân tán (tức là, nếu hệ thống được hiện thực trên một bộ xử lý duy nhất), thì deployment structure là tầm thường và không cần xem xét thêm. Nói chung, bạn chỉ nên thiết kế và tài liệu hóa một structure nếu việc đó mang lại lợi tức dương trên khoản đầu tư, thường là dưới dạng giảm chi phí phát triển hoặc bảo trì.
+Không phải hệ thống nào cũng đáng để xem xét nhiều structure. Hệ thống càng lớn, sự khác biệt giữa các structure này càng có xu hướng rõ rệt; nhưng với các hệ thống nhỏ, chúng ta thường có thể xoay xở với ít structure hơn. Ví dụ, thay vì làm việc với từng C&C structure trong số nhiều C&C structure, thường chỉ một là đủ. Nếu chỉ có một process, thì process structure thu gọn thành một node duy nhất và không cần được biểu diễn tường minh trong thiết kế. Nếu không có phân tán (tức là, nếu hệ thống được triển khai trên một bộ xử lý duy nhất), thì deployment structure là tầm thường và không cần xem xét thêm. Nói chung, bạn chỉ nên thiết kế và tài liệu hóa một structure nếu việc đó mang lại lợi tức dương trên khoản đầu tư, thường là dưới dạng giảm chi phí phát triển hoặc bảo trì.
 
 ### Nên chọn structure nào? (Which Structures to Choose?)
 
@@ -286,7 +286,7 @@ Chúng tôi chia các nhận xét của mình thành hai nhóm: khuyến nghị 
 2. Kiến trúc sư (hoặc team architecture) nên, một cách liên tục, xây dựng architecture dựa trên một danh sách được ưu tiên các yêu cầu quality attribute được đặc tả rõ ràng (well-specified). Những yêu cầu này sẽ định hướng các tradeoff vốn luôn xảy ra. Chức năng ít quan trọng hơn.
 3. Architecture nên được tài liệu hóa bằng các *view*. (Một view đơn giản là một biểu diễn của một hoặc nhiều structure thuộc architecture.) Các view nên giải quyết các mối quan tâm của những stakeholder quan trọng nhất, hỗ trợ cho tiến độ dự án. Điều này có thể có nghĩa là ban đầu chỉ có tài liệu tối thiểu, sau đó tài liệu mới được bổ sung chi tiết. Các mối quan tâm thường liên quan đến việc xây dựng, phân tích và bảo trì hệ thống, cũng như việc đào tạo các stakeholder mới.
 4. Architecture nên được đánh giá về khả năng mang lại các quality attribute quan trọng của hệ thống. Việc này nên diễn ra sớm trong vòng đời, khi nó mang lại nhiều lợi ích nhất, và được lặp lại khi thích hợp, để bảo đảm rằng các thay đổi đối với architecture (hoặc môi trường mà nó hướng tới) không làm cho thiết kế trở nên lỗi thời.
-5. Architecture nên phù hợp với việc hiện thực tăng dần, để tránh phải tích hợp mọi thứ cùng một lúc (điều gần như không bao giờ thành công) cũng như để phát hiện vấn đề sớm. Một cách để làm điều này là tạo ra một hệ thống “khung xương” trong đó các đường liên lạc được vận hành thử nhưng ban đầu chỉ có chức năng tối thiểu. Hệ thống khung xương này có thể được dùng để “phát triển” hệ thống một cách tăng dần, refactor khi cần.
+5. Architecture nên phù hợp với việc triển khai tăng dần, để tránh phải tích hợp mọi thứ cùng một lúc (điều gần như không bao giờ thành công) cũng như để phát hiện vấn đề sớm. Một cách để làm điều này là tạo ra một hệ thống “khung xương” trong đó các đường liên lạc được vận hành thử nhưng ban đầu chỉ có chức năng tối thiểu. Hệ thống khung xương này có thể được dùng để “phát triển” hệ thống một cách tăng dần, refactor khi cần.
 
 Các quy tắc kinh nghiệm về cấu trúc của chúng tôi như sau:
 
@@ -333,7 +333,7 @@ Các architectural pattern của phần mềm đã được lập danh mục r�
 
 Những bài báo đầu tiên về architectural view như được dùng trong các dự án phát triển công nghiệp là [Soni 95] và [Kruchten 95]. Bài báo thứ nhất đã phát triển thành một cuốn sách [Hofmeister 00] trình bày một bức tranh toàn diện về việc dùng view trong phát triển và phân tích.
 
-Một số cuốn sách đã tập trung vào các vấn đề hiện thực thực tế liên quan đến architecture, chẳng hạn như *Just Enough Software Architecture* của George Fairbanks [Fairbanks 10], *Software Systems Architecture* của Woods và Rozanski [Woods 11], và *Clean Architecture: A Craftsman’s Guide to Software Structure and Design* của Martin [Martin 17].
+Một số cuốn sách đã tập trung vào các vấn đề triển khai thực tế liên quan đến architecture, chẳng hạn như *Just Enough Software Architecture* của George Fairbanks [Fairbanks 10], *Software Systems Architecture* của Woods và Rozanski [Woods 11], và *Clean Architecture: A Craftsman’s Guide to Software Structure and Design* của Martin [Martin 17].
 
 <a id="sec1_6"></a>
 

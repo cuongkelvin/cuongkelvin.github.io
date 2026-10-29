@@ -106,7 +106,7 @@ from setuptools import setup
 )
 ```
 
-Đối số `install_requires` là danh sách các dependency bên ngoài cần được cài đặt tự động để một project hoạt động lúc runtime. Lưu ý rằng trong ví dụ của tôi, tôi không chỉ định cần phiên bản nào của các dependency này hay lấy chúng từ đâu. Tôi chỉ yêu cầu các thư viện trông và hoạt động như `requests` và `sqlalchemy`. Tách chính sách khỏi hiện thực như thế này cho phép bạn dễ dàng thay phiên bản PyPI chính thức của một dependency bằng phiên bản của riêng bạn trong trường hợp bạn cần sửa một bug hoặc thêm một tính năng.
+Đối số `install_requires` là danh sách các dependency bên ngoài cần được cài đặt tự động để một project hoạt động lúc runtime. Lưu ý rằng trong ví dụ của tôi, tôi không chỉ định cần phiên bản nào của các dependency này hay lấy chúng từ đâu. Tôi chỉ yêu cầu các thư viện trông và hoạt động như `requests` và `sqlalchemy`. Tách chính sách khỏi bản triển khai như thế này cho phép bạn dễ dàng thay phiên bản PyPI chính thức của một dependency bằng phiên bản của riêng bạn trong trường hợp bạn cần sửa một bug hoặc thêm một tính năng.
 
 Ghi chú thông tin
 

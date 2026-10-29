@@ -153,6 +153,7 @@ void *mythread(void *arg) {
     printf("%d\n", m);
     return (void *) (arg + 1);
 }
+
 int main(int argc, char *argv[]) {
     pthread_t p;
     int rc, m;
@@ -247,6 +248,7 @@ Routine đầu tiên, pthread_cond_wait(), đưa calling thread vào sleep, ch�
 ```
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  cond = PTHREAD_COND_INITIALIZER;
+
 Pthread_mutex_lock(&lock);
 while (ready == 0)
     Pthread_cond_wait(&cond, &lock);

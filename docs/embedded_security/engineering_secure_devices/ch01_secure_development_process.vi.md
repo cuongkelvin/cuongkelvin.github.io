@@ -14,9 +14,9 @@ Mục tiêu của chương này là thuyết phục sinh viên, kỹ sư và dev
 
 Các khuyến nghị về quy trình phát triển an toàn đã tồn tại từ khá lâu. Tuy nhiên, tùy theo ngành của bạn, có thể chưa ai trong tổ chức của bạn từng cân nhắc theo đuổi một cách tiếp cận có hệ thống như vậy cho đến giờ, hoặc ít nhất là chưa một cách tường minh.
 
-Các công ty phát triển hệ điều hành và ứng dụng web đã phải đối mặt với các vấn đề bảo mật tương đối sớm, nên không có gì ngạc nhiên khi Microsoft và Open Web Application Security Project (OWASP) là một trong những tổ chức đầu tiên làm việc và nói về SDL. Kể từ khi IEC công bố IEC 62443 Part 4-1, ngày càng nhiều nhà sản xuất các thành phần công nghiệp được dùng trong các cơ sở sản xuất, hạ tầng trọng yếu và nhiều ứng dụng tự động hóa khác nhau đã nhận thức được sự cần thiết phải hiện thực một quy trình phát triển an toàn.
+Các công ty phát triển hệ điều hành và ứng dụng web đã phải đối mặt với các vấn đề bảo mật tương đối sớm, nên không có gì ngạc nhiên khi Microsoft và Open Web Application Security Project (OWASP) là một trong những tổ chức đầu tiên làm việc và nói về SDL. Kể từ khi IEC công bố IEC 62443 Part 4-1, ngày càng nhiều nhà sản xuất các thành phần công nghiệp được dùng trong các cơ sở sản xuất, hạ tầng trọng yếu và nhiều ứng dụng tự động hóa khác nhau đã nhận thức được sự cần thiết phải triển khai một quy trình phát triển an toàn.
 
-SDL của Microsoft tuân theo 12 thực hành (*[https://www.microsoft.com/en-us/securityengineering/sdl/practices](https://www.microsoft.com/en-us/securityengineering/sdl/practices)*) mô tả các quy trình mà công ty dùng để phát triển các sản phẩm (phần mềm) an toàn. Những quy trình này trải dài từ đào tạo đến requirements engineering và threat modeling đến kiểm thử bảo mật. Cũng nhắm tới cộng đồng phần mềm, OWASP dùng năm nhóm để tóm tắt Software Assurance Maturity Model (SAMM, *[https://owaspsamm.org/model/](https://owaspsamm.org/model/)*) của mình: governance (quản trị), design (thiết kế), implementation (hiện thực), verification (kiểm chứng) và operations (vận hành). Part 4-1 của IEC 62443 (*[https://webstore.iec.ch/publication/33615](https://webstore.iec.ch/publication/33615)*) nhằm thiết lập một quy trình phát triển an toàn cho các nhà sản xuất thành phần công nghiệp. Nó được cấu trúc thành 8 thực hành, mỗi thực hành chứa từ 2 đến 13 thực hành con mô tả chi tiết các hoạt động được khuyến nghị, từ quản lý bảo mật đến thiết kế và hiện thực đến quản lý cập nhật ngoài hiện trường.
+SDL của Microsoft tuân theo 12 thực hành (*[https://www.microsoft.com/en-us/securityengineering/sdl/practices](https://www.microsoft.com/en-us/securityengineering/sdl/practices)*) mô tả các quy trình mà công ty dùng để phát triển các sản phẩm (phần mềm) an toàn. Những quy trình này trải dài từ đào tạo đến requirements engineering và threat modeling đến kiểm thử bảo mật. Cũng nhắm tới cộng đồng phần mềm, OWASP dùng năm nhóm để tóm tắt Software Assurance Maturity Model (SAMM, *[https://owaspsamm.org/model/](https://owaspsamm.org/model/)*) của mình: governance (quản trị), design (thiết kế), implementation (triển khai), verification (kiểm chứng) và operations (vận hành). Part 4-1 của IEC 62443 (*[https://webstore.iec.ch/publication/33615](https://webstore.iec.ch/publication/33615)*) nhằm thiết lập một quy trình phát triển an toàn cho các nhà sản xuất thành phần công nghiệp. Nó được cấu trúc thành 8 thực hành, mỗi thực hành chứa từ 2 đến 13 thực hành con mô tả chi tiết các hoạt động được khuyến nghị, từ quản lý bảo mật đến thiết kế và triển khai đến quản lý cập nhật ngoài hiện trường.
 
 Cả ba hướng dẫn này đều dùng một cấu trúc khác nhau để giải thích ý tưởng về một quy trình phát triển an toàn; tuy nhiên, bạn có thể nhận thấy rằng chúng chồng lấn nhau đáng kể. Ví dụ, Microsoft SDL bảo bạn thực hiện *threat modeling*, trong khi OWASP dùng thuật ngữ *threat assessment* trong nhóm *design* của mình, và IEC 62443-4-1, yêu cầu SR-2 (là một phần của thực hành *specification of security requirements*) giải thích sự cần thiết phải thiết lập một quy trình để tạo và duy trì một *threat model* cho một sản phẩm.
 
@@ -92,7 +92,7 @@ Cuộc đối thoại này là hư cấu, nhưng có thể bạn đã từng có
 
 Asset có thể thuộc nhiều loại khác nhau—ví dụ, một cryptographic key cần thiết cho một kịch bản pay-per-use, dữ liệu đo lường được truyền từ thiết bị của bạn tới một ứng dụng cloud để hỗ trợ các dịch vụ bảo trì dự đoán, một file cấu hình kích hoạt hay vô hiệu hóa các tính năng sản phẩm, code trong firmware của bạn phát ra cảnh báo trong trường hợp khẩn cấp, hay một web service cần thiết cho cả những hoạt động cơ bản nhất của thiết bị. Tóm lại, asset là mọi thứ quan trọng và có giá trị theo một cách nào đó.
 
-Việc xác định các asset này là phân tích ban đầu để khởi động một quy trình phát triển an toàn và là cơ sở cho mọi nỗ lực bảo vệ của bạn. Về mặt logic, bạn nên xác định asset của mình là gì trước khi hiện thực các biện pháp đối phó hay đặt hàng một penetration test, vì nếu bạn không biết mình muốn bảo vệ cái gì, làm sao bạn có thể hiện thực các biện pháp đối phó hiệu quả và xác định các kịch bản tấn công worst-case? Tuy nhiên, vì hầu hết các thiết bị hiện đại không hoạt động độc lập, quy trình này cũng bao gồm việc thiết lập một *hiểu biết chung về hệ thống* trong tổ chức của bạn, gồm các đối tượng, luồng dữ liệu, con người, thành phần third-party và các quy trình life-cycle liên quan, cũng như mô hình kinh doanh đằng sau tất cả những điều đó.
+Việc xác định các asset này là phân tích ban đầu để khởi động một quy trình phát triển an toàn và là cơ sở cho mọi nỗ lực bảo vệ của bạn. Về mặt logic, bạn nên xác định asset của mình là gì trước khi triển khai các biện pháp đối phó hay đặt hàng một penetration test, vì nếu bạn không biết mình muốn bảo vệ cái gì, làm sao bạn có thể triển khai các biện pháp đối phó hiệu quả và xác định các kịch bản tấn công worst-case? Tuy nhiên, vì hầu hết các thiết bị hiện đại không hoạt động độc lập, quy trình này cũng bao gồm việc thiết lập một *hiểu biết chung về hệ thống* trong tổ chức của bạn, gồm các đối tượng, luồng dữ liệu, con người, thành phần third-party và các quy trình life-cycle liên quan, cũng như mô hình kinh doanh đằng sau tất cả những điều đó.
 
 Đọc danh sách đó, bạn có thể nghĩ rằng nó bao gồm rất nhiều thông tin, và bạn đúng. Các chủ đề trải dài từ hiểu biết kinh doanh đến kiến thức kỹ thuật chuyên sâu đến các quy trình và cấu trúc tổ chức. Dù công ty của bạn nhỏ <a id="page_8"></a>hay lớn đến đâu, có lẽ không một người duy nhất nào chịu trách nhiệm cho tất cả những nhiệm vụ đó, đặc biệt là không phải trong một nhóm phát triển, nên tiếp cận phân tích này theo cách đa chiều là then chốt.
 
@@ -150,7 +150,7 @@ Sau khi xử lý một đống thông tin như vậy, mọi người thường s
 >
 > Vài năm trước, tôi được yêu cầu thực hiện một workshop phân tích rủi ro two-day tại một nhà sản xuất hệ thống điều khiển công nghiệp. Theo gợi ý của tôi, công ty đã mời nhiều người từ các chuyên môn khác nhau.
 >
-> Trong những giờ đầu của workshop, một developer đang giải thích cách việc tách biệt mạng công nghiệp trọng yếu và mạng IT được hiện thực trong thiết bị, thì một anh chàng từ bộ phận bảo trì kỹ thuật xen vào: “Ngoài hiện trường chúng tôi không làm như thế.” Anh ta tiếp tục giải thích rằng trong quá trình bảo trì, việc bắc cầu (bridge) hai mạng này tiện hơn nhiều, và kết nối bắc cầu này đôi khi vẫn còn đó ngay cả trong quá trình vận hành.
+> Trong những giờ đầu của workshop, một developer đang giải thích cách việc tách biệt mạng công nghiệp trọng yếu và mạng IT được triển khai trong thiết bị, thì một anh chàng từ bộ phận bảo trì kỹ thuật xen vào: “Ngoài hiện trường chúng tôi không làm như thế.” Anh ta tiếp tục giải thích rằng trong quá trình bảo trì, việc bắc cầu (bridge) hai mạng này tiện hơn nhiều, và kết nối bắc cầu này đôi khi vẫn còn đó ngay cả trong quá trình vận hành.
 >
 > Chỉ một khoảnh khắc này đã khởi đầu nhiều cuộc thảo luận, góp phần vào một trong những rủi ro hàng đầu được xác định và, cuối cùng, dẫn đến việc phát triển một tính năng network-monitoring bổ sung cho thiết bị. Sau đó, sách hướng dẫn bảo trì cũng được cập nhật với bảo mật được tính đến. Vấn đề này chỉ nổi lên nhờ <a id="page_11"></a>một nhóm người không đồng nhất, liên ngành cùng nói chuyện về bảo mật của một sản phẩm.
 
@@ -284,7 +284,7 @@ Sau khi đánh giá mọi threat scenario, bạn có được một danh sách t
 | TS04 | Trung bình (lợi ích tài chính) | Trung bình (nếu có nhiều trường hợp) | 4 |
 | TS05 | . . . | . . . | . . . |
 
-Sau khi bạn và các đồng nghiệp đã soạn được một danh sách các threat scenario đã đánh giá, bạn có thể sắp xếp nó theo risk score hay trình bày nó trong một ma trận rủi ro two-dimensional với xác suất và tác động là các trục. Cách tiếp cận này cho phép các kiến trúc sư thiết bị và product manager ưu tiên rủi ro tốt hơn, vì không bao giờ <a id="page_16"></a>có đủ tài nguyên để hiện thực mọi biện pháp giảm thiểu và bảo vệ trước mọi mối đe dọa khả dĩ.
+Sau khi bạn và các đồng nghiệp đã soạn được một danh sách các threat scenario đã đánh giá, bạn có thể sắp xếp nó theo risk score hay trình bày nó trong một ma trận rủi ro two-dimensional với xác suất và tác động là các trục. Cách tiếp cận này cho phép các kiến trúc sư thiết bị và product manager ưu tiên rủi ro tốt hơn, vì không bao giờ <a id="page_16"></a>có đủ tài nguyên để triển khai mọi biện pháp giảm thiểu và bảo vệ trước mọi mối đe dọa khả dĩ.
 
 > **LƯU Ý**
 >
@@ -326,19 +326,19 @@ Mặc dù Phần II và III của cuốn sách này nhằm hỗ trợ các kiế
 
 #### Thực hiện Defense in Depth (phòng thủ nhiều lớp)
 
-Mọi biện pháp bảo vệ đều có thể thất bại vào một ngày nào đó, hoặc do một kẻ tấn công tinh vi, hoặc do một hoàn cảnh ngoại lệ. Một architecture bảo mật nên hiện thực nhiều lớp bảo vệ. Nếu một lớp bị phá vỡ, một hay nhiều lớp còn lại có thể bảo đảm bảo mật hoặc ít nhất hạn chế thiệt hại tiềm năng.
+Mọi biện pháp bảo vệ đều có thể thất bại vào một ngày nào đó, hoặc do một kẻ tấn công tinh vi, hoặc do một hoàn cảnh ngoại lệ. Một architecture bảo mật nên triển khai nhiều lớp bảo vệ. Nếu một lớp bị phá vỡ, một hay nhiều lớp còn lại có thể bảo đảm bảo mật hoặc ít nhất hạn chế thiệt hại tiềm năng.
 
 #### Dùng công nghệ hay thành phần an toàn đã được kiểm chứng
 
 Một số công ty từ chối dùng công nghệ và thành phần hiện có từ các bên bên ngoài, ngay cả khi chúng có chất lượng cao. Dĩ nhiên, trong một số trường hợp, việc phát triển một thành phần bảo mật từ đầu là hợp lý. Tuy nhiên, làm như vậy có thể kéo theo một đường cong học tập dốc với nhiều thất bại. Hãy dùng phần mềm và phần cứng đã được chứng minh là bền vững và an toàn nếu bạn không có lý do chính đáng để không làm vậy.
 
-#### Hiện thực Least Privilege (đặc quyền tối thiểu)
+#### Triển khai Least Privilege (đặc quyền tối thiểu)
 
 Để có một architecture bảo mật vững chắc, mọi vai trò và quyền liên quan đều phải được ghi lại thành tài liệu. Khi nói đến việc cấp hay từ chối quyền truy cập cho người và dịch vụ, các vai trò cụ thể chỉ nên được phép truy cập các tài nguyên cần thiết để hoàn thành nhiệm vụ của mình. Thực hành này cũng giúp hạn chế tiềm năng đe dọa của các cuộc tấn công từ người trong nội bộ.
 
 #### <a id="page_18"></a>Giữ cho đơn giản
 
-Sự phức tạp và thiếu minh bạch là kẻ thù tự nhiên của bảo mật vì chúng làm cho việc phân tích rủi ro, xác định đường tấn công và hiện thực các biện pháp đối phó hiệu quả càng khó hơn. Duy trì sự đơn giản trong architecture thiết bị và architecture bảo mật của bạn dẫn đến cơ hội tốt hơn để các nỗ lực bảo mật thực sự đạt được các protection goal đã định nghĩa.
+Sự phức tạp và thiếu minh bạch là kẻ thù tự nhiên của bảo mật vì chúng làm cho việc phân tích rủi ro, xác định đường tấn công và triển khai các biện pháp đối phó hiệu quả càng khó hơn. Duy trì sự đơn giản trong architecture thiết bị và architecture bảo mật của bạn dẫn đến cơ hội tốt hơn để các nỗ lực bảo mật thực sự đạt được các protection goal đã định nghĩa.
 
 #### Giảm attack surface
 
@@ -352,17 +352,17 @@ Bạn có thể thêm bằng cách bớt! Thành ngữ này rất đúng khi nó
 
 <a id="ch00lev1_12"></a>
 
-## Hiện thực an toàn và kiểm thử bảo mật
+## Bản triển khai an toàn và kiểm thử bảo mật
 
-Trong khi các phần trước chủ yếu tập trung vào *làm đúng việc*, phần này liên quan đến *làm việc cho đúng*. Lẽ tự nhiên, các developer phần cứng và phần mềm muốn hiện thực một sản phẩm đầy đủ chức năng, hoạt động được. Tuy nhiên, nếu bảo mật không có trong đầu mọi người (và có khi còn không có trong đầu ai cả), rốt cuộc bạn sẽ có một sản phẩm đầy đủ chức năng nhưng có nhiều điểm yếu và lỗ hổng mà sớm hay muộn sau khi ra mắt thị trường có thể bị tội phạm, nhà nghiên cứu hay khách hàng phát hiện.
+Trong khi các phần trước chủ yếu tập trung vào *làm đúng việc*, phần này liên quan đến *làm việc cho đúng*. Lẽ tự nhiên, các developer phần cứng và phần mềm muốn triển khai một sản phẩm đầy đủ chức năng, hoạt động được. Tuy nhiên, nếu bảo mật không có trong đầu mọi người (và có khi còn không có trong đầu ai cả), rốt cuộc bạn sẽ có một sản phẩm đầy đủ chức năng nhưng có nhiều điểm yếu và lỗ hổng mà sớm hay muộn sau khi ra mắt thị trường có thể bị tội phạm, nhà nghiên cứu hay khách hàng phát hiện.
 
 <a id="ch00lev2_8"></a>
 
 ### *Shift Left*
 
-Một chiến lược để tránh tình huống này là *shift left* (dịch sang trái), nghĩa là việc phát hiện lỗi hiện thực không diễn ra sau khi triển khai, mà càng sớm càng tốt (càng xa về bên trái càng tốt) trong quy trình phát triển. Bên cạnh việc cho phép các vòng phản hồi nhanh, điều này còn làm giảm chi phí phát hiện và sửa lỗi.
+Một chiến lược để tránh tình huống này là *shift left* (dịch sang trái), nghĩa là việc phát hiện lỗi triển khai không diễn ra sau khi triển khai, mà càng sớm càng tốt (càng xa về bên trái càng tốt) trong quy trình phát triển. Bên cạnh việc cho phép các vòng phản hồi nhanh, điều này còn làm giảm chi phí phát hiện và sửa lỗi.
 
-Những cân nhắc này đã có liên quan ngay từ đầu giai đoạn hiện thực, khi nhóm của bạn đưa ra các quyết định quan trọng có thể <a id="page_19"></a>có hệ quả bảo mật then chốt, như các thành phần phần cứng trung tâm, hệ điều hành (OS), các quy tắc secure coding, v.v. Hãy xem hai ví dụ.
+Những cân nhắc này đã có liên quan ngay từ đầu giai đoạn triển khai, khi nhóm của bạn đưa ra các quyết định quan trọng có thể <a id="page_19"></a>có hệ quả bảo mật then chốt, như các thành phần phần cứng trung tâm, hệ điều hành (OS), các quy tắc secure coding, v.v. Hãy xem hai ví dụ.
 
 #### Lựa chọn thành phần phần cứng
 
@@ -384,7 +384,7 @@ Không có gì ngạc nhiên khi Rust ngày càng thu hút sự chú ý trong c�
 
 ### *Kiểm thử và phân tích liên tục*
 
-Dĩ nhiên, các quyết định thiết kế ban đầu không thể lường trước mọi vấn đề bảo mật khả dĩ. Mảnh ghép thứ hai của việc hiện thực an toàn là tự động hóa vững chắc các quy trình build, kiểm thử và review. Đặc biệt trong quá trình phát triển phần mềm<a id="page_20"></a>, developer phải nhận được phản hồi ngay lập tức sau khi các điểm yếu và vấn đề tiềm ẩn được xác định trong code của họ. Mặc dù bảo mật không phải là mục tiêu chính của tự động hóa và continuous integration (CI), chúng góp phần nâng cao chất lượng và giảm lỗi của con người, vốn thường là nguồn gốc của các lỗ hổng bảo mật.
+Dĩ nhiên, các quyết định thiết kế ban đầu không thể lường trước mọi vấn đề bảo mật khả dĩ. Mảnh ghép thứ hai của việc triển khai an toàn là tự động hóa vững chắc các quy trình build, kiểm thử và review. Đặc biệt trong quá trình phát triển phần mềm<a id="page_20"></a>, developer phải nhận được phản hồi ngay lập tức sau khi các điểm yếu và vấn đề tiềm ẩn được xác định trong code của họ. Mặc dù bảo mật không phải là mục tiêu chính của tự động hóa và continuous integration (CI), chúng góp phần nâng cao chất lượng và giảm lỗi của con người, vốn thường là nguồn gốc của các lỗ hổng bảo mật.
 
 Từ góc nhìn bảo mật, hãy bảo đảm bao quát các lĩnh vực sau khi tự động hóa một SDL (một số trong đó là software-specific, nhưng hầu hết cũng có thể được áp dụng cho quy trình phát triển phần cứng).
 
@@ -400,15 +400,15 @@ Dùng static application security testing (SAST) trong phát triển phần mề
 
 Phân tích tĩnh không thể phát hiện một số lỗ hổng vì các vấn đề liên quan phát sinh từ *hành vi không an toàn* của phần mềm hay một thiết bị, nghĩa là kiểm thử bảo mật động là cần thiết. Bạn có thể tự động hóa việc kiểm thử này đến một mức độ nhất định—ví dụ, bằng cách triển khai phần mềm được build trong một CI pipeline tới một thiết bị thử nghiệm, thiết bị này sau đó có thể được thử thách bằng các test case. Tuy nhiên, vì không gian kiểm thử rất lớn, và dynamic application security testing (DAST) đòi hỏi các môi trường runtime cụ thể, lĩnh vực này thường đi kèm công sức cao hơn đáng kể so với phân tích tĩnh.
 
-#### Review hiện thực
+#### Review triển khai
 
-Mặc dù chúng ta thường dành thuật ngữ *code review* cho các quy trình phần mềm, chúng ta cũng hoàn toàn có thể áp dụng review cho thiết kế phần cứng thiết bị để phát hiện các điểm yếu hiện thực, việc dùng các linh kiện bị cấm, hay các design pattern tồi tạo điều kiện cho tấn công vật lý. Mặc dù đây là một nhiệm vụ của con người, tự động hóa có thể hỗ trợ bạn trong việc lên lịch review hay kích hoạt review khi có thay đổi đối với các phần phần cứng hay phần mềm trọng yếu.
+Mặc dù chúng ta thường dành thuật ngữ *code review* cho các quy trình phần mềm, chúng ta cũng hoàn toàn có thể áp dụng review cho thiết kế phần cứng thiết bị để phát hiện các điểm yếu triển khai, việc dùng các linh kiện bị cấm, hay các design pattern tồi tạo điều kiện cho tấn công vật lý. Mặc dù đây là một nhiệm vụ của con người, tự động hóa có thể hỗ trợ bạn trong việc lên lịch review hay kích hoạt review khi có thay đổi đối với các phần phần cứng hay phần mềm trọng yếu.
 
 <a id="ch00lev2_10"></a>
 
 ### <a id="page_21"></a>*Kẻ tấn công như một dịch vụ (Attackers as a Service)*
 
-Tất cả các kỹ thuật được mô tả đều nhằm kiểm chứng và xác thực các yêu cầu bảo mật tường minh và tính năng bảo vệ, hay nhằm tránh các sai sót hiện thực có thể làm suy yếu bảo mật thiết bị. Tuy nhiên, trong khi hiện thực an toàn và kiểm thử bảo mật tiếp tục hội tụ để tạo thành một quy trình phát triển an toàn, tăng dần và agile, có một phương pháp kiểm thử bảo mật thường được áp dụng thủ công và bên ngoài môi trường CI: penetration testing.
+Tất cả các kỹ thuật được mô tả đều nhằm kiểm chứng và xác thực các yêu cầu bảo mật tường minh và tính năng bảo vệ, hay nhằm tránh các sai sót triển khai có thể làm suy yếu bảo mật thiết bị. Tuy nhiên, trong khi việc triển khai an toàn và kiểm thử bảo mật tiếp tục hội tụ để tạo thành một quy trình phát triển an toàn, tăng dần và agile, có một phương pháp kiểm thử bảo mật thường được áp dụng thủ công và bên ngoài môi trường CI: penetration testing.
 
 Trong một *penetration test*, các chuyên gia bảo mật nội bộ hay bên ngoài nhập vai kẻ tấn công. Bằng cách mô phỏng các cuộc tấn công vào thiết bị đang xét, họ cố kích hoạt các kịch bản worst-case cho thấy tính khả thi của các cuộc tấn công, công sức bỏ ra và các đường tấn công khả dĩ. Đổi lại, loại kiểm thử này cho phép nhà sản xuất làm lại các phần sản phẩm liên quan và phát hiện thêm các vấn đề liên quan khác.
 
@@ -438,7 +438,7 @@ Thông thường, thiết bị của bạn mang một vài asset trọng yếu, 
 >
 > May mắn thay, tôi gặp những người open-minded và đầy nhiệt huyết, sẵn lòng thiết lập một SDL và thực sự cải thiện bảo mật thiết bị của họ. Cuối cùng chúng tôi đã thực hiện một phân tích mối đe dọa và rủi ro vững chắc và, dựa trên kết quả, đặt ra các ưu tiên cho việc phát triển biện pháp giảm thiểu. Điểm mấu chốt là việc định hướng bảo mật của một sản phẩm chỉ dựa vào kết quả của một penetration test không phải là một chiến lược hợp lý. Điều này đáng được nhắc lại.
 
-Cuối cùng, đừng quên rằng đối với một sản phẩm vật lý như một thiết bị IoT, các bước hiện thực cuối cùng không diễn ra trong văn phòng của nhóm phát triển mà trong quá trình sản xuất tại nhà máy. Lựa chọn một môi trường sản xuất an toàn, bảo vệ các asset của thiết bị khi chúng được chuyển tới địa điểm sản xuất, và thực hiện kiểm thử post-production để xác nhận việc kích hoạt đúng các tính năng bảo vệ là thiết yếu cho một thiết bị được hiện thực an toàn.
+Cuối cùng, đừng quên rằng đối với một sản phẩm vật lý như một thiết bị IoT, các bước triển khai cuối cùng không diễn ra trong văn phòng của nhóm phát triển mà trong quá trình sản xuất tại nhà máy. Lựa chọn một môi trường sản xuất an toàn, bảo vệ các asset của thiết bị khi chúng được chuyển tới địa điểm sản xuất, và thực hiện kiểm thử post-production để xác nhận việc kích hoạt đúng các tính năng bảo vệ là thiết yếu cho một thiết bị được triển khai an toàn.
 
 <a id="ch00lev1_13"></a>
 
@@ -512,6 +512,6 @@ Chương này đã tóm tắt các hoạt động và quy trình quan trọng m�
 
 Một yêu cầu cơ bản cho mọi quy trình phát triển an toàn là mọi người nhận thức được rủi ro và nhận được đào tạo bảo mật mà họ cần cho các nhiệm vụ hằng ngày. Chìa khóa để tạo ra một sản phẩm an toàn là một phân tích vững chắc về asset, các protection goal tương ứng, các kẻ tấn công khả dĩ, mối đe dọa và các rủi ro liên quan. Bạn có thể giải quyết nhiệm vụ này bằng một cách tiếp cận có cấu trúc dẫn đến sự minh bạch, các quyết định tường minh về lòng tin và rủi ro, và tài liệu rõ ràng.
 
-Dựa trên công việc sơ bộ này, sau đó bạn có thể hiện thực các yêu cầu bảo mật product-specific và một architecture bảo mật riêng. Hãy vun đắp các thói quen hiện thực an toàn như secure coding trong số developer và kỹ sư, và thường xuyên kiểm tra kết quả hiện thực bằng kiểm thử bảo mật. Giám sát lỗ hổng cùng với các quy trình vulnerability-response hiệu quả và hữu hiệu sẽ hoàn thiện vòng đời bảo mật của một sản phẩm high-quality.
+Dựa trên công việc sơ bộ này, sau đó bạn có thể triển khai các yêu cầu bảo mật product-specific và một architecture bảo mật riêng. Hãy vun đắp các thói quen triển khai an toàn như secure coding trong số developer và kỹ sư, và thường xuyên kiểm tra kết quả triển khai bằng kiểm thử bảo mật. Giám sát lỗ hổng cùng với các quy trình vulnerability-response hiệu quả và hữu hiệu sẽ hoàn thiện vòng đời bảo mật của một sản phẩm high-quality.
 
 Nếu bạn muốn đi sâu hơn vào lĩnh vực quy trình phát triển an toàn và các phương pháp tương ứng, hãy xem *Designing Secure Software* của Loren Kohnfelder (No Starch Press, 2021) và *Threat Modeling: Designing for Security* của Adam Shostack (Wiley, 2014).

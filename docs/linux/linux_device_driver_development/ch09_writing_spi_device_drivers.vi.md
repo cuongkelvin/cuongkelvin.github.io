@@ -107,21 +107,17 @@ Code trên chỉ liệt kê những thành phần quan trọng cần để hiể
 
 - `transfer` thêm message vào transfer queue của controller. Trên controller registration path (nhờ `spi_register_controller()`), SPI core kiểm tra field này có là `NULL` hay không:
 
-- Nếu là `NULL`, SPI core kiểm tra `transfer_one` hoặc `transfer_one_message` có được đặt hay không; nếu có, nó giả định controller hỗ trợ message queuing và gọi `spi_controller_initialize_queue()`, đặt field này bằng `spi_queued_transfer` (SPI core helper để đưa SPI message vào queue của controller và schedule message pump `kworker` nếu nó chưa chạy hoặc chưa bận).
+  - Nếu là `NULL`, SPI core kiểm tra `transfer_one` hoặc `transfer_one_message` có được đặt hay không; nếu có, nó giả định controller hỗ trợ message queuing và gọi `spi_controller_initialize_queue()`, đặt field này bằng `spi_queued_transfer` (SPI core helper để đưa SPI message vào queue của controller và schedule message pump `kworker` nếu nó chưa chạy hoặc chưa bận).
 
-- Ngoài ra, `spi_controller_initialize_queue()` tạo cả kthread worker chuyên dụng (thành phần `kworker`) và work struct (thành phần `pump_messages`) cho controller này. Worker được schedule khá thường xuyên để xử lý message queue theo thứ tự FIFO.
+    - Ngoài ra, `spi_controller_initialize_queue()` tạo cả kthread worker chuyên dụng (thành phần `kworker`) và work struct (thành phần `pump_messages`) cho controller này. Worker được schedule khá thường xuyên để xử lý message queue theo thứ tự FIFO.
 
-- Tiếp theo, thành phần `queued` của controller được SPI core đặt thành true.
+    - Tiếp theo, thành phần `queued` của controller được SPI core đặt thành true.
 
-- Cuối cùng, nếu thành phần `rt` của controller được driver đặt thành true trước khi gọi registration API, SPI core đặt scheduling policy của worker thread thành real-time FIFO policy với priority 50.
+    - Cuối cùng, nếu thành phần `rt` của controller được driver đặt thành true trước khi gọi registration API, SPI core đặt scheduling policy của worker thread thành real-time FIFO policy với priority 50.
 
-- Nếu là `NULL`, đồng thời cả `transfer_one` lẫn `transfer_one_message` cũng là `NULL`, đây là lỗi và controller không được đăng ký.
+  - Nếu là `NULL`, đồng thời cả `transfer_one` lẫn `transfer_one_message` cũng là `NULL`, đây là lỗi và controller không được đăng ký.
 
-- Nếu không phải `NULL`, SPI core giả định controller không hỗ trợ queuing và không gọi
-
-```
-spi_controller_initialize_queue().
-```
+  - Nếu không phải `NULL`, SPI core giả định controller không hỗ trợ queuing và không gọi `spi_controller_initialize_queue()`.
 
 - `transfer_one` và `transfer_one_message` loại trừ lẫn nhau. Nếu cả hai được đặt, SPI core không gọi method đầu. `transfer_one` thực hiện một SPI transfer và không có khái niệm `spi_message`. Nếu driver cung cấp `transfer_one_message`, nó phải làm việc trên cơ sở `spi_message` và chịu trách nhiệm cho mọi transfer trong message. Controller driver không muốn bận tâm đến message-handling algorithm chỉ cần đặt callback `transfer_one`; khi đó SPI core đặt `transfer_one_message` thành `spi_transfer_one_message`. `spi_transfer_one_message` đảm nhận toàn bộ message logic, timing, CS và property khác hardware-related trước khi gọi callback `transfer_one` do driver cung cấp cho mỗi transfer trong message. CS giữ trạng thái active trong suốt các message transfer, trừ khi bị thay đổi bởi transfer có `spi_transfer.cs_change = 1`. Message transfer được thực hiện bằng clock và SPI mode parameter mà `setup()` đã áp dụng trước đó cho device này.
 
@@ -222,15 +218,15 @@ Một vài lời về SPI mode — chúng được tạo từ hai đặc tính:
 
 - CPOL, initial clock polarity:
 
-- `0`: Clock state ban đầu là low và cạnh đầu tiên là rising.
+  - `0`: Clock state ban đầu là low và cạnh đầu tiên là rising.
 
-- `1`: Clock state ban đầu là high và trạng thái đầu tiên là falling.
+  - `1`: Clock state ban đầu là high và trạng thái đầu tiên là falling.
 
 - CPHA là clock phase, xác định data được sample ở cạnh nào:
 
-- `0`: Data được latch tại falling edge (chuyển từ high sang low), còn output thay đổi tại rising edge.
+  - `0`: Data được latch tại falling edge (chuyển từ high sang low), còn output thay đổi tại rising edge.
 
-- `1`: Data được latch tại rising edge (chuyển từ low sang high), còn output thay đổi tại falling edge.
+  - `1`: Data được latch tại rising edge (chuyển từ low sang high), còn output thay đổi tại falling edge.
 
 Điều này cho phép phân biệt bốn SPI mode, là những macro dẫn xuất kết hợp hai macro chính, định nghĩa trong `include/linux/spi/spi.h` như sau:
 
@@ -342,9 +338,9 @@ Flag này dùng để tạm đưa CS thành inactive ở giữa message (tức t
 
 - `delay_usecs` biểu diễn delay (theo microsecond) sau transfer này trước khi (tùy chọn) thay đổi trạng thái `chip_select`, rồi bắt đầu transfer tiếp theo hoặc hoàn tất `spi_message` này.
 
-LƯU Ý
+  LƯU Ý
 
-SPI transfer luôn ghi cùng số byte như đọc, ngay cả trong half-duplex transaction. SPI core làm điều này nhờ thành phần `dummy_rx` và `dummy_tx` của controller. Khi transmit buffer là null, `spi_transfer->tx_buf` được đặt bằng `dummy_tx` của controller. Sau đó số 0 được dịch ra trong khi điền `rx_buf` bằng data từ slave. Nếu receive buffer là null, `spi_transfer->rx_buf` được đặt bằng `dummy_rx` của controller và data dịch vào bị loại bỏ.
+  SPI transfer luôn ghi cùng số byte như đọc, ngay cả trong half-duplex transaction. SPI core làm điều này nhờ thành phần `dummy_rx` và `dummy_tx` của controller. Khi transmit buffer là null, `spi_transfer->tx_buf` được đặt bằng `dummy_tx` của controller. Sau đó số 0 được dịch ra trong khi điền `rx_buf` bằng data từ slave. Nếu receive buffer là null, `spi_transfer->rx_buf` được đặt bằng `dummy_rx` của controller và data dịch vào bị loại bỏ.
 
 ### struct spi\_message
 
@@ -578,10 +574,9 @@ SPI core cho phép lấy/đặt driver state data bằng `spi_get_drvdata()` và
 
 ## Khai báo device trong driver
 
-Giống như cần danh sách i`2c_device_id` để cho I2C core biết I2C driver có thể hỗ trợ device nào, chúng ta phải cung cấp array `spi_device_id` để thông báo SPI core những device mà SPI driver hỗ trợ. Sau khi điền array, phải gán cho field `spi_driver.id_table`. Ngoài ra, để device matching và load module, phải truyền cùng array cho macro `MODULE_DEVICE_TABLE`. `struct spi_device_id` có khai báo sau trong
+Giống như cần danh sách i`2c_device_id` để cho I2C core biết I2C driver có thể hỗ trợ device nào, chúng ta phải cung cấp array `spi_device_id` để thông báo SPI core những device mà SPI driver hỗ trợ. Sau khi điền array, phải gán cho field `spi_driver.id_table`. Ngoài ra, để device matching và load module, phải truyền cùng array cho macro `MODULE_DEVICE_TABLE`. `struct spi_device_id` có khai báo sau trong `include/linux/mod_devicetable.h`:
 
 ```
-include/linux/mod_devicetable.h:
 struct spi_device_id {
    char name[SPI_NAME_SIZE];
    kernel_ulong_t driver_data;

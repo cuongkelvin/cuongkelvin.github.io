@@ -67,13 +67,17 @@ Phiên bản C gốc của Bell Labs được mô tả trong ấn bản đầu t
 
 International Standards Organization tiếp nhận trách nhiệm chuẩn hóa ngôn ngữ C, thông qua một phiên bản về cơ bản giống ANSI C vào năm 1990, do đó được gọi là “ISO C90”.
 
-Cũng tổ chức này đã bảo trợ việc cập nhật ngôn ngữ vào năm 1999, tạo ra “ISO C99”. Trong số những thay đổi khác, phiên bản này giới thiệu một số data type mới và hỗ trợ text string cần ký tự không có trong tiếng Anh. Một chuẩn gần đây hơn được phê chuẩn năm 2011, do đó mang tên “ISO C11”, tiếp tục bổ sung data type và tính năng. Phần lớn những bổ sung gần đây này có tính tương thích ngược, nghĩa là chương trình viết theo chuẩn trước đó (ít nhất từ ISO C90) có cùng hành vi khi biên dịch theo chuẩn mới hơn. GNU Compiler Collection (gcc) có thể biên dịch chương trình theo quy ước của một số phiên bản C khác nhau, dựa trên các tùy chọn command-line khác nhau như Hình 2.1. Ví dụ, để biên dịch prog.c theo ISO C11, chúng ta có thể dùng command line
+Cũng tổ chức này đã bảo trợ việc cập nhật ngôn ngữ vào năm 1999, tạo ra “ISO C99”. Trong số những thay đổi khác, phiên bản này giới thiệu một số data type mới và hỗ trợ text string cần ký tự không có trong tiếng Anh. Một chuẩn gần đây hơn được phê chuẩn năm 2011, do đó mang tên “ISO C11”, tiếp tục bổ sung data type và tính năng. Phần lớn những bổ sung gần đây này có tính tương thích ngược, nghĩa là chương trình viết theo chuẩn trước đó (ít nhất từ ISO C90) có cùng hành vi khi biên dịch theo chuẩn mới hơn.
+
+GNU Compiler Collection (gcc) có thể biên dịch chương trình theo quy ước của một số phiên bản C khác nhau, dựa trên các tùy chọn command-line khác nhau như Hình 2.1. Ví dụ, để biên dịch prog.c theo ISO C11, chúng ta có thể dùng command line
 
 ```
 linux> gcc -std=c11 prog.c
 ```
 
-Các tùy chọn -ansi và -std=c89 có tác dụng giống nhau—code được biên dịch theo chuẩn ANSI hoặc ISO C90. (C90 đôi khi được gọi là “C89” vì nỗ lực chuẩn hóa bắt đầu năm 1989.) Tùy chọn -std=c99 khiến compiler tuân theo quy ước ISO C99. Tại thời điểm viết sách, khi không chỉ định tùy chọn, chương trình được biên dịch theo một phiên bản C dựa trên ISO C90 nhưng có một số tính năng C99, một số của C11, một số của C++, cùng những tính năng riêng của gcc. Dự án GNU đang phát triển phiên bản kết hợp ISO C11 với các tính năng khác, có thể được chỉ định bằng tùy chọn command-line -std=gnu11. (Hiện tại cách triển khai này chưa hoàn tất.) Đây sẽ trở thành phiên bản mặc định.
+Các tùy chọn -ansi và -std=c89 có tác dụng giống nhau—code được biên dịch theo chuẩn ANSI hoặc ISO C90. (C90 đôi khi được gọi là “C89” vì nỗ lực chuẩn hóa bắt đầu năm 1989.) Tùy chọn -std=c99 khiến compiler tuân theo quy ước ISO C99.
+
+Tại thời điểm viết sách, khi không chỉ định tùy chọn, chương trình được biên dịch theo một phiên bản C dựa trên ISO C90 nhưng có một số tính năng C99, một số của C11, một số của C++, cùng những tính năng riêng của gcc. Dự án GNU đang phát triển phiên bản kết hợp ISO C11 với các tính năng khác, có thể được chỉ định bằng tùy chọn command-line -std=gnu11. (Hiện tại cách triển khai này chưa hoàn tất.) Đây sẽ trở thành phiên bản mặc định.
 
 |Phiên bản C|Tùy chọn command-line của gcc|
 |---|---|
@@ -84,7 +88,7 @@ Các tùy chọn -ansi và -std=c89 có tác dụng giống nhau—code được
 
 **Hình 2.1 Chỉ định các phiên bản C khác nhau cho gcc.**
 
-#### Mới học C? Vai trò của pointer trong C
+### Mới học C? Vai trò của pointer trong C
 
 Pointer là một tính năng trung tâm của C. Chúng cung cấp cơ chế tham chiếu các phần tử của data structure, bao gồm array. Giống variable, pointer có hai khía cạnh: giá trị và kiểu. Giá trị chỉ vị trí của một object, còn kiểu chỉ loại object (chẳng hạn số nguyên hoặc số floating-point) được lưu ở vị trí đó.
 
@@ -389,7 +393,9 @@ Argument 12,345 có biểu diễn hexadecimal 0x00003039. Với dữ liệu int,
 
 #### Mới học C? Đặt tên data type bằng typedef
 
-Khai báo typedef trong C cung cấp cách đặt tên cho data type. Điều này có thể giúp code dễ đọc hơn nhiều vì các khai báo kiểu lồng sâu có thể khó hiểu. Cú pháp typedef giống hệt khai báo variable, chỉ khác ở chỗ dùng tên kiểu thay cho tên variable. Vì vậy, khai báo byte_pointer trong Hình 2.4 có cùng dạng với khai báo variable kiểu unsigned char *.
+Khai báo typedef trong C cung cấp cách đặt tên cho data type. Điều này có thể giúp code dễ đọc hơn nhiều vì các khai báo kiểu lồng sâu có thể khó hiểu.
+
+Cú pháp typedef giống hệt khai báo variable, chỉ khác ở chỗ dùng tên kiểu thay cho tên variable. Vì vậy, khai báo byte_pointer trong Hình 2.4 có cùng dạng với khai báo variable kiểu unsigned char *.
 
 Ví dụ, khai báo
 
@@ -973,7 +979,9 @@ Với một số chương trình, điều thiết yếu là data type được m
 
 Chúng ta đã gặp phiên bản 32- và 64-bit của kiểu số nguyên fixed-size (Hình 2.3); chúng thuộc một lớp data type lớn hơn. Chuẩn ISO C99 giới thiệu lớp kiểu số nguyên này trong file stdint.h. File định nghĩa một tập hợp data type với khai báo dạng intN _t và uintN_t, chỉ số nguyên signed và unsigned N-bit với các giá trị N khác nhau. Giá trị N chính xác phụ thuộc cách triển khai, nhưng phần lớn compiler cho phép 8, 16, 32 và 64. Do đó, có thể khai báo rõ ràng variable unsigned 16-bit bằng kiểu uint16_t, và variable signed 32 bit bằng int32_t.
 
-Đi kèm các data type này là các macro định nghĩa giá trị nhỏ nhất và lớn nhất cho mỗi N. Chúng có tên dạng INTN_MIN, INTN_MAX và UINTN_MAX. In có định dạng với kiểu fixed-width đòi hỏi dùng macro mở rộng thành format string theo cách system-dependent. Ví dụ, giá trị variable x và y kiểu int32_t và uint64_t có thể được in bằng lời gọi printf sau:
+Đi kèm các data type này là các macro định nghĩa giá trị nhỏ nhất và lớn nhất cho mỗi N. Chúng có tên dạng INTN_MIN, INTN_MAX và UINTN_MAX.
+
+In có định dạng với kiểu fixed-width đòi hỏi dùng macro mở rộng thành format string theo cách system-dependent. Ví dụ, giá trị variable x và y kiểu int32_t và uint64_t có thể được in bằng lời gọi printf sau:
 
 ```
 printf("x = %" PRId32 ", y = %" PRIu64 "\n", x, y);
@@ -1088,7 +1096,7 @@ Tương tự, xét code sau:
 ```
 1       unsigned u = 4294967295u;   /* UMax */
 2       int     tu = (int) u;
-3 printf("u = %u, tu = %d\n", u, tu);
+3       printf("u = %u, tu = %d\n", u, tu);
 ```
 
 Khi chạy trên máy two’s-complement, code tạo output sau:
@@ -1297,9 +1305,9 @@ Ví dụ, xét code sau:
  8    printf("usx = %u:\t", usx);
  9    show_bytes((byte_pointer) &usx, sizeof(unsigned short));
 10    printf("x   = %d:\t", x);
-            11    show_bytes((byte_pointer) &x, sizeof(int));
-            12    printf("ux  = %u:\t", ux);
-            13    show_bytes((byte_pointer) &ux, sizeof(unsigned));
+11    show_bytes((byte_pointer) &x, sizeof(int));
+12    printf("ux  = %u:\t", ux);
+13    show_bytes((byte_pointer) &ux, sizeof(unsigned));
 ```
 
 Khi chạy dưới dạng chương trình 32-bit trên một máy big-endian sử dụng biểu diễn two’s-complement, code này in ra output sau
@@ -1728,9 +1736,6 @@ Trước hết hãy phân tích positive overflow. Nếu cả x > 0 và y > 0 nh
 | x | y | x + y | x +<sup>t</sup><sub>5</sub> y | Trường hợp |
 |---|---|---|---|---|
 | [10100] | [10001] | ______ | ______ | ______ |
-
-| x | y | x + y | x +<sup>t</sup><sub>5</sub> y | Trường hợp |
-|---|---|---|---|---|
 | [11000] | [11000] | \_\_\_\_\_\_<br>\_\_\_\_\_\_ | \_\_\_\_\_\_<br>\_\_\_\_\_\_ | \_\_\_\_\_\_<br>\_\_\_\_\_\_ |
 | [10111] | [01000] | \_\_\_\_\_\_<br>\_\_\_\_\_\_ | \_\_\_\_\_\_<br>\_\_\_\_\_\_ | \_\_\_\_\_\_<br>\_\_\_\_\_\_ |
 | [00010] | [00101] | \_\_\_\_\_\_<br>\_\_\_\_\_\_ | \_\_\_\_\_\_<br>\_\_\_\_\_\_ | \_\_\_\_\_\_<br>\_\_\_\_\_\_ |
@@ -1770,7 +1775,7 @@ Bạn được giao viết code cho hàm tsub_ok, với các đối số x và y
 /* Determine whether arguments can be subtracted without overflow */
 /* WARNING: This code is buggy. */
 int tsub_ok(int x, int y) {
-return tadd_ok(x, -y);
+    return tadd_ok(x, -y);
 }
 ```
 
@@ -1903,9 +1908,6 @@ U2B<sub>w</sub>(T2U<sub>w</sub>(x *<sup>t</sup><sub>w</sub> y)) = T2B<sub>w</sub
 | Two’s complement | ______ | [100] | ______ | [101] | ______ | ______ | ______ | ______ |
 | Unsigned | ______ | [010] | ______ | [111] | ______ | ______ | ______ | ______ |
 | Two’s complement | ______ | [010] | ______ | [111] | ______ | ______ | ______ | ______ |
-
-| Chế độ | x |  | y |  | x · y |  |  | x · y sau cắt ngắn |
-|---|---|---|---|---|---|---|---|---|
 | Unsigned | ______ | [110] | ______ | [110] | ______ | ______ | ______ | ______ |
 | Two’s complement | ______ | [110] | ______ | [110] | ______ | ______ | ______ | ______ |
 
@@ -2418,9 +2420,6 @@ Biểu diễn các giá trị 2<sup>E</sup>, f , M, 2<sup>E</sup> × M và V dư
 | 0 00 11 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
 | 0 01 00 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
 | 0 01 01 | 1 | 0 | 1 | 1/4 | 5/4 | 5/4 | 5/4 | 1.25 |
-
-| Bit | e | E | 2<sup>E</sup> | f | M | 2<sup>E</sup> × M | V | Thập phân |
-|---|---|---|---|---|---|---|---|---|
 | 0 01 10 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
 | 0 01 11 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
 | 0 10 00 | ______ | ______ | ______ | ______ | ______ | ______ | ______ | ______ |
@@ -2442,6 +2441,10 @@ Hình 2.36 trình bày biểu diễn và giá trị số của một số số f
 
 - Giá trị normalized dương nhỏ nhất có biểu diễn bit với một chữ số 1 ở least significant bit của exponent field và các bit còn lại đều bằng 0. Nó có giá trị significand M = 1 và giá trị exponent E = −2<sup>k−1</sup> + 2. Do đó, giá trị số là V = 2<sup>−2k−1+</sup>2 .
 
+- Giá trị 1.0 có biểu diễn bit trong đó mọi bit của exponent field trừ most significant bit đều bằng 1, và tất cả các bit còn lại đều bằng 0. Giá trị significand của nó là M = 1 và giá trị exponent là E = 0.
+
+- Giá trị normalized lớn nhất có biểu diễn bit với sign bit bằng 0, least significant bit của exponent bằng 0 và tất cả các bit khác bằng 1. Nó có giá trị fraction f = 1 − 2<sup>−n</sup>, cho significand M = 2 − 2<sup>−n</sup> (mà chúng ta viết là 2 − ϵ.) Nó có giá trị exponent E = 2<sup>k−1</sup> − 1, cho giá trị số V = (2 − 2<sup>−n</sup>) × 2<sup>2k−1−1</sup> = (1 − 2<sup>−n−1</sup>) × 2<sup>2k−1</sup>.
+
 |  |  |  | Single precision |  | Double precision |  |
 |---|---|---|---|---|---|---|
 | Mô tả | exp | frac | Giá trị | Thập phân | Giá trị | Thập phân |
@@ -2453,10 +2456,6 @@ Hình 2.36 trình bày biểu diễn và giá trị số của một số số f
 | Normalized lớn nhất | 11 · · · 10 | 1 · · · 11 | (2 − ϵ) × 2<sup>127</sup> | 3.4 × 10<sup>38</sup> | (2 − ϵ) × 2<sup>1023</sup> | 1.8 × 10<sup>308</sup> |
 
 **Hình 2.36 Ví dụ về các số floating-point không âm.**
-
-- Giá trị 1.0 có biểu diễn bit trong đó mọi bit của exponent field trừ most significant bit đều bằng 1, và tất cả các bit còn lại đều bằng 0. Giá trị significand của nó là M = 1 và giá trị exponent là E = 0.
-
-- Giá trị normalized lớn nhất có biểu diễn bit với sign bit bằng 0, least significant bit của exponent bằng 0 và tất cả các bit khác bằng 1. Nó có giá trị fraction f = 1 − 2<sup>−n</sup>, cho significand M = 2 − 2<sup>−n</sup> (mà chúng ta viết là 2 − ϵ.) Nó có giá trị exponent E = 2<sup>k−1</sup> − 1, cho giá trị số V = (2 − 2<sup>−n</sup>) × 2<sup>2k−1−1</sup> = (1 − 2<sup>−n−1</sup>) × 2<sup>2k−1</sup>.
 
 Một bài tập hữu ích để hiểu các biểu diễn floating-point là chuyển những giá trị số nguyên mẫu sang dạng floating-point. Ví dụ, trong Hình 2.15, chúng ta đã thấy rằng 12,345 có biểu diễn nhị phân [11000000111001]. Chúng ta tạo một biểu diễn normalized cho số này bằng cách dịch 13 vị trí sang bên phải binary point, cho 12,345 = 1.1000000111001<sub>2</sub> × 2<sup>13</sup>. Để mã hóa số này theo định dạng IEEE single-precision, chúng ta xây dựng fraction field bằng cách bỏ chữ số 1 đứng đầu và thêm 10 chữ số 0 vào cuối, thu được biểu diễn nhị phân [10000001110010000000000]. Để xây dựng exponent field, chúng ta cộng bias 127 vào 13, thu được 140, có biểu diễn nhị phân [10001100]. Chúng ta kết hợp kết quả này với sign bit bằng 0 để có biểu diễn floating-point ở dạng nhị phân [01000110010000001110010000000000]. Hãy nhớ lại rằng trong Mục 2.1.3, chúng ta đã quan sát được sự tương ứng sau trong các biểu diễn bit-level của giá trị số nguyên 12345 (0x3039) và giá trị floating-point single-precision 12345.0 (0x4640E400):
 
@@ -2533,15 +2532,15 @@ Xét hai biểu diễn floating-point 7-bit sau đây dựa trên định dạng
 
 1. Định dạng A
 
-- Có k = 3 exponent bit. Exponent bias là 3.
+   - Có k = 3 exponent bit. Exponent bias là 3.
 
-- Có n = 4 fraction bit.
+   - Có n = 4 fraction bit.
 
 2. Định dạng B
 
-- Có k = 4 exponent bit. Exponent bias là 7.
+   - Có k = 4 exponent bit. Exponent bias là 7.
 
-- Có n = 3 fraction bit.
+   - Có n = 3 fraction bit.
 
 Dưới đây là một số mẫu bit ở định dạng A, và nhiệm vụ của bạn là chuyển chúng thành giá trị gần nhất ở định dạng B. Nếu cần, bạn nên áp dụng quy tắc làm tròn round-to-even. Ngoài ra, hãy cho biết giá trị của các số được xác định bởi các mẫu bit ở định dạng A và định dạng B. Trình bày chúng dưới dạng số nguyên (ví dụ, 17) hoặc phân số (ví dụ, 17/64).
 
@@ -2558,7 +2557,7 @@ Dưới đây là một số mẫu bit ở định dạng A, và nhiệm vụ c�
 
 Tiêu chuẩn IEEE quy định một quy tắc đơn giản để xác định kết quả của phép toán số học như phép cộng hoặc phép nhân. Xem các giá trị floating-point x và y là số thực, và một phép toán ⊙ được định nghĩa trên số thực, phép tính phải cho ra Round(x ⊙ y), là kết quả của việc làm tròn kết quả chính xác của phép toán trên số thực. Trong thực tế, các nhà thiết kế floating-point unit sử dụng những thủ thuật khéo léo để tránh thực hiện phép tính chính xác này, vì phép tính chỉ cần đủ chính xác để bảo đảm kết quả được làm tròn đúng. Khi một trong các đối số là giá trị đặc biệt như −0, ∞ hoặc NaN, tiêu chuẩn quy định các quy ước nhằm đưa ra cách xử lý hợp lý. Ví dụ, 1/−0 được định nghĩa là cho ra −∞, còn 1/+0 được định nghĩa là cho ra +∞.
 
-Một điểm mạnh trong phương pháp quy định hành vi của các phép toán floating-point theo tiêu chuẩn IEEE là nó độc lập với bất kỳ cách hiện thực cụ thể nào bằng phần cứng hay phần mềm. Do đó, chúng ta có thể xem xét các tính chất toán học trừu tượng của nó mà không cần quan tâm nó thực sự được triển khai ra sao.
+Một điểm mạnh trong phương pháp quy định hành vi của các phép toán floating-point theo tiêu chuẩn IEEE là nó độc lập với bất kỳ cách triển khai cụ thể nào bằng phần cứng hay phần mềm. Do đó, chúng ta có thể xem xét các tính chất toán học trừu tượng của nó mà không cần quan tâm nó thực sự được triển khai ra sao.
 
 Trước đó, chúng ta đã thấy phép cộng số nguyên, cả unsigned lẫn two’s complement, tạo thành một nhóm Abel. Phép cộng trên số thực cũng tạo thành một nhóm Abel, nhưng chúng ta phải xem xét việc làm tròn ảnh hưởng thế nào đến các tính chất này. Hãy định nghĩa x +<sup>f</sup> y là Round(x + y). Phép toán này được định nghĩa cho mọi giá trị x và y, mặc dù nó có thể cho ra vô cực do overflow ngay cả khi cả x và y đều là số thực. Phép toán có tính giao hoán, với x +<sup>f</sup> y = y +<sup>f</sup> x cho mọi giá trị x và y. Tuy nhiên, phép toán không có tính kết hợp. Ví dụ, với floating point single-precision, biểu thức (3.14+1e10)-1e10 cho kết quả 0.0—giá trị 3.14 bị mất do làm tròn. Ngược lại, biểu thức 3.14+(1e10-1e10) cho kết quả 3.14. Tương tự một nhóm Abel, hầu hết các giá trị đều có phần tử nghịch đảo đối với phép cộng floating-point, tức x +<sup>f</sup> −x = 0. Các ngoại lệ là những giá trị vô cực (vì +∞ − ∞ = NaN), và NaN, vì NaN +<sup>f</sup> x = NaN với mọi x.
 
@@ -2709,33 +2708,33 @@ Trong một số bài toán sau, chúng ta sẽ chủ động giới hạn nhữ
 
 - Các giả định
 
-- Số nguyên được biểu diễn dưới dạng two’s-complement.
+  - Số nguyên được biểu diễn dưới dạng two’s-complement.
 
-- Các phép dịch phải đối với dữ liệu signed được thực hiện theo kiểu số học.
+  - Các phép dịch phải đối với dữ liệu signed được thực hiện theo kiểu số học.
 
-- Kiểu dữ liệu int dài w bit. Với một số bài toán, bạn sẽ được cho một giá trị w cụ thể; ngoài ra, code của bạn phải hoạt động miễn là w là bội số của 8. Bạn có thể dùng biểu thức sizeof(int)<<3 để tính w.
+  - Kiểu dữ liệu int dài w bit. Với một số bài toán, bạn sẽ được cho một giá trị w cụ thể; ngoài ra, code của bạn phải hoạt động miễn là w là bội số của 8. Bạn có thể dùng biểu thức sizeof(int)<<3 để tính w.
 
 - Những điều bị cấm
 
-- Các cấu trúc điều kiện (if hoặc ?:), vòng lặp, câu lệnh switch, lời gọi hàm và lời gọi macro.
+  - Các cấu trúc điều kiện (if hoặc ?:), vòng lặp, câu lệnh switch, lời gọi hàm và lời gọi macro.
 
-- Phép chia, phép lấy phần dư và phép nhân.
+  - Phép chia, phép lấy phần dư và phép nhân.
 
-- Các toán tử so sánh quan hệ (<, >, <= và >=).
+  - Các toán tử so sánh quan hệ (<, >, <= và >=).
 
 - Những phép toán được phép
 
-- Tất cả các phép toán bit-level và logic.
+  - Tất cả các phép toán bit-level và logic.
 
-- Phép dịch trái và dịch phải, nhưng chỉ với số bit dịch trong khoảng từ 0 đến w − 1.
+  - Phép dịch trái và dịch phải, nhưng chỉ với số bit dịch trong khoảng từ 0 đến w − 1.
 
-- Phép cộng và phép trừ.
+  - Phép cộng và phép trừ.
 
-- Kiểm tra bằng nhau (==) và khác nhau (!=). (Một số bài toán không cho phép các phép kiểm tra này.)
+  - Kiểm tra bằng nhau (==) và khác nhau (!=). (Một số bài toán không cho phép các phép kiểm tra này.)
 
-- Các hằng số nguyên INT_MIN và INT_MAX.
+  - Các hằng số nguyên INT_MIN và INT_MAX.
 
-- Ép kiểu giữa các kiểu dữ liệu int và unsigned, một cách tường minh hoặc ngầm định.
+  - Ép kiểu giữa các kiểu dữ liệu int và unsigned, một cách tường minh hoặc ngầm định.
 
 Ngay cả với các quy tắc này, bạn vẫn nên cố gắng làm cho code dễ đọc bằng cách chọn tên biến có tính mô tả và dùng comment để giải thích logic đằng sau lời giải. Ví dụ, code sau trích xuất byte có trọng số cao nhất từ đối số số nguyên x:
 
@@ -3072,12 +3071,12 @@ B. Giá trị số của chuỗi là bao nhiêu với các giá trị y sau?
 int float_le(float x, float y) {
     unsigned ux = f2u(x);
     unsigned uy = f2u(y);
-/* Get the sign bits */
-unsigned sx = ux >> 31;
-unsigned sy = uy >> 31;
+    /* Get the sign bits */
+    unsigned sx = ux >> 31;
+    unsigned sy = uy >> 31;
 
-/* Give an expression using only ux, uy, sx, and sy */
-return   ;
+    /* Give an expression using only ux, uy, sx, and sy */
+    return   ;
 }
 ```
 
@@ -3132,19 +3131,19 @@ Bạn không cần điền các ô được đánh dấu —.
 
 1. Định dạng A
 
-- Có 1 sign bit.
+   - Có 1 sign bit.
 
-- Có k = 5 bit exponent. Exponent bias là 15.
+   - Có k = 5 bit exponent. Exponent bias là 15.
 
-- Có n = 3 bit fraction.
+   - Có n = 3 bit fraction.
 
 2. Định dạng B
 
-- Có 1 sign bit.
+   - Có 1 sign bit.
 
-- Có k = 4 bit exponent. Exponent bias là 7.
+   - Có k = 4 bit exponent. Exponent bias là 7.
 
-- Có n = 4 bit fraction.
+   - Có n = 4 bit fraction.
 
 Trong bảng sau, bạn được cho một số bit pattern ở định dạng A, và nhiệm vụ của bạn là chuyển chúng sang giá trị gần nhất trong định dạng B. Nếu cần làm tròn, bạn phải làm tròn về +∞. Ngoài ra, hãy đưa ra giá trị của các số được cho bởi những bit pattern ở định dạng A và định dạng B. Viết chúng dưới dạng số nguyên (ví dụ 17) hoặc phân số (ví dụ 17/64 hoặc 17/2<sup>6</sup>).
 
@@ -3719,11 +3718,17 @@ Lời giải Bài toán 2.35 (trang 135) Kiểm thử hàm này với tất cả
 
 Dưới đây là một cách tiếp cận có cơ sở hơn, theo chuỗi lập luận được đề xuất:
 
-1. Chúng ta biết rằng x · y có thể được viết dưới dạng một số two’s-complement 2w-bit. Gọi u là số unsigned được biểu diễn bởi w bit thấp, và v là số two’s-complement được biểu diễn bởi w bit cao. Khi đó, dựa trên Phương trình 2.3, chúng ta có thể thấy rằng x · y = v2<sup>w</sup> + u. Chúng ta cũng biết u = T2U<sub>w</sub>(p), vì chúng là các số unsigned và two’s-complement phát sinh từ cùng một bit pattern, nên theo Phương trình 2.6, có thể viết u = p + p<sub>w−1</sub>2<sup>w</sup>, trong đó p<sub>w−1</sub> là bit có trọng số cao nhất của p. Đặt t = v + p<sub>w−1</sub>, chúng ta có x · y = p + t2<sup>w</sup>. Khi t = 0, chúng ta có x · y = p; phép nhân không bị overflow. Khi t ≠ 0, chúng ta có x · y ≠ p; phép nhân bị overflow.
+1. Chúng ta biết rằng x · y có thể được viết dưới dạng một số two’s-complement 2w-bit. Gọi u là số unsigned được biểu diễn bởi w bit thấp, và v là số two’s-complement được biểu diễn bởi w bit cao. Khi đó, dựa trên Phương trình 2.3, chúng ta có thể thấy rằng x · y = v2<sup>w</sup> + u.
+
+   Chúng ta cũng biết u = T2U<sub>w</sub>(p), vì chúng là các số unsigned và two’s-complement phát sinh từ cùng một bit pattern, nên theo Phương trình 2.6, có thể viết u = p + p<sub>w−1</sub>2<sup>w</sup>, trong đó p<sub>w−1</sub> là bit có trọng số cao nhất của p. Đặt t = v + p<sub>w−1</sub>, chúng ta có x · y = p + t2<sup>w</sup>.
+
+   Khi t = 0, chúng ta có x · y = p; phép nhân không bị overflow. Khi t ≠ 0, chúng ta có x · y ≠ p; phép nhân bị overflow.
 
 2. Theo định nghĩa phép chia số nguyên, chia p cho x khác không cho ra thương q và phần dư r sao cho p = x · q + r, và |r| < |x|. (Ở đây chúng ta dùng giá trị tuyệt đối vì dấu của x và r có thể khác nhau. Ví dụ, chia −7 cho 2 cho ra thương −3 và phần dư −1.)
 
-3. Giả sử q = y. Khi đó chúng ta có x · y = x · y + r + t2<sup>w</sup>. Từ đây có thể thấy rằng r + t2<sup>w</sup> = 0. Nhưng |r| < |x| ≤ 2<sup>w</sup>, nên đẳng thức này chỉ có thể đúng nếu t = 0, và khi đó r = 0. Giả sử r = t = 0. Khi đó chúng ta sẽ có x · y = x · q, suy ra y = q.
+3. Giả sử q = y. Khi đó chúng ta có x · y = x · y + r + t2<sup>w</sup>. Từ đây có thể thấy rằng r + t2<sup>w</sup> = 0. Nhưng |r| < |x| ≤ 2<sup>w</sup>, nên đẳng thức này chỉ có thể đúng nếu t = 0, và khi đó r = 0.
+
+   Giả sử r = t = 0. Khi đó chúng ta sẽ có x · y = x · q, suy ra y = q.
 
 Khi x bằng 0, phép nhân không bị overflow, nên chúng ta thấy code cung cấp một cách đáng tin cậy để kiểm tra phép nhân two’s-complement có gây overflow hay không.
 
@@ -3799,23 +3804,39 @@ int div16(int x) {
 
 Lời giải Bài toán 2.43 (trang 143) Chúng tôi nhận thấy mọi người gặp khó khăn với bài tập này khi làm việc trực tiếp với assembly code. Bài toán trở nên rõ ràng hơn khi được đặt dưới dạng trình bày trong optarith.
 
-Chúng ta có thể thấy M là 31; x*M được tính bằng (x<<5)-x. Chúng ta có thể thấy N là 8; một giá trị bias bằng 7 được cộng vào khi y âm, và phép dịch phải dịch 3 bit.
+Chúng ta có thể thấy M là 31; x*M được tính bằng (x<<5)-x.
+
+Chúng ta có thể thấy N là 8; một giá trị bias bằng 7 được cộng vào khi y âm, và phép dịch phải dịch 3 bit.
 
 Lời giải Bài toán 2.44 (trang 144) Những bài toán “câu đố C” này minh họa rõ ràng rằng lập trình viên phải hiểu các tính chất của số học máy tính:
 
-A. (x > 0) || (x-1 < 0) Sai. Cho x là −2,147,483,648 (TMin<sub>32</sub>). Khi đó x-1 sẽ bằng 2,147,483,647 (TMax<sub>32</sub>).
+A. (x > 0) || (x-1 < 0)
 
-B. (x & 7) != 7 || (x<<29 < 0) Đúng. Nếu (x & 7) != 7 có giá trị 0, thì bit x<sub>2</sub> phải bằng 1. Khi được dịch trái 29 bit, nó sẽ trở thành sign bit.
+   Sai. Cho x là −2,147,483,648 (TMin<sub>32</sub>). Khi đó x-1 sẽ bằng 2,147,483,647 (TMax<sub>32</sub>).
 
-C. (x * x) >= 0 Sai. Khi x là 65,535 (0xFFFF), x*x là −131,071 (0xFFFE0001).
+B. (x & 7) != 7 || (x<<29 < 0)
 
-D. x < 0 || -x <= 0 Đúng. Nếu x không âm thì -x không dương.
+   Đúng. Nếu (x & 7) != 7 có giá trị 0, thì bit x<sub>2</sub> phải bằng 1. Khi được dịch trái 29 bit, nó sẽ trở thành sign bit.
 
-E. x > 0 || -x >= 0 Sai. Cho x là −2,147,483,648 (TMin<sub>32</sub>). Khi đó cả x và -x đều âm.
+C. (x * x) >= 0
 
-F. x+y == uy+ux Đúng. Phép cộng Two’s-complement và unsigned có cùng hành vi bit-level, và chúng có tính giao hoán.
+   Sai. Khi x là 65,535 (0xFFFF), x*x là −131,071 (0xFFFE0001).
 
-G. x\*~y + uy\*ux == -x Đúng. ~y bằng -y-1. uy\*ux bằng x\*y. Do đó, vế left-hand tương đương với x\*-y-x+x\*y.
+D. x < 0 || -x <= 0
+
+   Đúng. Nếu x không âm thì -x không dương.
+
+E. x > 0 || -x >= 0
+
+   Sai. Cho x là −2,147,483,648 (TMin<sub>32</sub>). Khi đó cả x và -x đều âm.
+
+F. x+y == uy+ux
+
+   Đúng. Phép cộng Two’s-complement và unsigned có cùng hành vi bit-level, và chúng có tính giao hoán.
+
+G. x\*~y + uy\*ux == -x
+
+   Đúng. ~y bằng -y-1. uy\*ux bằng x\*y. Do đó, vế left-hand tương đương với x\*-y-x+x\*y.
 
 Lời giải Bài toán 2.45 (trang 147) Hiểu các biểu diễn nhị phân có phần lẻ là một bước quan trọng để hiểu cách biểu diễn floating-point. Bài tập này cho phép bạn thử một số ví dụ đơn giản.
 
@@ -3933,18 +3954,34 @@ Chúng ta giả sử rằng giá trị 1e400 bị overflow thành vô cực.
 
 Lời giải Bài toán 2.54 (trang 161) Các bài tập như thế này giúp bạn phát triển khả năng suy luận về các phép toán floating-point từ góc nhìn của lập trình viên. Hãy đảm bảo bạn hiểu từng đáp án.
 
-A. x == (int)(double) x Đúng, vì double có độ chính xác và miền giá trị lớn hơn int.
+A. x == (int)(double) x
 
-B. x == (int)(float) x Sai. Ví dụ, khi x là TMax.
+   Đúng, vì double có độ chính xác và miền giá trị lớn hơn int.
 
-C. d == (double)(float) d Sai. Ví dụ, khi d là 1e40, chúng ta sẽ thu được +∞ ở vế phải.
+B. x == (int)(float) x
 
-D. f == (float)(double) f Đúng, vì double có độ chính xác và miền giá trị lớn hơn float.
+   Sai. Ví dụ, khi x là TMax.
 
-E. f == -(-f) Đúng, vì một số floating-point được lấy số đối chỉ bằng cách đảo sign bit của nó.
+C. d == (double)(float) d
 
-F. 1.0/2 == 1/2.0 Đúng, cả tử số và mẫu số đều sẽ được chuyển sang biểu diễn floating-point trước khi thực hiện phép chia.
+   Sai. Ví dụ, khi d là 1e40, chúng ta sẽ thu được +∞ ở vế phải.
 
-G. d*d >= 0.0 Đúng, mặc dù nó có thể bị overflow thành +∞.
+D. f == (float)(double) f
 
-H. (f+d)-f == d Sai. Ví dụ, khi f là 1.0e20 và d là 1.0, biểu thức f+d sẽ được làm tròn thành 1.0e20, nên biểu thức ở vế left-hand sẽ có giá trị 0.0, trong khi vế right-hand sẽ là 1.0.
+   Đúng, vì double có độ chính xác và miền giá trị lớn hơn float.
+
+E. f == -(-f)
+
+   Đúng, vì một số floating-point được lấy số đối chỉ bằng cách đảo sign bit của nó.
+
+F. 1.0/2 == 1/2.0
+
+   Đúng, cả tử số và mẫu số đều sẽ được chuyển sang biểu diễn floating-point trước khi thực hiện phép chia.
+
+G. d*d >= 0.0
+
+   Đúng, mặc dù nó có thể bị overflow thành +∞.
+
+H. (f+d)-f == d
+
+   Sai. Ví dụ, khi f là 1.0e20 và d là 1.0, biểu thức f+d sẽ được làm tròn thành 1.0e20, nên biểu thức ở vế left-hand sẽ có giá trị 0.0, trong khi vế right-hand sẽ là 1.0.

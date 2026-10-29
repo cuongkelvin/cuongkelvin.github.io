@@ -2,7 +2,7 @@
 
 Khái niệm register trong VHDL và việc dùng nó sau đó trong thiết kế mạch số có lẽ là một trong những khái niệm đơn giản nhất trong VHDL. Một register trong VHDL đơn giản là một phiên bản vector của D flip-flop, trong đó mọi thao tác trên các flip-flops xảy ra đồng thời. “Register transfer level”, hay RTL, là một kiểu thiết kế chủ yếu quan tâm đến việc dữ liệu được chuyển giữa các register khác nhau trong một hệ thống số như thế nào và khi nào. Thiết kế RTL-level thường gắn với các thiết kế ”data-path”, loại thiết kế đòi hỏi điều khiển và định thời cẩn thận dữ liệu được chuyển giữa các register. Các điều khiển gắn với ngay cả những register đơn giản cũng đủ để bảo đảm rằng một entity bên ngoài nào đó có đủ quyền điều khiển đối với ”thứ tự” dữ liệu đi qua mạch gắn với data-path. Trong những trường hợp này, thứ tự đúng của các lần chuyển dữ liệu được điều khiển bởi một FSM.
 
-Việc học thiết kế RTL-level tốt nhất là trong ngữ cảnh của một thiết kế data-path. Việc thiết kế data-paths tốt nhất là trong ngữ cảnh của một mạch số có mục đích nào đó, chẳng hạn một thiết kế arithmetic logic unit. Cả hai chủ đề này đều vượt quá những gì cần nhắc đến ở đây. Tin tốt là sự đơn giản của register cho phép giới thiệu nhanh về vấn đề này. Các bản hiện thực mạch lớn để dành cho lúc khác.
+Việc học thiết kế RTL-level tốt nhất là trong ngữ cảnh của một thiết kế data-path. Việc thiết kế data-paths tốt nhất là trong ngữ cảnh của một mạch số có mục đích nào đó, chẳng hạn một thiết kế arithmetic logic unit. Cả hai chủ đề này đều vượt quá những gì cần nhắc đến ở đây. Tin tốt là sự đơn giản của register cho phép giới thiệu nhanh về vấn đề này. Các bản triển khai mạch lớn để dành cho lúc khác.
 
 > VÍ DỤ 23. Hãy dùng behavioral modeling VHDL để thiết kế register 8-bit có một signal parallel load đồng bộ active high LD. Coi việc load của register được đồng bộ với các cạnh lên của clock.
 
@@ -44,7 +44,7 @@ begin
 end reg8;
 ```
 
-Mạch trong ví dụ tiếp theo phức tạp hơn một chút so với phần lớn các ví dụ đã thấy cho đến giờ. Ngoài ra, hãy nhớ rằng có nhiều lời giải khác nhau cho cùng một bài toán. Đây là điều thường gặp trong VHDL; thực tế, nhiều khi không có phương pháp tốt nhất nào để hiện thực một mạch cho trước. Các ví dụ tiếp theo về bản chất là cùng một bài toán được giải bằng hai lời giải khác nhau nhưng tương đương về chức năng.
+Mạch trong ví dụ tiếp theo phức tạp hơn một chút so với phần lớn các ví dụ đã thấy cho đến giờ. Ngoài ra, hãy nhớ rằng có nhiều lời giải khác nhau cho cùng một bài toán. Đây là điều thường gặp trong VHDL; thực tế, nhiều khi không có phương pháp tốt nhất nào để triển khai một mạch cho trước. Các ví dụ tiếp theo về bản chất là cùng một bài toán được giải bằng hai lời giải khác nhau nhưng tương đương về chức năng.
 
 > VÍ DỤ 24. Hãy dùng behavioral modeling VHDL để thiết kế mạch ở bên phải. Coi cả hai signal load là active high. Coi mạch được đồng bộ với cạnh lên của signal clock.
 
@@ -186,42 +186,32 @@ end rtl_structural;
 
 ## 10.1 Những điểm quan trọng
 
-• VHDL có thể được dùng để dễ dàng hiện thực các mạch ở register transfer level. Các model VHDL tương ứng có thể được hiện thực ở dạng structural hoặc dạng hoàn toàn behavioral.
+• VHDL có thể được dùng để dễ dàng triển khai các mạch ở register transfer level. Các model VHDL tương ứng có thể được triển khai ở dạng structural hoặc dạng hoàn toàn behavioral.
 
 • Các model VHDL RTL level nên cố gắng hướng tới sự đơn giản trong thiết kế. Nếu các model behavioral trong thiết kế RTL trở nên phức tạp, khả năng mạch của bạn chạy đúng giảm đi rất nhiều do việc synthesis mạch phức tạp đó.
 
 ## 10.2 Bài tập: Mạch Register Transfer Level
 
-BÀI TẬP 1. Hãy viết một model VHDL
-
 ![p0152_4](images/ch10_registers_and_register_transfer_level/p0152_4.png)
 
-có thể được dùng để hiện thực mạch sau.
-
-BÀI TẬP 2. Hãy viết một model VHDL
+BÀI TẬP 1. Hãy viết một model VHDL có thể được dùng để triển khai mạch sau.
 
 ![p0152_5](images/ch10_registers_and_register_transfer_level/p0152_5.png)
 
-có thể được dùng để hiện thực mạch sau.
-
-BÀI TẬP 3. Hãy viết một model VHDL
+BÀI TẬP 2. Hãy viết một model VHDL có thể được dùng để triển khai mạch sau.
 
 ![p0152_6](images/ch10_registers_and_register_transfer_level/p0152_6.png)
 
-có thể được dùng để hiện thực mạch sau. BÀI TẬP 4. Hãy viết một model VHDL
+BÀI TẬP 3. Hãy viết một model VHDL có thể được dùng để triển khai mạch sau.
 
 ![p0153_7](images/ch10_registers_and_register_transfer_level/p0153_7.png)
 
-có thể được dùng để hiện thực mạch sau.
-
-BÀI TẬP 5. Hãy viết một model VHDL
+BÀI TẬP 4. Hãy viết một model VHDL có thể được dùng để triển khai mạch sau.
 
 ![p0153_8](images/ch10_registers_and_register_transfer_level/p0153_8.png)
 
-có thể được dùng để hiện thực mạch sau.
-
-BÀI TẬP 6. Hãy viết một model VHDL
+BÀI TẬP 5. Hãy viết một model VHDL có thể được dùng để triển khai mạch sau.
 
 ![p0153_9](images/ch10_registers_and_register_transfer_level/p0153_9.png)
 
-có thể được dùng để hiện thực mạch sau.
+BÀI TẬP 6. Hãy viết một model VHDL có thể được dùng để triển khai mạch sau.

@@ -1253,7 +1253,7 @@ Cuối cùng, chúng ta đã đến chủ đề cách build distro của riêng 
 
 ## Build distro của riêng bạn
 
-Ở đầu chương trước, tôi đã nói với bạn về các distro layer như `meta-poky` và distribution metadata chứa trong các thư mục con `conf/distro` của chúng. Như chúng ta đã thấy, bạn không cần distro layer riêng để build các image tùy chỉnh của mình. Bạn có thể đi rất xa mà không bao giờ phải sửa distribution metadata của Poky. Nhưng nếu bạn muốn thay đổi các chính sách distro (ví dụ, tính năng, bản hiện thực thư viện C, lựa chọn package manager, v.v.), thì bạn có thể chọn build distro của riêng mình.
+Ở đầu chương trước, tôi đã nói với bạn về các distro layer như `meta-poky` và distribution metadata chứa trong các thư mục con `conf/distro` của chúng. Như chúng ta đã thấy, bạn không cần distro layer riêng để build các image tùy chỉnh của mình. Bạn có thể đi rất xa mà không bao giờ phải sửa distribution metadata của Poky. Nhưng nếu bạn muốn thay đổi các chính sách distro (ví dụ, tính năng, bản triển khai thư viện C, lựa chọn package manager, v.v.), thì bạn có thể chọn build distro của riêng mình.
 
 Build distro của riêng bạn là một quá trình three-step:
 
@@ -1307,7 +1307,7 @@ $ bitbake-layers create-layer ../meta-mackerel
 $ bitbake-layers add-layer ../meta-mackerel
 ```
 
-Tên distro của chúng ta là `mackerel`. Tạo distro layer riêng cho phép chúng ta giữ các chính sách distro tách biệt với các package recipe (phần hiện thực).
+Tên distro của chúng ta là `mackerel`. Tạo distro layer riêng cho phép chúng ta giữ các chính sách distro tách biệt với các package recipe (phần triển khai).
 
 ### Cấu hình distro
 

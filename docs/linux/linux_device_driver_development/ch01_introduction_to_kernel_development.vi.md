@@ -79,21 +79,17 @@ Khi cần cross-compile, bạn phải xác định và cài đúng toolchain. So
 
 - `abi` viết tắt application binary interface. Chỉ hình dạng binary bên dưới, function call convention, cách truyền tham số, v.v. Convention có thể gồm `eabi`, `gnueabi`, `gnueabihf`. Xem chi tiết:
 
-- `eabi` nghĩa code được compile chạy trên bare metal ARM core.
+  - `eabi` nghĩa code được compile chạy trên bare metal ARM core.
 
-- `gnueabi` nghĩa code cho Linux sẽ được compile.
+  - `gnueabi` nghĩa code cho Linux sẽ được compile.
 
-- `gnueabihf` giống `gnueabi`, nhưng `hf` cuối nghĩa `hard float`, chỉ compiler và library bên dưới dùng hardware floating-point instruction thay triển khai software của floating-point instruction, như fixed-point software implementation. Nếu không có floating-point hardware, instruction được trap và thực hiện bằng floating-point emulation module. Khi software emulation, khác biệt chức năng thực sự duy nhất là thực thi chậm hơn.
+  - `gnueabihf` giống `gnueabi`, nhưng `hf` cuối nghĩa `hard float`, chỉ compiler và library bên dưới dùng hardware floating-point instruction thay triển khai software của floating-point instruction, như fixed-point software implementation. Nếu không có floating-point hardware, instruction được trap và thực hiện bằng floating-point emulation module. Khi software emulation, khác biệt chức năng thực sự duy nhất là thực thi chậm hơn.
 
 Một số tên toolchain minh họa pattern:
 
 - `arm-none-eabi`: Đây là toolchain nhắm đến architecture ARM. Nó không chỉ định vendor, nhắm đến một hệ thống bare-metal, tức không nhắm đến hệ điều hành, và tuân theo ARM EABI.
 
-- `arm-none-linux-gnueabi` hoặc `arm-linux-gnueabi`: Toolchain tạo object cho ARM chạy Linux với configuration (ABI) mặc định do toolchain cung cấp. Lưu ý `arm-none-linux-gnueabi` giống `arm-linux-gnueabi` vì như đã thấy không chỉ vendor thì giả định không có. Biến thể hỗ trợ hardware floating point là `arm-linux-gnueabihf` hoặc `arm-none-linux-`
-
-```
-gnueabihf.
-```
+- `arm-none-linux-gnueabi` hoặc `arm-linux-gnueabi`: Toolchain tạo object cho ARM chạy Linux với configuration (ABI) mặc định do toolchain cung cấp. Lưu ý `arm-none-linux-gnueabi` giống `arm-linux-gnueabi` vì như đã thấy không chỉ vendor thì giả định không có. Biến thể hỗ trợ hardware floating point là `arm-linux-gnueabihf` hoặc `arm-none-linux-gnueabihf`.
 
 Giờ quen quy ước tên toolchain, có thể xác định toolchain cross-compile cho target architecture.
 
@@ -288,13 +284,9 @@ Phần lớn option có ba lựa chọn. Tuy nhiên có thể liệt kê năm lo
 
 - Boolean option có hai lựa chọn:
 
-- `(blank)`, bỏ tính năng này. Khi option được chọn nổi bật trong configuration menu, nhấn `<n>` để bỏ. Tương đương false. Khi disable, configuration option kết quả bị comment trong configuration file.
+  - `(blank)`, bỏ tính năng này. Khi option được chọn nổi bật trong configuration menu, nhấn `<n>` để bỏ. Tương đương false. Khi disable, configuration option kết quả bị comment trong configuration file.
 
-- `(*)`, compile tĩnh vào kernel. Nghĩa là luôn có khi kernel nạp lần đầu. Tương đương true. Enable tính năng trong configuration menu bằng chọn và nhấn `<y>`. Option kết quả là `CONFIG_<OPTION>=y` trong configuration file; ví dụ,
-
-```
-CONFIG_INPUT_EVDEV=y.
-```
+  - `(*)`, compile tĩnh vào kernel. Nghĩa là luôn có khi kernel nạp lần đầu. Tương đương true. Enable tính năng trong configuration menu bằng chọn và nhấn `<y>`. Option kết quả là `CONFIG_<OPTION>=y` trong configuration file; ví dụ, `CONFIG_INPUT_EVDEV=y`.
 
 - Tristate option, ngoài Boolean state, có state thứ ba đánh dấu `(M)` trong configuration window. Thành `CONFIG_<OPTION>=m` trong configuration file; ví dụ `CONFIG_INPUT_EVDEV=m`. Để tạo loadable module (nếu option cho phép), chọn tính năng, nhấn phím `M`.
 
@@ -406,11 +398,7 @@ CONFIG_SOUND_OSS_CORE_PRECLAIM=y
 #
 ```
 
-- `CMDLINE_EXTEND` và `CMDLINE`: Option đầu Boolean cho mở rộng kernel command line từ configuration, option sau string chứa giá trị command-line extension thực tế; ví dụ,
-
-```
-CMDLINE="noinitrd usbcore.authorized_default=0".
-```
+- `CMDLINE_EXTEND` và `CMDLINE`: Option đầu Boolean cho mở rộng kernel command line từ configuration, option sau string chứa giá trị command-line extension thực tế; ví dụ, `CMDLINE="noinitrd usbcore.authorized_default=0"`.
 
 - `CONFIG_KALLSYMS`: Boolean option cung cấp kernel symbol table (mapping giữa symbol và địa chỉ) tại `/proc/kallsyms`. Rất hữu ích tracer và công cụ cần map kernel symbol sang địa chỉ. Dùng khi in oops message. Thiếu nó, oops listing tạo hexadecimal output khó diễn giải.
 
@@ -424,15 +412,15 @@ CMDLINE="noinitrd usbcore.authorized_default=0".
 
 - `FTRACE` và `DYNAMIC_FTRACE`: Enable tracer mạnh `ftrace`, trace toàn hệ thống. Khi enable `ftrace`, một số enumeration option cũng enable được:
 
-- `FUNCTION_TRACER`: Cho trace mọi non-inline function trong kernel.
+  - `FUNCTION_TRACER`: Cho trace mọi non-inline function trong kernel.
 
-- `FUNCTION_GRAPH_TRACER`: Giống lệnh trước nhưng hiện call graph (caller/callee function).
+  - `FUNCTION_GRAPH_TRACER`: Giống lệnh trước nhưng hiện call graph (caller/callee function).
 
-- `IRQSOFF_TRACER`: Cho theo dõi khoảng IRQ tắt trong kernel.
+  - `IRQSOFF_TRACER`: Cho theo dõi khoảng IRQ tắt trong kernel.
 
-- `PREEMPT_TRACER`: Cho đo preemption off latency.
+  - `PREEMPT_TRACER`: Cho đo preemption off latency.
 
-- `SCHED_TRACER`: Cho thực hiện scheduling latency tracing.
+  - `SCHED_TRACER`: Cho thực hiện scheduling latency tracing.
 
 Kernel đã configure, phải build để tạo runnable kernel. Mục tiếp mô tả kernel building process và build artifact dự kiến.
 
@@ -532,11 +520,11 @@ Quy trình cài Linux kernel khác giữa native compilation và cross-compilati
 
 - Trong native installation, tức cài trên host, bạn có thể chỉ cần chạy `sudo make install`. Phải sử dụng `sudo` vì việc cài đặt diễn ra trong directory `/boot`. Nếu thực hiện native installation trên x86, các file sau được cung cấp:
 
-- `/boot/vmlinuz-<version>`: Biến thể compressed, stripped của `vmlinux`. Cùng kernel image như trong `arch/<arch>/boot`.
+  - `/boot/vmlinuz-<version>`: Biến thể compressed, stripped của `vmlinux`. Cùng kernel image như trong `arch/<arch>/boot`.
 
-- `/boot/System.map-<version>`: Lưu kernel symbol table (mapping kernel symbol/địa chỉ), không chỉ debugging, còn cho vài kernel module resolve symbol và nạp đúng. File chỉ chứa static kernel symbol table, còn `/proc/kallsyms` (nếu enable `CONFIG_KALLSYMS` trong config) trên running kernel chứa `System.map` cùng loaded kernel module symbol.
+  - `/boot/System.map-<version>`: Lưu kernel symbol table (mapping kernel symbol/địa chỉ), không chỉ debugging, còn cho vài kernel module resolve symbol và nạp đúng. File chỉ chứa static kernel symbol table, còn `/proc/kallsyms` (nếu enable `CONFIG_KALLSYMS` trong config) trên running kernel chứa `System.map` cùng loaded kernel module symbol.
 
-- `/boot/config-<version>`: Tương ứng kernel configuration của version đã build.
+  - `/boot/config-<version>`: Tương ứng kernel configuration của version đã build.
 
 - Embedded installation thường dùng single file kernel. Hơn nữa target không truy cập được nên ưu tiên cài thủ công. Vì vậy embedded Linux build system (Yocto/Buildroot) dùng internal script đưa kernel image vào target root filesystem. Embedded installation có thể đơn giản nhờ build system, nhưng native installation (đặc biệt x86) có thể cần lệnh bootloader-related bổ sung (như `update-grub2`) để hệ thống thấy kernel mới.
 

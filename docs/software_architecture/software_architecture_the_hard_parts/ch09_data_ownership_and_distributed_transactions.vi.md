@@ -110,7 +110,7 @@ May mắn là có một số kỹ thuật để xử lý loại kịch bản s�
 
 *Kỹ thuật table split* (tách bảng) chia một bảng duy nhất thành nhiều bảng<a id="ch09-tst"></a><a id="ch09-tst2"></a><a id="ch09-tst3"></a> để mỗi service sở hữu một phần dữ liệu mà nó chịu trách nhiệm. Kỹ thuật này được mô tả chi tiết trong cuốn sách *Refactoring Databases* và trên [website đi kèm](https://oreil.ly/WJ2kt).
 
-Để minh họa kỹ thuật table split, hãy xét ví dụ bảng Product minh họa trong [Hình 9-4](#fig-data-access-and-update-joint-ownership). Trong trường hợp này, kiến trúc sư hoặc developer trước tiên sẽ tạo một bảng Inventory riêng chứa product ID (key) và lượng tồn kho (số mặt hàng có sẵn), pre-populate (điền trước) bảng Inventory bằng dữ liệu từ bảng Product hiện có, rồi cuối cùng gỡ cột lượng tồn kho khỏi bảng Product. Đoạn source trong [Ví dụ 9-1](#source-table-split) cho thấy kỹ thuật này có thể được hiện thực thế nào bằng data definition language (DDL) trong một relational database điển hình.
+Để minh họa kỹ thuật table split, hãy xét ví dụ bảng Product minh họa trong [Hình 9-4](#fig-data-access-and-update-joint-ownership). Trong trường hợp này, kiến trúc sư hoặc developer trước tiên sẽ tạo một bảng Inventory riêng chứa product ID (key) và lượng tồn kho (số mặt hàng có sẵn), pre-populate (điền trước) bảng Inventory bằng dữ liệu từ bảng Product hiện có, rồi cuối cùng gỡ cột lượng tồn kho khỏi bảng Product. Đoạn source trong [Ví dụ 9-1](#source-table-split) cho thấy kỹ thuật này có thể được triển khai thế nào bằng data definition language (DDL) trong một relational database điển hình.
 
 <a id="source-table-split"></a>
 
@@ -382,9 +382,9 @@ Chúng tôi sẽ dùng kịch bản này để mô tả từng eventual consiste
 
 ### Pattern đồng bộ nền (Background Synchronization Pattern)
 
-*Background synchronization pattern* (pattern đồng bộ nền) dùng một service<a id="ch09-eve"></a><a id="ch09-eve2"></a><a id="ch09-eve3"></a> hoặc tiến trình bên ngoài riêng biệt để định kỳ kiểm tra các nguồn dữ liệu và giữ chúng đồng bộ với nhau. Khoảng thời gian để các nguồn dữ liệu trở nên nhất quán cuối cùng khi dùng pattern này có thể khác nhau tùy theo tiến trình nền được hiện thực như một batch job chạy vào khoảng giữa đêm, hay một service thức dậy định kỳ (chẳng hạn, mỗi giờ) để kiểm tra tính nhất quán của các nguồn dữ liệu.
+*Background synchronization pattern* (pattern đồng bộ nền) dùng một service<a id="ch09-eve"></a><a id="ch09-eve2"></a><a id="ch09-eve3"></a> hoặc tiến trình bên ngoài riêng biệt để định kỳ kiểm tra các nguồn dữ liệu và giữ chúng đồng bộ với nhau. Khoảng thời gian để các nguồn dữ liệu trở nên nhất quán cuối cùng khi dùng pattern này có thể khác nhau tùy theo tiến trình nền được triển khai như một batch job chạy vào khoảng giữa đêm, hay một service thức dậy định kỳ (chẳng hạn, mỗi giờ) để kiểm tra tính nhất quán của các nguồn dữ liệu.
 
-Bất kể tiến trình nền được hiện thực thế nào (batch hằng đêm hay định kỳ), pattern này thường có khoảng thời gian dài nhất để các nguồn dữ liệu trở nên nhất quán. Tuy nhiên, trong nhiều trường hợp, các nguồn dữ liệu không cần được giữ đồng bộ ngay lập tức. Hãy xét ví dụ khách hàng hủy đăng ký trong [Hình 9-14](#fig-data-access-and-update-base-unsubscribe). Một khi khách hàng hủy đăng ký, việc thông tin hợp đồng hỗ trợ và thanh toán của khách hàng đó vẫn còn tồn tại thực sự không quan trọng. Trong trường hợp này, eventual consistency được thực hiện trong đêm là khoảng thời gian đủ để đưa dữ liệu về đồng bộ.
+Bất kể tiến trình nền được triển khai thế nào (batch hằng đêm hay định kỳ), pattern này thường có khoảng thời gian dài nhất để các nguồn dữ liệu trở nên nhất quán. Tuy nhiên, trong nhiều trường hợp, các nguồn dữ liệu không cần được giữ đồng bộ ngay lập tức. Hãy xét ví dụ khách hàng hủy đăng ký trong [Hình 9-14](#fig-data-access-and-update-base-unsubscribe). Một khi khách hàng hủy đăng ký, việc thông tin hợp đồng hỗ trợ và thanh toán của khách hàng đó vẫn còn tồn tại thực sự không quan trọng. Trong trường hợp này, eventual consistency được thực hiện trong đêm là khoảng thời gian đủ để đưa dữ liệu về đồng bộ.
 
 Một trong những thách thức của pattern này là tiến trình nền dùng để giữ mọi dữ liệu đồng bộ phải biết dữ liệu nào đã thay đổi. Việc này có thể được thực hiện thông qua một event stream, một database trigger, hoặc đọc dữ liệu từ các bảng nguồn và căn chỉnh các bảng đích theo dữ liệu nguồn. Bất kể kỹ thuật nào được dùng để xác định thay đổi, tiến trình nền phải có kiến thức về mọi bảng và nguồn dữ liệu tham gia transaction.
 
@@ -414,7 +414,7 @@ Ví dụ, khi một khách hàng hủy đăng ký, các hợp đồng hỗ trợ
 
 Background synchronization eventual consistency pattern không phù hợp với các architecture phân tán đòi hỏi bounded context chặt chẽ (như microservices) nơi coupling giữa quyền sở hữu dữ liệu và chức năng là một phần then chốt của architecture. Những tình huống mà pattern này hữu ích là các hệ thống không đồng nhất khép kín (self-contained) không giao tiếp với nhau hay dùng chung dữ liệu.
 
-Ví dụ, hãy xét một hệ thống nhập đơn hàng của nhà thầu chấp nhận đơn đặt vật liệu xây dựng, và một hệ thống riêng biệt khác (được hiện thực trên một nền tảng khác) thực hiện lập hóa đơn cho nhà thầu. Một khi nhà thầu đặt vật tư, một tiến trình đồng bộ nền chuyển các đơn hàng đó sang hệ thống lập hóa đơn để tạo hóa đơn. Khi nhà thầu thay đổi hoặc hủy một đơn hàng, tiến trình đồng bộ nền chuyển những thay đổi đó sang hệ thống lập hóa đơn để cập nhật hóa đơn. Đây là một ví dụ tốt về các hệ thống trở nên *nhất quán cuối cùng* (eventually consistent), với đơn hàng của nhà thầu luôn đồng bộ giữa hai hệ thống.
+Ví dụ, hãy xét một hệ thống nhập đơn hàng của nhà thầu chấp nhận đơn đặt vật liệu xây dựng, và một hệ thống riêng biệt khác (được triển khai trên một nền tảng khác) thực hiện lập hóa đơn cho nhà thầu. Một khi nhà thầu đặt vật tư, một tiến trình đồng bộ nền chuyển các đơn hàng đó sang hệ thống lập hóa đơn để tạo hóa đơn. Khi nhà thầu thay đổi hoặc hủy một đơn hàng, tiến trình đồng bộ nền chuyển những thay đổi đó sang hệ thống lập hóa đơn để cập nhật hóa đơn. Đây là một ví dụ tốt về các hệ thống trở nên *nhất quán cuối cùng* (eventually consistent), với đơn hàng của nhà thầu luôn đồng bộ giữa hai hệ thống.
 
 [Bảng 9-5](#table-ec-background-trade-offs) tóm tắt các trade-offs của background synchronization pattern cho eventual consistency.<a id="idm45798377920616"></a><a id="idm45798377919944"></a><a id="idm45798377919272"></a>
 
@@ -427,7 +427,7 @@ Ví dụ, hãy xét một hệ thống nhập đơn hàng của nhà thầu ch�
 > | Ưu điểm | Nhược điểm |
 > |---|---|
 > | Các service được decouple | Coupling giữa các nguồn dữ liệu |
-> | Khả năng phản hồi tốt | Hiện thực phức tạp |
+> | Khả năng phản hồi tốt | Bản triển khai phức tạp |
 > |  | Phá vỡ bounded context |
 > |  | Business logic có thể bị trùng lặp |
 > |  | Eventual consistency chậm |
@@ -436,11 +436,11 @@ Ví dụ, hãy xét một hệ thống nhập đơn hàng của nhà thầu ch�
 
 ### Pattern dựa trên request có orchestration (Orchestrated Request-Based Pattern)
 
-Một cách tiếp cận phổ biến để quản lý transaction phân tán là bảo đảm<a id="ch09-orch"></a><a id="ch09-orch2"></a><a id="ch09-orch3"></a><a id="ch09-orch4"></a> mọi nguồn dữ liệu được đồng bộ trong quá trình request nghiệp vụ (nói cách khác, trong khi người dùng cuối đang chờ). Cách tiếp cận này được hiện thực thông qua cái được gọi là *orchestrated request-based pattern*.
+Một cách tiếp cận phổ biến để quản lý transaction phân tán là bảo đảm<a id="ch09-orch"></a><a id="ch09-orch2"></a><a id="ch09-orch3"></a><a id="ch09-orch4"></a> mọi nguồn dữ liệu được đồng bộ trong quá trình request nghiệp vụ (nói cách khác, trong khi người dùng cuối đang chờ). Cách tiếp cận này được triển khai thông qua cái được gọi là *orchestrated request-based pattern*.
 
 Khác với background synchronization pattern trước đó hay event-based pattern được mô tả trong phần tiếp theo, orchestrated request-based pattern cố gắng xử lý toàn bộ transaction phân tán *trong quá trình request nghiệp vụ*, và do đó đòi hỏi một loại orchestrator nào đó để quản lý transaction phân tán. Orchestrator, có thể là một service hiện có được chỉ định hoặc một service riêng biệt mới, chịu trách nhiệm quản lý mọi công việc cần thiết để xử lý request, bao gồm kiến thức về quy trình nghiệp vụ, kiến thức về các bên tham gia, logic multicast, xử lý lỗi và quyền sở hữu contract.
 
-Một cách để hiện thực pattern này là chỉ định một trong các service chính (giả sử có một service như vậy) để quản lý transaction phân tán. Kỹ thuật này, minh họa trong [Hình 9-17](#fig-data-access-and-update-base-choreographed-request), chỉ định một trong các service đảm nhận vai trò orchestrator bên cạnh các trách nhiệm khác của nó, trong trường hợp này là Customer Profile Service.
+Một cách để triển khai pattern này là chỉ định một trong các service chính (giả sử có một service như vậy) để quản lý transaction phân tán. Kỹ thuật này, minh họa trong [Hình 9-17](#fig-data-access-and-update-base-choreographed-request), chỉ định một trong các service đảm nhận vai trò orchestrator bên cạnh các trách nhiệm khác của nó, trong trường hợp này là Customer Profile Service.
 
 <a id="fig-data-access-and-update-base-choreographed-request"></a>
 
@@ -513,7 +513,7 @@ Thời gian eventual consistency thường ngắn để đạt được tính nh
 
 *Hình 9-20. Pattern event-based dùng messaging publish-and-subscribe bất đồng bộ hoặc event stream để đạt được eventual consistency*
 
-Với các cách hiện thực dùng messaging publish-and-subscribe topic-based (dựa trên topic)<a id="idm45798377832616"></a><a id="idm45798377831336"></a><a id="idm45798377830376"></a><a id="idm45798377829144"></a><a id="idm45798377827896"></a> tiêu chuẩn (như ActiveMQ, RabbitMQ, AmazonMQ, v.v.), các service phản hồi sự kiện phải được thiết lập là *durable subscriber* để bảo đảm không message nào bị mất nếu message broker hoặc service nhận message gặp lỗi. Một durable subscriber có khái niệm tương tự persistent queue ở chỗ subscriber (trong trường hợp này là Support Contract Service và Billing Payment Service) không cần phải khả dụng tại thời điểm message được publish, và các subscriber được bảo đảm sẽ nhận được message một khi chúng khả dụng. Trong trường hợp các cách hiện thực event streaming, message broker (như Apache Kafka) phải luôn lưu bền vững message và bảo đảm nó có sẵn trong topic trong một khoảng thời gian hợp lý.
+Với các cách triển khai dùng messaging publish-and-subscribe topic-based (dựa trên topic)<a id="idm45798377832616"></a><a id="idm45798377831336"></a><a id="idm45798377830376"></a><a id="idm45798377829144"></a><a id="idm45798377827896"></a> tiêu chuẩn (như ActiveMQ, RabbitMQ, AmazonMQ, v.v.), các service phản hồi sự kiện phải được thiết lập là *durable subscriber* để bảo đảm không message nào bị mất nếu message broker hoặc service nhận message gặp lỗi. Một durable subscriber có khái niệm tương tự persistent queue ở chỗ subscriber (trong trường hợp này là Support Contract Service và Billing Payment Service) không cần phải khả dụng tại thời điểm message được publish, và các subscriber được bảo đảm sẽ nhận được message một khi chúng khả dụng. Trong trường hợp các cách triển khai event streaming, message broker (như Apache Kafka) phải luôn lưu bền vững message và bảo đảm nó có sẵn trong topic trong một khoảng thời gian hợp lý.
 
 Lợi thế của event-based pattern là khả năng phản hồi, tính nhất quán dữ liệu kịp thời, và việc decouple các service. Tuy nhiên, tương tự mọi eventual consistency pattern, trade-off chính của pattern này là xử lý lỗi. Nếu một trong các service (ví dụ, Billing Payment Service minh họa trong [Hình 9-20](#fig-data-access-and-update-base-event)) không khả dụng, việc nó là một durable subscriber nghĩa là *cuối cùng* nó sẽ nhận và xử lý sự kiện khi nó khả dụng. Tuy nhiên, nếu service đang xử lý sự kiện và gặp lỗi, mọi thứ nhanh chóng trở nên phức tạp.
 

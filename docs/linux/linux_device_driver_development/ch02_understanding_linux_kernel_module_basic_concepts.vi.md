@@ -109,11 +109,7 @@ MODULE_AUTHOR("John Madieu <john.madieu@foobar.com>");
 MODULE_AUTHOR("Lorem Ipsum <l.ipsum@foobar.com>");
 ```
 
-- `MODULE_DESCRIPTION()` mô tả ngắn module làm gì: `MODULE_DESCRIPTION("Hello, world!`
-
-```
-Module").
-```
+- `MODULE_DESCRIPTION()` mô tả ngắn module làm gì: `MODULE_DESCRIPTION("Hello, world!` `Module")`.
 
 Có thể dump nội dung section `.modeinfo` của kernel module bằng lệnh `objdump -d -j` `.modinfo` trên module đó. Với module cross-compiled, nên dùng `$(CORSS_COMPILE)objdump` thay thế.
 
@@ -389,11 +385,11 @@ Macro gồm các phần:
 
 - `perm`: File permission của `/sys/module/<module>/parameters/<param>`. Một số là `S_IWUSR`, `S_IRUSR`, `S_IXUSR`, `S_IRGRP`, `S_WGRP`, `S_IRUGO`, với:
 
-- `S_I` chỉ prefix.
+  - `S_I` chỉ prefix.
 
-- `R` = read, `W` = write, `X` = execute.
+  - `R` = read, `W` = write, `X` = execute.
 
-- `USR` = user, `GRP` = group, `UGO` = user, group, others.
+  - `USR` = user, `GRP` = group, `UGO` = user, group, others.
 
 Có thể dùng `|` (phép `OR`) đặt nhiều permission. Nếu `perm` bằng `0`, không tạo parameter file trong Sysfs. Chỉ nên dùng read-only parameter `S_IRUGO`, tôi rất khuyến nghị; OR với property khác cho property fine-grained hơn.
 

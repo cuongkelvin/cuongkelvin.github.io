@@ -24,7 +24,7 @@ Tuy nhiên, hãy nhớ lại từ [Chương 2](ch02_discerning_coupling_in_softw
 
 ## Các transactional saga pattern (Transactional Saga Patterns)
 
-Trong [Chương 2](ch02_discerning_coupling_in_software_architecture.vi.md#ch02-discerning), chúng tôi đã giới thiệu một ma trận đặt cạnh nhau từng<a id="idm45798377148680"></a><a id="idm45798377147496"></a><a id="idm45798377146536"></a><a id="idm45798377145592"></a><a id="idm45798377144360"></a><a id="idm45798377143400"></a><a id="idm45798377142440"></a><a id="idm45798377141224"></a><a id="idm45798377140264"></a> chiều giao nhau khi kiến trúc sư phải chọn cách hiện thực một transactional saga, được tái hiện trong [Bảng 12-1](#tbl-sagas-matrix).
+Trong [Chương 2](ch02_discerning_coupling_in_software_architecture.vi.md#ch02-discerning), chúng tôi đã giới thiệu một ma trận đặt cạnh nhau từng<a id="idm45798377148680"></a><a id="idm45798377147496"></a><a id="idm45798377146536"></a><a id="idm45798377145592"></a><a id="idm45798377144360"></a><a id="idm45798377143400"></a><a id="idm45798377142440"></a><a id="idm45798377141224"></a><a id="idm45798377140264"></a> chiều giao nhau khi kiến trúc sư phải chọn cách triển khai một transactional saga, được tái hiện trong [Bảng 12-1](#tbl-sagas-matrix).
 
 <a id="tbl-sagas-matrix"></a>
 
@@ -81,7 +81,7 @@ Biểu diễn đẳng cấu của Epic Saga<sup>(sao)</sup> pattern xuất hiệ
 
 Nhiều kiến trúc sư non nớt hoặc ngây thơ tin rằng, vì có một pattern cho một vấn đề, nó đại diện cho một giải pháp sạch sẽ. Tuy nhiên, pattern chỉ là sự công nhận tính phổ biến, không phải khả năng giải quyết được. <a id="idm45798377074472"></a><a id="idm45798377073480"></a>Transaction phân tán là một ví dụ tuyệt vời cho hiện tượng này—kiến trúc sư quen mô hình hóa transaction trong các hệ thống không phân tán đôi khi tin rằng chuyển năng lực đó sang thế giới phân tán là một thay đổi nhỏ. Tuy nhiên, transaction trong architecture phân tán đặt ra một số thách thức, những thách thức này trở nên tệ hơn theo tỉ lệ tùy thuộc vào độ phức tạp của semantic coupling của vấn đề.
 
-Hãy xét một cách hiện thực phổ biến của Epic Saga<sup>(sao)</sup> pattern, dùng compensating transaction.<a id="idm45798377070744"></a><a id="idm45798377069752"></a><a id="idm45798377068984"></a> Một *compensating update* (cập nhật bù trừ) là một cập nhật đảo ngược một hành động ghi dữ liệu do một service khác thực hiện (như đảo ngược một cập nhật, chèn lại một hàng đã bị xóa trước đó, hoặc xóa một hàng đã được chèn trước đó) trong phạm vi transaction phân tán. Dù compensating update cố gắng đảo ngược các thay đổi để đưa các nguồn dữ liệu phân tán về trạng thái ban đầu trước khi transaction phân tán bắt đầu, chúng đầy rẫy những vấn đề, thách thức và trade-offs phức tạp.
+Hãy xét một cách triển khai phổ biến của Epic Saga<sup>(sao)</sup> pattern, dùng compensating transaction.<a id="idm45798377070744"></a><a id="idm45798377069752"></a><a id="idm45798377068984"></a> Một *compensating update* (cập nhật bù trừ) là một cập nhật đảo ngược một hành động ghi dữ liệu do một service khác thực hiện (như đảo ngược một cập nhật, chèn lại một hàng đã bị xóa trước đó, hoặc xóa một hàng đã được chèn trước đó) trong phạm vi transaction phân tán. Dù compensating update cố gắng đảo ngược các thay đổi để đưa các nguồn dữ liệu phân tán về trạng thái ban đầu trước khi transaction phân tán bắt đầu, chúng đầy rẫy những vấn đề, thách thức và trade-offs phức tạp.
 
 Một compensating transaction pattern giao cho một service giám sát tính hoàn chỉnh transaction của một request, như thể hiện trong [Hình 12-4](#fig-discerning-comp-trans-success).
 
@@ -103,7 +103,7 @@ Một mediator vừa chấp nhận request vừa điều phối workflow, và c�
 
 Pattern này được dùng rộng rãi: nó mô hình hóa hành vi quen thuộc, và nó có một tên pattern well-established (đã vững vàng). Nhiều kiến trúc sư mặc định chọn Epic Saga<sup>(sao)</sup> pattern vì nó có cảm giác quen thuộc với monolithic architecture, kết hợp với yêu cầu (đôi khi là đòi hỏi) từ các stakeholder rằng các thay đổi trạng thái phải được đồng bộ, bất kể các ràng buộc kỹ thuật. Tuy nhiên, nhiều dynamic quantum coupling pattern khác có thể mang lại một tập trade-offs tốt hơn.
 
-Lợi thế rõ ràng của Epic Saga<sup>(sao)</sup> là sự phối hợp transaction bắt chước các hệ thống monolith, kết hợp với chủ sở hữu workflow rõ ràng được đại diện bởi orchestrator. Tuy nhiên, các nhược điểm thì đa dạng. Thứ nhất, orchestration cộng với tính transaction có thể tác động đến các architecture characteristic vận hành như performance, scale, elasticity, v.v.—orchestrator phải bảo đảm rằng mọi bên tham gia transaction đều đã thành công hoặc thất bại, tạo ra các nút thắt cổ chai về thời gian. Thứ hai, các pattern khác nhau được dùng để hiện thực tính transaction phân tán (như compensating transaction) dễ gặp nhiều kiểu thất bại và điều kiện biên, cùng với việc thêm độ phức tạp vốn có thông qua các thao tác hoàn tác. Transaction phân tán đặt ra hàng loạt khó khăn và do đó tốt nhất nên tránh nếu có thể.
+Lợi thế rõ ràng của Epic Saga<sup>(sao)</sup> là sự phối hợp transaction bắt chước các hệ thống monolith, kết hợp với chủ sở hữu workflow rõ ràng được đại diện bởi orchestrator. Tuy nhiên, các nhược điểm thì đa dạng. Thứ nhất, orchestration cộng với tính transaction có thể tác động đến các architecture characteristic vận hành như performance, scale, elasticity, v.v.—orchestrator phải bảo đảm rằng mọi bên tham gia transaction đều đã thành công hoặc thất bại, tạo ra các nút thắt cổ chai về thời gian. Thứ hai, các pattern khác nhau được dùng để triển khai tính transaction phân tán (như compensating transaction) dễ gặp nhiều kiểu thất bại và điều kiện biên, cùng với việc thêm độ phức tạp vốn có thông qua các thao tác hoàn tác. Transaction phân tán đặt ra hàng loạt khó khăn và do đó tốt nhất nên tránh nếu có thể.
 
 Epic Saga<sup>(sao)</sup> pattern có các đặc điểm sau:
 
@@ -121,7 +121,7 @@ Orchestration tạo ra một nút thắt cổ chai, đặc biệt khi nó cũng 
 
 **Scale/elasticity**
 
-Tương tự *khả năng phản hồi*, nút thắt cổ chai và sự phối hợp cần thiết để hiện thực pattern này khiến scale và các mối quan tâm vận hành khác trở nên khó khăn.
+Tương tự *khả năng phản hồi*, nút thắt cổ chai và sự phối hợp cần thiết để triển khai pattern này khiến scale và các mối quan tâm vận hành khác trở nên khó khăn.
 
 Dù Epic Saga<sup>(sao)</sup> phổ biến vì sự quen thuộc, nó tạo ra một số thách thức, cả từ góc độ thiết kế lẫn đặc điểm vận hành, như thể hiện trong [Bảng 12-2](#fig-discerning-aq-epic-saga-stars).
 
@@ -293,7 +293,7 @@ Topology cấu trúc minh họa việc không có orchestration, thể hiện tr
 
 *Hình 12-11. Các workflow phức tạp trở nên khó quản lý khi không có orchestration*
 
-Trong workflow này, mỗi service chấp nhận một request, thực hiện một hành động, rồi chuyển tiếp request tới service khác. <a id="idm45798376891176"></a><a id="idm45798376890200"></a><a id="idm45798376889560"></a><a id="idm45798376888616"></a>Architecture này có thể hiện thực design pattern *Chain of Responsibility* hoặc architecture style *Pipes and Filters*—bất kỳ workflow nào có một chuỗi bước one-way (một chiều). Mỗi service trong pattern này “sở hữu” tính transaction riêng của nó, nên kiến trúc sư phải thiết kế các điều kiện lỗi của workflow vào thiết kế domain. Nhìn chung, tồn tại một quan hệ tỉ lệ về độ phức tạp giữa độ phức tạp workflow và các giải pháp choreographed vì thiếu sự phối hợp built-in thông qua một mediator—workflow càng phức tạp, choreography càng trở nên khó khăn. Nó được gọi là Time Travel Saga<sup>(sec)</sup> vì mọi thứ đều decoupled từ góc độ thời gian: mỗi service sở hữu bối cảnh transaction riêng của nó, khiến tính nhất quán workflow diễn ra dần dần theo thời gian—trạng thái sẽ trở nên nhất quán theo thời gian dựa trên thiết kế của tương tác.
+Trong workflow này, mỗi service chấp nhận một request, thực hiện một hành động, rồi chuyển tiếp request tới service khác. <a id="idm45798376891176"></a><a id="idm45798376890200"></a><a id="idm45798376889560"></a><a id="idm45798376888616"></a>Architecture này có thể triển khai design pattern *Chain of Responsibility* hoặc architecture style *Pipes and Filters*—bất kỳ workflow nào có một chuỗi bước one-way (một chiều). Mỗi service trong pattern này “sở hữu” tính transaction riêng của nó, nên kiến trúc sư phải thiết kế các điều kiện lỗi của workflow vào thiết kế domain. Nhìn chung, tồn tại một quan hệ tỉ lệ về độ phức tạp giữa độ phức tạp workflow và các giải pháp choreographed vì thiếu sự phối hợp built-in thông qua một mediator—workflow càng phức tạp, choreography càng trở nên khó khăn. Nó được gọi là Time Travel Saga<sup>(sec)</sup> vì mọi thứ đều decoupled từ góc độ thời gian: mỗi service sở hữu bối cảnh transaction riêng của nó, khiến tính nhất quán workflow diễn ra dần dần theo thời gian—trạng thái sẽ trở nên nhất quán theo thời gian dựa trên thiết kế của tương tác.
 
 Việc không có transaction trong Time Travel Saga<sup>(sec)</sup> pattern khiến workflow dễ mô hình hóa hơn; tuy nhiên, việc không có orchestrator nghĩa là mỗi domain service phải bao gồm phần lớn trạng thái và thông tin workflow. Như trong mọi giải pháp choreographed, tồn tại một tương quan trực tiếp giữa độ phức tạp workflow và tính hữu dụng của một orchestrator; do đó, pattern này phù hợp nhất cho các workflow đơn giản.
 
@@ -335,7 +335,7 @@ Xếp hạng cho Time Travel Saga<sup>(sec)</sup> pattern xuất hiện trong [B
 | Khả năng phản hồi/availability | Trung bình |
 | Scale/elasticity | Cao |
 
-Time Travel Saga<sup>(sec)</sup> pattern mang lại một on-ramp (lối vào) tới Anthology Saga<sup>(aec)</sup> pattern phức tạp hơn nhưng rốt cuộc scalable hơn. Kiến trúc sư và developer thấy việc xử lý giao tiếp đồng bộ dễ lập luận, hiện thực và debug hơn; nếu pattern này mang lại đủ scalability, các team không phải áp dụng các lựa chọn thay thế phức tạp hơn nhưng scalable hơn.<a id="idm45798376853384"></a><a id="idm45798376852680"></a><a id="idm45798376852008"></a>
+Time Travel Saga<sup>(sec)</sup> pattern mang lại một on-ramp (lối vào) tới Anthology Saga<sup>(aec)</sup> pattern phức tạp hơn nhưng rốt cuộc scalable hơn. Kiến trúc sư và developer thấy việc xử lý giao tiếp đồng bộ dễ lập luận, triển khai và debug hơn; nếu pattern này mang lại đủ scalability, các team không phải áp dụng các lựa chọn thay thế phức tạp hơn nhưng scalable hơn.<a id="idm45798376853384"></a><a id="idm45798376852680"></a><a id="idm45798376852008"></a>
 
 <a id="sec-fantasy-fiction-saga"></a>
 
@@ -465,7 +465,7 @@ Horror Story<sup>(aac)</sup> pattern được đặt tên rất xác đáng này
 
 ### Parallel Saga<sup>(aeo)</sup> Pattern
 
-Pattern *Parallel Saga<sup>(aeo)</sup>* được đặt tên theo<a id="ch12-para"></a><a id="ch12-para2"></a><a id="ch12-para3"></a> Epic Saga<sup>(sao)</sup> pattern “truyền thống” với hai khác biệt then chốt giúp nới lỏng các ràng buộc và do đó khiến nó trở thành một pattern dễ hiện thực hơn: giao tiếp bất đồng bộ và eventual consistency. Sơ đồ chiều của Parallel Saga<sup>(aeo)</sup> pattern xuất hiện trong [Hình 12-16](#fig-discerning-aq-parallel-saga).
+Pattern *Parallel Saga<sup>(aeo)</sup>* được đặt tên theo<a id="ch12-para"></a><a id="ch12-para2"></a><a id="ch12-para3"></a> Epic Saga<sup>(sao)</sup> pattern “truyền thống” với hai khác biệt then chốt giúp nới lỏng các ràng buộc và do đó khiến nó trở thành một pattern dễ triển khai hơn: giao tiếp bất đồng bộ và eventual consistency. Sơ đồ chiều của Parallel Saga<sup>(aeo)</sup> pattern xuất hiện trong [Hình 12-16](#fig-discerning-aq-parallel-saga).
 
 <a id="fig-discerning-aq-parallel-saga"></a>
 
@@ -589,13 +589,13 @@ Bảng xếp hạng cho Anthology Saga<sup>(aec)</sup> pattern xuất hiện tro
 
 Anthology Saga<sup>(aec)</sup> pattern rất phù hợp với giao tiếp throughput cực kỳ cao với các điều kiện lỗi đơn giản hoặc hiếm khi xảy ra. <a id="idm45798376647688"></a><a id="idm45798376646712"></a>Ví dụ, một architecture *Pipes and Filters* sẽ khớp chính xác với pattern này.<a id="idm45798376645464"></a><a id="idm45798376644760"></a><a id="idm45798376644088"></a>
 
-Kiến trúc sư có thể hiện thực các pattern được mô tả trong phần này theo nhiều cách khác nhau. Ví dụ, kiến trúc sư có thể quản lý transactional saga thông qua atomic transaction bằng cách dùng compensating update hoặc bằng cách quản lý trạng thái transaction với eventual consistency. Phần này đã trình bày ưu và nhược điểm của từng cách tiếp cận, điều sẽ giúp kiến trúc sư quyết định nên dùng transactional saga pattern nào.
+Kiến trúc sư có thể triển khai các pattern được mô tả trong phần này theo nhiều cách khác nhau. Ví dụ, kiến trúc sư có thể quản lý transactional saga thông qua atomic transaction bằng cách dùng compensating update hoặc bằng cách quản lý trạng thái transaction với eventual consistency. Phần này đã trình bày ưu và nhược điểm của từng cách tiếp cận, điều sẽ giúp kiến trúc sư quyết định nên dùng transactional saga pattern nào.
 
 <a id="idm45798377151240"></a>
 
 ## Quản lý trạng thái và eventual consistency (State Management and Eventual Consistency)
 
-Quản lý trạng thái và eventual consistency tận dụng *finite state machine* (máy trạng thái hữu hạn) (xem [“Saga State Machines”](#sec-state-machines)) <a id="idm45798376639896"></a><a id="idm45798376638952"></a><a id="idm45798376638040"></a><a id="idm45798376636808"></a><a id="idm45798376635848"></a>để luôn biết trạng thái hiện tại của transactional saga, và cũng để cuối cùng sửa điều kiện lỗi thông qua thử lại hoặc một loại hành động khắc phục tự động hoặc thủ công nào đó. Để minh họa cách tiếp cận này, hãy xét cách hiện thực Fairy Tale Saga<sup>(seo)</sup> cho ví dụ hoàn tất ticket minh họa trong [Hình 12-20](#fig-managing-workflows-saga-state-mgmt).
+Quản lý trạng thái và eventual consistency tận dụng *finite state machine* (máy trạng thái hữu hạn) (xem [“Saga State Machines”](#sec-state-machines)) <a id="idm45798376639896"></a><a id="idm45798376638952"></a><a id="idm45798376638040"></a><a id="idm45798376636808"></a><a id="idm45798376635848"></a>để luôn biết trạng thái hiện tại của transactional saga, và cũng để cuối cùng sửa điều kiện lỗi thông qua thử lại hoặc một loại hành động khắc phục tự động hoặc thủ công nào đó. Để minh họa cách tiếp cận này, hãy xét cách triển khai Fairy Tale Saga<sup>(seo)</sup> cho ví dụ hoàn tất ticket minh họa trong [Hình 12-20](#fig-managing-workflows-saga-state-mgmt).
 
 <a id="fig-managing-workflows-saga-state-mgmt"></a>
 
@@ -660,7 +660,7 @@ Hai trạng thái khả dĩ một khi chuyên gia hoàn tất ticket là CLOSED 
 
 Ở trạng thái điều kiện lỗi này, hệ thống tiếp tục thử gửi khảo sát tới khách hàng. Một khi gửi thành công, trạng thái chuyển sang CLOSED, đánh dấu kết thúc transactional saga. Đây là kết quả khả dĩ duy nhất của state transaction này.
 
-Trong nhiều trường hợp, sẽ hữu ích khi đặt danh sách mọi phép chuyển trạng thái khả dĩ và hành động chuyển tiếp tương ứng vào một loại bảng nào đó. Developer sau đó có thể dùng bảng này để hiện thực các trigger chuyển trạng thái và các điều kiện lỗi khả dĩ trong một orchestration service (hoặc các service tương ứng nếu dùng choreography). Một ví dụ về thực hành này được thể hiện trong [Bảng 12-10](#table-saga-new-ticket), liệt kê mọi trạng thái và hành động khả dĩ được kích hoạt khi phép chuyển trạng thái xảy ra.
+Trong nhiều trường hợp, sẽ hữu ích khi đặt danh sách mọi phép chuyển trạng thái khả dĩ và hành động chuyển tiếp tương ứng vào một loại bảng nào đó. Developer sau đó có thể dùng bảng này để triển khai các trigger chuyển trạng thái và các điều kiện lỗi khả dĩ trong một orchestration service (hoặc các service tương ứng nếu dùng choreography). Một ví dụ về thực hành này được thể hiện trong [Bảng 12-10](#table-saga-new-ticket), liệt kê mọi trạng thái và hành động khả dĩ được kích hoạt khi phép chuyển trạng thái xảy ra.
 
 <a id="table-saga-new-ticket"></a>
 
@@ -701,7 +701,7 @@ Transaction phân tán không phải là thứ có thể đơn giản “thả v
 
 Một trong những kỹ thuật chúng tôi thích dùng để giúp quản lý transaction phân tán<a id="idm45798376541896"></a><a id="idm45798376541224"></a><a id="idm45798376540264"></a><a id="idm45798376539560"></a> là tận dụng annotation (Java) hoặc custom attribute (C#), hoặc các artifact tương tự khác trong các ngôn ngữ khác. Dù bản thân những artifact ngôn ngữ này không chứa chức năng thực tế nào, chúng cung cấp một cách theo chương trình để nắm bắt và ghi tài liệu các transactional saga trong hệ thống, cũng như cung cấp một phương tiện để gắn các service với các transactional saga.
 
-Các đoạn source trong [Ví dụ 12-1](#source-saga-java) (Java) và [Ví dụ 12-2](#source-saga-csharp) (C#) thể hiện một ví dụ hiện thực các annotation và custom attribute này. Hãy để ý rằng trong cả hai cách hiện thực, các transactional saga (`NEW_TICKET`, `CANCEL_TICKET`, v.v.) được chứa trong enum `Transaction`, cung cấp một nơi duy nhất trong source code để liệt kê và ghi tài liệu các saga khác nhau tồn tại trong một bối cảnh ứng dụng.
+Các đoạn source trong [Ví dụ 12-1](#source-saga-java) (Java) và [Ví dụ 12-2](#source-saga-csharp) (C#) thể hiện một ví dụ triển khai các annotation và custom attribute này. Hãy để ý rằng trong cả hai cách triển khai, các transactional saga (`NEW_TICKET`, `CANCEL_TICKET`, v.v.) được chứa trong enum `Transaction`, cung cấp một nơi duy nhất trong source code để liệt kê và ghi tài liệu các saga khác nhau tồn tại trong một bối cảnh ứng dụng.
 
 <a id="source-saga-java"></a>
 

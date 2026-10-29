@@ -81,7 +81,7 @@ port (  a_data    : in     std_logic_vector(0 to 7);
 end mux4;
 ```
 
-Kiểu dữ liệu std_logic và kiểu dữ liệu std_logic_vector là những gì IEEE đã chuẩn hóa để biểu diễn các signal số. Thông thường, bạn nên coi các kiểu dữ liệu này nhận giá trị logic 1 hoặc giá trị logic 0. Tuy nhiên, như được quy định trong package std_logic_1164, bản hiện thực của kiểu std_logic (và kiểu std_logic_vector) rộng rãi hơn một chút và gồm 9 giá trị khác nhau, cụ thể là: 0,1,U,X,Z,W,L,H,-.
+Kiểu dữ liệu std_logic và kiểu dữ liệu std_logic_vector là những gì IEEE đã chuẩn hóa để biểu diễn các signal số. Thông thường, bạn nên coi các kiểu dữ liệu này nhận giá trị logic 1 hoặc giá trị logic 0. Tuy nhiên, như được quy định trong package std_logic_1164, bản triển khai của kiểu std_logic (và kiểu std_logic_vector) rộng rãi hơn một chút và gồm 9 giá trị khác nhau, cụ thể là: 0,1,U,X,Z,W,L,H,-.
 
 Kiểu dữ liệu std_logic trở nên dùng được ngay sau phần khai báo library IEEE; use IEEE.std_logic_1164.all; ở đầu code của bạn.
 
@@ -91,7 +91,7 @@ Thay cho kiểu dữ liệu std_logic, người lập trình VHDL đôi khi dùn
 
 ## 3.2 Các library chuẩn của VHDL
 
-Ngôn ngữ VHDL, cũng như nhiều ngôn ngữ máy tính khác, đã trải qua một quá trình phát triển dài và mạnh mẽ. Trong số những bước chuẩn hóa quan trọng nhất, có thể kể đến việc phát hành package IEEE Standard 1164 cũng như một số chuẩn con giúp mở rộng thêm chức năng của ngôn ngữ. Để tận dụng tính năng hiện thực được chính của VHDL, bạn chỉ cần import hai package library chính như trong các dòng 2∼4 của Listing 3.4.
+Ngôn ngữ VHDL, cũng như nhiều ngôn ngữ máy tính khác, đã trải qua một quá trình phát triển dài và mạnh mẽ. Trong số những bước chuẩn hóa quan trọng nhất, có thể kể đến việc phát hành package IEEE Standard 1164 cũng như một số chuẩn con giúp mở rộng thêm chức năng của ngôn ngữ. Để tận dụng tính năng triển khai được chính của VHDL, bạn chỉ cần import hai package library chính như trong các dòng 2∼4 của Listing 3.4.
 
 Listing 3.4: Cách đưa vào các library chuẩn IEEE điển hình.
 
@@ -137,9 +137,9 @@ Khi đã đưa các package này vào, bạn sẽ có quyền dùng một tập 
 
 ## 3.3 Architecture
 
-Entity declaration của VHDL, đã được giới thiệu ở trên, mô tả interface hay biểu diễn bên ngoài của mạch. Architecture mô tả mạch thực sự làm gì. Nói cách khác, architecture của VHDL mô tả bản hiện thực bên trong của entity đi kèm. Như bạn có thể hình dung, mô tả interface bên ngoài của một mạch nói chung dễ hơn nhiều so với mô tả mạch được dự định hoạt động như thế nào. Nhận định này càng trở nên quan trọng hơn khi các mạch bạn mô tả càng phức tạp.
+Entity declaration của VHDL, đã được giới thiệu ở trên, mô tả interface hay biểu diễn bên ngoài của mạch. Architecture mô tả mạch thực sự làm gì. Nói cách khác, architecture của VHDL mô tả bản triển khai bên trong của entity đi kèm. Như bạn có thể hình dung, mô tả interface bên ngoài của một mạch nói chung dễ hơn nhiều so với mô tả mạch được dự định hoạt động như thế nào. Nhận định này càng trở nên quan trọng hơn khi các mạch bạn mô tả càng phức tạp.
 
-Có thể có bất kỳ số lượng architecture tương đương nào cùng mô tả một entity. Như rồi bạn sẽ phát hiện ra, coding style VHDL dùng bên trong phần thân architecture có ảnh hưởng đáng kể đến cách mạch được synthesize (cách mạch sẽ được hiện thực bên trong một thiết bị silicon thực tế). Điều này cho người lập trình VHDL sự linh hoạt trong việc thiết kế các hệ thống có những đặc điểm tích cực hay tiêu cực cụ thể, như kích thước vật lý nhất định (đo bằng số phần tử số cơ bản cần dùng) hay tốc độ hoạt động.
+Có thể có bất kỳ số lượng architecture tương đương nào cùng mô tả một entity. Như rồi bạn sẽ phát hiện ra, coding style VHDL dùng bên trong phần thân architecture có ảnh hưởng đáng kể đến cách mạch được synthesize (cách mạch sẽ được triển khai bên trong một thiết bị silicon thực tế). Điều này cho người lập trình VHDL sự linh hoạt trong việc thiết kế các hệ thống có những đặc điểm tích cực hay tiêu cực cụ thể, như kích thước vật lý nhất định (đo bằng số phần tử số cơ bản cần dùng) hay tốc độ hoạt động.
 
 Vì nhiều lý do khác nhau, chẳng hạn để tạo thuận lợi cho re-usability của code và khả năng kết nối, một architecture có thể được mô hình hóa theo nhiều cách khác nhau. Hiểu các kỹ thuật mô hình hóa khác nhau và hiểu cách dùng chúng là những bước quan trọng đầu tiên trong việc học VHDL.
 
@@ -183,7 +183,7 @@ Trước khi dùng bất kỳ signal hay variable nào, bắt buộc phải khai
 
 Như thấy ở dòng 19 và dòng 20 của Listing 3.5, khi bạn muốn gán một giá trị mới cho một object kiểu signal, bạn dùng operator “<=”. Ngược lại, khi bạn muốn gán một giá trị mới cho một object kiểu variable, bạn sẽ dùng operator “:=”, như ở dòng 21.
 
-Điều quan trọng là phải hiểu sự khác biệt giữa variable và signal, cụ thể là khi nào giá trị của chúng thay đổi. Một variable thay đổi giá trị ngay sau khi variable assignment được thực thi. Còn một signal thay đổi giá trị “một lúc nào đó” sau khi biểu thức signal assignment được đánh giá. Điều này có những hệ quả quan trọng đối với các giá trị được cập nhật của variable và signal. Điều này có nghĩa là bạn không bao giờ nên giả định rằng một signal assignment có thể xảy ra tức thì, và nó cũng có nghĩa là bạn có thể tận dụng variable mỗi khi bạn cần hiện thực một counter hoặc lưu giá trị khi đang ở bên trong một process.
+Điều quan trọng là phải hiểu sự khác biệt giữa variable và signal, cụ thể là khi nào giá trị của chúng thay đổi. Một variable thay đổi giá trị ngay sau khi variable assignment được thực thi. Còn một signal thay đổi giá trị “một lúc nào đó” sau khi biểu thức signal assignment được đánh giá. Điều này có những hệ quả quan trọng đối với các giá trị được cập nhật của variable và signal. Điều này có nghĩa là bạn không bao giờ nên giả định rằng một signal assignment có thể xảy ra tức thì, và nó cũng có nghĩa là bạn có thể tận dụng variable mỗi khi bạn cần triển khai một counter hoặc lưu giá trị khi đang ở bên trong một process.
 
 Để có thể giới thiệu cách dùng variable, chúng ta đã phải dùng construct process, một construct mà bạn chưa quen. Chúng ta sẽ thấy chi tiết hơn ở phần sau của sách rằng bất cứ khi nào cần một môi trường thực thi non-concurrent, nơi các dòng code được thực thi lần lượt cái này sau cái kia (như trong C hay Java), chúng ta sẽ dùng construct process. Bên trong một process, mọi instruction được thực thi liên tiếp từ trên xuống dưới. Tuy nhiên, bản thân process sẽ được thực thi concurrent với phần còn lại của code (ví dụ instruction ở dòng 24).
 
@@ -201,7 +201,7 @@ Một lưu ý cuối cùng, xin nhắc lại rằng kiểu std_logic chỉ tồn
 
 • Nhiều signal có cùng mục đích nên được khai báo thành một bundle dùng kiểu std_logic_vector. Những signal được gộp thành bundle như vậy luôn dễ làm việc hơn trong VHDL so với các kiểu scalar như std_logic.
 
-• Architecture mô tả mạch của bạn thực sự làm gì và hành vi của nó là gì. Trong VHDL có thể có nhiều bản hiện thực (model) khác nhau cho cùng một hành vi. Đó là model data-flow, model behavioral, model structural cũng như bất kỳ tổ hợp nào của chúng, thường gọi là model hybrid.
+• Architecture mô tả mạch của bạn thực sự làm gì và hành vi của nó là gì. Trong VHDL có thể có nhiều bản triển khai (model) khác nhau cho cùng một hành vi. Đó là model data-flow, model behavioral, model structural cũng như bất kỳ tổ hợp nào của chúng, thường gọi là model hybrid.
 
 ## 3.6 Bài tập
 
@@ -217,7 +217,9 @@ a) b)
 
 ![p0038_3](images/ch03_vhdl_design_units/p0038_3.png)
 
-5. Hãy vẽ các sơ đồ black-box được định nghĩa bởi các entity declaration VHDL sau: a)
+5. Hãy vẽ các sơ đồ black-box được định nghĩa bởi các entity declaration VHDL sau:
+
+a)
 
 ```vhdl
 entity ckt_c is
@@ -241,7 +243,9 @@ port (
 end ckt_e;
 ```
 
-6. Hai entity declaration sau chứa hai trong số những lỗi cú pháp phổ biến nhất khi viết VHDL. Đó là những lỗi gì? a)
+6. Hai entity declaration sau chứa hai trong số những lỗi cú pháp phổ biến nhất khi viết VHDL. Đó là những lỗi gì?
+
+a)
 
 ```vhdl
 entity ckt_a is

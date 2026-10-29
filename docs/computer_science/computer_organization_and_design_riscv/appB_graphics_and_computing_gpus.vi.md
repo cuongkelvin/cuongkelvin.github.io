@@ -20,11 +20,11 @@ Phụ lục tập trung GPU—graphics processing unit phổ biến trong mọi 
 
 Processor tối ưu cho đồ họa 2D, 3D, video, visual computing và hiển thị.
 
-#### visual computing
+### visual computing
 
 Sự kết hợp xử lý đồ họa và tính toán cho phép tương tác trực quan với đối tượng tính toán qua đồ họa, hình ảnh, video.
 
-#### heterogeneous system
+### heterogeneous system
 
 Hệ kết hợp các loại processor khác nhau. PC là hệ CPU–GPU heterogeneous.
 
@@ -309,7 +309,7 @@ Khi gọi kernel, chỉ định số thread mỗi block, số block grid. Mỗi 
 
 **HÌNH B.3.4 Code tuần tự C (trên) so với song song CUDA (dưới) cho SAXPY (Chương 6). Thread CUDA thay loop C tuần tự—mỗi thread tính như một iteration. Code song song tính n kết quả với n thread theo block 256 thread.**
 
-Declaration specifier __global__ chỉ procedure là kernel entry point. Chương trình CUDA launch kernel bằng cú pháp gọi function mở rộng:
+Declaration specifier \_\_global\_\_ chỉ procedure là kernel entry point. Chương trình CUDA launch kernel bằng cú pháp gọi function mở rộng:
 
 ```
 kernel<<<dimGrid, dimBlock>>>(… parameter list …);
@@ -335,7 +335,7 @@ Vì thread trong block dùng chung memory, đồng bộ barrier, chúng cùng tr
 
 Chuỗi memory read, modify, write hoàn tất không có truy cập xen vào.
 
-Thread truy cập nhiều memory space khi chạy. Mỗi thread có local memory riêng; CUDA dùng cho biến thread-private không vừa register, stack frame, register spilling. Mỗi block có shared memory mọi thread block thấy, cùng lifetime block. Cuối cùng mọi thread truy cập cùng global memory. Biến shared/global khai báo bằng qualifier __shared__, __device__. GPU Tesla ánh xạ chúng tới memory vật lý riêng: shared memory per-block là RAM low-latency on-chip, global memory nằm DRAM nhanh trên card.
+Thread truy cập nhiều memory space khi chạy. Mỗi thread có local memory riêng; CUDA dùng cho biến thread-private không vừa register, stack frame, register spilling. Mỗi block có shared memory mọi thread block thấy, cùng lifetime block. Cuối cùng mọi thread truy cập cùng global memory. Biến shared/global khai báo bằng qualifier \_\_shared\_\_, \_\_device\_\_. GPU Tesla ánh xạ chúng tới memory vật lý riêng: shared memory per-block là RAM low-latency on-chip, global memory nằm DRAM nhanh trên card.
 
 #### local memory
 
@@ -427,7 +427,7 @@ Multiprocessor thống nhất chạy vertex, geometry, pixel fragment shader và
 
 **HÌNH B.4.1 Multiprocessor multithreaded tám scalar processor (SP) core. Mỗi SP có RF multithreaded lớn, chia instruction cache, instruction issue unit multithreaded, constant cache, hai SFU, interconnection network, shared memory nhiều bank.**
 
-Shared memory 16 KB giữ buffer đồ họa, dữ liệu tính toán chung. Biến CUDA __shared__ nằm đó. Để ánh xạ workload pipeline qua multiprocessor nhiều lần như Mục B.2, thread vertex/geometry/pixel có buffer input/output riêng, workload tới, đi độc lập thực thi thread.
+Shared memory 16 KB giữ buffer đồ họa, dữ liệu tính toán chung. Biến CUDA \_\_shared\_\_ nằm đó. Để ánh xạ workload pipeline qua multiprocessor nhiều lần như Mục B.2, thread vertex/geometry/pixel có buffer input/output riêng, workload tới, đi độc lập thực thi thread.
 
 Mỗi SP có unit số học integer, floating-point scalar chạy phần lớn instruction. SP hardware multithreaded tối đa 64 thread. Mỗi SP pipeline thực thi một scalar instruction mỗi thread mỗi clock, từ 1.2 đến 1.6 GHz theo sản phẩm. RF mỗi SP có 1024 register general-purpose 32-bit, chia cho thread. Chương trình khai nhu cầu thường 16 đến 64 register scalar 32-bit/thread. SP chạy đồng thời nhiều thread ít register hoặc ít thread nhiều register. Compiler cân chi phí spilling và ít thread. Pixel shader thường ≤16 register, cho tối đa 64 thread che texture fetch long-latency. CUDA biên dịch thường cần 32 register/thread, giới hạn SP 32 thread, kernel tối đa 256 thread/block ở multiprocessor ví dụ thay tối đa 512.
 

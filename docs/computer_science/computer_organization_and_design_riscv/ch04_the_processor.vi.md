@@ -94,7 +94,7 @@ Một phần tử thực hiện phép toán, chẳng hạn AND gate hoặc ALU
 
 Các phần tử khác trong thiết kế không phải combinational mà chứa state. Một phần tử chứa state nếu có bộ lưu trữ bên trong. Chúng ta gọi chúng là state element vì nếu rút phích cắm điện máy tính, có thể khởi động lại chính xác bằng cách nạp cho các state element những giá trị chúng chứa trước khi rút phích. Hơn nữa, nếu lưu rồi khôi phục các state element, máy tính sẽ hoạt động như thể chưa từng mất điện. Do đó, các state element này xác định hoàn toàn trạng thái máy tính. Trong Hình 4.1, instruction memory và data memory, cũng như các register, đều là ví dụ về state element.
 
-#### state element
+### state element
 
 Một phần tử memory, chẳng hạn register hoặc memory.
 
@@ -164,7 +164,7 @@ Một cách hợp lý để bắt đầu thiết kế datapath là khảo sát c
 
 Một unit dùng để xử lý hoặc giữ dữ liệu trong processor. Trong triển khai RISC-V, các datapath element gồm instruction memory và data memory, register file, ALU và adder.
 
-#### program counter (PC)
+### program counter (PC)
 
 Register chứa địa chỉ của instruction trong chương trình đang được thực thi.
 
@@ -182,7 +182,7 @@ Hình 4.5a cho thấy phần tử đầu tiên chúng ta cần: một memory uni
 
 Bây giờ hãy xét các instruction R-format (xem Hình 2.19 ở trang 120). Tất cả đều đọc hai register, thực hiện phép toán ALU trên nội dung register rồi ghi kết quả vào một register. Chúng ta gọi chúng là instruction R-type hoặc instruction arithmetic-logical (vì chúng thực hiện phép toán số học hoặc logic). Lớp instruction này gồm add, sub, and và or đã được giới thiệu trong Chương 2. Nhớ rằng ví dụ điển hình là add x1, x2, x3, đọc x2 và x3 rồi ghi tổng vào x1.
 
-#### register file
+### register file
 
 Một state element gồm một tập register có thể đọc và ghi bằng cách cung cấp số register cần truy cập.
 
@@ -198,11 +198,11 @@ Hình 4.7b cho thấy ALU nhận hai input 64-bit và tạo ra kết quả 64-bi
 
 Tiếp theo, xét các instruction load register và store register của RISC-V, có dạng tổng quát ld x1, offset(x2) hoặc sd x1, offset(x2). Các instruction này tính địa chỉ memory bằng cách cộng base register x2 với offset field có dấu 12-bit trong instruction. Nếu instruction là store, giá trị cần lưu cũng phải được đọc từ register file, nơi nó nằm trong x1. Nếu instruction là load, giá trị đọc từ memory phải được ghi vào register được chỉ định trong register file, tức x1. Vì vậy, chúng ta cần cả register file lẫn ALU ở Hình 4.7.
 
-#### sign-extend
+### sign-extend
 
 Tăng kích thước một mục dữ liệu bằng cách lặp lại sign bit high-order của mục dữ liệu gốc vào các bit high-order của mục dữ liệu đích lớn hơn.
 
-#### branch target address
+### branch target address
 
 Địa chỉ được chỉ định trong branch, trở thành program counter (PC) mới nếu branch được thực hiện. Trong kiến trúc RISC-V, branch target là tổng offset field của instruction và địa chỉ branch.
 
@@ -222,11 +222,11 @@ Instruction beq có ba operand: hai register được so sánh bằng nhau và o
 
 Ngoài tính branch target address, chúng ta còn phải xác định instruction tiếp theo là instruction tuần tự kế tiếp hay instruction tại branch target address. Khi điều kiện đúng (tức hai operand bằng nhau), branch target address trở thành PC mới và chúng ta nói branch được taken. Nếu operand khác không, PC đã tăng phải thay thế PC hiện tại (như mọi instruction bình thường khác); trong trường hợp này, chúng ta nói branch không được taken.
 
-#### branch taken
+### branch taken
 
 Một branch có điều kiện branch được thỏa mãn và program counter (PC) trở thành branch target. Mọi unconditional branch đều là taken branch.
 
-#### branch not taken or (untaken branch)
+### branch not taken or (untaken branch)
 
 Một branch có điều kiện branch sai và program counter (PC) trở thành địa chỉ instruction tuần tự kế tiếp branch.
 
@@ -515,7 +515,7 @@ Các nguyên lý tương tự áp dụng cho processor khi chúng ta pipeline vi
 
 Vì vậy, pipeline RISC-V được khảo sát trong chương này có năm stage. Ví dụ tiếp theo cho thấy pipelining tăng tốc thực thi instruction giống như tăng tốc việc giặt quần áo.
 
-#### Hiệu năng Single-Cycle so với có Pipeline
+### Hiệu năng Single-Cycle so với có Pipeline
 
 **Ví dụ**
 
@@ -1160,7 +1160,7 @@ Hình 4.54 cho thấy hardware cần để hỗ trợ forwarding cho các thao t
 
 Nếu muốn xem thêm ví dụ minh họa bằng bản vẽ pipeline single-cycle, ![p0580_76](images/ch04_the_processor/p0580_76.png) Mục 4.13 có các hình thể hiện hai đoạn code RISC-V với hazard gây forwarding.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Forwarding cũng có thể giúp giải quyết hazard khi store instruction phụ thuộc instruction khác. Vì store chỉ dùng một giá trị dữ liệu trong MEM stage nên forwarding dễ thực hiện. Tuy nhiên, xét load được theo ngay bởi store, hữu ích khi sao chép memory-to-memory trong kiến trúc RISC-V. Vì sao chép thường gặp, cần thêm forwarding hardware để chúng chạy nhanh hơn. Nếu vẽ lại Hình 4.51, thay instruction sub và and bằng ld và sd, chúng ta sẽ thấy có thể tránh stall vì dữ liệu tồn tại trong MEM/WB register của load instruction kịp để dùng trong MEM stage của store instruction. Cần thêm forwarding vào memory access stage để thực hiện lựa chọn này. Chúng ta dành sửa đổi này làm bài tập cho độc giả.
 
@@ -1378,7 +1378,7 @@ Control là khía cạnh khó nhất trong thiết kế processor: vừa khó l�
 
 Còn gọi là interrupt. Một sự kiện không được lên lịch làm gián đoạn việc thực thi chương trình; dùng để phát hiện instruction không được định nghĩa.
 
-#### interrupt
+### interrupt
 
 Một exception đến từ bên ngoài processor. (Một số kiến trúc dùng thuật ngữ interrupt cho mọi exception.)
 
@@ -1517,7 +1517,7 @@ Tính song song giữa các instruction.
 
 Cách khác là nhân bản thành phần bên trong máy tính để có thể khởi chạy nhiều instruction trong mỗi pipeline stage. Tên chung của kỹ thuật này là multiple issue. Việc giặt multiple-issue sẽ thay máy giặt và máy sấy gia đình bằng chẳng hạn ba máy giặt và ba máy sấy. Cũng cần thêm người trợ giúp để gấp và cất lượng quần áo gấp ba trong cùng thời gian. Nhược điểm là thêm công việc để giữ mọi máy bận và chuyển các mẻ đến pipeline stage tiếp theo.
 
-#### multiple issue
+### multiple issue
 
 Phương án khởi chạy nhiều instruction trong một clock cycle.
 
@@ -1525,11 +1525,11 @@ Khởi chạy nhiều instruction trên mỗi stage cho phép tốc độ thực
 
 Có hai cách chính triển khai processor multiple-issue, khác biệt lớn là phân chia công việc giữa compiler và hardware. Vì phân chia này quyết định các quyết định được đưa ra statically (tức lúc compile) hay dynamically (tức trong lúc thực thi), hai cách đôi khi gọi là static multiple issue và dynamic multiple issue. Như sẽ thấy, cả hai có tên gọi khác phổ biến hơn, nhưng có thể kém chính xác hoặc hạn chế hơn.
 
-#### static multiple issue
+### static multiple issue
 
 Cách triển khai processor multiple-issue trong đó nhiều quyết định do compiler đưa ra trước khi thực thi.
 
-#### dynamic multiple issue
+### dynamic multiple issue
 
 Cách triển khai processor multiple-issue trong đó nhiều quyết định được processor đưa ra khi thực thi.
 
@@ -1539,7 +1539,7 @@ Trong pipeline multiple-issue, phải xử lý hai trách nhiệm chính, riêng
 
 2. Xử lý data hazard và control hazard: trong static issue processor, compiler xử lý một phần hoặc mọi hậu quả của data hazard và control hazard theo kiểu static. Ngược lại, phần lớn dynamic issue processor cố giảm ít nhất một số lớp hazard bằng kỹ thuật hardware hoạt động lúc thực thi.
 
-#### issue slots
+### issue slots
 
 Các vị trí mà từ đó instruction có thể được issue trong một clock cycle cụ thể; theo phép so sánh, tương ứng các vị trí xuất phát trong cuộc chạy nước rút.
 
@@ -1931,11 +1931,11 @@ Hình 4.79 cho thấy mức tăng hiệu năng DGEMM cho ma trận 32 ×32 khi c
 
 Như đã nêu trong phần Giải thích thêm ở Mục 3.8, các kết quả này thu được khi tắt Turbo mode. Nếu bật, như Chương 3, mọi kết quả được cải thiện nhờ tăng clock rate tạm thời 3.3/2.6 =1.27, thành 2.1 GFLOPS cho DGEMM chưa tối ưu, 8.1 GFLOPS với AVX và 18.6 GFLOPS với unrolling và AVX. Như đã nêu trong Mục 3.8, Turbo mode đặc biệt hiệu quả ở đây vì chỉ dùng một core của chip eight-core.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Không có pipeline stall dù dùng lại register %ymm5 ở dòng 9 đến 17 của Hình 4.78 vì pipeline Intel Core i7 đổi tên register.
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 Các phát biểu sau đúng hay sai?
 
@@ -2131,7 +2131,7 @@ Các Hình e4.13.11 đến e4.13.15 cho thấy các instruction này đi qua ch�
 
 ![p0684_135](images/ch04_the_processor/p0684_135.jpg)
 
-**HÌNH E4.13.11 Clock cycle 1 và 2. Cụm “before <i>” nghĩa là instruction thứ i trước ld. Instruction ld trong datapath trên nằm ở IF stage. Cuối clock cycle, ld nằm trong IF/ID pipeline register. Trong clock cycle thứ hai, thể hiện ở datapath dưới, ld chuyển sang ID stage và sub vào IF stage. Lưu ý giá trị instruction field và các source register được chọn thể hiện trong ID stage. Vì vậy, register x1 và hằng 40, operand của ld, được ghi vào ID/EX pipeline register. Số 10 biểu diễn số destination register của ld cũng được đặt vào ID/EX. Đầu ID/EX pipeline register cho thấy các control value của ld dùng trong stage còn lại. Có thể đọc các giá trị này từ hàng ld trong bảng ở Hình e4.18.**
+**HÌNH E4.13.11 Clock cycle 1 và 2. Cụm “before &lt;i&gt;” nghĩa là instruction thứ i trước ld. Instruction ld trong datapath trên nằm ở IF stage. Cuối clock cycle, ld nằm trong IF/ID pipeline register. Trong clock cycle thứ hai, thể hiện ở datapath dưới, ld chuyển sang ID stage và sub vào IF stage. Lưu ý giá trị instruction field và các source register được chọn thể hiện trong ID stage. Vì vậy, register x1 và hằng 40, operand của ld, được ghi vào ID/EX pipeline register. Số 10 biểu diễn số destination register của ld cũng được đặt vào ID/EX. Đầu ID/EX pipeline register cho thấy các control value của ld dùng trong stage còn lại. Có thể đọc các giá trị này từ hàng ld trong bảng ở Hình e4.18.**
 
 ![p0686_136](images/ch04_the_processor/p0686_136.jpg)
 
@@ -2139,7 +2139,7 @@ Các Hình e4.13.11 đến e4.13.15 cho thấy các instruction này đi qua ch�
 
 ![p0688_137](images/ch04_the_processor/p0688_137.jpg)
 
-**HÌNH E4.13.13 Clock cycle 5 và 6. Với add, instruction cuối ví dụ, vào IF ở datapath trên, mọi instruction đều hoạt động. Bằng cách ghi dữ liệu trong MEM/WB vào register 10, ld hoàn tất; cả dữ liệu và số register đều ở MEM/WB. Trong cùng clock cycle, sub gửi hiệu trong EX/MEM đến MEM/WB, và các instruction còn lại tiến lên. Trong clock cycle tiếp theo, sub chọn giá trị trong MEM/WB để ghi vào register số 11, cũng được tìm thấy trong MEM/WB. Các instruction còn lại theo kiểu follow-the-leader: ALU tính OR của x6 và x7 cho or instruction trong EX stage, còn register x8 và x9 được đọc trong ID stage cho add instruction. Các instruction sau add được thể hiện không hoạt động chỉ để nhấn mạnh điều xảy ra với năm instruction trong ví dụ. Cụm “after <i>” nghĩa là instruction thứ i sau add.**
+**HÌNH E4.13.13 Clock cycle 5 và 6. Với add, instruction cuối ví dụ, vào IF ở datapath trên, mọi instruction đều hoạt động. Bằng cách ghi dữ liệu trong MEM/WB vào register 10, ld hoàn tất; cả dữ liệu và số register đều ở MEM/WB. Trong cùng clock cycle, sub gửi hiệu trong EX/MEM đến MEM/WB, và các instruction còn lại tiến lên. Trong clock cycle tiếp theo, sub chọn giá trị trong MEM/WB để ghi vào register số 11, cũng được tìm thấy trong MEM/WB. Các instruction còn lại theo kiểu follow-the-leader: ALU tính OR của x6 và x7 cho or instruction trong EX stage, còn register x8 và x9 được đọc trong ID stage cho add instruction. Các instruction sau add được thể hiện không hoạt động chỉ để nhấn mạnh điều xảy ra với năm instruction trong ví dụ. Cụm “after &lt;i&gt;” nghĩa là instruction thứ i sau add.**
 
 ![p0690_138](images/ch04_the_processor/p0690_138.jpg)
 
@@ -2525,7 +2525,7 @@ addx15, x13, x12
 
 4.21 Xét một phiên bản pipeline trong Mục 4.5 không xử lý data hazard, tức lập trình viên chịu trách nhiệm xử lý data hazard bằng cách chèn các instruction NOP ở những nơi cần thiết. Giả sử sau khi tối ưu hóa, một chương trình n-instruction điển hình cần thêm 4*n instruction NOP để xử lý chính xác data hazard.
 
-4.21.1 [5] <§4.5> Giả sử cycle time pipeline không forwarding này là 250 ps. Giả sử thêm forwarding hardware giảm số NOP từ .4*n xuống .05*n nhưng tăng cycle time lên 300 ps. Speedup của pipeline mới so với không forwarding là bao nhiêu?
+4.21.1 [5] <§4.5> Giả sử cycle time pipeline không forwarding này là 250 ps. Giả sử thêm forwarding hardware giảm số NOP từ .4\*n xuống .05\*n nhưng tăng cycle time lên 300 ps. Speedup của pipeline mới so với không forwarding là bao nhiêu?
 
 4.21.2 [10] <§4.5> Các chương trình khác nhau cần lượng NOP khác nhau. Có thể còn bao nhiêu NOP (theo phần trăm instruction code) trong chương trình điển hình trước khi nó chạy chậm hơn trên pipeline có forwarding?
 

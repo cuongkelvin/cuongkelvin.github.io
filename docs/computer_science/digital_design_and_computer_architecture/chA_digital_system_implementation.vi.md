@@ -27,13 +27,9 @@ Trong những năm 1970 và 1980, nhiều hệ thống số được xây dựng
 
 > ![note_p629](images/chA/note_p629.png)
 >
-> Chip inverter 74LS04 trong vỏ dual inline 14-pin. Mã linh kiện ở dòng đầu. LS chỉ họ logic (xem Phần A.6). Hậu tố N chỉ vỏ DIP. Chữ S lớn là logo của nhà sản xuất Signetics. Hai dòng ký tự khó hiểu phía dưới là code cho biết lô sản xuất chip.
+> Chip inverter 74LS04 trong package dual inline 14-pin. Part number nằm trên dòng đầu tiên. LS biểu thị logic family (xem Mục A.6). Hậu tố N biểu thị package DIP. Chữ S lớn là logo của nhà sản xuất Signetics. Hai dòng ký tự khó hiểu phía dưới là các code chỉ lô sản xuất của chip.
 
-Hình eA.1 trình bày sơ đồ pinout của nhiều chip 74xx-series phổ biến chứa logic gate cơ bản. Đôi khi chúng được gọi là chip small-scale integration (SSI) vì được xây dựng từ vài transistor. Các vỏ 14-pin thường có rãnh ở phía trên hoặc chấm ở góc trên trái để chỉ hướng. Pin được đánh số từ 1 ở góc trên trái rồi ngược chiều kim đồng hồ quanh vỏ. Chip cần nhận nguồn (V<sub>DD</sub> = 5 V) và ground (GND = 0 V) lần lượt tại pin 14 và 7. Số logic gate trên chip do số pin quyết định. Lưu ý pin 3 và 11 của chip 7421 không nối (NC) với gì cả. flip-flop 7474 có các chân D, CLK và Q thông thường. Nó còn có output bù, $\overline{Q}$. Hơn nữa, nó nhận các tín hiệu set bất đồng bộ (còn gọi là preset, hoặc PRE) và reset (còn gọi là clear, hoặc CLR).
-
-![eq_p629](images/chA/eq_p629.png)
-
-các tín hiệu được asserted thường được viết trong văn bản là CLRb hoặc CLRbar.
+Hình eA.1 trình bày sơ đồ pinout của nhiều chip 74xx-series phổ biến chứa logic gate cơ bản. Đôi khi chúng được gọi là chip small-scale integration (SSI) vì được xây dựng từ vài transistor. Các vỏ 14-pin thường có rãnh ở phía trên hoặc chấm ở góc trên trái để chỉ hướng. Pin được đánh số từ 1 ở góc trên trái rồi ngược chiều kim đồng hồ quanh vỏ. Chip cần nhận nguồn (V<sub>DD</sub> = 5 V) và ground (GND = 0 V) lần lượt tại pin 14 và 7. Số logic gate trên chip do số pin quyết định. Lưu ý pin 3 và 11 của chip 7421 không nối (NC) với gì cả. flip-flop 7474 có các chân D, CLK và Q thông thường. Nó còn có output bù, $\overline{Q}$. Hơn nữa, nó nhận các tín hiệu set bất đồng bộ (còn gọi là preset, hoặc PRE) và reset (còn gọi là clear, hoặc CLR). Các tín hiệu này là active low; nói cách khác, flop set khi $\overline{PRE}$ = 0, reset khi $\overline{CLR}$ = 0, và hoạt động bình thường khi $\overline{PRE}$ = $\overline{CLR}$ = 1. Các tín hiệu low-asserted thường được viết trong văn bản là CLRb hoặc CLRbar.
 
 ### A.2.2 Các chức năng khác
 
@@ -130,7 +126,7 @@ Hình eA.6 thể hiện quy trình thiết kế ASIC, tương tự quy trình th
 
 Nhà sản xuất integrated circuit công bố datasheet mô tả chức năng và hiệu năng chip. Đọc và hiểu datasheet là thiết yếu. Một trong những nguồn lỗi hàng đầu của hệ thống số là hiểu sai hoạt động của chip.
 
-Datasheet thường có trên website nhà sản xuất. Nếu không tìm được datasheet của linh kiện và không có tài liệu rõ ràng từ nguồn khác, đừng dùng linh kiện đó. Một số mục trong datasheet có thể khó hiểu. Nhà sản xuất thường xuất bản data-books chứa datasheet của nhiều linh kiện liên quan. Đầu data book có thêm thông tin giải thích. Thường có thể tìm được thông tin này trên Web bằng cách tìm kiếm kỹ.
+Datasheet thường có trên website nhà sản xuất. Nếu không tìm được datasheet của linh kiện và không có tài liệu rõ ràng từ nguồn khác, đừng dùng linh kiện đó. Một số mục trong datasheet có thể khó hiểu. Nhà sản xuất thường xuất bản databooks chứa datasheet của nhiều linh kiện liên quan. Đầu data book có thêm thông tin giải thích. Thường có thể tìm được thông tin này trên Web bằng cách tìm kiếm kỹ.
 
 Phần này phân tích datasheet Texas Instruments (TI) cho chip inverter 74HC04. Datasheet tương đối đơn giản nhưng minh họa nhiều thành phần chính. TI vẫn sản xuất nhiều chip 74xx-series khác nhau. Trước đây nhiều công ty khác cũng làm chúng, nhưng thị trường đang hợp nhất khi doanh số giảm.
 
@@ -160,7 +156,7 @@ Hình eA.9 thể hiện trang thứ ba datasheet. Electrical characteristic mô 
 
 Switching characteristic xác định hiệu năng thiết bị trong điều kiện hoạt động khuyến nghị khi input thay đổi. Propagation delay, t<sub>pd</sub>, được đo từ khi input đi qua 0.5 V<sub>CC</sub> đến khi output đi qua 0.5 V<sub>CC</sub>. Nếu V<sub>CC</sub> danh định là 5 V và chip lái điện dung dưới 50 pF, propagation delay không vượt 24 ns (và thường nhanh hơn nhiều). Nhớ rằng mỗi input có thể có 10 pF, nên chip không thể lái hơn năm chip giống hệt ở tốc độ tối đa. Thực tế, điện dung ký sinh của dây nối chip còn giảm tải hữu ích. Transition time, còn gọi là rise/fall time, được đo khi output chuyển giữa 0.1 V<sub>CC</sub> và 0.9 V<sub>CC</sub>.
 
-Nhớ từ Phần 1.8 rằng chip tiêu thụ cả công suất tĩnh và động. Công suất tĩnh của mạch HC thấp. Ở 85°C, dòng nguồn tĩnh tối đa là 20 μA. Ở 5 V, tương ứng công suất tĩnh 0.1 mW. Công suất động phụ thuộc điện dung được lái và tần số chuyển mạch. 7404 có điện dung tiêu tán công suất nội bộ 20 pF mỗi inverter. Nếu cả sáu inverter trên 7404 chuyển ở 10 MHz và lái tải ngoài 25 pF, công suất động theo Phương trình 1.4 là 1/2(6)(20 pF + 25 pF)(5<sup>2</sup>)(10 MHz) = 33.75 mW, và tổng công suất tối đa là 33.85 mW.
+Hãy nhớ lại từ Phần 1.8 rằng chip tiêu thụ cả công suất tĩnh và động. Công suất tĩnh của mạch HC thấp. Ở 85°C, dòng nguồn tĩnh tối đa là 20 μA. Ở 5 V, tương ứng công suất tĩnh 0.1 mW. Công suất động phụ thuộc điện dung được lái và tần số chuyển mạch. 7404 có điện dung tiêu tán công suất nội bộ 20 pF mỗi inverter. Nếu cả sáu inverter trên 7404 chuyển ở 10 MHz và lái tải ngoài 25 pF, công suất động theo Phương trình 1.4 là 1/2(6)(20 pF + 25 pF)(5<sup>2</sup>)(10 MHz) = 33.75 mW, và tổng công suất tối đa là 33.85 mW.
 
 ![img_p641](images/chA/img_p641.png)
 
@@ -194,9 +190,9 @@ Bảng eA.2 Các thông số điển hình cho họ logic 5-V
 
 \*Giá mỗi chiếc khi mua 1000 chip 7408 của Texas Instruments năm 2012.
 
-logic level bất đối xứng. Chúng tuân theo logic level “TTL”: V<sub>IH</sub> = 2 V, V<sub>IL</sub> = 0.8 V, V<sub>OH</sub> \> 2.4 V và V<sub>OL</sub> \< 0.5 V.
+logic level bất đối xứng. Chúng tuân theo logic level “TTL”: V<sub>IH</sub> = 2 V, V<sub>IL</sub> = 0.8 V, V<sub>OH</sub> > 2.4 V và V<sub>OL</sub> < 0.5 V.
 
-Khi mạch CMOS trưởng thành trong những năm 1980 và 1990, chúng trở nên phổ biến vì hút rất ít dòng nguồn hoặc dòng input. Các họ High-Speed CMOS (HC) và Advanced High-Speed CMOS (AHC) hầu như không tiêu thụ công suất tĩnh. Chúng còn cung cấp cùng dòng cho output HIGH và LOW. Chúng tuân theo logic level “CMOS”: V<sub>IH</sub> = 3.15 V, V<sub>IL</sub> = 1.35 V, V<sub>OH</sub> \> 3.8 V và V<sub>OL</sub> \< 0.44 V. Đáng tiếc các mức này không tương thích mạch TTL vì output HIGH 2.4 V của TTL có thể không được nhận là input HIGH CMOS hợp lệ. Điều này thúc đẩy sử dụng High-Speed TTL-compatible CMOS (HCT) và Advanced High-Speed TTL-compatible CMOS (AHCT), nhận input logic level TTL và sinh output logic level CMOS hợp lệ. Những họ này chậm hơn đôi chút so với phiên bản CMOS thuần. Mọi chip CMOS nhạy với electrostatic discharge (ESD) do tĩnh điện. Hãy nối đất cơ thể bằng cách chạm vật kim loại lớn trước khi cầm chip CMOS, kẻo bạn làm hỏng chúng do phóng điện.
+Khi mạch CMOS trưởng thành trong những năm 1980 và 1990, chúng trở nên phổ biến vì hút rất ít dòng nguồn hoặc dòng input. Các họ High-Speed CMOS (HC) và Advanced High-Speed CMOS (AHC) hầu như không tiêu thụ công suất tĩnh. Chúng còn cung cấp cùng dòng cho output HIGH và LOW. Chúng tuân theo logic level “CMOS”: V<sub>IH</sub> = 3.15 V, V<sub>IL</sub> = 1.35 V, V<sub>OH</sub> > 3.8 V và V<sub>OL</sub> < 0.44 V. Đáng tiếc các mức này không tương thích mạch TTL vì output HIGH 2.4 V của TTL có thể không được nhận là input HIGH CMOS hợp lệ. Điều này thúc đẩy sử dụng High-Speed TTL-compatible CMOS (HCT) và Advanced High-Speed TTL-compatible CMOS (AHCT), nhận input logic level TTL và sinh output logic level CMOS hợp lệ. Những họ này chậm hơn đôi chút so với phiên bản CMOS thuần. Mọi chip CMOS nhạy với electrostatic discharge (ESD) do tĩnh điện. Hãy nối đất cơ thể bằng cách chạm vật kim loại lớn trước khi cầm chip CMOS, kẻo bạn làm hỏng chúng do phóng điện.
 
 Logic 74xx-series rẻ. Các họ logic mới thường rẻ hơn các họ lỗi thời. Họ LS sẵn có rộng rãi và bền, là lựa chọn phổ biến cho đồ án phòng thí nghiệm hay dự án sở thích không có yêu cầu hiệu năng đặc biệt.
 
@@ -338,9 +334,7 @@ Hình eA.18 Ký hiệu transmission line
 
 Hình eA.19 Transmission line với matched termination
 
-Ω
-
-với tải matched 50 Ω. Phần này phân tích điện áp và dòng tại A, B và C—lần lượt ở đầu đường, cách đầu đường one-third chiều dài, và ở cuối đường.
+với tải matched 50 Ω. Mục này phân tích điện áp và dòng điện tại các điểm A, B và C, lần lượt ở đầu đường truyền, tại vị trí one-third chiều dài đường truyền và ở cuối đường truyền.
 
 ![figeA_20](images/chA/figeA_20.png)
 
@@ -350,9 +344,7 @@ Hình eA.20 thể hiện điện áp tại A, B và C theo thời gian. Ban đ�
 
 Ở steady state, transmission line giống dây đẳng thế lý tưởng vì suy cho cùng nó chỉ là dây. Điện áp ở mọi điểm dọc đường phải giống nhau. Hình eA.21 thể hiện mô hình tương đương steady-state của mạch Hình eA.19. Điện áp là V<sub>S</sub> ở mọi điểm dọc dây.
 
-#### Ví dụ eA.2 TRANSMISSION LINE VỚI SOURCE VÀ
-
-LOAD TERMINATION MATCHED
+#### Ví dụ eA.2 TRANSMISSION LINE VỚI SOURCE VÀ LOAD TERMINATION MATCHED
 
 Hình eA.22 thể hiện transmission line với source và load impedance matched Z<sub>S</sub>, Z<sub>L</sub>. Vẽ điện áp tại node A, B và C theo thời gian. Khi nào hệ thống đạt steady state và mạch tương đương ở steady state là gì?
 
@@ -360,15 +352,11 @@ Hình eA.22 thể hiện transmission line với source và load impedance match
 
 Hình eA.21 Mạch tương đương của Hình eA.19 ở steady state
 
-Lời giải Khi nguồn điện áp có source impedance Z<sub>S</sub> nối tiếp transmission line, một phần điện áp rơi trên Z<sub>S</sub>, phần còn lại truyền dọc transmission line. Ban đầu, transmission line giống impedance Z<sub>0</sub>, vì tải ở cuối không thể ảnh hưởng hành vi đường cho tới khi qua một delay speed-of-light—tức tín hiệu ở đầu nguồn thậm chí chưa thể biết đầu tải có gì cho đến khi nó
+Lời giải Khi nguồn điện áp có source impedance Z<sub>S</sub> nối tiếp transmission line, một phần điện áp rơi trên Z<sub>S</sub>, phần còn lại truyền dọc transmission line. Ban đầu, transmission line giống impedance Z<sub>0</sub>, vì tải ở cuối không thể ảnh hưởng hành vi đường cho tới khi qua một delay speed-of-light—tức tín hiệu ở đầu nguồn thậm chí chưa thể biết đầu tải có gì cho đến khi nó tới đó. Vì vậy, theo phương trình chia áp, điện áp incident truyền dọc đường là
 
 ![figeA_22](images/chA/figeA_22.png)
 
 Hình eA.22 Transmission line có source và load impedance matched
-
-Ω
-
-tới đó. Vì vậy, theo phương trình chia áp, điện áp incident truyền dọc đường là
 
 ![figeA_23](images/chA/figeA_23.png)
 
@@ -382,7 +370,7 @@ Vì thế tại t = 0, sóng điện áp V = V<sub>S</sub>/2 được truyền t
 
 Khi load impedance không bằng Z<sub>0</sub>, termination không hấp thụ được toàn bộ dòng và một phần sóng phải phản xạ. Hình eA.25 thể hiện transmission line có open load termination. Không dòng nào qua open termination, nên dòng tại C phải luôn bằng 0.
 
-Điện áp ban đầu trên đường bằng không. Tại t = 0, switch đóng ![eq_p653_3](images/chA/eq_p653_3.png) đường. Lưu ý sóng ban đầu giống Ví dụ eA.2 và độc lập termination vì tải ở cuối không thể ảnh hưởng hành vi ở đầu cho tới khi ít nhất 2t<sub>d</sub> trôi qua. Sóng tới B tại t<sub>d</sub> /3 và C tại t<sub>d</sub>, như Hình eA.26.
+Điện áp ban đầu trên đường bằng không. Tại t = 0, switch đóng và một sóng điện áp, V = V<sub>S</sub> Z<sub>0</sub>/(Z<sub>0</sub> + Z<sub>S</sub>) = V<sub>S</sub>/2, bắt đầu lan truyền dọc đường. Lưu ý sóng ban đầu giống Ví dụ eA.2 và độc lập termination vì tải ở cuối không thể ảnh hưởng hành vi ở đầu cho tới khi ít nhất 2t<sub>d</sub> trôi qua. Sóng tới B tại t<sub>d</sub> /3 và C tại t<sub>d</sub>, như Hình eA.26.
 
 Khi incident wave tới C, nó không thể đi tiếp vì dây hở. Thay vào đó, nó phải phản xạ về nguồn. Sóng phản xạ cũng có điện áp V = V<sub>S</sub>/2 vì open termination phản xạ toàn bộ sóng.
 
@@ -390,11 +378,7 @@ Khi incident wave tới C, nó không thể đi tiếp vì dây hở. Thay vào 
 
 Hình eA.24 Mạch tương đương của Hình eA.22 ở steady state
 
-Điện áp ở mọi điểm là tổng của incident và reflected
-
-![eq_p653_5](images/chA/eq_p653_5.png)
-
-tới A, sóng bị source termination impedance hấp thụ vì impedance này bằng characteristic impedance của đường. Vì vậy hệ thống đạt steady state tại t = 2t<sub>d</sub>, và transmission line tương đương dây đẳng thế với điện áp V<sub>S</sub> và dòng I = 0.
+Điện áp ở mọi điểm là tổng của incident wave và reflected wave. Tại thời điểm t = t<sub>d</sub>, điện áp tại điểm C là V = V<sub>S</sub>/2 + V<sub>S</sub>/2 = V<sub>S</sub>. Sóng phản xạ tới điểm B tại 5t<sub>d</sub>/3 và điểm A tại 2t<sub>d</sub>. Khi tới A, sóng bị source termination impedance hấp thụ vì impedance này bằng characteristic impedance của đường. Vì vậy hệ thống đạt steady state tại t = 2t<sub>d</sub>, và transmission line tương đương dây đẳng thế với điện áp V<sub>S</sub> và dòng I = 0.
 
 ![figeA_25](images/chA/figeA_25.png)
 
@@ -408,11 +392,7 @@ Hình eA.26 Dạng sóng điện áp của Hình eA.25 tại A, B và C
 
 Hình eA.27 thể hiện transmission line được terminate bằng short circuit xuống ground. Vì thế điện áp tại C phải luôn bằng 0.
 
-Như các ví dụ trước, điện áp ban đầu trên đường bằng 0. Khi switch đóng, sóng điện áp V = V<sub>S</sub>/2 bắt đầu lan truyền dọc đường (Hình eA.28). Khi đến cuối đường, nó phải
-
-![eq_p654_2](images/chA/eq_p654_2.png)
-
-Sóng phản xạ tới nguồn tại t = 2t<sub>d</sub> và bị source impedance hấp thụ. Tại đây, hệ thống đạt steady state và transmission line tương đương dây đẳng thế với điện áp V = 0.
+Như các ví dụ trước, điện áp ban đầu trên đường bằng 0. Khi switch đóng, sóng điện áp V = V<sub>S</sub>/2 bắt đầu lan truyền dọc đường (Hình eA.28). Khi đến cuối đường, nó phải phản xạ với cực tính ngược lại. Sóng phản xạ, với điện áp V = −V<sub>S</sub>/2, cộng vào incident wave, bảo đảm điện áp tại điểm C vẫn bằng 0. Sóng phản xạ tới nguồn tại t = 2t<sub>d</sub> và bị source impedance hấp thụ. Tại đây, hệ thống đạt steady state và transmission line tương đương dây đẳng thế với điện áp V = 0.
 
 ![figeA_27](images/chA/figeA_27.png)
 
@@ -432,23 +412,17 @@ Lưu ý vài trường hợp đặc biệt. Nếu termination là mạch hở (Z
 
 Hình eA.28 Dạng sóng điện áp của Hình eA.27 tại A, B và C
 
-Hình eA.29 minh họa phản xạ trong transmission line có mismatched load termination 75 Ω. Z<sub>T</sub> = Z<sub>L</sub> = 75 Ω và Z<sub>0</sub> = 50 Ω, nên k<sub>r</sub> = 1/5. Như các ví dụ trước, điện áp ban đầu trên đường bằng 0. Khi switch đóng, sóng điện áp V = V<sub>S</sub>/2 truyền dọc đường, đến cuối tại t = t<sub>d</sub>. Khi incident wave tới termination cuối đường, one-fifth sóng phản xạ, còn four-fifths đi vào load impedance. Vì vậy, reflected
-
-![eq_p655_2](images/chA/eq_p655_2.png)
-
-matched termination 50 Ω, Z<sub>S</sub>. Hình eA.30 vẽ điện áp và dòng dọc đường. Một lần nữa, lưu ý ở steady state (ở đây tại t \> 2t<sub>d</sub>), transmission line tương đương dây đẳng thế, như Hình eA.31. Ở steady state, hệ thống giống bộ chia áp, nên
+Hình eA.29 minh họa phản xạ trong transmission line có mismatched load termination 75 Ω. Z<sub>T</sub> = Z<sub>L</sub> = 75 Ω và Z<sub>0</sub> = 50 Ω, nên k<sub>r</sub> = 1/5. Như các ví dụ trước, điện áp ban đầu trên đường bằng 0. Khi switch đóng, sóng điện áp V = V<sub>S</sub>/2 truyền dọc đường, đến cuối tại t = t<sub>d</sub>. Khi incident wave tới termination cuối đường, one-fifth sóng phản xạ, còn four-fifths đi vào load impedance. Vì vậy, reflected wave có điện áp V = V<sub>S</sub>/2 × 1/5 = V<sub>S</sub>/10. Tổng điện áp tại điểm C là tổng của điện áp tới và điện áp phản xạ, V<sub>C</sub> = V<sub>S</sub>/2 + V<sub>S</sub>/10 = 3V<sub>S</sub>/5. Tại t = 2t<sub>d</sub>, reflected wave tới điểm A, nơi nó bị hấp thụ bởi matched termination 50 Ω, Z<sub>S</sub>. Hình eA.30 vẽ điện áp và dòng dọc đường. Một lần nữa, lưu ý ở steady state (ở đây tại t > 2t<sub>d</sub>), transmission line tương đương dây đẳng thế, như Hình eA.31. Ở steady state, hệ thống giống bộ chia áp, nên
 
 ![eq_p655_3](images/chA/eq_p655_3.png).
 
 Phản xạ có thể xảy ra ở cả hai đầu transmission line. Hình eA.32 thể hiện transmission line với source impedance Z<sub>S</sub> là 450 Ω và open termination tại tải. Reflection coefficient ở tải và nguồn, k<sub>rL</sub> và k<sub>rS</sub>, lần lượt là 1 và 4/5. Trong trường hợp này, sóng phản xạ ở cả hai đầu đến khi đạt steady state.
 
-Bounce diagram trong Hình eA.33 giúp hình dung phản xạ ở cả hai đầu transmission line. Trục ngang biểu diễn khoảng cách dọc đường, trục dọc biểu diễn thời gian tăng xuống dưới. Hai phía của bounce
+Bounce diagram trong Hình eA.33 giúp hình dung phản xạ ở cả hai đầu transmission line. Trục ngang biểu diễn khoảng cách dọc đường, trục dọc biểu diễn thời gian tăng xuống dưới. Hai phía của bounce diagram biểu diễn đầu nguồn và đầu tải của transmission line, các điểm A và C. Sóng tín hiệu tới và phản xạ được vẽ bằng các đường chéo giữa A và C. Tại t = 0, source impedance và transmission line giống bộ chia áp, phát sóng điện áp V<sub>S</sub>/10 từ A về C. Tại t = t<sub>d</sub>, tín hiệu tới C và phản xạ hoàn toàn (k<sub>rL</sub> = 1). Tại t = 2t<sub>d</sub>, sóng phản xạ V<sub>S</sub>/10 tới A và phản xạ với reflection coefficient k<sub>rS</sub> = 4/5, tạo sóng 2V<sub>S</sub>/25 đi về C, rồi cứ thế tiếp tục.
 
 ![figeA_29](images/chA/figeA_29.png)
 
 Hình eA.29 Transmission line với mismatched termination
-
-Ω
 
 ![figeA_30](images/chA/figeA_30.png)
 
@@ -458,8 +432,6 @@ Hình eA.30 Dạng sóng điện áp của Hình eA.29 tại A, B và C
 
 Hình eA.31 Mạch tương đương của Hình eA.29 ở steady state
 
-Ω
-
 ![figeA_32](images/chA/figeA_32.png)
 
 Hình eA.32 Transmission line có source và load termination mismatched
@@ -468,13 +440,7 @@ Hình eA.32 Transmission line có source và load termination mismatched
 
 Hình eA.33 Bounce diagram của Hình eA.32
 
-diagram biểu diễn đầu nguồn và đầu tải của transmission line, các điểm A và C. Sóng tín hiệu tới và phản xạ được vẽ bằng các đường chéo giữa A và C. Tại t = 0, source impedance và transmission line giống bộ chia áp, phát sóng điện áp V<sub>S</sub>/10 từ A về C. Tại t = t<sub>d</sub>, tín hiệu tới C và phản xạ hoàn toàn (k<sub>rL</sub> = 1). Tại t = 2t<sub>d</sub>, sóng phản xạ V<sub>S</sub>/10 tới A và phản xạ với reflection coefficient k<sub>rS</sub> = 4/5, tạo sóng 2V<sub>S</sub>/25 đi về C, rồi cứ thế tiếp tục.
-
-Điện áp tại thời điểm cho trước ở mọi điểm trên transmission line là
-
-![eq_p656_4](images/chA/eq_p656_4.png)
-
-vẽ các điện áp theo thời gian. Khi t tới vô hạn, điện áp tiến tới steady state với V<sub>A</sub> = V<sub>B</sub> = V<sub>C</sub> = V<sub>S</sub>.
+Điện áp tại thời điểm cho trước ở mọi điểm trên transmission line là tổng của mọi incident wave và reflected wave. Vì vậy, tại t = 1.1t<sub>d</sub>, điện áp tại điểm C là V<sub>S</sub>/10 + V<sub>S</sub>/10 = V<sub>S</sub>/5. Tại t = 3.1t<sub>d</sub>, điện áp tại điểm C là V<sub>S</sub>/10 + V<sub>S</sub>/10 + 2V<sub>S</sub>/25 + 2V<sub>S</sub>/25 = 9V<sub>S</sub>/25, và cứ thế tiếp tục. Hình eA.34 vẽ các điện áp theo thời gian. Khi t tới vô hạn, điện áp tiến tới steady state với V<sub>A</sub> = V<sub>B</sub> = V<sub>C</sub> = V<sub>S</sub>.
 
 ![figeA_34](images/chA/figeA_34.png)
 
@@ -526,7 +492,7 @@ Hình eA.37 Mô hình transmission line: (a) cho cả đường và (b) có thê
 
 Dùng impedance cuộn cảm và tụ điện, ta viết lại quan hệ trong Hình eA.37 thành phương trình:
 
-Z<sub>0</sub> = jωLdx + \[Z<sub>0</sub>\|\|(1 / (jωCdx))\] (eA.11)
+Z<sub>0</sub> = jωLdx + [Z<sub>0</sub>\|\|(1 / (jωCdx))] (eA.11)
 
 Sắp xếp lại, ta có
 
@@ -538,21 +504,19 @@ Lấy giới hạn khi dx tới 0, số hạng cuối biến mất và ta đư�
 
 ### A.9.8 Suy ra Reflection Coefficient\*
 
-Reflection coefficient k<sub>r</sub> được suy ra bằng bảo toàn dòng. Hình eA.38 thể hiện transmission line có characteristic impedance Z<sub>0</sub> và load impedance Z<sub>L</sub>. Hình dung incident wave với điện áp V<sub>i</sub> và dòng I<sub>i</sub>. Khi sóng đến termination, một phần dòng I<sub>L</sub> đi qua load impedance, gây sụt áp V<sub>L</sub>. Phần còn lại
+Reflection coefficient k<sub>r</sub> được suy ra bằng bảo toàn dòng. Hình eA.38 thể hiện transmission line có characteristic impedance Z<sub>0</sub> và load impedance Z<sub>L</sub>. Hình dung incident wave với điện áp V<sub>i</sub> và dòng I<sub>i</sub>. Khi sóng đến termination, một phần dòng I<sub>L</sub> đi qua load impedance, gây sụt áp V<sub>L</sub>. Phần còn lại của dòng phản xạ ngược về dọc đường thành sóng có điện áp V<sub>r</sub> và dòng I<sub>r</sub>. Z<sub>0</sub> là tỉ số điện áp trên dòng của các sóng lan truyền dọc đường, nên V<sub>i</sub>/I<sub>i</sub> = V<sub>r</sub>/I<sub>r</sub> = Z<sub>0</sub>.
 
-![eq_p660_2](images/chA/eq_p660_2.png)
-
-Điện áp đường là tổng điện áp incident wave và reflected wave. Dòng theo chiều dương trên đường là hiệu dòng incident wave và reflected wave.
+Điện áp trên đường truyền là tổng điện áp của incident wave và reflected wave. Dòng điện chạy theo chiều dương trên đường truyền là hiệu giữa dòng điện của incident wave và dòng điện của reflected wave.
 
 V<sub>L</sub> = V<sub>i</sub> + V<sub>r</sub> (eA.14)
 
-I<sub>L</sub> = I<sub>i</sub> – I<sub>r</sub> (eA.15) Dùng định luật Ohm và thế cho I<sub>L</sub>, I<sub>i</sub> và I<sub>r</sub> trong Phương trình
+I<sub>L</sub> = I<sub>i</sub> – I<sub>r</sub> (eA.15)
+
+Dùng định luật Ohm và thế cho I<sub>L</sub>, I<sub>i</sub> và I<sub>r</sub> trong Phương trình eA.15, ta có
 
 ![figeA_38](images/chA/figeA_38.png)
 
 Hình eA.38 Transmission line thể hiện điện áp và dòng tới, phản xạ và tải
-
-eA.15, ta có
 
 ![eq_p661](images/chA/eq_p661.png) (eA.16)
 
@@ -608,9 +572,9 @@ Bảng eA.4 Chi phí ASIC so với FPGA
 | TỔNG | \$600,000 + (24,000 × \$5.50) = \$732,000 | \$1500 + (24,000 × \$18.50) = \$445,500 |
 | Mỗi đơn vị | \$30.50 | \$18.56 |
 
-#### Ví dụ eA.4 BEN TRỞ NÊN THAM LAM
+### Ví dụ eA.4 BEN TRỞ NÊN THAM LAM
 
-Sau khi thấy quảng cáo tiếp thị sản phẩm, Ben nghĩ có thể bán nhiều chip mỗi tháng hơn dự kiến ban đầu. Nếu chọn ASIC, anh phải bán bao nhiêu thiết bị mỗi tháng để ASIC có lợi hơn FPGA?
+Sau khi xem các quảng cáo tiếp thị cho sản phẩm của mình, Ben nghĩ rằng anh có thể bán được nhiều chip hơn mỗi tháng so với dự kiến ban đầu. Nếu chọn phương án ASIC, anh phải bán bao nhiêu thiết bị mỗi tháng để phương án ASIC mang lại lợi nhuận cao hơn phương án FPGA?
 
 Lời giải Ben tìm số đơn vị tối thiểu N cần bán trong 2 năm:
 
@@ -618,9 +582,9 @@ Lời giải Ben tìm số đơn vị tối thiểu N cần bán trong 2 năm:
 
 Giải phương trình cho N = 46,039 đơn vị, hay 1,919 đơn vị mỗi tháng. Anh cần gần gấp đôi doanh số hàng tháng để hưởng lợi từ giải pháp ASIC.
 
-#### Ví dụ eA.5 BEN BỚT THAM LAM
+### Ví dụ eA.5 BEN BỚT THAM LAM
 
-Ben nhận ra mình tham quá mức và không nghĩ có thể bán hơn 1,000 thiết bị mỗi tháng. Nhưng anh cho rằng vòng đời sản phẩm có thể hơn 2 năm. Với doanh số 1,000 thiết bị mỗi tháng, vòng đời phải dài bao lâu để lựa chọn ASIC đáng giá?
+Ben nhận ra mình đã quá tham vọng và không nghĩ rằng anh có thể bán hơn 1,000 thiết bị mỗi tháng. Tuy nhiên, anh cho rằng vòng đời sản phẩm có thể dài hơn 2 năm. Với doanh số 1,000 thiết bị mỗi tháng, vòng đời sản phẩm phải dài bao lâu để phương án ASIC trở nên đáng lựa chọn?
 
 Lời giải Nếu Ben bán tổng cộng hơn 46,039 đơn vị, ASIC là lựa chọn tốt nhất. Vậy anh cần bán với tốc độ 1,000 mỗi tháng trong ít nhất 47 tháng (làm tròn lên), gần 4 năm. Lúc đó sản phẩm có lẽ đã lỗi thời.
 

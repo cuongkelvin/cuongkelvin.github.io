@@ -74,7 +74,7 @@ Khi phát hiện một điều kiện không lường trước, có hai hành đ
 
 ### 12.2.2 Bạn có muốn phục hồi không?
 
-Theo định nghĩa, bất kỳ nỗ lực nào để phục hồi từ một tình huống không lường trước đều có nghĩa là thực thi một thuật toán chưa được kiểm thử, và việc thực thi này sẽ xảy ra vào lúc trạng thái hệ thống ill-defined. Đối với nhiều hệ thống, có thể lập luận rằng việc thực thi code chưa được kiểm thử, hiện thực một thuật toán chưa được kiểm thử, trên một hệ thống có trạng thái ill-defined và chắc chắn là bất ngờ, là không phù hợp cho một thiết bị safety-critical.
+Theo định nghĩa, bất kỳ nỗ lực nào để phục hồi từ một tình huống không lường trước đều có nghĩa là thực thi một thuật toán chưa được kiểm thử, và việc thực thi này sẽ xảy ra vào lúc trạng thái hệ thống ill-defined. Đối với nhiều hệ thống, có thể lập luận rằng việc thực thi code chưa được kiểm thử, triển khai một thuật toán chưa được kiểm thử, trên một hệ thống có trạng thái ill-defined và chắc chắn là bất ngờ, là không phù hợp cho một thiết bị safety-critical.
 
 Khi cần phục hồi, tiến trình đang hỏng ở trong một trạng thái ill-defined mà các nhà thiết kế không lường trước. Việc phục hồi cũng đòi hỏi một mức co-operation nào đó từ tiến trình đã phát hiện ra sự không nhất quán. Mức co-operation thay đổi từ rất nhỏ (có lẽ chỉ là tránh can thiệp vào phần mềm phục hồi) đến đáng kể (báo cáo chi tiết vấn đề cho phần mềm phục hồi).
 

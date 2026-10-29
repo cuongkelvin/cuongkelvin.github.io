@@ -321,9 +321,9 @@ Sau đó, mỗi fragment có hai thành phần:
 
 - Một trong hai property sau:
 
-- `target-path`: Chỉ định absolute path tới node mà fragment sẽ sửa.
+  - `target-path`: Chỉ định absolute path tới node mà fragment sẽ sửa.
 
-- `target`: Chỉ định relative path tới node alias (có tiền tố dấu ampersand) mà fragment sẽ sửa.
+  - `target`: Chỉ định relative path tới node alias (có tiền tố dấu ampersand) mà fragment sẽ sửa.
 
 - Một node tên `__overlay__`, chứa những thay đổi cần áp dụng cho node được tham chiếu. Thay đổi có thể là node mới (được thêm), property mới (được thêm), hoặc property đã có (bị ghi đè bằng giá trị mới). Không có thao tác xóa vì không thể xóa property hoặc node.
 
@@ -506,11 +506,7 @@ SPI device và I2C device đều thuộc non-memory-mapped device vì CPU không
 
 Nếu xem file SoC-level trong `arch/arm/boot/dts/imx6qdl.dtsi`, bạn sẽ thấy `#size-cells` và `#address-cells` được đặt lần lượt là `0` và `1` trong cả I2C controller node và SPI controller node (có label `i2c3` và `ecspi1`). Điều này giúp hiểu property `reg` của chúng, chỉ có một cell cho address value và không có cell cho size value.
 
-Property `reg` của I2C device dùng để chỉ định địa chỉ device trên bus. Với SPI device, `reg` biểu diễn index của chip-select line được gán cho device trong danh sách chip select của controller node. Ví dụ, với ADC `ad7606r8`, chip-select index là 1, tương ứng với `<&gpio5 17 0>` trong `cs-gpios.` Đây là danh sách chip select của controller node. Binding của controller khác có thể khác, và bạn nên tham khảo tài liệu của chúng trong
-
-```
-Documentation/devicetree/bindings/spi.
-```
+Property `reg` của I2C device dùng để chỉ định địa chỉ device trên bus. Với SPI device, `reg` biểu diễn index của chip-select line được gán cho device trong danh sách chip select của controller node. Ví dụ, với ADC `ad7606r8`, chip-select index là 1, tương ứng với `<&gpio5 17 0>` trong `cs-gpios.` Đây là danh sách chip select của controller node. Binding của controller khác có thể khác, và bạn nên tham khảo tài liệu của chúng trong `Documentation/devicetree/bindings/spi`.
 
 ## Memory-mapped device và định địa chỉ device
 
@@ -589,15 +585,15 @@ Sau đây là ý nghĩa các thành phần trong data structure:
 
 - `flags`: Chỉ loại resource. Các giá trị có thể có gồm:
 
-- `IORESOURCE_IO`: Chỉ PCI/ISA I/O port region. `start` là port đầu tiên của region và `end` là port cuối cùng.
+  - `IORESOURCE_IO`: Chỉ PCI/ISA I/O port region. `start` là port đầu tiên của region và `end` là port cuối cùng.
 
-- `IORESOURCE_MEM`: Dùng cho I/O memory region. `start` chỉ địa chỉ bắt đầu region và `end` chỉ nơi kết thúc.
+  - `IORESOURCE_MEM`: Dùng cho I/O memory region. `start` chỉ địa chỉ bắt đầu region và `end` chỉ nơi kết thúc.
 
-- `IORESOURCE_REG`: Đề cập tới register offset. Chủ yếu dùng với MFD device. `start` chỉ offset tương đối so với register của parent device, còn `end` chỉ nơi register section kết thúc.
+  - `IORESOURCE_REG`: Đề cập tới register offset. Chủ yếu dùng với MFD device. `start` chỉ offset tương đối so với register của parent device, còn `end` chỉ nơi register section kết thúc.
 
-- `IORESOURCE_IRQ`: Resource là IRQ line number. Trong trường hợp này, `start` và `end` có cùng giá trị hoặc `end` không liên quan.
+  - `IORESOURCE_IRQ`: Resource là IRQ line number. Trong trường hợp này, `start` và `end` có cùng giá trị hoặc `end` không liên quan.
 
-- `IORESOURCE_DMA`: Chỉ rằng resource là DMA channel number. Nên xem `end` tương tự trường hợp IRQ. Tuy nhiên, điều xảy ra khi có nhiều hơn một cell cho DMA channel identifier hoặc khi có nhiều DMA controller chưa được định nghĩa rõ ràng. `IORESOURCE_DMA` không có khả năng mở rộng cho hệ thống nhiều controller.
+  - `IORESOURCE_DMA`: Chỉ rằng resource là DMA channel number. Nên xem `end` tương tự trường hợp IRQ. Tuy nhiên, điều xảy ra khi có nhiều hơn một cell cho DMA channel identifier hoặc khi có nhiều DMA controller chưa được định nghĩa rõ ràng. `IORESOURCE_DMA` không có khả năng mở rộng cho hệ thống nhiều controller.
 
 Mỗi resource được cấp phát một instance của data structure này. Nghĩa là với device được gán hai memory region và một IRQ line, sẽ có ba data structure được cấp phát. Ngoài ra, resource cùng type được cấp phát và đánh index (bắt đầu từ 0) theo thứ tự khai báo trong device tree (hoặc board file). Điều này nghĩa là memory region được gán đầu tiên có index 0, v.v.
 

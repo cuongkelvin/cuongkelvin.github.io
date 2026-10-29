@@ -255,7 +255,7 @@ Có nhiều loại systems software, nhưng hai loại giữ vai trò trung tâm
 
 - Cho phép nhiều ứng dụng đồng thời dùng máy tính chia sẻ máy tính một cách có bảo vệ
 
-#### operating system
+### operating system
 
 Chương trình giám sát quản lý tài nguyên máy tính để phục vụ các chương trình chạy trên máy tính đó.
 
@@ -263,7 +263,7 @@ Ví dụ về operating system đang được sử dụng hiện nay là Linux, 
 
 Compiler thực hiện một chức năng thiết yếu khác: dịch chương trình viết bằng ngôn ngữ high-level, như C, C++, Java hoặc Visual Basic, thành instruction mà hardware có thể thực thi. Do sự phong phú của ngôn ngữ lập trình hiện đại và sự đơn giản của instruction mà hardware thực thi, việc dịch từ chương trình ngôn ngữ high-level sang hardware instruction rất phức tạp. Chúng tôi trình bày khái quát quá trình ở đây, rồi đi sâu hơn trong Chương 2.
 
-#### compiler
+### compiler
 
 Chương trình dịch các câu lệnh ngôn ngữ high-level thành câu lệnh assembly language.
 
@@ -357,13 +357,13 @@ Hai thành phần chính của máy tính là input device, như microphone, và
 
 Cơ chế đưa thông tin vào máy tính, chẳng hạn bàn phím.
 
-#### output device
+### output device
 
 Cơ chế truyền kết quả tính toán đến người dùng, chẳng hạn màn hình, hoặc đến máy tính khác.
 
 Chương 5 và 6 mô tả thiết bị input/output (I/O) chi tiết hơn, nhưng trước hết hãy tham quan nhập môn hardware máy tính, bắt đầu với các thiết bị I/O bên ngoài.
 
-#### Bức tranh TỔNG THỂ
+### Bức tranh TỔNG THỂ
 
 Năm thành phần kinh điển của máy tính là input, output, memory, datapath và control; hai thành phần cuối đôi khi được gộp lại và gọi là processor. Hình 1.5 cho thấy tổ chức tiêu chuẩn của máy tính. Tổ chức này độc lập với công nghệ hardware: bạn có thể xếp mọi bộ phận của mọi máy tính, trước đây và hiện nay, vào một trong năm nhóm đó. Để giúp bạn giữ được cái nhìn tổng thể, năm thành phần máy tính được trình bày ở trang đầu mỗi chương tiếp theo, trong đó phần liên quan đến chương được làm nổi bật.
 
@@ -559,7 +559,7 @@ Processor và memory đã cải thiện với tốc độ đáng kinh ngạc, v�
 
 Công tắc bật/tắt được điều khiển bằng tín hiệu điện.
 
-#### very large-scale integrated (VLSI) circuit
+### very large-scale integrated (VLSI) circuit
 
 Thiết bị chứa từ hàng trăm nghìn đến hàng triệu transistor.
 
@@ -573,11 +573,11 @@ Tốc độ tăng mức tích hợp này ổn định đáng kể. Hình 1.11 ch
 
 - Chất dẫn điện rất tốt (dùng dây đồng hoặc nhôm cực nhỏ)
 
-#### silicon
+### silicon
 
 Nguyên tố tự nhiên có tính semiconductor.
 
-#### semiconductor
+### semiconductor
 
 Chất dẫn điện không tốt.
 
@@ -589,11 +589,11 @@ Transistor thuộc nhóm cuối. Vì vậy, VLSI circuit chỉ là hàng tỷ t�
 
 Quy trình sản xuất integrated circuit quyết định chi phí chip, vì thế quan trọng với người thiết kế máy tính. Hình 1.12 cho thấy quy trình đó. Quy trình bắt đầu từ silicon crystal ingot trông như xúc xích khổng lồ. Ngày nay ingot có đường kính 8–12 inch và dài khoảng 12–24 inch. Ingot được cắt thành các wafer mỏng không quá 0.1 inch. Sau đó wafer trải qua một chuỗi bước xử lý, trong đó các mẫu hóa chất được đặt lên từng wafer, tạo thành transistor, chất dẫn và chất cách điện đã bàn ở trên. Integrated circuit ngày nay chỉ chứa một lớp transistor nhưng có thể có từ hai đến tám tầng chất dẫn kim loại, ngăn cách bởi các lớp cách điện.
 
-#### silicon crystal ingot
+### silicon crystal ingot
 
 Thanh tinh thể silicon có đường kính từ 8 đến 12 inch và dài khoảng 12 đến 24 inch.
 
-#### wafer
+### wafer
 
 Lát cắt từ silicon ingot không dày quá 0.1 inch, dùng để tạo chip.
 
@@ -603,11 +603,11 @@ Lát cắt từ silicon ingot không dày quá 0.1 inch, dùng để tạo chip.
 
 Một lỗi cực nhỏ duy nhất trong chính wafer hoặc trong một trong hàng chục bước tạo mẫu có thể khiến vùng wafer đó không hoạt động. Những lỗi này, được gọi là defect, khiến gần như không thể chế tạo wafer hoàn hảo. Cách đơn giản nhất để xử lý sự không hoàn hảo là đặt nhiều thành phần độc lập trên cùng wafer. Wafer có mẫu sau đó được chặt, hay cắt, thành những thành phần gọi là die, thường được gọi thân thuộc hơn là chip. Hình 1.13 là ảnh wafer chứa microprocessor trước khi cắt; Hình 1.9 trước đó cho thấy một die microprocessor riêng lẻ.
 
-#### defect
+### defect
 
 Lỗi cực nhỏ trong wafer hoặc bước tạo mẫu có thể khiến die chứa lỗi đó không hoạt động.
 
-#### die
+### die
 
 Những phần hình chữ nhật riêng lẻ được cắt từ wafer, thường gọi thân thuộc hơn là chip.
 
@@ -617,7 +617,7 @@ Những phần hình chữ nhật riêng lẻ được cắt từ wafer, thườ
 
 Việc cắt cho phép chỉ loại bỏ các die không may chứa lỗi, thay vì toàn bộ wafer. Khái niệm này được định lượng bằng yield của quy trình, định nghĩa là tỷ lệ phần trăm die tốt trên tổng số die của wafer.
 
-#### yield
+### yield
 
 Tỷ lệ phần trăm die tốt trên tổng số die của wafer.
 
@@ -625,7 +625,7 @@ Chi phí integrated circuit tăng nhanh khi kích thước die tăng, do cả yi
 
 Sau khi tìm được die tốt, chúng được nối với các chân input/output của package bằng quy trình gọi là bonding. Những linh kiện đóng gói này được kiểm tra lần cuối, vì có thể xảy ra sai sót khi đóng gói, rồi giao cho khách hàng.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Chi phí integrated circuit có thể được biểu diễn bằng ba phương trình đơn giản:
 
@@ -635,7 +635,7 @@ Phương trình đầu dễ suy ra. Phương trình thứ hai là xấp xỉ, v�
 
 Vì thế, tùy tỷ lệ defect và kích thước die, wafer, chi phí nhìn chung không tuyến tính theo diện tích die.
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 Một yếu tố chính quyết định chi phí integrated circuit là sản lượng. Điều nào sau đây là lý do khiến chip sản xuất số lượng lớn có chi phí thấp hơn?
 
@@ -992,11 +992,11 @@ Vấn đề hiện nay là hạ điện áp hơn nữa dường như khiến tra
 
 Vì người thiết kế máy tính đã đâm vào power wall, họ cần một hướng đi mới. Họ chọn con đường khác với cách thiết kế microprocessor trong 30 năm đầu tiên.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Tuy dynamic energy là nguồn tiêu thụ năng lượng chính trong CMOS, static energy vẫn bị tiêu thụ do leakage current chạy ngay cả khi transistor tắt. Trong server, leakage thường chiếm 40% năng lượng tiêu thụ. Do đó tăng số transistor làm tăng công suất tỏa nhiệt, ngay cả khi transistor luôn tắt. Nhiều kỹ thuật thiết kế và đổi mới công nghệ đang được triển khai để kiểm soát leakage, nhưng rất khó hạ điện áp hơn nữa.
 
-#### Giải thích thêm
+### Giải thích thêm
 
 Công suất là thách thức cho integrated circuit vì hai lý do. Thứ nhất, điện phải được đưa vào và phân phối quanh chip; microprocessor hiện đại dùng hàng trăm chân chỉ cho nguồn và ground! Tương tự, nhiều tầng interconnect của chip chỉ được dùng phân phối nguồn và ground đến các phần chip. Thứ hai, công suất tiêu tán thành nhiệt và phải được đưa đi. Chip server có thể tiêu thụ hơn 100 watt; làm mát chip và hệ thống xung quanh là chi phí lớn trong warehouse scale computer (xem Chương 6).
 
@@ -1176,7 +1176,7 @@ Một lựa chọn thay thời gian là MIPS (million instructions per second). 
 
 Vì MIPS là tốc độ thực thi instruction, nó biểu thị hiệu năng ngược với execution time; máy nhanh hơn có chỉ số MIPS cao hơn. Ưu điểm của MIPS là dễ hiểu, và máy nhanh hơn nghĩa là MIPS lớn hơn, phù hợp trực giác.
 
-#### million instructions per second (MIPS)
+### million instructions per second (MIPS)
 
 Phép đo tốc độ thực thi chương trình dựa trên số triệu instruction. MIPS được tính bằng instruction count chia tích execution time với 10<sup>6</sup>.
 
@@ -1188,7 +1188,7 @@ CPI thay đổi 5 lần với SPEC CPU2006 trên máy Intel Core i7 trong Hình 
 
 Xét các phép đo hiệu năng sau của một chương trình:
 
-#### Tự kiểm tra
+### Tự kiểm tra
 
 | Phép đo | Máy tính A | Máy tính B |
 |---|---|---|

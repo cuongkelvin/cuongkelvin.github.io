@@ -6,14 +6,14 @@
 
 DOI: [10.1201/9781003598145-17](https://doi.org/10.1201/9781003598145-17)
 
-Cùng với [Chương 18](ch18_formal_verification.vi.md), chương trình bày các phương pháp kiểm chứng hình thức,<a id="fn17_117b"></a>[<sup>1</sup>](#fn17_1) chương này xem xét một số kỹ thuật có thể được dùng để trả lời câu hỏi: *“Một hệ thống được hiện thực theo thiết kế đề xuất có đáp ứng được những gì được yêu cầu ở nó không?”* Những câu hỏi chi tiết hơn có thể là: Chúng ta tin tưởng đến mức nào rằng:
+Cùng với [Chương 18](ch18_formal_verification.vi.md), chương trình bày các phương pháp kiểm chứng hình thức,<a id="fn17_117b"></a>[<sup>1</sup>](#fn17_1) chương này xem xét một số kỹ thuật có thể được dùng để trả lời câu hỏi: *“Một hệ thống được triển khai theo thiết kế đề xuất có đáp ứng được những gì được yêu cầu ở nó không?”* Những câu hỏi chi tiết hơn có thể là: Chúng ta tin tưởng đến mức nào rằng:
 
 - hệ thống này sẽ đáp ứng các yêu cầu dependability (availability hoặc reliability) của nó?
 - protocol giao tiếp giữa subsystem A và B sẽ không bao giờ bị treo cứng?
 - hệ thống sẽ đáp ứng các yêu cầu real-time của nó trong *mọi* chuỗi sự kiện?
 - không có race condition nào giữa các thread trong thiết kế này có thể dẫn đến hành vi không lường trước, hiếm gặp nhưng có thể xảy ra?
 
-Sau một phần giải thích ngắn về việc khi nào có thể cần thực hiện kiểm chứng thiết kế một cách hồi tố trên một hệ thống đã được hiện thực, chương này mô tả các kỹ thuật semi-formal là discrete event simulation ([Mục 17.2](#sec17_2)) và timed Petri net ([Mục 17.3](#sec17_3)). Các kỹ thuật này không độc lập với nhau và có thể được coi là những cách khác nhau để biểu diễn cùng một mô phỏng.
+Sau một phần giải thích ngắn về việc khi nào có thể cần thực hiện kiểm chứng thiết kế một cách hồi tố trên một hệ thống đã được triển khai, chương này mô tả các kỹ thuật semi-formal là discrete event simulation ([Mục 17.2](#sec17_2)) và timed Petri net ([Mục 17.3](#sec17_3)). Các kỹ thuật này không độc lập với nhau và có thể được coi là những cách khác nhau để biểu diễn cùng một mô phỏng.
 
 Đây không phải là những kỹ thuật semi-formal duy nhất được dùng để kiểm chứng thiết kế; IEC 61508-7 có các tham chiếu đến data flow diagram, UML diagram, decision table, message sequence chart, mô hình entity-relationship-attribute và các phương pháp semi-formal khác. Tôi đã chọn discrete event simulation và timed Petri net để giải thích ở đây vì tôi thấy chúng mạnh hơn các kỹ thuật kia và vì chúng là tập cha của một số kỹ thuật khác, đặc biệt là finite state machine, message sequence chart, activity diagram của SysML và data flow diagram.
 
@@ -29,7 +29,7 @@ Sau một phần giải thích ngắn về việc khi nào có thể cần thự
 
 Lý tưởng nhất, một thiết kế được kiểm chứng ngay khi nó được tạo ra; một khi một số quyết định thiết kế đã được đưa ra, những quyết định đó có thể được kiểm chứng để xác nhận rằng chúng đáp ứng các yêu cầu của hệ thống.
 
-Tuy nhiên, có những lúc việc kiểm chứng thiết kế cần được thực hiện một cách hồi tố, sau khi thiết kế đã được hiện thực; xem <a id="b17fig17_1"></a>[Hình 17.1](#fig17_1).
+Tuy nhiên, có những lúc việc kiểm chứng thiết kế cần được thực hiện một cách hồi tố, sau khi thiết kế đã được triển khai; xem <a id="b17fig17_1"></a>[Hình 17.1](#fig17_1).
 
 <a id="fig17_1"></a>
 
@@ -39,7 +39,7 @@ Tuy nhiên, có những lúc việc kiểm chứng thiết kế cần được t
 
 Trường hợp hiển nhiên nhất cho việc tạo ra thiết kế một cách hồi tố là khi một sản phẩm hiện có, được phát triển theo một tiêu chuẩn thấp hơn, giờ cần được kiểm định để dùng trong một hệ thống safety-critical, và khi thiết kế ban đầu được ghi lại không đầy đủ hoặc đã bị mất.
 
-Cũng có những lý do ít hiển nhiên hơn để tái dựng “thiết kế” từ phần hiện thực và kiểm chứng nó. Trong quá trình phát triển sản phẩm, các mối liên kết giữa yêu cầu, architecture và thiết kế có thể được giữ khá chặt chẽ. Mỗi yêu cầu an toàn có thể được truy vết qua architecture và thiết kế, và mỗi khía cạnh của thiết kế có thể được truy vết ngược về một yêu cầu. Xem [mục 7.4.2](ch07_foundational_analyses.vi.md#sec7_4_2) của ISO 26262-6:
+Cũng có những lý do ít hiển nhiên hơn để tái dựng “thiết kế” từ phần triển khai và kiểm chứng nó. Trong quá trình phát triển sản phẩm, các mối liên kết giữa yêu cầu, architecture và thiết kế có thể được giữ khá chặt chẽ. Mỗi yêu cầu an toàn có thể được truy vết qua architecture và thiết kế, và mỗi khía cạnh của thiết kế có thể được truy vết ngược về một yêu cầu. Xem [mục 7.4.2](ch07_foundational_analyses.vi.md#sec7_4_2) của ISO 26262-6:
 
 > *Trong quá trình phát triển software architectural design, phải xem xét những điều sau: … khả năng kiểm chứng của software architectural design;*
 >
@@ -47,9 +47,9 @@ Cũng có những lý do ít hiển nhiên hơn để tái dựng “thiết k�
 >
 > *LƯU Ý: Điều này ngụ ý truy vết bi-directional giữa software architectural design và các yêu cầu an toàn phần mềm.*
 
-<a id="p201"></a>Tuy nhiên, việc truy vết chặt chẽ này có thể bị mất ở bước giữa thiết kế và hiện thực — nhóm hiện thực có khả năng lớn và quy trình hiện thực có thể khó kiểm soát hơn. Ngoài ra, ánh xạ giữa phần tử thiết kế và phần hiện thực hiếm khi là one-to-one: phần hiện thực của một yêu cầu cụ thể có thể trải rộng trên nhiều module và một module duy nhất có thể cung cấp các service chung để thỏa mãn nhiều yêu cầu. Việc tái dựng “thiết kế” từ phần hiện thực hiện có và so sánh nó với thiết kế thật, như được minh họa trong [Hình 17.1](#fig17_1), khi đó có thể hữu ích trong việc khép kín vòng lặp.
+<a id="p201"></a>Tuy nhiên, việc truy vết chặt chẽ này có thể bị mất ở bước giữa thiết kế và triển khai — nhóm triển khai có khả năng lớn và quy trình triển khai có thể khó kiểm soát hơn. Ngoài ra, ánh xạ giữa phần tử thiết kế và phần triển khai hiếm khi là one-to-one: phần triển khai của một yêu cầu cụ thể có thể trải rộng trên nhiều module và một module duy nhất có thể cung cấp các service chung để thỏa mãn nhiều yêu cầu. Việc tái dựng “thiết kế” từ phần triển khai hiện có và so sánh nó với thiết kế thật, như được minh họa trong [Hình 17.1](#fig17_1), khi đó có thể hữu ích trong việc khép kín vòng lặp.
 
-Food and Drug Administration (FDA) ở Mỹ chịu trách nhiệm bảo đảm rằng các thiết bị y tế mới an toàn để sử dụng ở quốc gia đó. Trong thập kỷ đầu tiên của thế kỷ 21, FDA nhận ra rằng việc kiểm thử các thiết bị software-based ngày càng kém hiệu quả, khi Heisenbug bắt đầu chiếm ưu thế,<a id="fn17_217b"></a>[<sup>2</sup>](#fn17_2) và đã tìm kiếm các kỹ thuật khác. Tài liệu tham khảo [<a id="b17refbib17_1"></a>[1](#refbib17_1)] của Dharmalingam Ganesan *et al.* mô tả cách các đặc tính design-level của một hệ thống bơm truyền dịch có thể được rút ra một cách hồi tố từ source code. Những đặc tính này sau đó có thể được dùng để kiểm chứng rằng các yêu cầu an toàn được đáp ứng và cũng có thể cung cấp những gợi ý hữu ích về các vùng của phần hiện thực cần phân tích sâu hơn.
+Food and Drug Administration (FDA) ở Mỹ chịu trách nhiệm bảo đảm rằng các thiết bị y tế mới an toàn để sử dụng ở quốc gia đó. Trong thập kỷ đầu tiên của thế kỷ 21, FDA nhận ra rằng việc kiểm thử các thiết bị software-based ngày càng kém hiệu quả, khi Heisenbug bắt đầu chiếm ưu thế,<a id="fn17_217b"></a>[<sup>2</sup>](#fn17_2) và đã tìm kiếm các kỹ thuật khác. Tài liệu tham khảo [<a id="b17refbib17_1"></a>[1](#refbib17_1)] của Dharmalingam Ganesan *et al.* mô tả cách các đặc tính design-level của một hệ thống bơm truyền dịch có thể được rút ra một cách hồi tố từ source code. Những đặc tính này sau đó có thể được dùng để kiểm chứng rằng các yêu cầu an toàn được đáp ứng và cũng có thể cung cấp những gợi ý hữu ích về các vùng của phần triển khai cần phân tích sâu hơn.
 
 <a id="sec17_2"></a>
 
@@ -57,7 +57,7 @@ Food and Drug Administration (FDA) ở Mỹ chịu trách nhiệm bảo đảm r
 
 Khi chúng ta kiểm định một thiết kế, discrete event simulation có thể trả lời một số câu hỏi quan trọng:
 
-- Chúng ta có thể mong đợi mức dependability nào từ một hệ thống được hiện thực theo thiết kế này? Khi được dùng để trả lời câu hỏi này, discrete event simulation thay thế hoặc, hữu ích hơn, bổ sung cho fault tree analysis ([Mục 15.2](ch15_the_fault_tree.vi.md#sec15_2)) và Petri net ([Mục 17.3](#sec17_3)).
+- Chúng ta có thể mong đợi mức dependability nào từ một hệ thống được triển khai theo thiết kế này? Khi được dùng để trả lời câu hỏi này, discrete event simulation thay thế hoặc, hữu ích hơn, bổ sung cho fault tree analysis ([Mục 15.2](ch15_the_fault_tree.vi.md#sec15_2)) và Petri net ([Mục 17.3](#sec17_3)).
 - Sẽ cần bao nhiêu tài nguyên mỗi loại (memory, mutex, message buffer, v.v.) để bảo đảm rằng xác suất cạn kiệt thấp hơn *x* mỗi giờ hoạt động?
 - Có thể mong đợi những độ trễ nào, với tải khác nhau trên hệ thống?
 - Thuật toán phức tạp *X* sẽ hành xử thế nào trong các điều kiện cực đoan? Khi được dùng để trả lời câu hỏi này, discrete event simulation có thể bổ sung cho kiểm chứng hình thức — xem [Chương 18](ch18_formal_verification.vi.md).

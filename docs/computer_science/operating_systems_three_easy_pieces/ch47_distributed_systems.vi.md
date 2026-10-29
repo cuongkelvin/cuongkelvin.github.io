@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
+
 // server code
 int main(int argc, char *argv[]) {
     int sd = UDP_Open(10000);
@@ -85,6 +86,7 @@ int UDP_Open(int port) {
     }
     return sd;
 }
+
 int UDP_FillSockAddr(struct sockaddr_in *addr, char *hostName, int port) {
     bzero(addr, sizeof(struct sockaddr_in));
     addr->sin_family = AF_INET;          // host byte order
@@ -96,10 +98,12 @@ int UDP_FillSockAddr(struct sockaddr_in *addr, char *hostName, int port) {
     addr->sin_addr = *inAddr;
     return 0;
 }
+
 int UDP_Write(int sd, struct sockaddr_in *addr, char *buffer, int n) {
     int addrLen = sizeof(struct sockaddr_in);
     return sendto(sd, buffer, n, 0, (struct sockaddr *) addr, addrLen);
 }
+
 int UDP_Read(int sd, struct sockaddr_in *addr, char *buffer, int n) {
   int len = sizeof(struct sockaddr_in);
   return recvfrom(sd, buffer, n, 0, (struct sockaddr *) addr,
@@ -117,7 +121,11 @@ Tuy nhiên, vì nhiều ứng dụng chỉ muốn gửi data tới destination m
 
 > MẸO: SỬ DỤNG CHECKSUM ĐỂ BẢO ĐẢM INTEGRITY
 >
-> Checksum là phương pháp commonly-used để phát hiện corruption nhanh và hiệu quả trong hệ thống hiện đại. Một checksum đơn giản là phép cộng: chỉ cần cộng các byte của một phần data; dĩ nhiên, nhiều checksum tinh vi hơn đã được tạo ra, gồm cyclic redundancy code (CRC) cơ bản, Fletcher checksum và nhiều loại khác [MK09]. Trong networking, checksum được sử dụng như sau. Trước khi gửi message từ máy này tới máy khác, tính checksum trên các byte của message. Sau đó gửi cả message lẫn checksum tới destination. Tại destination, receiver cũng tính checksum trên message nhận được; nếu computed checksum này khớp checksum đã gửi, receiver có thể phần nào yên tâm rằng có lẽ data không bị corrupt trong quá trình truyền. Có thể đánh giá checksum theo nhiều phương diện khác nhau. Hiệu quả phát hiện là yếu tố chính: data thay đổi có khiến checksum thay đổi không? Checksum càng mạnh, thay đổi trong data càng khó lọt qua mà không bị phát hiện. Performance là tiêu chí quan trọng còn lại: tính checksum tốn kém tới mức nào? Đáng tiếc là hiệu quả phát hiện và performance thường mâu thuẫn, nghĩa là checksum chất lượng cao thường tốn kém để tính. Một lần nữa, cuộc sống không hoàn hảo.
+> Checksum là phương pháp commonly-used để phát hiện corruption nhanh và hiệu quả trong hệ thống hiện đại. Một checksum đơn giản là phép cộng: chỉ cần cộng các byte của một phần data; dĩ nhiên, nhiều checksum tinh vi hơn đã được tạo ra, gồm cyclic redundancy code (CRC) cơ bản, Fletcher checksum và nhiều loại khác [MK09].
+>
+> Trong networking, checksum được sử dụng như sau. Trước khi gửi message từ máy này tới máy khác, tính checksum trên các byte của message. Sau đó gửi cả message lẫn checksum tới destination. Tại destination, receiver cũng tính checksum trên message nhận được; nếu computed checksum này khớp checksum đã gửi, receiver có thể phần nào yên tâm rằng có lẽ data không bị corrupt trong quá trình truyền.
+>
+> Có thể đánh giá checksum theo nhiều phương diện khác nhau. Hiệu quả phát hiện là yếu tố chính: data thay đổi có khiến checksum thay đổi không? Checksum càng mạnh, thay đổi trong data càng khó lọt qua mà không bị phát hiện. Performance là tiêu chí quan trọng còn lại: tính checksum tốn kém tới mức nào? Đáng tiếc là hiệu quả phát hiện và performance thường mâu thuẫn, nghĩa là checksum chất lượng cao thường tốn kém để tính. Một lần nữa, cuộc sống không hoàn hảo.
 
 ## 47.3 Communication layer đáng tin cậy
 
@@ -161,7 +169,9 @@ Với messaging layer cơ bản, giờ ta đến câu hỏi tiếp theo của ch
 
 > MẸO: CẨN THẬN KHI ĐẶT GIÁ TRỊ TIMEOUT
 >
-> Như có lẽ bạn đoán được từ phần thảo luận, đặt timeout đúng là khía cạnh quan trọng khi dùng timeout để retry việc gửi message. Nếu timeout quá nhỏ, sender sẽ re-send message không cần thiết, làm lãng phí CPU time của sender và network resource. Nếu timeout quá lớn, sender chờ quá lâu mới re-send, khiến performance cảm nhận từ sender giảm. Vì thế, giá trị “đúng”, từ góc độ một client và server duy nhất, là chỉ chờ vừa đủ lâu để phát hiện packet loss, không lâu hơn. Tuy nhiên, distributed system thường có nhiều hơn một client và server, như sẽ thấy ở các chương sau. Khi nhiều client gửi tới một server, packet loss tại server có thể cho thấy server bị quá tải. Nếu đúng, client có thể retry theo cách thích nghi khác; chẳng hạn, sau timeout đầu tiên, client tăng timeout lên giá trị cao hơn, có thể gấp đôi ban đầu. Cơ chế exponential back-off như vậy, được tiên phong trong Aloha network đời đầu và áp dụng trong Ethernet đời đầu [A70], tránh tình huống tài nguyên bị quá tải vì quá nhiều lần re-sends. Hệ thống vững chắc cố tránh dạng quá tải này.
+> Như có lẽ bạn đoán được từ phần thảo luận, đặt timeout đúng là khía cạnh quan trọng khi dùng timeout để retry việc gửi message. Nếu timeout quá nhỏ, sender sẽ re-send message không cần thiết, làm lãng phí CPU time của sender và network resource. Nếu timeout quá lớn, sender chờ quá lâu mới re-send, khiến performance cảm nhận từ sender giảm. Vì thế, giá trị “đúng”, từ góc độ một client và server duy nhất, là chỉ chờ vừa đủ lâu để phát hiện packet loss, không lâu hơn.
+>
+> Tuy nhiên, distributed system thường có nhiều hơn một client và server, như sẽ thấy ở các chương sau. Khi nhiều client gửi tới một server, packet loss tại server có thể cho thấy server bị quá tải. Nếu đúng, client có thể retry theo cách thích nghi khác; chẳng hạn, sau timeout đầu tiên, client tăng timeout lên giá trị cao hơn, có thể gấp đôi ban đầu. Cơ chế exponential back-off như vậy, được tiên phong trong Aloha network đời đầu và áp dụng trong Ethernet đời đầu [A70], tránh tình huống tài nguyên bị quá tải vì quá nhiều lần re-sends. Hệ thống vững chắc cố tránh dạng quá tải này.
 
 Qua nhiều năm, cộng đồng nghiên cứu hệ thống đã phát triển nhiều cách tiếp cận. Một hướng nghiên cứu lấy OS abstraction rồi mở rộng để hoạt động trong môi trường phân tán. Chẳng hạn, distributed shared memory (DSM) cho phép process trên các máy khác nhau chia sẻ một virtual address space lớn [LH89]. Abstraction này biến distributed computation thành thứ trông như ứng dụng multi-threaded; khác biệt duy nhất là các thread chạy trên những máy khác nhau thay vì trên các processor khác nhau trong cùng máy.
 

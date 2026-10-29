@@ -4,7 +4,7 @@ Rodolfo Giometti
 
 LUCCA, Italy
 
-Linux kernel tích hợp một **cryptographic subsystem** mạnh mẽ và linh hoạt. Subsystem này cung cấp một bộ đầy đủ các primitive và thuật toán mật mã, đóng vai trò một lớp bảo mật nền tảng cho toàn bộ hệ thống. Bằng cách hiện thực các chức năng này trực tiếp bên trong kernel, Linux bảo đảm rằng các thao tác mật mã quan trọng, chẳng hạn như mã hóa dữ liệu, hashing an toàn, v.v., được thực hiện với tăng tốc phần cứng (nếu có) và luôn sẵn sàng cho các thành phần khác nhau của kernel cũng như các ứng dụng user-space. Điều này rất quan trọng để bảo vệ mọi thứ, từ truyền thông mạng và filesystem cho đến tính toàn vẹn của hệ thống.
+Linux kernel tích hợp một **cryptographic subsystem** mạnh mẽ và linh hoạt. Subsystem này cung cấp một bộ đầy đủ các primitive và thuật toán mật mã, đóng vai trò một lớp bảo mật nền tảng cho toàn bộ hệ thống. Bằng cách triển khai các chức năng này trực tiếp bên trong kernel, Linux bảo đảm rằng các thao tác mật mã quan trọng, chẳng hạn như mã hóa dữ liệu, hashing an toàn, v.v., được thực hiện với tăng tốc phần cứng (nếu có) và luôn sẵn sàng cho các thành phần khác nhau của kernel cũng như các ứng dụng user-space. Điều này rất quan trọng để bảo vệ mọi thứ, từ truyền thông mạng và filesystem cho đến tính toàn vẹn của hệ thống.
 
 Gắn chặt với cryptographic subsystem là **kernel keyring**, đóng vai trò một kho lưu trữ an toàn cho các cryptographic key, cho phép quản lý và chia sẻ các key này một cách an toàn giữa các tiến trình và module của kernel với các tiến trình user-space.
 
@@ -91,7 +91,7 @@ Trong cuốn sách này, chúng ta sẽ thấy nhiều cách để ngăn key b�
 
 ## 1.2 Linux Crypto API
 
-Linux Crypto API là một framework mật mã được tích hợp sẵn trong Linux, cung cấp một interface nhất quán để kernel sử dụng nhiều loại thuật toán và chức năng mật mã khác nhau. Hơn nữa, nó cung cấp một interface thống nhất cho các thuật toán khác nhau theo cách mà một kernel module hoặc ứng dụng user-space có thể yêu cầu một thuật toán như AES-CBC hoặc SHA256 mà không cần biết chi tiết hiện thực của nó.
+Linux Crypto API là một framework mật mã được tích hợp sẵn trong Linux, cung cấp một interface nhất quán để kernel sử dụng nhiều loại thuật toán và chức năng mật mã khác nhau. Hơn nữa, nó cung cấp một interface thống nhất cho các thuật toán khác nhau theo cách mà một kernel module hoặc ứng dụng user-space có thể yêu cầu một thuật toán như AES-CBC hoặc SHA256 mà không cần biết chi tiết triển khai của nó.
 
 Ví dụ, chúng ta có thể xem danh sách tất cả các thuật toán có sẵn trên một hệ thống iMX8-based bằng cách xem file ảo `/proc/crypto`, như dưới đây (output này được lấy trên một hệ thống iMX8-based):
 
@@ -154,9 +154,9 @@ File này hiển thị tên của tất cả các thuật toán (nhãn `name`), 
 
 - `driver`: Tên duy nhất của cipher. Ngay cả tên này cũng có thể được dùng bởi các lời gọi API cấp phát cipher.
 
-- `module`: Kernel module cung cấp hiện thực của cipher (hoặc `kernel` đối với các cipher được link tĩnh).
+- `module`: Kernel module cung cấp bản triển khai của cipher (hoặc `kernel` đối với các cipher được link tĩnh).
 
-- `priority`: Giá trị độ ưu tiên của hiện thực cipher (xem bên dưới).
+- `priority`: Giá trị độ ưu tiên của bản triển khai cipher (xem bên dưới).
 
 - `refcnt`: Số đếm tham chiếu của cipher tương ứng, tức là số lượng consumer hiện tại của cipher này.
 
@@ -174,7 +174,7 @@ File này hiển thị tên của tất cả các thuật toán (nhãn `name`), 
 
   > Xem file `Documentation/crypto/architecture.rst` trong source của Linux kernel để có danh sách đầy đủ.
 
-Cơ chế lựa chọn priority-based là một cách để chọn hiện thực tốt nhất hiện có cho một thuật toán được yêu cầu. Khi chúng ta yêu cầu một tên thuật toán chung, kernel tự động chọn hiện thực có độ ưu tiên cao nhất.
+Cơ chế lựa chọn priority-based là một cách để chọn bản triển khai tốt nhất hiện có cho một thuật toán được yêu cầu. Khi chúng ta yêu cầu một tên thuật toán chung, kernel tự động chọn bản triển khai có độ ưu tiên cao nhất.
 
 Trong nội dung ở trên của file `/proc/crypto`, chúng ta có thể thấy hai thuật toán có cùng tên `cbc(aes)`; tuy nhiên, một thuật toán có các thuộc tính sau:
 
@@ -194,13 +194,13 @@ module       : kernel
 priority     : 300
 ```
 
-Như chúng ta có thể thấy, đây là hai hiện thực khác nhau của cùng một thuật toán AES-CBC, do mỗi hiện thực có driver riêng; tuy nhiên, hiện thực thứ nhất có độ ưu tiên cao hơn, là 3000. Trong kịch bản này, nếu chúng ta yêu cầu thuật toán `cbc(aes)`, kernel sẽ dùng hiện thực có độ ưu tiên cao hơn, trong ví dụ của chúng ta là hiện thực do driver `cbc-aes-caam` cung cấp (nếu nhiều hiện thực có cùng độ ưu tiên cao nhất, hành vi của kernel thường là chọn tùy ý một trong số đó).
+Như chúng ta có thể thấy, đây là hai cách triển khai khác nhau của cùng một thuật toán AES-CBC, do mỗi cách triển khai có driver riêng; tuy nhiên, cách triển khai thứ nhất có độ ưu tiên cao hơn, là 3000. Trong kịch bản này, nếu chúng ta yêu cầu thuật toán `cbc(aes)`, kernel sẽ dùng cách triển khai có độ ưu tiên cao hơn, trong ví dụ của chúng ta là cách triển khai do driver `cbc-aes-caam` cung cấp (nếu nhiều cách triển khai có cùng độ ưu tiên cao nhất, hành vi của kernel thường là chọn tùy ý một trong số đó).
 
-> Chúng ta sẽ giải thích CAAM là gì ở phần sau của mục này, vì nó sẽ được dùng để giải thích nhiều giải pháp mật mã khác nhau và thú vị. Tạm thời, người đọc nên coi nó như một hiện thực thuật toán thay thế bên trong kernel.
+> Chúng ta sẽ giải thích CAAM là gì ở phần sau của mục này, vì nó sẽ được dùng để giải thích nhiều giải pháp mật mã khác nhau và thú vị. Tạm thời, người đọc nên coi nó như một bản triển khai thuật toán thay thế bên trong kernel.
 
-Để ghi đè cơ chế lựa chọn priority-based này, chúng ta phải yêu cầu tên duy nhất (tức là tên driver) thay vì tên chung; kernel sẽ dùng hiện thực cụ thể đó bất kể độ ưu tiên của nó. Trong ví dụ của chúng ta, chúng ta phải yêu cầu `cbc-aes-ce` để chọn hiện thực còn lại (chúng ta sẽ đưa ra một ví dụ về cơ chế này ở phần sau của mục này).
+Để ghi đè cơ chế lựa chọn priority-based này, chúng ta phải yêu cầu tên duy nhất (tức là tên driver) thay vì tên chung; kernel sẽ dùng bản triển khai cụ thể đó bất kể độ ưu tiên của nó. Trong ví dụ của chúng ta, chúng ta phải yêu cầu `cbc-aes-ce` để chọn bản triển khai còn lại (chúng ta sẽ đưa ra một ví dụ về cơ chế này ở phần sau của mục này).
 
-Mọi thuật toán mật mã được liệt kê trong `/proc/crypto` đều có thể được dùng bên trong kernel cho các tác vụ đặc biệt (không được trình bày trong cuốn sách này) hoặc trong user space bằng cách dùng interface **AF_ALG socket**. Interface này cho phép developer giao tiếp trực tiếp với lớp crypto bên dưới (software hoặc hardware, tùy theo độ ưu tiên của từng hiện thực). Trong manpage của system call `socket()` (`man 2 socket`), chúng ta có thể đọc được thông tin sau:
+Mọi thuật toán mật mã được liệt kê trong `/proc/crypto` đều có thể được dùng bên trong kernel cho các tác vụ đặc biệt (không được trình bày trong cuốn sách này) hoặc trong user space bằng cách dùng interface **AF_ALG socket**. Interface này cho phép developer giao tiếp trực tiếp với lớp crypto bên dưới (software hoặc hardware, tùy theo độ ưu tiên của từng bản triển khai). Trong manpage của system call `socket()` (`man 2 socket`), chúng ta có thể đọc được thông tin sau:
 
 ```
 SOCKET(2)      Linux Programmer's Manual     SOCKET(2)
@@ -460,7 +460,7 @@ ivsize       : 16
 ...
 ```
 
-Người đọc nên để ý trong output ở trên rằng chúng ta có hai hiện thực AES-ECB khác nhau được hỗ trợ bởi CAAM (**Cryptographic Acceleration and Assurance Module**, có trên nhiều thiết bị i.MX-based của NXP): một hiện thực tên là `ecb(aes)` và hiện thực kia tên là `tk(ecb(aes))`.
+Người đọc nên để ý trong output ở trên rằng chúng ta có hai cách triển khai AES-ECB khác nhau được hỗ trợ bởi CAAM (**Cryptographic Acceleration and Assurance Module**, có trên nhiều thiết bị i.MX-based của NXP): một cách triển khai tên là `ecb(aes)` và cách triển khai kia tên là `tk(ecb(aes))`.
 
 Điều then chốt ở đây là chúng ta có cùng một thuật toán AES-CBC, nhưng nó làm việc trên các key khác nhau! Chữ *khác nhau* ở đây có nghĩa là gì sẽ rõ hơn ở phần sau, khi chúng ta làm một số ví dụ; lúc này người đọc nên ghi nhớ sự khác biệt thú vị này, vốn không có trong OpenSSL.
 
@@ -839,9 +839,9 @@ Tại thời điểm viết cuốn sách này, các trusted source hiện có l�
 
 - *TEE hoặc OP-TEE*: **Open Portable Trusted Execution Environment** là một Trusted Execution Environment (TEE) mã nguồn mở dựa trên công nghệ Arm TrustZone. Các số ngẫu nhiên có thể được tạo bằng hardware hoặc software, và chúng có thể được seed qua nhiều nguồn entropy.
 
-- *CAAM*: **Cryptographic Acceleration and Assurance Module** (có trong nhiều CPU i.MX của NXP) là phần cứng tăng tốc mật mã, hiện thực các thuật toán mã hóa khối, hashing và xác thực, một bộ điều khiển memory an toàn, và một bộ sinh số ngẫu nhiên bằng phần cứng có thể được dùng để tạo trusted key của chúng ta.
+- *CAAM*: **Cryptographic Acceleration and Assurance Module** (có trong nhiều CPU i.MX của NXP) là phần cứng tăng tốc mật mã, thực thi các thuật toán mã hóa khối, hashing và xác thực, một bộ điều khiển memory an toàn, và một bộ sinh số ngẫu nhiên bằng phần cứng có thể được dùng để tạo trusted key của chúng ta.
 
-  > Lưu ý rằng module này cũng hiện thực các cryptographic key hardware-backed riêng, có thể được gọi là *CAAM key*. Phần cứng này là engine cơ bản cho các secure key được trình bày ở phần tiếp theo.
+  > Lưu ý rằng module này cũng triển khai các cryptographic key hardware-backed riêng, có thể được gọi là *CAAM key*. Phần cứng này là engine cơ bản cho các secure key được trình bày ở phần tiếp theo.
 
 - *DCP*: Data Co-Processor là một bộ tăng tốc crypto của nhiều SoC i.MX khác nhau; bản thân thiết bị phần cứng này không cung cấp một interface RNG chuyên dụng, nên RNG mặc định của kernel được sử dụng.
 

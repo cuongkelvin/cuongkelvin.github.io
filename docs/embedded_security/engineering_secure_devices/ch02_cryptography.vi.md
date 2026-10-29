@@ -18,7 +18,7 @@ Auguste Kerckhoffs là một nhà mật mã học người Hà Lan ở thế k�
 
 Ngày nay, điểm này có vẻ không đáng nhắc đến vì mọi thuật toán crypto liên quan đều được tiêu chuẩn hóa ở cấp quốc gia hay quốc tế, và tất cả đều công khai cho mọi người đọc và phân tích. Tuy nhiên, khi nói đến kỹ thuật phần mềm và thiết bị, một số developer vẫn phá vỡ nguyên tắc này. Họ tự phát minh ra các thủ tục “crypto” của riêng mình và lập luận rằng bảo mật đạt được “vì không ai biết nó hoạt động thế nào.” Đôi khi họ làm điều này vì lý do performance, nhưng thường hơn đó là kết quả của việc thiếu kiến thức crypto vững chắc. Tuy nhiên, cụm từ “có thể bị kẻ thù đánh cắp” cũng có thể được hiểu là “có thể bị kẻ tấn công reverse engineering,” điều sẽ phá vỡ tính bảo mật của một “giải pháp” như vậy.
 
-Nếu bạn bắt gặp mình đang cân nhắc hiện thực một hàm tùy chỉnh, có lẽ bao gồm một vài giá trị ma thuật và các phép XOR để đạt được bảo mật, hãy ngừng nghĩ về nó ngay lập tức! Điều đó được gọi là *security by obscurity* và nó sẽ chỉ khiến bạn gặp rắc rối.
+Nếu bạn bắt gặp mình đang cân nhắc việc triển khai một hàm tùy chỉnh, có lẽ bao gồm một vài giá trị ma thuật và các phép XOR để đạt được bảo mật, hãy ngừng nghĩ về nó ngay lập tức! Điều đó được gọi là *security by obscurity* và nó sẽ chỉ khiến bạn gặp rắc rối.
 
 <a id="ch00lev1_16"></a>
 
@@ -146,27 +146,27 @@ Khi ảnh được mã hóa trong ECB mode, các pixel plaintext có cùng giá 
 
 *Hình 2-9: Mã hóa trong CBC mode*
 
-<a id="page_34"></a>Từ góc nhìn bảo mật, CBC mode tốt hơn đáng kể so với ECB mode, nhưng nó có một nhược điểm mới: sự phụ thuộc giữa các lần mã hóa liên tiếp làm cho các hiện thực song song kém hiệu quả hơn, điều này hạn chế performance.
+<a id="page_34"></a>Từ góc nhìn bảo mật, CBC mode tốt hơn đáng kể so với ECB mode, nhưng nó có một nhược điểm mới: sự phụ thuộc giữa các lần mã hóa liên tiếp làm cho các bản triển khai song song kém hiệu quả hơn, điều này hạn chế performance.
 
 <a id="ch00lev2_22"></a>
 
 ### *Counter Mode*
 
-Một mode thú vị không cho phép tồn tại quan hệ giữa các ciphertext nhưng tạo điều kiện cho các hiện thực high-performance, multicore được gọi là *Counter (CTR) mode*. Như được minh họa trong [Hình 2-10](#ch02fig010), bản thân các khối plaintext không được mã hóa, mà là sự ghép nối của một *nonce (number used once)* và một giá trị bộ đếm bắt đầu từ 0.
+Một mode thú vị không cho phép tồn tại quan hệ giữa các ciphertext nhưng tạo điều kiện cho các bản triển khai high-performance, multicore được gọi là *Counter (CTR) mode*. Như được minh họa trong [Hình 2-10](#ch02fig010), bản thân các khối plaintext không được mã hóa, mà là sự ghép nối của một *nonce (number used once)* và một giá trị bộ đếm bắt đầu từ 0.
 
 <a id="ch02fig010"></a>![](images/02fig10.jpg)
 
 *Hình 2-10: Mã hóa trong CTR mode*
 
-Kết quả của việc mã hóa này sau đó được XOR với plaintext để thu được ciphertext. Với mỗi khối plaintext tiếp theo, giá trị bộ đếm được tăng thêm một để tạo ra các ciphertext thay đổi, như được thể hiện trong [Hình 2-8](#ch02fig08)c. Cách tiếp cận này thậm chí còn mang lại một ưu điểm khác: cả mã hóa lẫn giải mã đều dùng hàm `Encrypt()` của block cipher được sử dụng. Không cần hiện thực `Decrypt()`.
+Kết quả của việc mã hóa này sau đó được XOR với plaintext để thu được ciphertext. Với mỗi khối plaintext tiếp theo, giá trị bộ đếm được tăng thêm một để tạo ra các ciphertext thay đổi, như được thể hiện trong [Hình 2-8](#ch02fig08)c. Cách tiếp cận này thậm chí còn mang lại một ưu điểm khác: cả mã hóa lẫn giải mã đều dùng hàm `Encrypt()` của block cipher được sử dụng. Không cần triển khai `Decrypt()`.
 
 Trái với ECB mode, CBC mode và CTR mode đòi hỏi thêm một tham số đầu vào: một *initialization vector (IV)* hay một nonce. Lý do cho cả hai là làm cho mỗi lần mã hóa là duy nhất, nên chúng không bao giờ được dùng hai lần. Hơn nữa, việc giải mã chỉ khả thi nếu bên nhận cũng có quyền truy cập vào IV hay nonce tương ứng. Nhưng vì nó không mang dữ liệu bí mật, việc truyền nó dưới dạng cleartext cùng với ciphertext là không sao.
 
 > **CẢNH BÁO**
 >
-> *Trên thực tế, việc chỉ đặt IV hay nonce bằng 0 hay một số ngẫu nhiên cố định rất hấp dẫn. Tuy nhiên, làm như vậy sẽ làm suy yếu đáng kể độ mạnh của cryptographic primitive này. Hãy bỏ thêm công sức để hiện thực một bộ sinh phù hợp cho các giá trị duy nhất.*
+> *Trên thực tế, việc chỉ đặt IV hay nonce bằng 0 hay một số ngẫu nhiên cố định rất hấp dẫn. Tuy nhiên, làm như vậy sẽ làm suy yếu đáng kể độ mạnh của cryptographic primitive này. Hãy bỏ thêm công sức để triển khai một bộ sinh phù hợp cho các giá trị duy nhất.*
 
-Cùng với các mode hoạt động CBC và CTR, AES rất được ưa chuộng. Tuy nhiên, các symmetric cipher khác, thú vị hơn, có thể hữu ích nếu bạn có các yêu cầu đặc biệt. Ví dụ, các stream cipher hiện đại Salsa20 và ChaCha20, do nhà mật mã học Daniel J. Bernstein phát triển, <a id="page_35"></a>có thiết kế đơn giản và cung cấp performance cao trong các hiện thực thuần phần mềm. Nếu phần cứng của bạn không hỗ trợ AES nhưng bạn cần đạt được performance cao nhất có thể, những thuật toán này có thể đáng để xem xét.
+Cùng với các mode hoạt động CBC và CTR, AES rất được ưa chuộng. Tuy nhiên, các symmetric cipher khác, thú vị hơn, có thể hữu ích nếu bạn có các yêu cầu đặc biệt. Ví dụ, các stream cipher hiện đại Salsa20 và ChaCha20, do nhà mật mã học Daniel J. Bernstein phát triển, <a id="page_35"></a>có thiết kế đơn giản và cung cấp performance cao trong các bản triển khai thuần phần mềm. Nếu phần cứng của bạn không hỗ trợ AES nhưng bạn cần đạt được performance cao nhất có thể, những thuật toán này có thể đáng để xem xét.
 
 <a id="ch00lev1_19"></a>
 
@@ -188,7 +188,7 @@ Dựa trên *birthday paradox* và *rho method* so-called (cái gọi là), các
 
 Đến đây, bạn có thể thắc mắc tại sao chúng ta cần hash function và quá trình ánh xạ cryptography của chúng cho bảo mật thiết bị. Lý do rất đơn giản: chúng là một phần của nhiều ứng dụng bảo mật như tạo và xác minh digital signature, các thuật toán key-derivation, lưu trữ mật khẩu an toàn và nhiều ứng dụng khác nữa.
 
-Những hiện thực thực tế đầu tiên của hash function xuất hiện vào những năm 1990. MD4, MD5 và SHA-1 là ba đại diện nổi bật. Tuy nhiên, trong khoảng thời gian đó, các nhà nghiên cứu đã tìm ra cách tìm va chạm cho ba hàm này (và những hàm khác), nên bạn không nên dùng những thuật toán legacy đó trong các thiết kế hiện đại nữa.
+Những bản triển khai thực tế đầu tiên của hash function xuất hiện vào những năm 1990. MD4, MD5 và SHA-1 là ba đại diện nổi bật. Tuy nhiên, trong khoảng thời gian đó, các nhà nghiên cứu đã tìm ra cách tìm va chạm cho ba hàm này (và những hàm khác), nên bạn không nên dùng những thuật toán legacy đó trong các thiết kế hiện đại nữa.
 
 <a id="page_36"></a>Hiện nay, họ hash function được dùng rộng rãi nhất là SHA-2, người kế nhiệm SHA-1. Nó được mô tả trong tiêu chuẩn *FIPS 180-4* và có bốn thành viên: SHA-224, SHA-256, SHA-384 và SHA-512. Các con số biểu thị độ dài đầu ra của các hàm này, nên SHA-224 rất giống SHA-256 ngoại trừ các giá trị khởi tạo khác nhau và việc cắt ngắn hash value cuối cùng xuống 224 bit. Điều tương tự áp dụng cho SHA-384 so với SHA-512.
 
@@ -220,7 +220,7 @@ Ví dụ, nếu SHA-256 được chọn làm hash function của một HMAC, thu
 
 > **LƯU Ý**
 >
-> *Trên thực tế, bạn có thể gặp các cấu trúc HMAC được xây dựng dựa trên MD5 hay SHA-1. Ngay cả khi các cuộc tấn công va chạm đã được chứng minh đối với những hash function này, chúng vẫn hợp lệ để dùng cho các hiện thực HMAC thực tế vì kẻ tấn công sẽ phải thu thập một số lượng khổng lồ authentication tag được tạo ra từ cùng một secret key duy nhất để phá vỡ một instance cụ thể.*
+> *Trên thực tế, bạn có thể gặp các cấu trúc HMAC được xây dựng dựa trên MD5 hay SHA-1. Ngay cả khi các cuộc tấn công va chạm đã được chứng minh đối với những hash function này, chúng vẫn hợp lệ để dùng cho các bản triển khai HMAC thực tế vì kẻ tấn công sẽ phải thu thập một số lượng khổng lồ authentication tag được tạo ra từ cùng một secret key duy nhất để phá vỡ một instance cụ thể.*
 
 Một *cipher-based message authentication code (CMAC)* dùng một block cipher trong CBC mode để tính MAC. Một biến thể dựa trên AES, gọi là *AES-CMAC*, được đặc tả trong RFC 4493. Ở đó, thông điệp cần bảo vệ được xử lý bằng AES trong CBC mode ngoại trừ khối thông điệp cuối cùng, vốn được xử lý đặc biệt vì lý do bảo mật. Ciphertext cuối cùng được lấy làm authentication tag, và mọi ciphertext khác bị loại bỏ.
 
@@ -238,7 +238,7 @@ Giải pháp này không phổ biến bằng cấu trúc HMAC, nhưng nó có th
 
 Khi kết hợp mã hóa và tạo MAC, chúng ta có thể dùng ba chiến lược. Cả ba đều giả định việc dùng các cipher và thuật toán MAC an toàn, và mỗi thứ dùng key riêng của nó, nhưng khác nhau ở thứ tự các thao tác được thực hiện:
 
-**Encrypt-and-MAC** Cách tiếp cận này tạo ra một ciphertext và một authentication tag từ cùng plaintext một cách song song, điều có thể mang lại lợi thế về performance. Tuy nhiên, việc áp dụng một thuật toán MAC lên plaintext có thể dẫn đến rò rỉ thông tin về plaintext thông qua <a id="page_38"></a>authentication tag vì các thuật toán MAC không được thiết kế để bảo vệ confidentiality của dữ liệu đầu vào của chúng. Tuy nhiên, với các MAC hiện đại như HMAC-SHA-256, vấn đề này không tồn tại. Vấn đề thứ hai là integrity của ciphertext không được bảo vệ. Một ciphertext bị thay đổi phải được giải mã trước để phát hiện việc thao túng, điều có thể cho phép kẻ tấn công khai thác các điểm yếu hiện thực trong routine giải mã.
+**Encrypt-and-MAC** Cách tiếp cận này tạo ra một ciphertext và một authentication tag từ cùng plaintext một cách song song, điều có thể mang lại lợi thế về performance. Tuy nhiên, việc áp dụng một thuật toán MAC lên plaintext có thể dẫn đến rò rỉ thông tin về plaintext thông qua <a id="page_38"></a>authentication tag vì các thuật toán MAC không được thiết kế để bảo vệ confidentiality của dữ liệu đầu vào của chúng. Tuy nhiên, với các MAC hiện đại như HMAC-SHA-256, vấn đề này không tồn tại. Vấn đề thứ hai là integrity của ciphertext không được bảo vệ. Một ciphertext bị thay đổi phải được giải mã trước để phát hiện việc thao túng, điều có thể cho phép kẻ tấn công khai thác các điểm yếu triển khai trong routine giải mã.
 
 **MAC-then-encrypt** Trong biến thể này, một authentication tag được tạo ra từ plaintext và được nối vào nó. Kết quả sau đó được mã hóa để thu được ciphertext cuối cùng. Trong trường hợp này, thuật toán MAC không thể làm rò rỉ bất kỳ thông tin nào, nhưng ciphertext vẫn có thể bị thao túng mà không có khả năng phát hiện trước khi giải mã.
 
@@ -262,11 +262,11 @@ Ngày nay, thuật toán AEAD phổ biến nhất là cipher AES vận hành tro
 
 Việc bảo vệ confidentiality rất giống CTR mode, ngoại trừ việc GCM không dùng kết quả của lần mã hóa đầu tiên để xử lý plaintext, mà dùng nó ở bước cuối cùng của việc tạo authentication-tag. Việc tạo MAC dựa trên hash function `GHASH`, về cơ bản gồm một chuỗi phép nhân trong một trường Galois nhị phân với một tham số cố định, *hash subkey*. Subkey này được dẫn xuất bằng cách mã hóa khối plaintext all-zeros bằng key AES được dùng cho việc mã hóa.
 
-Nonce hay initialization vector của GCM được dự định là một chuỗi nhị phân 96-bit duy nhất. GCM khá mong manh đối với việc dùng lại nonce, nghĩa là kẻ tấn công có thể giả mạo authentication tag nếu họ có quyền truy cập vào hai authentication tag được tạo ra bằng cùng key và nonce. Do đó, việc hiện thực một cơ chế sinh nonce vững chắc là thiết yếu cho GCM.
+Nonce hay initialization vector của GCM được dự định là một chuỗi nhị phân 96-bit duy nhất. GCM khá mong manh đối với việc dùng lại nonce, nghĩa là kẻ tấn công có thể giả mạo authentication tag nếu họ có quyền truy cập vào hai authentication tag được tạo ra bằng cùng key và nonce. Do đó, việc triển khai một cơ chế sinh nonce vững chắc là thiết yếu cho GCM.
 
-<a id="page_40"></a>Bên cạnh AES-GCM, bạn có thể gặp nhiều thuật toán AE khác trong thực tế. Ví dụ là Counter with CBC-MAC (CCM) mode như được trình bày chi tiết trong *Special Publication 800-38C* của NIST và Offset Codebook (OCB) mode do Phil Rogaway thiết kế. Sự kết hợp của stream cipher ChaCha20 và thuật toán MAC Poly1305, cả hai đều do Bernstein thiết kế, cũng là một giải pháp AEAD phổ biến. Nó đặc biệt hiệu quả trong các hiện thực software-only và đã được đặc tả trong RFC 8439.
+<a id="page_40"></a>Bên cạnh AES-GCM, bạn có thể gặp nhiều thuật toán AE khác trong thực tế. Ví dụ là Counter with CBC-MAC (CCM) mode như được trình bày chi tiết trong *Special Publication 800-38C* của NIST và Offset Codebook (OCB) mode do Phil Rogaway thiết kế. Sự kết hợp của stream cipher ChaCha20 và thuật toán MAC Poly1305, cả hai đều do Bernstein thiết kế, cũng là một giải pháp AEAD phổ biến. Nó đặc biệt hiệu quả trong các bản triển khai software-only và đã được đặc tả trong RFC 8439.
 
-Hơn nữa, cuộc thi CAESAR (*[https://competitions.cr.yp.to/caesar-submissions.xhtml](https://competitions.cr.yp.to/caesar-submissions.xhtml)*) diễn ra từ 2013 đến 2019 đã tạo ra thêm một tập thiết kế AEAD sáng tạo—ví dụ, các hiện thực lightweight trên các thiết bị resource-constrained hay các ứng dụng high-performance.
+Hơn nữa, cuộc thi CAESAR (*[https://competitions.cr.yp.to/caesar-submissions.xhtml](https://competitions.cr.yp.to/caesar-submissions.xhtml)*) diễn ra từ 2013 đến 2019 đã tạo ra thêm một tập thiết kế AEAD sáng tạo—ví dụ, các bản triển khai lightweight trên các thiết bị resource-constrained hay các ứng dụng high-performance.
 
 <a id="ch00lev1_22"></a>
 
@@ -290,7 +290,7 @@ Những cơ hội khác nhau về căn bản này đã mở đường cho nhiề
 
 ## Hệ mật RSA (The RSA Cryptosystem)
 
-Lược đồ crypto bất đối xứng đầu tiên và vẫn phổ biến nhất được công bố năm 1977 và được đặt theo tên các nhà phát minh: *Rivest-Shamir-Adleman (RSA)*. Để đạt được sự bất đối xứng điển hình giữa thao tác public và private, RSA hiện thực một *trapdoor function*. Với cách tiếp cận này, bạn có thể dễ dàng biến đổi dữ liệu A thành dữ liệu B, nhưng việc suy ra dữ liệu A từ dữ liệu B là bất khả thi trên thực tế trừ khi bạn biết trapdoor.
+Lược đồ crypto bất đối xứng đầu tiên và vẫn phổ biến nhất được công bố năm 1977 và được đặt theo tên các nhà phát minh: *Rivest-Shamir-Adleman (RSA)*. Để đạt được sự bất đối xứng điển hình giữa thao tác public và private, RSA triển khai một *trapdoor function*. Với cách tiếp cận này, bạn có thể dễ dàng biến đổi dữ liệu A thành dữ liệu B, nhưng việc suy ra dữ liệu A từ dữ liệu B là bất khả thi trên thực tế trừ khi bạn biết trapdoor.
 
 <a id="ch00lev2_25"></a>
 
@@ -438,11 +438,11 @@ ECC đạt được cùng security level với kích thước key nhỏ hơn nhi
 
 ### <a id="page_47"></a>*Nỗi khổ của sự lựa chọn*
 
-Trái với nhiều thuật toán cryptography khác, ECC đòi hỏi người hiện thực phải chọn không chỉ một kích thước key mà còn một elliptic curve cụ thể để sử dụng. Các đường cong “an toàn” phải đáp ứng một số yêu cầu toán học nhất định, đó là lý do tại sao hợp lý khi chọn một đường cong từ các lựa chọn phổ biến, đã được tiêu chuẩn hóa và trải qua phân tích nghiêm ngặt.
+Trái với nhiều thuật toán cryptography khác, ECC đòi hỏi người triển khai phải chọn không chỉ một kích thước key mà còn một elliptic curve cụ thể để sử dụng. Các đường cong “an toàn” phải đáp ứng một số yêu cầu toán học nhất định, đó là lý do tại sao hợp lý khi chọn một đường cong từ các lựa chọn phổ biến, đã được tiêu chuẩn hóa và trải qua phân tích nghiêm ngặt.
 
 Mặt khác, một tiêu chí mà bạn có thể xem xét trong quá trình lựa chọn là nguồn gốc của các tham số đường cong. Mặc dù National Security Agency (NSA) của Mỹ đã tạo ra đường cong số nguyên tố P-256, và NIST đã tiêu chuẩn hóa nó vào năm 2000, nó là một trong những đường cong phổ biến nhất trên thực tế. Tham số *b* của nó là một số 256-bit, và chỉ NSA biết nó được chọn như thế nào và tại sao. Điều tương tự cũng đúng với các đường cong NIST khác: P-192, P-224, P-384 và P-521. Đây có thể không phải là một vấn đề trọng yếu, nhưng có thể là một vấn đề đáng quan tâm, đối với các thiết bị hoạt động trong hạ tầng trọng yếu.
 
-Curve25519 hiện là elliptic curve phổ biến nhất và đáng tin cậy nhất. Nó được Bernstein đề xuất năm 2006 và nổi bật nhờ hai thuộc tính. Thứ nhất, nó tập trung mạnh vào performance cao trong các hiện thực phần mềm. Thứ hai, nó không dựa vào các tham số đường cong được chọn ngẫu nhiên hay mờ ám. Trong tương lai, các Edwards curve như Ed448-Goldilocks và Curve41417 cũng có thể được quan tâm vì chúng cung cấp security level trên 200-bit.
+Curve25519 hiện là elliptic curve phổ biến nhất và đáng tin cậy nhất. Nó được Bernstein đề xuất năm 2006 và nổi bật nhờ hai thuộc tính. Thứ nhất, nó tập trung mạnh vào performance cao trong các bản triển khai phần mềm. Thứ hai, nó không dựa vào các tham số đường cong được chọn ngẫu nhiên hay mờ ám. Trong tương lai, các Edwards curve như Ed448-Goldilocks và Curve41417 cũng có thể được quan tâm vì chúng cung cấp security level trên 200-bit.
 
 <a id="ch00lev2_31"></a>
 

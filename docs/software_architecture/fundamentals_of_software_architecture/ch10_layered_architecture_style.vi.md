@@ -4,7 +4,7 @@
 
 <a id="ix_ch10-style-layered-asciidoc0"></a>Architecture style *layered* (phân tầng), còn được biết đến là *n-tiered*, là một trong những architecture style phổ biến nhất. Nó là tiêu chuẩn de facto cho nhiều ứng dụng legacy nhờ sự đơn giản, quen thuộc và chi phí thấp.
 
-Layered architecture style có thể rơi vào một số architectural antipattern, bao gồm các antipattern [*Architecture by Implication*](https://oreil.ly/QAFGg) và [*Accidental Architecture*](https://oreil.ly/YNBXx). Khi developer hoặc kiến trúc sư “cứ bắt đầu viết code”, không chắc mình đang dùng architecture style nào, rất có khả năng họ đang hiện thực layered architecture style.
+Layered architecture style có thể rơi vào một số architectural antipattern, bao gồm các antipattern [*Architecture by Implication*](https://oreil.ly/QAFGg) và [*Accidental Architecture*](https://oreil.ly/YNBXx). Khi developer hoặc kiến trúc sư “cứ bắt đầu viết code”, không chắc mình đang dùng architecture style nào, rất có khả năng họ đang triển khai layered architecture style.
 
 <a id="id86"></a>
 
@@ -123,7 +123,7 @@ layeredArchitecture()
 
 Trong [Ví dụ 10-1](#src_archunitff2), kiến trúc sư định nghĩa các layer trong architecture, đặt các tên tiện lợi như `Controller` cho component được đại diện bởi tên package. (Trong cú pháp ArchUnit, hai dấu chấm (`..`) ở hai bên một tên package biểu thị quyền sở hữu của nó.) Sau đó kiến trúc sư định nghĩa giao tiếp được phép giữa các layer, quản trị các layer mở và đóng của chúng.
 
-Các thư viện fitness function hỗ trợ layered architecture style cực kỳ tốt, cho phép kiến trúc sư tự động hóa việc quản trị các mối quan hệ mà họ thiết kế giữa các layer trong quá trình hiện thực.
+Các thư viện fitness function hỗ trợ layered architecture style cực kỳ tốt, cho phép kiến trúc sư tự động hóa việc quản trị các mối quan hệ mà họ thiết kế giữa các layer trong quá trình triển khai.
 
 <a id="id314"></a>
 

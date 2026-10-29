@@ -2,7 +2,7 @@
 
 ## 16.1 Giới thiệu
 
-Trong chương này, chúng ta sẽ hiện thực một model hồi quy machine-learning trên FPGA bằng Simulink và Vivado. Trước hết, chúng ta tải một dataset từ Kaggle phù hợp cho việc hiện thực hồi quy tuyến tính (linear regression). Dùng MATLAB, chúng ta huấn luyện model linear regression dựa trên phương pháp bình phương tối thiểu (least squares). Chúng ta dùng admission dataset để dự đoán khả năng được nhận vào một trường đại học dựa trên nhiều tham số input khác nhau. Sau đó, chúng ta hiện thực model hồi quy machine learning đã huấn luyện và tạo code VHDL có thể synthesize bằng HDL Coder. Cuối cùng, dùng Vivado, chúng ta chạy synthesis analysis và simulation để kiểm chứng project VHDL đã thiết kế.
+Trong chương này, chúng ta sẽ triển khai một model hồi quy machine-learning trên FPGA bằng Simulink và Vivado. Trước hết, chúng ta tải một dataset từ Kaggle phù hợp cho việc triển khai hồi quy tuyến tính (linear regression). Dùng MATLAB, chúng ta huấn luyện model linear regression dựa trên phương pháp bình phương tối thiểu (least squares). Chúng ta dùng admission dataset để dự đoán khả năng được nhận vào một trường đại học dựa trên nhiều tham số input khác nhau. Sau đó, chúng ta triển khai model hồi quy machine learning đã huấn luyện và tạo code VHDL có thể synthesize bằng HDL Coder. Cuối cùng, dùng Vivado, chúng ta chạy synthesis analysis và simulation để kiểm chứng project VHDL đã thiết kế.
 
 ## 16.2 Dataset Kaggle
 
@@ -14,7 +14,7 @@ Tổng quan về admission dataset trong phần mềm Excel được thể hiệ
 
 ## 16.3 Model hồi quy machine learning cho admission dataset
 
-Chúng ta dùng m-file MATLAB sau (RegModel.m) để hiện thực model hồi quy machine learning cho admission dataset.
+Chúng ta dùng m-file MATLAB sau (RegModel.m) để triển khai model hồi quy machine learning cho admission dataset.
 
 ```
 clear all; close all; clc
@@ -26,13 +26,6 @@ d = xlsread('adm_data.xlsx');
 histogram(d(:,2));
 grid on;
 xlabel('Score')
-```
-
-![p0327_1](images/ch16_machine_learning_regression_model_on_fpga/p0327_1.png)
-
-Hình 16.1 Tổng quan về admission dataset trong Excel.
-
-```
 ylabel('Frequency')
 title('GRE Score')
 
@@ -73,6 +66,7 @@ grid on;
 xlabel('CGPA')
 ylabel('Frequency')
 title('CGPA')
+
 figure
 c4 = cellstr(string(d(:,8)));
 histogram(categorical(c4),'BarWidth',0.3);
@@ -126,6 +120,7 @@ plot(n, ypr);
 legend('Testing Data','Predicted Data')
 ylabel('Chance of Admit')
 title('Linear Regression')
+
 % Teta (Learned Parameters)
 t0 = Th(1);
 t1 = Th(2);
@@ -146,6 +141,10 @@ x5 = Convert_to_Fixed_Point(XTest(:,6));
 x6 = Convert_to_Fixed_Point(XTest(:,7));
 x7 = Convert_to_Fixed_Point(XTest(:,8));
 ```
+
+![p0327_1](images/ch16_machine_learning_regression_model_on_fpga/p0327_1.png)
+
+Hình 16.1 Tổng quan về admission dataset trong Excel.
 
 Function MATLAB (Convert_to_Fixed_Point.m) được định nghĩa bởi code sau.
 
@@ -185,13 +184,13 @@ s = 1;
 xf = fi(xin,s,WL,FL);
 ```
 
-Trong linear regression, chúng ta giả định rằng biến output y (một số vô hướng) có thể được mô tả như một tổ hợp của n biến input x<sub>1</sub> , x<sub>2</sub> ,… , x<sub>n</sub>.
+Trong linear regression, chúng ta giả định rằng biến output y (một số vô hướng) có thể được mô tả như một tổ hợp của n biến input x<sub>1</sub>, x<sub>2</sub>,…, x<sub>n</sub>.
 
 ![p0330_eq16_1](images/ch16_machine_learning_regression_model_on_fpga/p0330_eq16_1.png) (16.1)
 
 trong đó chúng ta có các biểu thức sau.
 
-1. Các hệ số θ<sub>0</sub> , θ<sub>1</sub> ,… , θ<sub>n</sub> là các tham số của model.
+1. Các hệ số θ<sub>0</sub>, θ<sub>1</sub>,…, θ<sub>n</sub> là các tham số của model.
 
 2. θ<sub>0</sub> là số hạng chặn (intercept, còn gọi là offset hay bias).
 

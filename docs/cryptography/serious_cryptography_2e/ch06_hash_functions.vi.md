@@ -443,7 +443,7 @@ static void sha3_keccakf(uint64_t st[25], int rounds)
 
 Listing 6-9: Implementation tiny_sha3
 
-Chương trình tiny_sha3 hiện thực permutation, P, của Keccak, một phép biến đổi khả nghịch trên một state 1,600-bit được xem như một mảng gồm twenty-five word 64-bit. Code lặp lại một chuỗi round, trong đó mỗi round gồm bốn bước chính:
+Chương trình tiny_sha3 triển khai permutation, P, của Keccak, một phép biến đổi khả nghịch trên một state 1,600-bit được xem như một mảng gồm twenty-five word 64-bit. Code lặp lại một chuỗi round, trong đó mỗi round gồm bốn bước chính:
 
 1. Theta ❶ bao gồm các phép XOR giữa các word 64-bit hoặc một giá trị đã xoay 1-bit của các word (phép toán ROTL64(w, 1) left-rotates một word w đi 1 bit).
 

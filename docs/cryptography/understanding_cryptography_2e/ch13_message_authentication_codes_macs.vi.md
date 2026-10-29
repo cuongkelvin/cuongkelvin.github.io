@@ -214,7 +214,7 @@ Bên nhận, Bob, nhận gói [(y<sub>1</sub>,...,y<sub>n</sub>),m,AAD], chứa 
 
 ### 13.3.5 Galois Counter Message Authentication Code (GMAC)
 
-GMAC là một biến thể của Galois Counter Mode (GCM) được giới thiệu trong Mục 13.3.4 ở trên. Khác với mode GCM, GMAC không mã hóa dữ liệu mà chỉ tính message authentication code. Mode được dùng trong các ứng dụng không cần tính bí mật của dữ liệu nhưng vẫn cần tính toàn vẹn và tính xác thực thông điệp. GMAC cho phép song song hóa dễ dàng, hấp dẫn cho các ứng dụng high-speed. Mode có thể được hiện thực hiệu quả bằng hardware và có thể đạt throughput 100 Gbit/sec trở lên.
+GMAC là một biến thể của Galois Counter Mode (GCM) được giới thiệu trong Mục 13.3.4 ở trên. Khác với mode GCM, GMAC không mã hóa dữ liệu mà chỉ tính message authentication code. Mode được dùng trong các ứng dụng không cần tính bí mật của dữ liệu nhưng vẫn cần tính toàn vẹn và tính xác thực thông điệp. GMAC cho phép song song hóa dễ dàng, hấp dẫn cho các ứng dụng high-speed. Mode có thể được triển khai hiệu quả bằng hardware và có thể đạt throughput 100 Gbit/sec trở lên.
 
 Mode là một phần của nhiều tiêu chuẩn được dùng rộng rãi. Chẳng hạn, GMAC được quy định trong tiêu chuẩn IPsec cho bảo mật internet, nơi nó được dùng cho Encapsulating Security Payload (ESP) và Authentication Header (AH).
 

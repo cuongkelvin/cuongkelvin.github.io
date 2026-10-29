@@ -76,7 +76,7 @@ Scalability gia tăng chỉ là một lợi ích của modularity kiến trúc. 
 
 > Có một điều sẽ chia cả đám thành kẻ thắng và người thua: năng lực on-demand (theo yêu cầu) để thực hiện những course-corrections (điều chỉnh hướng đi) táo bạo và quyết đoán được thực thi hiệu quả và khẩn trương.
 
-Các doanh nghiệp phải agile để tồn tại trong thế giới ngày nay. Tuy nhiên, dù các stakeholder nghiệp vụ có thể ra quyết định nhanh và đổi hướng nhanh, đội ngũ công nghệ của công ty có thể không hiện thực được các chỉ đạo mới đó đủ nhanh để tạo ra khác biệt. Việc cho phép công nghệ đi nhanh như nghiệp vụ (hoặc, ngược lại, ngăn công nghệ làm chậm nghiệp vụ) đòi hỏi một mức agility kiến trúc nhất định.
+Các doanh nghiệp phải agile để tồn tại trong thế giới ngày nay. Tuy nhiên, dù các stakeholder nghiệp vụ có thể ra quyết định nhanh và đổi hướng nhanh, đội ngũ công nghệ của công ty có thể không triển khai được các chỉ đạo mới đó đủ nhanh để tạo ra khác biệt. Việc cho phép công nghệ đi nhanh như nghiệp vụ (hoặc, ngược lại, ngăn công nghệ làm chậm nghiệp vụ) đòi hỏi một mức agility kiến trúc nhất định.
 
 <a id="idm45798387896536"></a>
 
@@ -130,7 +130,7 @@ Số lượng câu lệnh code tổng hợp bên trong một component
 
 Các component được sắp theo cách dùng kỹ thuật hoặc theo mục đích <a id="idm45798387835672"></a><a id="idm45798387834696"></a>domain—xem [Phụ lục A](ch16_appendix_concept_and_term_references.vi.md#sec-references)
 
-Trong bối cảnh architecture, chúng tôi <a id="idm45798387832456"></a>định nghĩa một *component* là một khối xây dựng kiến trúc của ứng dụng thực hiện một loại chức năng nghiệp vụ hoặc hạ tầng nào đó, thường được thể hiện thông qua cấu trúc package (Java), namespace (C#), hoặc nhóm vật lý các file (class) trong một loại cấu trúc thư mục nào đó. Ví dụ, component Order History có thể được hiện thực thông qua một tập file class nằm trong namespace `app.business.order.history`.
+Trong bối cảnh architecture, chúng tôi <a id="idm45798387832456"></a>định nghĩa một *component* là một khối xây dựng kiến trúc của ứng dụng thực hiện một loại chức năng nghiệp vụ hoặc hạ tầng nào đó, thường được thể hiện thông qua cấu trúc package (Java), namespace (C#), hoặc nhóm vật lý các file (class) trong một loại cấu trúc thư mục nào đó. Ví dụ, component Order History có thể được triển khai thông qua một tập file class nằm trong namespace `app.business.order.history`.
 
 Các monolithic architecture lớn nhìn chung có <a id="idm45798387829640"></a><a id="idm45798387828328"></a>mức maintainability thấp do việc phân vùng chức năng theo kỹ thuật thành các layer, coupling chặt giữa các component, và cohesion component yếu xét từ góc độ domain. <a id="idm45798387826760"></a>Ví dụ, hãy xét một yêu cầu mới trong một monolithic layered architecture truyền thống là thêm ngày hết hạn cho các mục trong wish list của khách hàng (các mục trong một danh sách có thể mua sau). Lưu ý trong [Hình 3-4](#fig-modularity-vs-granularity-maintain-app) rằng phạm vi thay đổi của yêu cầu mới nằm ở *mức ứng dụng* vì thay đổi lan tới tất cả các layer trong ứng dụng.
 
@@ -140,7 +140,7 @@ Các monolithic architecture lớn nhìn chung có <a id="idm45798387829640"></a
 
 *Hình 3-4. Với monolithic layered architecture, thay đổi nằm ở mức ứng dụng*
 
-Tùy thuộc vào cấu trúc team, việc hiện thực thay đổi đơn giản này để thêm ngày hết hạn cho các mục wish list trong một monolithic layered architecture có thể đòi hỏi sự phối hợp của ít nhất ba team:
+Tùy thuộc vào cấu trúc team, việc triển khai thay đổi đơn giản này để thêm ngày hết hạn cho các mục wish list trong một monolithic layered architecture có thể đòi hỏi sự phối hợp của ít nhất ba team:
 
 - Cần một thành viên từ team giao diện người dùng để thêm trường hết hạn mới lên màn hình.
 - Cần một thành viên từ team backend để thêm các business rule gắn với ngày hết hạn và thay đổi contract để thêm trường hết hạn mới.
@@ -168,7 +168,7 @@ Ba bước tiến tới modularity này chứng minh rằng khi mức modularity
 
 ### Testability
 
-*Testability* được định nghĩa là mức độ dễ dàng của việc testing (thường được hiện thực thông qua test tự động)<a id="idm45798387802808"></a><a id="idm45798387801544"></a><a id="idm45798387800328"></a><a id="idm45798387799640"></a><a id="idm45798387798696"></a><a id="idm45798387797464"></a> cũng như *độ đầy đủ* của testing. Testability là một thành phần thiết yếu cho agility kiến trúc. Các monolithic architecture style lớn như layered architecture hỗ trợ mức testability (và do đó agility) tương đối thấp do khó đạt được regression testing đầy đủ và hoàn chỉnh cho mọi tính năng bên trong đơn vị deployment lớn. Ngay cả khi một ứng dụng monolith có một bộ regression test đầy đủ, hãy tưởng tượng sự bực bội khi phải chạy hàng trăm hay thậm chí hàng nghìn unit test cho một thay đổi code đơn giản. Không chỉ mất nhiều thời gian để chạy mọi test, mà developer tội nghiệp sẽ bị mắc kẹt nghiên cứu vì sao hàng chục test thất bại trong khi thực tế các test thất bại chẳng liên quan gì đến thay đổi.
+*Testability* được định nghĩa là mức độ dễ dàng của việc testing (thường được triển khai thông qua test tự động)<a id="idm45798387802808"></a><a id="idm45798387801544"></a><a id="idm45798387800328"></a><a id="idm45798387799640"></a><a id="idm45798387798696"></a><a id="idm45798387797464"></a> cũng như *độ đầy đủ* của testing. Testability là một thành phần thiết yếu cho agility kiến trúc. Các monolithic architecture style lớn như layered architecture hỗ trợ mức testability (và do đó agility) tương đối thấp do khó đạt được regression testing đầy đủ và hoàn chỉnh cho mọi tính năng bên trong đơn vị deployment lớn. Ngay cả khi một ứng dụng monolith có một bộ regression test đầy đủ, hãy tưởng tượng sự bực bội khi phải chạy hàng trăm hay thậm chí hàng nghìn unit test cho một thay đổi code đơn giản. Không chỉ mất nhiều thời gian để chạy mọi test, mà developer tội nghiệp sẽ bị mắc kẹt nghiên cứu vì sao hàng chục test thất bại trong khi thực tế các test thất bại chẳng liên quan gì đến thay đổi.
 
 Modularity kiến trúc—việc tách ứng dụng thành các đơn vị deployment nhỏ hơn—giảm đáng kể<a id="idm45798387794552"></a> phạm vi testing tổng thể cho các thay đổi đối với một service, cho phép testing đầy đủ hơn cũng như dễ dàng hơn. Modularity không chỉ tạo ra các test suite nhỏ hơn, nhắm đích hơn, mà việc duy trì unit test cũng trở nên dễ hơn.
 
@@ -208,7 +208,7 @@ Kịch bản này dẫn đến cái thường được gọi là “big ball of 
 
 *Hình 3-8. Scalability khác với elasticity*
 
-Dù cả hai architectural characteristic này đều bao gồm khả năng phản hồi như một hàm của số lượng request đồng thời (hoặc người dùng trong hệ thống), chúng được xử lý khác nhau xét từ góc độ kiến trúc và hiện thực. Scalability thường diễn ra trong một khoảng thời gian dài hơn như một hàm của tăng trưởng bình thường của công ty, trong khi elasticity là phản ứng tức thời với một đợt tăng vọt tải người dùng.
+Dù cả hai architectural characteristic này đều bao gồm khả năng phản hồi như một hàm của số lượng request đồng thời (hoặc người dùng trong hệ thống), chúng được xử lý khác nhau xét từ góc độ kiến trúc và triển khai. Scalability thường diễn ra trong một khoảng thời gian dài hơn như một hàm của tăng trưởng bình thường của công ty, trong khi elasticity là phản ứng tức thời với một đợt tăng vọt tải người dùng.
 
 Một ví dụ tuyệt vời để minh họa thêm sự khác biệt là một hệ thống concert-ticketing (bán vé hòa nhạc). Giữa các sự kiện hòa nhạc lớn, tải người dùng đồng thời thường khá nhẹ. Tuy nhiên, ngay khi vé của một buổi hòa nhạc nổi tiếng được mở bán, tải người dùng đồng thời tăng vọt đáng kể. Hệ thống có thể đi từ 20 người dùng đồng thời lên 3,000 người dùng đồng thời chỉ trong vài giây. Để duy trì khả năng phản hồi, hệ thống phải có dung lượng xử lý các đỉnh tải người dùng cao, và cũng phải có khả năng khởi động tức thời thêm các service để xử lý đợt tăng vọt traffic. <a id="idm45798387755416"></a><a id="idm45798387754472"></a>Elasticity dựa vào việc các service có *mean time to startup* (MTTS — thời gian khởi động trung bình) rất nhỏ, điều đạt được *về mặt kiến trúc* bằng cách có các service rất nhỏ, fine-grained (mịn). Với một giải pháp kiến trúc phù hợp, MTTS (và do đó elasticity) có thể được quản lý thêm thông qua các kỹ thuật design-time (lúc thiết kế) như các nền tảng nhẹ nhỏ gọn và môi trường runtime.
 
@@ -301,7 +301,7 @@ Hài lòng rằng họ đã có một business case tốt để trình bày vớ
 > - Làm cho chức năng ticket cốt lõi khả dụng hơn cho khách hàng bên ngoài, do đó cung cấp fault tolerance tốt hơn
 > - Cung cấp scalability tốt hơn cho tăng trưởng khách hàng và việc tạo ticket, giải quyết các freeze-ups (treo) ứng dụng thường xuyên mà chúng tôi đang gặp
 > - Tách chức năng báo cáo và tải báo cáo trên database, giải quyết các freeze-ups ứng dụng thường xuyên mà chúng tôi đang gặp
-> - Cho phép các team hiện thực tính năng mới và sửa bug nhanh hơn nhiều so với ứng dụng monolith hiện tại, do đó cung cấp agility tổng thể tốt hơn
+> - Cho phép các team triển khai tính năng mới và sửa bug nhanh hơn nhiều so với ứng dụng monolith hiện tại, do đó cung cấp agility tổng thể tốt hơn
 > - Giảm lượng bug được đưa vào hệ thống khi có thay đổi, do đó cung cấp testability tốt hơn
 > - Cho phép chúng tôi deploy tính năng mới và bản sửa lỗi với tốc độ nhanh hơn nhiều (hằng tuần hoặc thậm chí hằng ngày), do đó cung cấp deployability tốt hơn
 >

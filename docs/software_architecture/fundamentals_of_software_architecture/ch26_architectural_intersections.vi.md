@@ -2,13 +2,13 @@
 
 # Chương 26. Các giao điểm của architecture (Architectural Intersections)
 
-<a id="ix_ch26-architecture-intersections-asciidoc0"></a>Cho đến giờ trong cuốn sách này, chúng tôi đã chỉ ra cách xác định các characteristic then chốt mà một architecture phải hỗ trợ, cách chọn architectural style phù hợp nhất cho những characteristic đó và cho vấn đề kinh doanh, cách đưa ra các architecture decision hiệu quả, và cách dẫn dắt và hướng dẫn các development team qua việc hiện thực architecture. Tuy nhiên, để một architecture hoạt động, nó cũng phải được gắn kết với các khía cạnh khác của môi trường kỹ thuật và kinh doanh. Chúng tôi gọi những sự gắn kết này là *các giao điểm của architecture* (intersections of architecture).
+<a id="ix_ch26-architecture-intersections-asciidoc0"></a>Cho đến giờ trong cuốn sách này, chúng tôi đã chỉ ra cách xác định các characteristic then chốt mà một architecture phải hỗ trợ, cách chọn architectural style phù hợp nhất cho những characteristic đó và cho vấn đề kinh doanh, cách đưa ra các architecture decision hiệu quả, và cách dẫn dắt và hướng dẫn các development team qua việc triển khai architecture. Tuy nhiên, để một architecture hoạt động, nó cũng phải được gắn kết với các khía cạnh khác của môi trường kỹ thuật và kinh doanh. Chúng tôi gọi những sự gắn kết này là *các giao điểm của architecture* (intersections of architecture).
 
 Trong chương này, chúng tôi thảo luận một số giao điểm quan trọng phát sinh khi tạo hoặc kiểm chứng một software architecture:
 
-**Hiện thực (Implementation)**
+**Bản triển khai (Implementation)**
 
-Hiện thực có được gắn kết với các mối quan tâm kiến trúc xoay quanh các characteristic vận hành, các ràng buộc kiến trúc, và cấu trúc bên trong của architecture không?
+Bản triển khai có được gắn kết với các mối quan tâm kiến trúc xoay quanh các characteristic vận hành, các ràng buộc kiến trúc, và cấu trúc bên trong của architecture không?
 
 **Hạ tầng (Infrastructure)**
 
@@ -46,11 +46,11 @@ Các mục sau mô tả chi tiết hơn những giao điểm này.
 
 <a id="id257"></a>
 
-## Architecture và hiện thực (Architecture and Implementation)
+## Architecture và bản triển khai (Architecture and Implementation)
 
-<a id="ix_ch26-architecture-intersections-asciidoc1"></a><a id="ix_ch26-architecture-intersections-asciidoc2"></a>Định luật thứ nhất của software architecture cũng tình cờ là câu trả lời phổ biến nhất của kiến trúc sư phần mềm cho bất kỳ câu hỏi nào: “Còn tùy.” Có lẽ câu trả lời phổ biến thứ hai là, “Đó là chi tiết hiện thực.” Khi một software architecture không đạt được mục tiêu, câu trả lời thứ hai này thường là thủ phạm.
+<a id="ix_ch26-architecture-intersections-asciidoc1"></a><a id="ix_ch26-architecture-intersections-asciidoc2"></a>Định luật thứ nhất của software architecture cũng tình cờ là câu trả lời phổ biến nhất của kiến trúc sư phần mềm cho bất kỳ câu hỏi nào: “Còn tùy.” Có lẽ câu trả lời phổ biến thứ hai là, “Đó là chi tiết triển khai.” Khi một software architecture không đạt được mục tiêu, câu trả lời thứ hai này thường là thủ phạm.
 
-Để một architecture hoạt động đúng, *hiện thực* của nó—tức là source code của nó—phải được gắn kết với thiết kế để giải quyết ba thứ: các mối quan tâm vận hành của architecture (như fault tolerance, responsiveness, scalability, v.v.), cấu trúc bên trong, và các ràng buộc. Mục này lần lượt đề cập từng thứ trong ba thứ đó.
+Để một architecture hoạt động đúng, *bản triển khai* của nó—tức là source code của nó—phải được gắn kết với thiết kế để giải quyết ba thứ: các mối quan tâm vận hành của architecture (như fault tolerance, responsiveness, scalability, v.v.), cấu trúc bên trong, và các ràng buộc. Mục này lần lượt đề cập từng thứ trong ba thứ đó.
 
 <a id="id258"></a>
 
@@ -58,7 +58,7 @@ Các mục sau mô tả chi tiết hơn những giao điểm này.
 
 <a id="ix_ch26-architecture-intersections-asciidoc3"></a><a id="ix_ch26-architecture-intersections-asciidoc4"></a><a id="ix_ch26-architecture-intersections-asciidoc5"></a>*Các mối quan tâm vận hành* (operational concerns) là các architectural characteristic mà chúng tôi tập trung vào trong [Phần I](part1_foundations.vi.md#part1-foundations) của cuốn sách, vốn tạo thành nền tảng của bất kỳ software architecture nào, và architecture phải hỗ trợ chúng để giải quyết vấn đề kinh doanh trước mắt. Các architectural characteristic là thứ dẫn dắt các quyết định kiến trúc (như được thảo luận trong [Chương 21](ch21_architectural_decisions.vi.md#ch-architectural-decisions)).
 
-Vậy việc architecture và hiện thực mất gắn kết trong cách chúng giải quyết các mối quan tâm vận hành của hệ thống có nghĩa là gì? Giả sử bạn là kiến trúc sư làm việc trên một hệ thống order-entry mới cần hỗ trợ từ vài nghìn đến nửa triệu khách hàng đồng thời. Bạn chọn microservices architecture style, dựa trên các đánh giá sao trong [“Style Characteristics”](ch18_microservices_architecture.vi.md#sec-ms-ratings) ở [Chương 18](ch18_microservices_architecture.vi.md#ch-style-microservices), lựa chọn phù hợp dựa trên nhu cầu scalability và elasticity cao của hệ thống này. Tuy nhiên, trong quá trình *hiện thực*, development team nhận thấy rằng, vì bounded context của các service được hình thành quá chặt (xem [“Bounded Context”](ch18_microservices_architecture.vi.md#sec-ms-bounded-context) trong [Chương 18](ch18_microservices_architecture.vi.md#ch-style-microservices)), service `Order Placement` không thể truy cập trực tiếp database tồn kho. Thay vào đó, nó phải gọi đồng bộ service `Inventory` để lấy tồn kho hiện tại cho bất kỳ sản phẩm nào khách hàng quan tâm mua. Lời gọi đồng bộ này không chỉ coupling chặt hai service, mà còn làm chậm đáng kể responsiveness của hệ thống.
+Vậy việc architecture và bản triển khai mất gắn kết trong cách chúng giải quyết các mối quan tâm vận hành của hệ thống có nghĩa là gì? Giả sử bạn là kiến trúc sư làm việc trên một hệ thống order-entry mới cần hỗ trợ từ vài nghìn đến nửa triệu khách hàng đồng thời. Bạn chọn microservices architecture style, dựa trên các đánh giá sao trong [“Style Characteristics”](ch18_microservices_architecture.vi.md#sec-ms-ratings) ở [Chương 18](ch18_microservices_architecture.vi.md#ch-style-microservices), lựa chọn phù hợp dựa trên nhu cầu scalability và elasticity cao của hệ thống này. Tuy nhiên, trong quá trình *triển khai*, development team nhận thấy rằng, vì bounded context của các service được hình thành quá chặt (xem [“Bounded Context”](ch18_microservices_architecture.vi.md#sec-ms-bounded-context) trong [Chương 18](ch18_microservices_architecture.vi.md#ch-style-microservices)), service `Order Placement` không thể truy cập trực tiếp database tồn kho. Thay vào đó, nó phải gọi đồng bộ service `Inventory` để lấy tồn kho hiện tại cho bất kỳ sản phẩm nào khách hàng quan tâm mua. Lời gọi đồng bộ này không chỉ coupling chặt hai service, mà còn làm chậm đáng kể responsiveness của hệ thống.
 
 <a id="id1673"></a>Development team quyết định dùng một [*in-memory replicated cache*](https://oreil.ly/LQNe4) giữa các service này, như trong [Hình 26-1](#fig-intersect-caching): dữ liệu nằm trong *bộ nhớ nội bộ* của mỗi instance service, và luôn được giữ đồng bộ phía sau thông qua caching. Các sản phẩm caching cho mục đích này bao gồm [Apache Ignite](https://ignite.apache.org) và [Hazelcast](https://hazelcast.com). Ở đây, service `Inventory` sẽ có một cache in-memory có thể ghi chứa item ID và số lượng tồn kho hiện tại; mỗi instance của service `Order Placement` sẽ có một phiên bản read-only được nhân bản của cache đó trong bộ nhớ nội bộ. Dùng một in-memory replicated cache decouple các service và cải thiện *đáng kể* responsiveness.
 
@@ -70,7 +70,7 @@ Vậy việc architecture và hiện thực mất gắn kết trong cách chúng
 
 Sau khi phát hành production, khi số lượng người dùng đồng thời tăng lên, cần thêm nhiều instance của mỗi service để xử lý tải. Hệ thống crash khi tải đạt khoảng 80,000 khách hàng đồng thời vì yêu cầu bộ nhớ của cache nội bộ quá cao, gây ra tình trạng out-of-memory ở tất cả các máy ảo.
 
-Trong kịch bản này, architecture và hiện thực của nó mất gắn kết. Trong khi architecture tập trung vào hỗ trợ mức *scalability* và *elasticity* cao, hiện thực lại tập trung vào *responsiveness* và *decoupling service*. Cả hai team đều đưa ra quyết định tốt, nhưng phục vụ những mục tiêu khác nhau.<a id="id1674"></a><a id="id1675"></a><a id="id1676"></a>
+Trong kịch bản này, architecture và bản triển khai của nó mất gắn kết. Trong khi architecture tập trung vào hỗ trợ mức *scalability* và *elasticity* cao, bản triển khai lại tập trung vào *responsiveness* và *decoupling service*. Cả hai team đều đưa ra quyết định tốt, nhưng phục vụ những mục tiêu khác nhau.<a id="id1674"></a><a id="id1675"></a><a id="id1676"></a>
 
 <a id="id259"></a>
 
@@ -86,7 +86,7 @@ Nếu không có hướng dẫn, kiến thức và governance phù hợp, develo
 
 *Hình 26-2. Một ví dụ về logical architecture nội bộ thiếu governance và sự gắn kết*
 
-Để bảo đảm cấu trúc của source code khớp với logical architecture, chúng tôi khuyến nghị dùng các công cụ governance tự động, như [ArchUnit](https://archunit.org) cho nền tảng Java, [ArchUnitNet](https://oreil.ly/qgPAf) và [NetArchTest](https://oreil.ly/2ZX8p) cho nền tảng .NET, [PyTestArch](https://oreil.ly/NmRZI) cho Python, hoặc [TSArch](https://oreil.ly/4Z8Ze) cho TypeScript và JavaScript. Các công cụ tự động này, kết hợp với giao tiếp và cộng tác tốt giữa kiến trúc sư và development team, tạo ra các hiện thực được gắn kết đúng với architecture, như trong [Hình 26-3](#fig-intersect-good-arch).
+Để bảo đảm cấu trúc của source code khớp với logical architecture, chúng tôi khuyến nghị dùng các công cụ governance tự động, như [ArchUnit](https://archunit.org) cho nền tảng Java, [ArchUnitNet](https://oreil.ly/qgPAf) và [NetArchTest](https://oreil.ly/2ZX8p) cho nền tảng .NET, [PyTestArch](https://oreil.ly/NmRZI) cho Python, hoặc [TSArch](https://oreil.ly/4Z8Ze) cho TypeScript và JavaScript. Các công cụ tự động này, kết hợp với giao tiếp và cộng tác tốt giữa kiến trúc sư và development team, tạo ra các bản triển khai được gắn kết đúng với architecture, như trong [Hình 26-3](#fig-intersect-good-arch).
 
 <a id="fig-intersect-good-arch"></a>
 
@@ -94,13 +94,13 @@ Nếu không có hướng dẫn, kiến thức và governance phù hợp, develo
 
 *Hình 26-3. Một ví dụ về logical architecture nội bộ dựa trên governance và sự gắn kết đúng đắn*
 
-Hãy so sánh [Hình 26-2](#fig-intersect-bad-arch) với [Hình 26-3](#fig-intersect-good-arch). Hãy chú ý architecture trong [Hình 26-3](#fig-intersect-good-arch) dễ bảo trì, dễ test, dễ deploy, đáng tin cậy, dễ thích ứng và dễ mở rộng hơn nhiều so với architecture mất gắn kết trong [Hình 26-2](#fig-intersect-bad-arch). Sự so sánh này minh họa tầm quan trọng của loại gắn kết hiện thực này.<a id="id1677"></a><a id="id1678"></a><a id="id1679"></a>
+Hãy so sánh [Hình 26-2](#fig-intersect-bad-arch) với [Hình 26-3](#fig-intersect-good-arch). Hãy chú ý architecture trong [Hình 26-3](#fig-intersect-good-arch) dễ bảo trì, dễ test, dễ deploy, đáng tin cậy, dễ thích ứng và dễ mở rộng hơn nhiều so với architecture mất gắn kết trong [Hình 26-2](#fig-intersect-bad-arch). Sự so sánh này minh họa tầm quan trọng của loại gắn kết triển khai này.<a id="id1677"></a><a id="id1678"></a><a id="id1679"></a>
 
 <a id="id260"></a>
 
 ### Các ràng buộc kiến trúc (Architectural Constraints)
 
-<a id="id1680"></a><a id="id1681"></a><a id="id1682"></a><a id="id1683"></a>Một *ràng buộc* (constraint) là một quy tắc hoặc nguyên lý chi phối mô tả một loại hạn chế nào đó trong architecture (như giới hạn giao tiếp chỉ bằng REST hoặc dùng một loại database cụ thể) cần thiết để đạt được mục tiêu của nó. Nếu hiện thực của hệ thống không tuân thủ các ràng buộc của nó, architecture sẽ thất bại. Do đó, một phần công việc của kiến trúc sư phần mềm là xác định và truyền đạt các *ràng buộc* của một architecture.
+<a id="id1680"></a><a id="id1681"></a><a id="id1682"></a><a id="id1683"></a>Một *ràng buộc* (constraint) là một quy tắc hoặc nguyên lý chi phối mô tả một loại hạn chế nào đó trong architecture (như giới hạn giao tiếp chỉ bằng REST hoặc dùng một loại database cụ thể) cần thiết để đạt được mục tiêu của nó. Nếu bản triển khai của hệ thống không tuân thủ các ràng buộc của nó, architecture sẽ thất bại. Do đó, một phần công việc của kiến trúc sư phần mềm là xác định và truyền đạt các *ràng buộc* của một architecture.
 
 Để minh họa ý chúng tôi về giao điểm cụ thể này, hãy xét một doanh nghiệp đang cố phát hành một hệ thống mới với ngân sách rất hạn chế và hạn chót gấp. Doanh nghiệp này dự kiến nhiều thay đổi cấu trúc đối với database và cần thực hiện những thay đổi đó nhanh nhất có thể. Trong trường hợp này, một layered architecture truyền thống (xem [Chương 10](ch10_layered_architecture_style.vi.md#ch-style-layered)) sẽ rất phù hợp nhờ sự đơn giản, cost-effectiveness và technical partitioning của nó. Vì style này tách các layer, các thay đổi database có thể được cô lập vào chỉ một layer, khiến chúng dễ dàng và nhanh hơn.
 
@@ -111,7 +111,7 @@ Hãy so sánh [Hình 26-2](#fig-intersect-bad-arch) với [Hình 26-3](#fig-inte
 
 Những ràng buộc này là cần thiết để ngăn logic database bị trải ra khắp toàn bộ architecture, và để các thay đổi đối với cấu trúc database vật lý (như xóa một bảng hoặc đổi tên một cột) sẽ không ảnh hưởng đến bất kỳ code nào bên ngoài Persistence layer.
 
-Giờ giả sử các UI developer quyết định gọi thẳng database thì nhanh hơn và thay vào đó hiện thực architecture theo cách đó. Ngoài ra, các backend developer nhận ra sẽ dễ bảo trì và test code hơn nhiều nếu logic Business và logic database ở cùng nhau, nên họ cũng phớt lờ các ràng buộc và coupling các mối quan tâm này trong business layer của architecture. Hiện thực này không gắn kết với các ràng buộc của architecture, điều có nghĩa là các thay đổi database sẽ tác động đến toàn bộ code ở mọi layer, mất quá nhiều thời gian, và hệ thống sẽ không đáp ứng được mục tiêu kinh doanh.
+Giờ giả sử các UI developer quyết định gọi thẳng database thì nhanh hơn và thay vào đó triển khai architecture theo cách đó. Ngoài ra, các backend developer nhận ra sẽ dễ bảo trì và test code hơn nhiều nếu logic Business và logic database ở cùng nhau, nên họ cũng phớt lờ các ràng buộc và coupling các mối quan tâm này trong business layer của architecture. Bản triển khai này không gắn kết với các ràng buộc của architecture, điều có nghĩa là các thay đổi database sẽ tác động đến toàn bộ code ở mọi layer, mất quá nhiều thời gian, và hệ thống sẽ không đáp ứng được mục tiêu kinh doanh.
 
 Các công cụ kiến trúc cũng hữu ích để quản trị các ràng buộc kiến trúc.<a id="id1684"></a><a id="id1685"></a>
 
@@ -133,7 +133,7 @@ Giao điểm giữa architecture và hạ tầng quan trọng vì nó hỗ trợ
 
 Trong hầu hết các trường hợp, sự mất gắn kết này xảy ra do thiếu giao tiếp và cộng tác giữa kiến trúc sư và những người chịu trách nhiệm về hạ tầng và vận hành. Kiến trúc sư thường không nhận ra ảnh hưởng của hạ tầng lên các characteristic như scalability, responsiveness, fault tolerance, performance, availability, elasticity, v.v. <a id="id1689"></a>Sự mất gắn kết này đã sinh ra lĩnh vực DevOps.
 
-Trong nhiều năm, nhiều công ty coi vận hành là tách biệt với phát triển phần mềm, thường thuê ngoài cho một công ty third-party như một biện pháp cost-saving. Trong những năm 1990s và 2000s, nhiều architecture được thiết kế theo kiểu phòng thủ xoay quanh giả định rằng vận hành sẽ được thuê ngoài và do đó nằm ngoài tầm kiểm soát của kiến trúc sư. (Để có một ví dụ tốt về điều này, xem [Chương 16](ch16_space_based_architecture_style.vi.md#ch-style-space-based).) Tuy nhiên, vào mid-2000s, các công ty bắt đầu thử nghiệm các dạng architecture mới kết hợp nhiều mối quan tâm vận hành. Ví dụ, các architecture style cũ hơn như orchestration-driven SOA đòi hỏi các công cụ và framework công phu để hỗ trợ các năng lực như scalability và elasticity, điều làm phức tạp đáng kể việc hiện thực. Vì vậy kiến trúc sư đã xây dựng các architecture có thể xử lý quy mô, performance, elasticity, và hàng loạt năng lực khác *bên trong*. Tác dụng phụ là các architecture này phức tạp hơn rất nhiều.
+Trong nhiều năm, nhiều công ty coi vận hành là tách biệt với phát triển phần mềm, thường thuê ngoài cho một công ty third-party như một biện pháp cost-saving. Trong những năm 1990s và 2000s, nhiều architecture được thiết kế theo kiểu phòng thủ xoay quanh giả định rằng vận hành sẽ được thuê ngoài và do đó nằm ngoài tầm kiểm soát của kiến trúc sư. (Để có một ví dụ tốt về điều này, xem [Chương 16](ch16_space_based_architecture_style.vi.md#ch-style-space-based).) Tuy nhiên, vào mid-2000s, các công ty bắt đầu thử nghiệm các dạng architecture mới kết hợp nhiều mối quan tâm vận hành. Ví dụ, các architecture style cũ hơn như orchestration-driven SOA đòi hỏi các công cụ và framework công phu để hỗ trợ các năng lực như scalability và elasticity, điều làm phức tạp đáng kể việc triển khai. Vì vậy kiến trúc sư đã xây dựng các architecture có thể xử lý quy mô, performance, elasticity, và hàng loạt năng lực khác *bên trong*. Tác dụng phụ là các architecture này phức tạp hơn rất nhiều.
 
 <a id="id1690"></a><a id="id1691"></a>Những người tạo ra microservices architecture style nhận ra rằng các mối quan tâm vận hành được xử lý tốt hơn bởi bộ phận vận hành. Bằng cách tạo ra một mối quan hệ cộng tác giữa architecture và vận hành, các kiến trúc sư nhận ra họ có thể đơn giản hóa thiết kế và dựa vào những người vận hành để xử lý những gì họ làm tốt nhất. Họ đã hợp tác với bộ phận vận hành để tạo ra microservices, và đặt nền móng cho thứ sẽ trở thành phong trào DevOps. Dù DevOps đã giúp ích, giao điểm giữa architecture và hạ tầng này vẫn còn là vấn đề đối với hầu hết các công ty.
 
@@ -195,7 +195,7 @@ Dù quy trình phần lớn tách biệt với architecture, các quy trình l�
 
 Sự tiến hóa của tư duy tiếp tục, từ Extreme Programming đến continuous delivery và xa hơn, khi những tiến bộ trong thực hành kỹ thuật khiến những năng lực architecture mới trở nên khả thi. Cuốn sách của Neal, [*Building Evolutionary Architectures*](https://learning.oreilly.com/library/view/building-evolutionary-architectures/9781492097532), làm nổi bật những cách mới để suy nghĩ về giao điểm giữa thực hành kỹ thuật và architecture có thể cải thiện cách chúng ta tự động hóa governance kiến trúc. Cuốn sách đưa ra một danh pháp mới quan trọng và cách suy nghĩ về architectural characteristic, và đề cập các kỹ thuật xây dựng những architecture thay đổi một cách uyển chuyển theo thời gian.
 
-Trong thế giới phát triển phần mềm, không có gì đứng yên. Kiến trúc sư có thể thiết kế một hệ thống để đáp ứng một số tiêu chí nhất định, nhưng để bảo đảm thiết kế của họ tồn tại qua cả việc hiện thực lẫn bước tiến không thể tránh khỏi của thay đổi, điều chúng ta cần là một *evolutionary architecture* (kiến trúc tiến hóa).
+Trong thế giới phát triển phần mềm, không có gì đứng yên. Kiến trúc sư có thể thiết kế một hệ thống để đáp ứng một số tiêu chí nhất định, nhưng để bảo đảm thiết kế của họ tồn tại qua cả việc triển khai lẫn bước tiến không thể tránh khỏi của thay đổi, điều chúng ta cần là một *evolutionary architecture* (kiến trúc tiến hóa).
 
 <a id="id1710"></a>*Building Evolutionary Architectures* giới thiệu khái niệm dùng *architectural fitness function* để bảo vệ (và quản trị) các architectural characteristic khi thay đổi xảy ra theo thời gian. Hãy nhớ lại từ [Chương 6](ch06_measuring_and_governing_architecture_characteristics.vi.md#ch06-measuring) rằng architectural fitness function là một cách để có được đánh giá khách quan về tính toàn vẹn của (các) architectural characteristic nào đó. Đánh giá này có thể bao gồm nhiều cơ chế khác nhau, như metric, unit test, monitor và chaos engineering.
 
@@ -209,7 +209,7 @@ Trong thế giới phát triển phần mềm, không có gì đứng yên. Ki�
 
 <a id="id1717"></a><a id="id1718"></a>Một trong những cách cơ bản nhất để team topologies gắn kết với architecture là theo loại phân vùng. Giống như architecture, các team có thể được phân vùng theo domain hoặc theo kỹ thuật. Các team domain-partitioned được tổ chức theo vùng domain và thường là cross-functional, với chuyên môn hóa xuyên suốt team. Ví dụ, một team domain-partitioned cụ thể có thể tập trung vào phần customer-facing của một hệ thống, và do đó sẽ chịu trách nhiệm xử lý end-to-end chức năng customer-related, từ UI đến database. Ngược lại, các team được phân vùng theo kỹ thuật mỗi team tập trung vào một chức năng kỹ thuật cụ thể của architecture và thường được tổ chức theo hạng mục kỹ thuật: ví dụ, các team UI, team backend-processing, team shared-services và team database sẽ gắn kết rất tốt với layered architecture style. Hoặc, các team này có thể được phân vùng theo kỹ thuật thành các team business-function và team data-synchronization, điều sẽ gắn kết tốt với space-based architectural style.
 
-Hiểu cách các team được tổ chức là thiết yếu để bảo đảm sự thành công của hệ thống. Nếu team topology của tổ chức mất gắn kết với architecture, các team sẽ vật lộn để hiện thực và bảo trì architecture, và architecture sẽ khó đạt được mục tiêu kinh doanh của nó.
+Hiểu cách các team được tổ chức là thiết yếu để bảo đảm sự thành công của hệ thống. Nếu team topology của tổ chức mất gắn kết với architecture, các team sẽ vật lộn để triển khai và bảo trì architecture, và architecture sẽ khó đạt được mục tiêu kinh doanh của nó.
 
 <a id="id266"></a>
 
@@ -280,4 +280,4 @@ Tính đến thời điểm viết ấn bản thứ hai này (đầu năm 2025),
 
 ## Tóm tắt (Summary)
 
-Software architecture là một hoạt động tổng thể liên quan đến nhiều khía cạnh của một tổ chức. Các kiến trúc sư phần mềm hiệu quả nhận ra rằng tạo và duy trì một architecture không chỉ là chọn một architectural style cụ thể rồi tiến hành hiện thực. Nó còn là bảo đảm architecture được gắn kết với các khía cạnh khác của môi trường, và là dùng các kỹ năng giao tiếp và cộng tác được mô tả trong [Phần III](part3_techniques_and_soft_skills.vi.md#part3-techniques-softskills) để hiện thực sự gắn kết đó.<a id="id1738"></a>
+Software architecture là một hoạt động tổng thể liên quan đến nhiều khía cạnh của một tổ chức. Các kiến trúc sư phần mềm hiệu quả nhận ra rằng tạo và duy trì một architecture không chỉ là chọn một architectural style cụ thể rồi tiến hành triển khai. Nó còn là bảo đảm architecture được gắn kết với các khía cạnh khác của môi trường, và là dùng các kỹ năng giao tiếp và cộng tác được mô tả trong [Phần III](part3_techniques_and_soft_skills.vi.md#part3-techniques-softskills) để triển khai sự gắn kết đó.<a id="id1738"></a>
