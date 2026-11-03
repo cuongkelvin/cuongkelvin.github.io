@@ -1,0 +1,3 @@
+collapse: true
+nav:
+  - ARM64 Kernel Booting Process: ARM64_Kernel_Booting_Process.vi.md

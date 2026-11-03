@@ -1,0 +1,10 @@
+title: NXP
+nav:
+  - index.md
+  - LLDPUG
+  - ARM64_Kernel_Booting_Process
+  - Setting_up_Secure_Boot_on_PBL_Based_Platforms_in_Prototype_Stage
+  - Setting_up_Secure_Boot_on_LS1028ARDB_Platform
+  - AN5199
+  - DPAA2UM
+  - ...

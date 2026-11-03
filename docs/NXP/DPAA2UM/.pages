@@ -1,0 +1,33 @@
+title: DPAA2 User Manual
+nav:
+  - Title Page: ch00_title.vi.md
+  - 1. Introduction: ch01_introduction.vi.md
+  - 2. Overview: ch02_overview.vi.md
+  - 3. Boot and Initialization: ch03_boot_and_initialization_process.vi.md
+  - 4. MC Firmware Versions: ch04_mc_firmware_versions.vi.md
+  - 5. Management Command Portals: ch05_management_command_portals.vi.md
+  - 6. DPRC – Resource Container: ch06_dprc.vi.md
+  - 7. DPNI – Network Interface: ch07_dpni.vi.md
+  - 8. DPBP – Buffer Pool: ch08_dpbp.vi.md
+  - 9. DPIO – Data Path I/O: ch09_dpio.vi.md
+  - 10. DPDBG – Debugging: ch10_dpdbg.vi.md
+  - 11. DPCON – Concentrator: ch11_dpcon.vi.md
+  - 12. DPCI – Communication Interface: ch12_dpci.vi.md
+  - 13. DPDMUX – Network DeMux: ch13_dpdmux.vi.md
+  - 14. DPSW – L2 Switch: ch14_dpsw.vi.md
+  - 15. DPMAC – MAC: ch15_dpmac.vi.md
+  - 16. DPRTC – Real Time Clock: ch16_dprtc.vi.md
+  - 17. DPSECI – SEC Interface: ch17_dpseci.vi.md
+  - 18. DPDCEI – DCE Interface: ch18_dpdcei.vi.md
+  - 19. DPDMAI – DMA Interface: ch19_dpdmai.vi.md
+  - 20. DPAIOP – AIOP Control: ch20_dpaiop.vi.md
+  - 21. DPMCP – MC Portal: ch21_dpmcp.vi.md
+  - 22. DPSPARSER – Soft Parser: ch22_dpsparser.vi.md
+  - 23. Memory Map and Registers: ch23_memory_map_and_register_definition.vi.md
+  - 24. DPL Reference: ch24_dpl_reference.vi.md
+  - 25. DPC Reference: ch25_dpc_reference.vi.md
+  - 26. Use Case Scenarios: ch26_use_case_scenarios.vi.md
+  - 27. Logging and Debugging: ch27_logging_and_debugging.vi.md
+  - 28. Known Limitations: ch28_known_limitations.vi.md
+  - A. Revision History: appA_revision_history.vi.md
+  - ...

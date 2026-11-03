@@ -16,3 +16,4 @@ Lưu trữ những kiến thức đã học về công việc, cuộc sống.
 - [**Network**](network/index.md): mạng máy tính theo hướng từ trên xuống
 - [**Software Architecture**](software_architecture/index.md): kiến trúc phần mềm và các đánh đổi khi thiết kế
 - [**Embedded Security & Safety**](embedded_security/index.md): an toàn và bảo mật cho hệ thống nhúng
+- [**NXP**](NXP/index.md): Layerscape, secure boot, kiến trúc mạng DPAA2
